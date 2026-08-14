@@ -12,12 +12,19 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 
 | Repo | Visibility | Role |
 |---|---|---|
-| `agents` | public | superproject: launcher, PLAN, gitlinks |
+| `agents` | public | superproject: launcher, PLAN, CONTEXT, BACKLOG, gitlinks |
 | `dsh-credentials` | public | account/credential manager (v2 = full vault parity port) |
 | `dsh-dialects` | public | provider wire dialects (shipped + boot-verified) |
 | `dsh-providers` | public | LLM provider adapters (shipped + boot-verified) |
-| `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified) |
+| `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 adds share links, observability, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
+| `dsh-tui` | public | **planned** client-only TUI (cannibalized opencode client) |
+| `dsh-desktop` | public | **planned** Tauri v2 thin shell + lifecycle plugin |
+| `dsh-themes` | public | **planned** VS Code/TextMate themes + marketplace catalog |
+| `dsh-formatters` | public | **planned** LSP-based format-on-edit |
+| `dsh-tools` | public | **planned** config-file custom tools |
+| `dsh-agents` | public | **planned** custom agent files (JSON/MD) |
+| `dsh-repos` | public | **planned** repo workflows (PR/commit), consuming GitHub credentials |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
@@ -28,7 +35,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-dialects` | shipped + boot-verified | `src/server/inference/**` |
 | `dsh-credentials` | v2 shipped + boot-verified | `src/vault/**`, `src/cli/secrets.ts`, `src/server/gateway/providers/credentials.ts` |
 | `dsh-providers` | shipped + boot-verified | `src/server/gateway/providers/**`, provider-CLI home + adapters in `src/cli/**` |
-| `dsh-tweaks` | shipped + boot-verified | `src/cli/state*.ts` — partial; rest stays as port-source |
+| `dsh-tweaks` | shipped + boot-verified (v2 planned) | `src/cli/state*.ts` — partial; rest stays as port-source |
 | `dsh-subscriptions` | shipped + boot-verified | `gateway/providers/{routing,accounts}.ts` |
 
 Deferred (future plugin candidates, kept as port-source): `src/cli/orchestrator.ts`
@@ -90,6 +97,64 @@ Delete the ported surface; breakage is accepted:
 Keep: app shell + tRPC server + routers + `apps/*` + `src/cli/{orchestrator,
 memory,state*}.ts` as port-source. `cli.ts`/`app.ts`/session capture are left
 broken — replaced by `dsh`.
+
+## P7+ roadmap — opencode-parity buildout
+
+Decided 2026-08-14 (session 4 grill). Phase 0 is the planning/documentation round;
+phases 1–7 are the build order for subsequent rounds. Full delta + per-plugin
+mapping lives in `BACKLOG.md`.
+
+### Phase 0 — repo docs sync [complete]
+
+`AGENTS.md` created (conventions, commit cadence, doc-sync rule); PLAN.md/CONTEXT.md/
+BACKLOG.md updated with this roadmap.
+
+### Phase 1 — scaffold 7 new plugin repos
+
+`dsh-tui`, `dsh-desktop`, `dsh-themes`, `dsh-formatters`, `dsh-tools`, `dsh-agents`,
+`dsh-repos` — public repos under `marius-patrik`, git submodules of `agents`, empty
+plugin scaffold + PLAN entry. No full implementation this phase.
+
+### Phase 2 — `dsh-tweaks` v2: share + observability + session UX
+
+- **Share links:** self-hosted `/share/:id` read-only snapshot (rendered from
+  `session-log-export`), opt-in per session; interactive mode opt-in, gated by
+  `trustedHosts` + random token in the URL. Works over Tailscale.
+- **Observability:** `dsh stats` CLI verb + web panel, reading native
+  `session-stats` / `token-meter` seams (turn/step counts, LLM/tool/first-token/
+  decode times, token/cost figures).
+- **Session UX (wire existing seams):** Plan/Build toggle (`plan-mode`), undo/redo
+  (`session-checkpoint-policy`), custom slash commands (`commands` registry in
+  settings), drag-drop images (`attachment`), keybinds (greenfield config surface).
+
+### Phase 3 — `dsh-desktop`
+
+Tauri v2 thin shell (clean chromeless window, macOS/Win/Linux) + Cordis lifecycle
+plugin that spawns `dsh web`, publishes `DSH_WEB_URL`, WebView → `127.0.0.1:3080`.
+
+### Phase 4 — `dsh-themes`
+
+VS Code/TextMate theme support. Sources: (a) **file install** — import local theme
+JSON; (b) **catalog** — search + download from a real theme marketplace
+(**Open VSX** `open-vsx.org`; public API, no token). Apply via `ui-theme` seam;
+`dsh theme` verb + settings surface.
+
+### Phase 5 — `dsh-formatters`
+
+LSP-based format-on-edit (`formatDocument` via `lsp-stdio` seam).
+
+### Phase 6 — partial plugins
+
+- **`dsh-credentials`** (extend): **GitHub credential half** — GitHub OAuth account
+  (token in vault, agent-usable `resolve(ref)`), same importers pattern.
+- **`dsh-repos`** (narrow): repo workflows only — branch/commit/push/PR, consuming
+  GitHub credentials from `dsh-credentials`. No credential storage here.
+- **`dsh-tools`:** config-file custom tools (scoped tool registry + `tool-cordis`).
+- **`dsh-agents`:** custom agent files (JSON/MD) via `agent-presets`/`persona`.
+
+### Phase 7 — provider catalog breadth (XL, own phase)
+
+Extend `dsh-providers` beyond kimi/claude/cursor/grok/gemini subs.
 
 ## Cadence
 

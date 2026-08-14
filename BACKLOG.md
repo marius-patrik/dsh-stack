@@ -1,11 +1,11 @@
 # BACKLOG — opencode parity delta (with shipped plugins knocked off)
 
-> Written 2026-08-14 alongside `CONTEXT.md`. Source: the opencode↔dsh parity analysis
-> (session `ses_0004c6e67f`). This is the working backlog: every parity delta from the
-> opencode comparison, with a status column. Rows that overlap with **already-shipped
-> plugins** (dsh-dialects, dsh-providers, dsh-tweaks, dsh-subscriptions, dsh-credentials)
-> or with **native dsh features** are knocked off / marked partial. Items kept are the
-> real remaining work toward "opencode parity".
+> Written 2026-08-14 alongside `CONTEXT.md`; re-keyed by owning plugin 2026-08-15.
+> Source: the opencode↔dsh parity analysis (session `ses_0004c6e67f`). This is the
+> working backlog: every parity delta from the opencode comparison, with a status
+> column and an **owner plugin** (from the P7+ roadmap in PLAN.md). Rows that overlap
+> with **already-shipped plugins** or **native dsh features** are knocked off / marked
+> partial. Items kept are the real remaining work toward "opencode parity".
 
 ---
 
@@ -76,43 +76,49 @@ skills, MCP, ACP, hooks (CC + Codex), sandbox/approval, headless one-shot, HTTP 
 Dropped by user instruction (not backlog): IDE extension, install matrix, subscription
 OAuth logins (Copilot/ChatGPT), Enterprise docs.
 
-| # | Area | Delta (missing in dsh) | Effort | Status | Note |
-|---|---|---|---|---|---|
-| 1 | Interfaces | Desktop app (macOS/Win/Linux) | XL | OPEN | Planned: Tauri v2 shell around `dsh web` (see CONTEXT §3.4) |
-| 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | dsh TUI is opt-in example profile only |
-| 3 | Models | Curated model gateway | XL | OPEN | Zen-analog; product decision, not plugin |
-| 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` covers single-seat remap; a Go-style hosted gateway still open |
-| 5 | Models | Broad provider catalog (75+ via Models.dev) | L | PARTIAL | dsh native catalog + `dsh-providers` adapters exist; Models.dev-scale breadth open |
-| 6 | Collaboration | Public session share links | M | OPEN | `/share` analog |
-| 7 | Git | GitHub integration (Copilot login, PR/commit) | L | PARTIAL | Credential half covered by `dsh-credentials` (GitHub OAuth accounts); PR/commit workflows open |
-| 8 | Git | GitLab integration | S | OPEN | — |
-| 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | dsh reads AGENTS.md; doesn't generate |
-| 10 | Session UX | `/undo` `/redo` | S | OPEN | dsh has session log fork only |
-| 11 | Session UX | First-class Plan/Build toggle | S | OPEN | Tab analog |
-| 12 | Session UX | Drag-and-drop images into prompt | S | OPEN | — |
-| 13 | Session UX | Custom slash commands | M | OPEN | — |
-| 14 | Session UX | Keybind customization | S | OPEN | — |
-| 15 | Session UX | Themes | S | OPEN | — |
-| 16 | Session UX | Code formatters (auto-format on edit) | M | OPEN | — |
-| 17 | Agent config | Custom agents as JSON/Markdown files | M | PARTIAL | dsh agent interface + skills exist; user-authored agent files open |
-| 18 | Agent config | Config-file custom tools | M | PARTIAL | Scoped tool registry + plugin tools exist; config-file tools open |
-| 19 | Observability | Token/cost stats CLI | S | OPEN | `opencode stats` analog |
-| 20 | Observability | Session list CLI | S | OPEN | `opencode session list` analog |
-| 21 | Maturity | GA stability guarantee + migration story | L | OPEN | dev preview; breaking changes expected |
+| # | Area | Delta (missing in dsh) | Effort | Status | Owner | Note |
+|---|---|---|---|---|---|---|
+| 1 | Interfaces | Desktop app (macOS/Win/Linux) | XL | OPEN | `dsh-desktop` (P3) | Tauri v2 chromeless shell + lifecycle plugin |
+| 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | `dsh-tui` (P1 scaffold) | Cannibalize opencode TUI → client-only for dsh |
+| 3 | Models | Curated model gateway | XL | OPEN | product | Zen-analog; product decision, not plugin |
+| 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
+| 5 | Models | Broad provider catalog (75+ via Models.dev) | L | PARTIAL | `dsh-providers` (P7) | native catalog + adapters exist; breadth open |
+| 6 | Collaboration | Public session share links | M | OPEN | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
+| 7 | Git | GitHub integration (PR/commit workflows) | L | PARTIAL | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (credentials); branch/commit/push/PR (repos) |
+| 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | — |
+| 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | `dsh-repos` (later) | dsh reads AGENTS.md; doesn't generate |
+| 10 | Session UX | `/undo` `/redo` | S | OPEN | `dsh-tweaks` (P2) | wire `session-checkpoint-policy` |
+| 11 | Session UX | First-class Plan/Build toggle | S | OPEN | `dsh-tweaks` (P2) | wire `plan-mode` |
+| 12 | Session UX | Drag-and-drop images into prompt | S | OPEN | `dsh-tweaks` (P2) | wire `attachment` seam |
+| 13 | Session UX | Custom slash commands | M | OPEN | `dsh-tweaks` (P2) | expose `commands` registry in settings |
+| 14 | Session UX | Keybind customization | S | OPEN | `dsh-tweaks` (P2) | greenfield config surface |
+| 15 | Session UX | Themes | S | OPEN | `dsh-themes` (P4) | VS Code/TextMate; file install + Open VSX catalog |
+| 16 | Session UX | Code formatters (auto-format on edit) | M | OPEN | `dsh-formatters` (P5) | LSP `formatDocument` via `lsp-stdio` |
+| 17 | Agent config | Custom agents as JSON/Markdown files | M | PARTIAL | `dsh-agents` (P6) | `agent-presets`/`persona` seams |
+| 18 | Agent config | Config-file custom tools | M | PARTIAL | `dsh-tools` (P6) | scoped tool registry + `tool-cordis` |
+| 19 | Observability | Token/cost stats CLI | S | OPEN | `dsh-tweaks` (P2) | `dsh stats` on `session-stats`/`token-meter` |
+| 20 | Observability | Session list CLI | S | OPEN | `dsh-tweaks` (P2) | part of `dsh stats` surface |
+| 21 | Maturity | GA stability guarantee + migration story | L | OPEN | — | dev preview; breaking changes expected |
 
-**Net remaining work (OPEN, by area):**
-- Interfaces: desktop app (1), TUI default (2)
-- Models: curated gateway (3), gateway product (4-remainder), catalog breadth (5-remainder)
-- Collaboration: share links (6)
-- Git: GitHub workflows (7-remainder), GitLab (8), agentic init (9)
-- Session UX: undo/redo (10), Plan/Build (11), drag-drop (12), slash commands (13),
-  keybinds (14), themes (15), formatters (16)
-- Agent config: agent files (17-remainder), tool files (18-remainder)
-- Observability: stats CLI (19), session list CLI (20)
-- Maturity: GA (21)
+**Net remaining work (OPEN, by area + owner):**
+- `dsh-desktop` (P3): desktop app (1)
+- `dsh-tui` (P1 scaffold, impl later): TUI default (2)
+- product: curated gateway (3)
+- `dsh-subscriptions`: hosted gateway product (4-remainder)
+- `dsh-providers` (P7): catalog breadth (5-remainder)
+- `dsh-tweaks` (P2): share links (6), undo/redo (10), Plan/Build (11), drag-drop (12),
+  slash commands (13), keybinds (14), stats CLI (19), session list CLI (20)
+- `dsh-credentials` + `dsh-repos` (P6): GitHub workflows (7-remainder)
+- `dsh-repos` (later): GitLab (8), agentic init (9)
+- `dsh-themes` (P4): themes (15)
+- `dsh-formatters` (P5): formatters (16)
+- `dsh-agents` (P6): agent files (17-remainder)
+- `dsh-tools` (P6): tool files (18-remainder)
+- —: GA (21)
 
-Suggested first slices (cheap, high visibility): 14 (keybinds), 15 (themes), 10
-(undo/redo), 20 (session list CLI), 19 (stats CLI) — all S-effort.
+Phase order (from PLAN.md): P1 scaffold → P2 tweaks v2 (share/observability/session-UX,
+the densest round) → P3 desktop → P4 themes → P5 formatters → P6 partials → P7 provider
+breadth. Session-UX S-items (10, 11, 14) are the cheapest first slices within P2.
 
 ---
 

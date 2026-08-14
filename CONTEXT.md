@@ -1,12 +1,12 @@
 # CONTEXT — full session run-through
 
-> Complete memory/context file, kept in-repo. Written 2026-08-14. Covers, in
-> chronological order: (1) the **Andromeda port project** (biggest prior session,
-> `ses_002adefbcffe`, 1375 msgs, Aug 13 → Aug 14 18:54), (2) the **Lidless/LSP/admin
-> session** (`ses_00060d5deffe`), (3) the **opencode↔dsh parity + product-plan
-> session** (`ses_0004c6e67f` — the most recent, chronologically after the others).
-> Ends with a final memory context / state of the world. Backlog lives in
-> `BACKLOG.md`.
+> Complete memory/context file, kept in-repo. Written 2026-08-14, updated 2026-08-15.
+> Covers, in chronological order: (1) the **Andromeda port project** (biggest prior
+> session, `ses_002adefbcffe`, 1375 msgs, Aug 13 → Aug 14 18:54), (2) the
+> **Lidless/LSP/admin session** (`ses_00060d5deffe`), (3) the **opencode↔dsh parity +
+> product-plan session** (`ses_0004c6e67f`), (4) the **planning round** (grill + P7+
+> roadmap, most recent). Ends with a final memory context / state of the world.
+> Backlog lives in `BACKLOG.md`.
 
 ---
 
@@ -16,7 +16,8 @@
 |---|---|---|---|
 | 1 | `ses_002adefbcffe` (big, 1375 msgs) | Aug 13 22:50 UTC → Aug 14 18:54 local | Andromeda → dsh port: pastacode pivot, plugins, P6, decommission |
 | 2 | `ses_00060d5deffe` (22 msgs) | Aug 14 | Lidless install, opencode LSP enable, admin agent |
-| 3 | `ses_0004c6e67f` (current, 39 msgs) | Aug 14 late (most recent) | opencode↔dsh parity map, 21-row delta, Tauri/Tailscale/PWA plan |
+| 3 | `ses_0004c6e67f` (39 msgs) | Aug 14 late | opencode↔dsh parity map, 21-row delta, Tauri/Tailscale/PWA plan |
+| 4 | `ses_...` (planning round) | Aug 15 | Phase 0 docs: AGENTS.md, P7+ roadmap in PLAN.md, backlog re-key |
 
 Prior-session subagent transcripts (all read-only @explore on `/Users/user/Andromeda`):
 - `ses_001d0e49` "Map Andromeda state/CLI surface"
@@ -168,7 +169,7 @@ Working dir `/Users/user`, agent = `build`. (Short session; no other open thread
 
 ---
 
-## 3. Session 3 — opencode↔dsh parity + product plan (current, most recent)
+## 3. Session 3 — opencode↔dsh parity + product plan
 
 ### 3.1 The two tools
 **opencode (reference)** — `anomalyco/opencode` (ex `sst/opencode`), opencode.ai, MIT,
@@ -302,35 +303,92 @@ cordis.patch.yml` → `--patch`. `DSH_WEB_URL`/`DSH_WEB_MODE` published by `shel
 
 ---
 
-## 4. Final memory context (state of the world, 2026-08-14)
+## 3b. Session 4 — planning round: grill + P7+ roadmap (most recent)
+
+Chronologically after Session 3. User asked to build a stub TUI plugin, a desktop
+plugin, share links + observability + session UX into tweaks, and finish the
+partials — but first to be grilled so the exact approach is agreed.
+
+**Grill 1 decisions (build-vs-approach):**
+- **TUI:** cannibalize opencode into a **client-only** app — vendor opencode's TUI
+  code (MIT) into `dsh-tui` talking to dsh's TS SDK / HTTP+SSE API, drop all server
+  code. Documented in PLAN; executed later.
+- **Desktop:** Tauri thin shell now — dsh-desktop = Tauri v2 chromeless window
+  (macOS/Win/Linux) + small Cordis lifecycle plugin that spawns `dsh web` and hands
+  the URL to the shell.
+- **Themes (separate plugin, not tweaks):** support **VS Code/TextMate themes**;
+  sources = **file install** (local theme JSON) + **catalog** search/download from a
+  real theme marketplace (**Open VSX**, `open-vsx.org`; public API, no token — chosen
+  over VS Code Marketplace which needs an Azure token/ToS limits).
+- **Formatters (separate plugin, as LSP plugin):** LSP-based format-on-edit via the
+  `lsp-stdio` seam.
+- **Share links:** self-hosted `/share/:id` **read-only snapshot** by default; opt-in
+  **interactive** mode gated by `trustedHosts` + a random token in the URL.
+- **Observability:** `dsh stats` CLI verb **+** web panel, on native `session-stats` /
+  `token-meter` seams.
+- **Session UX into tweaks:** Plan/Build toggle (`plan-mode`), undo/redo
+  (`session-checkpoint-policy`), slash commands (`commands` registry), drag-drop
+  images (`attachment`), keybinds (greenfield). Themes and formatters split OUT to
+  their own plugins (see above).
+- **Partials:** GitHub credential half → **`dsh-credentials`** (OAuth account in
+  vault, agent-usable); PR/commit workflows → **`dsh-repos`** (workflows ONLY, no
+  credential storage); config-file tools → **`dsh-tools`**; agent files → **`dsh-agents`**.
+  Provider catalog breadth → own XL phase in `dsh-providers`.
+- **Repo convention:** new plugins public, git submodules like the rest.
+
+**Grill 2 decisions (scope/mechanics):**
+- Desktop window mechanism: **Tauri thin shell** (accepted Rust toolchain).
+- Phasing: **planning-only round** — the user explicitly deferred all building; this
+  round = PLAN.md/CONTEXT.md/BACKLOG.md updates + creating **`AGENTS.md`** with repo
+  quirks/conventions (commit cadence + keep all `.md` files in sync), and writing the
+  full multi-phase plan.
+- TUI approach documented: vendor opencode TUI as dsh client (MIT retained).
+- Share interactivity: read-only default; interactive opt-in, token-gated.
+
+**Outcome (Phase 0, complete):**
+- `AGENTS.md` created: doc-sync rule (docs in every commit), commit+push per phase,
+  plugin scaffold conventions (NodeNext tsc → lib/, schemastery not zod,
+  `check-plugin.mjs` boot-verify, no default export), harness-pristine rule, launcher
+  verb routing (`dsh accounts`).
+- `PLAN.md`: repo table + 7 planned plugins; P7+ roadmap (Phase 0 docs → Phase 1
+  scaffold 7 repos → Phase 2 tweaks v2 → Phase 3 desktop → Phase 4 themes → Phase 5
+  formatters → Phase 6 partials → Phase 7 provider breadth).
+- `BACKLOG.md`: re-keyed rows by owning plugin.
+- `README.md`: layout entry for AGENTS.md.
+
+---
+
+## 4. Final memory context (state of the world, 2026-08-15)
 
 **Project:** `agents` = a plugin-built personal agent runtime on DeepSeek Harness.
 GitHub: `marius-patrik/{agents,Andromeda,dsh-credentials,dsh-dialects,dsh-providers,
-dsh-tweaks,dsh-subscriptions}` (all clean & pushed; `agents-oss` deleted). Local:
-`~/agents` (superproject at `e234f43`, submodules on `main`), harness pinned
-`47f943859b` (rc.5, detached, pristine), `~/.dsh` harness home.
+dsh-tweaks,dsh-subscriptions}` (all clean & pushed; `agents-oss` deleted). Planned
+(not yet created): `dsh-tui`, `dsh-desktop`, `dsh-themes`, `dsh-formatters`,
+`dsh-tools`, `dsh-agents`, `dsh-repos` (public submodules). Local: `~/agents`
+(superproject, submodules on `main`), harness pinned `47f943859b` (rc.5, detached,
+pristine), `~/.dsh` harness home.
 
 **Done:** pastacode fork idea abandoned → dsh pivot; 5 plugins shipped + boot-verified;
 P6 credentials v2 (full Andromeda vault parity) complete; Andromeda decommission
 executed (commit `c6d8cda`); port-source kept (orchestrator, memory, state files);
 opencode↔dsh parity map + 21-row delta table; Tailscale blockers verified; Tauri
-viability validated; PWA chosen for mobile; stack agreed.
+viability validated; PWA chosen for mobile; stack agreed; **Phase 0 planning round
+complete** (AGENTS.md + P7+ roadmap + backlog re-key).
 
 **Open threads:**
-1. Product plan next steps (offered, awaiting go-ahead): (a) ready-to-drop
-   `cordis.patch.yml` for Tailscale (both variants: `0.0.0.0` bind + trustedHosts, and
-   `tailscale serve` alternative); (b) Tauri v2 sidecar sketch (spawn `dsh web`, WebView
-   → 127.0.0.1:3080, Node/Bun bundling); (c) PWA manifest + responsive-pass notes for
-   `dsh-web-frontend`.
-2. Session-1 tail ("and .") may have had a third item — user confirmed only the two
+1. Execute Phase 1: scaffold the 7 planned plugin repos (public, submodules).
+2. Then Phases 2–7 in order (tweaks v2, desktop, themes, formatters, partials,
+   provider breadth). See PLAN.md.
+3. Tailscale `cordis.patch.yml` drafts (both variants) still offered, not yet applied.
+4. Session-1 tail ("and .") may have had a third item — user confirmed only the two
    (PLAN.md update + agents-oss deletion) were done.
-3. Future plugin candidates still in Andromeda: orchestrator (baton/heartbeat), memory
+5. Future plugin candidates still in Andromeda: orchestrator (baton/heartbeat), memory
    (durable memory), remaining state files. Credentials v3 = full account/credential
    manager for ALL the user's accounts (phase 2, deferred).
-4. Open questions: where dsh server runs long-term (Mac mini/NAS/VPS → tailnet naming);
+6. Open questions: where dsh server runs long-term (Mac mini/NAS/VPS → tailnet naming);
    native auth on mobile (Face ID/OS keychain) vs pure PWA; does dsh `ui-*` respond well
    at phone widths; single-tenant vs multi-user (trustedHosts/approval implications).
-5. Environment notes: macOS (`/Users/user`); opencode config at
+7. Environment notes: macOS (`/Users/user`); opencode config at
    `~/.config/opencode/opencode.jsonc` (`"lsp": true`), admin agent at
    `~/.config/opencode/agents/admin.md`; Lidless installed (lid-closed operation);
    opencode session store at `~/.local/share/opencode/opencode.db` (SQLite); transcript
@@ -340,12 +398,13 @@ viability validated; PWA chosen for mobile; stack agreed.
 
 ## 5. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
-  decommission, dependency policy, cadence)
-- `/Users/user/agents/BACKLOG.md` — parity delta backlog w/ knocked-off status
+  decommission, P7+ roadmap, dependency policy, cadence)
+- `/Users/user/agents/AGENTS.md` — repo conventions + commit/doc-sync rules
+- `/Users/user/agents/BACKLOG.md` — parity delta backlog re-keyed by owning plugin
 - `/Users/user/agents/README.md`, `/Users/user/agents/scripts/{agents,bootstrap,dsh}`
 - `/Users/user/agents/harness/` (pinned deepseek-harness), `/Users/user/agents/plugins/`
   (5 plugin submodules)
 - `/Users/user/Andromeda/` — port-source (commit `c6d8cda`)
 - `/Users/user/.config/opencode/opencode.jsonc`, `/Users/user/.config/opencode/agents/admin.md`
 - `/Users/user/.local/share/opencode/opencode.db` — session store (transcripts source)
-- `/Users/user/dsh-opencode-memory.md` — working copy of this file
+- `/Users/user/dsh-opencode-memory.md` — working copy of the memory file
