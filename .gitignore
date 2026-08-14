@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+.hub/
+.vite/
+
+# harness build output
+harness/apps/*/lib/
+harness/packages/*/lib/
+harness/*/dist/
+
+# state (never commit)
+.agents/
+.dsh/
+.credentials.yaml
+accounts.vault
+
+# secrets / browser artifacts
+*.vscdb
+*cookies*
+*.pem
+
+# editor
+.DS_Store
