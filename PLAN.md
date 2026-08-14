@@ -18,13 +18,13 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-providers` | public | LLM provider adapters (shipped + boot-verified) |
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 adds share links, observability, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
-| `dsh-tui` | public | **planned** client-only TUI (cannibalized opencode client) |
-| `dsh-desktop` | public | **planned** Tauri v2 thin shell + lifecycle plugin |
-| `dsh-themes` | public | **planned** VS Code/TextMate themes + marketplace catalog |
-| `dsh-formatters` | public | **planned** LSP-based format-on-edit |
-| `dsh-tools` | public | **planned** config-file custom tools |
-| `dsh-agents` | public | **planned** custom agent files (JSON/MD) |
-| `dsh-repos` | public | **planned** repo workflows (PR/commit), consuming GitHub credentials |
+| `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
+| `dsh-desktop` | public | scaffolded (P1); Tauri v2 thin shell + lifecycle plugin |
+| `dsh-themes` | public | scaffolded (P1); VS Code/TextMate themes + marketplace catalog |
+| `dsh-formatters` | public | scaffolded (P1); LSP-based format-on-edit (greenfield formatDocument) |
+| `dsh-tools` | public | scaffolded (P1); config-file custom tools |
+| `dsh-agents` | public | scaffolded (P1); custom agent files (JSON/MD) |
+| `dsh-repos` | public | scaffolded (P1); repo workflows (PR/commit), consuming GitHub credentials |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
@@ -109,7 +109,7 @@ mapping lives in `BACKLOG.md`.
 `AGENTS.md` created (conventions, commit cadence, doc-sync rule); PLAN.md/CONTEXT.md/
 BACKLOG.md updated with this roadmap.
 
-### Phase 1 — scaffold 7 new plugin repos
+### Phase 1 — scaffold 7 new plugin repos [complete]
 
 `dsh-tui`, `dsh-desktop`, `dsh-themes`, `dsh-formatters`, `dsh-tools`, `dsh-agents`,
 `dsh-repos` — public repos under `marius-patrik`, git submodules of `agents`, empty

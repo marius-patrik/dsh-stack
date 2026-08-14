@@ -16,3 +16,24 @@
 [submodule "plugins/dsh-subscriptions"]
 	path = plugins/dsh-subscriptions
 	url = https://github.com/marius-patrik/dsh-subscriptions.git
+[submodule "plugins/dsh-tui"]
+	path = plugins/dsh-tui
+	url = https://github.com/marius-patrik/dsh-tui.git
+[submodule "plugins/dsh-desktop"]
+	path = plugins/dsh-desktop
+	url = https://github.com/marius-patrik/dsh-desktop.git
+[submodule "plugins/dsh-themes"]
+	path = plugins/dsh-themes
+	url = https://github.com/marius-patrik/dsh-themes.git
+[submodule "plugins/dsh-formatters"]
+	path = plugins/dsh-formatters
+	url = https://github.com/marius-patrik/dsh-formatters.git
+[submodule "plugins/dsh-tools"]
+	path = plugins/dsh-tools
+	url = https://github.com/marius-patrik/dsh-tools.git
+[submodule "plugins/dsh-agents"]
+	path = plugins/dsh-agents
+	url = https://github.com/marius-patrik/dsh-agents.git
+[submodule "plugins/dsh-repos"]
+	path = plugins/dsh-repos
+	url = https://github.com/marius-patrik/dsh-repos.git

@@ -15,7 +15,13 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `dsh-credentials/` — account/credential manager (v1: LLM-enabling; v2: full manager).
   - `dsh-tweaks/` — general features: providers filter, state-folder (`homeRoot`) + command config.
   - `dsh-subscriptions/` — profile bundle mounting providers + credentials + defaults.
-  - *planned:* `dsh-tui`, `dsh-desktop`, `dsh-themes`, `dsh-formatters`, `dsh-tools`, `dsh-agents`, `dsh-repos`.
+  - `dsh-tui/` — client-only TUI (cannibalized opencode client; scaffolded, impl later).
+  - `dsh-desktop/` — Tauri v2 thin shell + lifecycle plugin (scaffolded).
+  - `dsh-themes/` — VS Code/TextMate themes + Open VSX catalog (scaffolded).
+  - `dsh-formatters/` — LSP-based format-on-edit (scaffolded).
+  - `dsh-tools/` — config-file custom tools (scaffolded).
+  - `dsh-agents/` — custom agent files (JSON/MD) (scaffolded).
+  - `dsh-repos/` — repo workflows (PR/commit), consuming GitHub credentials (scaffolded).
 - `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary.
 
 ## State
