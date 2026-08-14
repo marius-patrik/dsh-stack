@@ -41,7 +41,9 @@ No zod. The ported `record.ts`/`descriptor.ts` validation code translates to
 compat shim that reproduces the behaviors Andromeda relies on:
 - `strictObject` rejects unknown keys (schemastery strips by default)
 - `safeParse` aggregates every failing path (schemastery throws on the first)
-- `enum`/`refine`/`regex` map to `union`/`transform`/`pattern`
+- `enum`/`refine`/`regex` map to `union`/`pattern` plus a custom registered
+  `refine` schema type (schemastery transform callbacks receive no options, so
+  refinement is a registered type whose resolver does receive the threaded path)
 
 ## P6: dsh-credentials v2 — full vault parity port
 
