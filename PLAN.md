@@ -19,7 +19,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
 | `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
-| `dsh-desktop` | public | scaffolded (P1); Tauri v2 thin shell + lifecycle plugin |
+| `dsh-desktop` | public | **P3 shipped**: Tauri v2 thin shell + lifecycle plugin (readiness route, settings) |
 | `dsh-themes` | public | scaffolded (P1); VS Code/TextMate themes + marketplace catalog |
 | `dsh-formatters` | public | scaffolded (P1); LSP-based format-on-edit (greenfield formatDocument) |
 | `dsh-tools` | public | scaffolded (P1); config-file custom tools |
@@ -130,10 +130,18 @@ plugin scaffold + PLAN entry. No full implementation this phase.
   (`commands` registry bridge), drag-drop images (attachment seam), keybinds
   (greenfield settings surface). **Shipped** (src/session.ts, src/settings.ts).
 
-### Phase 3 — `dsh-desktop`
+### Phase 3 — `dsh-desktop` `[complete]`
 
-Tauri v2 thin shell (clean chromeless window, macOS/Win/Linux) + Cordis lifecycle
-plugin that spawns `dsh web`, publishes `DSH_WEB_URL`, WebView → `127.0.0.1:3080`.
+Tauri v2 thin shell (macOS/Win/Linux) + Cordis lifecycle plugin. The shell
+(`src-tauri/`: Tauri 2 Rust, `webui/index.html` stub) opens a window that polls
+the plugin's readiness route then redirects the WebView to `dsh web`. The
+plugin (`src/lifecycle.ts`, `src/index.ts`) mounts `GET /__dsh-desktop/health`,
+publishes the boot URL (`host`/`port` via `dsh-desktop` settings namespace,
+defaults `127.0.0.1:3080`), and exposes `spawnWebServer`/`waitForServer`/
+`probeServer`/`isAlive` lifecycle helpers. **Shipped** (commit `a20d758`):
+`cargo check` clean, `check-plugin.mjs` exercises route + lifecycle against real
+local servers, web profile mounts the bundle patch and the health route returns
+`{"ok":true,...}` (HTTP 200).
 
 ### Phase 4 — `dsh-themes`
 

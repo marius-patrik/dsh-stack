@@ -500,6 +500,38 @@ returns 200.
 
 ---
 
+## 5c. Session 5, round 3 — P3 dsh-desktop shipped (2026-08-15)
+
+**Goal:** Phase 3 — Tauri v2 desktop shell + lifecycle plugin, boot-verified in the
+web profile.
+
+**Work:**
+- Wrote `src/lifecycle.ts` (spawnWebServer, waitForServer, probeServer, isAlive,
+  collectStderr) and `src/index.ts` (exact route `READY_PATH = /__dsh-desktop/health`,
+  `dsh-desktop` settings namespace with host/port/mountHealth/readyPath boot facts).
+- Wrote the Tauri v2 shell: `src-tauri/{Cargo.toml, build.rs, tauri.conf.json,
+  capabilities/default.json, src/main.rs, src/lib.rs, icons/icon.png}` + `webui/index.html`
+  stub that polls the readiness route then redirects the WebView to `http://127.0.0.1:3080`.
+  `cargo check` clean (generated `icons/icon.png` locally since no `tauri` CLI; icon needs
+  replacing with a real asset later).
+- Extended `check-plugin.mjs`: probe/wait against a real local server; spawn a real
+  child, wait, stop; failed-spawn not-ready; plugin route registration (exact
+  READY_PATH) + health handler output; `mountHealth: false` registers nothing.
+- **Key seam learning:** plain profile `dependencies` do NOT mount plugin rows — plugins
+  mount through a `dsh.bundle` patch layer (`dsh.subscriptions` is the template). Added
+  `dsh-desktop/cordis.patch.yml` + `dsh.bundle` and appended `dsh-desktop` to the web
+  profile's `dsh.profile.bundles`.
+- Boot-verified: `GET /__dsh-desktop/health` → `{"ok":true,"url":"http://127.0.0.1:3080",
+  "readyPath":"/__dsh-desktop/health"}` HTTP 200; no duplicate/collision lines.
+- Committed + pushed dsh-desktop `a20d758` ("P3: dsh-desktop — Tauri v2 shell +
+  lifecycle plugin"). Docs: PLAN.md Phase 3 `[complete]` + repo table, BACKLOG.md row 1
+  DONE + net-remaining list, README layout line.
+
+**Verified:** `tsc -p tsconfig.json` clean, `node check-plugin.mjs` passes, `cargo check`
+clean, web profile health route 200, `dsh share`/`sessions` still working.
+
+---
+
 ## 6. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)

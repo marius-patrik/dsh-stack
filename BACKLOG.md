@@ -78,7 +78,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 
 | # | Area | Delta (missing in dsh) | Effort | Status | Owner | Note |
 |---|---|---|---|---|---|---|
-| 1 | Interfaces | Desktop app (macOS/Win/Linux) | XL | OPEN | `dsh-desktop` (P3) | Tauri v2 chromeless shell + lifecycle plugin |
+| 1 | Interfaces | Desktop app (macOS/Win/Linux) | XL | DONE | `dsh-desktop` (P3) | Tauri v2 shell + lifecycle plugin: readiness route, boot URL, spawn helpers |
 | 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | `dsh-tui` (P1 scaffold) | Cannibalize opencode TUI → client-only for dsh |
 | 3 | Models | Curated model gateway | XL | OPEN | product | Zen-analog; product decision, not plugin |
 | 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
@@ -101,7 +101,6 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 21 | Maturity | GA stability guarantee + migration story | L | OPEN | — | dev preview; breaking changes expected |
 
 **Net remaining work (OPEN, by area + owner):**
-- `dsh-desktop` (P3): desktop app (1)
 - `dsh-tui` (P1 scaffold, impl later): TUI default (2)
 - product: curated gateway (3)
 - `dsh-subscriptions`: hosted gateway product (4-remainder)
