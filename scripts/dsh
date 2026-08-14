@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# dsh — passthrough launcher for the pinned harness build.
+# Becomes homeRoot/command-aware in P3 (dsh-tweaks).
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec node "$here/../harness/apps/cli/lib/bin.js" "$@"
