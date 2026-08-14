@@ -26,7 +26,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | Harness plugin | Status | Andromeda original (removed as progress marker) |
 |---|---|---|
 | `dsh-dialects` | shipped + boot-verified | `src/server/inference/**` |
-| `dsh-credentials` | v1 shipped; **v2 = full vault parity port (this work)** | `src/vault/**`, `src/cli/secrets.ts`, `src/server/gateway/providers/credentials.ts` |
+| `dsh-credentials` | v2 shipped + boot-verified | `src/vault/**`, `src/cli/secrets.ts`, `src/server/gateway/providers/credentials.ts` |
 | `dsh-providers` | shipped + boot-verified | `src/server/gateway/providers/**`, provider-CLI home + adapters in `src/cli/**` |
 | `dsh-tweaks` | shipped + boot-verified | `src/cli/state*.ts` — partial; rest stays as port-source |
 | `dsh-subscriptions` | shipped + boot-verified | `gateway/providers/{routing,accounts}.ts` |
@@ -45,7 +45,7 @@ compat shim that reproduces the behaviors Andromeda relies on:
   `refine` schema type (schemastery transform callbacks receive no options, so
   refinement is a registered type whose resolver does receive the threaded path)
 
-## P6: dsh-credentials v2 — full vault parity port
+## P6: dsh-credentials v2 — full vault parity port [complete]
 
 Port Andromeda `src/vault/` module-for-module into the plugin, on the shim:
 
@@ -76,7 +76,7 @@ Port Andromeda `src/vault/` module-for-module into the plugin, on the shim:
   Andromeda's vault tests + real-boot witness (`dsh accounts` and
   dsh-providers `resolve()` read the same vault).
 
-## Decommission (after P6 evidence passes)
+## Decommission — executed (evidence passed on c23be1b; Andromeda c6d8cda)
 
 Delete the ported surface; breakage is accepted:
 - `src/vault/**`, `src/server/inference/**`, `src/server/gateway/providers/**`,
