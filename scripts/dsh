@@ -1,6 +1,67 @@
 #!/usr/bin/env bash
-# dsh — passthrough launcher for the pinned harness build.
-# Becomes homeRoot/command-aware in P3 (dsh-tweaks).
+# dsh — homeRoot/command-aware launcher for the pinned harness build.
+#
+# Each launch resolves the agent home (`$DSH_HOME`, else `~/.agents`), reads
+# its `settings.yaml` for the `dsh-tweaks:` section, and:
+#   * honors `dsh-tweaks.homeRoot`: if it differs from the current home,
+#     state (profiles, sessions, credentials, settings, vault) is migrated
+#     there additively and the run boots with DSH_HOME set to it;
+#   * appends `dsh-tweaks.command` when the invocation names no subcommand;
+# then execs the harness binary. The launcher re-checks the current path on
+# every launch — there is no stable symlink alias to go stale.
 set -euo pipefail
+
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec node "$here/../harness/apps/cli/lib/bin.js" "$@"
+bin="$here/../harness/apps/cli/lib/bin.js"
+
+# Read the `dsh-tweaks` section of a settings document (homeRoot, command).
+read_tweaks() {
+  node - "$1" <<'EOF'
+const fs = require('node:fs')
+const path = process.argv[2]
+const out = {}
+try {
+  const lines = fs.readFileSync(path, 'utf8').split('\n')
+  let inSection = false
+  for (const line of lines) {
+    if (/^dsh-tweaks\s*:/.test(line)) { inSection = true; continue }
+    if (inSection && !/^\s/.test(line)) break
+    if (!inSection) continue
+    const m = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/)
+    if (m && (m[1] === 'homeRoot' || m[1] === 'command')) {
+      out[m[1]] = m[2].trim().replace(/^(['"])(.*)\1$/, '$2')
+    }
+  }
+} catch { /* missing or unparsable document: no tweaks */ }
+process.stdout.write(JSON.stringify(out))
+EOF
+}
+
+pick() {
+  node -e 'const t = JSON.parse(process.argv[1]); process.stdout.write(t[process.argv[2]] ?? "")' "$1" "$2"
+}
+
+home="${DSH_HOME:-$HOME/.agents}"
+tweaks="$(read_tweaks "$home/settings.yaml")"
+home_root="$(pick "$tweaks" homeRoot)"
+command_override="$(pick "$tweaks" command)"
+
+if [[ -n "$home_root" && "$home_root" != "$home" ]]; then
+  echo "dsh: dsh-tweaks.homeRoot moved state $home -> $home_root" >&2
+  mkdir -p "$home_root"
+  for d in profiles sessions; do
+    if [[ -d "$home/$d" && ! -e "$home_root/$d" ]]; then cp -R "$home/$d" "$home_root/$d"; fi
+  done
+  for f in settings.yaml .credentials.yaml accounts.vault accounts.key; do
+    if [[ -f "$home/$f" && ! -e "$home_root/$f" ]]; then cp "$home/$f" "$home_root/$f"; fi
+  done
+  home="$home_root"
+fi
+
+if [[ "$#" -eq 0 && -n "$command_override" ]]; then
+  # Word-splitting is intentional: a settings command is an argv fragment.
+  set -- $command_override
+fi
+
+export DSH_HOME="$home"
+exec node "$bin" "$@"
