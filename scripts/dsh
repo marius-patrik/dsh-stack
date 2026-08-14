@@ -49,7 +49,7 @@ command_override="$(pick "$tweaks" command)"
 if [[ -n "$home_root" && "$home_root" != "$home" ]]; then
   echo "dsh: dsh-tweaks.homeRoot moved state $home -> $home_root" >&2
   mkdir -p "$home_root"
-  for d in profiles sessions; do
+  for d in profiles sessions vault; do
     if [[ -d "$home/$d" && ! -e "$home_root/$d" ]]; then cp -R "$home/$d" "$home_root/$d"; fi
   done
   for f in settings.yaml .credentials.yaml accounts.vault accounts.key; do
@@ -64,4 +64,13 @@ if [[ "$#" -eq 0 && -n "$command_override" ]]; then
 fi
 
 export DSH_HOME="$home"
+
+if [[ "${1:-}" == "accounts" ]]; then
+  # The `accounts` verb is the dsh-credentials owner surface, served by the
+  # plugin CLI against the same vault ctx.accounts resolves. Everything else
+  # falls through to the harness CLI.
+  shift
+  exec node "$here/../plugins/dsh-credentials/bin/accounts.mjs" "$@"
+fi
+
 exec node "$bin" "$@"
