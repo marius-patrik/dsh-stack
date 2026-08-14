@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# bootstrap — install + build + typecheck the pinned harness.
+# CI=true skips the lefthook hook-installer, which cannot run inside a
+# git submodule (core.worktree lives in the common config).
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cmd="${1:-all}"
+case "$cmd" in
+  install) CI=true pnpm install -C "$here/../harness" ;;
+  build)   CI=true pnpm -C "$here/../harness" run build ;;
+  typecheck) CI=true pnpm -C "$here/../harness" run typecheck ;;
+  all)     CI=true pnpm install -C "$here/../harness" \
+           && CI=true pnpm -C "$here/../harness" run build \
+           && CI=true pnpm -C "$here/../harness" run typecheck ;;
+  *) echo "usage: $0 [install|build|typecheck|all]" >&2; exit 2 ;;
+esac
