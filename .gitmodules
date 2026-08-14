@@ -1,3 +1,18 @@
 [submodule "harness"]
 	path = harness
 	url = https://github.com/deepseek-ai/deepseek-harness
+[submodule "plugins/dsh-credentials"]
+	path = plugins/dsh-credentials
+	url = https://github.com/marius-patrik/dsh-credentials.git
+[submodule "plugins/dsh-dialects"]
+	path = plugins/dsh-dialects
+	url = https://github.com/marius-patrik/dsh-dialects.git
+[submodule "plugins/dsh-providers"]
+	path = plugins/dsh-providers
+	url = https://github.com/marius-patrik/dsh-providers.git
+[submodule "plugins/dsh-tweaks"]
+	path = plugins/dsh-tweaks
+	url = https://github.com/marius-patrik/dsh-tweaks.git
+[submodule "plugins/dsh-subscriptions"]
+	path = plugins/dsh-subscriptions
+	url = https://github.com/marius-patrik/dsh-subscriptions.git
