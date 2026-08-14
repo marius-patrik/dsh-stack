@@ -83,21 +83,21 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 3 | Models | Curated model gateway | XL | OPEN | product | Zen-analog; product decision, not plugin |
 | 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
 | 5 | Models | Broad provider catalog (75+ via Models.dev) | L | PARTIAL | `dsh-providers` (P7) | native catalog + adapters exist; breadth open |
-| 6 | Collaboration | Public session share links | M | OPEN | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
+| 6 | Collaboration | Public session share links | M | DONE | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
 | 7 | Git | GitHub integration (PR/commit workflows) | L | PARTIAL | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (credentials); branch/commit/push/PR (repos) |
 | 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | — |
 | 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | `dsh-repos` (later) | dsh reads AGENTS.md; doesn't generate |
-| 10 | Session UX | `/undo` `/redo` | S | OPEN | `dsh-tweaks` (P2) | wire `session-checkpoint-policy` |
-| 11 | Session UX | First-class Plan/Build toggle | S | OPEN | `dsh-tweaks` (P2) | wire `plan-mode` |
-| 12 | Session UX | Drag-and-drop images into prompt | S | OPEN | `dsh-tweaks` (P2) | wire `attachment` seam |
-| 13 | Session UX | Custom slash commands | M | OPEN | `dsh-tweaks` (P2) | expose `commands` registry in settings |
-| 14 | Session UX | Keybind customization | S | OPEN | `dsh-tweaks` (P2) | greenfield config surface |
+| 10 | Session UX | `/undo` `/redo` | S | DONE | `dsh-tweaks` (P2) | fork-based via `sessions.create(seed)` |
+| 11 | Session UX | First-class Plan/Build toggle | S | DONE | `dsh-tweaks` (P2) | `/build` delegates `planMode.set`; harness `/plan` complements |
+| 12 | Session UX | Drag-and-drop images into prompt | S | PARTIAL | `dsh-tweaks` (P2) | attachment seam composed via profile; maxImageBytes knob |
+| 13 | Session UX | Custom slash commands | M | DONE | `dsh-tweaks` (P2) | settings `commands` section -> registry bridge |
+| 14 | Session UX | Keybind customization | S | DONE | `dsh-tweaks` (P2) | `keybinds` settings surface + validators |
 | 15 | Session UX | Themes | S | OPEN | `dsh-themes` (P4) | VS Code/TextMate; file install + Open VSX catalog |
 | 16 | Session UX | Code formatters (auto-format on edit) | M | OPEN | `dsh-formatters` (P5) | LSP `formatDocument` via `lsp-stdio` |
 | 17 | Agent config | Custom agents as JSON/Markdown files | M | PARTIAL | `dsh-agents` (P6) | `agent-presets`/`persona` seams |
 | 18 | Agent config | Config-file custom tools | M | PARTIAL | `dsh-tools` (P6) | scoped tool registry + `tool-cordis` |
-| 19 | Observability | Token/cost stats CLI | S | OPEN | `dsh-tweaks` (P2) | `dsh stats` on `session-stats`/`token-meter` |
-| 20 | Observability | Session list CLI | S | OPEN | `dsh-tweaks` (P2) | part of `dsh stats` surface |
+| 19 | Observability | Token/cost stats CLI | S | DONE | `dsh-tweaks` (P2) | `dsh stats` reads session_projcache |
+| 20 | Observability | Session list CLI | S | DONE | `dsh-tweaks` (P2) | `dsh sessions` JSON list |
 | 21 | Maturity | GA stability guarantee + migration story | L | OPEN | — | dev preview; breaking changes expected |
 
 **Net remaining work (OPEN, by area + owner):**

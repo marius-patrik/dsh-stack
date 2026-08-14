@@ -73,4 +73,13 @@ if [[ "${1:-}" == "accounts" ]]; then
   exec node "$here/../plugins/dsh-credentials/bin/accounts.mjs" "$@"
 fi
 
+if [[ "${1:-}" == "stats" || "${1:-}" == "sessions" || "${1:-}" == "share" ]]; then
+  # Observability + share verbs are the dsh-tweaks owner surface: they read
+  # the same home the harness boots (DSH_HOME already exported above) and the
+  # same projection cache / share route the web profile composes.
+  verb="${1}"
+  shift
+  exec node "$here/../plugins/dsh-tweaks/bin/${verb}.mjs" "$@"
+fi
+
 exec node "$bin" "$@"

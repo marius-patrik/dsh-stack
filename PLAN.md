@@ -16,7 +16,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-credentials` | public | account/credential manager (v2 = full vault parity port) |
 | `dsh-dialects` | public | provider wire dialects (shipped + boot-verified) |
 | `dsh-providers` | public | LLM provider adapters (shipped + boot-verified) |
-| `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 adds share links, observability, session UX |
+| `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
 | `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
 | `dsh-desktop` | public | scaffolded (P1); Tauri v2 thin shell + lifecycle plugin |
@@ -35,7 +35,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-dialects` | shipped + boot-verified | `src/server/inference/**` |
 | `dsh-credentials` | v2 shipped + boot-verified | `src/vault/**`, `src/cli/secrets.ts`, `src/server/gateway/providers/credentials.ts` |
 | `dsh-providers` | shipped + boot-verified | `src/server/gateway/providers/**`, provider-CLI home + adapters in `src/cli/**` |
-| `dsh-tweaks` | shipped + boot-verified (v2 planned) | `src/cli/state*.ts` — partial; rest stays as port-source |
+| `dsh-tweaks` | shipped + boot-verified (v2 shipped) | `src/cli/state*.ts` — partial; rest stays as port-source |
 | `dsh-subscriptions` | shipped + boot-verified | `gateway/providers/{routing,accounts}.ts` |
 
 Deferred (future plugin candidates, kept as port-source): `src/cli/orchestrator.ts`
@@ -115,17 +115,20 @@ BACKLOG.md updated with this roadmap.
 `dsh-repos` — public repos under `marius-patrik`, git submodules of `agents`, empty
 plugin scaffold + PLAN entry. No full implementation this phase.
 
-### Phase 2 — `dsh-tweaks` v2: share + observability + session UX
+### Phase 2 — `dsh-tweaks` v2: share + observability + session UX `[complete]`
 
 - **Share links:** self-hosted `/share/:id` read-only snapshot (rendered from
   `session-log-export`), opt-in per session; interactive mode opt-in, gated by
-  `trustedHosts` + random token in the URL. Works over Tailscale.
-- **Observability:** `dsh stats` CLI verb + web panel, reading native
-  `session-stats` / `token-meter` seams (turn/step counts, LLM/tool/first-token/
-  decode times, token/cost figures).
-- **Session UX (wire existing seams):** Plan/Build toggle (`plan-mode`), undo/redo
-  (`session-checkpoint-policy`), custom slash commands (`commands` registry in
-  settings), drag-drop images (`attachment`), keybinds (greenfield config surface).
+  random token in the URL. Works over Tailscale. **Shipped** (src/share.ts):
+  prefix route via `webServer.register`, zstd log read (`node:zlib`), token gate.
+- **Observability:** `dsh stats` / `dsh sessions` CLI verbs reading the native
+  `session-stats` projection cache (`storages/session_projcache.json`).
+  **Shipped** (src/stats.ts + bin/stats.mjs, bin/sessions.mjs).
+- **Session UX (wire existing seams):** Plan/Build toggle (`/build` →
+  `ctx.planMode.set`, complementing the harness's own `/plan`), fork-based
+  `/undo` `/redo` (`ctx.sessions.create`), config-file slash commands
+  (`commands` registry bridge), drag-drop images (attachment seam), keybinds
+  (greenfield settings surface). **Shipped** (src/session.ts, src/settings.ts).
 
 ### Phase 3 — `dsh-desktop`
 

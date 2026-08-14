@@ -451,6 +451,55 @@ to orient. This session is the first to follow it.
 
 ---
 
+## 5b. Session 5, round 2 — P2 dsh-tweaks v2 shipped (2026-08-15)
+
+P2 landed: `dsh-tweaks` v2 (0.2.0) adds the session-UX backlog features by wiring
+the audited harness seams, with a `check-plugin.mjs` boot-verify that passes and
+a live web-profile boot that serves real share pages.
+
+**What shipped in the plugin (src/):**
+- `settings.ts` — schemastery schemas for the new namespaces (`dsh-tweaks-share`,
+  `dsh-tweaks-stats`, `dsh-tweaks-session`, `dsh-tweaks-commands`,
+  `dsh-tweaks-keybinds`) + Config interface. Namespaces are flat (no dots —
+  harness NAMESPACE_PATTERN is `^[a-z][a-z0-9-]*$`).
+- `share.ts` — self-hosted read-only transcript route: prefix route
+  `<basePath>/<id>` registered via `webServer.register`; resolves the session log
+  across ALL `sessions/--workspace--/` segments (workspace keying by cwd made the
+  cwd-derived guess wrong), reads `.jsonl.zstd` via `node:zlib.zstdDecompressSync`
+  (harness session-persistence-jsonl uses the same), renders dependency-free HTML.
+  Interactive mode is opt-in + token-gated (`?token=`, constant-time compare,
+  `share.token` written 0600 by the verb).
+- `stats.ts` — reads `storages/session_projcache.json` (the durable projection
+  cache fold) + the session store dir → `dsh stats`/`dsh sessions` rows.
+- `session.ts` — `/build` (leaves plan mode via `ctx.planMode.set(agent, false)`;
+  the harness already owns `/plan`, so we complement, not collide), fork-based
+  `/undo` `/redo` (`ctx.sessions.create(undefined, { seed })` from message
+  boundaries), keybind/command validators.
+- `home.ts` — DSH_HOME → `dsh-tweaks.homeRoot` → `~/.agents` resolution for verbs.
+- `bin/{stats,sessions,share}.mjs` — launcher-routed verbs; `scripts/dsh` now
+  routes `stats|sessions|share` before exec'ing the harness CLI.
+
+**Seam notes learned during build:**
+- `ctx.inject([...], fn)` returns a Fiber, NOT a disposer — the callback must
+  return the disposer from `webServer.register`/`commands.register` directly.
+- Context augmentations (`.commands`, `.webServer`, `.planMode`, `.plan/mode`
+  event) only typecheck when the owning package is imported (`import type {} from
+  '@deepseek-ai/dsh-commands'` etc.).
+- The base bundle does NOT configure dsh-tweaks; the web profile composes it bare
+  → apply() must default every v2 section before use.
+- Session log files are `session.jsonl.zstd` (real Zstandard frames).
+- `dsh share` URL must default to `127.0.0.1:3080` (the web server port), not the
+  bare host.
+
+**Verified:** `node check-plugin.mjs` passes (share renderer + token gate, log path
+resolution incl. prefix variant, stats projection shaping + table/csv/json,
+fork helper, command/keybind validators, command registration). Web profile boots
+clean (HTTP 200, no duplicate/collision lines); `/share/<real-session-id>` serves
+a rendered transcript; `dsh sessions` lists the real session; interactive share URL
+returns 200.
+
+---
+
 ## 6. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)

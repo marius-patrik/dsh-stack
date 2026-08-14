@@ -13,7 +13,7 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `dsh-dialects/` — provider wire-protocol abstraction (bundled: openai, claude, gemini).
   - `dsh-providers/` — LLM provider adapters (kimi-code, kimi-sub, claude-sub, cursor-sub, grok-sub, gemini-sub).
   - `dsh-credentials/` — account/credential manager (v1: LLM-enabling; v2: full manager).
-  - `dsh-tweaks/` — general features: providers filter, state-folder (`homeRoot`) + command config.
+  - `dsh-tweaks/` — general features: providers filter, state-folder (`homeRoot`) + command config; v2: share links, stats/sessions CLI verbs, plan toggle, fork undo/redo, slash commands, keybinds.
   - `dsh-subscriptions/` — profile bundle mounting providers + credentials + defaults.
   - `dsh-tui/` — client-only TUI (cannibalized opencode client; scaffolded, impl later).
   - `dsh-desktop/` — Tauri v2 thin shell + lifecycle plugin (scaffolded).
@@ -22,7 +22,7 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `dsh-tools/` — config-file custom tools (scaffolded).
   - `dsh-agents/` — custom agent files (JSON/MD) (scaffolded).
   - `dsh-repos/` — repo workflows (PR/commit), consuming GitHub credentials (scaffolded).
-- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary.
+- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks).
 
 ## State
 
