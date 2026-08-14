@@ -27,6 +27,23 @@ commit.** Specifically:
 If you make a code change, you must also update the relevant docs in the same
 commit.
 
+## At every build start (IMPORTANT)
+
+Before writing any code in a build round, ALWAYS do these three things:
+
+1. **Open the todo list** (`todowrite`): lay out the phases/features for this
+   build round as todos, and keep them updated as work progresses. Do not start
+   coding before the todo list for the round exists.
+2. **Append a new CONTEXT.md session section** (chronological, always last)
+   recording what this round is building, the phase list, and today's date —
+   BEFORE the first code change lands. Revisit it at the end of the round to
+   update the "outcome" so the memory stays truthful.
+3. **Read PLAN.md + BACKLOG.md + CONTEXT.md** to orient on the current phase
+   status, owner mapping, and what the last session decided.
+
+Skip nothing. The docs rule, commit cadence, and this build-start ritual together
+keep the memory files truthful and the todos auditable.
+
 ## Commit cadence (IMPORTANT)
 
 **Commit + push to GitHub at the end of every phase** so progress is visible.

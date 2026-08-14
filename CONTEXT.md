@@ -396,7 +396,62 @@ complete** (AGENTS.md + P7+ roadmap + backlog re-key).
 
 ---
 
-## 5. Relevant files
+## 5. Session 5 — full-backlog buildout (2026-08-15)
+
+**Mode change:** plan → build. The user approved finishing the FULL backlog: all
+plugin phases 1–7 in one sustained round.
+
+**Decisions this session (grill on harness gaps):**
+- Scope = all plugin phases 1–7; rows 3/21 (product decisions) excluded; TUI impl
+  remains scaffold-now-impl-later; GitLab (8) + agentic init (9) included as trailing.
+- Formatters (P5): **greenfield LSP client** — speak JSON-RPC (`initialize` +
+  `textDocument/formatting`) over the `lsp-stdio` subprocess, reusing its server
+  config. The pinned rc.5 LSP seam has NO `formatDocument` (only definition/
+  references/implementation/hover), so we build the op ourselves without touching
+  the harness.
+- Undo/redo (P2): **fork-based** — `/undo` `/redo` fork/resume from an earlier
+  logged step via dsh's native session fork. `session-checkpoint-policy` is
+  durability-only, no rollback seam.
+
+**Harness reality-check (seam audit, rc.5 pinned):**
+- `webServer.register` lets plugins add real HTTP routes (exact/prefix + handler)
+  → share links are greenfield-feasible in `dsh-tweaks` v2.
+- `session-log-export` exists as download-only (`session-log-download`); no share
+  hosting — share links are net-new.
+- `commands` registry is programmatic-only → slash-commands need a settings→register
+  bridge plugin.
+- `ui-theme` accepts arbitrary `ThemeDefinition` (`register()`, `--dsw-alias-*`
+  token overrides) → VS Code/TextMate theme conversion feasible.
+- `session-stats` (`turns/steps/llmMs/toolMs/ttftMs/decodeMs/decodeTokens`) +
+  `token-meter` (`tokenUsage`/`contextPressure`/`contextBreakdown`) exist → `dsh stats`
+  CLI feasible.
+- `plan-mode`, `attachment`+`attachment-local`, `agent-presets`+`persona`,
+  `tool-cordis` + generic tool registry (`defineTool`, `ToolRestriction`) all exist.
+- NO git provider anywhere in the harness → `dsh-repos` is greenfield GitHub REST.
+- No harness CLI plugin-verb slot → plugin verbs live in our `scripts/dsh` launcher
+  (e.g. `dsh accounts`), and new verbs (`stats`, `sessions`, `theme`, `share`, `format`)
+  route there too.
+
+**This build round (phases + commit targets):**
+1. P1 scaffold: create public repos `dsh-{tui,desktop,themes,formatters,tools,agents,repos}`
+   as submodules with the `dsh-tweaks`-mirror scaffold; PLAN + README updates.
+2. P2 `dsh-tweaks` v2: share links, stats/session CLI verbs, plan/build toggle,
+   fork-undo, drag-drop, slash commands, keybinds.
+3. P3 `dsh-desktop`: Tauri v2 shell + lifecycle plugin.
+4. P4 `dsh-themes`: VS Code/TextMate import + Open VSX catalog + `dsh theme` verb.
+5. P5 `dsh-formatters`: greenfield LSP formatDocument + `dsh format` verb.
+6. P6 partials: credentials GitHub OAuth, repos workflows, tools config files, agents files.
+7. P7 `dsh-providers` catalog breadth.
+8. Final doc round: BACKLOG.md annotations, PLAN.md statuses, CONTEXT.md outcome,
+   README, push.
+
+**Ritual note:** AGENTS.md gained a "at every build start" rule — open todos,
+append a CONTEXT.md session BEFORE first code, and re-read PLAN/BACKLOG/CONTEXT
+to orient. This session is the first to follow it.
+
+---
+
+## 6. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)
 - `/Users/user/agents/AGENTS.md` — repo conventions + commit/doc-sync rules
