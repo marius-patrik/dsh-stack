@@ -82,7 +82,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | `dsh-tui` (P1 scaffold) | Cannibalize opencode TUI → client-only for dsh |
 | 3 | Models | Curated model gateway | XL | OPEN | product | Zen-analog; product decision, not plugin |
 | 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
-| 5 | Models | Broad provider catalog (75+ via Models.dev) | L | PARTIAL | `dsh-providers` (P7) | native catalog + adapters exist; breadth open |
+| 5 | Models | Broad provider catalog (75+ via Models.dev) | L | DONE | `dsh-providers` (P7) | 14 routes: 6 subscription adapters + 8 API-key routes (openai/anthropic/gemini/grok/deepseek/mistral/groq/openrouter); `subscription-only` default hides API routes, `mode: "all"` offers them |
 | 6 | Collaboration | Public session share links | M | DONE | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
 | 7 | Git | GitHub integration (PR/commit workflows) | L | DONE | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (P6a) + branch/commit/push/PR (P6b); GitLab split out as row 8 |
 | 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | — |
@@ -104,7 +104,6 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 - `dsh-tui` (P1 scaffold, impl later): TUI default (2)
 - product: curated gateway (3)
 - `dsh-subscriptions`: hosted gateway product (4-remainder)
-- `dsh-providers` (P7): catalog breadth (5-remainder)
 - `dsh-tweaks` (P2): share links (6), undo/redo (10), Plan/Build (11), drag-drop (12),
   slash commands (13), keybinds (14), stats CLI (19), session list CLI (20)
 - `dsh-repos` (later): GitLab (8), agentic init (9)

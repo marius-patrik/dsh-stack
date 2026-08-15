@@ -691,7 +691,34 @@ backlog evals (TUI/GitLab/agentic-init), final docs.
 
 ---
 
-## 6. Relevant files
+## 5h. Session 6, round 4 — P7 provider catalog breadth (2026-08-15)
+
+**Planned:** Extend `dsh-providers`' `PROVIDER_ROUTES` beyond the six
+subscription adapters (kimi-code, kimi-sub, claude-sub, cursor-sub, grok-sub,
+gemini-sub) with billable API-key routes, keeping the default
+`subscription-only` filter semantics (API routes hidden/refused, `mode: "all"`
+offers them). Then check-plugin coverage, commit + push, superproject pin +
+docs, and close out the backlog evals + final docs.
+
+**Notes:** The adapter (`DialectAdapter`) already serves every registered route
+through the wire dialect a route declares — breadth is purely a data change in
+`PROVIDER_ROUTES`. `openai`/`claude` dialects append `/chat/completions` and
+`/messages` to the route base URL respectively. Route count grew 6 → 14.
+
+**Outcome:** Shipped. `PROVIDER_ROUTES` grew 6 → 14: eight new billable
+API-key routes — `openai-api`, `anthropic-api`, `gemini-api`
+(Generative Language OpenAI-compat endpoint), `grok-api`, `deepseek-api`,
+`mistral-api`, `groq-api`, `openrouter-api` — each with advisory model
+catalogs/context windows. `subscription-only` default keeps API routes
+hidden/refused (`PROVIDER_DISABLED`), `mode: "all"` offers them.
+`check-plugin.mjs` extended: new `PROVIDER_IDS` assertion, API-route filter
+gate, real openai-dialect stream round-trip (`https://api.openai.com/v1/chat/completions`
++ Bearer apiKey), openrouter proxy catalog. Two fixture bugs found + fixed
+en route: malformed finish-chunk JSON (`}}]` → `}]}`) and eventsource-parser
+not flushing the final `[DONE]` event at EOF without a terminating blank line.
+Pinned in the superproject; PLAN (Phase 7 `[complete]`, repo row), BACKLOG
+(row 5 → DONE, net-remaining drop), README (provider row), and this section
+all updated in the superproject commit. `dsh-providers` da80f8f→3062793.
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)
 - `/Users/user/agents/AGENTS.md` — repo conventions + commit/doc-sync rules

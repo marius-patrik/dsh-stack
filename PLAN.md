@@ -15,7 +15,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `agents` | public | superproject: launcher, PLAN, CONTEXT, BACKLOG, gitlinks |
 | `dsh-credentials` | public | account/credential manager (v2 = full vault parity port) |
 | `dsh-dialects` | public | provider wire dialects (shipped + boot-verified) |
-| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified) |
+| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 6 sub routes + 8 API-key routes (`PROVIDER_ROUTES`, `subscription-only`/`all` filter) |
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
 | `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
@@ -211,9 +211,18 @@ CLI→route round-trip).
   boot/watch sync + `dsh agents list|add|remove|sync` CLI — boot-verified against
   the real `standard` composition and the live roster semantics.
 
-### Phase 7 — provider catalog breadth (XL, own phase)
+### Phase 7 — provider catalog breadth (XL, own phase) `[complete]`
 
-Extend `dsh-providers` beyond kimi/claude/cursor/grok/gemini subs.
+**P7 `[complete]`** (2026-08-15): extended `dsh-providers`' `PROVIDER_ROUTES`
+beyond the six subscription adapters (kimi-code, kimi-sub, claude-sub,
+cursor-sub, grok-sub, gemini-sub) with eight billable API-key routes —
+`openai-api`, `anthropic-api`, `gemini-api` (Generative Language OpenAI-compat
+endpoint), `grok-api`, `deepseek-api`, `mistral-api`, `groq-api`, `openrouter-api`
+(proxy) — each with advisory model catalogs/context windows. Route count 6 → 14.
+The `subscription-only` filter keeps API routes hidden/refused by default;
+`mode: "all"` offers them. Boot-verified: filter gate, catalog in all mode, real
+openai/claude dialect stream round-trips, missing-credential path. Committed +
+pushed (`dsh-providers` da80f8f→3062793), pinned in the superproject.
 
 ## Cadence
 

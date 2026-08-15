@@ -11,7 +11,7 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
 - `harness/` — pinned checkout of `deepseek-ai/deepseek-harness` (source of truth, kept pristine).
 - `plugins/` — one repo per plugin, each a git submodule:
   - `dsh-dialects/` — provider wire-protocol abstraction (bundled: openai, claude, gemini).
-  - `dsh-providers/` — LLM provider adapters (kimi-code, kimi-sub, claude-sub, cursor-sub, grok-sub, gemini-sub).
+  - `dsh-providers/` — LLM provider adapters: 6 subscription routes + 8 API-key routes (openai/anthropic/gemini/grok/deepseek/mistral/groq/openrouter).
   - `dsh-credentials/` — account/credential manager (v1: LLM-enabling; v2: full manager).
   - `dsh-tweaks/` — general features: providers filter, state-folder (`homeRoot`) + command config; v2: share links, stats/sessions CLI verbs, plan toggle, fork undo/redo, slash commands, keybinds.
   - `dsh-subscriptions/` — profile bundle mounting providers + credentials + defaults.
