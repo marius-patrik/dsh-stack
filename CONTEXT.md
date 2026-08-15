@@ -719,6 +719,15 @@ not flushing the final `[DONE]` event at EOF without a terminating blank line.
 Pinned in the superproject; PLAN (Phase 7 `[complete]`, repo row), BACKLOG
 (row 5 → DONE, net-remaining drop), README (provider row), and this section
 all updated in the superproject commit. `dsh-providers` da80f8f→3062793.
+
+**Close-out:** the P7+ roadmap is now fully dispatched. The still-OPEN backlog
+rows each carry a written decision/plan (PLAN.md "Remaining open work" section
++ BACKLOG row notes): TUI default (row 2) deferred by decision — web profile is
+the shipped default; curated + hosted gateways (rows 3, 4) are product items,
+not plugin work; GitLab (row 8) planned for `dsh-repos` in the same shape as
+the shipped GitHub half; agentic init (row 9) planned as an additive
+`dsh repos init` tool; GA (row 21) stays OPEN by design (dev-preview harness,
+kept pinned). Superproject docs committed + pushed as the round close.
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)
 - `/Users/user/agents/AGENTS.md` — repo conventions + commit/doc-sync rules

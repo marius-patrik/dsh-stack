@@ -79,14 +79,14 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | # | Area | Delta (missing in dsh) | Effort | Status | Owner | Note |
 |---|---|---|---|---|---|---|
 | 1 | Interfaces | Desktop app (macOS/Win/Linux) | XL | DONE | `dsh-desktop` (P3) | Tauri v2 shell + lifecycle plugin: readiness route, boot URL, spawn helpers |
-| 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | `dsh-tui` (P1 scaffold) | Cannibalize opencode TUI → client-only for dsh |
+| 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | `dsh-tui` (P1 scaffold) | deferred by decision: web profile is the shipped default; TUI stays a thin client-only scaffold until a keyboard-first experience is wanted |
 | 3 | Models | Curated model gateway | XL | OPEN | product | Zen-analog; product decision, not plugin |
 | 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
 | 5 | Models | Broad provider catalog (75+ via Models.dev) | L | DONE | `dsh-providers` (P7) | 14 routes: 6 subscription adapters + 8 API-key routes (openai/anthropic/gemini/grok/deepseek/mistral/groq/openrouter); `subscription-only` default hides API routes, `mode: "all"` offers them |
 | 6 | Collaboration | Public session share links | M | DONE | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
 | 7 | Git | GitHub integration (PR/commit workflows) | L | DONE | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (P6a) + branch/commit/push/PR (P6b); GitLab split out as row 8 |
-| 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | — |
-| 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | `dsh-repos` (later) | dsh reads AGENTS.md; doesn't generate |
+| 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | planned, same shape as shipped GitHub half: `GITLAB_TOKEN` slot + importer in `dsh-credentials`, MR + merge repo tools over subprocess/REST |
+| 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | `dsh-repos` (later) | planned: `dsh repos init` reads repo state, writes a harness-flavored AGENTS.md; additive tool, no new seams |
 | 10 | Session UX | `/undo` `/redo` | S | DONE | `dsh-tweaks` (P2) | fork-based via `sessions.create(seed)` |
 | 11 | Session UX | First-class Plan/Build toggle | S | DONE | `dsh-tweaks` (P2) | `/build` delegates `planMode.set`; harness `/plan` complements |
 | 12 | Session UX | Drag-and-drop images into prompt | S | PARTIAL | `dsh-tweaks` (P2) | attachment seam composed via profile; maxImageBytes knob |

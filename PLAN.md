@@ -224,6 +224,35 @@ The `subscription-only` filter keeps API routes hidden/refused by default;
 openai/claude dialect stream round-trips, missing-credential path. Committed +
 pushed (`dsh-providers` da80f8f→3062793), pinned in the superproject.
 
+## Remaining open work (documented plans, no open-ended rows)
+
+The P7+ roadmap is now fully dispatched. The still-OPEN backlog rows each have
+a written decision/plan; nothing is left open-ended.
+
+- **TUI default profile (row 2)** — deferred by decision, not blocked. The web
+  profile is the shipped default; `dsh-tui` keeps its P1 scaffold (client-only
+  TUI cannibalized from opencode). Revisit only when a keyboard-first experience
+  is actually wanted; the harness server model already makes the TUI a thin
+  client with no new backend seams needed.
+- **Curated model gateway (row 3)** — product decision, not a plugin: a
+  Zen-analog hosted gateway is out of scope for this stack. Tracked as a
+  product item, not backlog.
+- **Hosted gateway remainder (row 4)** — the single-seat subscription remap is
+  shipped (`dsh-subscriptions`); the multi-tenant hosted gateway is a product
+  item with no plugin work planned.
+- **GitLab integration (row 8)** — planned for `dsh-repos` (later), same shape
+  as the shipped GitHub half: credentials via `dsh-credentials` (`GITLAB_TOKEN`
+  slot + GitLab importer), repo tools over `ctx.subprocess`/REST (MRs + merge
+  paths). No blocking dependency; scheduled when `dsh-repos` gets its next
+  feature round.
+- **Agentic init → AGENTS.md (row 9)** — planned for `dsh-repos` (later): a
+  `dsh repos init` tool that reads repo state and writes a harness-flavored
+  `AGENTS.md` (conventions, plugin seams, boot-verify commands). Currently dsh
+  only reads AGENTS.md; generation is a small additive tool, no new seams.
+- **GA stability (row 21)** — remains OPEN by design: harness is a dev
+  preview, breaking changes expected, harness kept pinned and bumped only
+  deliberately.
+
 ## Cadence
 
 Commit + push at the end of every phase so progress is visible on GitHub.
