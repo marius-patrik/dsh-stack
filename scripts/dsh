@@ -82,4 +82,13 @@ if [[ "${1:-}" == "stats" || "${1:-}" == "sessions" || "${1:-}" == "share" ]]; t
   exec node "$here/../plugins/dsh-tweaks/bin/${verb}.mjs" "$@"
 fi
 
+if [[ "${1:-}" == "theme" ]]; then
+  # The `theme` verb is the dsh-themes owner surface: it reads the same home
+  # the harness boots and the same `dsh-themes` settings section the plugin
+  # composes (root, catalogUrl, active). Falls through to the harness CLI
+  # otherwise (the harness owns no `theme` subcommand).
+  shift
+  exec node "$here/../plugins/dsh-themes/bin/theme.mjs" "$@"
+fi
+
 exec node "$bin" "$@"

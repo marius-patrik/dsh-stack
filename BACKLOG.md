@@ -92,7 +92,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 12 | Session UX | Drag-and-drop images into prompt | S | PARTIAL | `dsh-tweaks` (P2) | attachment seam composed via profile; maxImageBytes knob |
 | 13 | Session UX | Custom slash commands | M | DONE | `dsh-tweaks` (P2) | settings `commands` section -> registry bridge |
 | 14 | Session UX | Keybind customization | S | DONE | `dsh-tweaks` (P2) | `keybinds` settings surface + validators |
-| 15 | Session UX | Themes | S | OPEN | `dsh-themes` (P4) | VS Code/TextMate; file install + Open VSX catalog |
+| 15 | Session UX | Themes | S | DONE | `dsh-themes` (P4) | VS Code/TextMate; file install + Open VSX catalog |
 | 16 | Session UX | Code formatters (auto-format on edit) | M | OPEN | `dsh-formatters` (P5) | LSP `formatDocument` via `lsp-stdio` |
 | 17 | Agent config | Custom agents as JSON/Markdown files | M | PARTIAL | `dsh-agents` (P6) | `agent-presets`/`persona` seams |
 | 18 | Agent config | Config-file custom tools | M | PARTIAL | `dsh-tools` (P6) | scoped tool registry + `tool-cordis` |
@@ -109,7 +109,6 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
   slash commands (13), keybinds (14), stats CLI (19), session list CLI (20)
 - `dsh-credentials` + `dsh-repos` (P6): GitHub workflows (7-remainder)
 - `dsh-repos` (later): GitLab (8), agentic init (9)
-- `dsh-themes` (P4): themes (15)
 - `dsh-formatters` (P5): formatters (16)
 - `dsh-agents` (P6): agent files (17-remainder)
 - `dsh-tools` (P6): tool files (18-remainder)

@@ -20,7 +20,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
 | `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
 | `dsh-desktop` | public | **P3 shipped**: Tauri v2 thin shell + lifecycle plugin (readiness route, settings) |
-| `dsh-themes` | public | scaffolded (P1); VS Code/TextMate themes + marketplace catalog |
+| `dsh-themes` | public | **P4 shipped**: VS Code/TextMate theme store + Open VSX catalog + `/themes.json` route + browser theme bundle + `dsh theme` CLI |
 | `dsh-formatters` | public | scaffolded (P1); LSP-based format-on-edit (greenfield formatDocument) |
 | `dsh-tools` | public | scaffolded (P1); config-file custom tools |
 | `dsh-agents` | public | scaffolded (P1); custom agent files (JSON/MD) |
@@ -37,6 +37,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-providers` | shipped + boot-verified | `src/server/gateway/providers/**`, provider-CLI home + adapters in `src/cli/**` |
 | `dsh-tweaks` | shipped + boot-verified (v2 shipped) | `src/cli/state*.ts` — partial; rest stays as port-source |
 | `dsh-subscriptions` | shipped + boot-verified | `gateway/providers/{routing,accounts}.ts` |
+| `dsh-themes` | shipped + boot-verified | `src/server/websocket/**` theme handling + opencode theme support |
 
 Deferred (future plugin candidates, kept as port-source): `src/cli/orchestrator.ts`
 (baton/heartbeat), `src/cli/memory.ts` (durable memory), `src/cli/state*.ts`.
@@ -143,12 +144,21 @@ defaults `127.0.0.1:3080`), and exposes `spawnWebServer`/`waitForServer`/
 local servers, web profile mounts the bundle patch and the health route returns
 `{"ok":true,...}` (HTTP 200).
 
-### Phase 4 — `dsh-themes`
+### Phase 4 — `dsh-themes` `[complete]`
 
 VS Code/TextMate theme support. Sources: (a) **file install** — import local theme
 JSON; (b) **catalog** — search + download from a real theme marketplace
 (**Open VSX** `open-vsx.org`; public API, no token). Apply via `ui-theme` seam;
 `dsh theme` verb + settings surface.
+
+Shipped + boot-verified: node half (store under `~/.agents/themes`, catalog
+search/extract, `/themes.json` route, `dsh theme` CLI verbs list/search/install/
+install-vsix/set/remove), browser half (hand-authored `__ModuleLoader__` bundle
+`client.js` registered through the web profile, maps each theme to the 13
+`--dsw-alias-*` tokens then `theme.setTheme(active)`), web-profile wiring
+(`dsh-themes` bundle + cordis patch row), boot-verified against the live web
+profile (boot manifest client row, bundle served, real Open VSX search/install,
+CLI→route round-trip).
 
 ### Phase 5 — `dsh-formatters`
 

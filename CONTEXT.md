@@ -532,6 +532,44 @@ clean, web profile health route 200, `dsh share`/`sessions` still working.
 
 ---
 
+## 5d. Session 5, round 4 — P4 dsh-themes shipped (2026-08-15)
+
+**Goal:** Phase 4 — VS Code/TextMate theme support, boot-verified in the web profile.
+
+**Work:**
+- Wrote the node half: `src/theme.ts` (13 `--dsw-alias-*` token map, VS Code
+  JSON + `.tmTheme` XML parsers, light/dark fallback tables, luminance-based
+  scheme inference), `src/store.ts` (store handle under `~/.agents/themes`),
+  `src/catalog.ts` (Open VSX search + vsix extract via `unzip`), `src/index.ts`
+  (`/themes.json` route + `dsh-themes` settings section).
+- Wrote `bin/theme.mjs` (verbs list/search/install/install-vsix/set/remove) and
+  routed the `theme` verb in `scripts/dsh`.
+- Wrote the browser half: hand-authored `client.js` `__ModuleLoader__` bundle
+  exporting `apply` (fetches `/themes.json`, registers each theme via
+  `theme.register({id,colorScheme,tokens})`, applies the active id) with
+  `inject: ["theme"]`. Registered through the web profile (bundle +
+  `cordis.patch.yml` row + `./client` export + `dsh.client` manifest).
+- **Two real boot bugs found + fixed:** (1) the client row never appeared in
+  `__DSH_BOOT__` — client-modules `require.resolve('dsh-themes/package.json')`
+  failed because the exports map lacked `./package.json`; added it. (2) the
+  `theme set/remove` YAML writer used `\z` (a literal `z` in JS regex — no such
+  anchor), so the whole-section match failed whenever `dsh-themes` was the last
+  section and it appended a second section instead of replacing; switched to
+  `$` with `gm` + dedupe.
+- Boot-verified end-to-end: `__DSH_BOOT__` carries the dsh-themes client row,
+  `/plugins/dsh-themes/client.js` serves the bundle, `/themes.json` reflects a
+  live `dsh theme set`, real Open VSX search (`monokai`) + install
+  (8 themes from the monokai-pro vsix) + CLI→route round-trip.
+- Committed + pushed dsh-themes `160892a` ("P4: ship dsh-themes — node store +
+  catalog + themes.json route, browser theme bundle, dsh theme CLI"). Docs:
+  PLAN.md Phase 4 `[complete]` + repo/mapping tables, BACKLOG.md row 15 DONE +
+  net-remaining list, README layout line.
+
+**Verified:** `tsc -p tsconfig.json` clean, `node check-plugin.mjs` passes (10
+checks), web profile boot manifest + bundle + route all live.
+
+---
+
 ## 6. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)
