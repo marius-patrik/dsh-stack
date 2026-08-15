@@ -599,6 +599,39 @@ a bundle listed in `dsh.profile.bundles` must declare `dsh.bundle.patch` +
 `cordis.patch.yml` or boot fails loud. Remaining: P6a–d, P7, backlog rows,
 final doc close-out.
 
+## 5f. Session 6, round 2 — P6a dsh-credentials GitHub OAuth half (2026-08-15)
+
+**Goal:** Ship the GitHub half of P6a in `dsh-credentials`: a canonical
+`github` purpose, a file importer for the `gh` CLI's `hosts.yml`, and a
+registered GitHub provider route + OAuth PKCE refresh supplement so the vault
+can reason about GitHub tokens the way it does LLM tokens (dsh-repos, P6b,
+consumes `GITHUB_OAUTH_TOKEN`).
+
+**Round todos:** (1) refs — `GITHUB_OAUTH_TOKEN`/`GITHUB_USER`/enterprise refs +
+`canonicalRefsForPurpose('github')`; (2) `githubFileProvider` reading
+`~/.config/gh/hosts.yml`; (3) `src/github.ts` route + PKCE supplement
+registration, wired in `apply()` under config `githubClientId`/`githubScopes`;
+(4) `check-plugin.mjs` assertions; (5) docs + commit + push, then superproject
+pin.
+
+**Outcome:** P6a GitHub half shipped. `src/refs.ts` now carries `GITHUB_OAUTH_TOKEN`,
+`GITHUB_USER`, `GITHUB_ENTERPRISE_TOKEN`, `GITHUB_ENTERPRISE_HOST` under the
+`github` purpose, and `canonicalRefsForPurpose('github', _)` returns
+`['GITHUB_OAUTH_TOKEN']`. `src/file-providers.ts` gained `githubFileProvider`
+(the `gh` `hosts.yml` importer: `github.com` `oauth_token` → `GITHUB_OAUTH_TOKEN`
++ `user` → `GITHUB_USER`, enterprise hosts → `GITHUB_ENTERPRISE_TOKEN`/`_HOST`)
+plus the shared `parseGitHubHosts` parser; `src/vault/cli.ts`'s duplicated
+parser was removed and the `github-hosts` detector now imports the one source of
+truth (also re-exported through `src/vault/index.ts`). New `src/github.ts`
+registers the `github` provider route (`https://api.github.com`) and, only when
+a public OAuth App client id is configured (`config.githubClientId` or
+`GITHUB_OAUTH_CLIENT_ID` env), an `oauth_pkce` supplement (`authorize` +
+`access_token` URLs, scopes `repo`/`workflow`, loopback redirect) — without a
+client id the supervisor honestly answers `expired_without_refresh_path`. Wired
+into `apply()` and exported from `index.ts`. `tsc` clean; `check-plugin.mjs`
+extended (gh importer, ref mapping, route baseUrl, supplement gated on client
+id) and fully passing. Uncommitted; superproject pin + PLAN/BACKLOG sync next.
+
 ---
 
 ## 6. Relevant files

@@ -186,6 +186,10 @@ CLI→route round-trip).
 
 - **`dsh-credentials`** (extend): **GitHub credential half** — GitHub OAuth account
   (token in vault, agent-usable `resolve(ref)`), same importers pattern.
+  **P6a GitHub half `[complete]`** (2026-08-15): canonical `github` refs +
+  `canonicalRefsForPurpose`, `gh` `hosts.yml` file importer, `github` provider
+  route + OAuth PKCE refresh supplement (gated on configured client id), all
+  boot-verified.
 - **`dsh-repos`** (narrow): repo workflows only — branch/commit/push/PR, consuming
   GitHub credentials from `dsh-credentials`. No credential storage here.
 - **`dsh-tools`:** config-file custom tools (scoped tool registry + `tool-cordis`).
