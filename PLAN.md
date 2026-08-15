@@ -23,9 +23,9 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-themes` | public | **P4 shipped**: VS Code/TextMate theme store + Open VSX catalog + `/themes.json` route + browser theme bundle + `dsh theme` CLI |
 | `dsh-formatters` | public | **P5 shipped**: formatter table + `format` tool + auto-format-on-edit + `dsh formatter` CLI |
 | `dsh-lsp` | public | **P5 shipped**: LSP server table + `Lsp` def + `lsp-stdio`/`tool-lsp` mounts + `dsh lsp` CLI |
-| `dsh-tools` | public | scaffolded (P1); config-file custom tools |
-| `dsh-agents` | public | scaffolded (P1); custom agent files (JSON/MD) |
-| `dsh-repos` | public | scaffolded (P1); repo workflows (PR/commit), consuming GitHub credentials |
+| `dsh-tools` | public | **P6c shipped**: config-file custom tools (settings registry + subprocess execution + `dsh tool` CLI) |
+| `dsh-agents` | public | **P6d shipped**: custom agents as JSON/MD persona files materialized into agent presets (`dsh agents` CLI) |
+| `dsh-repos` | public | **P6b shipped**: repo workflows — branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN` (`dsh repos` CLI) |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
@@ -182,7 +182,7 @@ CLI→route round-trip).
   pushed (`dsh-lsp` f25b21e→682c730, `dsh-formatters` 2eed54a→fb33604), pinned
   in the superproject, wired into the web profile bundle list.
 
-### Phase 6 — partial plugins
+### Phase 6 — partial plugins `[complete]`
 
 - **`dsh-credentials`** (extend): **GitHub credential half** — GitHub OAuth account
   (token in vault, agent-usable `resolve(ref)`), same importers pattern.
@@ -192,8 +192,24 @@ CLI→route round-trip).
   boot-verified.
 - **`dsh-repos`** (narrow): repo workflows only — branch/commit/push/PR, consuming
   GitHub credentials from `dsh-credentials`. No credential storage here.
-- **`dsh-tools`:** config-file custom tools (scoped tool registry + `tool-cordis`).
+  **P6b `[complete]`** (2026-08-15): `repo-status/branch/commit/push/pr` tools
+  over `ctx.subprocess` (never shell), token via vault `GITHUB_OAUTH_TOKEN` then
+  env fallback, push via `-c http.extraHeader`, PR via the GitHub REST API,
+  `dsh repos list|set|status|branch|commit` CLI — all boot-verified against real
+  git and a local HTTP server.
+- **`dsh-tools`:** config-file custom tools.
+  **P6c `[complete]`** (2026-08-15): `dsh-tools.tools` map of name → definition
+  (description, parameter schema, argv), each registered as a `ctx.tools` entry
+  via `defineTool` and run through `ctx.subprocess` with `{name}` placeholder
+  substitution, `dsh tool list|add|remove` CLI — boot-verified with real
+  subprocess round-trips.
 - **`dsh-agents`:** custom agent files (JSON/MD) via `agent-presets`/`persona`.
+  **P6d `[complete]`** (2026-08-15): persona files (MD frontmatter + body, or
+  JSON) under the authoring root materialize as agent presets — base preset
+  composition spliced verbatim (persona row swapped, `!!js` dialect preserved)
+  under the harness user preset root, picker metadata, source-marker pruning,
+  boot/watch sync + `dsh agents list|add|remove|sync` CLI — boot-verified against
+  the real `standard` composition and the live roster semantics.
 
 ### Phase 7 — provider catalog breadth (XL, own phase)
 

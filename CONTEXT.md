@@ -630,7 +630,64 @@ a public OAuth App client id is configured (`config.githubClientId` or
 client id the supervisor honestly answers `expired_without_refresh_path`. Wired
 into `apply()` and exported from `index.ts`. `tsc` clean; `check-plugin.mjs`
 extended (gh importer, ref mapping, route baseUrl, supplement gated on client
-id) and fully passing. Uncommitted; superproject pin + PLAN/BACKLOG sync next.
+id) and fully passing. Committed `a4b2f98` and pushed; superproject pinned +
+PLAN/BACKLOG/CONTEXT synced in superproject commit `316154a`.
+
+---
+
+## 5g. Session 6, round 3 — P6b/P6c/P6d shipped (2026-08-15)
+
+**Goal:** Finish the Phase 6 partial plugins: P6b `dsh-repos` (repo workflows
+consuming `GITHUB_OAUTH_TOKEN`), P6c `dsh-tools` (config-file custom tools),
+P6d `dsh-agents` (JSON/MD persona files → agent presets) — each shipped,
+boot-verified, committed, pushed, then pinned in the superproject with docs.
+
+**P6b — `dsh-repos` (commit `d2ae833`):** `src/git.ts` (`runGit` over
+`ctx.subprocess`, `currentBranch` via `git branch --show-current`),
+`src/github.ts` (`resolveGitHubToken`: vault `GITHUB_OAUTH_TOKEN` via
+`ctx.get('accounts')`, then `GITHUB_OAUTH_TOKEN`/`GH_TOKEN` env; `createPullRequest`
+against the GitHub REST API with `apiBase` override for tests),
+`src/settings.ts` (`dsh-repos` NS: `remote`/`defaultBaseBranch`),
+`src/index.ts` — tools `repo-status`, `repo-branch`, `repo-commit`, `repo-push`
+(`-c http.extraHeader=Authorization: Bearer <token>`), `repo-pr`; `ownerRepoFromRemote`
+handles https / scp `git@host:owner/repo` / `git://`; token required for push+PR.
+`bin/repos.mjs` CLI (list/set/status/branch/commit). `check-plugin.mjs` does real
+git init/branch/commit round-trips via a stub subprocess and verifies PR POST
+(auth header `Bearer gho_pr-token`, URL, body) against a local HTTP server.
+
+**P6c — `dsh-tools` (commit `e8f0909`):** the `dsh-tools` settings section maps
+tool name → definition (`description`, `parameters` of `string|number|boolean`,
+`command` argv). `apply()` registers each via `defineTool` and runs it through
+`ctx.subprocess` (never shell) with `{name}` argument placeholders; nonzero exit
+is a result, not a throw; output `{stdout, stderr, exitCode}`. `bin/tool.mjs`
+CLI (list/add/remove) writes the section with the fixed
+`/^dsh-<section>[^\n]*\n(?:[ \t][^\n]*\n)*/m` replace (no lazy `$`). Real
+subprocess round-trips in `check-plugin.mjs`. There is no `tool-cordis` package
+in the harness — greenfield on the `defineTool`/`ctx.tools.register` seam.
+
+**P6d — `dsh-agents` (commit `0b1296f`):** persona files (`.md` with `---`
+frontmatter + body, or `.json` `{prompt,...}`) under the authoring root
+(`dsh-agents.root`, default `<home>/agents`) materialize as harness agent
+presets under `<home>/.agent-presets/` — the base preset's composition (default
+`standard`, overridable `base`) spliced VERBATIM with the persona row's text
+swapped (text splice, no YAML parse — the `!!js` dialect and `{{model}}`/
+`{{cwd}}` round-trip untouched, proven against the real shipped `standard`
+composition), plus `preset.yml` picker metadata and a `.dsh-agents-source`
+marker so sync prunes only presets whose source is gone (hand-authored presets
+survive). No harness service required (the roster reads its root live);
+`dsh-agent-presets`/`dsh-persona` were inspected but the design avoids them.
+Base dir resolved repo-relative or via `DSH_AGENTS_BASE_DIR`; unreachable →
+bare persona row. `bin/agents.mjs` CLI (list/add/remove/sync); the plugin
+installs the settings section, syncs at boot, and re-syncs debounced on
+authoring-root changes (watcher `unref()`d so it never holds a process open).
+`check-plugin.mjs` covers parsing/splice/sync/prune/apply-boot/CLI. New `agents`
+verb added to `scripts/dsh`.
+
+**Outcome:** All three shipped + pushed, then pinned in this superproject commit
+with PLAN (Phase 6 `[complete]`, repo-table statuses) and BACKLOG (rows 7, 17, 18
+→ DONE) updates. `dsh-tools`, `dsh-agents`, `dsh-repos` moved from "scaffolded
+(P1)" to shipped in the repo table. Remaining: P7 (`dsh-providers` breadth),
+backlog evals (TUI/GitLab/agentic-init), final docs.
 
 ---
 
@@ -641,7 +698,7 @@ id) and fully passing. Uncommitted; superproject pin + PLAN/BACKLOG sync next.
 - `/Users/user/agents/BACKLOG.md` — parity delta backlog re-keyed by owning plugin
 - `/Users/user/agents/README.md`, `/Users/user/agents/scripts/{agents,bootstrap,dsh}`
 - `/Users/user/agents/harness/` (pinned deepseek-harness), `/Users/user/agents/plugins/`
-  (5 plugin submodules)
+  (14 plugin submodules, 13 shipped)
 - `/Users/user/Andromeda/` — port-source (commit `c6d8cda`)
 - `/Users/user/.config/opencode/opencode.jsonc`, `/Users/user/.config/opencode/agents/admin.md`
 - `/Users/user/.local/share/opencode/opencode.db` — session store (transcripts source)

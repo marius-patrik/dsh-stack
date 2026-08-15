@@ -20,10 +20,10 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `dsh-themes/` — VS Code/TextMate themes: store + Open VSX catalog, `/themes.json` route, browser bundle, `dsh theme` CLI (shipped, boot-verified).
   - `dsh-formatters/` — per-extension formatter commands: `format` tool + auto-format-on-edit + `dsh formatter` CLI (shipped, boot-verified).
   - `dsh-lsp/` — LSP server table for the harness LSP seam: `mergeServers`, `Lsp` def + `lsp-stdio`/`tool-lsp` mounts, `dsh lsp` CLI (shipped, boot-verified).
-  - `dsh-tools/` — config-file custom tools (scaffolded).
-  - `dsh-agents/` — custom agent files (JSON/MD) (scaffolded).
-  - `dsh-repos/` — repo workflows (PR/commit), consuming GitHub credentials (scaffolded).
-- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks), `theme` (dsh-themes), `lsp` (dsh-lsp), `formatter` (dsh-formatters).
+  - `dsh-tools/` — config-file custom tools: `dsh-tools.tools` map → `ctx.tools` entries, `{name}` placeholders, `dsh tool` CLI (shipped, boot-verified).
+  - `dsh-agents/` — custom agents as JSON/MD persona files materialized into agent presets: base composition spliced, live roster, `dsh agents` CLI (shipped, boot-verified).
+  - `dsh-repos/` — repo workflows: branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN`, `dsh repos` CLI (shipped, boot-verified).
+- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks), `theme` (dsh-themes), `lsp` (dsh-lsp), `formatter` (dsh-formatters), `agents` (dsh-agents).
 
 ## State
 

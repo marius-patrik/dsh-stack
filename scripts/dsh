@@ -107,4 +107,12 @@ if [[ "${1:-}" == "formatter" ]]; then
   exec node "$here/../plugins/dsh-formatters/bin/formatter.mjs" "$@"
 fi
 
+if [[ "${1:-}" == "agents" ]]; then
+  # The `agents` verb is the dsh-agents owner surface: it reads/writes the
+  # same home the harness boots and the same `dsh-agents` settings section
+  # the plugin composes (persona authoring root + default base preset).
+  shift
+  exec node "$here/../plugins/dsh-agents/bin/agents.mjs" "$@"
+fi
+
 exec node "$bin" "$@"

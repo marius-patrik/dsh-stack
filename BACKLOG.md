@@ -84,7 +84,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
 | 5 | Models | Broad provider catalog (75+ via Models.dev) | L | PARTIAL | `dsh-providers` (P7) | native catalog + adapters exist; breadth open |
 | 6 | Collaboration | Public session share links | M | DONE | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
-| 7 | Git | GitHub integration (PR/commit workflows) | L | PARTIAL | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (credentials); branch/commit/push/PR (repos) |
+| 7 | Git | GitHub integration (PR/commit workflows) | L | DONE | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (P6a) + branch/commit/push/PR (P6b); GitLab split out as row 8 |
 | 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | — |
 | 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | `dsh-repos` (later) | dsh reads AGENTS.md; doesn't generate |
 | 10 | Session UX | `/undo` `/redo` | S | DONE | `dsh-tweaks` (P2) | fork-based via `sessions.create(seed)` |
@@ -94,8 +94,8 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 14 | Session UX | Keybind customization | S | DONE | `dsh-tweaks` (P2) | `keybinds` settings surface + validators |
 | 15 | Session UX | Themes | S | DONE | `dsh-themes` (P4) | VS Code/TextMate; file install + Open VSX catalog |
 | 16 | Session UX | Code formatters (auto-format on edit) | M | DONE | `dsh-formatters` (P5) | formatter table + `format` tool + `tools/post-execute` auto-format; also `dsh-lsp` server table for the LSP seam |
-| 17 | Agent config | Custom agents as JSON/Markdown files | M | PARTIAL | `dsh-agents` (P6) | `agent-presets`/`persona` seams |
-| 18 | Agent config | Config-file custom tools | M | PARTIAL | `dsh-tools` (P6) | scoped tool registry + `tool-cordis` |
+| 17 | Agent config | Custom agents as JSON/Markdown files | M | DONE | `dsh-agents` (P6) | persona files (MD/JSON) materialized as agent presets (base composition spliced, picker metadata, live roster) |
+| 18 | Agent config | Config-file custom tools | M | DONE | `dsh-tools` (P6) | settings tool map registered via the harness tool seam; `{name}` placeholders |
 | 19 | Observability | Token/cost stats CLI | S | DONE | `dsh-tweaks` (P2) | `dsh stats` reads session_projcache |
 | 20 | Observability | Session list CLI | S | DONE | `dsh-tweaks` (P2) | `dsh sessions` JSON list |
 | 21 | Maturity | GA stability guarantee + migration story | L | OPEN | — | dev preview; breaking changes expected |
@@ -107,10 +107,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 - `dsh-providers` (P7): catalog breadth (5-remainder)
 - `dsh-tweaks` (P2): share links (6), undo/redo (10), Plan/Build (11), drag-drop (12),
   slash commands (13), keybinds (14), stats CLI (19), session list CLI (20)
-- `dsh-credentials` + `dsh-repos` (P6): GitHub workflows (7-remainder)
 - `dsh-repos` (later): GitLab (8), agentic init (9)
-- `dsh-agents` (P6): agent files (17-remainder)
-- `dsh-tools` (P6): tool files (18-remainder)
 - —: GA (21)
 
 Phase order (from PLAN.md): P1 scaffold → P2 tweaks v2 (share/observability/session-UX,
