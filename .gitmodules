@@ -37,3 +37,6 @@
 [submodule "plugins/dsh-repos"]
 	path = plugins/dsh-repos
 	url = https://github.com/marius-patrik/dsh-repos.git
+[submodule "plugins/dsh-lsp"]
+	path = plugins/dsh-lsp
+	url = https://github.com/marius-patrik/dsh-lsp.git

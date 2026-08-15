@@ -570,6 +570,37 @@ checks), web profile boot manifest + bundle + route all live.
 
 ---
 
+## 5e. Session 6 — P5–P7 finish-out (2026-08-15)
+
+**Goal:** Finish the remaining phases: P5 `dsh-formatters`, P6 partials
+(`dsh-credentials` GitHub half, `dsh-repos`, `dsh-tools`, `dsh-agents`), P7
+provider breadth — then knock off the remaining backlog rows (TUI, GitLab,
+agentic init) where feasible, and close out the doc stack.
+
+**Round todos:** (1) P5 formatters; (2) P6a credentials GitHub OAuth half;
+(3) P6b repos branch/commit/push/PR; (4) P6c tools config-file registry;
+(5) P6d agents JSON/MD persona files; (6) P7 provider catalog breadth;
+(7) backlog TUI/GitLab/agentic-init evaluation; (8) docs + commit per phase.
+
+**Outcome:** Round 1 of 5e — **P5 fully shipped**: `dsh-lsp` (server table +
+`mergeServers` + `Lsp` def + `lsp-stdio`/`tool-lsp` mounts + `dsh lsp` CLI) and
+`dsh-formatters` (formatter table + `format` tool + `tools/post-execute`
+auto-format with `[auto-format]` context note + `dsh formatter` CLI), both with
+`check-plugin.mjs` suites passing, `tsc` clean, committed + pushed and pinned in
+the superproject, wired into the web profile bundle list (pnpm links +
+`dsh.bundle` patches), boot-verified against the live web profile: Loader
+inventory shows `include:lsp` and `include:formatters` active, `/themes.json`
+real (the prior "200" was the SPA fallback — the server had been booted against
+the wrong `~/.dsh` default home, not `~/.agents`; fixed by launching with
+`DSH_HOME=$HOME/.agents`). Found + fixed the CLI section-replace regex bug
+(`m`-flag `$` matched line ends, leaving orphan section lines) in both
+`bin/lsp.mjs` and `bin/formatter.mjs`. Also verified profile-bundle contract:
+a bundle listed in `dsh.profile.bundles` must declare `dsh.bundle.patch` +
+`cordis.patch.yml` or boot fails loud. Remaining: P6a–d, P7, backlog rows,
+final doc close-out.
+
+---
+
 ## 6. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)

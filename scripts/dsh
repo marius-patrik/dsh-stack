@@ -91,4 +91,20 @@ if [[ "${1:-}" == "theme" ]]; then
   exec node "$here/../plugins/dsh-themes/bin/theme.mjs" "$@"
 fi
 
+if [[ "${1:-}" == "lsp" ]]; then
+  # The `lsp` verb is the dsh-lsp owner surface: it reads/writes the same home
+  # the harness boots and the same `dsh-lsp` settings section the plugin
+  # composes (the LSP server table). Falls through otherwise.
+  shift
+  exec node "$here/../plugins/dsh-lsp/bin/lsp.mjs" "$@"
+fi
+
+if [[ "${1:-}" == "formatter" ]]; then
+  # The `formatter` verb is the dsh-formatters owner surface: it reads/writes
+  # the same home the harness boots and the same `dsh-formatters` settings
+  # section the plugin composes (formatter table + auto-format toggle).
+  shift
+  exec node "$here/../plugins/dsh-formatters/bin/formatter.mjs" "$@"
+fi
+
 exec node "$bin" "$@"

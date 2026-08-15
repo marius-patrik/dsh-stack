@@ -18,11 +18,12 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `dsh-tui/` — client-only TUI (cannibalized opencode client; scaffolded, impl later).
   - `dsh-desktop/` — Tauri v2 thin shell + lifecycle plugin: readiness route (`/__dsh-desktop/health`), boot URL, spawn helpers.
   - `dsh-themes/` — VS Code/TextMate themes: store + Open VSX catalog, `/themes.json` route, browser bundle, `dsh theme` CLI (shipped, boot-verified).
-  - `dsh-formatters/` — LSP-based format-on-edit (scaffolded).
+  - `dsh-formatters/` — per-extension formatter commands: `format` tool + auto-format-on-edit + `dsh formatter` CLI (shipped, boot-verified).
+  - `dsh-lsp/` — LSP server table for the harness LSP seam: `mergeServers`, `Lsp` def + `lsp-stdio`/`tool-lsp` mounts, `dsh lsp` CLI (shipped, boot-verified).
   - `dsh-tools/` — config-file custom tools (scaffolded).
   - `dsh-agents/` — custom agent files (JSON/MD) (scaffolded).
   - `dsh-repos/` — repo workflows (PR/commit), consuming GitHub credentials (scaffolded).
-- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks), `theme` (dsh-themes).
+- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks), `theme` (dsh-themes), `lsp` (dsh-lsp), `formatter` (dsh-formatters).
 
 ## State
 

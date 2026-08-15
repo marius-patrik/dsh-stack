@@ -21,7 +21,8 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
 | `dsh-desktop` | public | **P3 shipped**: Tauri v2 thin shell + lifecycle plugin (readiness route, settings) |
 | `dsh-themes` | public | **P4 shipped**: VS Code/TextMate theme store + Open VSX catalog + `/themes.json` route + browser theme bundle + `dsh theme` CLI |
-| `dsh-formatters` | public | scaffolded (P1); LSP-based format-on-edit (greenfield formatDocument) |
+| `dsh-formatters` | public | **P5 shipped**: formatter table + `format` tool + auto-format-on-edit + `dsh formatter` CLI |
+| `dsh-lsp` | public | **P5 shipped**: LSP server table + `Lsp` def + `lsp-stdio`/`tool-lsp` mounts + `dsh lsp` CLI |
 | `dsh-tools` | public | scaffolded (P1); config-file custom tools |
 | `dsh-agents` | public | scaffolded (P1); custom agent files (JSON/MD) |
 | `dsh-repos` | public | scaffolded (P1); repo workflows (PR/commit), consuming GitHub credentials |
@@ -160,9 +161,26 @@ install-vsix/set/remove), browser half (hand-authored `__ModuleLoader__` bundle
 profile (boot manifest client row, bundle served, real Open VSX search/install,
 CLI→route round-trip).
 
-### Phase 5 — `dsh-formatters`
+### Phase 5 — `dsh-formatters` + `dsh-lsp`  `[complete]`
 
-LSP-based format-on-edit (`formatDocument` via `lsp-stdio` seam).
+- **`dsh-lsp`** — LSP server table for the harness LSP seam: `dsh-lsp`
+  settings section (per-extension `LspLocalServerConfig` entries), `mergeServers`
+  (entry-config baseline, settings win), mounts the `Lsp` service definition
+  always and `lsp-stdio` + `tool-lsp` only when the merged table is non-empty
+  (boot-time composition), `dsh lsp list|servers add|servers remove` CLI.
+  Greenfield — no `formatDocument` (the harness LSP op set is
+  goToDefinition/findReferences/goToImplementation/hover).
+- **`dsh-formatters`** — per-extension formatter commands with a model-facing
+  `format` tool and optional auto-format-on-edit: `dsh-formatters` settings
+  section (formatter table + toggle), `formatFile` runs formatters through
+  `ctx.subprocess` (cwd = file dir, 15s grace, stderr surfaced), the
+  `tools/post-execute` waterfall rewrites formatted `edit`/`write` results and
+  prepends an `[auto-format]` context note, `dsh formatter
+  list|add|remove|set-auto` CLI.
+- Both shipped + boot-verified against the live web profile (active Loader
+  entries, `dsh lsp`/`dsh formatter` verbs through `scripts/dsh`), committed +
+  pushed (`dsh-lsp` f25b21e→682c730, `dsh-formatters` 2eed54a→fb33604), pinned
+  in the superproject, wired into the web profile bundle list.
 
 ### Phase 6 — partial plugins
 

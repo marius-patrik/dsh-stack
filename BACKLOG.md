@@ -93,7 +93,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 13 | Session UX | Custom slash commands | M | DONE | `dsh-tweaks` (P2) | settings `commands` section -> registry bridge |
 | 14 | Session UX | Keybind customization | S | DONE | `dsh-tweaks` (P2) | `keybinds` settings surface + validators |
 | 15 | Session UX | Themes | S | DONE | `dsh-themes` (P4) | VS Code/TextMate; file install + Open VSX catalog |
-| 16 | Session UX | Code formatters (auto-format on edit) | M | OPEN | `dsh-formatters` (P5) | LSP `formatDocument` via `lsp-stdio` |
+| 16 | Session UX | Code formatters (auto-format on edit) | M | DONE | `dsh-formatters` (P5) | formatter table + `format` tool + `tools/post-execute` auto-format; also `dsh-lsp` server table for the LSP seam |
 | 17 | Agent config | Custom agents as JSON/Markdown files | M | PARTIAL | `dsh-agents` (P6) | `agent-presets`/`persona` seams |
 | 18 | Agent config | Config-file custom tools | M | PARTIAL | `dsh-tools` (P6) | scoped tool registry + `tool-cordis` |
 | 19 | Observability | Token/cost stats CLI | S | DONE | `dsh-tweaks` (P2) | `dsh stats` reads session_projcache |
@@ -109,7 +109,6 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
   slash commands (13), keybinds (14), stats CLI (19), session list CLI (20)
 - `dsh-credentials` + `dsh-repos` (P6): GitHub workflows (7-remainder)
 - `dsh-repos` (later): GitLab (8), agentic init (9)
-- `dsh-formatters` (P5): formatters (16)
 - `dsh-agents` (P6): agent files (17-remainder)
 - `dsh-tools` (P6): tool files (18-remainder)
 - —: GA (21)
