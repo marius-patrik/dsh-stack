@@ -236,7 +236,24 @@ the 5s model family; `gemini-sub` moved from consumer-web cookies to the Code
 Assist `v1internal` OAuth transport (new `code-assist` dialect: wrapped
 `{model, project, user_prompt_id, request}` body, `{traceId, response}` SSE
 unwrap); `cursor-sub` dropped (unreachable Connect-RPC endpoint). 14 → 13 routes.
-Boot-verified (grok identity headers, code-assist wrap/unwrap round-trip).
+ Boot-verified (grok identity headers, code-assist wrap/unwrap round-trip).
+
+**Post-P7 token-refresh seams** (2026-08-16): subscription OAuth tokens are
+short-lived (kimi ~15 min, gemini 1 h, grok/claude a few hours), so every
+subscription loader now refreshes on expiry through the provider's verified
+refresh endpoint and persists the rotated bundle. `dsh-providers` stores per
+provider access + refresh + expiry in the account vault (`KIMI_SUB_REFRESH_TOKEN`,
+`..._EXPIRES`, etc.) and refreshes in `resolveAuth` with singleflight + write-back
+via `accounts.set`. The privatecode plugin does the same against `auth.json`
+(`{type:"oauth"}` entries) with singleflight + serialized writes. Reverse-
+engineered + live-verified endpoints: kimi `auth.kimi.com/api/oauth/token`
+(client `17e5f671-…`), claude `api.anthropic.com/v1/oauth/token` (JSON, client
+`9d1c250a-…`), grok `auth.x.ai/oauth2/token` (client `b1a00492-…`), gemini
+`oauth2.googleapis.com/token`. kimi/grok/claude refresh tokens ROTATE (single
+use); gemini's is durable. Live E2E: kimi + gemini refresh, rotation, and
+write-back verified in both stacks. grok/claude stashes were consumed during
+probing — one-time interactive re-login (`grok login`, `claude /login`) needed
+before their seams have live material again.
 
 ### Phase 8 — `dsh-session-modes` `[in progress]`
 

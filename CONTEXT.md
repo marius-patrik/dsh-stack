@@ -1086,3 +1086,85 @@ sibling plugins resolve via `node_modules` symlinks (`link:`-style), matching
 the original workspace-less convention. Docs updated (PLAN.md rows + P7
 post-fix note, BACKLOG rows 5/61/62 + auth bullet, this CONTEXT section).
 Committed: `dsh-dialects` + `dsh-providers`, then superproject pin + docs.
+
+## 11. Session 10 — OAuth token refresh seams for every subscription provider (2026-08-16)
+
+**Build round** after Session 9 shipped the wire-truth transports. The remaining
+gap: subscription OAuth tokens are short-lived (kimi ~15 min, gemini 1 h, grok /
+claude a few hours), so both the privatecode plugin and `dsh-providers` need a
+per-request refresh seam that rotates and **persists** the token bundle.
+
+Phase list:
+1. Reverse-engineer + verify a refresh endpoint for all four subscription
+   providers (claude, kimi, grok, gemini).
+2. privatecode plugin: generic OAuth refresh (refresh-on-expiry, singleflight,
+   persist back to `auth.json`) wired into every subscription loader.
+3. `dsh-providers`: same seam on the account vault (refresh refs written back
+   through `ctx.accounts.set`).
+4. Re-bootstrap token material + seed the vault, verify end-to-end.
+
+Reverse-engineering results (all verified live with curl):
+- **claude**: `POST https://api.anthropic.com/v1/oauth/token`, JSON
+  `{grant_type: refresh_token, refresh_token, client_id}` where the Claude Code
+  client id is `9d1c250a-e61b-44d9-88ed-5944d1962f5e` (discovered by probing the
+  device-authorization oracle against the candidate UUIDs in the CLI bundle;
+  `claude.ai/*` is Cloudflare-gated). Refresh tokens ROTATE.
+- **kimi**: `POST https://auth.kimi.com/api/oauth/token`, form-encoded
+  `grant_type=refresh_token&refresh_token&client_id=17e5f671-d194-4dfb-9706-5516cb48c098`
+  (client id extracted from the kimi CLI bundle; `/v1/oauth/token` on
+  `api.kimi.com` 404s — the real path is `/api/oauth/token` on `auth.kimi.com`).
+  Response rotates the refresh token; `expires_in: 900`.
+- **grok**: `POST https://auth.x.ai/oauth2/token`, form-encoded with
+  `client_id=b1a00492-073a-47ea-816f-4c329264a828` (from `auth.json`
+  `oidc_client_id`). Rotates + revokes the old token.
+- **gemini**: `POST https://oauth2.googleapis.com/token` with client_id
+  `1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com` +
+  client_secret `GOCSPX-…` (durable, non-rotating).
+
+Caveats learned the hard way: the claude and grok refresh tokens are single-use
+(rotated) — probing them consumed the stored sessions; claude's keychain entry
+was also cleared by its background daemon, so claude + grok need a one-time
+interactive re-login (`claude /login`, `grok login`) before the new seams have
+live material again. kimi and gemini material remains healthy.
+
+**Outcome:** Both refresh seams shipped and live-verified.
+
+`privatecode` plugin (`packages/opencode/src/plugin/subscriptions.ts`): added an
+`oauth` field to the subscription `Spec`s, a generic `refreshOAuthToken`
+(JSON body for Anthropic, form for the rest), singleflight per provider
+(`refreshInflight`), and `persistAuth` which rewrites `auth.json`
+(`path.join(Global.Path.data, "auth.json")`) with the full rotated
+`{type:"oauth", access, refresh, expires}` bundle behind a serialized write
+chain. `oauthFetch` (claude/kimi/grok) and `geminiFetch` now refresh when the
+stored `expires` has passed; bare `{type:"api"}` tokens keep working but do not
+refresh. Typecheck clean; built + reinstalled (1.18.18). Live E2E: forced the
+kimi-sub entry past expiry → one real refresh to `auth.kimi.com`, new bundle
+persisted (access + rotated refresh + fresh expiry), outgoing request used the
+new token.
+
+`dsh-providers` (`src/index.ts`): module-level `OAUTH_REFRESHERS` table carrying
+the verified endpoint + client id/secret (gemini's client id + secret live in
+the vault as `GEMINI_SUB_CLIENT_ID`/`GEMINI_SUB_CLIENT_SECRET` — GitHub push
+protection rejects GCP OAuth material in committed code) + the vault refs
+(`*_OAUTH_TOKEN`, `*_REFRESH_TOKEN`, `*_EXPIRES`) per subscription provider;
+generic `refreshOAuthToken`; in-`apply` singleflight + `readToken`
+(refresh-on-expiry) + `write` through `ctx.accounts.set` with an in-process
+`memory`/`refreshed` override when no vault is present so a rotated token is
+never double-consumed. Wired into `credentialsFor` so both the gate and
+`resolveAuth` see fresh tokens. Typecheck + `check-plugin` green. Live E2E
+(real vault + live endpoints): forced kimi expiry → exactly one refresh, rotated
+bundle written back, fresh bearer used; gemini → exactly one refresh, durable
+refresh token kept, expiry advanced to ~1 h.
+
+Material: `~/.local/share/opencode/auth.json` kimi-sub + gemini-sub are now
+`{type:"oauth"}` bundles; the dsh vault at `~/.agents/vault` was initialized
+(existing `master.key` reused; the service key is the Keychain `dsh.accounts`
+hex, which matches `master.key`'s base64) and seeded with the six kimi/gemini
+refs plus the two gemini OAuth client refs (slugs + `ref:` tags, so
+`accounts.resolve` finds them). Verified `AccountsService.resolve` returns each
+ref from the vault. Caveats: grok +
+claude still need a one-time interactive re-login (`grok login`, `claude /login`)
+— probing consumed their single-use refresh tokens — and the privatecode
+loader only refreshes `{type:"oauth"}` entries, so the user must re-seed those
+two as oauth bundles after re-login. Committed: `dsh-providers` seam + docs,
+then superproject pin + docs.

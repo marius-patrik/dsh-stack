@@ -147,6 +147,12 @@ From the abandoned pastacode (opencode fork) plan — check before treating as b
   (Code Assist OAuth bearer; the old `GEMINI_SUB_COOKIE_*` slots were dropped
   with the consumer-web transport), `KIMI_SUB_OAUTH_TOKEN`, `KIMI_API_KEY`;
   `CURSOR_SUB_TOKEN` removed with `cursor-sub`. Done.
+- **Subscription token refresh** — every subscription OAuth token now refreshes
+  on expiry and persists its rotated bundle: `dsh-providers` keeps
+  `*_REFRESH_TOKEN` + `*_EXPIRES` refs in the account vault with singleflight +
+  write-back, and the privatecode plugin refreshes + rewrites its `auth.json`
+  `{type:"oauth"}` entries. kimi/grok/claude refresh tokens are single-use;
+  gemini's is durable. Live-verified for kimi + gemini in both stacks. Done.
 
 Deferred plugin candidates (port-source kept in Andromeda): `src/cli/orchestrator.ts`
 (baton/heartbeat), `src/cli/memory.ts` (durable memory), remaining `src/cli/state*.ts`.
