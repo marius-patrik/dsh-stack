@@ -970,3 +970,119 @@ themes dir). All six bundles materialize against the real platform seed modules
 and export exactly `apply` + `inject` (smoke harness with CSS-stub loader). Docs
 updated: PLAN.md Phase B shipped bullet, BACKLOG rows 22/23/24/25 notes, this
 CONTEXT section. Commits + pushes follow in this round's close.
+
+## 9. Session 8 — Phase C build round: live personas (2026-08-16)
+
+**Directive:** implement PRD §5 Phase C — live persona switching — in `dsh-agents`,
+mirroring the harness's own plan-mode pattern (durable log event + pending-while-open
+fold + projection + popupSelect switcher + composer badge).
+
+**Round todo:**
+1. `src/types.ts` — structural host types (Session/Agent/PreStepDecision faces,
+   narrow to the seams) + the `persona` projection wire value.
+2. `src/controller.ts` — `PersonaController`: `persona/selected` durable event,
+   `foldPersona` (last-wins), WeakMap pending with open-turn detection,
+   `set()` (committed/queued/cancelled/noop), `agent/pre-step` commit that calls
+   `next()` first, fold-on-read `get()`.
+3. `src/catalog.ts` — `PersonaCatalog`: id→prompt resolution over the authoring
+   root with mtime-cached reads (reuses `parsePersona`).
+4. `src/index.ts` — provide `personaController` + catalog; `persona:policy`
+   section (order 45, function text provider: live event → `defaultPersona`
+   config → `session.header.agentPreset` (known persona) → `''`); `persona`
+   session-projection unit (folds `command/run` name `persona` + `persona/selected`,
+   `{ personaId, pending }`); `/persona` command (via `ctx.inject(['commands'])`,
+   no-arg prints current, unknown id errors); Config gains `defaultPersona`.
+5. `src/compose.ts` — composition change per PRD: generated presets mount the
+   persona package ONCE with neutral `text: ''` (drops at render); the persona
+   now flows from the `persona:policy` section, never from spliced text.
+6. `check-plugin.mjs` — assertions for controller fold/set/pre-step, catalog
+   resolution, section provider (default chains), projection unit, neutral
+   compose (one persona row, `!!js` preserved, no embedded persona text),
+   `/persona` command, client switcher + badge.
+7. `client.js` — `/persona` popupSelect via `commandUi.register` (options from
+   `connection.api.agentPresets.list`, onSelect →
+   `ctx.remote.commands.execute(sessionId, '/persona <id>')`); active-persona
+   badge in `conversation.input.left` reading `useProjection('persona')` +
+   session header preset; inject grows to `['slots','connection','commandUi','remote']`.
+8. Boot-verify (manifest edges, served bundle, seed-materialization smoke) + docs
+   (PLAN/BACKLOG/CONTEXT) + commit dsh-agents + superproject pin.
+
+**Carried state at round start:** Phase B shipped + pinned (6 plugins, superproject
+`Phase 11 B` commit); server UP; dsh-agents clean tree. Harness facts learned this
+round: `AssembleContext` is `{scope?, signal?}` with `agent` added by the agent
+package (`core/agent/src/runtime-types.ts:17`); the only persona-adjacent host
+events are `plan/mode` (plan-mode), `session-mode/selected` (dsh-session-modes),
+`agent-preset/selected` (appended only by the recompose flow, `api-proxy.ts:3113`);
+the durable default preset lives on `session.header.agentPreset` (`types.ts:98`);
+`PERSONA_SECTION='deployment:persona'`, `PERSONA_ORDER=0`; client commands run via
+`ctx.remote.commands.execute`; popupSelect port = `ui-model-selection/client/index.ts:122-151`;
+projection fold template = `plan-mode/src/index.ts` (unit + declaration merge);
+web profile composes `sessionProjections` (base/web-app bundles).
+
+**Outcome:** [filled at round end]
+
+## 10. Session 9 — provider wire-truth round: fix dsh transports to match reality (2026-08-16)
+
+**Directive:** propagate the reverse-engineered subscription transports into the
+harness plugins. The old dsh descriptors were wrong on the wire: `kimi-sub` and
+`grok-sub` spoke the claude dialect against dead endpoints (`api.kimi.com/coding`,
+`api.x.ai/coding`); `gemini-sub` used consumer-web cookies against
+`gemini.google.com/gemini/v1beta/...`; model catalogs were stale (Kimi K2.5-era,
+Claude 4.1-era); `cursor-sub` pointed at the unreachable Connect-RPC
+`api2.cursor.sh/anthropic`. Wire facts learned outside this repo (opencode plugin
+work, session-summarized): kimi subscription speaks OpenAI-compatible at
+`https://api.kimi.com/coding/v1`; grok subscription speaks OpenAI-compatible at
+`https://cli-chat-proxy.grok.com/v1` with identity headers
+`x-xai-token-auth: xai-grok-cli`, `x-grok-client-identifier: grok-shell`,
+`x-grok-client-version: 0.2.93`; claude subscription needs
+`anthropic-beta: oauth-2025-04-20`; Gemini Code Assist is the `v1internal`
+endpoint (`https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse`)
+with OAuth bearer + wrapped body `{model, project, user_prompt_id, request}` and
+SSE payloads wrapped as `{traceId, response}`.
+
+**Round todo:**
+1. `dsh-dialects`: add a `code-assist` dialect id + implementation — Code Assist
+   wrapper serialize (contents via `serializeContents`, `session_id`/`user_prompt_id`
+   UUIDs, `request` nesting) and SSE parse that unwraps `{traceId, response}` and
+   reuses `translateGemini`.
+2. `dsh-providers/providers.ts`: `kimi-sub` → openai dialect + `/coding/v1` +
+   K3/K2.7-code/K2.6/K2.5 models; `claude-sub` → 5s model family + oauth beta
+   header; remove `cursor-sub`; `grok-sub` → openai dialect +
+   `cli-chat-proxy.grok.com/v1` + identity headers + grok-4.6/4.5/composer models;
+   `gemini-sub` → code-assist dialect + `v1internal` baseURL + OAuth token slot
+   + gemini-3.6/3.5/3.1-pro/3-pro models; route descriptors gain optional
+   `headers`.
+3. `dsh-providers/adapter.ts` + `index.ts`: thread route headers through
+   `ProviderConnection` into `DialectAuth.headers`.
+4. `check-plugin.mjs` updates in both plugins (13 routes, no cursor, code-assist
+   registered) + boot-verify.
+5. Docs: PLAN.md (dsh-dialects/dsh-providers rows + P7 notes), BACKLOG row notes,
+   this CONTEXT section. Commit + push plugin repos, then superproject pin.
+
+**Carried state at round start:** clean trees in dsh-dialects (ac47efd) and
+dsh-providers (3062793); superproject working tree carried Session 8's unfilled
+dsh-agents round (CONTEXT.md + dirty dsh-agents submodule) — left untouched.
+Wire facts verified live against the real endpoints: grok `chat/completions` 200
+("Pong!"), kimi 403 billing-cycle usage limit (auth OK), claude 429 rate limit
+(auth OK), gemini `:loadCodeAssist` 200 (standard-tier) + `:streamGenerateContent`
+429 RESOURCE_EXHAUSTED with the full `x-goog-api-client`/`user-agent` header set
+(request well-formed; account quota-gated).
+
+**Outcome:** All targets shipped + boot-verified. `dsh-dialects` gained the
+`code-assist` dialect (Code Assist wrapper serialize + `{traceId, response}` SSE
+unwrap reusing `translateGemini`; registered + exported, `WireContent` exported,
+tsconfig lib gained `DOM.AsyncIterable` for TS 5.9). `dsh-providers` corrected
+every subscription route: `kimi-sub` openai@`/coding/v1` + K3/K2.7/K2.6/K2.5,
+`claude-sub` 5s family + `anthropic-beta: oauth-2025-04-20`, `grok-sub`
+openai@`cli-chat-proxy.grok.com/v1` + identity headers + grok-4.6/4.5/composer,
+`gemini-sub` code-assist@`v1internal` + OAuth bearer + gemini-3.6/3.5/3.1-pro/3-pro,
+`cursor-sub` removed (13 routes total); route descriptors + adapter gained fixed
+`headers` threaded through `ProviderConnection` → `DialectAuth.headers`.
+Typecheck clean in both plugins; check-plugin + dialect test suites green
+(grok identity header + code-assist wrap/unwrap round-trips asserted).
+Build env note: the plugin repos have no committed lockfiles; `@deepseek-ai/dsh-*`
+resolve from npm only as `0.1.0-rc.x` (rc.6 used for build) and the unscoped
+sibling plugins resolve via `node_modules` symlinks (`link:`-style), matching
+the original workspace-less convention. Docs updated (PLAN.md rows + P7
+post-fix note, BACKLOG rows 5/61/62 + auth bullet, this CONTEXT section).
+Committed: `dsh-dialects` + `dsh-providers`, then superproject pin + docs.

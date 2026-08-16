@@ -58,7 +58,7 @@ knocked off or marked partial.
 
 | Plugin | Status | Covers (parity-relevant) |
 |---|---|---|
-| `dsh-dialects` | shipped + boot-verified | Provider **wire dialects**: openai, claude, gemini |
+| `dsh-dialects` | shipped + boot-verified | Provider **wire dialects**: openai, claude, gemini, code-assist |
 | `dsh-providers` | shipped + boot-verified | **Provider adapters** for subscription + API providers; `PROVIDER_ROUTES` descriptor registry |
 | `dsh-tweaks` | shipped + boot-verified | **State folder** (homeRoot) + **command string config**; provider **filter** (subscriptions vs API split, pinning/favorites) |
 | `dsh-subscriptions` | shipped + boot-verified | **Single-seat subscription remap** — use existing LLM subscription accounts as providers |
@@ -82,7 +82,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 2 | Interfaces | Terminal TUI as shipped default profile | L | OPEN | `dsh-tui` (P1 scaffold) | deferred by decision: web profile is the shipped default; TUI stays a thin client-only scaffold until a keyboard-first experience is wanted |
 | 3 | Models | Curated model gateway | XL | OPEN | product | Zen-analog; product decision, not plugin |
 | 4 | Models | Low-cost subscription to tested open models | XL | PARTIAL | `dsh-subscriptions` | single-seat remap shipped; hosted gateway open |
-| 5 | Models | Broad provider catalog (75+ via Models.dev) | L | DONE | `dsh-providers` (P7) | 14 routes: 6 subscription adapters + 8 API-key routes (openai/anthropic/gemini/grok/deepseek/mistral/groq/openrouter); `subscription-only` default hides API routes, `mode: "all"` offers them |
+| 5 | Models | Broad provider catalog (75+ via Models.dev) | L | DONE | `dsh-providers` (P7) | 13 routes: 5 subscription adapters + 8 API-key routes (openai/anthropic/gemini/grok/deepseek/mistral/groq/openrouter); `subscription-only` default hides API routes, `mode: "all"` offers them |
 | 6 | Collaboration | Public session share links | M | DONE | `dsh-tweaks` (P2) | self-hosted `/share/:id`, readonly default, token-gated interactive |
 | 7 | Git | GitHub integration (PR/commit workflows) | L | DONE | `dsh-credentials` + `dsh-repos` (P6) | GitHub OAuth account in vault (P6a) + branch/commit/push/PR (P6b); GitLab split out as row 8 |
 | 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | planned, same shape as shipped GitHub half: `GITLAB_TOKEN` slot + importer in `dsh-credentials`, MR + merge repo tools over subprocess/REST |
@@ -143,8 +143,10 @@ From the abandoned pastacode (opencode fork) plan — check before treating as b
   shipped (vault parity); v3 = full general account manager is deferred phase 2.
   Backlog (future).
 - **Reverse-engineering subscription auth** — Andromeda importers landed as
-  `CLAUDE_SUB_OAUTH_TOKEN`, `CURSOR_SUB_TOKEN`, `GROK_SUB_OAUTH_TOKEN`,
-  `GEMINI_SUB_COOKIE_*`, `KIMI_SUB_OAUTH_TOKEN`, `KIMI_API_KEY`. Done.
+  `CLAUDE_SUB_OAUTH_TOKEN`, `GROK_SUB_OAUTH_TOKEN`, `GEMINI_SUB_OAUTH_TOKEN`
+  (Code Assist OAuth bearer; the old `GEMINI_SUB_COOKIE_*` slots were dropped
+  with the consumer-web transport), `KIMI_SUB_OAUTH_TOKEN`, `KIMI_API_KEY`;
+  `CURSOR_SUB_TOKEN` removed with `cursor-sub`. Done.
 
 Deferred plugin candidates (port-source kept in Andromeda): `src/cli/orchestrator.ts`
 (baton/heartbeat), `src/cli/memory.ts` (durable memory), remaining `src/cli/state*.ts`.

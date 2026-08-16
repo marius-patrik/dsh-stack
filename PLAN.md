@@ -14,8 +14,8 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 |---|---|---|
 | `agents` | public | superproject: launcher, PLAN, CONTEXT, BACKLOG, gitlinks |
 | `dsh-credentials` | public | account/credential manager (v2 = full vault parity port) |
-| `dsh-dialects` | public | provider wire dialects (shipped + boot-verified) |
-| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 6 sub routes + 8 API-key routes (`PROVIDER_ROUTES`, `subscription-only`/`all` filter) |
+| `dsh-dialects` | public | provider wire dialects: openai, claude, gemini, code-assist (shipped + boot-verified) |
+| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes (`PROVIDER_ROUTES`, `subscription-only`/`all` filter) |
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
 | `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
@@ -77,8 +77,10 @@ Port Andromeda `src/vault/` module-for-module into the plugin, on the shim:
   fingerprints, scan read-only unless `--import`).
 - **P6d accounts**: named accounts on vault records, backward-compat
   `resolve(ref)`, importers wired to real refs (`CLAUDE_SUB_OAUTH_TOKEN`,
-  `CURSOR_SUB_TOKEN`, `GROK_SUB_OAUTH_TOKEN`, `GEMINI_SUB_COOKIE_*`,
-  `KIMI_SUB_OAUTH_TOKEN`, `KIMI_API_KEY`).
+  `GROK_SUB_OAUTH_TOKEN`, `GEMINI_SUB_OAUTH_TOKEN` (Code Assist bearer; the
+  cookie importers were removed with the consumer-web transport),
+  `KIMI_SUB_OAUTH_TOKEN`, `KIMI_API_KEY`; `CURSOR_SUB_TOKEN` removed with
+  `cursor-sub`).
 - **P6e command**: `bin/accounts.mjs` + `scripts/dsh` `accounts` verb route.
   Harness untouched.
 - **P6f/g evidence**: `check-plugin.mjs` (v1->v2 migration, 9-type round-trips,
@@ -225,6 +227,16 @@ The `subscription-only` filter keeps API routes hidden/refused by default;
 `mode: "all"` offers them. Boot-verified: filter gate, catalog in all mode, real
 openai/claude dialect stream round-trips, missing-credential path. Committed +
 pushed (`dsh-providers` da80f8f→3062793), pinned in the superproject.
+
+**Post-P7 wire-truth fix** (2026-08-16): the subscription descriptors were
+corrected against the live endpoints — `kimi-sub` speaks the openai dialect at
+`api.kimi.com/coding/v1`; `grok-sub` speaks openai at `cli-chat-proxy.grok.com/v1`
+with identity headers; `claude-sub` sends `anthropic-beta: oauth-2025-04-20` and
+the 5s model family; `gemini-sub` moved from consumer-web cookies to the Code
+Assist `v1internal` OAuth transport (new `code-assist` dialect: wrapped
+`{model, project, user_prompt_id, request}` body, `{traceId, response}` SSE
+unwrap); `cursor-sub` dropped (unreachable Connect-RPC endpoint). 14 → 13 routes.
+Boot-verified (grok identity headers, code-assist wrap/unwrap round-trip).
 
 ### Phase 8 — `dsh-session-modes` `[in progress]`
 
