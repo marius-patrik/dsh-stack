@@ -268,7 +268,7 @@ removal of inline key fields) is delivered in Phase 11 via the abstraction
 layer's `settings.models.row` seat + `openSection` affordance — never by
 patching the harness or using DOM mutation (see `BLOCKED.md` #1).
 
-### Phase 11 — the harness extension layer (Option A) `[planned]`
+### Phase 11 — the harness extension layer (Option A) `[in progress]`
 
 **Rule change (2026-08-16):** the harness stays pinned and pristine — no forks,
 no source edits — but `dsh-tweaks` becomes the single owned abstraction through
@@ -307,6 +307,19 @@ rename + Agents/Themes tabs → **C** live personas (`persona/selected`,
 switcher, client fold) → **D** Keychain↔Models binding + `/vault?ref=`
 deep-link → **E** sidebar batch (History, machine-root, chevrons, collapsed
 toggles) → **F** quotas polish + icon.
+
+**Phase A shipped (2026-08-16, boot-verified):** `dsh-tweaks` carries a
+`dsh.client` manifest (`platform: web`, `inject: slots/locale/layout/
+workspaces/connection`, `exports["./client"]` = the hand-authored `client.js`,
+plus `exports["./package.json"]` so the host module registry can read the
+declaration) and the take-over bundle: `TweaksSidebarRoot` / `TweaksSettingsRoot`
+occupants, chrome re-registration (trigger/header/close/general/action), the
+`sidebar.newSession` / `sidebar.history` / `settings.section.icon` seats, the
+loopback-only `open-document` action, and the `sidebar` + `settings`
+dictionaries. The web profile patch disables `ui-sidebar` and
+`ui-settings-general`; the boot manifest now lists the `dsh-tweaks` client row
+with its inject edges and serves `/plugins/dsh-tweaks/client.js` (verified
+materializing against the real platform seed modules).
 
 ## Remaining open work (documented plans, no open-ended rows)
 
