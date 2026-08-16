@@ -26,6 +26,8 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-tools` | public | **P6c shipped**: config-file custom tools (settings registry + subprocess execution + `dsh tool` CLI) |
 | `dsh-agents` | public | **P6d shipped**: custom agents as JSON/MD persona files materialized into agent presets (`dsh agents` CLI) |
 | `dsh-repos` | public | **P6b shipped**: repo workflows — branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN` (`dsh repos` CLI) |
+| `dsh-session-modes` | public | session mode controller: durable mode state, tool policy, model routing, bounded agent assist |
+| `dsh-quotas` | public | provider quota/usage aggregation and a settings usage dashboard; endpoint adapters are best-effort and CLI-backed providers are planned separately |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
@@ -223,6 +225,88 @@ The `subscription-only` filter keeps API routes hidden/refused by default;
 `mode: "all"` offers them. Boot-verified: filter gate, catalog in all mode, real
 openai/claude dialect stream round-trips, missing-credential path. Committed +
 pushed (`dsh-providers` da80f8f→3062793), pinned in the superproject.
+
+### Phase 8 — `dsh-session-modes` `[in progress]`
+
+Implement explicit per-session modes over the harness agent seams: durable
+`session-mode/selected` state with pending acceptance at `agent/pre-step`, a
+`/mode` command, mode policy prompt section, executor-level tool allowlists via
+`tools/pre-execute`, optional result substitution via `tools/execute`,
+per-mode provider/model routing via `agent/request`, and bounded one-shot
+subagent assistance. The plugin must remain agent-scoped for session state and
+use isolated preset composition for per-agent services. Boot verification will
+exercise state transitions, denied tools, routing, and depth-bounded delegation.
+
+Execution order: finish the durable kernel first, then add the isolated preset
+row and bounded subagent tool. Do not make mode state prompt-only or treat
+`tools.restrict()` as authorization. The mode set is `tool`, `search`, `action`,
+`plan`, `agent`, `shell`, and `code`; `plan` delegates its planning behavior to
+the native `ctx.planMode` seam rather than duplicating plan state. The settings
+nav rename to "Session Modes" (label swap on `id:'agent-presets'`) lands in
+Phase 11; modes stay independent of personas (any × any).
+
+### Phase 9 — `dsh-quotas` `[planned]`
+
+Add a provider-neutral quota snapshot service and settings section displayed
+below Models. Each provider adapter is isolated and best-effort: reverse
+engineered HTTP usage/quota endpoints may be used only when their response
+shape and authentication are understood, while CLI/subscription providers are
+represented by planned adapters and later CLI probes. The settings view must
+show freshness, window/reset, used/remaining values, and an explicit unknown
+state rather than inventing a quota. Start with read-only snapshots, cached
+with timestamps, and never log credential material.
+
+### Phase 10 — `dsh-credentials` Keychain/provider binding `[in progress]`
+
+The credential manager's web surface is a Settings section named Keychain, not
+a sidebar application page. It must represent the vault's typed records
+(`api_key`, OAuth token, password, TOTP seed, passkey, cookie jar, recovery
+codes, SSH key, and generic note) with purpose/account metadata and safe reveal
+actions. Provider configuration stores a credential reference, not material.
+The Models↔Keychain binding (a `Manage in Keychain` action per provider row and
+removal of inline key fields) is delivered in Phase 11 via the abstraction
+layer's `settings.models.row` seat + `openSection` affordance — never by
+patching the harness or using DOM mutation (see `BLOCKED.md` #1).
+
+### Phase 11 — the harness extension layer (Option A) `[planned]`
+
+**Rule change (2026-08-16):** the harness stays pinned and pristine — no forks,
+no source edits — but `dsh-tweaks` becomes the single owned abstraction through
+which every other plugin modifies the web UI. Full product scope lives in
+`PRD.md`; the seam-by-seam audit lives in `BLOCKED.md`.
+
+Mechanism: the web profile's patch layer (`disable + insert` rows, the harness's
+own endorsed composition model) disables harness UI occupants and mounts
+dsh-tweaks replacements. Because a slot key has one declarer (`children =
+declaration + authorization`), taking over the `sidebar` seat means dsh-tweaks
+re-declares the whole subtree and registers `TweaksSidebarRoot`,
+`TweaksWorkspaceBrowser`, and `TweaksSettingsRoot` (replacing the ui-sidebar /
+ui-workspace / ui-settings-general occupants). New seams declared by the
+replacements:
+
+- `sidebar.newSession` — New Chat icon (clipboard-with-pen);
+- `sidebar.history` — History section below Workspaces (full history incl.
+  machine-root, collapsible);
+- `settings.section.icon` — per-section nav glyphs registered by name
+  (keychain / meter-bar / plug-in-socket ship in the owning plugins' client
+  bundles; dsh-tweaks owns the name→glyph map);
+- `settings.models.row` — per-provider Keychain action (`{ only: provider }`,
+  mirroring `settings.plugins.tab`), plus `openSection` passed to every section.
+
+Settings nav order becomes General (0) → Models (10) → Quotas (15) → Session
+Modes (20) → Agents (25) → Themes (30) → Keychain (35) → Plugins (40).
+
+The one backend exception: pushing `persona/selected` live needs the harness
+`API_REMOTE_FORWARDED_EVENTS` allowlist, so the **client folds persona state
+from `session.history`** instead (`BLOCKED.md` #3, unblocks).
+
+Phases (detail in `PRD.md` §9): **A** abstraction foundation (occupant shells +
+profile patch rows) → **B** icon abstraction + settings reorder + Session Modes
+rename + Agents/Themes tabs → **C** live personas (`persona/selected`,
+`PersonaController`, `persona:policy` prompt hook, `/persona`, input-bar
+switcher, client fold) → **D** Keychain↔Models binding + `/vault?ref=`
+deep-link → **E** sidebar batch (History, machine-root, chevrons, collapsed
+toggles) → **F** quotas polish + icon.
 
 ## Remaining open work (documented plans, no open-ended rows)
 

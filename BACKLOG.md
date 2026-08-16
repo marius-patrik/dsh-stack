@@ -88,7 +88,7 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 8 | Git | GitLab integration | S | OPEN | `dsh-repos` (later) | planned, same shape as shipped GitHub half: `GITLAB_TOKEN` slot + importer in `dsh-credentials`, MR + merge repo tools over subprocess/REST |
 | 9 | Git | Repo-analysis agentic init → `AGENTS.md` | M | OPEN | `dsh-repos` (later) | planned: `dsh repos init` reads repo state, writes a harness-flavored AGENTS.md; additive tool, no new seams |
 | 10 | Session UX | `/undo` `/redo` | S | DONE | `dsh-tweaks` (P2) | fork-based via `sessions.create(seed)` |
-| 11 | Session UX | First-class Plan/Build toggle | S | DONE | `dsh-tweaks` (P2) | `/build` delegates `planMode.set`; harness `/plan` complements |
+| 11 | Session UX | First-class Plan/Build toggle | S | DONE | `dsh-tweaks` (P2) | `/build` delegates `planMode.set`; harness `/plan` complements; session-modes will add explicit tool/search/action/agent/shell/code modes |
 | 12 | Session UX | Drag-and-drop images into prompt | S | PARTIAL | `dsh-tweaks` (P2) | attachment seam composed via profile; maxImageBytes knob |
 | 13 | Session UX | Custom slash commands | M | DONE | `dsh-tweaks` (P2) | settings `commands` section -> registry bridge |
 | 14 | Session UX | Keybind customization | S | DONE | `dsh-tweaks` (P2) | `keybinds` settings surface + validators |
@@ -99,6 +99,10 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
 | 19 | Observability | Token/cost stats CLI | S | DONE | `dsh-tweaks` (P2) | `dsh stats` reads session_projcache |
 | 20 | Observability | Session list CLI | S | DONE | `dsh-tweaks` (P2) | `dsh sessions` JSON list |
 | 21 | Maturity | GA stability guarantee + migration story | L | OPEN | — | dev preview; breaking changes expected |
+| 22 | Provider UX | Provider quota and usage visibility below Models | L | OPEN | `dsh-quotas` | provider-neutral snapshots; reverse-engineered endpoints only where stable; CLI/subscription adapters planned separately; read-only, cached, freshness/reset aware; scaffolded + live `/quotas/api/snapshots` 200; meter-bar nav glyph + data polish in Phase 11 F |
+| 23 | Session UX | Explicit tool/search/action/plan/agent/shell/code modes | L | IN PROGRESS | `dsh-session-modes` | durable mode event + pending acceptance, executor-level allowlists, request routing, isolated preset row, bounded subagent assist; nav rename to "Session Modes" in Phase 11 B |
+| 24 | Credential UX | Keychain settings tab with full typed credential records and provider bindings | L | IN PROGRESS | `dsh-credentials` + abstraction layer | move credential inputs out of provider cards, expose typed material/account/purpose metadata, and give each provider a Keychain redirect; delivered in Phase 11 D via the `settings.models.row` seat + `openSection` (`BLOCKED.md` #1) |
+| 25 | Platform | Harness extension layer (Option A): tweaks-owned UI occupants + seams for every settings/credential/agent/sidebar feature | L | PLANNED | `dsh-tweaks` | replaces harness UI occupants via profile patch rows; declares `sidebar.newSession`, `sidebar.history`, `settings.section.icon`, `settings.models.row`; client folds persona from history; product scope in PRD.md, seam audit in BLOCKED.md |
 
 **Net remaining work (OPEN, by area + owner):**
 - `dsh-tui` (P1 scaffold, impl later): TUI default (2)
@@ -108,10 +112,17 @@ OAuth logins (Copilot/ChatGPT), Enterprise docs.
   slash commands (13), keybinds (14), stats CLI (19), session list CLI (20)
 - `dsh-repos` (later): GitLab (8), agentic init (9)
 - —: GA (21)
+- `dsh-quotas`: provider quota/usage dashboard (22)
+- `dsh-session-modes`: explicit mode kernel and agent assist (23)
+- `dsh-credentials` + abstraction layer: Keychain/provider binding (24)
+- `dsh-tweaks`: harness extension layer (25)
 
 Phase order (from PLAN.md): P1 scaffold → P2 tweaks v2 (share/observability/session-UX,
 the densest round) → P3 desktop → P4 themes → P5 formatters → P6 partials → P7 provider
-breadth. Session-UX S-items (10, 11, 14) are the cheapest first slices within P2.
+breadth → P8 session modes → P9 quotas → P10 Keychain → **P11 harness extension layer
+(Option A) — the abstraction that delivers the P8/P10 UI surfaces without harness
+edits** (PRD.md + BLOCKED.md). Session-UX S-items (10, 11, 14) are the cheapest first
+slices within P2.
 
 ---
 

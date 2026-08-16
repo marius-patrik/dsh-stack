@@ -18,6 +18,7 @@
 | 2 | `ses_00060d5deffe` (22 msgs) | Aug 14 | Lidless install, opencode LSP enable, admin agent |
 | 3 | `ses_0004c6e67f` (39 msgs) | Aug 14 late | opencode↔dsh parity map, 21-row delta, Tauri/Tailscale/PWA plan |
 | 4 | `ses_...` (planning round) | Aug 15 | Phase 0 docs: AGENTS.md, P7+ roadmap in PLAN.md, backlog re-key |
+| 5 | `ses_...` (planning round) | Aug 16 | PRD.md + BLOCKED.md at root; harness extension layer (Option A) decision |
 
 Prior-session subagent transcripts (all read-only @explore on `/Users/user/Andromeda`):
 - `ses_001d0e49` "Map Andromeda state/CLI surface"
@@ -728,8 +729,134 @@ not plugin work; GitLab (row 8) planned for `dsh-repos` in the same shape as
 the shipped GitHub half; agentic init (row 9) planned as an additive
 `dsh repos init` tool; GA (row 21) stays OPEN by design (dev-preview harness,
 kept pinned). Superproject docs committed + pushed as the round close.
+
+---
+
+## 5i. Session 6, round 5 — vault page in the web UI sidebar (2026-08-15)
+
+**Planned:** Add a "Vault" page to the web UI sidebar for managing stored
+credentials/passwords, owned by `dsh-credentials` (the vault + `ctx.accounts`
+seam already live there). Server half mounts `/vault` (self-contained page)
+plus a JSON API over `ctx.accounts` (list/set/reveal/unset). Client half is a
+hand-authored `__ModuleLoader__` bundle (the `dsh-themes` client-bundle seam:
+`exports["./client"]` + `dsh.client` declaration, served at
+`/plugins/dsh-credentials/client.js`, discovered via the `__DSH_BOOT__`
+manifest) that injects a Vault item into the harness `sidebar.footer.action`
+list slot linking to `/vault`. Boot-verify in `check-plugin.mjs` + a live web
+profile curl pass.
+
+**Notes:** The harness web shell composes UI through the slot system
+(`ctx.slots.inject`/`register`); `sidebar.footer.action` is a declared list
+slot currently unused by built-in plugins — the sanctioned extension point for
+a footer nav action. A native full-page route inside the harness layout is not
+exposed by the client runtime (the main view is the conversation), so the page
+is our own route served by the plugin. The vault stores material only for
+vault-held refs; reveal is a single-ref on-demand operation, never in list
+output. Localhost trust model matches the rest of the web UI (unauthenticated
+127.0.0.1).
+
+**Outcome:** (filled in at round close)
+
+---
+
+## 5j. Session 7, round 1 — session modes seam implementation (2026-08-15)
+
+**Planned:** Build the new public `dsh-session-modes` plugin. It owns durable
+session mode state and projection, pending mode acceptance at `agent/pre-step`,
+the `/mode` command, mode policy prompt context, executor-level tool policy,
+per-mode request routing, and bounded one-shot subagent assistance. The first
+implementation target is the deterministic kernel; settings/client surfaces are
+secondary until the agent-scoped behavior is boot-verified.
+
+**Seams confirmed:** `agent/pre-step`, `agent/request`, `tools/pre-execute`,
+`tools/execute`, `system-prompt/assemble`, `ctx.commands`, `ctx.subagents`, and
+isolated preset composition. Tool restrictions are not sufficient as an
+authorization boundary because scoped tools can bypass inherited restrictions;
+final denial belongs at `tools/pre-execute` or a monotonic guard. Mode changes
+must be durable and must not commit when a step is rejected.
+
+**Outcome:** in progress.
+
+**Scope correction:** the former Vault sidebar action is being replaced by a
+Settings tab named Keychain. The backend now returns stored record type,
+purpose, label, and expiry metadata instead of presenting every row as an API
+key. A provider redirect and removal of inline Models inputs remain blocked on
+a sanctioned Models-row slot; the pristine harness currently exposes no such
+slot, so DOM mutation is explicitly rejected.
+
+---
+
+## 5k. Session 8, round 1 — Vault polish, backlog planning, session modes, quotas (2026-08-15)
+
+**Requested order:** make the Vault page coherent with the existing harness UI,
+add the quota visibility item to the backlog, plan the session-mode and quota
+work explicitly, execute session modes, then begin a new `dsh-quotas` plugin.
+
+**Plan:** Vault remains owned by `dsh-credentials` but will use the shell's
+semantic panel/toolbar language, responsive density, and safer inline reveal/edit
+interactions. `dsh-session-modes` completes its durable deterministic kernel
+before preset and subagent integration. `dsh-quotas` owns read-only cached
+provider snapshots and a settings section below Models; reverse-engineered
+endpoints are adapter-by-adapter and CLI/subscription sources remain planned
+until their contracts are verified.
+
+**Outcome:** in progress.
+
+---
+
+## 5l. Session 8, round 2 — planning round: PRD + harness extension layer (2026-08-16)
+
+**Requested order:** reorient on full context; consolidate the scope corrections
+(keychain icon, Session Modes/Agents split with decoupled personas, input-bar mode
+and persona switchers, Themes catalogue tab, quotas meter-bar icon, plugins
+plug-in-socket icon, sidebar batch); "plan with me everything" (no execution
+round); then document a PRD at the superproject root covering all of it.
+
+**Decisions locked with the user:**
+- Settings nav order: General (0) → Models (10) → Quotas (15) → Session Modes (20)
+  → Agents (25) → Themes (30) → Keychain (35) → Plugins (40).
+- Agent Presets splits into Session Modes + Agents; personas are live-switchable
+  and fully decoupled from modes (any persona × any mode); the session log is the
+  hook for the agent.
+- Icons: keychain → dsh-credentials, meter-bar → dsh-quotas, plug-in-socket →
+  dsh-tweaks maps for Plugins; each glyph lives in the owning plugin's client
+  bundle, registered by name.
+- **Rule change:** the harness stays pinned and pristine, but `dsh-tweaks` becomes
+  the single owned **harness extension layer (Option A)** — UI modification via the
+  harness's own composition model (slot shadowing + profile patch "disable + insert"
+  rows), with `TweaksSidebarRoot` / `TweaksWorkspaceBrowser` / `TweaksSettingsRoot`
+  replacing the harness occupants and declaring new seams (`sidebar.newSession`,
+  `sidebar.history`, `settings.section.icon`, `settings.models.row` + `openSection`).
+  Other plugins register into those seams; they never touch harness or patch files.
+- Live `persona/selected` push is **not** used — the client folds persona state from
+  `session.history` (the backend allowlist `API_REMOTE_FORWARDED_EVENTS` is
+  harness-owned; `BLOCKED.md` #3 unblocks).
+
+**Research completed (4 @explore passes + direct reads):** settings/sidebar seam
+inventory (slot contracts, `navIcon` at `SettingsRoot.tsx:22-28`, `settings.plugins.tab`
+`{ only }` precedent, ui-slots priority/shadowing semantics); live-persona design
+(port of the `agent-preset/selected` event chain + plan-mode pre-step commit +
+ui-model-selection popupSelect; `persona:policy` function-text prompt provider folds
+the log per step); Keychain↔Models integration (Models section joins, `deriveKeyRef`
+mismatch, `WEB_SETTINGS_NAMESPACES` gating, vault-vs-harness ref namespaces); sidebar
+behaviors (all five require occupant replacement; host already supports machine-root
+sessions).
+
+**Outcome:** documented, not executed (docs-only round). Wrote `PRD.md` (product
+scope, abstraction layer, phases A–F) and `BLOCKED.md` (8-row harness-seam ledger) at
+the superproject root; synced PLAN.md (Phase 11 added, P8/P10 notes), BACKLOG.md
+(rows 22–25, phase order), README.md (layout + links), and this CONTEXT section.
+Next execution round is Phase 11 A: the abstraction foundation (occupant shells +
+profile patch rows), boot-verified against the live web profile.
+
+---
+
+## 6. Relevant files
 - `/Users/user/agents/PLAN.md` — the authoritative project plan (repos, mapping, P6,
   decommission, P7+ roadmap, dependency policy, cadence)
+- `/Users/user/agents/PRD.md` — product requirements (settings IA, Keychain, session
+  modes, agents/personas, themes, quotas, sidebar batch; the harness extension layer)
+- `/Users/user/agents/BLOCKED.md` — harness-seam ledger (decision key + 8 rows)
 - `/Users/user/agents/AGENTS.md` — repo conventions + commit/doc-sync rules
 - `/Users/user/agents/BACKLOG.md` — parity delta backlog re-keyed by owning plugin
 - `/Users/user/agents/README.md`, `/Users/user/agents/scripts/{agents,bootstrap,dsh}`
