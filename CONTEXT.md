@@ -20,6 +20,10 @@
 | 4 | `ses_...` (planning round) | Aug 15 | Phase 0 docs: AGENTS.md, P7+ roadmap in PLAN.md, backlog re-key |
 | 5 | `ses_...` (planning round) | Aug 16 | PRD.md + BLOCKED.md at root; harness extension layer (Option A) decision |
 | 6 | `ses_...` (build round) | Aug 16 | Execute full backlog: Phase 11 A–F + backlog rows 8/9; abstraction foundation first |
+| 7 | `ses_...` (build round) | Aug 16 | Phase B: settings reorder + full tabs (Session Modes, Agents, Themes) |
+| 8 | `ses_...` (build round) | Aug 16 | Phase C: live personas (PersonaController, persona:policy, /persona command, client badge + switcher) |
+| 9 | `ses_...` (build round) | Aug 16 | Provider wire-truth round: fix dsh transports to match reality (kimi/claude/grok/gemini) |
+| 10 | `ses_...` (build round) | Aug 16 | OAuth token refresh seams for every subscription provider |
 
 Prior-session subagent transcripts (all read-only @explore on `/Users/user/Andromeda`):
 - `ses_001d0e49` "Map Andromeda state/CLI surface"
@@ -1019,7 +1023,41 @@ the durable default preset lives on `session.header.agentPreset` (`types.ts:98`)
 projection fold template = `plan-mode/src/index.ts` (unit + declaration merge);
 web profile composes `sessionProjections` (base/web-app bundles).
 
-**Outcome:** [filled at round end]
+**Outcome:** All targets shipped. `dsh-agents` host half: `types.ts` (session/agent/
+pre-step decision faces), `controller.ts` (PERSONA_SELECTED, foldPersona last-wins,
+hasOpenTurn, PersonaController with WeakMap pending + committed/queued/cancelled/noop),
+`catalog.ts` (PersonaCatalog, readdir+parsePersona, get/nameOf/ids — plus a fix to
+the `extensionOf` helper: `name.slice(dot)` instead of `name.slice(dot+1)` so the
+`.md`/`.json` extension set actually matches), `compose.ts` rewritten to use a
+neutral `neutralPersonaRow()` (private, returns `text: ''`), `splicePersona(composition)`
+single-arg, `composeComposition(baseComposition)` single-arg (composition is now
+persona-text-decoupled), `settings.ts` adds `defaultPersona` resolver, `sync.ts`
+call updated to single-arg, `index.ts` full wiring: settings section + catalog +
+controller + `provide('personaController'|'personaCatalog')` + EventHub-cast pre-step
+listener + `persona:policy` section (order 45) + `persona` projection unit + `/persona`
+command + boot mkdir + catalog.load + syncOnce + watch (250ms debounce, unref).
+`tsc --noEmit` clean against harness TS 5.9.
+
+`check-plugin.mjs` fully rewritten: loader shape, settings helpers (root/base/persona),
+persona parsing (md/json/sanitize/errors), neutral composition assertions (splicePersona
+on empty base, standard splice with !!js preservation), sync materialization (neutral
+row, no embedded persona text, prune marked-only), catalog tests (readdir+parse),
+controller tests (fold, hasOpenTurn, set committed/queued/cancelled/noop, commitPending,
+pendingOf), personaPolicyText resolution chain tests (live → header → default → ''),
+boot apply with stub services (section def with persona:policy text provider, projection
+def with init/apply, command def with no-arg/switch/unknown/noop handlers), CLI
+round-trip (list/add/remove/sync), client bundle (settings section + icon + badge
+after roster warmup + commandUi switcher with options/onSelect assertions).
+
+`client.js` Phase C additions: `PersonaChip` component in `conversation.input.left`
+(display-only, reads `useProjection('persona')`, roster-backed `nameFor`), `/persona`
+popupSelect via `commandUi.register` (options from `connection.api.agentPresets.list`,
+active flag from `sessions.get().projections.get('persona')`,
+onSelect → `ctx.remote.commands.execute(sessionId, '/persona <id>')`), inject grows
+to `['slots','connection','commandUi','sessions','remote']`, `PersonaGlyph` uses
+`IconPersonalizationOutline16`. `package.json` `dsh.client.inject` updated to match.
+Docs updated: PLAN.md Phase C bullet, BACKLOG row 25, CONTEXT.md session 9 outcome.
+Committed + pushed dsh-agents; superproject pin pending.
 
 ## 10. Session 9 — provider wire-truth round: fix dsh transports to match reality (2026-08-16)
 

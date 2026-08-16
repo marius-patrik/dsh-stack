@@ -369,6 +369,24 @@ manifest now carries all six plugin client rows with correct inject edges
 (dsh-themes `['slots','theme']`, dsh-agents `['slots','connection']`, etc.) and
 all six bundles materialize against the real seed modules.
 
+**Phase C shipped (2026-08-16, tsc clean + check-plugin green):** live personas.
+dsh-agents now mirrors the harness's plan-mode pattern end-to-end: a durable
+`persona/selected` session-log event, a `PersonaController` with queued/committed/
+cancelled/noop semantics, a `persona:policy` prompt section (order 45) that
+resolves the active persona from the runtime catalog via
+`personaPolicyText(live → header → default → '')`, a `persona` projection unit
+(wire: `{ personaId, pending }`, folds `command/run` → pending, `persona/selected`
+→ committed), and a `/persona` command (no-arg reports, set switches). The
+neutral composition row (`text: ''`) ensures no preset-embedded persona text
+bleeds through; persona text lives only in the policy section. Client half
+grows to inject `['slots','connection','commandUi','sessions','remote']` with
+a display-only `PersonaChip` badge in `conversation.input.left` (reads
+`useProjection('persona')`, `nameFor` resolves from a cached roster) and a
+`/persona` popupSelect switcher (via `commandUi.register`, options from
+`connection.api.agentPresets.list`, active from `sessions.get().projections`,
+onSelect → `ctx.remote.commands.execute`). A pre-existing `extensionOf` bug in
+`catalog.ts` (`'md'` vs `'.md'`) was caught and fixed.
+
 ## Remaining open work (documented plans, no open-ended rows)
 
 The P7+ roadmap is now fully dispatched. The still-OPEN backlog rows each have
