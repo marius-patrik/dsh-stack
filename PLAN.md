@@ -321,6 +321,25 @@ dictionaries. The web profile patch disables `ui-sidebar` and
 with its inject edges and serves `/plugins/dsh-tweaks/client.js` (verified
 materializing against the real platform seed modules).
 
+**Phase B shipped (2026-08-16, boot-verified):** the settings nav is now
+General (0) → Models (10) → Quotas (15) → Session Modes (20) → Agents (25) →
+Themes (30) → Keychain (35) → Plugins (40), and every row resolves its glyph
+through the `settings.section.icon` seat keyed by section id. Plugin-owned
+sections register their own glyph (dsh-quotas 15 + `IconDataOutline16`,
+dsh-session-modes 20 + `IconListPenOutline16`, dsh-agents 25 +
+`IconGoalOutline16`, dsh-themes 30 + `IconLightOutline16`, dsh-credentials 35 +
+`IconApiOutline14`); dsh-tweaks registers the three harness-section glyphs
+(models / plugins / agent-presets) and keeps the name→glyph fallback map. Three
+full tabs land in the owning plugins' bundles: **Session Modes** (roster over
+the node half's new `/session-modes` route — mode vocabulary, default, per-mode
+route/tool policies), **Agents** (live preset roster over
+`connection.api.agentPresets.list`, so persona files materialized by the
+dsh-agents node half show up without a restart), and **Themes** (live switcher
+over `ctx.theme`, bound through a `themeSnapshot` observable). The host boot
+manifest now carries all six plugin client rows with correct inject edges
+(dsh-themes `['slots','theme']`, dsh-agents `['slots','connection']`, etc.) and
+all six bundles materialize against the real seed modules.
+
 ## Remaining open work (documented plans, no open-ended rows)
 
 The P7+ roadmap is now fully dispatched. The still-OPEN backlog rows each have

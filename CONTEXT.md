@@ -904,4 +904,69 @@ registered as submodules (staged `M .gitmodules`, `A plugins/dsh-quotas`,
 boot manifest client rows currently `dsh-credentials` / `dsh-themes` / `dsh-quotas`
 only (`dsh-tweaks` and `dsh-session-modes` lack a `dsh.client` manifest).
 
-**Outcome:** [filled at round end]
+**Outcome:** Phase A shipped and boot-verified. Root cause of the missing client
+row found and fixed: the host module registry reads each entry's
+`require.resolve('<spec>/package.json')`, and dsh-tweaks' `exports` lacked
+`"./package.json"` → `ERR_PACKAGE_PATH_NOT_EXPORTED` → the pkgMeta cached null and
+the row never composed. Added the export, corrected the home path discovery (the
+`scripts/dsh` launcher defaults `$DSH_HOME=~/.agents`; direct `bin.js` use falls
+back to `~/.dsh`, the wrong bundle-less profile), restarted the server with an
+explicit `DSH_HOME`, and verified: boot manifest 40 entries rev `d1678d3b0204`
+incl. `dsh-tweaks ['slots','locale','layout','workspaces','connection']`,
+ui-sidebar/ui-settings-general gone (disable rows effective),
+`/plugins/dsh-tweaks/client.js` serving 200 (sha1 `b08389ce12fa`), and the bundle
+materializing against the real seed modules exporting exactly `apply`+`inject`.
+Committed + pushed: dsh-tweaks `1660f47`, superproject `b0ec3d2` (PLAN.md Phase 11
+→ `[in progress]` + Phase A shipped bullet; BACKLOG row 25 → IN PROGRESS). The
+remaining phases (B–F + backlog rows 8/9) carried into the next session. The
+Phase B scope was narrowed by the user to "Reorder + full new tabs" (plugin-owned
+reorder + full Themes/Session Modes/Agents tabs; harness-owned sections keep
+natural order).
+
+## 8. Session 7 — Phase B build round: settings reorder + full tabs (2026-08-16)
+
+**Directive:** execute Phase 11 B in the narrowed user scope — "Reorder + full new
+tabs": plugin-owned settings reorder plus full Themes, Session Modes, and Agents
+tabs, with every nav row's glyph resolved through the `settings.section.icon` seat.
+
+**Round todo:**
+1. B1 `dsh-quotas` — settings section 20 → 15 + `settings.section.icon` glyph
+   (`IconDataOutline16`) + client assertions in check-plugin.
+2. B2 `dsh-credentials` — keychain section 20 → 35 + glyph (`IconApiOutline14`) +
+   client assertions.
+3. B3 `dsh-themes` — new Themes section (order 30) with a live switcher over
+   `ctx.theme`, `themeSnapshot` observable in the inject face, glyph
+   (`IconLightOutline16`), `dsh.client.inject` → `['slots','theme']`.
+4. B4 `dsh-session-modes` — node `/session-modes` route (modes, defaultMode,
+   routes, tools) + client Session Modes section (order 20, roster UI) + glyph
+   (`IconListPenOutline16`) + `dsh.client` manifest.
+5. B5 `dsh-agents` — client Agents section (order 25) reading the live preset
+   roster via `connection.api.agentPresets.list` + glyph (`IconGoalOutline16`) +
+   `dsh.client` manifest + `cordis.patch.yml` + profile bundle registration.
+6. B6 `dsh-tweaks` — extend the `navIcon` fallback map to every section id and
+   register glyph seats for the three harness-owned sections (models / plugins /
+   agent-presets).
+7. Phase B verification + docs + commits.
+
+**Carried state at round start:** server UP (PID 70177) with Phase A boot-verified;
+all six Phase B plugin bundles hand-authored; `dsh-credentials` has uncommitted
+worktree changes from a prior round (committed here alongside B2).
+
+**Outcome:** Phase B shipped and boot-verified. Every plugin's `npm test` green
+(build `tsc && cp client.js lib/client.js` + `node check-plugin.mjs`); served
+bundles confirmed live: dsh-quotas order 15, dsh-credentials order 35,
+dsh-themes order 30 + switcher, dsh-session-modes order 20, dsh-agents order 25,
+dsh-tweaks harness glyph registrations. Boot manifest rev `00d60e1fcccc` carries
+all six client rows with correct inject edges (dsh-themes `['slots','theme']`,
+dsh-agents `['slots','connection']`, dsh-session-modes `['slots']`,
+dsh-quotas/dsh-tweaks `['slots']`-family). Two non-obvious boot facts surfaced and
+fixed: (a) a `cordis.patch.yml` per plugin is required for the entry to compose —
+dsh-agents was missing it (ENOENT overlay at boot), and (b) the profile's
+`dsh.profile.bundles` list in `~/.agents/profiles/web/package.json` must include
+the plugin for its patch to load — dsh-agents was added (dsh-tweaks/dsh-credentials
+already reach the graph through dsh-subscriptions' bundle patch inserts).
+`/session-modes` serves the full mode registry; `/themes.json` serves 200 (empty
+themes dir). All six bundles materialize against the real platform seed modules
+and export exactly `apply` + `inject` (smoke harness with CSS-stub loader). Docs
+updated: PLAN.md Phase B shipped bullet, BACKLOG rows 22/23/24/25 notes, this
+CONTEXT section. Commits + pushes follow in this round's close.
