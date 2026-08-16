@@ -19,6 +19,7 @@
 | 3 | `ses_0004c6e67f` (39 msgs) | Aug 14 late | opencode↔dsh parity map, 21-row delta, Tauri/Tailscale/PWA plan |
 | 4 | `ses_...` (planning round) | Aug 15 | Phase 0 docs: AGENTS.md, P7+ roadmap in PLAN.md, backlog re-key |
 | 5 | `ses_...` (planning round) | Aug 16 | PRD.md + BLOCKED.md at root; harness extension layer (Option A) decision |
+| 6 | `ses_...` (build round) | Aug 16 | Execute full backlog: Phase 11 A–F + backlog rows 8/9; abstraction foundation first |
 
 Prior-session subagent transcripts (all read-only @explore on `/Users/user/Andromeda`):
 - `ses_001d0e49` "Map Andromeda state/CLI surface"
@@ -866,3 +867,41 @@ profile patch rows), boot-verified against the live web profile.
 - `/Users/user/.config/opencode/opencode.jsonc`, `/Users/user/.config/opencode/agents/admin.md`
 - `/Users/user/.local/share/opencode/opencode.db` — session store (transcripts source)
 - `/Users/user/dsh-opencode-memory.md` — working copy of the memory file
+
+---
+
+## 7. Session 6 — execute the full backlog (build round, 2026-08-16)
+
+**Directive:** execute the full backlog — Phase 11 A–F (PRD §9) plus the remaining
+open backlog rows. This round ships code, boot-verified against the live web profile.
+
+**Round todo (from the session plan):**
+1. Append this CONTEXT session section + orientation (reading PLAN/BACKLOG/PRD).
+2. Phase A — abstraction foundation (dsh-tweaks): `dsh.client` manifest +
+   hand-authored `client.js` bundle with `TweaksSidebarRoot`, `TweaksSettingsRoot`,
+   chrome re-registration (trigger/header/close/general/action), and the new slot
+   declarations `sidebar.newSession`, `sidebar.history`, `settings.section.icon`,
+   `settings.models.row` + `openSection` affordance; profile patch `disable`/`insert`
+   rows in `profiles/web/cordis.patch.yml`; boot-verify (boot manifest rows,
+   `/plugins/dsh-tweaks/client.js` served, log cleanliness).
+3. Phase B — icon abstraction + settings reorder + Session Modes rename +
+   Agents/Themes tabs.
+4. Phase C — live personas (`persona/selected`, PersonaController, `persona:policy`
+   prompt hook, `/persona`, input-bar switcher, client fold from `session.history`).
+5. Phase D — Keychain↔Models binding (`settings.models.row` + `openSection` +
+   `/vault?ref=` deep-link).
+6. Phase E — sidebar batch (History, machine-root, chevrons, collapsed toggles).
+7. Phase F — quotas polish + meter-bar glyph.
+8. Backlog rows 8/9 — GitLab + agentic init (dsh-repos).
+9. Final docs sync (PLAN/BACKLOG/CONTEXT/README) + commit + push all plugin repos
+   and the superproject pin.
+
+**Carried state at round start:** server UP at `127.0.0.1:3080` (PID 81349,
+`node harness/apps/cli/lib/bin.js --profile web`, `DSH_HOME=/Users/user/.agents`,
+log `/tmp/dsh-web.log`); `dsh-session-modes` and `dsh-quotas` created on GitHub and
+registered as submodules (staged `M .gitmodules`, `A plugins/dsh-quotas`,
+`A plugins/dsh-session-modes`); `dsh-credentials` has uncommitted worktree changes;
+boot manifest client rows currently `dsh-credentials` / `dsh-themes` / `dsh-quotas`
+only (`dsh-tweaks` and `dsh-session-modes` lack a `dsh.client` manifest).
+
+**Outcome:** [filled at round end]
