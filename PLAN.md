@@ -28,6 +28,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-repos` | public | **P6b shipped**: repo workflows — branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN` (`dsh repos` CLI) |
 | `dsh-session-modes` | public | session mode controller: durable mode state, tool policy, model routing, bounded agent assist |
 | `dsh-quotas` | public | provider quota/usage aggregation and a settings usage dashboard; endpoint adapters are best-effort and CLI-backed providers are planned separately |
+| `privatecode` | public | opencode fork (subscription providers, OAuth refresh, TUI rendering); will be cannibalized into dsh-tui |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 

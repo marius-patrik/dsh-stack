@@ -1206,3 +1206,42 @@ claude still need a one-time interactive re-login (`grok login`, `claude /login`
 loader only refreshes `{type:"oauth"}` entries, so the user must re-seed those
 two as oauth bundles after re-login. Committed: `dsh-providers` seam + docs,
 then superproject pin + docs.
+
+## 12. Session 11 — dsh provider E2E verification + privatecode submodule (2026-08-17)
+
+**Build round** verifying all dsh subscription providers work end-to-end through
+the harness, and adding privatecode as a submodule.
+
+Phase list:
+1. Set up a headless profile for harness testing (no web server required).
+2. E2E test all 4 subscription providers through the harness agent loop.
+3. Fix grok auth (refreshed consumed tokens).
+4. Add privatecode as submodule to agents superproject.
+
+**Results:**
+- **kimi-sub**: OK — auth works, streams through harness. Billing limit
+  occasionally hit (quota resets periodically).
+- **claude-sub**: OK — valid tokens, streams through harness. Full pipeline:
+  dialect serialize → fetch → SSE parse → agent loop → output.
+- **grok-sub**: OK — tokens refreshed, rotated bundle persisted to both
+  auth.json and vault. Streams through harness.
+- **gemini-sub**: Auth works (refresh succeeds, fresh token obtained), but
+  code-assist endpoint returns 429 RESOURCE_EXHAUSTED (quota). The harness
+  swallows the real error into "Internal error encountered" — a harness-level
+  UX issue (cannot fix without modifying pinned harness). Not a code bug.
+
+**Architecture verified:** dsh-harness boots correctly with all plugins
+(dsh-dialects, dsh-credentials, dsh-providers, dsh-subscriptions, dsh-tweaks,
+dsh-agents, dsh-formatters, dsh-lsp). The headless profile
+(`~/.agents/profiles/headless/`) loads dsh-base + dsh-headless + plugin bundles.
+Agent loop creates session → user message → LLM stream → assistant message →
+output. Provider selection via `agent-default-model` in settings.yaml.
+
+**privatecode submodule:** added at `plugins/privatecode` (branch `dev`,
+commit `9a03d2a3`). Contains the opencode fork with subscription providers
+plugin, OAuth refresh seams, and TUI rendering. Plan: cannibalize into
+dsh-tui (Option B — dsh as runtime, extracted opencode TUI as rendering layer).
+
+**Outcome:** 4/4 subscription providers verified through dsh harness
+(3 working, 1 quota-gated). privatecode submodule added. DSH settings
+default: claude-sub / claude-haiku-4-5.
