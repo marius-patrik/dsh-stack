@@ -46,6 +46,6 @@
 [submodule "plugins/dsh-quotas"]
 	path = plugins/dsh-quotas
 	url = https://github.com/marius-patrik/dsh-quotas.git
-[submodule "plugins/privatecode"]
-	path = plugins/privatecode
-	url = https://github.com/marius-patrik/privatecode.git
+[submodule "plugins/dsh-translator"]
+	path = plugins/dsh-translator
+	url = https://github.com/marius-patrik/dsh-translator.git

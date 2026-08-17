@@ -4,11 +4,28 @@ Guidance for any agent (human or AI) working in this repository.
 
 ## Mission
 
-`agents` is a personal agent stack built on top of the DeepSeek Harness (`dsh`).
-**Everything is a harness plugin.** The harness checkout (`harness/`) is the
-upstream source, pinned and kept pristine — never edit it. Andromeda
-(`~/Andromeda`, `marius-patrik/Andromeda`) is the porting SOURCE for future
-plugins; it is not part of this project. Removed-from-Andromeda = progress marker.
+`dsh-stack` is a personal agent stack built on top of the DeepSeek Harness
+(`dsh`). **Everything is a harness plugin.** The harness checkout (`harness/`)
+is the upstream source, pinned and kept pristine — never edit it. Andromeda
+(`~/.andromeda`, `marius-patrik/Andromeda`) is the porting SOURCE for future
+plugins; it is not part of this project. Removed-from-Andromeda = progress
+marker.
+
+## The rules system (IMPORTANT)
+
+All workflow rules live in `.agents/rules/`. Every agent MUST load and follow
+these rules. The rules are enforced by hooks AND by agent self-discipline.
+
+| Rule | File | Purpose |
+|------|------|---------|
+| Context load | `01-context-load.md` | Full context system loaded at session start |
+| Blocked gate | `02-blocked-gate.md` | Blocked items → BLOCKED.md |
+| Vague input | `03-vague-input.md` | Vague input → BACKLOG.md, keep working |
+| Digestion pipeline | `04-digestion-pipeline.md` | REQUEST → BACKLOG → PLAN → TASKS → CODE → PRD |
+| User input gate | `05-user-input-gate.md` | Design decisions need user sign-off |
+| Subagent utilization | `06-subagent-utilization.md` | Subagents execute, main agent orchestrates |
+
+**Read `.agents/rules/` before doing anything else.**
 
 ## The docs rule (IMPORTANT)
 
@@ -21,25 +38,46 @@ the same commit.** Specifically:
 - `CONTEXT.md` — strictly chronological session run-through. **Append** new
   sessions; never rewrite history. Newest session is always last.
 - `BACKLOG.md` — parity delta re-keyed by owning plugin. Move/annotate rows as
-  plugins ship.
+  plugins ship. Every backlog row that is being worked MUST also appear in the
+  todo list (tasks).
+- `BLOCKED.md` — harness seam audit + active blockers.
+- `PRD.md` — product requirements. Features are promoted here after completion.
 - `README.md` — repo layout + state; update when the layout changes.
 
 If you make a code change, you must also update the relevant docs in the same
 commit.
 
+## The digestion pipeline (IMPORTANT)
+
+Every user prompt enters a pipeline. No work happens outside it.
+
+```
+REQUEST → BACKLOG → PLAN → TASKS → CODE → PRD
+```
+
+1. **REQUEST**: every user work prompt becomes a file in `.agents/requests/`
+2. **BACKLOG**: requests are triaged into BACKLOG.md rows
+3. **PLAN**: before coding, design decisions are documented in PLAN.md
+4. **TASKS**: planned items become todo items, each assigned to a subagent
+5. **CODE**: subagent builds, main agent reviews, fix loop until good enough
+6. **PRD**: finished features are promoted to PRD.md
+
+When a task moves from BACKLOG to PLAN, it MUST also appear in the todo list
+(tasks). The todo list is the execution view of planned work.
+
 ## At every build start (IMPORTANT)
 
-Before writing any code in a build round, ALWAYS do these three things:
+Before writing any code in a build round, ALWAYS do these things:
 
-1. **Open the todo list** (`todowrite`): lay out the phases/features for this
-   build round as todos, and keep them updated as work progresses. Do not start
-   coding before the todo list for the round exists.
-2. **Append a new CONTEXT.md session section** (chronological, always last)
+1. **Load the full context system** (rule 01): read AGENTS.md, PLAN.md,
+   CONTEXT.md (last 2 sessions), BACKLOG.md, and BLOCKED.md/PRD.md as needed.
+2. **Open the todo list** (`todowrite`): lay out the phases/features for this
+   build round as todos, and keep them updated as work progresses.
+3. **Append a new CONTEXT.md session section** (chronological, always last)
    recording what this round is building, the phase list, and today's date —
-   BEFORE the first code change lands. Revisit it at the end of the round to
-   update the "outcome" so the memory stays truthful.
-3. **Read PLAN.md + BACKLOG.md + CONTEXT.md** to orient on the current phase
-   status, owner mapping, and what the last session decided.
+   BEFORE the first code change lands.
+4. **Create request files** for any new user input that contains work
+   instructions.
 
 Skip nothing. The docs rule, commit cadence, and this build-start ritual together
 keep the memory files truthful and the todos auditable.
@@ -56,15 +94,15 @@ committed + pushed.
 ## Repo layout
 
 ```
-.agents/        this directory — project docs (PLAN, CONTEXT, BACKLOG, README,
-                AGENTS, PRD, BLOCKED) + workflow hooks
+.agents/        this directory — project docs (PLAN, CONTEXT, BACKLOG, AGENTS,
+                PRD, BLOCKED) + workflow hooks + rules + requests
 harness/        pinned deepseek-harness submodule (deepseek-ai/deepseek-harness),
                 KEPT PRISTINE — never edit, never commit changes
 plugins/        one repo per plugin, each a git submodule of this superproject:
                 dsh-dialects, dsh-providers, dsh-credentials, dsh-tweaks,
-                dsh-subscriptions, privatecode, dsh-desktop, dsh-themes,
-                dsh-formatters, dsh-lsp, dsh-tools, dsh-agents, dsh-repos,
-                dsh-session-modes, dsh-quotas, dsh-tui
+                dsh-subscriptions, dsh-desktop, dsh-themes, dsh-formatters,
+                dsh-lsp, dsh-tools, dsh-agents, dsh-repos, dsh-session-modes,
+                dsh-quotas, dsh-tui, dsh-translator
 scripts/dsh     homeRoot/command-aware launcher; also owns plugin verb routes
                 (e.g. `dsh accounts` → plugins/dsh-credentials/bin/accounts.mjs)
 ```
@@ -107,12 +145,13 @@ Each plugin is a git repo (submodule here) under `marius-patrik`, named
 
 ## Workflow
 
-1. Read PLAN.md + CONTEXT.md first to orient.
-2. For new features: confirm which plugin owns it (see BACKLOG.md mapping).
-3. Implement + boot-verify with `check-plugin.mjs`.
-4. Update docs (PLAN.md status, CONTEXT.md if a session boundary, BACKLOG.md
-   row status, README if layout changed).
-5. Commit + push (plugin repo first, then the superproject pin).
+1. **Load context** (rule 01): read AGENTS.md + PLAN.md + CONTEXT.md + BACKLOG.md.
+2. **Digest input** (rule 04): every user prompt → request file → BACKLOG row.
+3. **Plan before coding**: design decisions in PLAN.md, questions back to BACKLOG.
+4. **Execute via subagents** (rule 06): each task → subagent → build → review → fix.
+5. **Update docs** (PLAN.md status, CONTEXT.md session, BACKLOG.md row status).
+6. **Commit + push** (plugin repo first, then superproject pin).
+7. **Promote to PRD** (rule 04): finished features documented in PRD.md.
 
 ## User input gate (IMPORTANT)
 

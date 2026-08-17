@@ -14,6 +14,10 @@ harness/*/dist/
 !.agents/*.md
 !.agents/hooks/
 !.agents/hooks/**
+!.agents/rules/
+!.agents/rules/**
+!.agents/requests/
+!.agents/requests/**
 .dsh/
 .credentials.yaml
 accounts.vault
