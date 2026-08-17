@@ -1245,3 +1245,62 @@ dsh-tui (Option B — dsh as runtime, extracted opencode TUI as rendering layer)
 **Outcome:** 4/4 subscription providers verified through dsh harness
 (3 working, 1 quota-gated). privatecode submodule added. DSH settings
 default: claude-sub / claude-haiku-4-5.
+
+---
+
+## 13. Session 13 — bug fixes, docs restructure, orientation on ALL remaining work (2026-08-17)
+
+**Build round** after the user oriented on the full project state and identified
+stale docs + missing work.
+
+**Fixes shipped this session:**
+1. `dsh-agents`: added `id: "persona-chip"` to `conversation.input.left` slot
+   registration — the harness list slot requires `options.id`; without it the
+   web profile fails to load with "list slot conversation.input.left requires
+   options.id". Committed `f11a83b`, pushed, pinned.
+2. `dsh-tweaks`: registered `ui-onboarding` settings namespace — Phase A
+   disabled `ui-settings-general` (dsh-tweaks took over the settings surface),
+   but `ui-settings-models` still writes `welcomeNoticeVersion` through the
+   settings API. Without this registration, `settings.mutate` fails and the
+   welcome notice shows "The acknowledgement could not be saved." Committed
+   `e28f86e`, pushed, pinned.
+3. `dsh-subscriptions`: updated `check-plugin.mjs` assertion for 2-entry
+   `cordis.patch.yml` (insert + agent-presets config override). The old
+   assertion expected `patch.length === 1`. Committed `e9d26c1`, pushed, pinned.
+
+**Docs restructure:**
+- Moved PLAN/CONTEXT/BACKLOG/README/AGENTS/PRD/BLOCKED from repo root to
+  `.agents/` subdirectory. Updated `.gitignore` to whitelist `.agents/*.md` and
+  `.agents/hooks/`.
+- Updated AGENTS.md with new layout, hooks section, and repo layout reflecting
+  all 16 plugins (including privatecode and dsh-tui).
+
+**Workflow hooks added (`.agents/hooks/`):**
+- `pre-commit`: secrets check, check-plugin.mjs staging guard, node_modules
+  block, docs reminder on plugin src changes.
+- `commit-msg`: `<verb>: <subject>` format enforcement.
+- `pre-push`: runs all plugin check-plugin.mjs suites before allowing push.
+- `install.sh`: symlinks hooks into `.git/hooks/`.
+
+**Key architecture decision:** dsh-tui will be a **separate repo** (not
+cannibalizing privatecode). The privatecode binary stays untouched since it
+works. dsh-tui will be a new standalone TUI client that talks to dsh as its
+backend.
+
+**/goal command:** dsh has a native `/goal` command (persistent same-session
+goals with create/edit/pause/resume/clear). When dsh-tui is dsh-backed, this
+command should work. The implementation lives in `packages/goal/` (GoalService,
+command-goal, goal-round-driver, tool-goal). No separate implementation needed —
+it comes free from the harness.
+
+**Remaining work identified (ALL open/in-progress items):**
+1. `dsh-credentials` multi-account gaps (resolveFor, resolveAll, slugRecordId)
+2. `dsh-tui` separate repo setup + TUI as default profile
+3. `dsh-session-modes` completion (durable mode kernel, agent assist)
+4. `dsh-quotas` completion (quota dashboard, meter-bar polish)
+5. Phase 11 D-F (Keychain↔Models binding, sidebar batch, quotas polish)
+6. `dsh-repos` GitLab + agentic init
+7. Curated/hosted gateway (product decisions)
+
+**Halted on:** user interrupted to demand full orientation before continuing
+execution.

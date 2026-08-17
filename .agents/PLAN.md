@@ -18,7 +18,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes (`PROVIDER_ROUTES`, `subscription-only`/`all` filter) |
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
 | `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
-| `dsh-tui` | public | scaffolded (P1); client-only TUI (cannibalized opencode client), impl later |
+| `dsh-tui` | public | standalone TUI client for dsh (talks to dsh as backend); separate repo, NOT cannibalizing privatecode; impl later |
 | `dsh-desktop` | public | **P3 shipped**: Tauri v2 thin shell + lifecycle plugin (readiness route, settings) |
 | `dsh-themes` | public | **P4 shipped**: VS Code/TextMate theme store + Open VSX catalog + `/themes.json` route + browser theme bundle + `dsh theme` CLI |
 | `dsh-formatters` | public | **P5 shipped**: formatter table + `format` tool + auto-format-on-edit + `dsh formatter` CLI |
@@ -28,7 +28,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-repos` | public | **P6b shipped**: repo workflows — branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN` (`dsh repos` CLI) |
 | `dsh-session-modes` | public | session mode controller: durable mode state, tool policy, model routing, bounded agent assist |
 | `dsh-quotas` | public | provider quota/usage aggregation and a settings usage dashboard; endpoint adapters are best-effort and CLI-backed providers are planned separately |
-| `privatecode` | public | opencode fork (subscription providers, OAuth refresh, TUI rendering); will be cannibalized into dsh-tui |
+| `privatecode` | public | opencode fork (subscription providers, OAuth refresh, TUI rendering); kept as-is (works); NOT modified |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
