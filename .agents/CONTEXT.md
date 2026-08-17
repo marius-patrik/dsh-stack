@@ -1447,6 +1447,18 @@ Options:
   (c) Both (a) and (b).
   (d) Defer — not needed right now.
 
-**Status:** 4 high/medium tasks completed in this session. All 15 plugin
-check-plugin suites green. Superproject pushed clean. Implementation halted
-on remaining items pending user input on the above questions.
+**Harness acknowledgement fix (2026-08-17):**
+Root cause found: `dsh-tweaks` claimed to disable `ui-settings-general` (see
+note at dsh-tweaks/src/index.ts:125-128) but the web-profile cordis.patch.yml
+still had `ui-settings-general` active. Both plugins tried to register the
+`ui-onboarding` settings namespace, and the settings service throws on
+duplicate registration (`settings/src/index.ts:436-438`). This prevented the
+welcome notice acknowledgement from persisting. Fix: added
+`dsh-tweaks/cordis.patch.yml` that disables `ui-settings-general`, plus
+`bundle.patch` reference in package.json. Committed `4ef23aa` in dsh-tweaks,
+pushed.
+
+**Status:** 4 high/medium tasks completed in this session + harness
+acknowledgement fix. All 16 plugin check-plugin suites green. Superproject
+pushed clean. Implementation halted on remaining items pending user input on
+the above questions.
