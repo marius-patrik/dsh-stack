@@ -1,6 +1,6 @@
 # CONTEXT — full session run-through
 
-> Complete memory/context file, kept in-repo. Written 2026-08-14, updated 2026-08-15.
+> Complete memory/context file, kept in-repo. Written 2026-08-14, updated 2026-08-17.
 > Covers, in chronological order: (1) the **Andromeda port project** (biggest prior
 > session, `ses_002adefbcffe`, 1375 msgs, Aug 13 → Aug 14 18:54), (2) the
 > **Lidless/LSP/admin session** (`ses_00060d5deffe`), (3) the **opencode↔dsh parity +
@@ -24,6 +24,11 @@
 | 8 | `ses_...` (build round) | Aug 16 | Phase C: live personas (PersonaController, persona:policy, /persona command, client badge + switcher) |
 | 9 | `ses_...` (build round) | Aug 16 | Provider wire-truth round: fix dsh transports to match reality (kimi/claude/grok/gemini) |
 | 10 | `ses_...` (build round) | Aug 16 | OAuth token refresh seams for every subscription provider |
+| 11 | `ses_...` (build round) | Aug 17 | E2E provider verification + privatecode submodule |
+| 12 | (skipped) | | |
+| 13 | `ses_...` (fix round) | Aug 17 | Bug fixes, docs restructure, remaining work orientation |
+| 14 | `ses_...` (build round) | Aug 17 | Multi-account, dsh-tui, session-modes, quotas, harness fix |
+| 15 | `ses_...` (infra round) | Aug 17 | Harness 400 fix, agents-super restructure, state cleanup, andromeda conversion |
 
 Prior-session subagent transcripts (all read-only @explore on `/Users/user/Andromeda`):
 - `ses_001d0e49` "Map Andromeda state/CLI surface"
@@ -1462,3 +1467,60 @@ pushed.
 acknowledgement fix. All 16 plugin check-plugin suites green. Superproject
 pushed clean. Implementation halted on remaining items pending user input on
 the above questions.
+
+---
+
+## Session 15 — August 17, 2026 (infra + cleanup round)
+
+**Context:** Continuing from Session 14's multi-task round. User said "What did we
+do so far?" — triggered orientation, then "Continue if you have next steps."
+
+**What was done:**
+
+### Harness web server 400 error — RESOLVED
+- Root cause: directory rename from `~/agents` → `~/projects/dsh-stack` broke all
+  symlinks (profile node_modules, per-plugin peer deps).
+- Fixed all 12 profile symlinks (`~/.agents/profiles/web/node_modules/dsh-*`).
+- Fixed profile `package.json` (link: dependencies + 4 missing plugins).
+- Ran `pnpm install` to regenerate pnpm symlinks.
+- Fixed 8 broken per-plugin `node_modules/@deepseek-ai/` symlinks.
+- Added `dsh-lsp`, `dsh-lsp-stdio`, `dsh-tool-lsp` to flat fallback.
+- Created per-plugin `node_modules/@deepseek-ai/` symlinks for all peer deps.
+- Verified: `HTTP 200` at `http://127.0.0.1:3080/`.
+
+### agents-super restructure (completed)
+- ALL 16 dsh- plugin repos as submodules under `dsh/`.
+- `privatecode` moved to root (out of `dsh/`).
+- `paes` + `ams` added under `apps/` (private GitHub repos).
+- `darkfactory` made public.
+- `mediastream` + `messenger` archived (private repos, NOT in agents-super).
+- README updated, committed + pushed (`ca1cd09`).
+
+### External state cleanup
+- Deleted `.dsh` (stale), `.gemini` (155M), `.grok` (177M), `.kimi` (646M).
+- All credentials already in dsh vault.
+- `.claude` kept (has opencode agent CLI).
+
+### Andromeda session conversion
+- Converted ALL 405 andromeda transcripts into dsh `.jsonl.zstd` format.
+- Script: `/tmp/convert-andromeda.mjs`.
+- Output: `~/.agents/sessions/andromeda-*/session-andromeda-*.jsonl.zst`.
+- 405 sessions converted, 0 skipped, 0 errors.
+
+### Request file backfill
+- Created 12 request files in `.agents/requests/` covering all DSH session history.
+- Sources: CONTEXT.md sessions 1-14 (preserved exact user wording).
+- Claude Desktop tasks: not DSH-related (old Andromeda Agent OS), skipped.
+- Andromeda transcripts: mostly DarkFactory PR/issue reviews, converted but
+  not individually backfilled as separate request files.
+
+**Status:** All infrastructure work done. 16 request files in `.agents/requests/`.
+All 16 plugin check-plugin suites green. Superproject pushed clean.
+
+**Remaining work (from Session 14, unchanged):**
+1. Phase 11 D-F: Keychain↔Models binding, sidebar batch, quotas polish
+2. `dsh-repos` GitLab + agentic init
+3. Curated/hosted gateway (product decisions)
+
+All three items require user input before proceeding (questions documented in
+Session 14's CONTEXT section).

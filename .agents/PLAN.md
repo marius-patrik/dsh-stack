@@ -420,3 +420,25 @@ a written decision/plan; nothing is left open-ended.
 ## Cadence
 
 Commit + push at the end of every phase so progress is visible on GitHub.
+
+## Session 15 infrastructure (2026-08-17)
+
+- **Harness web server 400 error resolved:** directory rename from `~/agents` to
+  `~/projects/dsh-stack` broke all symlinks (profile node_modules, per-plugin peer
+  deps). Fixed by re-pointing all symlinks, updating profile package.json, adding
+  missing flat fallback entries, and creating per-plugin `node_modules/@deepseek-ai/`
+  symlinks. Verified: HTTP 200 at `http://127.0.0.1:3080/`.
+
+- **agents-super restructure complete:** all 16 dsh- plugin repos as submodules under
+  `dsh/`, privatecode at root, paes + ams under `apps/` (private), darkfactory
+  public. Committed `ca1cd09`.
+
+- **External state cleanup:** deleted `.dsh` (stale), `.gemini` (155M), `.grok` (177M),
+  `.kimi` (646M). All credentials already in dsh vault. `.claude` kept (opencode
+  agent CLI).
+
+- **Andromeda session conversion:** 405 andromeda transcripts converted to dsh
+  `.jsonl.zstd` format at `~/.agents/sessions/andromeda-*/`.
+
+- **Request file backfill:** 16 request files in `.agents/requests/` covering all DSH
+  session history (CONTEXT.md sessions 1-14 + current session).
