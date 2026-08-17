@@ -8,8 +8,12 @@ harness/apps/*/lib/
 harness/packages/*/lib/
 harness/*/dist/
 
-# state (never commit)
-.agents/
+# state (never commit) — .agents/ in repo is docs + hooks (tracked);
+# ~/.agents is the harness home (state folder, never committed)
+.agents/*
+!.agents/*.md
+!.agents/hooks/
+!.agents/hooks/**
 .dsh/
 .credentials.yaml
 accounts.vault

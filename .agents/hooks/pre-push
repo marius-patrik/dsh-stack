@@ -1,0 +1,34 @@
+#!/bin/sh
+# pre-push hook — validates plugin check suites before push
+#
+# Install: .agents/hooks/install.sh
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+echo "Running plugin check-plugin suites..."
+
+failed=""
+for plugin_dir in "$REPO_ROOT"/plugins/*/; do
+  plugin_name="$(basename "$plugin_dir")"
+  check_file="$plugin_dir/check-plugin.mjs"
+  if [ -f "$check_file" ]; then
+    echo -n "  $plugin_name... "
+    if (cd "$plugin_dir" && node check-plugin.mjs) > /dev/null 2>&1; then
+      echo "ok"
+    else
+      echo "FAILED"
+      failed="$failed $plugin_name"
+    fi
+  fi
+done
+
+if [ -n "$failed" ]; then
+  echo ""
+  echo "ERROR: Failed check-plugin suites:$failed"
+  echo "Fix before pushing."
+  exit 1
+fi
+
+echo "All plugin checks passed."

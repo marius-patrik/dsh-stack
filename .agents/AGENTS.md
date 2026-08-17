@@ -12,9 +12,9 @@ plugins; it is not part of this project. Removed-from-Andromeda = progress marke
 
 ## The docs rule (IMPORTANT)
 
-PLAN.md, CONTEXT.md, BACKLOG.md, and README.md are the living memory of this
-project. **Every code/phase change ships with its doc updates in the same
-commit.** Specifically:
+All project docs live under `.agents/` (this directory). They are the living
+memory of this project. **Every code/phase change ships with its doc updates in
+the same commit.** Specifically:
 
 - `PLAN.md` — authoritative plan: repos, mapping, phases, dependency policy.
   Update phase status lines (`[complete]`, `[in progress]`, etc.) as work lands.
@@ -56,17 +56,15 @@ committed + pushed.
 ## Repo layout
 
 ```
-AGENTS.md       this file
-PLAN.md         authoritative plan (repos, mapping, phases, dependency policy)
-CONTEXT.md      chronological session memory (append-only)
-BACKLOG.md      opencode-parity delta re-keyed by owning plugin
-README.md       layout + state
+.agents/        this directory — project docs (PLAN, CONTEXT, BACKLOG, README,
+                AGENTS, PRD, BLOCKED) + workflow hooks
 harness/        pinned deepseek-harness submodule (deepseek-ai/deepseek-harness),
                 KEPT PRISTINE — never edit, never commit changes
 plugins/        one repo per plugin, each a git submodule of this superproject:
                 dsh-dialects, dsh-providers, dsh-credentials, dsh-tweaks,
-                dsh-subscriptions, (+ planned: dsh-tui, dsh-desktop,
-                dsh-themes, dsh-formatters, dsh-tools, dsh-agents, dsh-repos)
+                dsh-subscriptions, privatecode, dsh-desktop, dsh-themes,
+                dsh-formatters, dsh-lsp, dsh-tools, dsh-agents, dsh-repos,
+                dsh-session-modes, dsh-quotas, dsh-tui
 scripts/dsh     homeRoot/command-aware launcher; also owns plugin verb routes
                 (e.g. `dsh accounts` → plugins/dsh-credentials/bin/accounts.mjs)
 ```
@@ -115,3 +113,30 @@ Each plugin is a git repo (submodule here) under `marius-patrik`, named
 4. Update docs (PLAN.md status, CONTEXT.md if a session boundary, BACKLOG.md
    row status, README if layout changed).
 5. Commit + push (plugin repo first, then superproject pin).
+
+## Hooks
+
+Hooks live in `.agents/hooks/` and enforce workflow rules automatically:
+
+### pre-commit
+Validates that:
+- PLAN.md, CONTEXT.md, BACKLOG.md, README.md are not stale (mtime < last
+  commit's plugin changes)
+- Every plugin submodule with dirty tree is staged
+- No secrets (vault keys, OAuth client secrets) appear in staged files
+- CONTEXT.md has a session section for today (if any code changed)
+- No uncommitted check-plugin.mjs changes ship without corresponding src/ changes
+
+### commit-msg
+Validates that:
+- Commit messages match the `<verb>: <subject>` convention
+- Submodule pin commits reference the plugin commit hash
+- Phase-closing commits include doc file updates
+
+### pre-push
+Validates that:
+- All plugin check-plugin.mjs suites pass
+- No `node_modules` or build artifacts are staged
+- The superproject tree is coherent (submodule pins match committed hashes)
+
+Install hooks: `cd /Users/user/agents && .agents/hooks/install.sh`

@@ -1,0 +1,26 @@
+#!/bin/sh
+# commit-msg hook — validates commit message format
+#
+# Install: .agents/hooks/install.sh
+
+set -e
+
+msg_file="$1"
+msg="$(cat "$msg_file")"
+
+# --- 1. Must match <verb>: <subject> convention ---
+# Allowed verbs: fix, feat, docs, build, refactor, test, chore, pin, ship
+if ! echo "$msg" | head -1 | grep -qE '^(fix|feat|docs|build|refactor|test|chore|pin|ship): .+'; then
+  echo "ERROR: Commit message must start with <verb>: <subject>"
+  echo "Allowed verbs: fix, feat, docs, build, refactor, test, chore, pin, ship"
+  echo "Example: fix: register ui-onboarding settings namespace"
+  exit 1
+fi
+
+# --- 2. Subject line should be <= 72 characters ---
+subject="$(echo "$msg" | head -1)"
+if [ "${#subject}" -gt 72 ]; then
+  echo "WARNING: Subject line is ${#subject} characters (recommended <= 72)."
+fi
+
+echo "commit-msg checks passed."
