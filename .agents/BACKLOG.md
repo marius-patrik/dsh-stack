@@ -156,3 +156,26 @@ From the abandoned pastacode (opencode fork) plan — check before treating as b
 
 Deferred plugin candidates (port-source kept in Andromeda): `src/cli/orchestrator.ts`
 (baton/heartbeat), `src/cli/memory.ts` (durable memory), remaining `src/cli/state*.ts`.
+
+---
+
+## 6. Session 16 buildout rows (2026-08-17)
+
+Source: `.agents/requests/session-16-providers-overhaul-loops-zen.md`. These rows
+supersede the Session-14 gates (Keychain deep-link question, quotas polish, sidebar
+batch scope): the user gave explicit directives.
+
+| # | Area | Delta | Effort | Status | Owner | Note |
+|---|---|---|---|---|---|---|
+| 26 | Themes UI | VS Code theme catalog (Open VSX search/install) inside the Themes settings tab | M | OPEN | `dsh-themes` | node half (catalog/route/CLI) shipped P4; only the settings tab UI is missing — tab is switcher-only today |
+| 27 | Credential UX | Keychain overhaul: correct nav icon, full settings section (not an embedded modal page), typed-record CRUD (list/add/edit/remove/reveal) | L | OPEN | `dsh-credentials` | supersedes row 24 gate; deep-link + Models binding still apply |
+| 28 | Agent config | Split agent presets across Agents and Actions tabs; both tabs inadequate → full rosters | L | OPEN | `dsh-agents` + `dsh-actions` | harness "Agent" section renamed "Agents"; personas + agent presets live there; action/mode presets live in Actions |
+| 29 | Platform | Rename dsh-session-modes → dsh-actions: package, repo, profile, client, routes, docs | M | OPEN | `dsh-actions` | GitHub repo rename + superproject submodule path + web profile wiring |
+| 30 | Provider UX | Merge Quotas + Models settings tabs into "Providers"; per-provider auth + subscription + quota indicators | L | OPEN | `dsh-providers` + `dsh-tweaks` | Models section is harness-owned (ui-settings-models) → replaced via tweaks occupant, same pattern as settings.general |
+| 31 | Platform | Merge dsh-subscriptions + dsh-quotas plugins into dsh-providers (single providers plugin) | L | OPEN | `dsh-providers` | quotas registry/dashboard + subscription remap fold in; retire the two repos after pin move |
+| 32 | Tools UX | dsh-tools exposed in settings: full user control (list/enable/disable/add/edit/remove custom tools) | M | OPEN | `dsh-tools` | settings section + web routes over the existing tools registry |
+| 33 | Loops | New plugin dsh-loops: goal-based loops from .agents/loops; predefinable criteria + workflows incl. deterministic orchestration; editable via agent tools and settings | XL | OPEN | `dsh-loops` | new repo; settings section + agent tools (loop create/edit/run/stop) |
+| 34 | Platform | Plugin enable/disable in settings via dsh-tweaks, with "takes effect on reload" popup + reload button | M | OPEN | `dsh-tweaks` | writes profile enable state; popup + `location.reload()` affordance |
+| 35 | Agent config | Actions live under .agents/actions (file-based action definitions, like persona files) | M | OPEN | `dsh-actions` | mirrors dsh-agents catalog/sync pattern |
+| 36 | Models | OpenCode Zen provider: auth + quotas + catalog, in dsh-providers | L | OPEN | `dsh-providers` | reverse-engineer opencode zen (opencode.ai/zen) auth + usage endpoints |
+

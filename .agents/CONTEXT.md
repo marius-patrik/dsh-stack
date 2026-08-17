@@ -1524,3 +1524,41 @@ All 16 plugin check-plugin suites green. Superproject pushed clean.
 
 All three items require user input before proceeding (questions documented in
 Session 14's CONTEXT section).
+
+---
+
+## Session 16 — August 17, 2026 (settings/providers overhaul + loops + zen)
+
+**Context:** User returned with a large directive (request file
+`session-16-providers-overhaul-loops-zen.md`) that supersedes the Session-14
+open gates. Prior state: Phase 11 A/B/C shipped; D/E/F gated; an uncommitted
+dsh-quotas change (built-in probe providers + 15-min auto-refresh) was found in
+the working tree and answers the old "quotas polish" question with (b).
+
+**Request items (verbatim in the request file):**
+1. Themes catalog UI missing from the Themes settings tab (Open VSX search/install).
+2. Keychain: wrong icon, embedded page inside the modal, underimplemented → full section.
+3. Agent presets split across session modes and agents; both tabs inadequate;
+   rename harness "Agent" → "Agents", "Session Modes" → "Actions".
+4. Rename plugin dsh-session-modes → dsh-actions (repo, package, wiring).
+5. Models tab: show auth + quota indicators; merge Quotas+Models tabs into
+   "Providers"; merge dsh-subscriptions + dsh-quotas + dsh-providers into one
+   dsh-providers plugin.
+6. dsh-tools exposed in settings — full user control over tools.
+7. New plugin dsh-loops: goal-based loops from .agents/loops, predefinable
+   criteria + workflows + deterministic orchestration, editable via agent tools
+   or settings.
+8. dsh-tweaks: enable/disable plugins in settings with "takes effect on reload"
+   popup + reload button.
+9. Actions live under .agents/actions (file-based).
+10. OpenCode Zen provider for the stack: auth + quotas + everything.
+
+**Plan:** design decisions recorded in PLAN.md "P12 — Session 16 buildout".
+Phases: P12.0 housekeeping (commit pending dsh-quotas work) → P12.1 providers
+consolidation (backend merge + zen) → P12.2 Providers settings UI → P12.3
+Keychain overhaul → P12.4 Actions rename + .agents/actions → P12.5 Agents tab +
+presets split → P12.6 Themes catalog → P12.7 Tools settings → P12.8 dsh-loops →
+P12.9 plugin enable/disable + reload.
+
+**Status:** in progress.
+

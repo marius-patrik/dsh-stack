@@ -417,6 +417,74 @@ a written decision/plan; nothing is left open-ended.
   preview, breaking changes expected, harness kept pinned and bumped only
   deliberately.
 
+
+
+## P12 — Session 16 buildout (2026-08-17) `[in progress]`
+
+Source: `.agents/requests/session-16-providers-overhaul-loops-zen.md`. Supersedes
+the Session-14 gates. Ten work items grouped into ten phases; each phase ships
+docs-synced commits (plugin repo first, then the superproject pin).
+
+### Design decisions
+
+1. **Providers consolidation (P12.1).** `dsh-subscriptions` and `dsh-quotas` fold
+   into `dsh-providers` as modules (`src/subscriptions.ts`, `src/quotas/*` —
+   registry, snapshot store, `/quotas/api/*` routes, HTML dashboard, probe
+   providers incl. the uncommitted Session-15 work). One plugin owns provider
+   routes + auth state + quota state. The two retired repos stay on GitHub with an
+   archive notice; superproject submodules are removed after the pin moves.
+   Web profile: `dsh-subscriptions`/`dsh-quotas` rows removed, `dsh-providers`
+   carries the merged client bundle.
+2. **OpenCode Zen (P12.1).** New `zen` provider route in dsh-providers:
+   `opencode.ai/zen` gateway — OpenAI-compatible wire (openai dialect), API-key
+   auth stored in the vault (`ZEN_API_KEY` / OAuth if the live endpoint proves
+   out), model catalog from the zen models endpoint, quota probe adapter in the
+   merged quotas module. Wire-truth first: probe the real endpoints, record the
+   evidence in the plugin's check-plugin and CONTEXT.md.
+3. **Providers settings UI (P12.2).** The harness `ui-settings-models` occupant
+   is replaced the same way `ui-settings-general` was (profile disable+insert,
+   dsh-tweaks declares the seat, dsh-providers registers the `Providers`
+   section): provider rows show auth state (credential present/valid/expired),
+   subscription vs API badge, and quota meter from the merged quotas registry.
+   Quotas tab (order 15) is removed; Models tab renamed `Providers`.
+4. **Keychain overhaul (P12.3).** Full settings section (own nav row, correct
+   key glyph) replacing the embedded page: typed-record list grouped by
+   purpose/account, add/edit/remove, fingerprint-first reveal, expiry display,
+   provider bindings. All over the existing `/vault/*` routes, extended as
+   needed.
+5. **Actions rename (P12.4).** `dsh-session-modes` → `dsh-actions`: GitHub repo
+   rename, package name, plugin `name`, routes (`/actions`), client bundle,
+   profile wiring, docs. Action definitions become file-based under
+   `.agents/actions` (MD/JSON, same catalog/sync pattern as dsh-agents persona
+   files) layered over the built-in mode set; the settings tab is renamed
+   `Actions`.
+6. **Agents tab + presets split (P12.5).** Harness `agent-presets` section is
+   relabeled `Agents`; agent/persona presets roster lives in the dsh-agents tab;
+   action/mode presets live in the Actions tab. Both tabs become full management
+   surfaces (list/enable/edit-source), not read-only teasers.
+7. **Themes catalog (P12.6).** Themes tab gains the Open VSX catalog pane
+   (search → install → apply) over the shipped `/themes.json` route + CLI
+   backend, next to the installed-themes switcher.
+8. **Tools settings (P12.7).** dsh-tools registers a settings section listing
+   both harness built-in tools (enable/disable policy where the seam allows) and
+   config-file custom tools (full CRUD over the `dsh-tools.tools` map).
+9. **dsh-loops (P12.8).** New plugin + repo. Loop files under `.agents/loops`
+   (MD/JSON): goal, completion criteria, workflow steps; deterministic
+   orchestration = declarative step sequences with fixed tool/prompt bindings
+   executed without free-form planning where declared. Agent tools
+   (`loop list/create/edit/run/stop/status`) + a settings section editing the
+   same files.
+10. **Plugin enable/disable (P12.9).** dsh-tweaks Plugins section: toggle per
+    plugin writes the profile enable state, modal popup "takes effect on reload"
+    with a Reload button (`location.reload()`).
+
+### Phase order
+
+P12.0 housekeeping (verify + commit the pending dsh-quotas probe-providers work)
+→ P12.1 providers merge + zen → P12.2 Providers UI → P12.3 Keychain → P12.4
+Actions rename + .agents/actions → P12.5 Agents tab → P12.6 Themes catalog →
+P12.7 Tools settings → P12.8 dsh-loops → P12.9 enable/disable + reload.
+
 ## Cadence
 
 Commit + push at the end of every phase so progress is visible on GitHub.
