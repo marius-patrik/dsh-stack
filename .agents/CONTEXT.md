@@ -1392,5 +1392,61 @@ steps, or stop and ask for clarification if you are unsure how to proceed."
 2. `dsh-repos` GitLab + agentic init
 3. Curated/hosted gateway (product decisions)
 
+**Open questions (awaiting user input before proceeding):**
+
+These items require the user's decision on scope, design, or priority. Per
+AGENTS.md "user input gate" rule, implementation is halted until the user
+answers.
+
+**Phase 11 D — Keychain↔Models binding:**
+Q: How should the "Manage in Keychain" action work in the Models settings row?
+Options:
+  (a) Clicking the key icon opens the Keychain section scrolled to the
+      relevant credential (deep-link via `/vault?ref=<ref>`).
+  (b) Clicking the key icon opens a small popover with reveal/copy/edit
+      actions inline, without leaving the Models page.
+  (c) The key icon is a toggle that shows/hides the credential value
+      inline (like VS Code's password fields).
+Recommendation: (a) — keeps Keychain as the single source of truth, avoids
+duplicating reveal logic across two settings pages.
+
+**Phase 11 E — Sidebar batch:**
+Q: What scope of sidebar changes do you want?
+Options:
+  (a) Full: History section + machine-root workspace + chevron collapse
+      toggles + drag-to-reorder sessions.
+  (b) Medium: History section + machine-root workspace (no chevrons/drag).
+  (c) Minimal: History section only (read-only list of past sessions).
+Recommendation: (b) — History + machine-root give the most value without
+the complexity of drag-and-drop (which needs a new harness seam).
+
+**Phase 11 F — Quotas polish:**
+Q: What does "quotas polish" mean to you? The quota dashboard is now shipped
+(HTML UI, summary API, meter bars). What else is needed?
+Options:
+  (a) Nothing — the current dashboard is sufficient.
+  (b) Auto-refresh on a timer (e.g. every 15 minutes) in the background.
+  (c) Per-session usage tracking (tokens consumed per conversation turn).
+  (d) All of the above.
+
+**dsh-repos — GitLab support:**
+Q: What scope of GitLab support?
+Options:
+  (a) Full parity with GitHub: MR creation, branch/commit/push, repo list,
+      credentials via `GITLAB_TOKEN`.
+  (b) Read-only: repo list + branch status only (no push/MR).
+  (c) Defer — GitLab support is not needed right now.
+
+**dsh-repos — Agentic init:**
+Q: What should `dsh repos init` generate?
+Options:
+  (a) A harness-flavored AGENTS.md with plugin seams, conventions, and
+      boot-verify commands auto-detected from the repo structure.
+  (b) A minimal .agents/ directory with PLAN.md, CONTEXT.md, BACKLOG.md
+      templates.
+  (c) Both (a) and (b).
+  (d) Defer — not needed right now.
+
 **Status:** 4 high/medium tasks completed in this session. All 15 plugin
-check-plugin suites green. Superproject pushed clean.
+check-plugin suites green. Superproject pushed clean. Implementation halted
+on remaining items pending user input on the above questions.

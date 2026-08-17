@@ -112,7 +112,31 @@ Each plugin is a git repo (submodule here) under `marius-patrik`, named
 3. Implement + boot-verify with `check-plugin.mjs`.
 4. Update docs (PLAN.md status, CONTEXT.md if a session boundary, BACKLOG.md
    row status, README if layout changed).
-5. Commit + push (plugin repo first, then superproject pin).
+5. Commit + push (plugin repo first, then the superproject pin).
+
+## User input gate (IMPORTANT)
+
+When a task requires the user's decision, preference, or sign-off — on scope,
+design, naming, priority, or any choice that affects the product — **stop and
+document the question before doing the work**. Specifically:
+
+1. **Write the open question into CONTEXT.md** (under the current session) and
+   into BACKLOG.md (as a note on the relevant row). Include the options or
+   tradeoffs so the user can make an informed choice.
+2. **Do NOT proceed with the implementation** until the user has answered.
+3. After the user answers, record the decision in CONTEXT.md and proceed.
+
+This applies to:
+- Design choices with multiple valid answers (architecture, naming, UX flows)
+- Scope decisions (what to include/exclude in a feature)
+- Priority ordering between independent tasks
+- Any change that could surprise the user or alter existing behavior
+
+This does NOT apply to:
+- Pure technical execution (typecheck passes, tests green, docs updated)
+- Choosing internal implementation details that don't affect the user-facing
+  behavior or product direction
+- Following established conventions that are already documented in PLAN.md
 
 ## Hooks
 
