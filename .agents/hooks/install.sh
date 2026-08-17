@@ -4,7 +4,13 @@
 
 set -e
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# Resolve repo root: if $0 is inside .agents/hooks/, go up 3 levels.
+# If run via git hook symlink, resolve the symlink first.
+SCRIPT="$0"
+if [ -L "$SCRIPT" ]; then
+  SCRIPT="$(readlink "$SCRIPT")"
+fi
+REPO_ROOT="$(cd "$(dirname "$SCRIPT")/../.." && pwd)"
 HOOKS_DIR="$REPO_ROOT/.agents/hooks"
 GIT_HOOKS_DIR="$REPO_ROOT/.git/hooks"
 
