@@ -40,9 +40,9 @@
 [submodule "plugins/dsh-lsp"]
 	path = plugins/dsh-lsp
 	url = https://github.com/marius-patrik/dsh-lsp.git
-[submodule "plugins/dsh-session-modes"]
-	path = plugins/dsh-session-modes
-	url = https://github.com/marius-patrik/dsh-session-modes.git
+[submodule "plugins/dsh-actions"]
+	path = plugins/dsh-actions
+	url = https://github.com/marius-patrik/dsh-actions.git
 [submodule "plugins/dsh-quotas"]
 	path = plugins/dsh-quotas
 	url = https://github.com/marius-patrik/dsh-quotas.git
