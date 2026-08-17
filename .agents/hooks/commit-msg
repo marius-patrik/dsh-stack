@@ -24,3 +24,17 @@ if [ "${#subject}" -gt 72 ]; then
 fi
 
 echo "commit-msg checks passed."
+
+# --- 3. Phase-closing commits should reference request files ---
+# When closing a phase (docs, feat with PRD promotion), check that
+# corresponding request files exist under .agents/requests/
+verb="$(echo "$msg" | head -1 | cut -d: -f1)"
+if [ "$verb" = "ship" ] || [ "$verb" = "feat" ]; then
+  if [ -d "$AGENTS_DIR/requests" ]; then
+    request_count="$(ls "$AGENTS_DIR/requests/" 2>/dev/null | wc -l | tr -d ' ')"
+    if [ "$request_count" -eq 0 ]; then
+      echo "NOTE: Shipping a feature without request files in .agents/requests/."
+      echo "Consider documenting the user request that drove this work."
+    fi
+  fi
+fi

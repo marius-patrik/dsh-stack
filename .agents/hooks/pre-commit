@@ -53,3 +53,24 @@ if [ -n "$plugin_src_changed" ] && [ -z "$docs_files" ]; then
 fi
 
 echo "pre-commit checks passed."
+
+# --- 5. Rules system integrity ---
+# Verify that all 6 rule files exist under .agents/rules/
+missing_rules=""
+for rule in 01-context-load.md 02-blocked-gate.md 03-vague-input.md 04-digestion-pipeline.md 05-user-input-gate.md 06-subagent-utilization.md; do
+  if [ ! -f "$AGENTS_DIR/rules/$rule" ]; then
+    missing_rules="$missing_rules $rule"
+  fi
+done
+if [ -n "$missing_rules" ]; then
+  echo "ERROR: Missing rule files:$missing_rules"
+  echo "All 6 rule files must exist under .agents/rules/."
+  exit 1
+fi
+
+# --- 6. Requests folder exists ---
+if [ ! -d "$AGENTS_DIR/requests" ]; then
+  echo "ERROR: .agents/requests/ directory missing."
+  echo "Create it with: mkdir -p .agents/requests"
+  exit 1
+fi
