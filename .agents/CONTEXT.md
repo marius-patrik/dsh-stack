@@ -1304,3 +1304,93 @@ it comes free from the harness.
 
 **Halted on:** user interrupted to demand full orientation before continuing
 execution.
+
+---
+
+## Session 14 — August 17, 2026 (continued)
+
+**Context:** Continuing from Session 13's boot fixes and docs restructure.
+User said "What did we do so far?" — triggered full orientation and continued
+execution of ALL remaining work. User directive: "Continue if you have next
+steps, or stop and ask for clarification if you are unsure how to proceed."
+
+**What was done:**
+
+### dsh-credentials: Multi-account support (two commits)
+1. `795e8fb` — Core multi-account:
+   - `slugRecordId(ref, account?)` now appends `--<account-slug>` when account
+     is provided, so two accounts for the same ref (e.g., two Claude accounts
+     both needing `CLAUDE_SUB_OAUTH_TOKEN`) coexist without collision.
+   - `recordForRef(ref, value, { account? })` tags records with `account:<name>`.
+   - `resolveFor(ref, account)` resolves a specific account; skips ambient
+     credentials (they're per-machine, not per-account).
+   - `resolveAll(ref)` returns all records across every account for a ref.
+   - `set(ref, value, account?)` and `unset(ref, account?)` accept optional
+     account parameter.
+   - Web API: GET/PUT/DELETE support `?account=<name>` query parameter.
+   - Private `recordForRef` in AccountsService updated: direct slug lookup first
+     (fast path), then tag scan with account filter.
+
+2. `6489f0d` — CLI multi-account:
+   - `vault add` now accepts `--account <a>` (added to USAGE + adds `account:<a>`
+     tag to the record).
+   - `vault list` now shows ACCOUNT column (extracted from tags).
+   - All 15 check-plugin suites pass.
+
+### dsh-tui: Standalone HTTP client (one commit)
+`9760ff5` — Complete standalone TUI, rebuilt from scratch:
+- **No cordis dependency** — pure Node.js HTTP client.
+- `DshClient`: HTTP POST RPC (JSON envelope `client-request`/`server-response`)
+  + SSE mux streaming via `fetch()` with streaming body reader.
+- `protocol.ts`: Wire format types matching harness `apiproxy` shapes
+  (`ClientRequest`, `ServerResponse`, `MuxFrame`, domain types).
+- `tui.ts`: readline + ANSI escape codes — status bar (connection dot, session,
+  model, streaming tag), stream buffer display, colored output helpers.
+- `commands.ts`: Slash commands — `/session` (list/new/switch/info), `/model`
+  (list/switch), `/goal` (list/create/pause/resume/clear), `/cancel`, `/help`,
+  `/exit`/`/quit`.
+- `bin/dsh-tui.mjs`: CLI entry point (`dsh-tui [--url <url>]`).
+- Auto-connects, auto-selects latest session, reconnects mux on error.
+- Architecture: standalone client talks to dsh over HTTP — no WebSocket needed
+  (SSE provides the same data as WS downlinks, simpler for standalone client).
+
+### dsh-session-modes: Durable mode kernel completion
+`1cc68d5` — Added web endpoints:
+- `GET /session-modes` — mode catalog and config (existing, unchanged).
+- `GET /session-modes/current` — query current mode for an agent.
+- `GET /session-modes/history` — mode definitions, transitions graph, tool/route
+  policies per mode.
+- Durable persistence was already working via `session-mode/selected` events
+  appended to session history and restored via `findLast()`.
+
+### dsh-quotas: Quota dashboard completion
+`976c11a` — Complete quota dashboard:
+- `GET /quotas` — full HTML dashboard with dark theme, status colors, usage meter
+  bars, refresh button.
+- `GET /quotas/api/summary` — aggregated counts (available/unknown/error/exhausted).
+- `GET /quotas/api/snapshots` — raw JSON (unchanged).
+- `POST /quotas/api/refresh` — refresh all providers.
+- `POST /quotas/api/refresh/:provider` — refresh single provider.
+- Meter bar visualization: `[████████░░░░] 67%` with color coding
+  (green <60%, yellow <85%, red >=85%).
+
+**Wire verification (all HTTP, no harness restart needed):**
+- dsh-credentials multi-account: all 15 check-plugin suites pass.
+- dsh-tui: typecheck clean, check-plugin pass.
+- dsh-session-modes: typecheck clean, check-plugin pass.
+- dsh-quotas: typecheck clean, check-plugin pass.
+
+**Pushes made:**
+- dsh-credentials: `795e8fb` → pushed, `6489f0d` → pushed
+- dsh-tui: `9760ff5` → pushed
+- dsh-session-modes: `1cc68d5` → pushed
+- dsh-quotas: `976c11a` → pushed
+- Superproject pins: `d10835f`, `b3d07fb`, `546041f`, `872e175`, `03bb050` → all pushed
+
+**Remaining work (from prior session's list, updated):**
+1. Phase 11 D-F: Keychain↔Models binding, sidebar batch, quotas polish
+2. `dsh-repos` GitLab + agentic init
+3. Curated/hosted gateway (product decisions)
+
+**Status:** 4 high/medium tasks completed in this session. All 15 plugin
+check-plugin suites green. Superproject pushed clean.
