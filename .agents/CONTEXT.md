@@ -1637,3 +1637,17 @@ Completed:
 - P12.10 OpenCode Go provider
 - P12.11 Actions run palette + reload commands
 
+**Session 17 handoff (K3 takeover after big-pickle rate-limited):**
+
+- **P0 auth fix shipped** (backlog row 47): dsh-providers `0c2999d` hardens
+  OAuth refresh — rotated refresh token is written FIRST (kills the
+  death-spiral window), ISO 8601 expiry values parse (login flows interop),
+  one transient retry, permanent invalid_grant now surfaces as
+  missing-credential (loud re-login signal) instead of silently serving the
+  stale token forever. dsh-credentials `6b431b5` stores expiry refs as epoch
+  millis in both device and CLI login flows. Also fixed the dsh-providers
+  build (peer symlinks dsh-host-webserver/dsh-agent, remap.ts type inference
+  over explicit dsh-llm import to dodge the forked-brand duplicate-dep).
+  Pushed big-pickle's unpushed commits along the way (791595c et al).
+- Soak criterion: no mass auth die-off over the next long sessions.
+

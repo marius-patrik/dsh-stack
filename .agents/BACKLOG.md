@@ -182,6 +182,7 @@ batch scope): the user gave explicit directives.
 | 38 | Session UX | Actions **run palette** in the session input bar + **reload app** command (clean reload that preserves running agents and resumes them after) + **force reload** (server self-restart: spawn replacement, then exit) | L | OPEN | `dsh-actions` + `dsh-tweaks` | force reload must NOT kill the caller mid-call — self-spawn pattern; clean reload resumes agents post-restart |
 | 39 | Platform | Harness accessible via Tailscale | S/M | OPEN | `dsh-tweaks` | if more than a bind config change (likely: loopback trust fence / auth on non-loopback), implement via dsh-tweaks |
 | 40 | Voice | Own dsh-voice plugin (MIT zhuiyueya/dsh-voice as reference base): browser STT + human-sounding model-assisted TTS through vault credentials | L | OPEN | `dsh-voice` | third-party dsh-voice uninstalled from profile; ours must sound human (model TTS), not classic TTS |
+| 47 | Reliability | Mid-use auth failures (kimi ~15-min TTL token dies mid-session, mass agent deaths 2026-08-17/18 ×2) | M | FIXED (soak pending) | `dsh-providers` + `dsh-credentials` | root causes: refresh-token-last write order (death spiral on process kill mid-rotation), ISO-vs-epoch expiry mismatch (login flows wrote ISO, refresh gate expects epoch ms), transient failures unretried, invalid_grant silently returning stale token forever. Fixed in dsh-providers 0c2999d (refresh-first write order, ISO parse, 1 retry, permanent→missing-credential) + dsh-credentials 6b431b5 (epoch-ms expiry refs) |
 
 ---
 
