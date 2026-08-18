@@ -1589,3 +1589,51 @@ P12.9 plugin enable/disable + reload.
   the session input bar + **reload app** command (clean reload preserving and
   resuming running agents) + **force reload** (server self-restart) (P12.11).
 
+**Session 17 (Aug 18) — P12.1 complete: providers merge + OpenCode Zen route.**
+
+Completed:
+
+1. **OpenCode Zen route** (`6394320`): new `zen` provider in `PROVIDER_ROUTES`:
+   - Base URL: `opencode.ai/zen/v1`, dialect: `openai` (POST `/chat/completions`)
+   - Auth: `ZEN_API_KEY` credential slot (Bearer token)
+   - 24 advisory models: GPT 5.x, Claude Opus/Sonnet/Haiku, Gemini 3.x,
+     Grok 4.x, DeepSeek V4 (incl. free tier), Kimi K2.7/K3, Qwen 3.x,
+     MiMo-V2.5 free
+   - Probe: GET `/zen/v1/models` (public, no auth required)
+   - check-plugin: catalog + stream assertions added
+
+2. **Quotas wiring into dsh-providers** (`0178cc8`):
+   - `applyQuotas()` called at end of `apply()` with `config.quotas` forwarding
+   - `QuotaRegistry` registered as `ctx.quotas` cordis service
+   - `QuotasConfig` added to `Config` interface
+   - Re-exports: `QuotaRegistry`, `applyQuotas`, `QUOTAS_PREFIX`, `mountQuotaWeb`
+   - Subpath export: `dsh-providers/quotas` → `lib/quotas/index.{js,d.ts}`
+   - quotas subpackage derives probe routes from `PROVIDER_ROUTES` (no duplication)
+   - remap.ts merged from standalone dsh-subscriptions (identical logic)
+
+3. **Standalone packages deleted** (`155f6c5`):
+   - `plugins/dsh-subscriptions/` removed (git rm)
+   - `plugins/dsh-quotas/` removed (git rm)
+   - `.gitmodules` cleaned (two submodule entries removed)
+   - PLAN.md, BACKLOG.md, README.md updated
+
+4. **BACKLOG.md rows updated**:
+   - Row 25 (sidebar batch): SHIPPED
+   - Row 31 (merge subscriptions+quotas): SHIPPED
+   - Row 36 (OpenCode Zen): SHIPPED
+   - Row 41 (mega-merge end-state): partial progress (dsh-quotas ✅, dsh-subscriptions ✅)
+
+**Superproject state:** pushed to `155f6c5`, all 16 check-plugin suites green.
+
+**Remaining P12 phases:**
+- P12.2 Providers UI: Models tab + auth/quota indicators
+- P12.3 Keychain overhaul: full CRUD + nav icon
+- P12.4 Actions rename: dsh-session-modes → dsh-actions
+- P12.5 Agents tab + presets split
+- P12.6 Themes catalog (Open VSX search/install)
+- P12.7 Tools settings (full user control)
+- P12.8 dsh-loops (goal-based loops)
+- P12.9 plugin enable/disable + reload
+- P12.10 OpenCode Go provider
+- P12.11 Actions run palette + reload commands
+
