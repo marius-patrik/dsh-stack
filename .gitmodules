@@ -13,9 +13,6 @@
 [submodule "plugins/dsh-tweaks"]
 	path = plugins/dsh-tweaks
 	url = https://github.com/marius-patrik/dsh-tweaks.git
-[submodule "plugins/dsh-subscriptions"]
-	path = plugins/dsh-subscriptions
-	url = https://github.com/marius-patrik/dsh-subscriptions.git
 [submodule "plugins/dsh-tui"]
 	path = plugins/dsh-tui
 	url = https://github.com/marius-patrik/dsh-tui.git
@@ -43,9 +40,6 @@
 [submodule "plugins/dsh-actions"]
 	path = plugins/dsh-actions
 	url = https://github.com/marius-patrik/dsh-actions.git
-[submodule "plugins/dsh-quotas"]
-	path = plugins/dsh-quotas
-	url = https://github.com/marius-patrik/dsh-quotas.git
 [submodule "plugins/dsh-translator"]
 	path = plugins/dsh-translator
 	url = https://github.com/marius-patrik/dsh-translator.git

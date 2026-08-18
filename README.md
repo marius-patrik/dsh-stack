@@ -15,10 +15,9 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
 - `harness/` — pinned checkout of `deepseek-ai/deepseek-harness` (source of truth, kept pristine).
 - `plugins/` — one repo per plugin, each a git submodule:
   - `dsh-dialects/` — provider wire-protocol abstraction (bundled: openai, claude, gemini, code-assist).
-  - `dsh-providers/` — LLM provider adapters: 5 subscription routes + 8 API-key routes (openai/anthropic/gemini/grok/deepseek/mistral/groq/openrouter).
+  - `dsh-providers/` — LLM provider adapters: 14 routes (5 subscription + 8 API-key + OpenCode Zen); quotas subpackage (QuotaRegistry, web routes, auto-refresh, settings). Merged from standalone dsh-subscriptions + dsh-quotas.
   - `dsh-credentials/` — account/credential manager (v2: full vault parity port).
   - `dsh-tweaks/` — general features: providers filter, state-folder (`homeRoot`) + command config; v2: share links, stats/sessions CLI verbs, plan toggle, fork undo/redo, slash commands, keybinds; v3 (P11): the harness extension layer — owns replaced sidebar/workspaces/settings occupants and plugin-facing seams.
-  - `dsh-subscriptions/` — profile bundle mounting providers + credentials + defaults.
   - `dsh-tui/` — standalone TUI client for dsh (talks to dsh as backend; separate repo, NOT modifying privatecode).
   - `dsh-desktop/` — Tauri v2 thin shell + lifecycle plugin: readiness route, boot URL, spawn helpers.
   - `dsh-themes/` — VS Code/TextMate themes: store + Open VSX catalog, `/themes.json` route, browser bundle, `dsh theme` CLI.
@@ -28,7 +27,6 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `dsh-agents/` — custom agents as JSON/MD persona files materialized as agent presets: base composition spliced, live roster, `/persona` command, `dsh agents` CLI.
   - `dsh-repos/` — repo workflows: branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN`, `dsh repos` CLI.
   - `dsh-session-modes/` — explicit tool/search/action/plan/agent/shell/code modes with durable state, executor policy, and request routing (in progress).
-  - `dsh-quotas/` — provider quota/usage snapshots and a settings dashboard below Models (in progress).
   - `privatecode/` — opencode fork (subscription providers, OAuth refresh, TUI rendering); kept as-is (works), not modified.
 - `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks), `theme` (dsh-themes), `lsp` (dsh-lsp), `formatter` (dsh-formatters), `agents` (dsh-agents).
 
