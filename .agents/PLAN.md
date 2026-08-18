@@ -15,9 +15,9 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `agents` | public | superproject: launcher, PLAN, CONTEXT, BACKLOG, gitlinks |
 | `dsh-credentials` | public | account/credential manager (v2 = full vault parity port); **shipped**: multi-account support (resolveFor/resolveAll, account-tagged records, vault CLI --account, ACCOUNT column) |
 | `dsh-dialects` | public | provider wire dialects: openai, claude, gemini, code-assist (shipped + boot-verified) |
-| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes (`PROVIDER_ROUTES`, `subscription-only`/`all` filter) |
+| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes (`PROVIDER_ROUTES`, `subscription-only`/`all` filter); **P12.1**: absorbs dsh-subscriptions + dsh-quotas, adds OpenCode Zen route (auth + quota probe) |
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
-| `dsh-subscriptions` | **private** | profile bundle: single-seat subscription remap (shipped + boot-verified) |
+| `dsh-subscriptions` | **private** | **merged into dsh-providers in P12.1** — repo archived with a deprecation notice |
 | `dsh-tui` | public | standalone TUI client for dsh (talks to dsh as backend); separate repo, NOT cannibalizing privatecode; **shipped**: HTTP client + readline TUI + slash commands |
 | `dsh-desktop` | public | **P3 shipped**: Tauri v2 thin shell + lifecycle plugin (readiness route, settings) |
 | `dsh-themes` | public | **P4 shipped**: VS Code/TextMate theme store + Open VSX catalog + `/themes.json` route + browser theme bundle + `dsh theme` CLI |
@@ -26,8 +26,9 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `dsh-tools` | public | **P6c shipped**: config-file custom tools (settings registry + subprocess execution + `dsh tool` CLI) |
 | `dsh-agents` | public | **P6d shipped**: custom agents as JSON/MD persona files materialized into agent presets (`dsh agents` CLI) |
 | `dsh-repos` | public | **P6b shipped**: repo workflows — branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN` (`dsh repos` CLI) |
-| `dsh-session-modes` | public | session mode controller: durable mode state, tool policy, model routing, bounded agent assist; **shipped**: web endpoints for current/history/transitions |
-| `dsh-quotas` | public | provider quota/usage aggregation and a settings usage dashboard; **shipped**: HTML dashboard, summary API, per-provider refresh, meter bars |
+| `dsh-actions` | public | action controller (renamed from dsh-session-modes in P12.4): durable action state, tool policy, model routing, bounded agent assist, file-based actions under `.agents/actions` |
+| `dsh-loops` | public | **P12.8**: goal-based loops from `.agents/loops` — criteria + workflows, deterministic step orchestration, agent tools + settings section |
+| `dsh-quotas` | public | **merged into dsh-providers in P12.1** — repo archived with a deprecation notice |
 | `privatecode` | public | opencode fork (subscription providers, OAuth refresh, TUI rendering); kept as-is (works); NOT modified |
 
 `harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.

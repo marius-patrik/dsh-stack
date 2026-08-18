@@ -1562,3 +1562,30 @@ P12.9 plugin enable/disable + reload.
 
 **Status:** in progress.
 
+
+**Interlude (Aug 18) — external work + incidents:**
+
+- **kimi auth fixed externally.** A big-pickle (zen free model) session via
+  privatecode implemented and pushed: dsh-credentials `d8ffe04` (subscription
+  login flows — RFC 8628 device flow for grok-sub/kimi-sub, manual paste for
+  claude/gemini; new src/login.ts, /login/* endpoints, Keychain "Subscription
+  Logins" UI) and dsh-quotas `74f7101` (quota probes decrypt via ctx.accounts
+  — the exact gap noted in Session 16 P12.0 review). Superproject pins
+  `90a6b8a`/`c69c60e`/`113892a`. Transcripts were not found on disk; the
+  commits are the record. Consequence for P12.1/P12.3: the providers merge and
+  Keychain overhaul MUST build on this new login surface, not replace it.
+- **dsh-voice installed.** `dsh plugin --profile web add github:zhuiyueya/dsh-voice`
+  (browser STT/TTS + Whisper/TTS agent tools). The profile edit only takes
+  effect on server restart; the restart killed the agent's own host session
+  mid-call (lesson: never kill PID-on-3080 from inside — a future "force
+  reload" feature must self-spawn a replacement before exiting). Server came
+  back up clean; voice bundle serves 200.
+- **All six P12 subagents died in the auth outage.** Salvage: dsh-providers has
+  uncommitted partial merge output (src/quotas/, src/remap.ts, presets/,
+  cordis.patch.yml) to review/complete; the other five tasks must be
+  re-dispatched.
+- **New asks folded into P12:** OpenCode **Go** provider with full parity
+  (login, refresh, quotas) alongside Zen (P12.10); actions **run palette** in
+  the session input bar + **reload app** command (clean reload preserving and
+  resuming running agents) + **force reload** (server self-restart) (P12.11).
+

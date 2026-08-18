@@ -178,4 +178,9 @@ batch scope): the user gave explicit directives.
 | 34 | Platform | Plugin enable/disable in settings via dsh-tweaks, with "takes effect on reload" popup + reload button | M | OPEN | `dsh-tweaks` | writes profile enable state; popup + `location.reload()` affordance |
 | 35 | Agent config | Actions live under .agents/actions (file-based action definitions, like persona files) | M | OPEN | `dsh-actions` | mirrors dsh-agents catalog/sync pattern |
 | 36 | Models | OpenCode Zen provider: auth + quotas + catalog, in dsh-providers | L | OPEN | `dsh-providers` | reverse-engineer opencode zen (opencode.ai/zen) auth + usage endpoints |
+| 37 | Models | OpenCode **Go** provider with full parity to other providers: login flow, token refresh, quota probe, catalog | L | OPEN | `dsh-providers` | same shape as Zen (row 36); wire-truth first against opencode.ai/go endpoints |
+| 38 | Session UX | Actions **run palette** in the session input bar + **reload app** command (clean reload that preserves running agents and resumes them after) + **force reload** (server self-restart: spawn replacement, then exit) | L | OPEN | `dsh-actions` + `dsh-tweaks` | force reload must NOT kill the caller mid-call — self-spawn pattern; clean reload resumes agents post-restart |
+| 39 | Platform | Harness accessible via Tailscale | S/M | OPEN | `dsh-tweaks` | if more than a bind config change (likely: loopback trust fence / auth on non-loopback), implement via dsh-tweaks |
+| 40 | Voice | Own dsh-voice plugin (MIT zhuiyueya/dsh-voice as reference base): browser STT + human-sounding model-assisted TTS through vault credentials | L | OPEN | `dsh-voice` | third-party dsh-voice uninstalled from profile; ours must sound human (model TTS), not classic TTS |
+
 
