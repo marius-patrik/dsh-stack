@@ -217,9 +217,13 @@ End-state repo map (everything else gets archived with deprecation notices):
 | # | Directive | Status | Owner | Note |
 |---|---|---|---|---|
 | 51 | **Codex (ChatGPT-sub) provider** — full parity: login (device/CLI), model list, probes, quotas, refresh, reasoning-effort levels | OPEN | `dsh-integrations` | wire-truth first (auth.openai.com / chatgpt.com backend); reference opencode's chatgpt login |
-| 52 | Provider display names + per-row **(Sub)/(API)** badge: Kimi Code/Kimi Console, Claude Code/Anthropic Console, DeepSeek Console, Antigravity/Google Cloud, Grok Build, OpenCode Zen/Go | OPEN | `dsh-integrations` | lands with the Integrations tab |
+| 52 | Provider display names + per-row **(Sub)/(API)** badge: Kimi Code/Kimi Console, Claude Code/Anthropic Console, DeepSeek Console, Antigravity/Google Cloud, Grok Build / **xAI API**, OpenCode Zen/Go | OPEN | `dsh-integrations` | lands with the Integrations tab |
 | 53 | Settings tab: Models + Keychain + Quotas → one **Integrations** tab | OPEN | `dsh-integrations` + `dsh-tweaks` | supersedes row 50 naming ("Providers") |
 | 54 | dsh-themes + dsh-voice fold into dsh-tweaks; **dsh-desktop DELETED** | IN PROGRESS | `dsh-tweaks` | final plugin count: integrations, tweaks, code, tui |
+| 55 | Data import | Import EVERYTHING from the drive into dsh — sessions (all tools), skills, hooks, memory — plus SSH to desktop machine for its state. Prior translator import left many sessions not loading + missing | XL | OPEN | `dsh-translator` → `dsh-integrations` | audit existing ~/.agents/sessions imports first (which fail to load and why), then full-disk discovery (claude, opencode, gemini, codex, cursor, andromeda, ...), then desktop SSH pull |
+| 56 | Providers | **Cursor subscription provider** — re-implement with full parity (was dropped as unreachable Connect-RPC; retry with fresh wire-truth) | L | OPEN | `dsh-integrations` | login + refresh + models + quotas + probes |
+| 57 | Providers | **Antigravity model picking** — user rejects "server-determined" conclusion: the Antigravity CLI has a picker, so the client must signal the model; find the mechanism (config id derivation, request field); FALLBACK: use the CLI fake-PTY wrapper (as used for login) as the transport for chat + model selection | L | OPEN | `dsh-integrations` | supersedes Claude commit 6db23b1 conclusion |
+
 
 Supersedes P12.1/P12.2 scope (the merge is bigger now) and P12.4 naming
 (actions becomes a tweaks module, plugin disappears). Standing rule: do NOT

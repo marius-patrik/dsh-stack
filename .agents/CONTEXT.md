@@ -1676,4 +1676,27 @@ Completed:
   Integrations tab naming; provider display names + (Sub)/(API) badges.
   Final stack: 4 plugins — integrations, tweaks, code, tui.
 
+**Session 18 (Aug 19) — Claude takeover + provider wire-truth:**
+
+- Claude hit session limit 00:50 after shipping: provider status lights,
+  credential-capability probes, unusable-route hiding, QUOTA-vs-auth error
+  split, live model discovery, reasoning-effort selection, antigravity-sub
+  route, Zen credential wiring, CLI login fixes (PTY, Claude Code credential
+  store). Its Stop-hook goal ("all providers working, truly executing")
+  reached: kimi-code/kimi-sub/grok-sub/antigravity executing; claude-sub +
+  zen rate-limited (transient); gemini-sub free tier exhausted; deepseek-api
+  unfunded; 8 API routes keyless.
+- **probe-live.mjs** (dsh-providers 06a5257) independently verified the above
+  through the REAL AccountsService — 4/15 executing, failures all accounted
+  (transient quota / missing keys / unfunded). Shim pitfalls recorded: vault
+  records are slug-keyed and account-tagged; always resolve through
+  AccountsService.
+- **Restart protocol (user directive, durable):** NEVER restart the harness
+  from inside — it kills this session. Prepare everything, PING the user to
+  restart. (Claude had the same instruction.)
+- New rows: 55 total data import (drive + desktop SSH), 56 cursor-sub
+  provider, 57 Antigravity model picking (user rejects server-determined
+  conclusion; fallback = CLI fake-PTY transport).
+
+
 
