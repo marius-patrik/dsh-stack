@@ -514,20 +514,23 @@ Commit + push at the end of every phase so progress is visible on GitHub.
 
 ## P13 — the great consolidation (agreed 2026-08-18, user + K3 planning round)
 
+**Amendment (same round): dsh-agents also folds into dsh-tweaks** — personas,
+preset materialization (.agents files), the Agents tab, and live persona state
+become tweaks modules. Final count: 7 plugins.
+
 **Decisions taken with the user:** credentials merge FULLY into the providers
 plugin; the final plugin is named **dsh-integrations** via GitHub rename of
 dsh-providers (history/redirects preserved); TUI base leaning opentui, NOT
 locked.
 
-### End-state plugin map (8 plugins)
+### End-state plugin map (7 plugins)
 
 | Plugin | Contents | Absorbs (archived) |
 |---|---|---|
 | `dsh-integrations` | provider routes (zen, go, 5 sub, 8 api), wire dialects, quota registry + probes, subscription remap, **the vault + Keychain + login flows**, translator | dsh-providers (renamed), dsh-dialects, dsh-subscriptions ✅, dsh-quotas ✅, dsh-credentials, dsh-translator |
-| `dsh-tweaks` | extension layer, share/stats/session-UX, keybinds, slash commands, **actions (.agents/actions + reload actions), custom tools, loops (.agents/loops)** | dsh-actions, dsh-tools, dsh-loops |
+| `dsh-tweaks` | extension layer, share/stats/session-UX, keybinds, slash commands, **actions (.agents/actions + reload actions), custom tools, loops (.agents/loops), agents/personas + the Agents tab** | dsh-actions, dsh-tools, dsh-loops, dsh-agents |
 | `dsh-code` (new) | formatters, LSP server table, repo workflows (GitHub/GitLab) | dsh-formatters, dsh-lsp, dsh-repos |
 | `dsh-themes` | ALL appearance: VS Code themes only, default dark+light pair, Open VSX catalogue | (harness ui-theme occupant, replaced) |
-| `dsh-agents` | Agents tab = presets + personas + action presets UI; live personas | — |
 | `dsh-voice` | browser STT + human TTS via vault creds | — |
 | `dsh-desktop` | Tauri shell | — |
 | `dsh-tui` | own TUI, fully dsh-integrated (base: likely opentui, unlocked) | privatecode as TUI base |

@@ -206,7 +206,7 @@ End-state repo map (everything else gets archived with deprecation notices):
 |---|---|---|---|
 | 41 | Merge quotas + subscriptions + dialects + providers + **credentials** + translator into ONE providers plugin | `dsh-providers` | ~~dsh-quotas~~ ✅, ~~dsh-subscriptions~~ ✅, dsh-dialects, dsh-credentials, dsh-translator |
 | 42 | Web UI only supports VS Code themes: implement default themes + catalogue, port the theming UI fully | `dsh-themes` | harness ui-theme occupant (replaced via tweaks seat) |
-| 43 | Merge actions into tweaks | `dsh-tweaks` | dsh-actions |
+| 43 | Merge actions + **agents** into tweaks | `dsh-tweaks` | dsh-actions, dsh-agents |
 | 44 | Merge formatters + lsp + repos into a new `dsh-code` plugin | `dsh-code` (new) | dsh-formatters, dsh-lsp, dsh-repos |
 | 45 | Own TUI fully integrated with dsh (drop the opencode-fork plan); find a base to fork | `dsh-tui` | privatecode as TUI base |
 | 46 | Merge tools + loops into tweaks | `dsh-tweaks` | dsh-tools, dsh-loops |
