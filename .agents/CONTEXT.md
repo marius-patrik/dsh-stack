@@ -1662,4 +1662,18 @@ Completed:
   over explicit dsh-llm import to dodge the forked-brand duplicate-dep).
   Pushed big-pickle's unpushed commits along the way (791595c et al).
 - Soak criterion: no mass auth die-off over the next long sessions.
+- **Codex wire-truth captured** (from privatecode plugin/openai/codex.ts,
+  ready for row 51 once Claude settles): issuer auth.openai.com
+  (/oauth/authorize + /oauth/token, refresh_token grant, rotating refresh),
+  client id app_EMoamEEZ73f0CkXaXp7hrann, PKCE S256, localhost:1455
+  /auth/callback, scopes openid profile email offline_access +
+  codex_cli_simplified_flow; API = chatgpt.com/backend-api/codex/responses
+  (Responses API, reasoning effort native); account id from JWT
+  chatgpt_account_id claim, sent as ChatGPT-Account-Id header; models
+  gpt-5.5 / gpt-5.4 / gpt-5.4-mini / gpt-5.3-codex-spark (5.5-pro excluded).
+- **Amendments 2-5 recorded** (PLAN P13 + BACKLOG §9 rows 51-54): themes+voice
+  fold into tweaks; dsh-desktop DELETED (profile, submodule, GitHub archive);
+  Integrations tab naming; provider display names + (Sub)/(API) badges.
+  Final stack: 4 plugins — integrations, tweaks, code, tui.
+
 
