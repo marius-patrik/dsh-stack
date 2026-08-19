@@ -1698,5 +1698,21 @@ Completed:
   provider, 57 Antigravity model picking (user rejects server-determined
   conclusion; fallback = CLI fake-PTY transport).
 
+**Session 19 (Aug 19) — realign + restate (post-restart):**
+
+- Harness restarted by the user; all subagent work-in-progress was lost to the
+  kimi rate-limit death EXCEPT committed code. Subagents now run on big-pickle.
+- Goal restated (rev 4) as the full buildout + consolidation contract: 4-plugin
+  end-state (integrations/tweaks/code/tui), Integrations/Agents/Themes/Plugins
+  settings IA, per-provider full parity (login/models/probes/quotas/refresh/
+  effort), binary-integration standard preferred (harness ships
+  subagent-claude-code + subagent-codex + hooks-* packages), restart protocol
+  (prepare + ping, never self-kill).
+- Wave plan: W0 me (binary-integration exploration, reload action) → W1 salvage
+  subagents (voice/themes/loops/tools/agents/parity) → W2 providers
+  (codex/cursor/go, antigravity picking, badges, Integrations tab) → W3 merge
+  cascade → W4 platform (TUI, tailscale, data import).
+
+
 
 
