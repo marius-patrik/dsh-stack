@@ -1647,6 +1647,18 @@ Completed:
   stale token forever. dsh-credentials `6b431b5` stores expiry refs as epoch
   millis in both device and CLI login flows. Also fixed the dsh-providers
   build (peer symlinks dsh-host-webserver/dsh-agent, remap.ts type inference
+**Session 17 handoff 2 (K3, after second mass death):**
+
+- User directives recorded as BACKLOG §8 rows 48-50: General loses Appearance
+  (Themes owns all appearance, VS Code themes, default dark+light pair);
+  Session Modes + Agents + agent presets merge into ONE "Agents" tab; Models
+  renamed "Providers" absorbing Keychain; quota data not showing.
+- Claude Code (2 processes) is LIVE in dsh-providers + dsh-credentials
+  (status lights, credential-capability probes, PTY login fix) — K3 side stays
+  out of those repos and dsh-tweaks until it settles.
+- All 7 subagents resumed with a survival rule (commit every increment) and
+  the new IA context.
+
   over explicit dsh-llm import to dodge the forked-brand duplicate-dep).
   Pushed big-pickle's unpushed commits along the way (791595c et al).
 - Soak criterion: no mass auth die-off over the next long sessions.

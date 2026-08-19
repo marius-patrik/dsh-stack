@@ -186,6 +186,18 @@ batch scope): the user gave explicit directives.
 
 ---
 
+## 8. Settings IA corrections (2026-08-18, user)
+
+Supersede parts of rows 24/27/28/30 and the P11 nav order where conflicting:
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 48 | **General loses Appearance** — appearance lives ONLY in the Themes tab, which offers VS Code themes with a dark and light default pair | OPEN | `dsh-themes` + `dsh-tweaks` | tweaks-owned settings root removes the harness appearance subsection; dsh-themes ships default light+dark VS Code themes + the picker |
+| 49 | **Merge Session Modes + Agents + agent presets into one "Agents" tab** | OPEN | `dsh-agents` (+ dsh-actions content) | supersedes the "Session Modes → Actions tab" split direction for the UI: one Agents tab contains agent presets, personas, and action/mode presets; dsh-actions plugin code rename still proceeds (profile package is dsh-actions) but its settings surface folds into the Agents tab; P13 row 43 (actions→tweaks) still stands |
+| 50 | **Rename Models → Providers and merge Keychain INTO it** — no separate Keychain tab; credential management lives per-provider inside Providers | OPEN | `dsh-providers` + `dsh-credentials` (client) + `dsh-tweaks` (nav) | Claude is live in providers/credentials — do not start until it settles. "Quota data isn't showing" noted; Claude's status-light/probe commits address it — verify after |
+
+---
+
 ## 7. P13 consolidation directives (2026-08-18, user) — resolve after big-pickle settles
 
 End-state repo map (everything else gets archived with deprecation notices):
