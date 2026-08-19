@@ -211,6 +211,16 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 45 | Own TUI fully integrated with dsh (drop the opencode-fork plan); find a base to fork | `dsh-tui` | privatecode as TUI base |
 | 46 | Merge tools + loops into tweaks | `dsh-tweaks` | dsh-tools, dsh-loops |
 
+
+## 9. Amendments 2-5 (2026-08-18, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 51 | **Codex (ChatGPT-sub) provider** — full parity: login (device/CLI), model list, probes, quotas, refresh, reasoning-effort levels | OPEN | `dsh-integrations` | wire-truth first (auth.openai.com / chatgpt.com backend); reference opencode's chatgpt login |
+| 52 | Provider display names + per-row **(Sub)/(API)** badge: Kimi Code/Kimi Console, Claude Code/Anthropic Console, DeepSeek Console, Antigravity/Google Cloud, Grok Build, OpenCode Zen/Go | OPEN | `dsh-integrations` | lands with the Integrations tab |
+| 53 | Settings tab: Models + Keychain + Quotas → one **Integrations** tab | OPEN | `dsh-integrations` + `dsh-tweaks` | supersedes row 50 naming ("Providers") |
+| 54 | dsh-themes + dsh-voice fold into dsh-tweaks; **dsh-desktop DELETED** | IN PROGRESS | `dsh-tweaks` | final plugin count: integrations, tweaks, code, tui |
+
 Supersedes P12.1/P12.2 scope (the merge is bigger now) and P12.4 naming
 (actions becomes a tweaks module, plugin disappears). Standing rule: do NOT
 start P13 while the big-pickle session (opencode PID 2059) is live in

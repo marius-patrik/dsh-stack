@@ -518,6 +518,24 @@ Commit + push at the end of every phase so progress is visible on GitHub.
 preset materialization (.agents files), the Agents tab, and live persona state
 become tweaks modules. Final count: 7 plugins.
 
+**Amendment 2 (same round): dsh-themes and dsh-voice also fold into dsh-tweaks,
+and dsh-desktop is DELETED** (no Tauri shell in the end-state). Final count: 4
+plugins — `dsh-integrations`, `dsh-tweaks`, `dsh-code`, `dsh-tui`.
+
+**Amendment 3 (settings IA):** the Models/Keychain/Quotas merge is named
+**Integrations** (matching the plugin), not "Providers".
+
+**Amendment 4 (provider display names + row badges):** every model row shows
+its seat — `(Sub)` or `(API)`. Canonical names: kimi-sub = **Kimi Code**,
+kimi api = **Kimi Console**; claude-sub = **Claude Code**, anthropic api =
+**Anthropic Console**; deepseek api = **DeepSeek Console**; gemini-sub =
+**Antigravity**, gemini api = **Google Cloud**; grok-sub = **Grok Build**;
+zen = **OpenCode Zen**; go = **OpenCode Go**; chatgpt sub = **Codex/ChatGPT**.
+
+**Amendment 5 (new provider):** ChatGPT-subscription **Codex** provider with
+full parity — login flow, model list, probes, quotas, token refresh, effort
+levels (reasoning effort is a Codex-native knob).
+
 **Decisions taken with the user:** credentials merge FULLY into the providers
 plugin; the final plugin is named **dsh-integrations** via GitHub rename of
 dsh-providers (history/redirects preserved); TUI base leaning opentui, NOT
