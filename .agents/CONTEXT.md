@@ -1712,6 +1712,16 @@ Completed:
   subagents (voice/themes/loops/tools/agents/parity) → W2 providers
   (codex/cursor/go, antigravity picking, badges, Integrations tab) → W3 merge
   cascade → W4 platform (TUI, tailscale, data import).
+- **Local inference routes SHIPPED** (dsh-providers 0734a96 + 9b50663):
+  ollama/llamacpp/vllm as no-auth 'local' kind routes with discovery + quota
+  probes. Ollama running with qwen3.8:27b (17GB) + qwen3:8b (5.2GB) pulled.
+  Verified: qwen3:8b executes (28s cold), qwen3.8:27b executes (113s cold
+  load on M3). Subagents can route to ollama/* via provider/model overrides —
+  zero rate limits, the fix for mass auth deaths.
+- **KV cache quick win**: claude dialect now sends ephemeral cache_control
+  breakpoints on system blocks (dsh-dialects 149aa34) — 90% discount on
+  cached system prompt tokens, fewer rate-limit hits.
+
 
 
 
