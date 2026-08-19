@@ -511,3 +511,44 @@ Commit + push at the end of every phase so progress is visible on GitHub.
 
 - **Request file backfill:** 16 request files in `.agents/requests/` covering all DSH
   session history (CONTEXT.md sessions 1-14 + current session).
+
+## P13 — the great consolidation (agreed 2026-08-18, user + K3 planning round)
+
+**Decisions taken with the user:** credentials merge FULLY into the providers
+plugin; the final plugin is named **dsh-integrations** via GitHub rename of
+dsh-providers (history/redirects preserved); TUI base leaning opentui, NOT
+locked.
+
+### End-state plugin map (8 plugins)
+
+| Plugin | Contents | Absorbs (archived) |
+|---|---|---|
+| `dsh-integrations` | provider routes (zen, go, 5 sub, 8 api), wire dialects, quota registry + probes, subscription remap, **the vault + Keychain + login flows**, translator | dsh-providers (renamed), dsh-dialects, dsh-subscriptions ✅, dsh-quotas ✅, dsh-credentials, dsh-translator |
+| `dsh-tweaks` | extension layer, share/stats/session-UX, keybinds, slash commands, **actions (.agents/actions + reload actions), custom tools, loops (.agents/loops)** | dsh-actions, dsh-tools, dsh-loops |
+| `dsh-code` (new) | formatters, LSP server table, repo workflows (GitHub/GitLab) | dsh-formatters, dsh-lsp, dsh-repos |
+| `dsh-themes` | ALL appearance: VS Code themes only, default dark+light pair, Open VSX catalogue | (harness ui-theme occupant, replaced) |
+| `dsh-agents` | Agents tab = presets + personas + action presets UI; live personas | — |
+| `dsh-voice` | browser STT + human TTS via vault creds | — |
+| `dsh-desktop` | Tauri shell | — |
+| `dsh-tui` | own TUI, fully dsh-integrated (base: likely opentui, unlocked) | privatecode as TUI base |
+
+### Settings IA end-state
+
+General (no Appearance) → **Providers** (auth + quota + credentials/Keychain
+per provider, subscription/API badges) → **Agents** (presets + personas +
+actions) → **Themes** (sole appearance surface) → Plugins (+ Tools/Loops
+sections owned by tweaks).
+
+### Execution order (gate: Claude settles in providers/credentials/dialects)
+
+1. Verify all providers truly work (probe-live.mjs against the real vault).
+2. Land in-flight P12 subagent work (themes/tools/loops/actions/agents/voice).
+3. P13a rename dsh-providers → dsh-integrations (GitHub, code, profile).
+4. P13b fold credentials → integrations (vault, logins, Keychain UI →
+   Providers tab).
+5. P13c fold dialects + translator → integrations.
+6. P13d fold actions + tools + loops → tweaks.
+7. P13e create dsh-code ← formatters + lsp + repos.
+8. P13f settings IA final (appearance port, Agents tab merge, nav).
+9. P13g archive retired repos, profile cleanup, docs/PRD promotion.
+
