@@ -3309,37 +3309,97 @@ button:hover .dsh-icon-animated,
       var repoName = props.repoName || (repoPath ? repoPath.split("/").pop() : "Repository");
       var onClose = props.onClose;
 
-      var tabState = React.useState("changes");
+      var tabState = React.useState("code"); // "code" | "changes" | "history" | "branches"
       var activeTab = tabState[0], setActiveTab = tabState[1];
+
+      var overviewState = React.useState(null);
+      var overview = overviewState[0], setOverview = overviewState[1];
+
+      var subPathState = React.useState("");
+      var subPath = subPathState[0], setSubPath = subPathState[1];
 
       var statusState = React.useState({ branch: "main", ahead: 0, behind: 0, files: [] });
       var status = statusState[0], setStatus = statusState[1];
+
       var logState = React.useState([]);
       var log = logState[0], setLog = logState[1];
+
       var branchesState = React.useState([]);
       var branches = branchesState[0], setBranches = branchesState[1];
 
+      var diffState = React.useState("");
+      var diffText = diffState[0], setDiffText = diffState[1];
+
+      var selectedDiffFileState = React.useState(null);
+      var selectedDiffFile = selectedDiffFileState[0], setSelectedDiffFile = selectedDiffFileState[1];
+
       var loadingState = React.useState(false);
       var loading = loadingState[0], setLoading = loadingState[1];
+
       var commitMsgState = React.useState("");
       var commitMsg = commitMsgState[0], setCommitMsg = commitMsgState[1];
+
       var actionStatusState = React.useState("");
       var actionStatus = actionStatusState[0], setActionStatus = actionStatusState[1];
 
-      var fetchRepoData = function () {
+      var cloneOpenState = React.useState(false);
+      var isCloneOpen = cloneOpenState[0], setCloneOpen = cloneOpenState[1];
+
+      var branchPickerOpenState = React.useState(false);
+      var isBranchPickerOpen = branchPickerOpenState[0], setBranchPickerOpen = branchPickerOpenState[1];
+      var branchSearchState = React.useState("");
+      var branchSearch = branchSearchState[0], setBranchSearch = branchSearchState[1];
+
+      var fetchOverview = React.useCallback(function (curSubPath) {
+        var sp = curSubPath !== undefined ? curSubPath : subPath;
+        fetch(QUOTAS_API + "/git/overview?path=" + encodeURIComponent(repoPath) + "&subpath=" + encodeURIComponent(sp || ""))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && !data.error) setOverview(data);
+          })
+          .catch(function () {});
+      }, [repoPath, subPath]);
+
+      var fetchDiff = React.useCallback(function (file) {
+        var url = QUOTAS_API + "/git/diff?path=" + encodeURIComponent(repoPath);
+        if (file) url += "&file=" + encodeURIComponent(file);
+        fetch(url)
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && data.diff !== undefined) setDiffText(data.diff);
+          })
+          .catch(function () {});
+      }, [repoPath]);
+
+      var fetchRepoData = React.useCallback(function () {
         setLoading(true);
         Promise.all([
+          fetch(QUOTAS_API + "/git/overview?path=" + encodeURIComponent(repoPath) + "&subpath=" + encodeURIComponent(subPath || "")).then(function (r) { return r.json(); }),
           fetch(QUOTAS_API + "/git/status?path=" + encodeURIComponent(repoPath)).then(function (r) { return r.json(); }),
           fetch(QUOTAS_API + "/git/log?path=" + encodeURIComponent(repoPath)).then(function (r) { return r.json(); }),
           fetch(QUOTAS_API + "/git/branches?path=" + encodeURIComponent(repoPath)).then(function (r) { return r.json(); })
         ]).then(function (results) {
-          if (results[0] && !results[0].error) setStatus(results[0]);
-          if (results[1] && results[1].commits) setLog(results[1].commits);
-          if (results[2] && results[2].branches) setBranches(results[2].branches);
+          if (results[0] && !results[0].error) setOverview(results[0]);
+          if (results[1] && !results[1].error) setStatus(results[1]);
+          if (results[2] && results[2].commits) setLog(results[2].commits);
+          if (results[3] && results[3].branches) setBranches(results[3].branches);
         }).catch(function () {}).finally(function () { setLoading(false); });
-      };
+      }, [repoPath, subPath]);
 
-      React.useEffect(function () { fetchRepoData(); }, [repoPath]);
+      React.useEffect(function () {
+        fetchRepoData();
+      }, [fetchRepoData]);
+
+      React.useEffect(function () {
+        if (activeTab === "changes") {
+          fetchDiff(selectedDiffFile);
+        }
+      }, [activeTab, selectedDiffFile, fetchDiff]);
+
+      var handleNavigateSubPath = function (newSp) {
+        setSubPath(newSp);
+        fetchOverview(newSp);
+      };
 
       var handleCommitAndPush = function () {
         if (!commitMsg.trim()) return;
@@ -3368,10 +3428,72 @@ button:hover .dsh-icon-animated,
             else setActionStatus("Committed & pushed!");
             setCommitMsg("");
             fetchRepoData();
+            if (activeTab === "changes") fetchDiff(selectedDiffFile);
             setTimeout(function () { setActionStatus(""); }, 3000);
           })
           .catch(function (err) { setActionStatus("Action failed: " + err.message); });
       };
+
+      var handleDiscardChanges = function (file) {
+        if (!confirm(file ? ("Discard all changes in " + file + "?") : "Discard all unstaged changes and untracked files?")) return;
+        setActionStatus("Discarding changes…");
+        fetch(QUOTAS_API + "/git/discard", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: repoPath, file: file }),
+        }).then(function () {
+          fetchRepoData();
+          fetchDiff(null);
+          setSelectedDiffFile(null);
+          setActionStatus("Changes discarded.");
+          setTimeout(function () { setActionStatus(""); }, 2500);
+        });
+      };
+
+      var handleStashChanges = function () {
+        setActionStatus("Stashing changes…");
+        fetch(QUOTAS_API + "/git/stash", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: repoPath }),
+        }).then(function () {
+          fetchRepoData();
+          fetchDiff(null);
+          setActionStatus("Changes stashed.");
+          setTimeout(function () { setActionStatus(""); }, 2500);
+        });
+      };
+
+      var handleSwitchBranch = function (bName, createNew) {
+        setActionStatus("Switching branch to " + bName + "…");
+        fetch(QUOTAS_API + "/git/checkout", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: repoPath, branch: bName, create: Boolean(createNew) }),
+        }).then(function (r) { return r.json(); }).then(function (res) {
+          if (res.error) {
+            alert("Checkout failed: " + res.error);
+          } else {
+            setBranchPickerOpen(false);
+            fetchRepoData();
+            setActionStatus("Switched to " + bName);
+            setTimeout(function () { setActionStatus(""); }, 2500);
+          }
+        });
+      };
+
+      var handleCreateNewBranch = function () {
+        var name = prompt("New branch name:");
+        if (name && name.trim()) {
+          handleSwitchBranch(name.trim(), true);
+        }
+      };
+
+      var curBranch = (overview && overview.branch) || status.branch || "main";
+      var remoteUrl = (overview && overview.remoteUrl) || "";
+      var repoDisplayName = (overview && overview.owner && overview.repoName)
+        ? (overview.owner + " / " + overview.repoName)
+        : repoName;
 
       return h("div", {
         className: "dsh-mainview-repo",
@@ -3385,23 +3507,35 @@ button:hover .dsh-icon-animated,
           zIndex: 50,
           display: "flex",
           flexDirection: "column",
-          fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
+          fontFamily: "var(--ds-font-sans, system-ui, -apple-system, sans-serif)",
+          color: "var(--dsw-alias-label-primary)",
         }
       },
+        // 1. TOP HEADER & GITHUB ACTIONS
         h("div", {
           style: {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "8px 16px",
+            padding: "8px 18px",
             background: "var(--dsw-alias-surface-l1, #181926)",
             borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
             userSelect: "none",
           }
         },
-          h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 } },
             h("span", { style: { color: "var(--dsw-alias-primary, #6366f1)", display: "inline-flex" } }, h(RepoGlyph, { size: 18 })),
-            h("strong", { style: { color: "var(--dsw-alias-label-primary)", fontSize: "14px", fontWeight: 600 } }, repoName),
+            h("strong", { style: { color: "var(--dsw-alias-label-primary)", fontSize: "14px", fontWeight: 600 } }, repoDisplayName),
+            h("span", {
+              style: {
+                fontSize: "11px",
+                padding: "2px 7px",
+                borderRadius: "12px",
+                border: "1px solid var(--dsw-alias-border-l1)",
+                color: "var(--dsw-alias-label-secondary)",
+                fontWeight: 500,
+              }
+            }, "Public"),
             h("span", {
               style: {
                 display: "inline-flex",
@@ -3414,12 +3548,106 @@ button:hover .dsh-icon-animated,
                 fontSize: "12px",
                 fontWeight: 600,
               }
-            }, "⎇ " + (status.branch || "main")),
+            }, "⎇ " + curBranch),
             (status.ahead > 0 || status.behind > 0) ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
               (status.ahead > 0 ? "↑" + status.ahead + " " : "") + (status.behind > 0 ? "↓" + status.behind : "")
             ) : null
           ),
-          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "8px", position: "relative" } },
+            remoteUrl ? h("button", {
+              type: "button",
+              onClick: function () { window.open(remoteUrl.replace(/\.git$/, ""), "_blank"); },
+              title: "Open on GitHub",
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                height: "26px",
+                padding: "0 10px",
+                borderRadius: "6px",
+                border: "1px solid var(--dsw-alias-border-l1)",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: 500,
+              }
+            }, "Open on GitHub ↗") : null,
+            h("div", { style: { position: "relative" } },
+              h("button", {
+                type: "button",
+                onClick: function () { setCloneOpen(!isCloneOpen); },
+                style: {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  height: "26px",
+                  padding: "0 12px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: "var(--dsw-alias-primary, #238636)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                }
+              }, "<> Code ▾"),
+              isCloneOpen ? h("div", {
+                style: {
+                  position: "absolute",
+                  top: "32px",
+                  right: 0,
+                  width: "320px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  background: "var(--dsw-alias-surface-l1, #181926)",
+                  border: "1px solid var(--dsw-alias-border-l1)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                  zIndex: 100,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }
+              },
+                h("span", { style: { fontSize: "12px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Clone repository:"),
+                h("div", { style: { display: "flex", alignItems: "center", gap: "6px" } },
+                  h("input", {
+                    type: "text",
+                    readOnly: true,
+                    value: remoteUrl || ("file://" + repoPath),
+                    style: {
+                      flex: 1,
+                      padding: "5px 8px",
+                      borderRadius: "5px",
+                      border: "1px solid var(--dsw-alias-border-l1)",
+                      background: "var(--dsw-alias-surface-l0)",
+                      color: "var(--dsw-alias-label-primary)",
+                      fontFamily: "var(--ds-font-mono, monospace)",
+                      fontSize: "11px",
+                      outline: "none",
+                    }
+                  }),
+                  h("button", {
+                    type: "button",
+                    onClick: function () {
+                      if (navigator.clipboard) navigator.clipboard.writeText(remoteUrl || repoPath);
+                      alert("Copied clone URL to clipboard!");
+                      setCloneOpen(false);
+                    },
+                    style: {
+                      height: "26px",
+                      padding: "0 8px",
+                      borderRadius: "5px",
+                      border: "1px solid var(--dsw-alias-border-l1)",
+                      background: "var(--dsw-alias-primary, #6366f1)",
+                      color: "#fff",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                    }
+                  }, "Copy")
+                )
+              ) : null
+            ),
             h("button", {
               type: "button",
               onClick: fetchRepoData,
@@ -3464,20 +3692,23 @@ button:hover .dsh-icon-animated,
             }, "✕")
           )
         ),
+
+        // 2. GITHUB TAB NAVIGATION
         h("div", {
           style: {
             display: "flex",
             alignItems: "center",
-            gap: "6px",
-            padding: "8px 16px",
+            gap: "4px",
+            padding: "6px 18px",
             background: "var(--dsw-alias-surface-l0, #13141f)",
             borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
           }
         },
           [
-            { id: "changes", label: "Changes (" + (status.files ? status.files.length : 0) + ")" },
-            { id: "history", label: "Commit History (" + log.length + ")" },
-            { id: "branches", label: "Branches (" + branches.length + ")" },
+            { id: "code", label: "<> Code", count: overview ? overview.totalCommits : null },
+            { id: "changes", label: "+/- Changes", count: status.files ? status.files.length : 0 },
+            { id: "history", label: "◷ Commits", count: log.length },
+            { id: "branches", label: "⎇ Branches", count: branches.length },
           ].map(function (subTab) {
             var isSel = activeTab === subTab.id;
             return h("button", {
@@ -3485,109 +3716,626 @@ button:hover .dsh-icon-animated,
               type: "button",
               onClick: function () { setActiveTab(subTab.id); },
               style: {
-                padding: "4px 12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 14px",
                 borderRadius: "6px",
                 border: "1px solid " + (isSel ? "var(--dsw-alias-primary, #6366f1)" : "transparent"),
                 background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.15))" : "transparent",
                 color: isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-secondary)",
-                fontSize: "12px",
-                fontWeight: isSel ? 600 : 400,
+                fontSize: "12.5px",
+                fontWeight: isSel ? 600 : 500,
                 cursor: "pointer",
                 transition: "all 120ms ease",
               }
-            }, subTab.label);
+            },
+              h("span", null, subTab.label),
+              subTab.count !== null ? h("span", {
+                style: {
+                  padding: "1px 6px",
+                  borderRadius: "10px",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  background: isSel ? "rgba(99, 102, 241, 0.25)" : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.15))",
+                  color: isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-tertiary)",
+                }
+              }, subTab.count) : null
+            );
           })
         ),
+
+        // 3. MAIN TAB BODIES
         h("div", { style: { flex: 1, overflowY: "auto", padding: "16px 20px" } },
-          activeTab === "changes" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "16px", maxWidth: "800px" } },
-            h("div", {
-              style: {
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-                padding: "14px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1, #181926)",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-              }
-            },
-              h("input", {
-                type: "text",
-                placeholder: "Commit message (e.g. fix: update styling)",
-                value: commitMsg,
-                onChange: function (e) { setCommitMsg(e.target.value); },
-                onKeyDown: function (e) { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleCommitAndPush(); },
+
+          // === TAB: CODE (GITHUB OVERVIEW, FILE TREE, README, STATS) ===
+          activeTab === "code" ? h("div", { style: { display: "flex", gap: "24px", width: "100%", maxWidth: "1200px" } },
+            // Left main section (File Tree & README)
+            h("div", { style: { flex: 1, display: "flex", flexDirection: "column", gap: "16px", minWidth: 0 } },
+              // Branch picker & Breadcrumb bar
+              h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" } },
+                h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                  h("div", { style: { position: "relative" } },
+                    h("button", {
+                      type: "button",
+                      onClick: function () { setBranchPickerOpen(!isBranchPickerOpen); },
+                      style: {
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        height: "28px",
+                        padding: "0 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--dsw-alias-border-l1)",
+                        background: "var(--dsw-alias-surface-l1)",
+                        color: "var(--dsw-alias-label-primary)",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }
+                    }, "⎇ " + curBranch + " ▾"),
+                    isBranchPickerOpen ? h("div", {
+                      style: {
+                        position: "absolute",
+                        top: "34px",
+                        left: 0,
+                        width: "240px",
+                        borderRadius: "8px",
+                        background: "var(--dsw-alias-surface-l1, #181926)",
+                        border: "1px solid var(--dsw-alias-border-l1)",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                        zIndex: 100,
+                        padding: "8px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "6px",
+                      }
+                    },
+                      h("input", {
+                        type: "text",
+                        placeholder: "Filter branches…",
+                        value: branchSearch,
+                        onChange: function (e) { setBranchSearch(e.target.value); },
+                        style: {
+                          width: "100%",
+                          boxSizing: "border-box",
+                          padding: "5px 8px",
+                          borderRadius: "5px",
+                          border: "1px solid var(--dsw-alias-border-l1)",
+                          background: "var(--dsw-alias-surface-l0)",
+                          color: "var(--dsw-alias-label-primary)",
+                          fontSize: "12px",
+                          outline: "none",
+                        }
+                      }),
+                      h("div", { style: { maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "2px" } },
+                        branches.filter(function (b) { return !branchSearch || b.name.toLowerCase().indexOf(branchSearch.toLowerCase()) !== -1; }).map(function (b) {
+                          return h("button", {
+                            key: b.name,
+                            type: "button",
+                            onClick: function () { handleSwitchBranch(b.name, false); },
+                            style: {
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "6px 8px",
+                              borderRadius: "4px",
+                              border: "none",
+                              background: b.isCurrent ? "rgba(99, 102, 241, 0.15)" : "transparent",
+                              color: b.isCurrent ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)",
+                              fontSize: "12px",
+                              fontWeight: b.isCurrent ? 600 : 400,
+                              cursor: "pointer",
+                              textAlign: "left",
+                            }
+                          },
+                            h("span", null, b.name),
+                            b.isCurrent ? h("span", { style: { fontSize: "10px" } }, "✓") : null
+                          );
+                        })
+                      ),
+                      h("button", {
+                        type: "button",
+                        onClick: handleCreateNewBranch,
+                        style: {
+                          marginTop: "4px",
+                          padding: "5px 8px",
+                          borderRadius: "5px",
+                          border: "1px dashed var(--dsw-alias-border-l1)",
+                          background: "transparent",
+                          color: "var(--dsw-alias-primary, #6366f1)",
+                          fontSize: "11.5px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }
+                      }, "+ New branch")
+                    ) : null
+                  ),
+                  // Breadcrumb directory navigation
+                  h("div", { style: { display: "flex", alignItems: "center", gap: "4px", fontSize: "13px" } },
+                    h("span", {
+                      style: { color: "var(--dsw-alias-primary, #6366f1)", cursor: "pointer", fontWeight: 600 },
+                      onClick: function () { handleNavigateSubPath(""); }
+                    }, repoName),
+                    subPath ? subPath.split("/").map(function (segment, sIdx, sArr) {
+                      var accPath = sArr.slice(0, sIdx + 1).join("/");
+                      return h(React.Fragment, { key: accPath },
+                        h("span", { style: { color: "var(--dsw-alias-label-tertiary)" } }, "/"),
+                        h("span", {
+                          style: { color: (sIdx === sArr.length - 1) ? "var(--dsw-alias-label-primary)" : "var(--dsw-alias-primary, #6366f1)", cursor: "pointer", fontWeight: (sIdx === sArr.length - 1) ? 600 : 400 },
+                          onClick: function () { handleNavigateSubPath(accPath); }
+                        }, segment)
+                      );
+                    }) : null
+                  )
+                ),
+                h("div", { style: { display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                  overview ? h("span", {
+                    style: { cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" },
+                    onClick: function () { setActiveTab("history"); }
+                  }, h("strong", { style: { color: "var(--dsw-alias-label-primary)" } }, overview.totalCommits), " commits") : null,
+                  overview ? h("span", {
+                    style: { cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" },
+                    onClick: function () { setActiveTab("branches"); }
+                  }, h("strong", { style: { color: "var(--dsw-alias-label-primary)" } }, overview.branchesCount), " branches") : null
+                )
+              ),
+
+              // Latest Commit Banner (GitHub style)
+              (overview && overview.latestCommit && overview.latestCommit.sha) ? h("div", {
                 style: {
-                  width: "100%",
-                  boxSizing: "border-box",
-                  padding: "8px 12px",
-                  borderRadius: "6px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 14px",
+                  borderRadius: "8px 8px 0 0",
+                  background: "var(--dsw-alias-surface-l1, #181926)",
                   border: "1px solid var(--dsw-alias-border-l1)",
-                  background: "var(--dsw-alias-surface-l0, #13141f)",
-                  color: "var(--dsw-alias-label-primary)",
-                  fontSize: "13px",
-                  outline: "none",
+                  borderBottom: "none",
+                  fontSize: "12.5px",
                 }
-              }),
-              h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
-                actionStatus ? h("span", { style: { fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)" } }, actionStatus) : h("span", null),
-                h("button", {
-                  type: "button",
-                  onClick: handleCommitAndPush,
-                  disabled: !commitMsg.trim(),
-                  style: {
-                    height: "28px",
-                    padding: "0 14px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: "var(--dsw-alias-primary, #6366f1)",
-                    color: "#fff",
-                    fontSize: "12.5px",
-                    fontWeight: 600,
-                    cursor: commitMsg.trim() ? "pointer" : "default",
-                    opacity: commitMsg.trim() ? 1 : 0.5,
-                    transition: "opacity 120ms",
-                  }
-                }, "Commit & Push (⌘Enter)")
-              )
-            ),
-            h("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
-              h("span", { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Changed Files:"),
-              (!status.files || status.files.length === 0) ? h("div", { style: { color: "var(--dsw-alias-label-tertiary)", fontSize: "12.5px", padding: "8px 0" } }, "Working directory clean — no unstaged changes.") :
-              status.files.map(function (f) {
-                return h("div", {
-                  key: f.path,
+              },
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px", minWidth: 0 } },
+                  h("div", {
+                    style: {
+                      width: "22px",
+                      height: "22px",
+                      borderRadius: "50%",
+                      background: "var(--dsw-alias-primary, #6366f1)",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }
+                  }, (overview.latestCommit.author ? overview.latestCommit.author[0].toUpperCase() : "G")),
+                  h("strong", { style: { color: "var(--dsw-alias-label-primary)", flexShrink: 0 } }, overview.latestCommit.author),
+                  h("span", { style: { color: "var(--dsw-alias-label-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: overview.latestCommit.message }, overview.latestCommit.message)
+                ),
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 } },
+                  h("span", { style: { color: "var(--dsw-alias-label-tertiary)", fontSize: "11px" } }, overview.latestCommit.date),
+                  h("button", {
+                    type: "button",
+                    onClick: function () {
+                      if (navigator.clipboard) navigator.clipboard.writeText(overview.latestCommit.sha);
+                      alert("Copied commit SHA: " + overview.latestCommit.sha);
+                    },
+                    style: {
+                      padding: "2px 7px",
+                      borderRadius: "5px",
+                      border: "1px solid var(--dsw-alias-border-l1)",
+                      background: "rgba(99, 102, 241, 0.1)",
+                      color: "var(--dsw-alias-primary, #6366f1)",
+                      fontFamily: "var(--ds-font-mono, monospace)",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }
+                  }, overview.latestCommit.shortSha || overview.latestCommit.sha.slice(0, 7))
+                )
+              ) : null,
+
+              // File Tree Table (GitHub style)
+              h("div", {
+                style: {
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: (overview && overview.latestCommit && overview.latestCommit.sha) ? "0 0 8px 8px" : "8px",
+                  border: "1px solid var(--dsw-alias-border-l1)",
+                  overflow: "hidden",
+                  background: "var(--dsw-alias-surface-l0, #13141f)",
+                }
+              },
+                // Go to parent directory if in subpath
+                subPath ? h("div", {
                   style: {
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    borderRadius: "6px",
+                    padding: "8px 14px",
+                    borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
+                    cursor: "pointer",
                     background: "var(--dsw-alias-surface-l1, #181926)",
-                    border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
                     fontSize: "12.5px",
-                    fontFamily: "var(--ds-font-mono, monospace)",
+                    color: "var(--dsw-alias-primary, #6366f1)",
+                    fontWeight: 600,
+                  },
+                  onClick: function () {
+                    var parts = subPath.split("/");
+                    parts.pop();
+                    handleNavigateSubPath(parts.join("/"));
+                  }
+                }, "📁 .. (parent directory)") : null,
+                // Tree rows
+                (overview && overview.tree && overview.tree.length > 0) ? overview.tree.map(function (item) {
+                  var isDir = item.type === "tree";
+                  return h("div", {
+                    key: item.path,
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 14px",
+                      borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.08))",
+                      fontSize: "12.5px",
+                      transition: "background 100ms",
+                    },
+                    onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))"; },
+                    onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
+                  },
+                    // Name & icon
+                    h("div", {
+                      style: { display: "flex", alignItems: "center", gap: "8px", width: "35%", minWidth: 0, cursor: "pointer" },
+                      onClick: function () {
+                        if (isDir) {
+                          handleNavigateSubPath(item.relPath);
+                        } else {
+                          window.dispatchEvent(new CustomEvent("dsh:open-file-tab", {
+                            detail: { id: "file::" + item.path, type: "file", title: item.name, path: item.path }
+                          }));
+                        }
+                      }
+                    },
+                      h("span", { style: { color: isDir ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-tertiary)", display: "inline-flex" } },
+                        isDir ? h(P.IconFolderClose16, { size: 15 }) : h(FileGlyph, { size: 15 })
+                      ),
+                      h("span", {
+                        style: {
+                          color: isDir ? "var(--dsw-alias-label-primary)" : "var(--dsw-alias-label-primary)",
+                          fontWeight: isDir ? 500 : 400,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }
+                      }, item.name)
+                    ),
+                    // Last commit message
+                    h("span", {
+                      style: {
+                        flex: 1,
+                        padding: "0 12px",
+                        color: "var(--dsw-alias-label-tertiary)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        fontSize: "12px",
+                      },
+                      title: item.lastCommitMsg
+                    }, item.lastCommitMsg),
+                    // Last commit time
+                    h("span", {
+                      style: {
+                        width: "90px",
+                        textAlign: "right",
+                        color: "var(--dsw-alias-label-tertiary)",
+                        fontSize: "11px",
+                        flexShrink: 0,
+                      }
+                    }, item.lastCommitDate)
+                  );
+                }) : h("div", { style: { padding: "16px", color: "var(--dsw-alias-label-tertiary)", fontSize: "12px" } }, "Loading file tree…")
+              ),
+
+              // README.md Rendered Markdown Section
+              (overview && overview.readme) ? h("div", {
+                style: {
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: "8px",
+                  border: "1px solid var(--dsw-alias-border-l1)",
+                  overflow: "hidden",
+                  background: "var(--dsw-alias-surface-l0, #13141f)",
+                  marginTop: "8px",
+                }
+              },
+                h("div", {
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 16px",
+                    background: "var(--dsw-alias-surface-l1, #181926)",
+                    borderBottom: "1px solid var(--dsw-alias-border-l1)",
+                    fontSize: "13px",
+                    fontWeight: 600,
                   }
                 },
-                  h("span", { style: { color: "var(--dsw-alias-label-primary)" } }, f.path),
-                  h("span", {
-                    style: {
-                      fontSize: "11px",
-                      padding: "2px 7px",
-                      borderRadius: "4px",
-                      background: f.status === "added" ? "rgba(34, 197, 94, 0.2)" : (f.status === "untracked" ? "rgba(59, 130, 246, 0.2)" : "rgba(234, 179, 8, 0.2)"),
-                      color: f.status === "added" ? "#22c55e" : (f.status === "untracked" ? "#3b82f6" : "#eab308"),
-                      fontWeight: 600,
-                    }
-                  }, f.status)
-                );
-              })
+                  h("span", { style: { color: "var(--dsw-alias-primary, #6366f1)" } }, "📖"),
+                  h("span", null, overview.readme.name)
+                ),
+                h("div", {
+                  style: {
+                    padding: "20px 24px",
+                    fontSize: "13.5px",
+                    lineHeight: "1.7",
+                    color: "var(--dsw-alias-label-primary)",
+                    whiteSpace: "pre-wrap",
+                    fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
+                    maxHeight: "450px",
+                    overflowY: "auto",
+                  }
+                }, overview.readme.content)
+              ) : null
+            ),
+
+            // Right Sidebar (About, Releases, Languages)
+            h("div", { style: { width: "280px", display: "flex", flexDirection: "column", gap: "20px", flexShrink: 0 } },
+              // About Box
+              h("div", { style: { display: "flex", flexDirection: "column", gap: "10px" } },
+                h("h4", { style: { margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "About"),
+                h("p", { style: { margin: 0, fontSize: "12.5px", color: "var(--dsw-alias-label-secondary)", lineHeight: "1.5" } },
+                  repoDisplayName + " — personal agent stack plugin workspace."
+                ),
+                remoteUrl ? h("a", {
+                  href: remoteUrl,
+                  target: "_blank",
+                  rel: "noreferrer",
+                  style: { fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }
+                }, "🔗 " + remoteUrl.replace(/^https?:\/\//, "")) : null
+              ),
+
+              // Releases Box
+              h("div", { style: { display: "flex", flexDirection: "column", gap: "6px", borderTop: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingTop: "14px" } },
+                h("h4", { style: { margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Releases"),
+                h("span", { style: { fontSize: "12px", color: "var(--dsw-alias-label-tertiary)" } }, (overview && overview.tagsCount > 0) ? (overview.tagsCount + " tags published") : "No releases published")
+              ),
+
+              // Languages Box
+              (overview && overview.languages && overview.languages.length > 0) ? h("div", {
+                style: { display: "flex", flexDirection: "column", gap: "10px", borderTop: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingTop: "14px" }
+              },
+                h("h4", { style: { margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Languages"),
+                // Multi-colored progress bar
+                h("div", {
+                  style: {
+                    display: "flex",
+                    height: "8px",
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                    width: "100%",
+                    background: "var(--dsw-alias-surface-l1)",
+                  }
+                },
+                  overview.languages.map(function (lang) {
+                    return h("div", {
+                      key: lang.name,
+                      style: {
+                        width: lang.percent + "%",
+                        background: lang.color,
+                        height: "100%",
+                      },
+                      title: lang.name + " " + lang.percent + "%"
+                    });
+                  })
+                ),
+                // Language badges list
+                h("div", { style: { display: "flex", flexWrap: "wrap", gap: "10px" } },
+                  overview.languages.map(function (lang) {
+                    return h("div", { key: lang.name, style: { display: "flex", alignItems: "center", gap: "5px", fontSize: "12px" } },
+                      h("span", { style: { width: "8px", height: "8px", borderRadius: "50%", background: lang.color } }),
+                      h("strong", { style: { color: "var(--dsw-alias-label-primary)" } }, lang.name),
+                      h("span", { style: { color: "var(--dsw-alias-label-tertiary)" } }, lang.percent + "%")
+                    );
+                  })
+                )
+              ) : null
             )
           ) : null,
-          activeTab === "history" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "8px", maxWidth: "800px" } },
+
+          // === TAB: CHANGES / PULL REQUESTS & UNIFIED DIFF VIEWER ===
+          activeTab === "changes" ? h("div", { style: { display: "flex", gap: "20px", width: "100%", maxWidth: "1200px" } },
+            // Left column: commit form & changed files list
+            h("div", { style: { width: "340px", display: "flex", flexDirection: "column", gap: "14px", flexShrink: 0 } },
+              // Commit box
+              h("div", {
+                style: {
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  padding: "14px",
+                  borderRadius: "8px",
+                  background: "var(--dsw-alias-surface-l1, #181926)",
+                  border: "1px solid var(--dsw-alias-border-l1)",
+                }
+              },
+                h("strong", { style: { fontSize: "13px", color: "var(--dsw-alias-label-primary)" } }, "Commit changes"),
+                h("textarea", {
+                  placeholder: "Commit message (e.g. feat: implement repository overview)",
+                  value: commitMsg,
+                  rows: 3,
+                  onChange: function (e) { setCommitMsg(e.target.value); },
+                  onKeyDown: function (e) { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleCommitAndPush(); },
+                  style: {
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "8px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "var(--dsw-alias-surface-l0, #13141f)",
+                    color: "var(--dsw-alias-label-primary)",
+                    fontSize: "12.5px",
+                    outline: "none",
+                    resize: "none",
+                  }
+                }),
+                h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                  actionStatus ? h("span", { style: { fontSize: "11.5px", color: "var(--dsw-alias-primary, #6366f1)" } }, actionStatus) : h("span", null),
+                  h("button", {
+                    type: "button",
+                    onClick: handleCommitAndPush,
+                    disabled: !commitMsg.trim(),
+                    style: {
+                      height: "28px",
+                      padding: "0 14px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: "var(--dsw-alias-primary, #6366f1)",
+                      color: "#fff",
+                      fontSize: "12.5px",
+                      fontWeight: 600,
+                      cursor: commitMsg.trim() ? "pointer" : "default",
+                      opacity: commitMsg.trim() ? 1 : 0.5,
+                    }
+                  }, "Commit & Push (⌘Enter)")
+                )
+              ),
+
+              // Actions: Stash & Discard
+              h("div", { style: { display: "flex", gap: "8px" } },
+                h("button", {
+                  type: "button",
+                  onClick: handleStashChanges,
+                  style: {
+                    flex: 1,
+                    height: "26px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "transparent",
+                    color: "var(--dsw-alias-label-secondary)",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                  }
+                }, "Stash All"),
+                h("button", {
+                  type: "button",
+                  onClick: function () { handleDiscardChanges(); },
+                  style: {
+                    flex: 1,
+                    height: "26px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "transparent",
+                    color: "var(--dsw-alias-state-error-primary, #f85149)",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                  }
+                }, "Discard All")
+              ),
+
+              // Changed files list
+              h("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
+                h("span", { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } },
+                  "Changed Files (" + (status.files ? status.files.length : 0) + "):"
+                ),
+                (!status.files || status.files.length === 0) ? h("div", { style: { color: "var(--dsw-alias-label-tertiary)", fontSize: "12px", padding: "8px 0" } }, "Working tree clean — no unstaged changes.") :
+                status.files.map(function (f) {
+                  var isSel = selectedDiffFile === f.path;
+                  return h("div", {
+                    key: f.path,
+                    onClick: function () {
+                      setSelectedDiffFile(isSel ? null : f.path);
+                    },
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 10px",
+                      borderRadius: "6px",
+                      background: isSel ? "rgba(99, 102, 241, 0.15)" : "var(--dsw-alias-surface-l1, #181926)",
+                      border: "1px solid " + (isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-border-l1, rgba(128,128,128,0.1))"),
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }
+                  },
+                    h("span", { style: { color: isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "var(--ds-font-mono, monospace)" } }, f.path),
+                    h("span", {
+                      style: {
+                        fontSize: "10.5px",
+                        padding: "1px 6px",
+                        borderRadius: "4px",
+                        background: f.status === "added" ? "rgba(34, 197, 94, 0.2)" : (f.status === "untracked" ? "rgba(59, 130, 246, 0.2)" : "rgba(234, 179, 8, 0.2)"),
+                        color: f.status === "added" ? "#22c55e" : (f.status === "untracked" ? "#3b82f6" : "#eab308"),
+                        fontWeight: 600,
+                        marginLeft: "6px",
+                        flexShrink: 0,
+                      }
+                    }, f.status)
+                  );
+                })
+              )
+            ),
+
+            // Right column: Full Unified Diff Viewer
+            h("div", { style: { flex: 1, display: "flex", flexDirection: "column", minWidth: 0, border: "1px solid var(--dsw-alias-border-l1)", borderRadius: "8px", overflow: "hidden", background: "var(--dsw-alias-surface-l0)" } },
+              h("div", {
+                style: {
+                  padding: "8px 14px",
+                  background: "var(--dsw-alias-surface-l1, #181926)",
+                  borderBottom: "1px solid var(--dsw-alias-border-l1)",
+                  fontSize: "12.5px",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }
+              },
+                h("span", null, selectedDiffFile ? ("Diff: " + selectedDiffFile) : "Working Tree Diff"),
+                selectedDiffFile ? h("button", {
+                  type: "button",
+                  onClick: function () { setSelectedDiffFile(null); },
+                  style: { background: "transparent", border: "none", color: "var(--dsw-alias-primary, #6366f1)", fontSize: "11.5px", cursor: "pointer" }
+                }, "Show all diffs") : null
+              ),
+              h("div", {
+                style: {
+                  flex: 1,
+                  padding: "12px",
+                  fontFamily: "var(--ds-font-mono, monospace)",
+                  fontSize: "12px",
+                  lineHeight: "1.6",
+                  overflowY: "auto",
+                  maxHeight: "650px",
+                }
+              },
+                !diffText ? h("div", { style: { color: "var(--dsw-alias-label-tertiary)", padding: "16px" } }, "No diffs to display.") :
+                diffText.split("\n").map(function (line, lIdx) {
+                  var isAdd = line.startsWith("+") && !line.startsWith("+++");
+                  var isDel = line.startsWith("-") && !line.startsWith("---");
+                  var isHunk = line.startsWith("@@");
+                  return h("div", {
+                    key: lIdx,
+                    style: {
+                      padding: "1px 6px",
+                      background: isAdd ? "rgba(34, 197, 94, 0.15)" : (isDel ? "rgba(239, 68, 68, 0.15)" : (isHunk ? "rgba(99, 102, 241, 0.12)" : "transparent")),
+                      color: isAdd ? "#4ade80" : (isDel ? "#f87171" : (isHunk ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)")),
+                      whiteSpace: "pre",
+                    }
+                  }, line);
+                })
+              )
+            )
+          ) : null,
+
+          // === TAB: COMMITS (DATE-GROUPED COMMIT HISTORY) ===
+          activeTab === "history" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "10px", maxWidth: "900px" } },
+            h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" } },
+              h("strong", { style: { fontSize: "14px", color: "var(--dsw-alias-label-primary)" } }, "Commit History (" + log.length + ")"),
+              h("span", { style: { fontSize: "12px", color: "var(--dsw-alias-label-tertiary)" } }, "branch: " + curBranch)
+            ),
             log.map(function (c) {
               return h("div", {
-                key: c.sha,
+                key: c.fullSha || c.sha,
                 style: {
                   display: "flex",
                   alignItems: "center",
@@ -3598,15 +4346,71 @@ button:hover .dsh-icon-animated,
                   border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12))",
                 }
               },
-                h("div", { style: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 } },
-                  h("span", { style: { fontSize: "13px", fontWeight: 500, color: "var(--dsw-alias-label-primary)" } }, c.message),
-                  h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, c.author + " • " + c.date)
+                h("div", { style: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 } },
+                  h("div", {
+                    style: {
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      background: "rgba(99, 102, 241, 0.2)",
+                      color: "var(--dsw-alias-primary, #6366f1)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }
+                  }, (c.author ? c.author[0].toUpperCase() : "C")),
+                  h("div", { style: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 } },
+                    h("span", { style: { fontSize: "13px", fontWeight: 500, color: "var(--dsw-alias-label-primary)" } }, c.message),
+                    h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, c.author + " committed " + c.date)
+                  )
                 ),
-                h("span", { style: { fontFamily: "var(--ds-font-mono, monospace)", fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600, background: "rgba(99, 102, 241, 0.1)", padding: "2px 6px", borderRadius: "4px" } }, c.sha)
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 } },
+                  h("button", {
+                    type: "button",
+                    onClick: function () {
+                      if (navigator.clipboard) navigator.clipboard.writeText(c.fullSha || c.sha);
+                      alert("Copied SHA: " + (c.fullSha || c.sha));
+                    },
+                    style: {
+                      fontFamily: "var(--ds-font-mono, monospace)",
+                      fontSize: "11.5px",
+                      color: "var(--dsw-alias-primary, #6366f1)",
+                      fontWeight: 600,
+                      background: "rgba(99, 102, 241, 0.1)",
+                      border: "1px solid var(--dsw-alias-border-l1)",
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }
+                  }, c.sha)
+                )
               );
             })
           ) : null,
-          activeTab === "branches" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "6px", maxWidth: "600px" } },
+
+          // === TAB: BRANCHES ===
+          activeTab === "branches" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "12px", maxWidth: "700px" } },
+            h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+              h("strong", { style: { fontSize: "14px", color: "var(--dsw-alias-label-primary)" } }, "Branches (" + branches.length + ")"),
+              h("button", {
+                type: "button",
+                onClick: handleCreateNewBranch,
+                style: {
+                  height: "26px",
+                  padding: "0 12px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: "var(--dsw-alias-primary, #6366f1)",
+                  color: "#fff",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }
+              }, "+ New Branch")
+            ),
             branches.map(function (b) {
               return h("div", {
                 key: b.name,
@@ -3620,8 +4424,26 @@ button:hover .dsh-icon-animated,
                   border: b.isCurrent ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
                 }
               },
-                h("span", { style: { fontSize: "13px", fontWeight: b.isCurrent ? 600 : 400, color: b.isCurrent ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)" } }, (b.isCurrent ? "● " : "  ") + b.name),
-                b.isCurrent ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600, background: "rgba(99, 102, 241, 0.2)", padding: "2px 6px", borderRadius: "4px" } }, "Current") : null
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                  h("span", { style: { fontSize: "13px", fontWeight: b.isCurrent ? 600 : 400, color: b.isCurrent ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)" } },
+                    (b.isCurrent ? "● " : "  ") + b.name
+                  ),
+                  b.isCurrent ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600, background: "rgba(99, 102, 241, 0.2)", padding: "2px 6px", borderRadius: "4px" } }, "Default / Active") : null
+                ),
+                !b.isCurrent ? h("button", {
+                  type: "button",
+                  onClick: function () { handleSwitchBranch(b.name, false); },
+                  style: {
+                    height: "24px",
+                    padding: "0 10px",
+                    borderRadius: "4px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "transparent",
+                    color: "var(--dsw-alias-label-secondary)",
+                    fontSize: "11.5px",
+                    cursor: "pointer",
+                  }
+                }, "Checkout") : null
               );
             })
           ) : null
@@ -4739,8 +5561,6 @@ button:hover .dsh-icon-animated,
         var id = sId || (s && s.id);
         if (id && archivedSet.has(id)) return true;
         if (s && (s.isArchived || s.archived || s.status === 'archived')) return true;
-        var title = (s && (s.displayTitle || s.title || s.name || '')) || '';
-        if (title.trim().toLowerCase() === 'pong' || title.trim().toLowerCase() === 'ping') return true;
         return false;
       };
 

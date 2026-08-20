@@ -2109,15 +2109,53 @@ Close`
    - File Editor now features code line numbers gutter, syntax monospace formatting, clean header with breadcrumbs and unsaved changes indicator (`●`), Save (`⌘S`), and hover-responsive close button.
    - Repository Workbench now features segmented control tab pills (`Changes`, `Commit History`, `Branches`), commit message bar with `⌘Enter` shortcut, clean git status badges, author avatars/initials, and copyable SHA badges.
 
+## Session 36 — August 20, 2026 (Removed Auto-Pong Archiving & Full GitHub Parity Repository Workbench)
+
+**Context & User Directives:**
+User prompt: `dont autodetect pong sessions to archive that was supposed to be one time thing
+the repo tab should show all data this isnt enough full parity with github website`
+
+**Implementation & Fixes:**
+1. **Removed Automatic Pong Title Archiving**:
+   - Removed `title === 'pong' || title === 'ping'` runtime filtering from `isArchivedSession` in `UnifiedWorkspacesBrowser`. Sessions are now only archived if explicitly present in `archivedSet` or marked with `isArchived: true`.
+   - Preserved manual "Archive All Pong Sessions" button for on-demand batch archiving.
+
+2. **Backend GitHub-Parity Git Endpoints (`dsh-providers`)**:
+   - Implemented `GET /quotas/api/git/overview`: returns `remoteUrl`, `owner`, `repoName`, `branch`, `totalCommits`, `branchesCount`, `tagsCount`, `latestCommit`, `tree` (folders/files with last commit message and relative time), `readme` (name and content), and `languages` (calculated extension distribution with colors and percentages).
+   - Implemented `GET /quotas/api/git/diff`: returns full or file-specific unified diff.
+   - Implemented `POST /quotas/api/git/checkout`: switches branch or creates new branch (`git checkout [-b] <branch>`).
+   - Implemented `POST /quotas/api/git/discard`: discards changes for a file or entire working directory.
+   - Implemented `POST /quotas/api/git/stash`: stashes working directory changes.
+
+3. **Frontend Full GitHub Repository Parity (`MainViewRepoOccupant`)**:
+   - **Top Bar**: Owner / Repo name (`marius-patrik / dsh-stack`), `Public` badge, `⎇ branch` badge with ahead/behind metrics, `Open on GitHub ↗` link, and `<> Code ▾` clone dropdown (HTTPS, SSH, 1-click Copy).
+   - **`<> Code` (Overview) Tab**:
+     - Branch picker dropdown with search filter and "+ New branch" action.
+     - Interactive breadcrumbs for directory navigation (`dsh-stack / plugins / dsh-providers`).
+     - Quick metrics badges: Commits count, Branches count.
+     - Latest Commit Banner: Author avatar initials, author name, commit message, timestamp, and short SHA badge with 1-click copy.
+     - File Tree Table: Folders and files with icons, drill-down directory navigation (with `..` parent folder), last commit message per item, and time ago. Clicking files opens them directly in the Monaco file editor tab.
+     - `README.md` Preview: Formatted markdown preview below the file tree.
+     - About & Languages Sidebar: Repo description, public status, Releases section, and multi-colored Languages progress bar with percentage legend pills (`TypeScript 43%`, `Markdown 23%`, `JavaScript 16%`, `JSON 13%`, `YAML 4%`).
+   - **`+/- Changes` (Pull Requests & Diffs) Tab**:
+     - Changed files list (`Added`, `Modified`, `Deleted`, `Untracked`), Stash & Discard actions, Commit & Push form with `⌘Enter`.
+     - Full unified diff viewer with syntax highlighted green additions (`+`) and red deletions (`-`).
+   - **`◷ Commits` (History) Tab**:
+     - Full 50-commit history with author avatars, commit titles, dates, full SHA, and 1-click copy buttons.
+   - **`⎇ Branches` Tab**:
+     - Default branch badge, ahead/behind status, "+ New Branch" creation, and 1-click Checkout.
+
 **Verification**:
-- Headless Chrome CDP automation test suites verified:
-  - Settings modal: `modalOpen: true`, `isRecovered: false`, zero React errors.
-  - Archived section: `archivedSectionFound: true`, `archivedCount: 34`.
-  - File editor: `editorMounted: true`, `headerText: 'package.json'`, line numbers gutter and syntax fonts matching theme.
-  - Repo workbench: `mounted: true`, `header: 'dsh-stack'`, tabs `['Changes (2)', 'Commit History (25)', 'Branches (3)']`.
+- Headless Chrome CDP browser automation test (`scripts/test-repo-github.mjs`) verified:
+  - Header: `"marius-patrik / dsh-stack"`.
+  - Tabs: `["<> Code 122", "+/- Changes 3", "◷ Commits 50", "⎇ Branches 3"]`.
+  - README rendered preview: loaded and displayed.
+  - Languages breakdown: `["TypeScript", "Markdown", "JavaScript", "JSON"]`.
+  - File tree items: 21 items populated with live commit messages and relative dates.
 - All 16 plugins passed `check-plugin.mjs`.
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+
 
 
 

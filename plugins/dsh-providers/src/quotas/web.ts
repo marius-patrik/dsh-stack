@@ -531,6 +531,216 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
         return
       }
 
+      // GET /quotas/api/git/overview — Complete GitHub-parity repository overview
+      if (pathname === `${QUOTAS_PREFIX}/api/git/overview` && req.method === 'GET') {
+        const repoPath = url.searchParams.get('path') || ''
+        const subPath = url.searchParams.get('subpath') || ''
+        if (!repoPath) {
+          sendJson(res, 400, { error: 'path parameter required' })
+          return
+        }
+        try {
+          // 1. Remote URL & Owner / Repo name
+          let remoteUrl = ''
+          try {
+            remoteUrl = execSync('git remote get-url origin', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim()
+          } catch {}
+          let repoName = path.basename(repoPath)
+          let owner = 'workspace'
+          if (remoteUrl) {
+            const match = remoteUrl.match(/[:/]([^/]+)\/([^/]+?)(?:\.git)?$/)
+            if (match && match[1] && match[2]) {
+              owner = match[1]
+              repoName = match[2]
+            }
+          }
+
+          // 2. Current branch & default branch
+          let branch = 'main'
+          try {
+            branch = execSync('git branch --show-current', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim() || 'main'
+          } catch {}
+
+          // 3. Stats: Commits count, tags count, branches count
+          let totalCommits = 0
+          try {
+            const cStr = execSync('git rev-list --count HEAD', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim()
+            totalCommits = parseInt(cStr, 10) || 0
+          } catch {}
+
+          let tagsCount = 0
+          try {
+            const tStr = execSync('git tag', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim()
+            tagsCount = tStr ? tStr.split('\n').length : 0
+          } catch {}
+
+          let branchesCount = 1
+          try {
+            const bStr = execSync('git branch -a', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim()
+            branchesCount = bStr ? bStr.split('\n').length : 1
+          } catch {}
+
+          // 4. Latest commit
+          let latestCommit = { sha: '', shortSha: '', author: '', date: '', message: '', fullMessage: '' }
+          try {
+            const lRaw = execSync('git log -1 --pretty=format:"%H%x09%h%x09%an%x09%ar%x09%s%x09%B"', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim()
+            const parts = lRaw.split('\t')
+            latestCommit = {
+              sha: parts[0] || '',
+              shortSha: parts[1] || '',
+              author: parts[2] || '',
+              date: parts[3] || '',
+              message: parts[4] || '',
+              fullMessage: parts[5] || parts[4] || ''
+            }
+          } catch {}
+
+          // 5. File tree at current (sub)path with last commit for each item
+          const targetDir = subPath ? path.join(repoPath, subPath) : repoPath
+          const tree: Array<{ name: string; type: 'blob' | 'tree'; path: string; relPath: string; lastCommitMsg: string; lastCommitDate: string; size?: number }> = []
+          try {
+            const refPath = subPath ? `HEAD:${subPath}` : 'HEAD'
+            const treeRaw = execSync(`git ls-tree ${refPath}`, { cwd: repoPath, encoding: 'utf-8', timeout: 4000 }).trim()
+            if (treeRaw) {
+              const lines = treeRaw.split('\n')
+              for (const line of lines) {
+                const parts = line.split(/\s+/)
+                if (parts.length >= 4) {
+                  const type = parts[1] === 'tree' ? 'tree' : 'blob'
+                  const name = line.substring(line.indexOf('\t') + 1).trim()
+                  const itemRelPath = subPath ? `${subPath}/${name}` : name
+                  const itemFullPath = path.join(repoPath, itemRelPath)
+                  let lastCommitMsg = ''
+                  let lastCommitDate = ''
+                  try {
+                    const cLog = execSync(`git log -1 --pretty=format:"%s%x09%ar" -- "${itemRelPath}"`, { cwd: repoPath, encoding: 'utf-8', timeout: 2000 }).trim()
+                    const cParts = cLog.split('\t')
+                    lastCommitMsg = cParts[0] || ''
+                    lastCommitDate = cParts[1] || ''
+                  } catch {}
+                  tree.push({
+                    name,
+                    type,
+                    path: itemFullPath,
+                    relPath: itemRelPath,
+                    lastCommitMsg,
+                    lastCommitDate
+                  })
+                }
+              }
+            }
+          } catch {}
+
+          // Sort tree: folders first, then files alphabetically
+          tree.sort((a, b) => {
+            if (a.type !== b.type) return a.type === 'tree' ? -1 : 1
+            return a.name.localeCompare(b.name)
+          })
+
+          // 6. README.md content if available
+          let readme: { name: string; content: string } | null = null
+          const readmeCandidates = ['README.md', 'readme.md', 'README.txt', 'README']
+          for (const cand of readmeCandidates) {
+            const candPath = path.join(repoPath, cand)
+            if (fs.existsSync(candPath)) {
+              try {
+                readme = {
+                  name: cand,
+                  content: fs.readFileSync(candPath, 'utf-8')
+                }
+                break
+              } catch {}
+            }
+          }
+
+          // 7. Languages breakdown from git ls-files
+          const languages: Array<{ name: string; percent: number; color: string }> = []
+          try {
+            const filesRaw = execSync('git ls-files', { cwd: repoPath, encoding: 'utf-8', timeout: 3000 }).trim()
+            const extCounts: Record<string, number> = {}
+            let totalExt = 0
+            if (filesRaw) {
+              for (const f of filesRaw.split('\n')) {
+                const ext = path.extname(f).toLowerCase()
+                if (ext && !f.includes('node_modules') && !f.includes('dist') && !f.includes('lib/')) {
+                  extCounts[ext] = (extCounts[ext] || 0) + 1
+                  totalExt++
+                }
+              }
+            }
+            const extMap: Record<string, { name: string; color: string }> = {
+              '.ts': { name: 'TypeScript', color: '#3178c6' },
+              '.tsx': { name: 'TypeScript', color: '#3178c6' },
+              '.js': { name: 'JavaScript', color: '#f7df1e' },
+              '.jsx': { name: 'JavaScript', color: '#f7df1e' },
+              '.mjs': { name: 'JavaScript', color: '#f7df1e' },
+              '.json': { name: 'JSON', color: '#292929' },
+              '.md': { name: 'Markdown', color: '#083fa1' },
+              '.sh': { name: 'Shell', color: '#89e051' },
+              '.bash': { name: 'Shell', color: '#89e051' },
+              '.py': { name: 'Python', color: '#3572A5' },
+              '.go': { name: 'Go', color: '#00ADD8' },
+              '.rs': { name: 'Rust', color: '#dea584' },
+              '.css': { name: 'CSS', color: '#563d7c' },
+              '.html': { name: 'HTML', color: '#e34c26' },
+              '.yaml': { name: 'YAML', color: '#cb171e' },
+              '.yml': { name: 'YAML', color: '#cb171e' }
+            }
+            const langCounts: Record<string, { count: number; color: string }> = {}
+            for (const [ext, count] of Object.entries(extCounts)) {
+              const info = extMap[ext] || { name: 'Other', color: '#8b949e' }
+              if (!langCounts[info.name]) langCounts[info.name] = { count: 0, color: info.color }
+              const entry = langCounts[info.name]
+              if (entry) entry.count += count
+            }
+            for (const [name, data] of Object.entries(langCounts)) {
+              const pct = totalExt > 0 ? Math.round((data.count / totalExt) * 100) : 0
+              if (pct > 0) {
+                languages.push({ name, percent: pct, color: data.color })
+              }
+            }
+            languages.sort((a, b) => b.percent - a.percent)
+          } catch {}
+
+          sendJson(res, 200, {
+            repoPath,
+            repoName,
+            owner,
+            remoteUrl,
+            branch,
+            totalCommits,
+            branchesCount,
+            tagsCount,
+            latestCommit,
+            tree,
+            subPath,
+            readme,
+            languages
+          })
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message })
+        }
+        return
+      }
+
+      // GET /quotas/api/git/diff — Full unified diff or file-specific diff
+      if (pathname === `${QUOTAS_PREFIX}/api/git/diff` && req.method === 'GET') {
+        const repoPath = url.searchParams.get('path') || ''
+        const file = url.searchParams.get('file') || ''
+        if (!repoPath) {
+          sendJson(res, 400, { error: 'path parameter required' })
+          return
+        }
+        try {
+          const cmd = file ? `git diff HEAD -- "${file}"` : 'git diff HEAD'
+          const diff = execSync(cmd, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+          sendJson(res, 200, { repoPath, file, diff })
+        } catch (err) {
+          sendJson(res, 200, { repoPath, file, diff: '', error: (err as Error).message })
+        }
+        return
+      }
+
       // GET /quotas/api/git/status — Git status for repository workbench tab
       if (pathname === `${QUOTAS_PREFIX}/api/git/status` && req.method === 'GET') {
         const repoPath = url.searchParams.get('path') || ''
@@ -577,10 +787,17 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
       if (pathname === `${QUOTAS_PREFIX}/api/git/log` && req.method === 'GET') {
         const repoPath = url.searchParams.get('path') || ''
         try {
-          const raw = execSync('git log -n 25 --pretty=format:"%h%x09%an%x09%ar%x09%s"', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+          const raw = execSync('git log -n 50 --pretty=format:"%H%x09%h%x09%an%x09%ar%x09%s%x09%ad" --date=short', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
           const commits = raw ? raw.split('\n').map((l) => {
             const parts = l.split('\t')
-            return { sha: parts[0] || '', author: parts[1] || '', date: parts[2] || '', message: parts[3] || '' }
+            return {
+              fullSha: parts[0] || '',
+              sha: parts[1] || parts[0]?.slice(0, 7) || '',
+              author: parts[2] || '',
+              date: parts[3] || '',
+              message: parts[4] || '',
+              dateFormatted: parts[5] || ''
+            }
           }) : []
           sendJson(res, 200, { repoPath, commits })
         } catch (err) {
@@ -605,6 +822,66 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
         } catch (err) {
           sendJson(res, 200, { repoPath, current: 'main', branches: [], error: (err as Error).message })
         }
+        return
+      }
+
+      // POST /quotas/api/git/checkout — Switch branch or create new branch
+      if (pathname === `${QUOTAS_PREFIX}/api/git/checkout` && req.method === 'POST') {
+        let bodyStr = ''
+        req.on('data', (c) => { bodyStr += c })
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(bodyStr || '{}')
+            const repoPath = data.path
+            const branch = data.branch
+            const isNew = Boolean(data.create)
+            const cmd = isNew ? `git checkout -b "${branch}"` : `git checkout "${branch}"`
+            const out = execSync(cmd, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+            sendJson(res, 200, { success: true, output: out })
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message })
+          }
+        })
+        return
+      }
+
+      // POST /quotas/api/git/discard — Discard changes
+      if (pathname === `${QUOTAS_PREFIX}/api/git/discard` && req.method === 'POST') {
+        let bodyStr = ''
+        req.on('data', (c) => { bodyStr += c })
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(bodyStr || '{}')
+            const repoPath = data.path
+            const file = data.file
+            if (file) {
+              execSync(`git checkout -- "${file}"`, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+            } else {
+              execSync('git checkout -- .', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+              execSync('git clean -fd', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+            }
+            sendJson(res, 200, { success: true })
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message })
+          }
+        })
+        return
+      }
+
+      // POST /quotas/api/git/stash — Stash changes
+      if (pathname === `${QUOTAS_PREFIX}/api/git/stash` && req.method === 'POST') {
+        let bodyStr = ''
+        req.on('data', (c) => { bodyStr += c })
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(bodyStr || '{}')
+            const repoPath = data.path
+            const out = execSync('git stash', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+            sendJson(res, 200, { success: true, output: out })
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message })
+          }
+        })
         return
       }
 
