@@ -1904,4 +1904,15 @@ Diagnosed and resolved settings button activation issues:
 3. **Capture-phase document click listener**: Added capture-phase global listener in `TweaksSettingsRoot` intercepting any clicks on `[data-action="open-settings"]`, `.dsh-tw-settingsArea button`, `button.dsh-tw-trigger`, or harness trigger buttons, guaranteeing settings open regardless of DOM hierarchy.
 4. **List slot priority shadowing in dsh-providers**: In Cordis list slots (`settings.section` and `settings.section.icon`), registering an entry with an existing ID (`models`) at the default priority `0` throws a collision error with harness defaults. Added `priority: -10` to all custom section and icon registrations in `dsh-providers` (`accounts`, `models`, `apps`, `terminals`, `containers`, `tools`, `loops`) and `dsh-tweaks` (`keybinds`, `harnessGlyph`).
 
+### Session 29d — August 20, 2026 (Harmonize Chat Subagent Collapse Visuals with Folder Hover Swap)
+
+1. **Folder-parity hover chevron swap for chat rows**: Replaced static chevron spacing with in-place hover replacement.
+   - Rest state: Chat icon is visible, chevron takes zero space (`display: none`).
+   - Hover state on sessions with subagents (`.dsh-has-children`): The chat icon hides and the interactive chevron arrow appears in the exact same 16px slot.
+   - Sessions without subagents: Never render a chevron slot or empty gap, keeping icons consistently aligned.
+2. **Subagent uncollapse fix**:
+   - Added robust `getParentId()` helper supporting `parentId`, `parentSessionId`, `parentSession`, and `parent` fields.
+   - Chevron slot and subagent count pill both handle click events with `e.stopPropagation()` and trigger `toggleSubagentExpand(chat.id)`.
+   - Subagent rows use leaf rendering without empty chevron slots.
+
 **Status:** completed, all 16 plugin test suites passed.
