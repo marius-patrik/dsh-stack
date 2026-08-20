@@ -1915,4 +1915,9 @@ Diagnosed and resolved settings button activation issues:
    - Chevron slot and subagent count pill both handle click events with `e.stopPropagation()` and trigger `toggleSubagentExpand(chat.id)`.
    - Subagent rows use leaf rendering without empty chevron slots.
 
+3. **Settings button trigger hardening**:
+   - Updated `.dsh-tw-trigger` CSS to full-width comfortable button with gear icon and label in wide mode, and centered 36x36 in rail mode.
+   - Wrapped `resolveSlotLabel` in try-catch in `makeShellInjected` to prevent potential render crashes from dynamic slot label functions.
+   - Hardened `TweaksSettingsRoot` and `SettingsPanel` with fallback renderers and guards for undefined hooks.
+
 **Status:** completed, all 16 plugin test suites passed.
