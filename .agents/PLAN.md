@@ -613,4 +613,13 @@ sections owned by tweaks).
 4. **Replace maximize with collapse toggle & remove close button**: Bottom panel header replaces maximize with a collapse/expand toggle and completely removes the close button.
 5. **Terminal specialized actions menu & right-click**: Provide Refresh Buffer, Clear Buffer, Rename, Kill, and New Window under tab right-click and trailing 3-dots tab bar menu.
 
+## P18 — Sidebar Search, Input Text Centering, Delete Skills, Settings Fix & Panel Alignment (Session 25) [complete]
+
+1. **Sidebar search input & visibility setting**: Search filter box at top of sidebar with a toggle setting in General settings.
+2. **Input bar preview text true vertical centering**: Center text glyphs vertically (fix bottom on centerline).
+3. **Delete all Cursor imported skills**: Remove all cursor imported skills from the repository.
+4. **Settings button click fix**: Reliable open/trigger of settings dialog from sidebar and all buttons.
+5. **Remove duplicate conversation tab from panel**: Only show terminal/containers in panel when chat is in main.
+6. **Panel background & edge alignment**: Fix gap behind panel and align edges with sidebar and centerCol.
+
 

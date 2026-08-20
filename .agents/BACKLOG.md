@@ -272,3 +272,14 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 83 | **Unify panel tabs with top styling**: Align bottom panel tab strip with top capsule/pill tabs | DONE ✅ | `dsh-providers` | Shared visual design for all tabs |
 | 84 | **Panel collapse toggle & remove close button**: Replace maximize with collapse button, remove close | DONE ✅ | `dsh-providers` | Clean panel minimize/expand toggle |
 | 85 | **Terminal specialized actions in 3-dots & right-click**: Refresh buffer & session ops in context/3-dots menus | DONE ✅ | `dsh-providers` | Right-click tab context menu and tab bar trailing three-dots menu |
+
+## 14. Session 25 Sidebar Search, Input Text Centering, Delete Skills, Settings Fix & Panel Alignment (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 86 | **Sidebar search input & visibility setting**: Search box at top of sidebar with toggle in Settings | DONE ✅ | `dsh-providers` + `dsh-tweaks` | Quick filter of files and chats, with hide/show setting |
+| 87 | **Input bar preview text true vertical centering**: Center text glyphs vertically (fix bottom on centerline) | DONE ✅ | `dsh-tweaks` | Exact line-height and padding flex centering |
+| 88 | **Delete all Cursor imported skills**: Remove cursor imported skills | DONE ✅ | `dsh-stack` | Purge cursor skills from project |
+| 89 | **Settings button click fix**: Reliable open/trigger of settings dialog from sidebar and all buttons | DONE ✅ | `dsh-tweaks` | Fix click propagation and dialog state mount |
+| 90 | **Remove duplicate conversation tab from panel**: Only show terminal/containers in panel when chat is in main | DONE ✅ | `dsh-providers` | Prevent duplicate conversation tab |
+| 91 | **Panel background & edge alignment**: Fix gap behind panel and align edges with sidebar and centerCol | DONE ✅ | `dsh-providers` | Seamless docking and alignment |

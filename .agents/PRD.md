@@ -273,3 +273,21 @@ Product requirements for composer alignment, shell tab unification, and OLED con
    - Replaced maximize button with a dedicated collapse toggle button (`▲` / `▼`) that shrinks the panel to a 38px tab strip or restores it to full height, with the close `×` button removed.
 5. **Terminal Specialized Actions Menu & Right-Click**:
    - Right-clicking any terminal tab or clicking the trailing three-dots menu provides access to **Refresh Buffer**, **Clear Buffer (Ctrl+L)**, **New Window in Session**, **New Terminal Session**, and **Kill Current Session**.
+
+---
+
+## 14. Sidebar Search, Centering, Skills Purge, Settings & Panel Alignment (Session 25)
+
+1. **Sidebar Quick Search & Settings Toggle**:
+   - Real-time search input bar rendered at the top of the sidebar explorer filtering files, folders, and conversation sessions.
+   - Settings toggle in **Settings > General** allowing users to show or hide the sidebar search bar on demand.
+2. **True Vertical Centering of Composer Input**:
+   - Line-height, box-sizing, and flex centering align placeholder text and typed glyphs directly on the horizontal center line of the input bar matching send and plus buttons.
+3. **Cursor Imported Skills Purge**:
+   - Removed all legacy `cursor-*` skills from the system.
+4. **Settings Dialog Reliability & Click Fix**:
+   - Pointer events pass-through and click handler guarantees clicking Settings from the sidebar footer reliably opens the settings dialog across all viewports.
+5. **Deduplicated Bottom Panel Conversation Tab**:
+   - Automatically suppresses duplicate Conversation tabs from the bottom panel when the conversation is active in the main workspace view.
+6. **Pixel-Perfect Panel Edge Alignment & Solid Background**:
+   - Docking offsets align seamlessly with the center column bounding box, with `paddingBottom` spacing preventing layout gaps or transparency behind the bottom panel.

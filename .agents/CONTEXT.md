@@ -1805,3 +1805,18 @@ User requested 5 focused UX refinements across session headers, sidebar, bottom 
 5. **Terminal specialized actions menu & right-click**: Provide Refresh Buffer, Clear Buffer, Rename, Kill, and New Window under tab right-click and trailing 3-dots tab bar menu.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 25 — August 20, 2026 (Sidebar Search, Input Text Centering, Delete Skills, Settings Fix & Panel Alignment)
+
+**Context & User Directives:**
+User requested 6 targeted improvements across sidebar, input bar, skill cleaning, settings, and panel docking (request file `session-25-sidebar-search-centering-skills-cleanup-tabs-alignment.md`):
+1. **Sidebar search input bar & toggle setting**: Search input at top of sidebar filtering files/chats with a setting in General settings to hide/show it.
+2. **Input bar preview text true vertical centering**: True vertical centering of placeholder and input text (middle of glyphs on center line).
+3. **Delete all Cursor imported skills**: Remove cursor imported skills from the project.
+4. **Settings button click fix**: Reliable open/trigger of settings dialog from sidebar and all buttons.
+5. **Remove duplicate conversation tab from panel**: Only show terminal/containers in panel when chat is in main.
+6. **Panel background & edge alignment**: Fix gap behind panel and align edges with sidebar and centerCol.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.
