@@ -1860,3 +1860,40 @@ User requested 4 focused improvements in the sidebar (request file `session-28-r
 4. **Purge Legacy Sidebar Layout**: Ensure clicking a terminal never switches/regresses the sidebar to an old legacy layout; purge old sidebar view branches so `UnifiedWorkspacesBrowser` is always active.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 29 — August 20, 2026 (Full UI Polish, Settings Split, Secondary Sidebar & Context Menus)
+
+**Context & User Directives:**
+User requested a complete round of UI polish and bugfixes across 10 areas (request file `session-29-fix-settings-button-repo-icon-sidebar-terminals-click.md`):
+1. **Fix Settings Button**: Eliminate capture-phase double-toggle bug in `TweaksSettingsRoot`, set `z-index: 1000000`.
+2. **Accurate Git Repo Detection**: Strictly verify `.git` presence for repo icons, not home root.
+3. **Sidebar Terminal & Container Click Handlers**: Reactive window listeners in `BottomTerminalPanel`.
+4. **Toolbar Model Picker vs Dropdown Menu**: Generic model icon on toolbar button (`SparklesGlyph`), individual provider brand icons in dropdown menu options.
+5. **Unclosable Conversation Tab**: Omit close button for chat tabs in top and panel tab bars.
+6. **Split Settings into Accounts, Models, and Apps**: Dedicated sections with brand icons across all provider rows.
+7. **Harmonize Subagent Collapse Style**: Sessions with subagents match folder collapse visuals.
+8. **Right-Click Context Menu Parity**: Right-click opens at cursor `(e.clientX, e.clientY)` with full 3-dots actions.
+9. **Secondary Sidebar & Sidebar Swap Setting**: Add sidebar swap toggle in Personalization settings to switch Main and Secondary sidebars.
+10. **Remove Top Preset Badge**: Permanently suppress `conversation.session.header.actions` preset badges.
+
+**Status:** in progress.
+
+### Session 29b — August 20, 2026 (Finalize Tree Harmonization, Settings Sections, Model Picker)
+
+Continuation of Session 29. Finalized the remaining implementation tasks:
+
+1. **Harmonized subagent collapse visuals with folders**: Chat rows now use `[Icon] [Chevron] [Title] [Pill] [Actions]` slot order matching `renderDirEntries` folder rows. Subagent rows use `[Icon] [empty chevron] [Title] [Actions]` to maintain consistent indentation.
+2. **Strict `isRepo` detection**: `renderDirEntries` now uses `Boolean(entry.isRepo)` exclusively for repo icons; workspace detection is separate (`isWorkspace` check) and excludes `/Users/user` home directory.
+3. **WorkspaceGlyph in directory tree**: Directories matching active workspaces (but not repos) now show `WorkspaceGlyph` instead of generic folder icons.
+4. **Cursor-positioned right-click context menus**: `ellipsisOpen` state changed from string to `{ id, pos: { x, y } }` object. All `onContextMenu` handlers in `renderChatRow`, subagent rows, and `renderDirEntries` now capture `(e.clientX, e.clientY)` and pass `position` prop to `SelectDropdownMenu`.
+5. **Settings split (accounts/models/apps)**: Replaced single `ProvidersSection` registration with `AccountsSection` (order 8), `ModelsSection` (order 9), `AppsSection` (order 10) — each with dedicated icons and glyphs.
+6. **dsh-tweaks integration**: Added `accounts`, `models`, `apps` to `INTEGRATION_IDS` set and `navIcon()` function in dsh-tweaks so they group and display correctly in the settings sidebar.
+7. **Model picker toolbar decoration**: Added `ensureModelPickerDecoration()` MutationObserver that inserts a generic sparkles icon on model picker buttons and provider brand icons on dropdown items.
+
+**Files changed:**
+- `plugins/dsh-providers/client.js` — renderChatRow, renderDirEntries, apply sections, ensureModelPickerDecoration
+- `plugins/dsh-tweaks/client.js` — navIcon, INTEGRATION_IDS
+
+**Status:** completed, all 16 plugin test suites passed.

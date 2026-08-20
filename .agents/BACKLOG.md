@@ -311,3 +311,18 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 102 | **Sidebar item indentation alignment**: Child items below a folder line up with sibling subfolders | DONE ✅ | `dsh-providers` | Standardize tree row padding and icon/label gutters |
 | 103 | **Rename section to "Pinned & Active"**: Rename "Live Sessions" section header to "Pinned & Active" | DONE ✅ | `dsh-providers` | Clean section title update |
 | 104 | **Purge legacy sidebar layout**: Permanently remove old sidebar views so clicking terminal never regresses | DONE ✅ | `dsh-providers` | Remove legacy sidebar mode switches and dead views |
+
+## 18. Session 29 Full UI Polish, Settings Split, Secondary Sidebar & Context Menus (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 105 | **Fix Settings Button**: Guarantee settings dialog opens from sidebar footer across all states | IN PROGRESS | `dsh-tweaks` | Fix double-toggle event conflict and set z-index to 1000000 |
+| 106 | **Fix Git Repo Detection & Icon**: Strictly verify .git presence for repo icons, not home root | IN PROGRESS | `dsh-providers` | Accurate repo detection on backend and frontend |
+| 107 | **Fix Sidebar Terminals/Containers Click Action**: Open and focus terminal/container in bottom panel | IN PROGRESS | `dsh-providers` | Reactive window listeners in BottomTerminalPanel |
+| 108 | **Toolbar Model Picker Icon & Menu**: Generic model icon on toolbar button, provider brand icons in dropdown | IN PROGRESS | `dsh-providers` | SparklesGlyph on button, ProviderBrandIcon in list |
+| 109 | **Unclosable Conversation Tab**: Prevent closing the main conversation tab (no close button) | IN PROGRESS | `dsh-providers` | Omit close button for chat tabs |
+| 110 | **Split Settings into Accounts, Models, and Apps**: Dedicated sections with brand icons | IN PROGRESS | `dsh-providers` + `dsh-tweaks` | Accounts (8), Models (9), Apps (10) |
+| 111 | **Harmonize Subagent Collapse Style**: Sessions with subagents match folder collapse visuals | IN PROGRESS | `dsh-providers` | Standardized slot order and chevron style |
+| 112 | **Right-Click Context Menu Parity**: Right-click opens at cursor position with full 3-dots actions | IN PROGRESS | `dsh-providers` | Cursor-anchored SelectDropdownMenu |
+| 113 | **Secondary Sidebar & Sidebar Swap Setting**: Add sidebar swap toggle in Personalization | IN PROGRESS | `dsh-tweaks` + `dsh-providers` | Swap Main (right) and Secondary (left) sidebars |
+| 114 | **Remove Top Preset Badge**: Permanently suppress preset badges at top of conversation area | IN PROGRESS | `dsh-tweaks` | Suppress conversation.session.header.actions badge |

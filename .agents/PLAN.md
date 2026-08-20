@@ -644,4 +644,17 @@ sections owned by tweaks).
 3. **Rename section to "Pinned & Active"**: Rename "Live Sessions" header to "Pinned & Active".
 4. **Purge legacy sidebar layout**: Completely eliminate old sidebar views so clicking a terminal never causes sidebar regressions.
 
+## P22 — Full UI Polish, Settings Split, Secondary Sidebar & Context Menus (Session 29) [in progress]
+
+1. **Settings Button Fix & High Z-Index**: Eliminate double-toggle capture conflict in `TweaksSettingsRoot`, set `z-index: 1000000`.
+2. **Accurate Git Repository Detection**: Strictly verify `.git` presence on the filesystem; remove workspace fallback for repo icon.
+3. **Sidebar Terminal & Container Click Handlers**: Attach reactive event listeners in `BottomTerminalPanel` to auto-expand and switch views.
+4. **Toolbar Model Picker vs Dropdown Menu**: Generic model icon on toolbar trigger button, individual provider brand icons in dropdown options.
+5. **Unclosable Conversation Tab**: Omit close button on conversation tabs in top and panel bars.
+6. **Split Settings into Accounts, Models, and Apps**: Dedicated sections (Accounts, Models, Apps) with brand icons across all provider rows.
+7. **Harmonize Subagent Collapse Style**: Standardize `renderChatRow` slot structure to match folders (`[Icon] [Chevron] [Title] [Count Pill] [Actions]`).
+8. **Right-Click Context Menu Parity**: Anchor `SelectDropdownMenu` to `(e.clientX, e.clientY)` with full 3-dots actions.
+9. **Secondary Sidebar & Sidebar Swap Setting**: Add sidebar swap toggle in Personalization settings to switch Main Sidebar and Secondary Sidebar sides.
+10. **Remove Top Preset Badge**: Permanently suppress `conversation.session.header.actions` preset badges via global CSS & slot filters.
+
 
