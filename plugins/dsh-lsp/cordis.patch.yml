@@ -1,0 +1,8 @@
+# The dsh-lsp bundle patch: mounts the LSP plugin, which installs the
+# `dsh-lsp` settings section (the LSP server table), and — when the merged
+# table is non-empty — the lsp-stdio provider set plus the tool-lsp gateway.
+
+- insert:
+    - id: lsp
+      name: 'dsh-lsp'
+      config: {}

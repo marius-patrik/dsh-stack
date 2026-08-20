@@ -1947,3 +1947,22 @@ Diagnosed and resolved settings button activation issues:
 
 **Status:** completed, all 16 plugin test suites passed, changes committed and pushed.
 
+
+## Session 30 — August 20, 2026 (Monorepo Migration, 3-Dots Menu, Subagents Dock & Sidebar Polish)
+
+**Context & User Directives:**
+User approved comprehensive plan for monorepo migration and major UX additions:
+1. **Monorepo Migration**: Subtree merge all plugins into `dsh-stack`, keep `harness/` as the only submodule in `.gitmodules`, and delete leftover plugin repos on GitHub.
+2. **Conversation 3-Dots Menu & View Switcher**: Add persistent 3-dots button (`...`) in `conversation.session.header.utilities` with "Switch View" (Chat/Trajectory) and "Download Session Log", while hiding header tab buttons.
+3. **Move Subagents Display Above Input Bar**: Remove subagents from header actions and mount a collapsible **Subagents Dock** in `conversation.input.dock` directly above the input bar, styled identical to todos and goals.
+4. **Sidebar Navigation Polish**:
+   - Remove `/`, `~` (user), and `Projects` button bar from sidebar header.
+   - Fix conversation row hover highlight on `.dsh-tree-sessionRow` and subagent rows.
+   - Fix `node_modules` showing as a repo by strictly checking `Boolean(entry.isRepo)` and excluding vendor folders.
+   - Fold live terminals and running containers into the collapsible `Ungrouped` section.
+5. **Model Picker & Settings Hardening**:
+   - Pure CSS SVG mask for white wireframe cube on model picker button (zero DOM mutations).
+   - Size `P.Modal` to 840×800px with clean event dispatching.
+   - Suppress preset badge next to the session title.
+
+**Status:** in progress.

@@ -1,0 +1,18 @@
+# The `subscriptions` agent preset: the single-seat composition. Every session
+# mounts this standing scope, so the remap listener below is an ancestor of the
+# agent's own scope and observes `agent/request` AFTER the model-selection
+# listener applied the session's provider/model choice.
+#
+# `subscription-remap` steers requests that resolved to a provider the
+# `dsh-providers` filter hides (subscription-only mode, pay-as-you-go API
+# route) to the configured subscription default; visible failures (a
+# subscription that is not logged in) stay loud.
+#
+# Merged from the standalone dsh-subscriptions package; the plugin now ships
+# as the `./remap` submodule of dsh-providers.
+- id: subscription-remap
+  name: 'dsh-providers/remap'
+  config:
+    default:
+      provider: kimi-sub
+      model: kimi-k2.5

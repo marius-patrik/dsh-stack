@@ -1,0 +1,2286 @@
+// dsh-tweaks client half (hand-authored bundle, no build step): owns the
+// two replaced web-profile shells.
+//
+//   sidebar occupant (TweaksSidebarRoot)  — replaces ui-sidebar. Column
+//     geometry, fold state machine, brand row, and the two new seats
+//     sidebar.newSession (the New Session button, extracted) and
+//     sidebar.history (empty until the sidebar batch phase). Everything
+//     between the brand and the foot stays a slot: sidebar.workspaces,
+//     sidebar.footer.action, sidebar.settings.
+//   sidebar.settings occupant (TweaksSettingsRoot) — replaces
+//     ui-settings-general. Trigger row + modal panel (1080x700 figma),
+//     section nav rail, onboarding coordinator, and the new
+//     settings.section.icon seat (glyphs registered by section id, with the
+//     shell's gear fallback while a section owns no glyph). Every section
+//     receives an extra `openSection` owner prop (harness sections ignore it)
+//     so later phases can navigate across sections.
+//   ownerless Settings copy — re-registers the trigger/header/close chrome,
+//     the General section, the loopback-only open-document action, and the
+//     `sidebar` + `settings` dictionaries, since ui-sidebar and
+//     ui-settings-general are disabled in the web profile patch.
+//
+// The shell CSS ships as a claimed <style> block (prefixed class names); the
+// module system's claimStyles machinery owns untagged <style> tags injected
+// during materialization. Only platform seed words are required (react,
+// ui-primitives, ui-slots, web-react) — no cross-package value imports, no
+// dsh-client-runtime/client, so the document action re-implements its state
+// as a hand-rolled observable over the connection api.
+//
+// Re-running the bundle (HMR / entry refresh) is idempotent through the slot
+// ledger and the style-tag guard.
+
+const SHELL_CSS = `
+.dsh-tw-root {
+  --dsh-sidebar-inline-padding: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 6px var(--dsh-sidebar-inline-padding);
+  box-sizing: border-box;
+  background: var(--dsw-specific-sidebar-fill);
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+.dsh-tw-root.dsh-tw-collapsed { padding: 18px 10px 6px; }
+.dsh-tw-root.dsh-tw-quietBars { --dsh-scrollbar-thumb: transparent; --dsh-scrollbar-thumb-hover: transparent; }
+.dsh-tw-fading > * { opacity: 0; transition: opacity 150ms var(--ds-ease-in-out); }
+.dsh-tw-wide { animation: dsh-tw-wide-in 200ms var(--ds-ease-in-out); }
+@keyframes dsh-tw-wide-in { from { opacity: 0; } }
+.dsh-tw-railIn .dsh-tw-iconButton,
+.dsh-tw-railIn .dsh-tw-newSession,
+.dsh-tw-railIn .dsh-tw-regionArea { animation: dsh-tw-rail-in 150ms var(--ds-ease-in-out) backwards; }
+.dsh-tw-railIn .dsh-tw-footArea { animation: dsh-tw-rail-fade-in 150ms var(--ds-ease-in-out) backwards; }
+@keyframes dsh-tw-rail-in { from { opacity: 0; transform: translateX(49px); } }
+@keyframes dsh-tw-rail-fade-in { from { opacity: 0; } }
+.dsh-tw-logoRow { flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 8px; height: 60px; padding: 8px 0 8px 4px; margin-bottom: 8px; box-sizing: border-box; overflow: hidden; }
+.dsh-tw-collapsed .dsh-tw-logoRow { height: 36px; padding: 0; margin-bottom: 12px; justify-content: flex-start; }
+.dsh-tw-brand { flex: 1; min-width: 0; display: inline-flex; align-items: center; overflow: hidden; padding: 0; border: none; background: transparent; color: inherit; cursor: pointer; }
+.dsh-tw-iconButton { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; border-radius: 50%; padding: 0; background: transparent; cursor: pointer; color: var(--dsw-alias-label-secondary); }
+.dsh-tw-iconButton:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-tw-collapsed .dsh-tw-iconButton { width: 36px; height: 36px; }
+.dsh-tw-collapsed .dsh-tw-toggle .dsh-tw-panelIcon { display: none; }
+.dsh-tw-collapsed .dsh-tw-toggle:hover .dsh-tw-panelIcon { display: inline; }
+.dsh-tw-collapsed .dsh-tw-toggle:hover .dsh-tw-railFish { display: none; }
+.dsh-tw-collapsed .dsh-tw-iconButton { color: var(--dsw-alias-label-primary); }
+.dsh-tw-newSession { flex: none; display: flex; align-items: center; justify-content: center; gap: 6px; height: 38px; padding: 8px 16px; margin: 0 2px 8px; box-sizing: border-box; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; background: var(--dsw-alias-button-elevated-fill); color: var(--dsw-alias-label-primary); font-size: 14px; font-weight: 500; line-height: 22px; cursor: pointer; overflow: hidden; }
+.dsh-tw-newSession:hover { background: var(--dsw-alias-button-floating-hover); }
+.dsh-tw-collapsed .dsh-tw-newSession { align-self: flex-start; width: 36px; height: 36px; padding: 0; margin: 0 0 12px; gap: 0; border-color: transparent; background: transparent; }
+.dsh-tw-collapsed .dsh-tw-newSession:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-tw-newSessionLabel { max-width: 200px; overflow: hidden; white-space: nowrap; }
+.dsh-tw-collapsed .dsh-tw-newSessionLabel { max-width: 0; }
+.dsh-tw-regionArea { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-left: -4px; margin-right: calc(-1 * var(--dsh-sidebar-inline-padding)); padding-left: 4px; overflow: hidden; }
+.dsh-tw-collapsed .dsh-tw-regionArea { margin-left: 0; margin-right: 0; padding-left: 0; }
+.dsh-tw-historyArea { flex: none; min-width: 0; width: 100%; }
+.dsh-tw-historySection { padding: 0 4px 8px; }
+.dsh-tw-historyHeader { height: 28px; padding: 0 8px; display: flex; align-items: center; }
+.dsh-tw-historyLabel { font-size: 11px; color: var(--dsw-alias-label-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+.dsh-tw-historyList { display: flex; flex-direction: column; gap: 1px; }
+.dsh-tw-historyRow { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; cursor: pointer; min-height: 28px; }
+.dsh-tw-historyRow:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-tw-historyTitle { flex: 1; font-size: 13px; color: var(--dsw-alias-label-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dsh-tw-historyTime { flex: none; font-size: 11px; color: var(--dsw-alias-label-tertiary); }
+.dsh-tw-footArea { flex: none; display: flex; flex-direction: column; gap: 2px; }
+.dsh-tw-settingsArea { flex: none; display: flex; align-items: center; justify-content: flex-start; padding: 2px 4px; }
+.dsh-tw-footerActions { flex: none; min-width: 0; width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.dsh-tw-collapsed .dsh-tw-footArea { align-items: center; gap: 4px; }
+.dsh-tw-collapsed .dsh-tw-settingsArea,
+.dsh-tw-collapsed .dsh-tw-footerActions { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: 4px; padding: 0; }
+.dsh-tw-trigger { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; margin: 2px 0; padding: 6px 10px; box-sizing: border-box; border: none; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; color: var(--dsw-alias-label-primary); font-family: inherit; font-size: 13.5px; line-height: 20px; font-weight: 500; user-select: none; transition: background 120ms ease; }
+.dsh-tw-trigger:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-tw-trigger.dsh-tw-rail { width: 36px; height: 36px; margin: 4px 0; justify-content: center; gap: 0; padding: 0; border-radius: 50%; }
+.dsh-tw-triggerLabel { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.dsh-tw-overlay { position: fixed; inset: 0; z-index: 1000000; display: flex; align-items: center; justify-content: center; }
+.dsh-tw-mask { position: absolute; inset: 0; background: var(--dsw-alias-bg-mask-1); backdrop-filter: var(--dsw-mask-blur); }
+.dsh-tw-panel { position: relative; z-index: 1; display: flex; width: 840px; height: min(800px, calc(100vh - 48px)); max-width: calc(100vw - 48px); border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: var(--dsw-shadow-lv3); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.15)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
+.dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; }
+.dsh-tw-nav.dsh-tw-navCollapsed { width: 56px !important; padding: 18px 6px 0; }
+.dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navLabel { display: none; }
+.dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navGroupHeader { display: none; }
+.dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navTitle { display: none; }
+.dsh-tw-navResizer { position: absolute; top: 0; right: -4px; bottom: 0; width: 8px; cursor: col-resize; z-index: 10; }
+.dsh-tw-navResizer:hover, .dsh-tw-navResizer.dsh-tw-resizing { background: var(--dsw-alias-primary, #6366f1); opacity: 0.4; }
+.dsh-tw-draggableHeader { cursor: grab; user-select: none; }
+.dsh-tw-draggableHeader:active { cursor: grabbing; }
+.dsh-tw-navTitleRow { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 8px; }
+.dsh-tw-navTitle { font-size: 16px; line-height: 24px; font-weight: 500; color: var(--dsw-alias-label-primary); }
+.dsh-tw-navCollapseBtn { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: none; border-radius: 6px; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; }
+.dsh-tw-navCollapseBtn:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.dsh-tw-navList { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+.dsh-tw-navCell { display: flex; align-items: center; gap: 8px; height: 38px; padding: 8px 12px; box-sizing: border-box; border: none; border-radius: 10px; background: transparent; cursor: pointer; font-family: inherit; font-size: 14px; line-height: 22px; font-weight: 400; color: var(--dsw-alias-label-primary); text-align: left; transition: background 100ms; }
+.dsh-tw-navCell:hover { background: var(--dsw-specific-sidebar-nav-item-hover); }
+.dsh-tw-navCell.dsh-tw-active { background: var(--dsw-specific-sidebar-nav-item-active); }
+.dsh-tw-navIcon { flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.dsh-tw-navLabel { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.dsh-tw-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dsh-tw-header { flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; height: 54px; padding: 20px 14px 8px 10px; box-sizing: border-box; }
+.dsh-tw-actions { min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-left: auto; }
+.dsh-tw-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: none; border-radius: 28px; background: transparent; cursor: pointer; color: var(--dsw-alias-label-primary); }
+.dsh-tw-close:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-tw-options { flex: 1; min-height: 0; padding: 0 24px 24px; overflow-y: auto; }
+.dsh-tw-hiddenLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.dsh-tw-section { display: flex; flex-direction: column; width: 100%; }
+.dsh-tw-section > [data-slot='settings.general.item'] > :last-child { border-bottom: none; }
+.dsh-tw-action { display: flex; min-width: 0; align-items: center; gap: 8px; }
+.dsh-tw-error { max-width: 180px; overflow: hidden; color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
+[class*="inputRow"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+  padding: 0 4px !important;
+}
+[class*="inputRow"] > button[class*="add"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  align-self: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+}
+[class*="sendGroup"] {
+  display: flex !important;
+  align-items: center !important;
+  align-self: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+}
+[class*="sendGroup"] button[class*="primary"],
+[class*="sendGroup"] button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+[class*="inputRow"] [class*="scroll"] {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  flex: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+[class*="inputRow"] [class*="grow"] {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  min-height: 24px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+[class*="inputRow"] textarea[class*="input"],
+[class*="inputRow"] [class*="backdrop"],
+[class*="inputRow"] [class*="mirror"] {
+  padding: 2px 10px !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  min-height: 24px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+[data-slot="conversation.session.header.actions"] [data-slot-id="agent-preset"],
+[data-slot="conversation.session.header.actions"] > div:has([class*="agentPreset"]),
+[data-slot="conversation.session.header.actions"] > div:has([class*="preset"]),
+[data-slot="conversation.session.header.actions"] > [class*="agentPreset"],
+[data-slot="conversation.session.header.actions"] > [class*="preset"],
+[class*="headerActions"] [class*="preset"],
+[class*="headerActions"] [class*="AgentPreset"],
+[class*="headerActions"] [class*="agentPreset"],
+[class*="conversationSessionHeader"] [class*="preset"],
+[class*="conversationSessionHeader"] [class*="AgentPreset"],
+[class*="conversationSessionHeader"] [class*="agentPreset"],
+div[class*="AgentPresetLabel"],
+button[class*="AgentPresetLabel"] {
+  display: none !important;
+}
+/* Hide conversation header tabs (Chat / Trajectory) — view switcher is housed in 3-dots */
+[class*="ConversationSession_tabs"],
+[class*="tabs"][role="tablist"] {
+  display: none !important;
+}
+/* Hide header subagent catalog from session header actions */
+[data-slot="conversation.session.header.actions"] [data-slot-entry="subagent-catalog"],
+[data-slot="conversation.session.header.actions"] [data-slot-id="subagent-catalog"],
+[class*="headerActions"] [class*="SubagentCatalog"],
+[class*="headerActions"] [class*="subagent"] {
+  display: none !important;
+}
+.dsh-subagent-dock-row:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
+}
+.dsh-header-ellipsis-btn:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--dsw-alias-label-primary) !important;
+}
+body.dsh-sidebars-swapped .dsh-tw-root {
+  left: auto !important;
+  right: 0 !important;
+  border-right: none !important;
+  border-left: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+}
+body.dsh-sidebars-swapped .dsh-right-sidebar-dock {
+  right: auto !important;
+  left: 0 !important;
+  border-left: none !important;
+  border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+}
+body.dsh-sidebars-swapped .dsh-mainview-terminal,
+body.dsh-sidebars-swapped .dsh-mainview-container {
+  left: var(--dsh-secondary-sidebar-width, 0px) !important;
+  right: var(--dsh-sidebar-width, 240px) !important;
+}
+button[class*="sessionLogButton"],
+[data-slot="conversation.session.header.utilities"] > button[class*="sessionLogButton"] {
+  display: none !important;
+}
+[data-slot="conversation.session.header.utilities"] [class*="ellipsisButton"] {
+  display: inline-flex !important;
+}
+@media (max-width: 768px) {
+  .dsh-tw-root.dsh-tw-wide {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8) !important;
+  }
+  .dsh-tw-panel {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    transform: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dsh-tw-wide,
+  .dsh-tw-fading > *,
+  .dsh-tw-railIn .dsh-tw-iconButton,
+  .dsh-tw-railIn .dsh-tw-newSession,
+  .dsh-tw-railIn .dsh-tw-footArea,
+  .dsh-tw-railIn .dsh-tw-regionArea { transition: none; animation: none; }
+}
+`;
+
+const SIDEBAR_ZH = {
+  'session.new': '新会话',
+  'session.new.label': '新建会话',
+  'toggle.open': '打开侧边栏',
+  'toggle.collapse': '收起侧边栏',
+};
+
+const SIDEBAR_EN = {
+  'session.new': 'New Session',
+  'session.new.label': 'New session',
+  'toggle.open': 'Open sidebar',
+  'toggle.collapse': 'Collapse sidebar',
+};
+
+const SETTINGS_ZH = {
+  'trigger': '设置',
+  'title': '设置',
+  'close': '关闭',
+  'openDocument': '打开配置文件',
+  'openDocument.error': '无法打开配置文件',
+  'general.nav': '通用设置',
+};
+
+const SETTINGS_EN = {
+  'trigger': 'Settings',
+  'title': 'Settings',
+  'close': 'Close',
+  'openDocument': 'Open configuration file',
+  'openDocument.error': 'Could not open configuration file',
+  'general.nav': 'General',
+};
+
+const COLLAPSE_SETTLE_MS = 150;
+(function () {
+  if (typeof globalThis.crypto === 'undefined') globalThis.crypto = {};
+  if (typeof globalThis.crypto.randomUUID !== 'function') {
+    globalThis.crypto.randomUUID = function () {
+      if (typeof globalThis.crypto.getRandomValues === 'function') {
+        try {
+          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function (c) {
+            return (c ^ (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16);
+          });
+        } catch (e) {}
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    };
+  }
+})();
+
+window.__ModuleLoader__.load({
+  id: 'dsh-tweaks',
+  factory: (require) => {
+    var module = { exports: {} };
+    var exports = module.exports;
+    //#region lib/client.js
+    if (typeof document !== 'undefined') {
+      var style = document.querySelector('style[data-plugin-css="dsh-tweaks-shells"]');
+      if (style === null) {
+        style = document.createElement('style');
+        style.setAttribute('data-plugin-css', 'dsh-tweaks-shells');
+        style.textContent = SHELL_CSS;
+        document.head.appendChild(style);
+      }
+    }
+    var React = require('react');
+    var ReactDOM = (typeof window !== 'undefined' && window.ReactDOM) ? window.ReactDOM : null;
+    try { if (!ReactDOM) ReactDOM = require('react-dom'); } catch (e) {}
+    var P = require('@deepseek-ai/dsh-client-ui-primitives');
+    var slotsModule = require('@deepseek-ai/dsh-client-ui-slots');
+    var resolveSlotLabel = slotsModule.resolveSlotLabel;
+    var webReact = require('@deepseek-ai/dsh-client-web-react');
+    var bindSnapshotSelector = webReact.bindSnapshotSelector;
+    var h = React.createElement;
+    var Fragment = React.Fragment;
+
+    function KeychainNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('circle', { cx: '5.5', cy: '5.5', r: '3.25', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('circle', { cx: '5.5', cy: '5.5', r: '1.25', fill: 'currentColor' }),
+        h('path', { d: 'M8 8L13.5 13.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M10.5 10.5L12 9', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M12 12L13.5 10.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M3.5 8L2.5 12.5C2.4 13 2.8 13.5 3.3 13.5H4.7C5.2 13.5 5.6 13 5.5 12.5L4.5 8', stroke: 'currentColor', strokeWidth: '1.1', strokeLinecap: 'round', strokeLinejoin: 'round' })
+      );
+    }
+
+    function ProvidersNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M2 4L8 1.5L14 4L8 6.5L2 4Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
+        h('path', { d: 'M2 8L8 10.5L14 8', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' }),
+        h('path', { d: 'M2 12L8 14.5L14 12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' })
+      );
+    }
+
+    function GeneralNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M2 4h12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('circle', { cx: '5.5', cy: '4', r: '2', fill: 'var(--dsw-alias-surface-l0, #1e1e2e)', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('path', { d: 'M2 8h12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('circle', { cx: '10.5', cy: '8', r: '2', fill: 'var(--dsw-alias-surface-l0, #1e1e2e)', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('path', { d: 'M2 12h12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('circle', { cx: '6.5', cy: '12', r: '2', fill: 'var(--dsw-alias-surface-l0, #1e1e2e)', stroke: 'currentColor', strokeWidth: '1.25' })
+      );
+    }
+    function TerminalsNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M3 4.5L6.5 8L3 11.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' }),
+        h('path', { d: 'M8 12.5H13', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+      );
+    }
+
+    function ContainersNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M8 1.5L14 4.5V11.5L8 14.5L2 11.5V4.5L8 1.5Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
+        h('path', { d: 'M8 1.5V14.5', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('path', { d: 'M14 4.5L8 8L2 4.5', stroke: 'currentColor', strokeWidth: '1.25' })
+      );
+    }
+
+    function PlugNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M5.5 2V4.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M10.5 2V4.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M3.5 4.5H12.5V8C12.5 10.4853 10.4853 12.5 8 12.5C5.51472 12.5 3.5 10.4853 3.5 8V4.5Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
+        h('path', { d: 'M8 12.5V15', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+      );
+    }
+
+    function ToolsNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M13.5 2.5L10 6L11 7L14.5 3.5C14.8 3.2 14.8 2.8 14.5 2.5C14.2 2.2 13.8 2.2 13.5 2.5Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
+        h('path', { d: 'M10 6L4.5 11.5L2 14L4.5 11.5L10 6Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
+        h('path', { d: 'M2 14L4.5 13.5L2.5 11.5L2 14Z', fill: 'currentColor' }),
+        h('path', { d: 'M6.5 4.5L8 3L10.5 5.5L9 7', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+      );
+    }
+
+    function LoopsNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M2.5 8C2.5 5 4.5 3 8 3C11 3 13.5 5.2 13.5 8', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M11.5 5.5L13.5 8L15.5 5.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' }),
+        h('path', { d: 'M13.5 8C13.5 11 11.5 13 8 13C5 13 2.5 10.8 2.5 8', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M4.5 10.5L2.5 8L0.5 10.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' })
+      );
+    }
+
+    function TriangleRightFill14(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = props && props.className ? props.className : undefined;
+      var style = props && props.style ? props.style : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, style: style, viewBox: '0 0 14 14', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', {
+          d: 'M4.25 2.82782L4.25 11.1722C4.25 11.6622 4.84243 11.9076 5.18891 11.5611L9.36109 7.38891C9.57588 7.17412 9.57588 6.82588 9.36109 6.61109L5.18891 2.43891C4.84243 2.09243 4.25 2.33782 4.25 2.82782Z',
+          fill: 'currentColor',
+        })
+      );
+    }
+
+    function RobotHeadNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M8 1V3.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('circle', { cx: '8', cy: '1.5', r: '1', fill: 'currentColor' }),
+        h('rect', { x: '2.5', y: '3.5', width: '11', height: '10', rx: '2.5', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('circle', { cx: '5.5', cy: '7.5', r: '1.2', fill: 'currentColor' }),
+        h('circle', { cx: '10.5', cy: '7.5', r: '1.2', fill: 'currentColor' }),
+        h('path', { d: 'M5.5 10.5H10.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
+        h('path', { d: 'M1 7.5H2.5M13.5 7.5H15', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+      );
+    }
+
+    function KeyboardNavIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('rect', { x: '1.5', y: '3.5', width: '13', height: '9', rx: '2', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('circle', { cx: '4.5', cy: '6.5', r: '0.8', fill: 'currentColor' }),
+        h('circle', { cx: '8', cy: '6.5', r: '0.8', fill: 'currentColor' }),
+        h('circle', { cx: '11.5', cy: '6.5', r: '0.8', fill: 'currentColor' }),
+        h('path', { d: 'M5 9.5H11', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+      );
+    }
+
+    function DataGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+      },
+        h('ellipse', { cx: '8', cy: '3.5', rx: '6', ry: '2', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('path', { d: 'M2 3.5V8C2 9.1 4.7 10 8 10C11.3 10 14 9.1 14 8V3.5', stroke: 'currentColor', strokeWidth: '1.25' }),
+        h('path', { d: 'M2 8V12.5C2 13.6 4.7 14.5 8 14.5C11.3 14.5 14 13.6 14 12.5V8', stroke: 'currentColor', strokeWidth: '1.25' })
+      );
+    }
+
+    function navIcon(id) {
+      if (id === 'general') return h(GeneralNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'integrations' || id === 'providers') return h(ProvidersNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'accounts') return h(ProvidersNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'terminals') return h(TerminalsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'containers') return h(ContainersNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'models') return h(DataGlyph, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'apps') return h(P.IconListPenOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'provider-usage') return h(DataGlyph, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'keychain') return h(KeychainNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'session-modes' || id === 'actions' || id === 'commands') return h(P.IconListPenOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'agents') return h(RobotHeadNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'themes' || id === 'appearance') return h(P.IconLightOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'agent-presets' || id === 'modes') return h(P.IconAgentPresetOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'tools') return h(ToolsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'loops') return h(LoopsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'plugins') return h(PlugNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'keybinds' || id === 'keybindings' || id === 'shortcuts') return h(KeyboardNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'hosts') return h(DataGlyph, { className: 'dsh-tw-navIcon', size: 16 });
+      return h(P.IconSettingsOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+    }
+
+    // Glyph seat: a registrant's glyph wins; an id with no glyph falls back to
+    // the static map so every nav cell keeps a mark.
+    function navGlyph(renderSlot, row) {
+      var content = renderSlot('settings.section.icon', {}, { only: row.id });
+      if (content === null || content === undefined) return navIcon(row.id);
+      return content;
+    }
+
+    function ChatGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
+      );
+    }
+    function TerminalsGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("polyline", { points: "4 17 10 11 4 5" }),
+        h("line", { x1: "12", y1: "19", x2: "20", y2: "19" })
+      );
+    }
+    function ContainersGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2", ry: "2" }),
+        h("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
+        h("line", { x1: "12", y1: "17", x2: "12", y2: "21" })
+      );
+    }
+
+    function SelectDropdownMenu(props) {
+      var open = props.open, onClose = props.onClose, items = props.items, onSelect = props.onSelect;
+      var menuRef = React.useRef(null);
+
+      React.useEffect(function () {
+        if (!open) return;
+        var handlePointerDown = function (e) {
+          if (menuRef.current && !menuRef.current.contains(e.target)) {
+            onClose();
+          }
+        };
+        document.addEventListener("pointerdown", handlePointerDown);
+        return function () { document.removeEventListener("pointerdown", handlePointerDown); };
+      }, [open, onClose]);
+
+      if (!open) return null;
+
+      var alignRight = Boolean(props && props.align === 'right');
+      return h(
+        "div",
+        {
+          ref: menuRef,
+          style: {
+            position: "absolute",
+            top: "100%",
+            left: alignRight ? "auto" : "0",
+            right: alignRight ? "0" : "auto",
+            marginTop: "6px",
+            zIndex: 99999,
+            minWidth: "190px",
+            background: "var(--dsw-alias-surface-l0, #1e1e2e)",
+            border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
+            borderRadius: "8px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+            padding: "4px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+          },
+          onClick: function (e) { e.stopPropagation(); }
+        },
+        items.map(function (item) {
+          return h(
+            "button",
+            {
+              key: item.id,
+              type: "button",
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: "6px",
+                border: "none",
+                background: "transparent",
+                color: item.danger ? "#f85149" : "var(--dsw-alias-label-primary)",
+                fontSize: "13px",
+                textAlign: "left",
+                cursor: "pointer",
+                fontFamily: "inherit",
+              },
+              onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))"; },
+              onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
+              onClick: function (e) {
+                e.stopPropagation();
+                onSelect(item.id);
+                onClose();
+              },
+            },
+            item.icon ? h("span", { style: { display: "inline-flex", flexShrink: 0 } }, item.icon) : null,
+            h("span", { style: { flex: 1 } }, item.label)
+          );
+        })
+      );
+    }
+
+    function NewSessionButton(props) {
+      var wide = props.wide, startSession = props.startSession, t = props.t;
+      var menuState = React.useState(false);
+      var menuOpen = menuState[0], setMenuOpen = menuState[1];
+
+      var handleSelect = function (id) {
+        if (id === "chat") {
+          startSession();
+        } else if (id === "terminal") {
+          window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
+        } else if (id === "container") {
+          window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+        }
+      };
+
+      return h("div", { style: { position: "relative", width: "100%" } },
+        h(P.Tooltip, { label: t("session.new.label"), delayMs: 500, disabled: wide },
+          h("button", {
+            type: "button",
+            className: "dsh-tw-newSession",
+            "aria-label": t("session.new.label"),
+            onClick: function (e) {
+              e.stopPropagation();
+              setMenuOpen(!menuOpen);
+            },
+          },
+            h(P.IconPlusOutline16, { size: wide ? 14 : 18 }),
+            wide ? h("span", { className: "dsh-tw-newSessionLabel dsh-tw-wide" }, t("session.new")) : null,
+            wide ? h(P.IconChevronDownOutline14, { size: 12, style: { marginLeft: "auto", opacity: 0.6 } }) : null
+          )
+        ),
+        h(SelectDropdownMenu, {
+          open: menuOpen,
+          onClose: function () { setMenuOpen(false); },
+          items: [
+            { id: "chat", label: "New Chat Session", icon: h(ChatGlyph, { size: 14 }) },
+            { id: "terminal", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 14 }) },
+            { id: "container", label: "New Sandbox Container", icon: h(ContainersGlyph, { size: 14 }) },
+          ],
+          onSelect: handleSelect,
+        })
+      );
+    }
+
+    function TweaksSidebarRoot(props) {
+      var collapsed = props.collapsed, width = props.width, startSession = props.startSession;
+      var toggleSidebar = props.toggleSidebar, t = props.t, renderSlot = props.renderSlot;
+      var useSessions = props.useSessions;
+      var settledState = React.useState(collapsed);
+      var settled = settledState[0], setSettled = settledState[1];
+      React.useEffect(function () {
+        if (!collapsed) { setSettled(false); return; }
+        var timer = window.setTimeout(function () { setSettled(true); }, COLLAPSE_SETTLE_MS);
+        return function () { window.clearTimeout(timer); };
+      }, [collapsed]);
+      var wide = !collapsed || !settled;
+
+      var lastWideWidth = React.useRef(width);
+      if (!collapsed) lastWideWidth.current = width;
+
+      var everWide = React.useRef(!collapsed);
+      if (!collapsed) everWide.current = true;
+
+      var column = React.useRef(null);
+      var pointerState = React.useState(false);
+      var pointerInside = pointerState[0], setPointerInside = pointerState[1];
+      var lingerTimer = React.useRef(undefined);
+      var armLinger = function () {
+        if (lingerTimer.current !== undefined) return;
+        lingerTimer.current = window.setTimeout(function () {
+          lingerTimer.current = undefined;
+          setPointerInside(false);
+        }, SCROLLBAR_LINGER_MS);
+      };
+      var cancelLinger = function () {
+        window.clearTimeout(lingerTimer.current);
+        lingerTimer.current = undefined;
+      };
+      React.useEffect(function () {
+        if (!pointerInside) return;
+        var onMove = function (event) {
+          var rect = column.current && column.current.getBoundingClientRect();
+          if (rect === undefined) return;
+          var inside = event.clientX >= rect.left && event.clientX < rect.right
+            && event.clientY >= rect.top && event.clientY < rect.bottom;
+          if (inside) cancelLinger();
+          else armLinger();
+        };
+        document.addEventListener('pointermove', onMove);
+        return function () {
+          document.removeEventListener('pointermove', onMove);
+          cancelLinger();
+        };
+      }, [pointerInside]);
+
+      React.useEffect(function () {
+        var onKeyDown = function (e) {
+          var target = e.target;
+          var isEditable = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+          var customKeybind = null;
+          try {
+            var raw = localStorage.getItem('dsh_keybind_toggle_sidebar');
+            if (raw) customKeybind = JSON.parse(raw);
+          } catch (err) {}
+
+          var matched = false;
+          if (customKeybind) {
+            var ctrlMatch = customKeybind.ctrl ? (e.ctrlKey || e.metaKey) : (!e.ctrlKey && !e.metaKey);
+            var altMatch = customKeybind.alt ? e.altKey : !e.altKey;
+            var shiftMatch = customKeybind.shift ? e.shiftKey : !e.shiftKey;
+            var keyMatch = customKeybind.key && customKeybind.key.toLowerCase() === e.key.toLowerCase();
+            if (ctrlMatch && altMatch && shiftMatch && keyMatch) matched = true;
+          } else {
+            // Default Ctrl+B / Cmd+B
+            if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === 'b' || e.key === 'B')) {
+              matched = true;
+            }
+          }
+
+          if (matched) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+          }
+        };
+
+        window.addEventListener('keydown', onKeyDown, { capture: true });
+        return function () { window.removeEventListener('keydown', onKeyDown, { capture: true }); };
+      }, [toggleSidebar]);
+
+      var className = 'dsh-tw-root';
+      if (!wide) className += ' dsh-tw-collapsed';
+      if (!wide && everWide.current) className += ' dsh-tw-railIn';
+      if (collapsed && wide) className += ' dsh-tw-fading';
+      if (!pointerInside) className += ' dsh-tw-quietBars';
+      var style = wide ? { width: collapsed ? lastWideWidth.current : width } : undefined;
+
+      return h('div', {
+        ref: column,
+        className: className,
+        style: style,
+        onPointerEnter: function () { cancelLinger(); setPointerInside(true); },
+        onPointerLeave: function () { armLinger(); },
+      },
+        h('div', { className: 'dsh-tw-logoRow' },
+          wide
+            ? h('button', { type: 'button', className: 'dsh-tw-brand dsh-tw-wide', 'aria-label': t('session.new.label'), onClick: function () { startSession(); } }, h(P.BrandWordmark))
+            : null,
+          h(P.Tooltip, { label: collapsed ? t('toggle.open') : t('toggle.collapse'), delayMs: 500 },
+            h('button', { type: 'button', className: 'dsh-tw-iconButton dsh-tw-toggle', 'aria-label': collapsed ? t('toggle.open') : t('toggle.collapse'), onClick: function () { toggleSidebar(); } },
+              !wide ? h(P.FishLogo, { className: 'dsh-tw-railFish', size: 24 }) : null,
+              h(P.IconPanelLeftOutline16, { className: 'dsh-tw-panelIcon', size: wide ? 16 : 18 })))),
+        h('div', { className: 'dsh-tw-regionArea' },
+          renderSlot('sidebar.workspaces', {
+            wide,
+            expandSidebar: function () { if (collapsed) toggleSidebar(); },
+          })),
+        h('div', { className: 'dsh-tw-footArea' },
+          h('div', { className: 'dsh-tw-footerActions' }, renderSlot('sidebar.footer.action', { wide })),
+          h('div', { className: 'dsh-tw-settingsArea' }, renderSlot('sidebar.settings', { wide }))));
+    }
+
+    function TriggerContent(props) {
+      var wide = Boolean(props && props.wide);
+      var t = props && props.t;
+      var label = (typeof t === 'function') ? t('trigger') : 'Settings';
+      return h(Fragment, null,
+        h(P.IconSettingsOutline16, { size: wide ? 16 : 18 }),
+        wide ? h('span', { className: 'dsh-tw-triggerLabel', style: { marginLeft: '8px' } }, label || 'Settings') : null
+      );
+    }
+
+    function HeaderContent(props) {
+      var t = props.t;
+      return h(Fragment, null, (typeof t === 'function') ? t('title') : 'Settings');
+    }
+
+    function CloseLabel(props) {
+      var t = props.t;
+      return h(Fragment, null, (typeof t === 'function') ? t('close') : 'Close');
+    }
+
+    function GeneralSection(props) {
+      var noticeState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return false;
+        return window.localStorage.getItem('dsh_suppress_welcome_notice') === 'false';
+      });
+      var noticeEnabled = noticeState[0], setNoticeEnabled = noticeState[1];
+
+      var searchState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return true;
+        return window.localStorage.getItem('dsh_show_sidebar_search') !== 'false';
+      });
+      var searchEnabled = searchState[0], setSearchEnabled = searchState[1];
+
+      var handleToggleNotice = function (e) {
+        var checked = e.target.checked;
+        setNoticeEnabled(checked);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('dsh_suppress_welcome_notice', checked ? 'false' : 'true');
+        }
+      };
+
+      var handleToggleSearch = function (e) {
+        var checked = e.target.checked;
+        setSearchEnabled(checked);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('dsh_show_sidebar_search', checked ? 'true' : 'false');
+          window.dispatchEvent(new CustomEvent('dsh:sidebar-search-toggle', { detail: { enabled: checked } }));
+        }
+      };
+
+      var swapSidebarsState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return false;
+        return window.localStorage.getItem('dsh_swap_sidebars') === 'true';
+      });
+      var swapSidebars = swapSidebarsState[0], setSwapSidebars = swapSidebarsState[1];
+
+      var handleToggleSwapSidebars = function (e) {
+        var checked = e.target.checked;
+        setSwapSidebars(checked);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('dsh_swap_sidebars', checked ? 'true' : 'false');
+          window.dispatchEvent(new CustomEvent('dsh:sidebars-swapped', { detail: { swapped: checked } }));
+          if (document.body) {
+            if (checked) document.body.classList.add('dsh-sidebars-swapped');
+            else document.body.classList.remove('dsh-sidebars-swapped');
+          }
+        }
+      };
+
+      return h('div', { className: 'dsh-tw-section', style: { display: 'flex', flexDirection: 'column', gap: '16px' } },
+        props.renderSlot('settings.general.item', {}),
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Sidebar Search Bar'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Display quick search bar at the top of the sidebar explorer')
+          ),
+          h('input', {
+            type: 'checkbox',
+            checked: searchEnabled,
+            onChange: handleToggleSearch,
+            style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        ),
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Swap Main & Secondary Sidebars'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Position the Main Sidebar on the right and the Secondary Sidebar dock on the left')
+          ),
+          h('input', {
+            type: 'checkbox',
+            checked: swapSidebars,
+            onChange: handleToggleSwapSidebars,
+            style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        ),
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Internal Testing Notice'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Show the internal testing notice modal dialog on startup')
+          ),
+          h('input', {
+            type: 'checkbox',
+            checked: noticeEnabled,
+            onChange: handleToggleNotice,
+            style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        )
+      );
+    }
+
+    function createObservable(initial) {
+      var snapshot = initial;
+      var listeners = new Set();
+      return {
+        getSnapshot: function () { return snapshot; },
+        subscribe: function (listener) {
+          listeners.add(listener);
+          return function () { listeners.delete(listener); };
+        },
+        update: function (fn) {
+          var next = fn(snapshot);
+          if (next === snapshot) return;
+          snapshot = next;
+          listeners.forEach(function (listener) { listener(); });
+        },
+      };
+    }
+
+    function messageOf(error) {
+      return error instanceof Error ? error.message : String(error);
+    }
+
+    // Local re-implementation of the harness SettingsDocumentStore: the
+    // snapshot-store engine (dsh-client-runtime/client) is not a platform seed
+    // word, so the state rides a hand-rolled observable bound through the
+    // framework-made bindSnapshotSelector.
+    function SettingsDocumentStore(api) {
+      this.api = api;
+      this.observable = createObservable({ status: 'idle', opening: false, error: null });
+      this.generation = 0;
+    }
+
+    SettingsDocumentStore.prototype.load = function () {
+      var self = this;
+      var generation = ++this.generation;
+      this.observable.update(function (state) { return { status: 'loading', opening: state.opening, error: null }; });
+      return this.api.settings.describe({}).then(function (response) {
+        if (generation !== self.generation) return;
+        var result = response.result;
+        if (!result.ok) {
+          self.observable.update(function (state) { return { status: 'unavailable', opening: state.opening, error: result.error.message }; });
+          return;
+        }
+        self.observable.update(function (state) { return { status: result.value.hasDocument ? 'ready' : 'unavailable', opening: state.opening, error: null }; });
+      }, function (error) {
+        if (generation !== self.generation) return;
+        self.observable.update(function (state) { return { status: 'unavailable', opening: state.opening, error: messageOf(error) }; });
+      });
+    };
+
+    SettingsDocumentStore.prototype.open = function () {
+      var self = this;
+      var current = this.observable.getSnapshot();
+      if (current.status !== 'ready' || current.opening) return;
+      this.observable.update(function (state) { return { status: state.status, opening: true, error: null }; });
+      return this.api.settings.openDocument({}).then(function (response) {
+        if (!response.result.ok) throw new Error(response.result.error.message);
+      }, function (error) {
+        throw messageOf(error);
+      }).catch(function (error) {
+        self.observable.update(function (state) { return { status: state.status, opening: state.opening, error: messageOf(error) }; });
+      }).then(function () {
+        self.observable.update(function (state) { return { status: state.status, opening: false, error: state.error }; });
+      });
+    };
+
+    function refreshDocumentIfLoaded(controller) {
+      if (controller === undefined || controller.observable.getSnapshot().status === 'idle') return;
+      controller.load();
+    }
+
+    function SettingsDocumentAction(props) {
+      var controller = props.controller, useSnapshot = props.useSnapshot, t = props.t;
+      var state = useSnapshot(function (s) { return s; });
+      React.useEffect(function () { controller.load(); }, [controller]);
+      if (state.status !== 'ready') return null;
+      return h('div', { className: 'dsh-tw-action' },
+        state.error === null ? null : h('span', { className: 'dsh-tw-error', role: 'alert' }, t('openDocument.error')),
+        h(P.Button, { variant: 'outline', size: 'sm', disabled: state.opening, onClick: function () { controller.open(); } }, t('openDocument')));
+    }
+
+    function KeybindsSettingsSection() {
+      var isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      var defaultSidebarKey = isMac ? '⌘B' : 'Ctrl+B';
+
+      var customKeybindState = React.useState(function () {
+        try {
+          return localStorage.getItem('dsh_keybind_toggle_sidebar_label') || defaultSidebarKey;
+        } catch (e) {
+          return defaultSidebarKey;
+        }
+      });
+      var sidebarKeyLabel = customKeybindState[0], setSidebarKeyLabel = customKeybindState[1];
+
+      var recordingState = React.useState(false);
+      var isRecording = recordingState[0], setIsRecording = recordingState[1];
+
+      var handleRecordKey = React.useCallback(function (e) {
+        if (!isRecording) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (e.key === 'Escape') {
+          setIsRecording(false);
+          return;
+        }
+
+        var parts = [];
+        if (e.ctrlKey || e.metaKey) parts.push(isMac ? '⌘' : 'Ctrl');
+        if (e.altKey) parts.push(isMac ? '⌥' : 'Alt');
+        if (e.shiftKey) parts.push(isMac ? '⇧' : 'Shift');
+
+        var keyName = e.key.toUpperCase();
+        if (['CONTROL', 'META', 'ALT', 'SHIFT'].indexOf(keyName) !== -1) return;
+        parts.push(keyName);
+
+        var label = parts.join(isMac ? '' : '+');
+        var spec = {
+          ctrl: Boolean(e.ctrlKey || e.metaKey),
+          alt: Boolean(e.altKey),
+          shift: Boolean(e.shiftKey),
+          key: e.key.toLowerCase(),
+        };
+
+        try {
+          localStorage.setItem('dsh_keybind_toggle_sidebar', JSON.stringify(spec));
+          localStorage.setItem('dsh_keybind_toggle_sidebar_label', label);
+        } catch (err) {}
+
+        setSidebarKeyLabel(label);
+        setIsRecording(false);
+      }, [isRecording, isMac]);
+
+      React.useEffect(function () {
+        if (isRecording) {
+          window.addEventListener('keydown', handleRecordKey, { capture: true });
+          return function () { window.removeEventListener('keydown', handleRecordKey, { capture: true }); };
+        }
+      }, [isRecording, handleRecordKey]);
+
+      var handleReset = function () {
+        try {
+          localStorage.removeItem('dsh_keybind_toggle_sidebar');
+          localStorage.removeItem('dsh_keybind_toggle_sidebar_label');
+        } catch (e) {}
+        setSidebarKeyLabel(defaultSidebarKey);
+        setIsRecording(false);
+      };
+
+      var shortcuts = [
+        {
+          id: 'toggle-sidebar',
+          title: 'Toggle Sidebar',
+          description: 'Collapse or expand the navigation sidebar rail (Ctrl + B)',
+          keyLabel: isRecording ? 'Press keys (or Esc)…' : sidebarKeyLabel,
+          isConfigurable: true,
+        },
+        {
+          id: 'new-session',
+          title: 'New Chat Session',
+          description: 'Start a new conversation in current workspace',
+          keyLabel: isMac ? '⌘N' : 'Ctrl+N',
+        },
+        {
+          id: 'quick-search',
+          title: 'Search Workspaces & Sessions',
+          description: 'Focus workspace search or command query',
+          keyLabel: isMac ? '⌘K' : 'Ctrl+K',
+        },
+        {
+          id: 'settings',
+          title: 'Open Settings',
+          description: 'Open the preferences and customization modal',
+          keyLabel: isMac ? '⌘,' : 'Ctrl+,',
+        },
+        {
+          id: 'terminal-toggle',
+          title: 'Toggle Terminal Overlay',
+          description: 'Quickly open or close full-screen terminal',
+          keyLabel: isMac ? '⌘`' : 'Ctrl+`',
+        },
+      ];
+
+      return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '760px' } },
+        h('div', null,
+          h('h2', { style: { margin: '0 0 6px', fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Keyboard Shortcuts'),
+          h('p', { style: { margin: 0, fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' } }, 'Configure workspace navigation hotkeys and global panel triggers.')
+        ),
+        h('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
+          shortcuts.map(function (s) {
+            return h('div', {
+              key: s.id,
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))',
+                background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))',
+              },
+            },
+              h('div', { style: { display: 'flex', flexDirection: 'column', gap: '2px' } },
+                h('span', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, s.title),
+                h('span', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, s.description)
+              ),
+              h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                s.isConfigurable
+                  ? h('button', {
+                      type: 'button',
+                      onClick: function () { setIsRecording(!isRecording); },
+                      style: {
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        border: isRecording ? '1px solid #6366f1' : '1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))',
+                        background: isRecording ? 'rgba(99, 102, 241, 0.15)' : 'var(--dsw-alias-surface-l2, rgba(128,128,128,0.08))',
+                        color: isRecording ? '#6366f1' : 'var(--dsw-alias-label-primary)',
+                        cursor: 'pointer',
+                        minWidth: '70px',
+                        textAlign: 'center',
+                        fontFamily: 'var(--ds-font-mono, monospace)',
+                      },
+                    }, s.keyLabel)
+                  : h('kbd', {
+                      style: {
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        border: '1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))',
+                        background: 'var(--dsw-alias-surface-l2, rgba(128,128,128,0.08))',
+                        color: 'var(--dsw-alias-label-primary)',
+                        fontFamily: 'var(--ds-font-mono, monospace)',
+                      },
+                    }, s.keyLabel),
+                s.isConfigurable && sidebarKeyLabel !== defaultSidebarKey
+                  ? h('button', {
+                      type: 'button',
+                      onClick: handleReset,
+                      title: 'Reset to default',
+                      style: {
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        border: '1px solid var(--dsw-alias-border-l2)',
+                        background: 'transparent',
+                        color: 'var(--dsw-alias-label-secondary)',
+                        cursor: 'pointer',
+                      },
+                    }, 'Reset')
+                  : null
+              )
+            );
+          })
+        )
+      );
+    }
+
+    function SettingsPanel(props) {
+      var rows = props.rows, renderSlot = props.renderSlot, activeId = props.activeId;
+      var onSelect = props.onSelect, onClose = props.onClose, openSection = props.openSection;
+      var active;
+      var found = false;
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].id === activeId) { active = rows[i].id; found = true; break; }
+      }
+      if (!found) active = rows.length > 0 ? rows[0].id : undefined;
+      var titleId = React.useId();
+
+      React.useEffect(function () {
+        var onKeyDown = function (e) { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', onKeyDown);
+        return function () { document.removeEventListener('keydown', onKeyDown); };
+      }, [onClose]);
+
+      var closeButton = React.useRef(null);
+      React.useEffect(function () { if (closeButton.current) closeButton.current.focus(); }, []);
+
+      var PERSONALIZATION_IDS = new Set(['general', 'themes', 'appearance', 'keybinds', 'keybindings']);
+      var CUSTOMIZATION_IDS = new Set(['agents', 'actions', 'session-modes', 'commands', 'agent-presets', 'modes', 'tools', 'loops', 'plugins']);
+      var INTEGRATION_IDS = new Set(['providers', 'accounts', 'models', 'apps', 'hosts', 'terminals', 'containers']);
+
+      var personalRows = [];
+      var customRows = [];
+      var integRows = [];
+      var otherRows = [];
+
+      for (var rIdx = 0; rIdx < rows.length; rIdx++) {
+        var r = rows[rIdx];
+        if (r.id === 'themes') r = Object.assign({}, r, { label: 'Appearance' });
+        if (r.id === 'providers') r = Object.assign({}, r, { label: 'Providers' });
+        if (r.id === 'agent-presets') r = Object.assign({}, r, { label: 'Modes' });
+        if (r.id === 'actions' || r.id === 'session-modes') r = Object.assign({}, r, { label: 'Commands' });
+        if (r.id === 'keybinds') r = Object.assign({}, r, { label: 'Keybinds' });
+
+        if (PERSONALIZATION_IDS.has(r.id)) {
+          personalRows.push(r);
+        } else if (CUSTOMIZATION_IDS.has(r.id)) {
+          customRows.push(r);
+        } else if (INTEGRATION_IDS.has(r.id)) {
+          integRows.push(r);
+        } else {
+          otherRows.push(r);
+        }
+      }
+
+      var navWidthState = React.useState(function () {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          var saved = parseInt(window.localStorage.getItem('dsh_settings_nav_width'), 10);
+          if (!isNaN(saved) && saved >= 120 && saved <= 400) return saved;
+        }
+        return 192;
+      });
+      var navWidth = navWidthState[0], setNavWidth = navWidthState[1];
+
+      var navCollapsedState = React.useState(function () {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          return window.localStorage.getItem('dsh_settings_nav_collapsed') === 'true';
+        }
+        return false;
+      });
+      var isNavCollapsed = navCollapsedState[0], setIsNavCollapsed = navCollapsedState[1];
+
+      var isResizingState = React.useState(false);
+      var isResizing = isResizingState[0], setIsResizing = isResizingState[1];
+
+      var dialogPosState = React.useState({ x: 0, y: 0 });
+      var dialogPos = dialogPosState[0], setDialogPos = dialogPosState[1];
+
+      // Drag modal window handler
+      var handleHeaderPointerDown = function (e) {
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('a')) return;
+        e.preventDefault();
+        var startX = e.clientX - dialogPos.x;
+        var startY = e.clientY - dialogPos.y;
+
+        var onMove = function (moveEv) {
+          setDialogPos({
+            x: moveEv.clientX - startX,
+            y: moveEv.clientY - startY,
+          });
+        };
+        var onUp = function () {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+        };
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+      };
+
+      // Resize nav width handler
+      var handleResizePointerDown = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsResizing(true);
+        var startX = e.clientX;
+        var startW = isNavCollapsed ? 56 : navWidth;
+
+        var onMove = function (moveEv) {
+          var delta = moveEv.clientX - startX;
+          var nextW = Math.max(130, Math.min(380, startW + delta));
+          setNavWidth(nextW);
+          if (isNavCollapsed && nextW > 90) {
+            setIsNavCollapsed(false);
+            if (typeof window !== 'undefined' && window.localStorage) {
+              window.localStorage.setItem('dsh_settings_nav_collapsed', 'false');
+            }
+          }
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('dsh_settings_nav_width', String(nextW));
+          }
+        };
+        var onUp = function () {
+          setIsResizing(false);
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+        };
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+      };
+
+      var toggleNavCollapse = function (e) {
+        e.stopPropagation();
+        setIsNavCollapsed(function (prev) {
+          var next = !prev;
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('dsh_settings_nav_collapsed', next ? 'true' : 'false');
+          }
+          return next;
+        });
+      };
+
+      var collapsedGroupsState = React.useState({});
+      var collapsedGroups = collapsedGroupsState[0], setCollapsedGroups = collapsedGroupsState[1];
+
+      function toggleGroup(groupName) {
+        setCollapsedGroups(function (s) {
+          var n = Object.assign({}, s);
+          n[groupName] = !n[groupName];
+          return n;
+        });
+      }
+
+      function renderNavRow(row) {
+        return h('button', {
+          key: row.id,
+          type: 'button',
+          title: isNavCollapsed ? row.label : undefined,
+          className: 'dsh-tw-navCell' + (row.id === active ? ' dsh-tw-active' : ''),
+          'aria-current': row.id === active ? 'true' : undefined,
+          onClick: function () { onSelect(row.id); },
+        },
+          navGlyph(renderSlot, row),
+          !isNavCollapsed ? h('span', { className: 'dsh-tw-navLabel' }, row.label) : null);
+      }
+
+      function renderGroupHeader(label, count) {
+        if (isNavCollapsed) return null;
+        var isCollapsed = Boolean(collapsedGroups[label]);
+        return h('button', {
+          key: 'header-' + label,
+          type: 'button',
+          className: 'dsh-tw-navGroupHeader',
+          onClick: function () { toggleGroup(label); },
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            width: '100%',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.6px',
+            color: 'var(--dsw-alias-label-tertiary, #888)',
+            textTransform: 'uppercase',
+            padding: '10px 10px 4px 10px',
+            cursor: 'pointer',
+            textAlign: 'left',
+            userSelect: 'none',
+            marginTop: '4px',
+            transition: 'color 120ms ease',
+          },
+          onMouseEnter: function (e) { e.currentTarget.style.color = 'var(--dsw-alias-label-primary)'; },
+          onMouseLeave: function (e) { e.currentTarget.style.color = 'var(--dsw-alias-label-tertiary, #888)'; },
+        },
+          h('span', {
+            style: {
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '14px',
+              height: '14px',
+              transition: 'transform 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)',
+              color: 'inherit',
+            },
+          }, h(TriangleRightFill14, { size: 10 })),
+          h('span', { style: { flex: 1 } }, label),
+          count ? h('span', { style: { fontSize: '10px', opacity: 0.6, fontWeight: 600 } }, count) : null
+        );
+      }
+
+      var currentNavWidth = isNavCollapsed ? 56 : navWidth;
+
+      return h('div', {
+        className: 'dsh-tw-panel',
+        role: 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': titleId,
+        style: {
+          transform: 'translate(' + dialogPos.x + 'px, ' + dialogPos.y + 'px)',
+        },
+      },
+        h('nav', {
+          className: 'dsh-tw-nav' + (isNavCollapsed ? ' dsh-tw-navCollapsed' : ''),
+          style: { width: currentNavWidth + 'px' },
+        },
+          h('div', {
+            className: 'dsh-tw-navTitleRow dsh-tw-draggableHeader',
+            onPointerDown: handleHeaderPointerDown,
+          },
+            !isNavCollapsed ? h('div', { className: 'dsh-tw-navTitle', id: titleId }, renderSlot('settings.header', {})) : null,
+            h('button', {
+              type: 'button',
+              className: 'dsh-tw-navCollapseBtn',
+              title: isNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar',
+              onClick: toggleNavCollapse,
+            }, h(P.IconSideBarOutline16, { size: 16 }))
+          ),
+          h('div', { className: 'dsh-tw-navList' },
+            personalRows.length > 0 ? renderGroupHeader('Personalization', personalRows.length) : null,
+            !collapsedGroups['Personalization'] ? personalRows.map(renderNavRow) : null,
+            customRows.length > 0 ? renderGroupHeader('Customization', customRows.length) : null,
+            !collapsedGroups['Customization'] ? customRows.map(renderNavRow) : null,
+            integRows.length > 0 ? renderGroupHeader('Integrations', integRows.length) : null,
+            !collapsedGroups['Integrations'] ? integRows.map(renderNavRow) : null,
+            otherRows.length > 0 ? renderGroupHeader('Other', otherRows.length) : null,
+            !collapsedGroups['Other'] ? otherRows.map(renderNavRow) : null
+          ),
+          h('div', {
+            className: 'dsh-tw-navResizer' + (isResizing ? ' dsh-tw-resizing' : ''),
+            onPointerDown: handleResizePointerDown,
+            title: 'Drag to resize settings sidebar',
+          })
+        ),
+        h('div', { className: 'dsh-tw-content' },
+          h('div', {
+            className: 'dsh-tw-header dsh-tw-draggableHeader',
+            onPointerDown: handleHeaderPointerDown,
+          },
+            h('div', { className: 'dsh-tw-actions' }, renderSlot('settings.action', {})),
+            h('button', { ref: closeButton, type: 'button', className: 'dsh-tw-close', onClick: onClose },
+              h(P.IconCloseOutline16, { size: 14 }),
+              h('span', { className: 'dsh-tw-hiddenLabel' }, renderSlot('settings.close', {})))),
+          h('div', { className: 'dsh-tw-options' },
+            active !== undefined
+              ? renderSlot('settings.section', { close: onClose, openSection: openSection }, { only: active })
+              : null))
+      );
+    }
+
+    function TweaksSettingsRoot(props) {
+      var wide = Boolean(props && props.wide);
+      var useSections = props && props.useSections;
+      var useOnboardingSteps = props && props.useOnboardingSteps;
+      var useSessions = props && props.useSessions;
+      var renderSlot = props && props.renderSlot;
+
+      var openState = React.useState(false);
+      var open = openState[0], setOpen = openState[1];
+      var activeState = React.useState(undefined);
+      var activeId = activeState[0], setActiveId = activeState[1];
+      var completedState = React.useState(function () { return new Set(); });
+      var completedOnboarding = completedState[0], setCompletedOnboarding = completedState[1];
+
+      var close = React.useCallback(function () {
+        setOpen(false);
+        setActiveId(undefined);
+      }, []);
+      var openSection = React.useCallback(function (id) {
+        setActiveId(id);
+        setOpen(true);
+      }, []);
+
+      React.useEffect(function () {
+        var onOpenSettings = function (e) {
+          var sec = (e && e.detail && e.detail.section) ? e.detail.section : undefined;
+          if (sec) setActiveId(sec);
+          setOpen(true);
+        };
+        window.addEventListener('dsh:open-settings', onOpenSettings);
+        return function () {
+          window.removeEventListener('dsh:open-settings', onOpenSettings);
+        };
+      }, []);
+
+      var rawRows = [];
+      if (typeof useSections === 'function') {
+        try { rawRows = useSections(function (s) { return s; }) || []; } catch (err) {}
+      }
+      var SUPPRESSED_SECTIONS = new Set(['provider-status', 'provider-usage', 'keychain', 'integrations']);
+      var rows = rawRows.filter(function (r) { return r && !SUPPRESSED_SECTIONS.has(r.id); });
+
+      var onboardingSteps = [];
+      if (typeof useOnboardingSteps === 'function') {
+        try { onboardingSteps = useOnboardingSteps(function (s) { return s; }) || []; } catch (err) {}
+      }
+
+      var onboardingActive = false;
+      if (typeof useSessions === 'function') {
+        try {
+          onboardingActive = useSessions(function (state) {
+            return state && state.phase === 'ready'
+              && (state.current === undefined || (state.byId && state.byId[state.current] && state.byId[state.current].blank === true));
+          });
+        } catch (err) {}
+      }
+
+      var onboardingStep;
+      if (onboardingActive) {
+        for (var i = 0; i < onboardingSteps.length; i++) {
+          if (!completedOnboarding.has(onboardingSteps[i].id)) { onboardingStep = onboardingSteps[i]; break; }
+        }
+      }
+
+      React.useEffect(function () {
+        if (onboardingActive) return;
+        setCompletedOnboarding(new Set());
+      }, [onboardingActive]);
+
+      var completeOnboardingStep = React.useCallback(function (id) {
+        setCompletedOnboarding(function (previous) {
+          if (previous.has(id)) return previous;
+          var next = new Set(previous);
+          next.add(id);
+          return next;
+        });
+      }, []);
+
+      return h(Fragment, null,
+        h('button', {
+          type: 'button',
+          className: 'dsh-tw-trigger' + (!wide ? ' dsh-tw-rail' : ''),
+          'aria-haspopup': 'dialog',
+          'aria-expanded': open,
+          'data-action': 'open-settings',
+          title: 'Settings',
+          onClick: function () {
+            setOpen(true);
+          },
+        },
+          (renderSlot && typeof renderSlot === 'function')
+            ? renderSlot('settings.trigger', { wide: wide })
+            : h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '8px' } },
+                h(P.IconSettingsOutline16, { size: wide ? 16 : 18 }),
+                wide ? h('span', { className: 'dsh-tw-triggerLabel' }, 'Settings') : null
+              )
+        ),
+        open
+          ? h(P.Modal, {
+            open: true,
+            onClose: close,
+            headless: true,
+            title: 'Settings',
+          }, h(SettingsPanel, { rows: rows, renderSlot: renderSlot, activeId: activeId, onSelect: setActiveId, onClose: close, openSection: openSection }))
+          : null,
+        (onboardingStep !== undefined && renderSlot && typeof renderSlot === 'function')
+          ? renderSlot('settings.onboarding', {
+            stepId: onboardingStep.id,
+            complete: function () { completeOnboardingStep(onboardingStep.id); },
+            openSection: openSection,
+          }, { only: onboardingStep.id })
+          : null);
+    }
+
+    // Ledger -> nav-row / coordinator projections as observable sources (uSES
+    // contract: getSnapshot returns the cached rows until the ledger or the
+    // locale revision moves). Ported from ui-settings-general's apply.
+    function makeShellInjected(ctx) {
+      var rowsVersion = -1;
+      var rowsRevision = -1;
+      var rows = [];
+      var onboardingVersion = -1;
+      var onboardingSteps = [];
+      return function () {
+        return {
+          hooks: {
+            sections: {
+              getSnapshot: function () {
+                var version = ctx.slots.getVersion('settings.section');
+                var revision = ctx.locale.getSnapshot().revision;
+                if (version !== rowsVersion || revision !== rowsRevision) {
+                  rowsVersion = version;
+                  rowsRevision = revision;
+                  rows = ctx.slots.entries('settings.section')
+                    .map(function (e) {
+                      var lbl = '';
+                      try {
+                        if (typeof e.options.label === 'function') lbl = e.options.label();
+                        else if (typeof e.options.label === 'string') lbl = e.options.label;
+                        else if (resolveSlotLabel) lbl = resolveSlotLabel(e.options.label);
+                      } catch (err) {
+                        lbl = e.options.id || '';
+                      }
+                      return {
+                        id: e.options.id !== undefined ? e.options.id : '',
+                        order: e.options.order !== undefined ? e.options.order : 0,
+                        label: lbl || e.options.id || '',
+                      };
+                    })
+                    .sort(function (a, b) { return a.order - b.order; });
+                }
+                return rows;
+              },
+              subscribe: function (listener) {
+                var offLedger = ctx.slots.subscribe('settings.section', listener);
+                var offLocale = ctx.locale.subscribe(listener);
+                return function () { offLedger(); offLocale(); };
+              },
+            },
+            onboardingSteps: {
+              getSnapshot: function () {
+                var version = ctx.slots.getVersion('settings.onboarding');
+                if (version !== onboardingVersion) {
+                  onboardingVersion = version;
+                  onboardingSteps = ctx.slots.entries('settings.onboarding')
+                    .map(function (e) {
+                      return {
+                        id: e.options.id !== undefined ? e.options.id : '',
+                        order: e.options.order !== undefined ? e.options.order : 0,
+                      };
+                    })
+                    .sort(function (a, b) { return a.order - b.order; });
+                }
+                return onboardingSteps;
+              },
+              subscribe: function (listener) {
+                return ctx.slots.subscribe('settings.onboarding', listener);
+              },
+            },
+          },
+        };
+      };
+    }
+
+    function apply(ctx) {
+      ctx.effect(function () { ctx.locale.register('sidebar', { zh: SIDEBAR_ZH, en: SIDEBAR_EN }); }, 'dsh-tweaks: sidebar dictionaries');
+      ctx.effect(function () { ctx.locale.register('settings', { zh: SETTINGS_ZH, en: SETTINGS_EN }); }, 'dsh-tweaks: settings dictionaries');
+
+      var tSettings = ctx.locale.bind('settings');
+      var connection = ctx.get('connection');
+      var documentController = connection && connection.api ? new SettingsDocumentStore(connection.api) : undefined;
+      var documentInjected = documentController === undefined
+        ? undefined
+        : (function () {
+          var useSnapshot = bindSnapshotSelector(documentController.observable);
+          return function () { return { controller: documentController, useSnapshot: useSnapshot }; };
+        })();
+      ctx.effect(function () {
+        ctx.on('connection/reset', function () { refreshDocumentIfLoaded(documentController); });
+      }, 'dsh-tweaks: metadata invalidations');
+
+      var startSession = function (workspaceId) { ctx.workspaces.startSession(workspaceId); };
+      var sidebarInjected = function () {
+        return {
+          startSession: startSession,
+          toggleSidebar: function () { ctx.layout.toggleSidebar(); },
+          useSessions: function (selector) {
+            var s = ctx.get('sessions') || ctx.sessions;
+            return s ? s.useSessions(selector) : { byId: {}, order: [], phase: 'ready' };
+          },
+        };
+      };
+      ctx.slots.inject('sidebar', function () {
+        return ctx.slots.register({
+          name: 'sidebar',
+          priority: -10,
+          locale: 'sidebar',
+          children: {
+            'sidebar.workspaces': { kind: 'single', scope: 'root' },
+            'sidebar.settings': { kind: 'single', scope: 'root' },
+            'sidebar.footer.action': { kind: 'list', scope: 'root' },
+            'sidebar.newSession': { kind: 'single', scope: 'root' },
+            'sidebar.history': { kind: 'single', scope: 'root' },
+          },
+          inject: sidebarInjected,
+        }, TweaksSidebarRoot);
+      }, 'dsh-tweaks: sidebar registration');
+
+      ctx.slots.inject('sidebar.newSession', function () {
+        return ctx.slots.register({
+          name: 'sidebar.newSession',
+          locale: 'sidebar',
+          inject: function () { return { startSession: startSession }; },
+        }, NewSessionButton);
+      }, 'dsh-tweaks: new session content');
+
+      ctx.slots.inject('sidebar.settings', function () {
+        return ctx.slots.register({
+          name: 'sidebar.settings',
+          priority: -10,
+          children: {
+            'settings.trigger': { kind: 'single', scope: 'root' },
+            'settings.header': { kind: 'single', scope: 'root' },
+            'settings.action': { kind: 'list', scope: 'root' },
+            'settings.close': { kind: 'single', scope: 'root' },
+            'settings.section': { kind: 'list', scope: 'root' },
+            'settings.onboarding': { kind: 'list', scope: 'root' },
+            'settings.section.icon': { kind: 'list', scope: 'root' },
+          },
+          inject: makeShellInjected(ctx),
+        }, TweaksSettingsRoot);
+      }, 'dsh-tweaks: settings shell');
+
+      ctx.slots.inject('settings.trigger', function () {
+        return ctx.slots.register({ name: 'settings.trigger', locale: 'settings' }, TriggerContent);
+      }, 'dsh-tweaks: trigger content');
+      ctx.slots.inject('settings.header', function () {
+        return ctx.slots.register({ name: 'settings.header', locale: 'settings' }, HeaderContent);
+      }, 'dsh-tweaks: header content');
+      ctx.slots.inject('settings.close', function () {
+        return ctx.slots.register({ name: 'settings.close', locale: 'settings' }, CloseLabel);
+      }, 'dsh-tweaks: close label');
+      if (documentInjected !== undefined) {
+        ctx.slots.inject('settings.action', function () {
+          return ctx.slots.register({
+            name: 'settings.action',
+            id: 'open-document',
+            order: 0,
+            locale: 'settings',
+            inject: documentInjected,
+          }, SettingsDocumentAction);
+        }, 'dsh-tweaks: open-document action');
+      }
+      ctx.slots.inject('settings.section', function () {
+        return ctx.slots.register({
+          name: 'settings.section',
+          id: 'general',
+          priority: -10,
+          order: 0,
+          label: function () { return tSettings('general.nav'); },
+          locale: 'settings',
+          children: { 'settings.general.item': { kind: 'list', scope: 'root' } },
+        }, GeneralSection);
+      }, 'dsh-tweaks: general section');
+
+      ctx.slots.inject('settings.section', function () {
+        return ctx.slots.register({
+          name: 'settings.section',
+          id: 'keybinds',
+          priority: -10,
+          order: 35,
+          label: function () { return 'Keybinds'; },
+          inject: function () { return {}; },
+        }, KeybindsSettingsSection);
+      }, 'dsh-tweaks: keybinds section');
+
+      // Harness-owned sections cannot register a glyph from their own bundles
+      // (the harness checkout is kept pristine), so dsh-tweaks owns the three
+      // mark seats — models, plugins, agent-presets — under the shared
+      // settings.section.icon seat keyed by section id.
+      function GeneralGlyph() { return navIcon('general'); }
+      function ModelsGlyph() { return navIcon('models'); }
+      function PluginsGlyph() { return navIcon('plugins'); }
+      function AgentPresetsGlyph() { return navIcon('agent-presets'); }
+      function KeybindsGlyph() { return navIcon('keybinds'); }
+      function harnessGlyph(id, component) {
+        return function () {
+          return ctx.slots.register({
+            name: 'settings.section.icon',
+            id: id,
+            priority: -10,
+            order: 0,
+          }, component);
+        };
+      }
+      ctx.slots.inject('settings.section.icon', harnessGlyph('general', GeneralGlyph), 'dsh-tweaks: general nav glyph');
+      ctx.slots.inject('settings.section.icon', harnessGlyph('keybinds', KeybindsGlyph), 'dsh-tweaks: keybinds nav glyph');
+      ctx.slots.inject('settings.section.icon', harnessGlyph('plugins', PluginsGlyph), 'dsh-tweaks: plugins nav glyph');
+      ctx.slots.inject('settings.section.icon', harnessGlyph('agent-presets', AgentPresetsGlyph), 'dsh-tweaks: agent presets nav glyph');
+
+      // 1. Session header utilities: 3-dots with View Switcher and Download Log
+      function SessionHeaderUtilities(props) {
+        var sessionId = props.sessionId;
+        var useSession = props.useSession;
+        var actions = props.actions;
+        var session = (typeof useSession === 'function') ? useSession(function (s) { return s; }) : null;
+        var currentView = session && session.view ? session.view : 'chat';
+        var isTrajectory = currentView === 'trajectory';
+        var menuState = React.useState(false);
+        var menuOpen = menuState[0], setMenuOpen = menuState[1];
+        var busyState = React.useState(false);
+        var busy = busyState[0], setBusy = busyState[1];
+
+        var handleToggleView = function () {
+          setMenuOpen(false);
+          var nextView = isTrajectory ? 'chat' : 'trajectory';
+          if (actions && typeof actions.setView === 'function') {
+            actions.setView(nextView);
+          } else {
+            window.dispatchEvent(new CustomEvent('dsh:set-session-view', { detail: { sessionId: sessionId, view: nextView } }));
+          }
+        };
+
+        var handleDownloadLog = function () {
+          setMenuOpen(false);
+          setBusy(true);
+          try {
+            var exportUrl = '/api/session.export?id=' + encodeURIComponent(sessionId || '');
+            var a = document.createElement('a');
+            a.href = exportUrl;
+            a.download = (sessionId || 'session') + '.jsonl';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+              if (a.parentNode) a.parentNode.removeChild(a);
+              setBusy(false);
+            }, 1000);
+          } catch (e) {
+            setBusy(false);
+          }
+        };
+
+        var items = [
+          {
+            id: 'toggle-view',
+            label: isTrajectory ? 'Switch to Chat View' : 'Switch to Trajectory View',
+            icon: h(isTrajectory ? P.IconChatOutline16 : P.IconBranchOutline16, { size: 14 }),
+          },
+          {
+            id: 'download-log',
+            label: busy ? 'Exporting log…' : 'Download Session Log',
+            icon: h(P.IconDownloadOutline16, { size: 14 }),
+            disabled: busy,
+          },
+        ];
+
+        return h(Fragment, null,
+          h('div', { style: { position: 'relative', display: 'inline-flex', alignItems: 'center' } },
+            h('button', {
+              type: 'button',
+              className: 'dsh-header-ellipsis-btn',
+              title: 'Session Options (…)',
+              'aria-label': 'Session Options',
+              style: {
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                border: 'none',
+                background: menuOpen ? 'var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.08))' : 'transparent',
+                color: 'var(--dsw-alias-label-secondary)',
+                cursor: 'pointer',
+                transition: 'background 100ms, color 100ms',
+              },
+              onClick: function (e) {
+                e.stopPropagation();
+                setMenuOpen(!menuOpen);
+              },
+            }, h(P.IconEllipsisOutline16, { size: 16 })),
+            menuOpen ? h(SelectDropdownMenu, {
+              open: true,
+              align: 'right',
+              onClose: function () { setMenuOpen(false); },
+              items: items,
+              onSelect: function (id) {
+                if (id === 'toggle-view') handleToggleView();
+                else if (id === 'download-log') handleDownloadLog();
+              },
+            }) : null
+          )
+        );
+      }
+
+      ctx.slots.inject('conversation.session.header.utilities', function () {
+        return ctx.slots.register({
+          name: 'conversation.session.header.utilities',
+          id: 'dsh-session-utilities',
+          priority: -10,
+          order: 0,
+        }, SessionHeaderUtilities);
+      }, 'dsh-tweaks: 3-dots session header utilities');
+
+      // 2. Subagents Dock above input bar
+      function SubagentsDock(props) {
+        var sessionId = props.sessionId;
+        var useSessions = props.useSessions;
+        var openChild = props.openChild;
+        var sessionsState = (typeof useSessions === 'function') ? useSessions(function (s) { return s; }) : null;
+        var subagentsMap = sessionsState && sessionsState.subagentsByParent ? sessionsState.subagentsByParent : {};
+        var rawSubagents = (sessionId && subagentsMap[sessionId]) ? subagentsMap[sessionId].entries || [] : [];
+        var summaries = sessionsState && sessionsState.summaries ? sessionsState.summaries : {};
+        
+        var collapsedState = React.useState(true);
+        var collapsed = collapsedState[0], setCollapsed = collapsedState[1];
+
+        if (!rawSubagents || rawSubagents.length === 0) return null;
+
+        var runningCount = 0;
+        var completedCount = 0;
+        var childList = rawSubagents.map(function (entry) {
+          var cId = entry.childSessionId || entry.id;
+          var summary = summaries[cId] || {};
+          var title = summary.displayTitle || summary.title || entry.name || entry.role || ('Subagent ' + (cId ? cId.slice(0, 6) : ''));
+          var isRunning = entry.activity === 'running' || summary.status === 'running';
+          if (isRunning) runningCount++;
+          else completedCount++;
+          return {
+            id: cId,
+            title: title,
+            isRunning: isRunning,
+            address: entry.address || { parentSessionId: sessionId, childSessionId: cId },
+          };
+        });
+
+        var progressParts = [];
+        if (runningCount > 0) progressParts.push(runningCount + ' active');
+        if (completedCount > 0) progressParts.push(completedCount + ' completed');
+        var progressStr = progressParts.join(' · ') || (childList.length + ' subagents');
+
+        return h('section', {
+          className: 'dsh-subagents-dock',
+          style: {
+            boxSizing: 'border-box',
+            flex: 'none',
+            overflow: 'hidden',
+            margin: '0 auto 6px auto',
+            width: 'calc(100% - 24px)',
+            maxWidth: '776px',
+            border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))',
+            borderRadius: '12px',
+            background: 'var(--dsw-specific-tip, rgba(30,30,30,0.85))',
+          },
+        },
+          h('div', {
+            className: 'dsh-subagents-dock-header',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              height: '36px',
+              padding: '0 12px',
+              border: 'none',
+              background: 'transparent',
+              cursor: 'pointer',
+              userSelect: 'none',
+              boxSizing: 'border-box',
+            },
+            onClick: function () { setCollapsed(!collapsed); },
+          },
+            h(P.IconGoalOutline16, { size: 14, style: { color: 'var(--dsw-alias-label-secondary)' } }),
+            h('span', { style: { fontSize: '13px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Subagents'),
+            h('span', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)', marginLeft: '4px' } }, progressStr),
+            h('span', {
+              style: {
+                marginLeft: 'auto',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '16px',
+                height: '16px',
+                transition: 'transform 150ms ease',
+                transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+                color: 'var(--dsw-alias-label-tertiary)',
+              },
+            }, h(TriangleRightFill14, { size: 10 }))
+          ),
+          !collapsed ? h('div', {
+            className: 'dsh-subagents-dock-body',
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              padding: '4px 12px 10px 12px',
+              borderTop: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))',
+            },
+          },
+            childList.map(function (sub) {
+              return h('div', {
+                key: sub.id,
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12.5px',
+                  color: 'var(--dsw-alias-label-primary)',
+                  transition: 'background 100ms',
+                },
+                className: 'dsh-subagent-dock-row',
+                onClick: function (e) {
+                  e.stopPropagation();
+                  if (openChild) openChild(sub.address);
+                  else window.dispatchEvent(new CustomEvent('dsh:open-session', { detail: { sessionId: sub.id } }));
+                },
+              },
+                h('span', {
+                  style: {
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: sub.isRunning ? 'var(--dsw-alias-state-success-primary, #22c55e)' : 'var(--dsw-alias-label-tertiary, #888)',
+                    boxShadow: sub.isRunning ? '0 0 6px rgba(34,197,94,0.6)' : 'none',
+                  },
+                }),
+                h('span', { style: { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, sub.title),
+                h('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-tertiary)' } }, sub.isRunning ? 'running' : 'completed')
+              );
+            })
+          ) : null
+        );
+      }
+
+      ctx.slots.inject('conversation.input.dock', function () {
+        return ctx.slots.register({
+          name: 'conversation.input.dock',
+          id: 'dsh-subagents-dock',
+          order: 5,
+          inject: function () {
+            return {
+              openChild: function (address) {
+                if (ctx.sessions && typeof ctx.sessions.openSubagent === 'function') {
+                  ctx.sessions.openSubagent(address);
+                } else if (address && address.childSessionId) {
+                  window.dispatchEvent(new CustomEvent('dsh:open-session', { detail: { sessionId: address.childSessionId } }));
+                }
+              },
+            };
+          },
+        }, SubagentsDock);
+      }, 'dsh-tweaks: subagents dock above input bar');
+
+      // 3. Shadow header subagent catalog and agent-preset
+      ctx.slots.inject('conversation.session.header.actions', function () {
+        return ctx.slots.register({
+          name: 'conversation.session.header.actions',
+          id: 'subagent-catalog',
+          priority: -20,
+          order: 10,
+        }, function () { return null; });
+      }, 'dsh-tweaks: hide header subagent catalog');
+
+      ctx.slots.inject('conversation.session.header.actions', function () {
+        return ctx.slots.register({
+          name: 'conversation.session.header.actions',
+          id: 'agent-preset',
+          priority: -20,
+          order: -10,
+        }, function () { return null; });
+      }, 'dsh-tweaks: hide header agent-preset');
+
+      // APP-WIDE CUSTOM RIGHT-CLICK CONTEXT MENU ABSTRACTION
+      if (typeof document !== 'undefined') {
+        var oldContainer = document.getElementById('dsh-global-context-menu');
+        if (oldContainer && oldContainer.parentNode) {
+          oldContainer.parentNode.removeChild(oldContainer);
+        }
+        if (window.__dsh_cleanup_context_menu__) {
+          try { window.__dsh_cleanup_context_menu__(); } catch (e) {}
+        }
+
+        var menuContainer = document.createElement('div');
+        menuContainer.id = 'dsh-global-context-menu';
+        menuContainer.style.position = 'fixed';
+        menuContainer.style.zIndex = '9999999';
+        menuContainer.style.display = 'none';
+        document.body.appendChild(menuContainer);
+
+        var closeMenu = function () {
+          menuContainer.style.display = 'none';
+          menuContainer.innerHTML = '';
+        };
+
+        var onKeyDown = function (e) { if (e.key === 'Escape') closeMenu(); };
+        var onContextMenu = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          var icons = {
+            chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            terminal: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+            container: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+            cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+            copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+            paste: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
+            rename: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+            close: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+            appearance: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
+            settings: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+            reload: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+          };
+
+          var x = e.clientX;
+          var y = e.clientY;
+          var selectedText = window.getSelection ? window.getSelection().toString() : '';
+          var targetEl = e.target;
+          var isEditable = targetEl && (targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA' || targetEl.isContentEditable);
+          var sessionEl = targetEl ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]') : null;
+          var workspaceEl = targetEl ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]') : null;
+          var targetSessionId = sessionEl ? (sessionEl.getAttribute('data-session-id') || sessionEl.getAttribute('data-id')) : null;
+          var targetWorkspaceId = workspaceEl ? (workspaceEl.getAttribute('data-workspace-id') || workspaceEl.getAttribute('data-id')) : null;
+
+          var items = [];
+
+          // 1. Contextual Items (Rename / Close / Delete)
+          if (sessionEl) {
+            items.push({
+              id: 'rename-session',
+              label: 'Rename Conversation',
+              icon: icons.rename,
+              action: function () {
+                window.dispatchEvent(new CustomEvent('dsh:rename-session', { detail: { id: targetSessionId } }));
+              }
+            });
+            items.push({
+              id: 'close-session',
+              label: 'Close / Archive Session',
+              icon: icons.close,
+              action: function () {
+                window.dispatchEvent(new CustomEvent('dsh:close-session', { detail: { id: targetSessionId } }));
+              }
+            });
+            items.push({ type: 'divider' });
+          } else if (workspaceEl) {
+            items.push({
+              id: 'rename-workspace',
+              label: 'Rename Workspace',
+              icon: icons.rename,
+              action: function () {
+                window.dispatchEvent(new CustomEvent('dsh:rename-workspace', { detail: { id: targetWorkspaceId } }));
+              }
+            });
+            items.push({
+              id: 'close-workspace',
+              label: 'Close Workspace',
+              icon: icons.close,
+              action: function () {
+                window.dispatchEvent(new CustomEvent('dsh:delete-workspace', { detail: { id: targetWorkspaceId } }));
+              }
+            });
+            items.push({ type: 'divider' });
+          }
+
+          // 2. Clipboard actions
+          if (selectedText) {
+            if (isEditable) {
+              items.push({
+                id: 'cut',
+                label: 'Cut',
+                icon: icons.cut,
+                action: function () {
+                  navigator.clipboard.writeText(selectedText).then(function () {
+                    try { document.execCommand('delete'); } catch (err) {}
+                  });
+                }
+              });
+            }
+            items.push({
+              id: 'copy',
+              label: 'Copy ("' + (selectedText.length > 20 ? selectedText.slice(0, 18) + '…' : selectedText) + '")',
+              icon: icons.copy,
+              action: function () { navigator.clipboard.writeText(selectedText); }
+            });
+          }
+
+          items.push({
+            id: 'paste',
+            label: 'Paste',
+            icon: icons.paste,
+            action: function () {
+              navigator.clipboard.readText().then(function (text) {
+                if (!text) return;
+                try {
+                  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.isContentEditable)) {
+                    document.execCommand('insertText', false, text);
+                  } else {
+                    var activeInput = document.querySelector('textarea, input:focus');
+                    if (activeInput) {
+                      activeInput.value = (activeInput.value || '') + text;
+                      activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                  }
+                } catch (err) {}
+              });
+            }
+          });
+
+          items.push({ type: 'divider' });
+
+          // 3. Main actions
+          items.push({ id: 'chat', label: 'New Conversation', icon: icons.chat, action: function () { startSession(); } });
+          items.push({ id: 'terminal', label: 'New Terminal', icon: icons.terminal, action: function () { window.dispatchEvent(new CustomEvent('dsh:open-terminal', { detail: { session: '0' } })); } });
+          items.push({ id: 'container', label: 'New Container', icon: icons.container, action: function () { window.dispatchEvent(new CustomEvent('dsh:open-container', { detail: { id: null } })); } });
+          items.push({ type: 'divider' });
+
+          items.push({ id: 'appearance', label: 'Appearance & Themes', icon: icons.appearance, action: function () { window.dispatchEvent(new CustomEvent('dsh:open-settings', { detail: { section: 'themes' } })); } });
+          items.push({ id: 'settings', label: 'Settings & Preferences', icon: icons.settings, action: function () { window.dispatchEvent(new CustomEvent('dsh:open-settings', { detail: { section: 'general' } })); } });
+          items.push({ type: 'divider' });
+          items.push({ id: 'reload', label: 'Reload Window', icon: icons.reload, action: function () { window.location.reload(); } });
+
+          menuContainer.innerHTML = '';
+          var menuEl = document.createElement('div');
+          menuEl.style.minWidth = '220px';
+          menuEl.style.background = 'var(--dsw-alias-surface-l0, #181825)';
+          menuEl.style.border = '1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))';
+          menuEl.style.borderRadius = '10px';
+          menuEl.style.boxShadow = '0 12px 36px rgba(0,0,0,0.6)';
+          menuEl.style.padding = '5px';
+          menuEl.style.display = 'flex';
+          menuEl.style.flexDirection = 'column';
+          menuEl.style.gap = '2px';
+          menuEl.style.fontFamily = 'inherit';
+
+          items.forEach(function (item) {
+            if (item.type === 'divider') {
+              var div = document.createElement('div');
+              div.style.height = '1px';
+              div.style.background = 'var(--dsw-alias-border-l1, rgba(128,128,128,0.15))';
+              div.style.margin = '4px 0';
+              menuEl.appendChild(div);
+              return;
+            }
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.gap = '10px';
+            btn.style.width = '100%';
+            btn.style.padding = '8px 12px';
+            btn.style.borderRadius = '6px';
+            btn.style.border = 'none';
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--dsw-alias-label-primary, #fff)';
+            btn.style.fontSize = '13px';
+            btn.style.textAlign = 'left';
+            btn.style.cursor = 'pointer';
+            btn.style.fontFamily = 'inherit';
+
+            btn.onmouseenter = function () { btn.style.background = 'var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))'; };
+            btn.onmouseleave = function () { btn.style.background = 'transparent'; };
+            btn.onclick = function (ev) {
+              ev.stopPropagation();
+              closeMenu();
+              item.action();
+            };
+
+            var iconSpan = document.createElement('span');
+            iconSpan.style.width = '16px';
+            iconSpan.style.height = '16px';
+            iconSpan.style.display = 'inline-flex';
+            iconSpan.style.alignItems = 'center';
+            iconSpan.style.justifyContent = 'center';
+            iconSpan.style.color = 'var(--dsw-alias-label-secondary, #a8a8a8)';
+            iconSpan.innerHTML = item.icon;
+
+            var textSpan = document.createElement('span');
+            textSpan.style.flex = '1';
+            textSpan.textContent = item.label;
+
+            btn.appendChild(iconSpan);
+            btn.appendChild(textSpan);
+            menuEl.appendChild(btn);
+          });
+
+          menuContainer.appendChild(menuEl);
+          menuContainer.style.display = 'block';
+
+          var menuWidth = 220;
+          var menuHeight = 240;
+          var finalX = (x + menuWidth > window.innerWidth) ? (x - menuWidth) : x;
+          var finalY = (y + menuHeight > window.innerHeight) ? (y - menuHeight) : y;
+
+          menuContainer.style.left = Math.max(8, finalX) + 'px';
+          menuContainer.style.top = Math.max(8, finalY) + 'px';
+        };
+
+        document.addEventListener('click', closeMenu);
+        document.addEventListener('scroll', closeMenu, true);
+        window.addEventListener('keydown', onKeyDown);
+        document.addEventListener('contextmenu', onContextMenu, true);
+
+        window.__dsh_cleanup_context_menu__ = function () {
+          document.removeEventListener('click', closeMenu);
+          document.removeEventListener('scroll', closeMenu, true);
+          window.removeEventListener('keydown', onKeyDown);
+          document.removeEventListener('contextmenu', onContextMenu, true);
+        };
+      }
+    }
+    //#endregion
+    exports.apply = apply;
+    exports.inject = ['slots', 'locale', 'layout', 'sessions', 'workspaces', 'connection'];
+    return module.exports;
+  },
+});

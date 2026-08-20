@@ -1,0 +1,4819 @@
+(function () {
+  if (typeof globalThis.crypto === 'undefined') globalThis.crypto = {};
+  if (typeof globalThis.crypto.randomUUID !== 'function') {
+    globalThis.crypto.randomUUID = function () {
+      if (typeof globalThis.crypto.getRandomValues === 'function') {
+        try {
+          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function (c) {
+            return (c ^ (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16);
+          });
+        } catch (e) {}
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    };
+  }
+})();
+
+window.__ModuleLoader__.load({
+  id: "dsh-providers",
+  factory: function (require) {
+    var module = { exports: {} };
+    var exports = module.exports;
+
+    var React = require("react");
+    var h = React.createElement;
+    var Fragment = React.Fragment;
+    var P = require("@deepseek-ai/dsh-client-ui-primitives");
+
+    var NS = "dsh-providers";
+    var VAULT_API = "/vault/api";
+    var QUOTAS_API = "/quotas/api";
+
+    var TREE_STYLES = `
+@keyframes dsh-row-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dsh-tree-projectRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  border-radius: 6px;
+  padding: 0 6px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--dsw-alias-label-primary);
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 12px;
+  transition: background 120ms ease;
+}
+.dsh-tree-projectRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+.dsh-tree-slot {
+  flex: none;
+  width: 16px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dsw-alias-label-tertiary);
+}
+.dsh-tree-projectRow .dsh-tree-chevron,
+.dsh-tree-sessionRow.dsh-has-children .dsh-tree-chevron {
+  display: none;
+}
+.dsh-tree-projectRow:hover .dsh-tree-chevron,
+.dsh-tree-sessionRow.dsh-has-children:hover .dsh-tree-chevron {
+  display: inline-flex;
+}
+.dsh-tree-projectRow:hover .dsh-tree-icon,
+.dsh-tree-sessionRow.dsh-has-children:hover .dsh-tree-icon {
+  display: none;
+}
+.dsh-tree-sessionRow:not(.dsh-has-children) .dsh-tree-chevron {
+  display: none !important;
+}
+.dsh-tree-sessionRow:not(.dsh-has-children) .dsh-tree-icon {
+  display: inline-flex !important;
+}
+.dsh-tree-arrow {
+  transition: transform 150ms var(--ds-ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dsh-tree-arrowOpen {
+  transform: rotate(90deg);
+}
+.dsh-tree-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.dsh-tree-actions {
+  display: none;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  margin-left: auto;
+}
+.dsh-tree-projectRow:hover .dsh-tree-actions,
+.dsh-tree-sessionRow:hover .dsh-tree-actions {
+  display: inline-flex !important;
+}
+.dsh-tree-actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  padding: 0;
+}
+.dsh-tree-actionBtn:hover {
+  background: var(--dsw-alias-button-elevated-fill, rgba(128,128,128,0.25));
+  color: var(--dsw-alias-label-primary);
+}
+.dsh-tree-sessionRow {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  gap: 4px;
+  border-radius: 6px;
+  padding: 0 6px 0 16px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--dsw-alias-label-primary);
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 12px;
+  animation: dsh-row-in 150ms var(--ds-ease-in-out, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: background 100ms;
+}
+.dsh-tree-sessionRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
+}
+.dsh-tree-sessionRowActive,
+.dsh-tree-sessionRowActive:hover {
+  background: var(--dsw-alias-surface-l2, rgba(255, 255, 255, 0.12)) !important;
+}
+[data-slot="conversation.input.model"] button::before,
+[class*="ModelSelect_trigger"]::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  background-color: #ffffff;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.dsh-tree-sessionTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 18px;
+  margin-left: 4px;
+}
+.dsh-term-tabs::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.dsh-term-tabs {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+`;
+
+    var stylesInjected = false;
+    function ensureTreeStyles() {
+      if (stylesInjected || typeof document === 'undefined') return;
+      var el = document.createElement("style");
+      el.textContent = TREE_STYLES;
+      document.head.appendChild(el);
+      stylesInjected = true;
+    }
+
+    var modelDecoratorInstalled = false;
+    function ensureModelPickerDecoration() {
+      if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
+      if (modelDecoratorInstalled) return;
+      modelDecoratorInstalled = true;
+
+      var getFavoriteModels = function () {
+        try {
+          var raw = window.localStorage.getItem('dsh_favorite_models');
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      };
+
+      var setFavoriteModels = function (favs) {
+        try {
+          window.localStorage.setItem('dsh_favorite_models', JSON.stringify(favs));
+        } catch (e) {}
+      };
+
+      var CUBE_WIRE_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="dsh-cube-wire-icon" style="margin-right: 6px; flex-shrink: 0; display: inline-flex; vertical-align: middle;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+
+      var STAR_GRAY_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+      var STAR_GOLD_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+      var updateTimer = null;
+      var scheduleUpdate = function () {
+        if (updateTimer) clearTimeout(updateTimer);
+        updateTimer = setTimeout(updateModelDecorations, 100);
+      };
+
+      var updateModelDecorations = function () {
+        // 1. Remove old inline brand icons if any
+        var oldBrandIcons = document.querySelectorAll('.dsh-prov-brand-icon');
+        oldBrandIcons.forEach(function (icon) { icon.remove(); });
+
+        // 2. Decorate model dropdown options with Star/Favorite buttons and build Favorites group at top
+        var modelMenus = document.querySelectorAll('[role="menu"][id*="menu"], [class*="ModelSelect_menu"]');
+        modelMenus.forEach(function (menu) {
+          var options = menu.querySelectorAll('button[role="menuitemradio"], button[class*="option"]');
+          if (options.length === 0) return;
+
+          var favs = getFavoriteModels();
+          var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
+          var favOptionsMap = {};
+
+          options.forEach(function (opt) {
+            if (opt.closest('.dsh-favorites-group')) return;
+
+            var modelNameEl = opt.querySelector('[class*="modelName"]') || opt;
+            var modelKey = (opt.getAttribute('title') || modelNameEl.textContent || '').trim();
+            if (!modelKey) return;
+
+            var isFav = favs.indexOf(modelKey) !== -1;
+            if (isFav) {
+              favOptionsMap[modelKey] = opt;
+            }
+
+            var starBtn = opt.querySelector('.dsh-model-star-btn');
+            if (!starBtn) {
+              starBtn = document.createElement('button');
+              starBtn.type = 'button';
+              starBtn.className = 'dsh-model-star-btn';
+              starBtn.style.border = 'none';
+              starBtn.style.background = 'transparent';
+              starBtn.style.padding = '2px 6px';
+              starBtn.style.cursor = 'pointer';
+              starBtn.style.marginLeft = 'auto';
+              starBtn.style.marginRight = '4px';
+              starBtn.style.display = 'inline-flex';
+              starBtn.style.alignItems = 'center';
+              starBtn.style.justifyContent = 'center';
+              starBtn.style.flexShrink = '0';
+              starBtn.style.zIndex = '3';
+
+              starBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var currentFavs = getFavoriteModels();
+                var idx = currentFavs.indexOf(modelKey);
+                if (idx === -1) currentFavs.push(modelKey);
+                else currentFavs.splice(idx, 1);
+                setFavoriteModels(currentFavs);
+                scheduleUpdate();
+              });
+
+              var checkEl = opt.querySelector('[class*="check"]');
+              if (checkEl) {
+                opt.insertBefore(starBtn, checkEl);
+              } else {
+                opt.appendChild(starBtn);
+              }
+            }
+
+            starBtn.title = isFav ? 'Remove from Favorites' : 'Add to Favorites';
+            starBtn.style.color = isFav ? '#eab308' : 'var(--dsw-alias-label-tertiary, #888)';
+            starBtn.innerHTML = isFav ? STAR_GOLD_SVG : STAR_GRAY_SVG;
+          });
+
+          // Build or update Favorites section at top of menu
+          var existingFavGroup = groupsContainer.querySelector('.dsh-favorites-group');
+          var favKeys = Object.keys(favOptionsMap);
+
+          if (favKeys.length === 0) {
+            if (existingFavGroup) existingFavGroup.remove();
+          } else {
+            if (!existingFavGroup) {
+              existingFavGroup = document.createElement('section');
+              existingFavGroup.className = 'dsh-favorites-group';
+              existingFavGroup.setAttribute('role', 'group');
+              existingFavGroup.style.display = 'flex';
+              existingFavGroup.style.flexDirection = 'column';
+              existingFavGroup.style.marginBottom = '8px';
+              existingFavGroup.style.paddingBottom = '6px';
+              existingFavGroup.style.borderBottom = '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))';
+
+              var titleDiv = document.createElement('div');
+              titleDiv.className = 'dsh-favorites-title';
+              titleDiv.style.padding = '4px 12px 2px';
+              titleDiv.style.fontSize = '10.5px';
+              titleDiv.style.fontWeight = '700';
+              titleDiv.style.color = '#eab308';
+              titleDiv.style.textTransform = 'uppercase';
+              titleDiv.style.letterSpacing = '0.5px';
+              titleDiv.style.display = 'flex';
+              titleDiv.style.alignItems = 'center';
+              titleDiv.style.gap = '4px';
+              titleDiv.innerHTML = '<span>★ Favorites</span>';
+              existingFavGroup.appendChild(titleDiv);
+
+              groupsContainer.insertBefore(existingFavGroup, groupsContainer.firstChild);
+            }
+
+            var oldClones = existingFavGroup.querySelectorAll('.dsh-fav-cloned-option');
+            oldClones.forEach(function (c) { c.remove(); });
+
+            favKeys.forEach(function (key) {
+              var origOpt = favOptionsMap[key];
+              if (!origOpt) return;
+              var clone = origOpt.cloneNode(true);
+              clone.className = origOpt.className + ' dsh-fav-cloned-option';
+              clone.addEventListener('click', function () {
+                origOpt.click();
+              });
+
+              var cloneStar = clone.querySelector('.dsh-model-star-btn');
+              if (cloneStar) {
+                cloneStar.addEventListener('click', function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  var currentFavs = getFavoriteModels();
+                  var idx = currentFavs.indexOf(key);
+                  if (idx !== -1) {
+                    currentFavs.splice(idx, 1);
+                    setFavoriteModels(currentFavs);
+                    scheduleUpdate();
+                  }
+                });
+              }
+              existingFavGroup.appendChild(clone);
+            });
+          }
+        });
+      };
+
+      var observer = new MutationObserver(scheduleUpdate);
+      if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+      scheduleUpdate();
+    }
+
+    var PROVIDERS_CATALOG = [
+      {
+        id: "antigravity",
+        name: "Google Antigravity",
+        category: "ai",
+        description: "Google Antigravity project credentials & multi-model quota pools",
+        prefixes: ["ANTIGRAVITY_"],
+        defaultKeys: ["ANTIGRAVITY_PROJECT"],
+        probeIds: ["antigravity-sub"],
+        oauthProviderId: null,
+        hasSubscription: true,
+        hasDualAntigravityQuotas: true,
+        models: [
+          { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash", context: "1M", tags: ["Reasoning", "Agentic Coding", "Multimodal"], isDefault: true },
+          { id: "gemini-3.6-flash", name: "Gemini 3.6 Flash", context: "1M", tags: ["Fast", "Multimodal", "Tools"] },
+          { id: "gemini-3.1-pro", name: "Gemini 3.1 Pro", context: "1M", tags: ["Deep Reasoning", "Architecture", "1M Context"] },
+        ],
+      },
+      {
+        id: "ollama",
+        name: "Ollama (Local Inference)",
+        category: "ai",
+        description: "Local model runner on host (127.0.0.1:11434) running Qwen 2.5/3.8, DeepSeek R1 & Llama 3",
+        prefixes: ["OLLAMA_"],
+        defaultKeys: ["OLLAMA_HOST"],
+        probeIds: ["ollama-local"],
+        oauthProviderId: null,
+        hasSubscription: false,
+        models: [
+          { id: "qwen3.8:27b", name: "Qwen 3.8 27B", context: "262k", tags: ["27.3B Q4_K_M", "Tools", "Thinking", "Vision", "Coding"], isDefault: true },
+        ],
+      },
+      {
+        id: "anthropic",
+        name: "Anthropic / Claude",
+        category: "ai",
+        description: "Claude Code embedded runner, subscription OAuth, and Anthropic API keys",
+        prefixes: ["CLAUDE_", "ANTHROPIC_"],
+        defaultKeys: ["CLAUDE_SUB_OAUTH_TOKEN", "CLAUDE_API_KEY", "ANTHROPIC_API_KEY"],
+        probeIds: ["claude-sub", "anthropic-api"],
+        oauthProviderId: "claude",
+        hasSubscription: true,
+        models: [
+          { id: "claude-3-7-sonnet", name: "Claude 3.7 Sonnet", context: "200k", tags: ["Reasoning", "Coding", "Vision", "Tools"], isDefault: true },
+          { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", context: "200k", tags: ["Coding", "Vision", "Tools"] },
+          { id: "claude-3-5-haiku", name: "Claude 3.5 Haiku", context: "200k", tags: ["Fast", "Tools"] },
+          { id: "claude-3-opus", name: "Claude 3 Opus", context: "200k", tags: ["Reasoning", "Analysis"] },
+        ],
+      },
+      {
+        id: "openai",
+        name: "OpenAI / ChatGPT",
+        category: "ai",
+        description: "ChatGPT Codex subscription tokens and OpenAI platform API keys",
+        prefixes: ["OPENAI_", "CODEX_CHATGPT_"],
+        defaultKeys: ["OPENAI_API_KEY", "CODEX_CHATGPT_ACCESS_TOKEN"],
+        probeIds: ["openai-api"],
+        oauthProviderId: null,
+        hasSubscription: true,
+        models: [
+          { id: "gpt-4o", name: "GPT-4o (Omni)", context: "128k", tags: ["Multimodal", "Fast", "Tools"], isDefault: true },
+          { id: "gpt-4o-mini", name: "GPT-4o Mini", context: "128k", tags: ["Fast", "Lightweight"] },
+          { id: "o1", name: "OpenAI o1", context: "200k", tags: ["Deep Reasoning", "STEM"] },
+          { id: "o3-mini", name: "OpenAI o3-mini", context: "200k", tags: ["Reasoning", "Coding"] },
+        ],
+      },
+      {
+        id: "deepseek",
+        name: "DeepSeek",
+        category: "ai",
+        description: "DeepSeek platform API key (DeepSeek V3 & R1)",
+        prefixes: ["DEEPSEEK_"],
+        defaultKeys: ["DEEPSEEK_API_KEY"],
+        probeIds: ["deepseek-api"],
+        oauthProviderId: null,
+        hasSubscription: false,
+        models: [
+          { id: "deepseek-chat", name: "DeepSeek-V3", context: "64k", tags: ["671B MoE", "Coding", "General"], isDefault: true },
+          { id: "deepseek-reasoner", name: "DeepSeek-R1", context: "64k", tags: ["Reasoning", "Math", "Logic"] },
+        ],
+      },
+      {
+        id: "google",
+        name: "Google Gemini",
+        category: "ai",
+        description: "Google Gemini OAuth tokens and Gemini API keys",
+        prefixes: ["GEMINI_"],
+        defaultKeys: ["GEMINI_SUB_OAUTH_TOKEN", "GEMINI_API_KEY"],
+        probeIds: ["gemini-sub", "gemini-api"],
+        oauthProviderId: null,
+        hasSubscription: true,
+        models: [
+          { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", context: "1M", tags: ["Multimodal", "Realtime", "Tools"], isDefault: true },
+          { id: "gemini-2.0-pro-exp", name: "Gemini 2.0 Pro", context: "2M", tags: ["Complex Reasoning", "Coding"] },
+          { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", context: "2M", tags: ["2M Context", "Analysis"] },
+        ],
+      },
+      {
+        id: "grok",
+        name: "xAI / Grok",
+        category: "ai",
+        description: "Grok subscription OAuth and xAI API keys",
+        prefixes: ["GROK_", "XAI_"],
+        defaultKeys: ["GROK_SUB_OAUTH_TOKEN", "XAI_API_KEY"],
+        probeIds: ["grok-sub", "grok-api"],
+        oauthProviderId: "grok",
+        hasSubscription: true,
+        models: [
+          { id: "grok-2", name: "Grok 2", context: "128k", tags: ["Reasoning", "Realtime Search"], isDefault: true },
+          { id: "grok-2-vision", name: "Grok 2 Vision", context: "32k", tags: ["Vision", "Multimodal"] },
+        ],
+      },
+      {
+        id: "kimi",
+        name: "Moonshot / Kimi",
+        category: "ai",
+        description: "Kimi subscription OAuth and Moonshot API keys",
+        prefixes: ["KIMI_"],
+        defaultKeys: ["KIMI_SUB_OAUTH_TOKEN", "KIMI_API_KEY"],
+        probeIds: ["kimi-sub"],
+        oauthProviderId: "kimi",
+        hasSubscription: true,
+        models: [
+          { id: "kimi-k1.5", name: "Kimi k1.5", context: "128k", tags: ["Long Context", "Reasoning"], isDefault: true },
+          { id: "moonshot-v1-128k", name: "Moonshot v1 128k", context: "128k", tags: ["Analysis"] },
+          { id: "moonshot-v1-32k", name: "Moonshot v1 32k", context: "32k", tags: ["Fast"] },
+        ],
+      },
+      {
+        id: "cursor",
+        name: "Cursor",
+        category: "ai",
+        description: "Cursor subscription token and embedded runner",
+        prefixes: ["CURSOR_"],
+        defaultKeys: ["CURSOR_SUB_TOKEN", "CURSOR_EMAIL"],
+        probeIds: [],
+        oauthProviderId: "cursor",
+        hasSubscription: true,
+        models: [
+          { id: "cursor-fast", name: "Cursor Fast", context: "128k", tags: ["Autocompletion", "Edit"], isDefault: true },
+          { id: "cursor-small", name: "Cursor Small", context: "64k", tags: ["Speed"] },
+        ],
+      },
+      {
+        id: "github",
+        name: "GitHub Platform",
+        category: "platform",
+        description: "GitHub CLI, Copilot bridge, and repository integrations (Account: marius-patrik)",
+        prefixes: ["GITHUB_"],
+        defaultKeys: ["GITHUB_OAUTH_TOKEN", "GITHUB_USER"],
+        probeIds: [],
+        oauthProviderId: "github",
+        hasSubscription: true,
+        models: [
+          { id: "copilot-chat", name: "Copilot Chat", context: "128k", tags: ["Coding", "Workspace"], isDefault: true },
+        ],
+      },
+      {
+        id: "zen",
+        name: "OpenCode Zen",
+        category: "ai",
+        description: "OpenCode Zen API key and smart routing",
+        prefixes: ["ZEN_"],
+        defaultKeys: ["ZEN_API_KEY"],
+        probeIds: ["zen"],
+        oauthProviderId: null,
+        hasSubscription: false,
+        models: [
+          { id: "zen-big-picker", name: "Zen Big Picker", context: "128k", tags: ["Smart Routing"], isDefault: true },
+          { id: "zen-fast", name: "Zen Fast", context: "64k", tags: ["Low Latency"] },
+        ],
+      },
+      {
+        id: "other",
+        name: "Other Providers",
+        category: "ai",
+        description: "Custom endpoints, Mistral, Groq, OpenRouter, and additional API keys",
+        prefixes: ["MISTRAL_", "GROQ_", "OPENROUTER_", "CUSTOM_"],
+        defaultKeys: ["MISTRAL_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY"],
+        probeIds: [],
+        oauthProviderId: null,
+        hasSubscription: false,
+        models: [],
+      },
+    ];
+
+    function ProvidersGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M2 4L8 1.5L14 4L8 6.5L2 4Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
+        h("path", { d: "M2 8L8 10.5L14 8", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" }),
+        h("path", { d: "M2 12L8 14.5L14 12", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+      );
+    }
+
+    function TerminalsGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M3 4.5L6.5 8L3 11.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" }),
+        h("path", { d: "M8 12.5H13", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" })
+      );
+    }
+
+    function ContainersGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M8 1.5L14 4.5V11.5L8 14.5L2 11.5V4.5L8 1.5Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
+        h("path", { d: "M8 1.5V14.5", stroke: "currentColor", strokeWidth: "1.25" }),
+        h("path", { d: "M14 4.5L8 8L2 4.5", stroke: "currentColor", strokeWidth: "1.25" })
+      );
+    }
+
+    function ToolsGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M13.5 2.5L10 6L11 7L14.5 3.5C14.8 3.2 14.8 2.8 14.5 2.5C14.2 2.2 13.8 2.2 13.5 2.5Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
+        h("path", { d: "M10 6L4.5 11.5L2 14L4.5 11.5L10 6Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
+        h("path", { d: "M2 14L4.5 13.5L2.5 11.5L2 14Z", fill: "currentColor" }),
+        h("path", { d: "M6.5 4.5L8 3L10.5 5.5L9 7", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" })
+      );
+    }
+
+    function LoopsGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M2.5 8C2.5 5 4.5 3 8 3C11 3 13.5 5.2 13.5 8", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
+        h("path", { d: "M11.5 5.5L13.5 8L15.5 5.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" }),
+        h("path", { d: "M13.5 8C13.5 11 11.5 13 8 13C5 13 2.5 10.8 2.5 8", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
+        h("path", { d: "M4.5 10.5L2.5 8L0.5 10.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+      );
+    }
+
+    function TriangleRightFill14(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = props && props.className ? props.className : undefined;
+      var style = props && props.style ? props.style : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, style: style, viewBox: "0 0 14 14", fill: "none", "aria-hidden": "true",
+      },
+        h("path", {
+          d: "M4.25 2.82782L4.25 11.1722C4.25 11.6622 4.84243 11.9076 5.18891 11.5611L9.36109 7.38891C9.57588 7.17412 9.57588 6.82588 9.36109 6.61109L5.18891 2.43891C4.84243 2.09243 4.25 2.33782 4.25 2.82782Z",
+          fill: "currentColor",
+        })
+      );
+    }
+
+    function PassGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("circle", { cx: "5.5", cy: "6.5", r: "3.5", stroke: "currentColor", strokeWidth: "1.25" }),
+        h("path", { d: "M8.5 8.5L14 14M11 11L13 13M12.5 9.5L14.5 11.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" })
+      );
+    }
+
+    function DataGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("ellipse", { cx: "8", cy: "3.5", rx: "6", ry: "2", stroke: "currentColor", strokeWidth: "1.25" }),
+        h("path", { d: "M2 3.5V8C2 9.1 4.7 10 8 10C11.3 10 14 9.1 14 8V3.5", stroke: "currentColor", strokeWidth: "1.25" }),
+        h("path", { d: "M2 8V12.5C2 13.6 4.7 14.5 8 14.5C11.3 14.5 14 13.6 14 12.5V8", stroke: "currentColor", strokeWidth: "1.25" })
+      );
+    }
+
+    function ChatGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", {
+          d: "M2.5 3C2.5 2.17 3.17 1.5 4 1.5H12C12.83 1.5 13.5 2.17 13.5 3V10C13.5 10.83 12.83 11.5 12 11.5H6L3 14.5V11.5H4C3.17 11.5 2.5 10.83 2.5 10V3Z",
+          stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round"
+        })
+      );
+    }
+
+    function RefreshGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M2.5 8C2.5 4.96 4.96 2.5 8 2.5C10.5 2.5 12.6 4.14 13.3 6.4M13.5 8C13.5 11.04 11.04 13.5 8 13.5C5.5 13.5 3.4 11.86 2.7 9.6", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
+        h("path", { d: "M14 3.5V6.5H11M2 12.5V9.5H5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+      );
+    }
+
+    function TrashGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M3 4.5H13M6 4.5V3C6 2.45 6.45 2 7 2H9C9.55 2 10 2.45 10 3V4.5M4 4.5L4.8 13.2C4.85 13.65 5.23 14 5.68 14H10.32C10.77 14 11.15 13.65 11.2 13.2L12 4.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+      );
+    }
+
+    function EditGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" })
+      );
+    }
+
+    function FileGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("path", { d: "M4 1.5h5.5l4 4V14.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1z", stroke: "currentColor", strokeWidth: "1.2", strokeLinecap: "round", strokeLinejoin: "round" }),
+        h("polyline", { points: "9.5 1.5 9.5 5.5 13.5 5.5", stroke: "currentColor", strokeWidth: "1.2", strokeLinecap: "round", strokeLinejoin: "round" })
+      );
+    }
+
+    function SubagentGlyph(props) {
+      var size = props && props.size ? props.size : 12;
+      var className = props && props.className ? props.className : undefined;
+      return h("svg", {
+        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+      },
+        h("circle", { cx: "4", cy: "4", r: "2", stroke: "currentColor", strokeWidth: "1.2" }),
+        h("circle", { cx: "4", cy: "12", r: "2", stroke: "currentColor", strokeWidth: "1.2" }),
+        h("circle", { cx: "12", cy: "8", r: "2", stroke: "currentColor", strokeWidth: "1.2" }),
+        h("path", { d: "M4 6v4M4 8h6", stroke: "currentColor", strokeWidth: "1.2", strokeLinecap: "round" })
+      );
+    }
+
+    function CutGlyph(props) {
+      var size = (props && props.size) ? props.size : 13;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("circle", { cx: "6", cy: "6", r: "3" }),
+        h("circle", { cx: "6", cy: "18", r: "3" }),
+        h("line", { x1: "20", y1: "4", x2: "8.12", y2: "15.88" }),
+        h("line", { x1: "14.47", y1: "14.48", x2: "20", y2: "20" }),
+        h("line", { x1: "8.12", y1: "8.12", x2: "12", y2: "12" })
+      );
+    }
+
+    function CopyGlyph(props) {
+      var size = (props && props.size) ? props.size : 13;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("rect", { x: "9", y: "9", width: "13", height: "13", rx: "2", ry: "2" }),
+        h("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })
+      );
+    }
+
+    function formatTokenCount(num) {
+      if (num === undefined || num === null || isNaN(num)) return "0";
+      if (num >= 1000000000) return (num / 1000000000).toFixed(1) + "B";
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+      if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+      return String(num);
+    }
+
+    // High-speed ANSI to HTML converter
+    function ansiToHtml(raw) {
+      if (!raw) return "";
+      var text = raw
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      var COLOR_MAP = {
+        30: "#4e5569", 31: "#ff7b72", 32: "#7ee787", 33: "#f2cc60",
+        34: "#79c0ff", 35: "#d2a8ff", 36: "#56d4dd", 37: "#e6edf3",
+        90: "#8b949e", 91: "#ffa198", 92: "#aff5b4", 93: "#fbe59e",
+        94: "#a5d6ff", 95: "#e2c5ff", 96: "#76e3ea", 97: "#ffffff",
+      };
+
+      var BG_MAP = {
+        40: "#161b22", 41: "#b62324", 42: "#1f6feb", 43: "#9e6a03",
+        44: "#1f6feb", 45: "#8957e5", 46: "#1b7c83", 47: "#8b949e",
+      };
+
+      var parts = text.split(/\x1b\[([0-9;]+)m/);
+      var html = "";
+      var curColor = null;
+      var curBg = null;
+      var isBold = false;
+      var isDim = false;
+      var isUnderline = false;
+
+      for (var i = 0; i < parts.length; i++) {
+        if (i % 2 === 1) {
+          var codes = parts[i].split(";");
+          for (var c = 0; c < codes.length; c++) {
+            var code = parseInt(codes[c], 10);
+            if (code === 0) {
+              curColor = null; curBg = null; isBold = false; isDim = false; isUnderline = false;
+            } else if (code === 1) {
+              isBold = true;
+            } else if (code === 2) {
+              isDim = true;
+            } else if (code === 4) {
+              isUnderline = true;
+            } else if (COLOR_MAP[code]) {
+              curColor = COLOR_MAP[code];
+            } else if (BG_MAP[code]) {
+              curBg = BG_MAP[code];
+            }
+          }
+        } else {
+          var chunk = parts[i];
+          if (chunk) {
+            var style = "";
+            if (curColor) style += "color:" + curColor + ";";
+            if (curBg) style += "background:" + curBg + ";";
+            if (isBold) style += "font-weight:700;";
+            if (isDim) style += "opacity:0.65;";
+            if (isUnderline) style += "text-decoration:underline;";
+
+            if (style) {
+              html += '<span style="' + style + '">' + chunk + "</span>";
+            } else {
+              html += chunk;
+            }
+          }
+        }
+      }
+      return html;
+    }
+
+    function ProviderBrandIcon(props) {
+      var id = props.id || "";
+      var size = props.size || 20;
+      var style = Object.assign({ display: "inline-flex", alignItems: "center", justifyContent: "center", width: size + "px", height: size + "px", flexShrink: 0 }, props.style || {});
+
+      if (id === "antigravity" || id === "google") {
+        return h("span", { style: style, title: "Google Gemini / Antigravity" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("path", { d: "M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z", fill: "url(#gemini-grad)", stroke: "#6366f1", strokeWidth: "1.2" }),
+            h("defs", null,
+              h("linearGradient", { id: "gemini-grad", x1: "2", y1: "2", x2: "22", y2: "22", gradientUnits: "userSpaceOnUse" },
+                h("stop", { stopColor: "#4285F4" }),
+                h("stop", { offset: "0.5", stopColor: "#9B72CB" }),
+                h("stop", { offset: "1", stopColor: "#D96570" })
+              )
+            )
+          )
+        );
+      }
+      if (id === "anthropic") {
+        return h("span", { style: style, title: "Anthropic Claude" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#cc785c" }),
+            h("path", { d: "M14.5 7L9.5 17M9.5 7L14.5 17M7 13.5H17", stroke: "#ffffff", strokeWidth: "2", strokeLinecap: "round" })
+          )
+        );
+      }
+      if (id === "openai") {
+        return h("span", { style: style, title: "OpenAI ChatGPT" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#10a37f" }),
+            h("circle", { cx: "12", cy: "12", r: "5.5", stroke: "#ffffff", strokeWidth: "1.8" }),
+            h("path", { d: "M12 6.5V17.5M6.5 12H17.5", stroke: "#ffffff", strokeWidth: "1.5" })
+          )
+        );
+      }
+      if (id === "deepseek") {
+        return h("span", { style: style, title: "DeepSeek" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#0066FF" }),
+            h("path", { d: "M7 16C7 11 11 8 17 8C17 13 13 16 7 16Z", fill: "#ffffff" }),
+            h("circle", { cx: "10", cy: "12", r: "1.5", fill: "#0066FF" })
+          )
+        );
+      }
+      if (id === "grok") {
+        return h("span", { style: style, title: "xAI Grok" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#000000", stroke: "#333", strokeWidth: "1" }),
+            h("path", { d: "M6 6L18 18M18 6L6 18", stroke: "#ffffff", strokeWidth: "2.2", strokeLinecap: "round" })
+          )
+        );
+      }
+      if (id === "kimi") {
+        return h("span", { style: style, title: "Moonshot Kimi" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#0052D9" }),
+            h("path", { d: "M7 6V18M7 12L17 6M7 12L17 18", stroke: "#ffffff", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" })
+          )
+        );
+      }
+      if (id === "ollama") {
+        return h("span", { style: style, title: "Ollama Local" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#1e1e2e", stroke: "#585b70", strokeWidth: "1" }),
+            h("circle", { cx: "9", cy: "11", r: "2", fill: "#fab387" }),
+            h("circle", { cx: "15", cy: "11", r: "2", fill: "#fab387" }),
+            h("path", { d: "M9 16C10.5 17.5 13.5 17.5 15 16", stroke: "#cdd6f4", strokeWidth: "1.5", strokeLinecap: "round" })
+          )
+        );
+      }
+      if (id === "cursor") {
+        return h("span", { style: style, title: "Cursor" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#111" }),
+            h("path", { d: "M7 7L17 17M17 7L7 17", stroke: "#38bdf8", strokeWidth: "2", strokeLinecap: "round" })
+          )
+        );
+      }
+      if (id === "github") {
+        return h("span", { style: style, title: "GitHub" },
+          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
+            h("rect", { width: "24", height: "24", rx: "5", fill: "#24292e" }),
+            h("path", { d: "M12 4C7.58 4 4 7.58 4 12C4 15.54 6.29 18.53 9.47 19.59C9.87 19.66 10.02 19.42 10.02 19.21V17.87C7.8 18.35 7.33 16.8 7.33 16.8C6.97 15.89 6.45 15.65 6.45 15.65C5.72 15.15 6.51 15.16 6.51 15.16C7.32 15.22 7.74 15.99 7.74 15.99C8.46 17.22 9.62 16.87 10.08 16.66C10.15 16.14 10.36 15.78 10.59 15.58C8.82 15.38 6.95 14.69 6.95 11.64C6.95 10.77 7.26 10.06 7.77 9.51C7.69 9.31 7.42 8.5 7.85 7.41C7.85 7.41 8.52 7.2 10.05 8.23C10.69 8.05 11.37 7.96 12.05 7.96C12.73 7.96 13.41 8.05 14.05 8.23C15.58 7.2 16.25 7.41 16.25 7.41C16.68 8.5 16.41 9.31 16.33 9.51C16.84 10.06 17.15 10.77 17.15 11.64C17.15 14.7 15.27 15.38 13.5 15.57C13.78 15.81 14.04 16.29 14.04 17.03V19.21C14.04 19.42 14.19 19.67 14.59 19.59C17.77 18.53 20.06 15.54 20.06 12C20.06 7.58 16.48 4 12 4Z", fill: "#ffffff" })
+          )
+        );
+      }
+      return h("span", { style: style },
+        h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+          h("circle", { cx: "12", cy: "12", r: "10" }),
+          h("path", { d: "M12 6v6l4 2" })
+        )
+      );
+    }
+
+    // 1a. SETTINGS: ACCOUNTS SECTION
+    function AccountsSection() {
+      var state = React.useState({
+        accounts: [],
+        snapshots: [],
+        integrationsMeta: null,
+        loading: true,
+        error: null,
+      });
+      var data = state[0], setData = state[1];
+      var expandedKeysState = React.useState({});
+      var expandedKeys = expandedKeysState[0], setExpandedKeys = expandedKeysState[1];
+      var revealedState = React.useState({});
+      var revealed = revealedState[0], setRevealed = revealedState[1];
+      var editModalState = React.useState(null);
+      var editModal = editModalState[0], setEditModal = editModalState[1];
+      var addKeyModalState = React.useState(null);
+      var addKeyModal = addKeyModalState[0], setAddKeyModal = addKeyModalState[1];
+      var oauthModalState = React.useState(null);
+      var oauthModal = oauthModalState[0], setOauthModal = oauthModalState[1];
+      var probingState = React.useState({});
+      var probing = probingState[0], setProbing = probingState[1];
+
+      var load = React.useCallback(function () {
+        setData(function (s) { return Object.assign({}, s, { loading: true }); });
+        Promise.all([
+          fetch(VAULT_API + "/accounts").then(function (r) { return r.json(); }).catch(function () { return { rows: [] }; }),
+          fetch(QUOTAS_API + "/snapshots").then(function (r) { return r.json(); }).catch(function () { return { snapshots: [] }; }),
+          fetch(QUOTAS_API + "/integrations").then(function (r) { return r.json(); }).catch(function () { return null; }),
+        ]).then(function (res) {
+          setData({
+            accounts: (res[0] && res[0].rows) || [],
+            snapshots: (res[1] && res[1].snapshots) || [],
+            integrationsMeta: res[2] || null,
+            loading: false,
+            error: null,
+          });
+        }).catch(function (err) {
+          setData(function (s) { return Object.assign({}, s, { loading: false, error: err.message }); });
+        });
+      }, []);
+
+      React.useEffect(function () { load(); }, [load]);
+
+      var handleProbe = function (providerId) {
+        setProbing(function (s) { var n = Object.assign({}, s); n[providerId] = true; return n; });
+        fetch(QUOTAS_API + "/refresh/" + encodeURIComponent(providerId), { method: "POST" })
+          .then(function () { load(); })
+          .finally(function () { setProbing(function (s) { var n = Object.assign({}, s); n[providerId] = false; return n; }); });
+      };
+
+      var handleProbeAll = function () {
+        setProbing(function (s) { return Object.assign({}, s, { all: true }); });
+        fetch(QUOTAS_API + "/refresh", { method: "POST" })
+          .then(function () { load(); })
+          .finally(function () { setProbing(function (s) { var n = Object.assign({}, s); n.all = false; return n; }); });
+      };
+
+      var toggleKeys = function (provId) { setExpandedKeys(function (s) { var n = Object.assign({}, s); n[provId] = !n[provId]; return n; }); };
+
+      var toggleReveal = function (keyId) {
+        if (revealed[keyId]) {
+          setRevealed(function (s) { var n = Object.assign({}, s); delete n[keyId]; return n; });
+          return;
+        }
+        var parts = keyId.split("::");
+        var ref = parts[0], account = parts[1];
+        fetch(VAULT_API + "/accounts/" + encodeURIComponent(ref) + "?account=" + encodeURIComponent(account))
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            setRevealed(function (s) { var n = Object.assign({}, s); n[keyId] = res.value || "(empty)"; return n; });
+          });
+      };
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "900px" } },
+        h(
+          "div",
+          { style: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("div", null,
+            h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Accounts & Credentials"),
+            h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Manage AI platform API keys, subscription OAuth logins, and real sliding window token quotas.")
+          ),
+          h("div", { style: { display: "flex", gap: "8px" } },
+            h("button", { onClick: handleProbeAll, disabled: probing.all, style: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "7px", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", border: "none", fontSize: "12px", fontWeight: 600, cursor: probing.all ? "wait" : "pointer" } }, h(P.IconRefreshOutline16, { size: 14 }), probing.all ? "Probing All…" : "Probe All Health"),
+            h("button", { onClick: load, style: { display: "inline-flex", alignItems: "center", padding: "7px 12px", borderRadius: "7px", background: "var(--dsw-alias-surface-l2, rgba(128,128,128,0.1))", border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.2))", color: "var(--dsw-alias-label-primary)", cursor: "pointer" } }, h(P.IconRefreshOutline16, { size: 14 }))
+          )
+        ),
+        PROVIDERS_CATALOG.filter(function (p) { return p.category === "ai" || p.hasSubscription || p.prefixes.length > 0; }).map(function (prov) {
+          var provRows = (data.accounts || []).filter(function (r) { return prov.prefixes.some(function (p) { return r.ref && r.ref.startsWith(p); }); });
+          var activeSnapshots = (data.snapshots || []).filter(function (s) { return prov.probeIds.indexOf(s.provider) !== -1; });
+          var isConfigured = provRows.length > 0;
+          var primarySnap = activeSnapshots[0];
+          var status = primarySnap ? primarySnap.status : (isConfigured ? "available" : "unconfigured");
+          var isLiveHealthy = status === "available" || status === "ok";
+          var isDegraded = status === "error" || status === "degraded" || status === "rate_limited";
+          var isKeysOpen = Boolean(expandedKeys[prov.id]);
+          var isClaude = prov.id === "anthropic";
+          var isAntigravity = prov.id === "antigravity";
+          var claudeStats = data.integrationsMeta && data.integrationsMeta.claudeStats ? data.integrationsMeta.claudeStats : null;
+          var antigravityQuotas = data.integrationsMeta && data.integrationsMeta.antigravity ? data.integrationsMeta.antigravity : null;
+
+          return h(
+            "div",
+            { key: prov.id, style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.18))", background: "var(--dsw-alias-surface-l0, rgba(255,255,255,0.02))", overflow: "hidden", display: "flex", flexDirection: "column" } },
+            h(
+              "div",
+              { style: { padding: "16px 20px", display: "flex", flexDirection: "column", gap: "14px", background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))", borderBottom: isKeysOpen ? "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12))" : "none" } },
+              h(
+                "div",
+                { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" } },
+                h("div", { style: { display: "flex", flexDirection: "column", gap: "4px" } },
+                  h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                    h(ProviderBrandIcon, { id: prov.id, size: 22 }),
+                    h("span", { style: { fontSize: "15px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, prov.name),
+                    h("span", { style: { display: "inline-flex", alignItems: "center", gap: "5px", padding: "2px 8px", borderRadius: "12px", fontSize: "11px", fontWeight: 600, background: isLiveHealthy ? "rgba(63, 185, 80, 0.15)" : isDegraded ? "rgba(248, 81, 73, 0.15)" : "rgba(128, 128, 128, 0.12)", color: isLiveHealthy ? "#3fb950" : isDegraded ? "#f85149" : "var(--dsw-alias-label-secondary)" } },
+                      h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: isLiveHealthy ? "#3fb950" : isDegraded ? "#f85149" : "#888", boxShadow: isLiveHealthy ? "0 0 6px #3fb950" : "none" } }),
+                      isLiveHealthy ? "LIVE HEALTHY" : isDegraded ? "DEGRADED" : "UNCONFIGURED"
+                    ),
+                    prov.hasSubscription ? h("span", { style: { padding: "2px 7px", borderRadius: "4px", fontSize: "10px", fontWeight: 600, background: "rgba(99, 102, 241, 0.12)", color: "var(--dsw-alias-primary, #6366f1)", border: "1px solid rgba(99, 102, 241, 0.25)" } }, "SUBSCRIPTION") : null
+                  ),
+                  h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, prov.description)
+                ),
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                  prov.probeIds.length > 0 ? h("button", { onClick: function () { handleProbe(prov.probeIds[0]); }, disabled: probing[prov.probeIds[0]], style: { padding: "5px 10px", borderRadius: "6px", fontSize: "11px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "var(--dsw-alias-label-primary)", cursor: "pointer" } }, h(RefreshGlyph, { size: 12 }), probing[prov.probeIds[0]] ? "Testing…" : "Probe Health") : null,
+                  prov.oauthProviderId ? h("button", { onClick: function () { setOauthModal({ providerId: prov.oauthProviderId, label: prov.name }); }, style: { padding: "5px 10px", borderRadius: "6px", fontSize: "11px", border: "1px solid #6366f1", background: "rgba(99, 102, 241, 0.1)", color: "#6366f1", cursor: "pointer" } }, h(PassGlyph, { size: 12 }), "Sign In (OAuth)") : null,
+                  h("button", { onClick: function () { setAddKeyModal({ prov: prov, account: "default" }); }, style: { padding: "5px 10px", borderRadius: "6px", fontSize: "11px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "var(--dsw-alias-label-primary)", cursor: "pointer" } }, "+ Add Key")
+                )
+              ),
+              isClaude && claudeStats ? h("div", { style: { display: "flex", flexDirection: "column", gap: "10px", padding: "12px 14px", borderRadius: "8px", background: "var(--dsw-alias-surface-l2, rgba(128,128,128,0.06))", border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))" } },
+                h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" } },
+                  h("div", { style: { display: "flex", gap: "8px", alignItems: "baseline" } },
+                    h("span", { style: { fontSize: "17px", fontWeight: 700, color: "var(--dsw-alias-label-primary)" } }, formatTokenCount(claudeStats.totalTokens) + " Tokens"),
+                    h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(" + (claudeStats.totalTokens || 0).toLocaleString() + " total)")
+                  ),
+                  h("div", { style: { display: "flex", gap: "10px", fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
+                    h("span", null, h("strong", { style: { color: "var(--dsw-alias-label-primary)" } }, (claudeStats.messages || 0).toLocaleString()), " messages"),
+                    h("span", null, h("strong", { style: { color: "var(--dsw-alias-label-primary)" } }, (claudeStats.totalToolCalls || 0).toLocaleString()), " tool calls")
+                  )
+                )
+              ) : null,
+              isAntigravity && antigravityQuotas ? h("div", { style: { display: "flex", flexDirection: "column", gap: "10px", padding: "12px 14px", borderRadius: "8px", background: "var(--dsw-alias-surface-l2, rgba(128,128,128,0.06))", border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))" } },
+                h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                  h("div", { style: { display: "flex", gap: "8px", alignItems: "baseline" } },
+                    h("span", { style: { fontSize: "15px", fontWeight: 700, color: "var(--dsw-alias-label-primary)" } }, "Antigravity Multi-Pool Runtime"),
+                    h("span", { style: { padding: "2px 7px", borderRadius: "10px", fontSize: "10px", fontWeight: 600, background: "rgba(63, 185, 80, 0.15)", color: "#3fb950" } }, antigravityQuotas.status || "Active")
+                  ),
+                  h("div", { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } }, "Context: " + (antigravityQuotas.contextWindow || "1M tokens"))
+                )
+              ) : null,
+              h("div", { style: { display: "flex", gap: "10px", marginTop: "2px" } },
+                h("button", { onClick: function () { toggleKeys(prov.id); }, style: { padding: "6px 12px", borderRadius: "6px", fontSize: "12px", border: "1px solid " + (isKeysOpen ? "#6366f1" : "var(--dsw-alias-border-l2)"), background: isKeysOpen ? "rgba(99, 102, 241, 0.1)" : "transparent", color: isKeysOpen ? "#6366f1" : "var(--dsw-alias-label-secondary)", cursor: "pointer" } }, h(PassGlyph, { size: 13 }), " Configured Keys & Accounts (" + provRows.length + ") " + (isKeysOpen ? "▲" : "▼"))
+              )
+            ),
+            isKeysOpen ? h("div", { style: { padding: "16px 20px", background: "var(--dsw-alias-surface-l0, rgba(0,0,0,0.1))", display: "flex", flexDirection: "column", gap: "12px" } },
+              provRows.length === 0 ? h("div", { style: { padding: "16px", textAlign: "center", fontSize: "12px", color: "var(--dsw-alias-label-tertiary)" } }, "No credentials configured. Click '+ Add Key' above.") : provRows.map(function (row) {
+                var accountName = row.account || "default";
+                var keyId = row.ref + "::" + accountName;
+                var isRev = Boolean(revealed[keyId]);
+                var valDisplay = isRev ? revealed[keyId] : (row.inVault ? "••••••••••••••••••••••••••••••••" : "(not set)");
+                return h("div", { key: keyId, style: { padding: "12px 14px", borderRadius: "8px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", display: "flex", flexDirection: "column", gap: "8px" } },
+                  h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                    h("div", { style: { display: "flex", gap: "8px", alignItems: "center" } }, h("code", { style: { fontSize: "13px", fontWeight: 600 } }, row.ref), h("span", { style: { padding: "1px 6px", borderRadius: "4px", fontSize: "10px", background: "rgba(99, 102, 241, 0.1)", color: "#6366f1" } }, "@" + accountName)),
+                    h("div", { style: { display: "flex", gap: "6px" } },
+                      h("button", { onClick: function () { toggleReveal(keyId); }, style: { padding: "4px 8px", borderRadius: "4px", fontSize: "11px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", cursor: "pointer" } }, isRev ? "Hide" : "Reveal"),
+                      h("button", { onClick: function () { fetch(VAULT_API + "/accounts/" + encodeURIComponent(row.ref) + "?account=" + encodeURIComponent(accountName)).then(function (r) { return r.json(); }).then(function (res) { if (res.value) navigator.clipboard.writeText(res.value); }); }, style: { padding: "4px 8px", borderRadius: "4px", fontSize: "11px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", cursor: "pointer" } }, "Copy"),
+                      h("button", { onClick: function () { setEditModal({ ref: row.ref, account: accountName }); }, style: { padding: "4px 8px", borderRadius: "4px", fontSize: "11px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", cursor: "pointer" } }, "Edit")
+                    )
+                  ),
+                  h("code", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, valDisplay)
+                );
+              })
+            ) : null
+          );
+        }),
+        editModal ? h(EditValueModal, { target: editModal, onClose: function () { setEditModal(null); }, onSaved: load }) : null,
+        addKeyModal ? h(AddKeyModal, { target: addKeyModal, onClose: function () { setAddKeyModal(null); }, onSaved: load }) : null,
+        oauthModal ? h(OAuthFlowModal, { target: oauthModal, onClose: function () { setOauthModal(null); }, onDone: load }) : null
+      );
+    }
+
+    // 1b. SETTINGS: MODELS SECTION
+    function ModelsSection() {
+      var addModelModalState = React.useState(null);
+      var addModelModal = addModelModalState[0], setAddModelModal = addModelModalState[1];
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "900px" } },
+        h(
+          "div",
+          { style: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("div", null,
+            h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "AI Models Catalog"),
+            h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Explore supported AI models by provider, context window capacities, reasoning tags, and custom model endpoints.")
+          ),
+          h("div", { style: { display: "flex", gap: "8px" } },
+            h("button", { onClick: function () { setAddModelModal({ prov: PROVIDERS_CATALOG[0] }); }, style: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "7px", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", border: "none", fontSize: "12px", fontWeight: 600, cursor: "pointer" } }, "+ Add Custom Model")
+          )
+        ),
+        PROVIDERS_CATALOG.filter(function (p) { return p.models && p.models.length > 0; }).map(function (prov) {
+          return h(
+            "div",
+            { key: "models::" + prov.id, style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.18))", background: "var(--dsw-alias-surface-l0, rgba(255,255,255,0.02))", overflow: "hidden", display: "flex", flexDirection: "column", padding: "16px 20px", gap: "12px" } },
+            h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+              h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                h(ProviderBrandIcon, { id: prov.id, size: 20 }),
+                h("span", { style: { fontSize: "14px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, prov.name),
+                h("span", { style: { padding: "1px 6px", borderRadius: "10px", fontSize: "10.5px", background: "rgba(99,102,241,0.12)", color: "#6366f1", fontWeight: 600 } }, prov.models.length + " models")
+              )
+            ),
+            h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "10px" } },
+              prov.models.map(function (m) {
+                return h("div", { key: m.id, style: { padding: "12px 14px", borderRadius: "8px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", display: "flex", flexDirection: "column", gap: "6px" } },
+                  h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                    h("div", { style: { display: "flex", alignItems: "center", gap: "6px" } },
+                      h(ProviderBrandIcon, { id: prov.id, size: 14 }),
+                      h("span", { style: { fontSize: "13px", fontWeight: 600 } }, m.name)
+                    ),
+                    m.isDefault ? h("span", { style: { padding: "1px 5px", borderRadius: "3px", fontSize: "9px", fontWeight: 700, background: "#3fb950", color: "#fff" } }, "DEFAULT") : null
+                  ),
+                  h("code", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, m.id),
+                  h("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "2px" } },
+                    h("span", { style: { padding: "1px 5px", borderRadius: "3px", fontSize: "10px", background: "rgba(128,128,128,0.1)" } }, m.context + " ctx"),
+                    (m.tags || []).map(function (tag) { return h("span", { key: tag, style: { padding: "1px 5px", borderRadius: "3px", fontSize: "10px", background: "rgba(99, 102, 241, 0.1)", color: "#6366f1" } }, tag); })
+                  )
+                );
+              })
+            )
+          );
+        }),
+        addModelModal ? h(AddModelModal, { target: addModelModal, onClose: function () { setAddModelModal(null); }, onSaved: function () {} }) : null
+      );
+    }
+
+    // 1c. SETTINGS: APPS SECTION
+    function AppsSection() {
+      var state = React.useState({
+        integrationsMeta: null,
+        loading: true,
+      });
+      var data = state[0], setData = state[1];
+
+      React.useEffect(function () {
+        fetch(QUOTAS_API + "/integrations")
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setData({ integrationsMeta: res, loading: false }); })
+          .catch(function () { setData({ integrationsMeta: null, loading: false }); });
+      }, []);
+
+      var ollamaMeta = data.integrationsMeta && data.integrationsMeta.ollama ? data.integrationsMeta.ollama : null;
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "850px" } },
+        h(
+          "div",
+          { style: { borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Developer Apps & Local Runners"),
+          h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Manage local inference runtimes (Ollama, vLLM), developer platforms, MCP tools, and speech engines.")
+        ),
+        // Ollama Local Runner
+        h(
+          "div",
+          { style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" } },
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+            h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+              h(ProviderBrandIcon, { id: "ollama", size: 22 }),
+              h("div", null,
+                h("div", { style: { fontSize: "15px", fontWeight: 600 } }, "Ollama Local Engine"),
+                h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Local offline LLM runner on http://127.0.0.1:11434")
+              )
+            ),
+            h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: ollamaMeta ? "rgba(63, 185, 80, 0.15)" : "rgba(128,128,128,0.15)", color: ollamaMeta ? "#3fb950" : "var(--dsw-alias-label-secondary)" } }, ollamaMeta ? "ONLINE" : "STANDBY")
+          ),
+          ollamaMeta ? h("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
+            h("div", { style: { fontSize: "12px", fontWeight: 600 } }, "Installed Local Models:"),
+            (ollamaMeta.availableModels || []).map(function (m) {
+              return h("div", { key: m.name, style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", borderRadius: "5px", background: "var(--dsw-alias-surface-l2)" } },
+                h("span", { style: { fontSize: "12px" } }, m.name),
+                h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, m.size ? (m.size / (1024*1024*1024)).toFixed(1) + " GB" : "")
+              );
+            })
+          ) : null
+        ),
+        // MCP Tools Runner
+        h(
+          "div",
+          { style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+            h(ToolsGlyph, { size: 22 }),
+            h("div", null,
+              h("div", { style: { fontSize: "15px", fontWeight: 600 } }, "Model Context Protocol (MCP) Tools"),
+              h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Dynamic external tool servers and agent execution bridges")
+            )
+          ),
+          h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "rgba(99, 102, 241, 0.15)", color: "#6366f1" } }, "ENABLED")
+        ),
+        // Voice & Speech Engine
+        h(
+          "div",
+          { style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+            h(P.IconMicrophoneOutline16, { size: 22, style: { color: "#6366f1" } }),
+            h("div", null,
+              h("div", { style: { fontSize: "15px", fontWeight: 600 } }, "Voice & Audio Synthesis Engine"),
+              h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Neural text-to-speech (Edge TTS, OpenAI, ElevenLabs) and audio controls")
+            )
+          ),
+          h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "rgba(63, 185, 80, 0.15)", color: "#3fb950" } }, "ACTIVE")
+        )
+      );
+    }
+
+    // 2. SETTINGS: TMUX CONFIGURATION
+    function TmuxSettingsSection() {
+      var shellState = React.useState("/bin/zsh");
+      var shell = shellState[0], setShell = shellState[1];
+      var historyState = React.useState("10000");
+      var history = historyState[0], setHistory = historyState[1];
+      var mouseState = React.useState(true);
+      var mouse = mouseState[0], setMouse = mouseState[1];
+      var autoContainState = React.useState(true);
+      var autoContain = autoContainState[0], setAutoContain = autoContainState[1];
+      var savedState = React.useState(false);
+      var saved = savedState[0], setSaved = savedState[1];
+
+      var handleSave = function () {
+        setSaved(true);
+        setTimeout(function () { setSaved(false); }, 2500);
+      };
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "800px" } },
+        h("div", { style: { borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } }, "Tmux Engine Configuration"),
+          h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Configure the in-process tmux multiplexer, default shell, scrollback buffer, and agent containment.")
+        ),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Default Shell"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Shell executed when launching new tmux terminal sessions")),
+            h("select", { value: shell, onChange: function (e) { setShell(e.target.value); }, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit" } },
+              h("option", { value: "/bin/zsh" }, "Zsh (/bin/zsh)"),
+              h("option", { value: "/bin/bash" }, "Bash (/bin/bash)"),
+              h("option", { value: "/bin/sh" }, "POSIX Shell (/bin/sh)")
+            )
+          ),
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Scrollback History Limit"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Maximum line count retained in terminal screen buffer")),
+            h("input", { type: "number", value: history, onChange: function (e) { setHistory(e.target.value); }, style: { width: "100px", padding: "6px 10px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit" } })
+          ),
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Mouse Mode Support"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Enable mouse scrolling and pane focus (set -g mouse on)")),
+            h("input", { type: "checkbox", checked: mouse, onChange: function (e) { setMouse(e.target.checked); }, style: { width: "18px", height: "18px", cursor: "pointer" } })
+          ),
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Agent Task Containment"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Automatically contain and multiplex background agent CLI subprocesses inside tmux")),
+            h("input", { type: "checkbox", checked: autoContain, onChange: function (e) { setAutoContain(e.target.checked); }, style: { width: "18px", height: "18px", cursor: "pointer" } })
+          ),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } },
+            h("button", { onClick: handleSave, style: { padding: "8px 18px", borderRadius: "7px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, saved ? "Saved & Applied ✓" : "Save Tmux Configuration")
+          )
+        )
+      );
+    }
+
+    // 3. SETTINGS: DOCKER CONFIGURATION
+    function DockerSettingsSection() {
+      var imageState = React.useState("node:22-alpine");
+      var image = imageState[0], setImage = imageState[1];
+      var memoryState = React.useState("2GB");
+      var memory = memoryState[0], setMemory = memoryState[1];
+      var networkState = React.useState("bridge");
+      var network = networkState[0], setNetwork = networkState[1];
+      var autoPruneState = React.useState(false);
+      var autoPrune = autoPruneState[0], setAutoPrune = autoPruneState[1];
+      var savedState = React.useState(false);
+      var saved = savedState[0], setSaved = savedState[1];
+
+      var handleSave = function () {
+        setSaved(true);
+        setTimeout(function () { setSaved(false); }, 2500);
+      };
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "800px" } },
+        h("div", { style: { borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } }, "Docker Sandbox Configuration"),
+          h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Configure default container isolation images, memory quotas, and network sandboxing.")
+        ),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Default Sandbox Image"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Base container image for agent sandboxed execution")),
+            h("select", { value: image, onChange: function (e) { setImage(e.target.value); }, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit" } },
+              h("option", { value: "node:22-alpine" }, "Node.js 22 Alpine (Fast & Lightweight)"),
+              h("option", { value: "python:3.11-slim" }, "Python 3.11 Slim (Data & Scripting)"),
+              h("option", { value: "ubuntu:22.04" }, "Ubuntu 22.04 LTS (Full Environment)")
+            )
+          ),
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Container Memory Quota"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Maximum RAM allocated per sandboxed container")),
+            h("select", { value: memory, onChange: function (e) { setMemory(e.target.value); }, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit" } },
+              h("option", { value: "1GB" }, "1 GB"),
+              h("option", { value: "2GB" }, "2 GB (Recommended)"),
+              h("option", { value: "4GB" }, "4 GB"),
+              h("option", { value: "8GB" }, "8 GB")
+            )
+          ),
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Network Sandboxing"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Isolation mode for agent container networking")),
+            h("select", { value: network, onChange: function (e) { setNetwork(e.target.value); }, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit" } },
+              h("option", { value: "bridge" }, "Bridge (Standard Outbound Access)"),
+              h("option", { value: "none" }, "None / Air-Gapped (No Network Access)"),
+              h("option", { value: "host" }, "Host Network")
+            )
+          ),
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", null, h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Auto-Prune Idle Sandboxes"), h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Automatically clean up stopped sandboxes after session completion")),
+            h("input", { type: "checkbox", checked: autoPrune, onChange: function (e) { setAutoPrune(e.target.checked); }, style: { width: "18px", height: "18px", cursor: "pointer" } })
+          ),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } },
+            h("button", { onClick: handleSave, style: { padding: "8px 18px", borderRadius: "7px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, saved ? "Saved & Applied ✓" : "Save Docker Configuration")
+          )
+        )
+      );
+    }
+
+    // 4. SETTINGS: TOOLS SECTION
+    function ToolsSection() {
+      var TOOLS_LIST = [
+        { id: "read_file", name: "Read File", cat: "Coding", desc: "Read file contents, slices, and text ranges", perm: "Auto-Approve" },
+        { id: "write_to_file", name: "Write File", cat: "Coding", desc: "Create new files or overwrite existing files", perm: "Prompt" },
+        { id: "replace_file_content", name: "Edit Code (Replace)", cat: "Coding", desc: "Precise contiguous code replacements", perm: "Auto-Approve" },
+        { id: "run_command", name: "Run Terminal Command", cat: "Coding", desc: "Execute CLI commands in host/sandbox shell", perm: "Prompt" },
+        { id: "search_web", name: "Web Search", cat: "Research", desc: "Query live web results via search engine", perm: "Auto-Approve" },
+        { id: "read_url_content", name: "Fetch URL Markdown", cat: "Research", desc: "Extract clean markdown from web documentation", perm: "Auto-Approve" },
+        { id: "invoke_subagent", name: "Invoke Subagent", cat: "Orchestration", desc: "Spawn background specialist subagents", perm: "Auto-Approve" },
+        { id: "manage_task", name: "Manage Tasks", cat: "Orchestration", desc: "List, status, kill, or send input to tasks", perm: "Auto-Approve" },
+        { id: "schedule", name: "Schedule / Timers", cat: "Orchestration", desc: "One-shot timers and recurring cron jobs", perm: "Auto-Approve" },
+        { id: "mcp_deepseek_harness", name: "MCP DeepSeek Harness", cat: "MCP Protocol", desc: "Model Context Protocol bridge into dsh runtime", perm: "Auto-Approve" },
+      ];
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "840px" } },
+        h("div", { style: { borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } }, "Tools & MCP Capabilities"),
+          h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Inspect built-in agent coding tools, registered MCP servers, and execution approval policies.")
+        ),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "10px" } },
+          TOOLS_LIST.map(function (t) {
+            return h(
+              "div",
+              { key: t.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+              h("div", { style: { display: "flex", flexDirection: "column", gap: "2px" } },
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                  h("strong", { style: { fontSize: "14px" } }, t.name),
+                  h("code", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, t.id),
+                  h("span", { style: { padding: "1px 6px", borderRadius: "4px", fontSize: "10px", background: "rgba(99, 102, 241, 0.1)", color: "#6366f1" } }, t.cat)
+                ),
+                h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, t.desc)
+              ),
+              h("span", { style: { padding: "4px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: t.perm === "Auto-Approve" ? "rgba(63, 185, 80, 0.15)" : "rgba(217, 119, 6, 0.15)", color: t.perm === "Auto-Approve" ? "#3fb950" : "#d97706" } }, t.perm)
+            );
+          })
+        )
+      );
+    }
+
+    // 5. SETTINGS: LOOPS SECTION
+    function LoopsSection() {
+      var LOOPS_LIST = [
+        { id: "darkfactory-orchestrator", name: "DarkFactory Autonomous Work Loop", interval: "Continuous / Baton Handoff", status: "Active", desc: "Multi-provider quota recovery & session watchdog" },
+        { id: "metrics-telemetry", name: "Metrics & Quota Sync", interval: "Every 5m", status: "Active", desc: "Refreshes token counters & sliding window utilization" },
+        { id: "sandbox-watchdog", name: "Docker Container Prune Loop", interval: "Hourly (0 * * * *)", status: "Idle", desc: "Cleans up unattached stopped sandbox instances" },
+      ];
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "840px" } },
+        h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px" } },
+          h("div", null,
+            h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } }, "Autonomous Work Loops"),
+            h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Manage autonomous execution loops, recurring cron jobs, and background workers.")
+          ),
+          h("button", { onClick: function () { alert("Use `/loop <interval> <prompt>` or the schedule tool to add new autonomous loops."); }, style: { padding: "7px 14px", borderRadius: "7px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, fontSize: "12px", cursor: "pointer" } }, "+ Schedule Loop")
+        ),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "12px" } },
+          LOOPS_LIST.map(function (loop) {
+            return h(
+              "div",
+              { key: loop.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderRadius: "8px", background: "var(--dsw-alias-surface-l1)", border: "1px solid var(--dsw-alias-border-l1)" } },
+              h("div", { style: { display: "flex", flexDirection: "column", gap: "4px" } },
+                h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                  h("strong", { style: { fontSize: "14px" } }, loop.name),
+                  h("span", { style: { padding: "1px 6px", borderRadius: "4px", fontSize: "10px", background: "rgba(63, 185, 80, 0.15)", color: "#3fb950", fontWeight: 600 } }, loop.status)
+                ),
+                h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, loop.desc),
+                h("div", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "Interval: " + loop.interval)
+              ),
+              h("div", { style: { display: "flex", gap: "6px" } },
+                h("button", { style: { padding: "5px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", fontSize: "11px", cursor: "pointer" } }, "Trigger Now"),
+                h("button", { style: { padding: "5px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", fontSize: "11px", cursor: "pointer" } }, "Pause")
+              )
+            );
+          })
+        )
+      );
+    }
+
+    // 6. DOCKED BOTTOM TERMINAL PANEL WITH TABS
+    function BottomTerminalPanel(props) {
+      ensureTreeStyles();
+      var onClose = props.onClose;
+      var initialSession = props.initialSession || "0";
+      var initialContainerId = props.initialContainerId || null;
+      var state = React.useState({ sessions: [], loading: true, error: null });
+      var data = state[0], setData = state[1];
+      var selectedSessionState = React.useState(initialContainerId ? null : initialSession);
+      var selectedSession = selectedSessionState[0], setSelectedSession = selectedSessionState[1];
+      
+      var windowsState = React.useState([]);
+      var windows = windowsState[0], setWindows = windowsState[1];
+
+      var bufferState = React.useState("Connecting to tmux interactive runner…");
+      var buffer = bufferState[0], setBuffer = bufferState[1];
+      
+      var cmdState = React.useState("");
+      var cmd = cmdState[0], setCmd = cmdState[1];
+      
+      var isFocusedState = React.useState(true);
+      var isFocused = isFocusedState[0], setIsFocused = isFocusedState[1];
+
+      var newModalState = React.useState(false);
+      var newModal = newModalState[0], setNewModal = newModalState[1];
+
+      var heightState = React.useState(290);
+      var height = heightState[0], setHeight = heightState[1];
+      var isMaximizedState = React.useState(false);
+      var isMaximized = isMaximizedState[0], setIsMaximized = isMaximizedState[1];
+
+      // Container state
+      var containersState = React.useState([]);
+      var containers = containersState[0], setContainers = containersState[1];
+      var selectedContainerState = React.useState(initialContainerId);
+      var selectedContainer = selectedContainerState[0], setSelectedContainer = selectedContainerState[1];
+      var containerLogsState = React.useState("Loading container logs…");
+      var containerLogs = containerLogsState[0], setContainerLogs = containerLogsState[1];
+      // activeView: "chat" | "terminal" | "container"
+      var activeViewState = React.useState(props.initialView || (initialContainerId ? "container" : (initialSession ? "terminal" : "terminal")));
+      var activeView = activeViewState[0], setActiveView = activeViewState[1];
+      var panelPlusMenuState = React.useState(false);
+      var panelPlusMenuOpen = panelPlusMenuState[0], setPanelPlusMenuOpen = panelPlusMenuState[1];
+      var isCollapsedState = React.useState(false);
+      var isCollapsed = isCollapsedState[0], setIsCollapsed = isCollapsedState[1];
+      var tabActionsBtnRef = React.useRef(null);
+      var tabActionsOpenState = React.useState(false);
+      var tabActionsOpen = tabActionsOpenState[0], setTabActionsOpen = tabActionsOpenState[1];
+
+      var terminalContainerRef = React.useRef(null);
+      var terminalPreRef = React.useRef(null);
+
+      // Drag to resize handler
+      var handleResizeStart = function (e) {
+        e.preventDefault();
+        var startY = e.clientY;
+        var startHeight = height;
+        var handleMove = function (moveEvent) {
+          var delta = startY - moveEvent.clientY;
+          var newHeight = Math.max(160, Math.min(window.innerHeight * 0.88, startHeight + delta));
+          setHeight(newHeight);
+          setIsMaximized(false);
+        };
+        var handleUp = function () {
+          document.removeEventListener("pointermove", handleMove);
+          document.removeEventListener("pointerup", handleUp);
+        };
+        document.addEventListener("pointermove", handleMove);
+        document.addEventListener("pointerup", handleUp);
+      };
+
+      var loadSessions = React.useCallback(function () {
+        fetch(QUOTAS_API + "/tmux/sessions")
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            var list = res.sessions || [];
+            if (list.length === 0) {
+              fetch(QUOTAS_API + "/tmux/sessions/new", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ name: selectedSession || "0" }),
+              }).then(function () {
+                fetch(QUOTAS_API + "/tmux/sessions")
+                  .then(function (r2) { return r2.json(); })
+                  .then(function (res2) {
+                    var l2 = res2.sessions || [];
+                    setData({ sessions: l2, loading: false, error: null });
+                    if (l2.length > 0) setSelectedSession(l2[0].name);
+                  });
+              });
+              return;
+            }
+            setData({ sessions: list, loading: false, error: null });
+            if (!list.some(function (s) { return s.name === selectedSession; })) {
+              setSelectedSession(list[0].name);
+            }
+          });
+      }, [selectedSession]);
+
+      var loadWindows = React.useCallback(function (sessName) {
+        if (!sessName) return;
+        fetch(QUOTAS_API + "/tmux/sessions/windows?name=" + encodeURIComponent(sessName))
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setWindows(res.windows || []); });
+      }, []);
+
+      var loadBuffer = React.useCallback(function (sessName) {
+        if (!sessName) return;
+        fetch(QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessName))
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            setBuffer(res.buffer || "(empty session)");
+          });
+      }, []);
+
+      React.useEffect(function () { loadSessions(); }, [loadSessions]);
+      React.useEffect(function () {
+        loadWindows(selectedSession);
+        loadBuffer(selectedSession);
+      }, [selectedSession, loadWindows, loadBuffer]);
+
+      // High-frequency live buffer streaming (every 600ms)
+      React.useEffect(function () {
+        var interval = setInterval(function () {
+          loadBuffer(selectedSession);
+        }, 600);
+        return function () { clearInterval(interval); };
+      }, [selectedSession, loadBuffer]);
+
+      // Auto-scroll to bottom on buffer update
+      React.useEffect(function () {
+        if (terminalPreRef.current) {
+          terminalPreRef.current.scrollTop = terminalPreRef.current.scrollHeight;
+        }
+      }, [buffer, containerLogs]);
+
+      // Container data loading
+      var loadContainers = React.useCallback(function () {
+        fetch(QUOTAS_API + "/docker/containers")
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setContainers(res.containers || []); })
+          .catch(function () {});
+      }, []);
+
+      var loadContainerLogs = React.useCallback(function (cId) {
+        if (!cId) return;
+        fetch(QUOTAS_API + "/docker/containers/logs?id=" + encodeURIComponent(cId))
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setContainerLogs(res.logs || "(no logs)"); });
+      }, []);
+
+      React.useEffect(function () {
+        var onOpenTerm = function (e) {
+          var sess = (e && e.detail && e.detail.session) ? e.detail.session : "0";
+          setActiveView("terminal");
+          setSelectedSession(sess);
+          setSelectedContainer(null);
+          setIsCollapsed(false);
+          loadBuffer(sess);
+          loadWindows(sess);
+        };
+        var onOpenCont = function (e) {
+          var id = (e && e.detail && e.detail.id) ? e.detail.id : null;
+          setActiveView("container");
+          setSelectedContainer(id);
+          setSelectedSession(null);
+          setIsCollapsed(false);
+          if (id) loadContainerLogs(id);
+        };
+        window.addEventListener("dsh:open-terminal", onOpenTerm);
+        window.addEventListener("dsh:open-container", onOpenCont);
+        return function () {
+          window.removeEventListener("dsh:open-terminal", onOpenTerm);
+          window.removeEventListener("dsh:open-container", onOpenCont);
+        };
+      }, [loadBuffer, loadWindows, loadContainerLogs]);
+
+      React.useEffect(function () { loadContainers(); var t = setInterval(loadContainers, 5000); return function () { clearInterval(t); }; }, [loadContainers]);
+      React.useEffect(function () {
+        if (activeView === "container" && selectedContainer) loadContainerLogs(selectedContainer);
+      }, [activeView, selectedContainer, loadContainerLogs]);
+      // Live container log streaming (every 2s)
+      React.useEffect(function () {
+        if (activeView !== "container" || !selectedContainer) return;
+        var interval = setInterval(function () { loadContainerLogs(selectedContainer); }, 2000);
+        return function () { clearInterval(interval); };
+      }, [activeView, selectedContainer, loadContainerLogs]);
+
+      var handleContainerAction = function (cId, action) {
+        fetch(QUOTAS_API + "/docker/containers/action", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: cId, action: action }),
+        }).then(function () { loadContainers(); });
+      };
+
+      var selectTerminalTab = function (name) {
+        setActiveView("terminal");
+        setSelectedSession(name);
+        setSelectedContainer(null);
+        setIsCollapsed(false);
+      };
+
+      var selectContainerTab = function (c) {
+        setActiveView("container");
+        setSelectedContainer(c.id);
+        setSelectedSession(null);
+        setIsCollapsed(false);
+      };
+
+      // Send key actions
+      var sendKey = function (key) {
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: selectedSession, keys: key, isLiteral: false }),
+        }).then(function () {
+          setTimeout(function () { loadBuffer(selectedSession); }, 40);
+        });
+      };
+
+      var sendLiteral = function (text, pressEnter) {
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: selectedSession, keys: text, isLiteral: true, pressEnter: Boolean(pressEnter) }),
+        }).then(function () {
+          setTimeout(function () { loadBuffer(selectedSession); }, 60);
+        });
+      };
+
+      var handleExecuteCommand = function (e) {
+        if (e) e.preventDefault();
+        if (!cmd.trim()) return;
+        sendLiteral(cmd, true);
+        setCmd("");
+      };
+
+      var handleKeyDown = function (e) {
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+
+        if (e.key === "Enter") {
+          sendKey("Enter");
+          e.preventDefault();
+        } else if (e.key === "Backspace") {
+          sendKey("BSpace");
+          e.preventDefault();
+        } else if (e.key === "Tab") {
+          sendKey("Tab");
+          e.preventDefault();
+        } else if (e.key === "ArrowUp") {
+          sendKey("Up");
+          e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          sendKey("Down");
+          e.preventDefault();
+        } else if (e.key === "ArrowLeft") {
+          sendKey("Left");
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          sendKey("Right");
+          e.preventDefault();
+        } else if (e.key === "Escape") {
+          sendKey("Escape");
+          e.preventDefault();
+        } else if (e.ctrlKey) {
+          if (e.key === "c" || e.key === "C") { sendKey("C-c"); e.preventDefault(); }
+          else if (e.key === "d" || e.key === "D") { sendKey("C-d"); e.preventDefault(); }
+          else if (e.key === "l" || e.key === "L") { sendKey("C-l"); e.preventDefault(); }
+          else if (e.key === "z" || e.key === "Z") { sendKey("C-z"); e.preventDefault(); }
+        } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
+          sendLiteral(e.key, false);
+          e.preventDefault();
+        }
+      };
+
+      var handleSelectWindow = function (idx) {
+        fetch(QUOTAS_API + "/tmux/sessions/select-window", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: selectedSession, index: idx }),
+        }).then(function () {
+          loadWindows(selectedSession);
+          loadBuffer(selectedSession);
+        });
+      };
+
+      var handleNewWindow = function () {
+        var winName = prompt("New Window Name:", "sh");
+        if (!winName) return;
+        fetch(QUOTAS_API + "/tmux/sessions/new-window", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: selectedSession, windowName: winName }),
+        }).then(function () {
+          loadWindows(selectedSession);
+          loadBuffer(selectedSession);
+        });
+      };
+
+      var handleKill = function (name) {
+        if (!confirm("Kill tmux session '" + name + "'?")) return;
+        fetch(QUOTAS_API + "/tmux/sessions/kill", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: name }),
+        }).then(function () { loadSessions(); });
+      };
+
+      var sidebarRightState = React.useState(260);
+      var sidebarRight = sidebarRightState[0], setSidebarRight = sidebarRightState[1];
+      var detailsWidthState = React.useState(0);
+      var detailsWidth = detailsWidthState[0], setDetailsWidth = detailsWidthState[1];
+
+      React.useEffect(function () {
+        var updateOffsets = function () {
+          var centerEl = document.querySelector('[class*="centerCol"]');
+          if (centerEl) {
+            var cRect = centerEl.getBoundingClientRect();
+            if (cRect.width > 0) {
+              setSidebarRight(cRect.left);
+              setDetailsWidth(window.innerWidth - cRect.right);
+              return;
+            }
+          }
+          var sidebarEl = document.querySelector('[class*="sidebarCol"]');
+          if (sidebarEl) {
+            var sRect = sidebarEl.getBoundingClientRect();
+            if (sRect.right > 0) setSidebarRight(sRect.right);
+          }
+          var detailsEl = document.querySelector('[class*="detailsCol"]');
+          if (detailsEl) {
+            var dRect = detailsEl.getBoundingClientRect();
+            var dWidth = window.innerWidth - dRect.left;
+            if (dWidth >= 0 && dRect.width > 0) setDetailsWidth(dWidth);
+            else setDetailsWidth(0);
+          }
+        };
+
+        updateOffsets();
+        var timer = setInterval(updateOffsets, 200);
+        window.addEventListener("resize", updateOffsets);
+        return function () {
+          clearInterval(timer);
+          window.removeEventListener("resize", updateOffsets);
+        };
+      }, []);
+
+      var currentHeight = isCollapsed ? "38px" : (isMaximized ? "84vh" : height + "px");
+
+      // Broadcast panel geometry for top view occupants
+      React.useEffect(function () {
+        if (typeof window !== "undefined") {
+          window.__dsh_panel_collapsed__ = isCollapsed;
+          window.__dsh_panel_height__ = currentHeight;
+          window.dispatchEvent(new CustomEvent("dsh:panel-geometry-changed", {
+            detail: { collapsed: isCollapsed, height: currentHeight }
+          }));
+        }
+      }, [isCollapsed, currentHeight]);
+
+      // Push chat messages up without expanding centerCol layout bounds
+      React.useEffect(function () {
+        var centerCol = document.querySelector('[class*="centerCol"]');
+        if (centerCol) {
+          centerCol.style.paddingBottom = isCollapsed ? "38px" : currentHeight;
+          centerCol.style.marginBottom = "0px";
+          centerCol.style.transition = "padding-bottom 120ms ease";
+        }
+        return function () {
+          var col = document.querySelector('[class*="centerCol"]');
+          if (col) {
+            col.style.paddingBottom = "0px";
+            col.style.marginBottom = "0px";
+          }
+        };
+      }, [currentHeight, isCollapsed]);
+
+      return h(
+        "div",
+        {
+          ref: terminalContainerRef,
+          tabIndex: 0,
+          onKeyDown: handleKeyDown,
+          onFocus: function () { setIsFocused(true); },
+          onBlur: function () { setIsFocused(false); },
+          style: {
+            position: "fixed",
+            bottom: 0,
+            left: sidebarRight + "px",
+            right: detailsWidth + "px",
+            height: currentHeight,
+            zIndex: 9000,
+            background: "var(--dsw-alias-bg-layer-0, #000000)",
+            borderTop: "1px solid var(--dsw-alias-border-l2, rgba(255,255,255,0.15))",
+            borderLeft: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+            display: "flex",
+            flexDirection: "column",
+            boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.4)",
+            outline: "none",
+            transition: isMaximized ? "height 150ms cubic-bezier(0.4, 0, 0.2, 1)" : "none",
+            fontFamily: "var(--ds-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)",
+          },
+        },
+        // Top Resize Drag Handle (visible when expanded)
+        (!isCollapsed && activeView !== "chat") ? h(
+          "div",
+          {
+            onPointerDown: handleResizeStart,
+            style: {
+              position: "absolute",
+              top: "-4px",
+              left: 0,
+              right: 0,
+              height: "8px",
+              cursor: "row-resize",
+              zIndex: 100000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          },
+          h("div", {
+            style: {
+              width: "36px",
+              height: "3px",
+              borderRadius: "2px",
+              background: "var(--dsw-alias-border-l2, rgba(255,255,255,0.2))",
+              opacity: 0.7,
+              transition: "background 150ms, opacity 150ms",
+            }
+          })
+        ) : null,
+        // Header Tab Bar
+        h(
+          "div",
+          {
+            style: {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              height: "38px",
+              background: "var(--dsw-alias-bg-layer-0, #000000)",
+              borderBottom: (activeView === "chat" || isCollapsed) ? "none" : "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              padding: "0 8px 0 10px",
+              userSelect: "none",
+            },
+          },
+          // Unified Tabs Container (matching TopConversationTabBar)
+          h(
+            "div",
+            {
+              className: "dsh-top-tab-bar",
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+                padding: "2px 4px",
+                borderRadius: "8px",
+                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+                userSelect: "none",
+                maxWidth: "calc(100% - 90px)",
+                overflowX: "auto",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              },
+              onDragOver: function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; },
+              onDrop: function (e) {
+                e.preventDefault();
+                setIsCollapsed(false);
+                try {
+                  var raw = e.dataTransfer.getData("text/dsh-tab");
+                  if (raw) {
+                    var tabData = JSON.parse(raw);
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-bottom", { detail: tabData }));
+                    if (tabData.type === "terminal") selectTerminalTab(tabData.id);
+                    else if (tabData.type === "container") { setSelectedContainer(tabData.id); setActiveView("container"); setIsCollapsed(false); }
+                    else if (tabData.type === "chat") { setActiveView("chat"); setSelectedSession(null); setSelectedContainer(null); setIsCollapsed(false); }
+                  }
+                } catch (err) {}
+              },
+            },
+            // 0. Conversation Tab (suppressed if open in top main bar)
+            (function () {
+              var topMap = (typeof window !== "undefined" && window.__dsh_top_tab_ids__) ? window.__dsh_top_tab_ids__ : {};
+              if (topMap["chat-main"] || topMap["chat"]) return null;
+              var isChatSel = activeView === "chat";
+              return h(
+                "div",
+                {
+                  key: "tab-conversation",
+                  draggable: true,
+                  onDragStart: function (e) {
+                    e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: "chat-main", type: "chat", title: "Conversation", from: "bottom" }));
+                  },
+                  onClick: function () {
+                    setActiveView("chat");
+                    setSelectedSession(null);
+                    setSelectedContainer(null);
+                    setIsCollapsed(false);
+                  },
+                  onContextMenu: function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: { id: "chat-main", type: "chat", title: "Conversation" } }));
+                  },
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "3px 8px",
+                    borderRadius: "5px",
+                    background: isChatSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                    border: isChatSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                    color: isChatSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                    fontSize: "12px",
+                    fontWeight: isChatSel ? 600 : 400,
+                    cursor: "pointer",
+                    transition: "all 120ms ease",
+                    whiteSpace: "nowrap",
+                  },
+                },
+                h(ChatGlyph, { size: 12 }),
+                h("span", null, "Conversation")
+              );
+            })(),
+            // 1. Terminal Tabs (filtered against Top Tab Bar for deduplication)
+            (function () {
+              var topMap = (typeof window !== "undefined" && window.__dsh_top_tab_ids__) ? window.__dsh_top_tab_ids__ : {};
+              var visibleSessions = data.sessions.filter(function (s) { return !topMap[s.name] && !topMap["term-" + s.name]; });
+              return visibleSessions.map(function (s) {
+                var isSel = activeView === "terminal" && s.name === selectedSession;
+                return h(
+                  "div",
+                  {
+                    key: "term-" + s.name,
+                    draggable: true,
+                    onDragStart: function (e) {
+                      e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: s.name, type: "terminal", title: s.name, session: s.name, from: "bottom" }));
+                    },
+                    onClick: function () { selectTerminalTab(s.name); },
+                    onContextMenu: function (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setTabActionsOpen(true);
+                    },
+                    style: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      padding: "3px 8px",
+                      borderRadius: "5px",
+                      background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                      border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                      color: isSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                      fontSize: "12px",
+                      fontWeight: isSel ? 600 : 400,
+                      cursor: "pointer",
+                      transition: "all 120ms ease",
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                  h(TerminalsGlyph, { size: 12 }),
+                  h("span", null, s.name),
+                  h("span", { style: { fontSize: "10px", opacity: 0.5, marginLeft: "1px" } }, s.windows + "w"),
+                  h("button", {
+                    type: "button",
+                    title: "Kill Session",
+                    onClick: function (e) { e.stopPropagation(); handleKill(s.name); },
+                    style: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "14px",
+                      height: "14px",
+                      marginLeft: "2px",
+                      padding: 0,
+                      border: "none",
+                      borderRadius: "3px",
+                      background: "transparent",
+                      color: "inherit",
+                      opacity: 0.6,
+                      cursor: "pointer",
+                      fontSize: "12px",
+                    },
+                    onMouseEnter: function (e) { e.currentTarget.style.opacity = "1"; e.currentTarget.style.color = "#f85149"; },
+                    onMouseLeave: function (e) { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.color = "inherit"; },
+                  }, "×")
+                );
+              });
+            })(),
+            // 2. Container Tabs (filtered against Top Tab Bar for deduplication)
+            (function () {
+              var topMap = (typeof window !== "undefined" && window.__dsh_top_tab_ids__) ? window.__dsh_top_tab_ids__ : {};
+              var visibleContainers = containers.filter(function (c) { return !topMap[c.id] && !topMap["container-sandboxes"]; });
+              return visibleContainers.map(function (c) {
+                var isSel = activeView === "container" && selectedContainer === c.id;
+                return h(
+                  "div",
+                  {
+                    key: "cont-" + c.id,
+                    draggable: true,
+                    onDragStart: function (e) {
+                      e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: c.id, type: "container", title: c.name || c.id.substring(0, 12), from: "bottom" }));
+                    },
+                    onClick: function () { selectContainerTab(c); },
+                    style: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      padding: "3px 8px",
+                      borderRadius: "5px",
+                      background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                      border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                      color: isSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                      fontSize: "12px",
+                      fontWeight: isSel ? 600 : 400,
+                      cursor: "pointer",
+                      transition: "all 120ms ease",
+                      whiteSpace: "nowrap",
+                    },
+                  },
+                  h(ContainersGlyph, { size: 12 }),
+                  h("span", null, c.name || c.id.substring(0, 12)),
+                  h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: c.isRunning ? "#3fb950" : "#888", marginLeft: "2px" } })
+                );
+              });
+            })(),
+            // 3. Plus Button with Dropdown Context Menu
+            (function () {
+              var panelPlusBtnRef = React.useRef(null);
+              return h(
+                "div",
+                { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+                h(
+                  "button",
+                  {
+                    ref: panelPlusBtnRef,
+                    type: "button",
+                    title: "New Session / Terminal / Container",
+                    onClick: function (e) {
+                      e.stopPropagation();
+                      setPanelPlusMenuOpen(function (v) { return !v; });
+                    },
+                    style: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "22px",
+                      height: "22px",
+                      borderRadius: "4px",
+                      border: "none",
+                      background: "transparent",
+                      color: "var(--dsw-alias-label-secondary)",
+                      cursor: "pointer",
+                    },
+                    onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
+                    onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
+                  },
+                  h(P.IconPlusOutline16, { size: 13 })
+                ),
+                h(SelectDropdownMenu, {
+                  open: panelPlusMenuOpen,
+                  anchorRef: panelPlusBtnRef,
+                  onClose: function () { setPanelPlusMenuOpen(false); },
+                  items: [
+                    { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+                    { id: "terminal", label: "Terminal", icon: h(TerminalsGlyph, { size: 13 }) },
+                    { id: "container", label: "Container", icon: h(ContainersGlyph, { size: 13 }) },
+                  ],
+                  onSelect: function (actionId) {
+                    setPanelPlusMenuOpen(false);
+                    setIsCollapsed(false);
+                    if (actionId === "chat") {
+                      setActiveView("chat");
+                      var startBtn = document.querySelector('[class*="brand"], [class*="newSession"]');
+                      if (startBtn) startBtn.click();
+                      window.dispatchEvent(new CustomEvent("dsh:new-session"));
+                    } else if (actionId === "terminal") {
+                      setNewModal(true);
+                    } else if (actionId === "container") {
+                      window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+                    }
+                  }
+                })
+              );
+            })()
+          ),
+          // Right Controls Bar (3-dots specialized actions + collapse/expand toggle)
+          h(
+            "div",
+            { style: { display: "flex", alignItems: "center", gap: "4px" } },
+            windows.length > 1
+              ? h(
+                  "div",
+                  {
+                    className: "dsh-term-tabs",
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "3px",
+                      marginRight: "6px",
+                      overflowX: "auto",
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
+                    },
+                  },
+                  windows.map(function (w) {
+                    return h(
+                      "button",
+                      {
+                        key: w.index,
+                        onClick: function () { handleSelectWindow(w.index); },
+                        style: {
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          border: "none",
+                          background: w.active ? "var(--dsw-alias-interactive-bg-active, #238636)" : "rgba(255,255,255,0.05)",
+                          color: "#fff",
+                          fontSize: "11px",
+                          cursor: "pointer",
+                        },
+                      },
+                      w.index + ":" + w.name
+                    );
+                  }),
+                  h("button", { onClick: handleNewWindow, title: "New window in this session", style: { padding: "2px 6px", borderRadius: "4px", border: "1px dashed var(--dsw-alias-border-l2)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" } }, "+")
+                )
+              : null,
+            // Specialized 3-dots actions menu
+            h("div", { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+              h("button", {
+                ref: tabActionsBtnRef,
+                type: "button",
+                title: "Actions (…)",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  setTabActionsOpen(function (v) { return !v; });
+                },
+                style: {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "26px",
+                  height: "26px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: "transparent",
+                  color: "var(--dsw-alias-label-secondary)",
+                  cursor: "pointer",
+                },
+                onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
+                onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
+              }, h(P.IconEllipsisOutline16, { size: 14 })),
+              h(SelectDropdownMenu, {
+                open: tabActionsOpen,
+                anchorRef: tabActionsBtnRef,
+                onClose: function () { setTabActionsOpen(false); },
+                items: [
+                  { id: "move-top", label: "Move to Main Area", icon: h(P.IconEyeOutline16, { size: 13 }) },
+                  { id: "move-right", label: "Move to Right Dock", icon: h(P.IconSideBarOutline16, { size: 13 }) },
+                  { id: "refresh", label: "Refresh Buffer", icon: h(P.IconRefreshOutline16, { size: 13 }) },
+                  { id: "clear", label: "Clear Buffer (Ctrl+L)", icon: h(TrashGlyph, { size: 13 }) },
+                  { id: "new-window", label: "New Window in Session", icon: h(P.IconPlusOutline16, { size: 13 }) },
+                  { id: "new-session", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
+                  { id: "kill", label: "Kill Current Session", icon: h(TrashGlyph, { size: 13 }), danger: true },
+                ],
+                onSelect: function (actionId) {
+                  setTabActionsOpen(false);
+                  if (actionId === "move-top") {
+                    if (activeView === "terminal" && selectedSession) {
+                      window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", {
+                        detail: { id: selectedSession, type: "terminal", title: selectedSession, session: selectedSession }
+                      }));
+                    } else if (activeView === "container" && selectedContainer) {
+                      window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", {
+                        detail: { id: selectedContainer, type: "container", title: selectedContainer }
+                      }));
+                    } else if (activeView === "chat") {
+                      window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", {
+                        detail: { id: "chat-main", type: "chat", title: "Conversation" }
+                      }));
+                    }
+                  } else if (actionId === "move-right") {
+                    if (activeView === "terminal" && selectedSession) {
+                      window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", {
+                        detail: { id: selectedSession, type: "terminal", title: selectedSession, session: selectedSession }
+                      }));
+                    } else if (activeView === "container" && selectedContainer) {
+                      window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", {
+                        detail: { id: selectedContainer, type: "container", title: selectedContainer }
+                      }));
+                    }
+                  } else if (actionId === "refresh") {
+                    loadBuffer(selectedSession);
+                  } else if (actionId === "clear") {
+                    sendKey("C-l");
+                  } else if (actionId === "new-window") {
+                    handleNewWindow();
+                  } else if (actionId === "new-session") {
+                    setNewModal(true);
+                  } else if (actionId === "kill") {
+                    if (selectedSession) handleKill(selectedSession);
+                  }
+                }
+              })
+            ),
+            // Collapse / Expand toggle button (Panel Dock Icon)
+            h("button", {
+              type: "button",
+              onClick: function () { setIsCollapsed(function (v) { return !v; }); },
+              title: isCollapsed ? "Expand Bottom Dock" : "Collapse Bottom Dock",
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                borderRadius: "6px",
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+                padding: "4px",
+              },
+              onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
+              onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
+            }, h(P.IconSideBarOutline16, {
+              size: 14,
+              style: {
+                transform: isCollapsed ? "rotate(-90deg)" : "rotate(90deg)",
+                transition: "transform 150ms ease",
+              }
+            }))
+          )
+        ),
+        // Body content: terminal or container view (rendered when not collapsed)
+        !isCollapsed && (activeView === "terminal") ? h(
+          // Terminal Buffer Output
+          "pre",
+          {
+            ref: terminalPreRef,
+            style: {
+              flex: 1,
+              margin: 0,
+              padding: "12px 16px",
+              color: "var(--dsw-alias-label-primary, #c9d1d9)",
+              fontFamily: "var(--ds-font-mono, 'JetBrains Mono', 'Fira Code', 'Menlo', 'Consolas', monospace)",
+              fontSize: "12.5px",
+              lineHeight: "1.48",
+              overflowY: "auto",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+              cursor: "text",
+              background: "var(--dsw-alias-bg-layer-1, #0d1117)",
+            },
+            dangerouslySetInnerHTML: { __html: ansiToHtml(buffer) + '<span style="display:inline-block;width:7px;height:14px;background:#7ee787;margin-left:2px;vertical-align:middle;animation:blink 1s step-start infinite;"></span>' },
+          }
+        ) : activeView === "container" ? h(React.Fragment, null,
+          // Container info bar
+          (function () {
+            var selCont = containers.find(function (c) { return c.id === selectedContainer; });
+            if (!selCont) return h("div", { style: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--dsw-alias-label-tertiary)", fontSize: "13px" } }, "No container selected");
+            return h(React.Fragment, null,
+              // Container action bar
+              h("div", {
+                style: {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px 16px",
+                  background: "var(--dsw-alias-bg-layer-2, #161b22)",
+                  borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+                },
+              },
+                h("div", { style: { display: "flex", gap: "10px", alignItems: "center" } },
+                  h("strong", { style: { color: "var(--dsw-alias-label-primary)", fontSize: "13px" } }, selCont.name || selCont.id.substring(0, 12)),
+                  h("code", { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)", background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))", padding: "1px 6px", borderRadius: "4px" } }, selCont.image),
+                  h("span", { style: { padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 600, background: selCont.isRunning ? "rgba(63, 185, 80, 0.15)" : "rgba(128,128,128,0.1)", color: selCont.isRunning ? "#3fb950" : "var(--dsw-alias-label-tertiary)" } }, selCont.isRunning ? "RUNNING" : "STOPPED")
+                ),
+                h("div", { style: { display: "flex", gap: "6px" } },
+                  selCont.isRunning
+                    ? h("button", { onClick: function () { handleContainerAction(selCont.id, "stop"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid rgba(248, 81, 73, 0.3)", background: "rgba(248, 81, 73, 0.08)", color: "#f85149", fontSize: "11px", fontWeight: 500, cursor: "pointer" } }, "Stop")
+                    : h("button", { onClick: function () { handleContainerAction(selCont.id, "start"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontSize: "11px", fontWeight: 500, cursor: "pointer" } }, "Start"),
+                  h("button", { onClick: function () { handleContainerAction(selCont.id, "restart"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l1)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" } }, "Restart"),
+                  h("button", { onClick: function () { loadContainerLogs(selCont.id); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l1)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" } }, h(P.IconRefreshOutline16, { size: 12 }))
+                )
+              ),
+              // Container logs
+              h("pre", {
+                ref: terminalPreRef,
+                style: {
+                  flex: 1,
+                  margin: 0,
+                  padding: "12px 16px",
+                  color: "var(--dsw-alias-label-primary, #c9d1d9)",
+                  fontFamily: "var(--ds-font-mono, 'JetBrains Mono', 'Fira Code', 'Menlo', 'Consolas', monospace)",
+                  fontSize: "12.5px",
+                  lineHeight: "1.48",
+                  overflowY: "auto",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                  background: "var(--dsw-alias-bg-layer-1, #0d1117)",
+                },
+              }, containerLogs)
+            );
+          })()
+        ) : null,
+        newModal ? h(NewSessionModal, { onClose: function () { setNewModal(false); }, onCreated: loadSessions }) : null
+      );
+    }
+    var FullPageTerminalsWorkspace = BottomTerminalPanel;
+
+    // 7. FULL-PAGE CONTAINERS WORKSPACE
+    function FullPageContainersWorkspace(props) {
+      var onClose = props.onClose;
+      var initialContainerId = props.initialContainerId;
+      var state = React.useState({ containers: [], loading: true, error: null });
+      var data = state[0], setData = state[1];
+      var selectedContainerState = React.useState(null);
+      var selectedContainer = selectedContainerState[0], setSelectedContainer = selectedContainerState[1];
+      var logsState = React.useState("Loading container logs…");
+      var logs = logsState[0], setLogs = logsState[1];
+      var actionState = React.useState({});
+      var actionMap = actionState[0], setActionMap = actionState[1];
+
+      var loadContainers = React.useCallback(function () {
+        fetch(QUOTAS_API + "/docker/containers")
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            var list = res.containers || [];
+            setData({ containers: list, loading: false, error: null });
+            if (list.length > 0) {
+              if (initialContainerId) {
+                var found = list.find(function (c) { return c.id === initialContainerId; });
+                setSelectedContainer(found || list[0]);
+              } else if (!selectedContainer) {
+                setSelectedContainer(list[0]);
+              }
+            }
+          });
+      }, [selectedContainer, initialContainerId]);
+
+      var loadLogs = React.useCallback(function (cId) {
+        if (!cId) return;
+        fetch(QUOTAS_API + "/docker/containers/logs?id=" + encodeURIComponent(cId))
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setLogs(res.logs || "(no logs)"); });
+      }, []);
+
+      React.useEffect(function () { loadContainers(); }, [loadContainers]);
+      React.useEffect(function () { if (selectedContainer) loadLogs(selectedContainer.id); }, [selectedContainer, loadLogs]);
+
+      var handleAction = function (id, action) {
+        setActionMap(function (s) { var n = Object.assign({}, s); n[id] = action; return n; });
+        fetch(QUOTAS_API + "/docker/containers/action", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: id, action: action }),
+        })
+          .then(function () { loadContainers(); })
+          .finally(function () { setActionMap(function (s) { var n = Object.assign({}, s); delete n[id]; return n; }); });
+      };
+
+      return h(
+        "div",
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999 } },
+        h(
+          "div",
+          { style: { width: "92vw", height: "88vh", borderRadius: "14px", background: "#0e1117", border: "1px solid rgba(128,128,128,0.25)", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.7)" } },
+          h(
+            "div",
+            { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(128,128,128,0.2)", background: "#161b22" } },
+            h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } }, h(ContainersGlyph, { size: 18 }), h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600, color: "#fff" } }, "Docker Container Sandboxes")),
+            h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+              h("button", { onClick: function () { if (selectedContainer) loadLogs(selectedContainer.id); }, style: { padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, h(P.IconRefreshOutline16, { size: 14 })),
+              h("button", { onClick: onClose, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, "Close ✕")
+            )
+          ),
+          h(
+            "div",
+            { style: { display: "flex", flex: 1, overflow: "hidden" } },
+            h(
+              "div",
+              { style: { width: "280px", borderRight: "1px solid rgba(128,128,128,0.2)", background: "#11141a", display: "flex", flexDirection: "column", padding: "10px", gap: "6px", overflowY: "auto" } },
+              h("div", { style: { fontSize: "10px", fontWeight: 700, color: "#8b949e", textTransform: "uppercase", letterSpacing: "0.5px", padding: "6px 8px" } }, "Containers (" + data.containers.length + ")"),
+              data.containers.map(function (c) {
+                var isSel = selectedContainer && selectedContainer.id === c.id;
+                return h(
+                  "div",
+                  {
+                    key: c.id,
+                    onClick: function () { setSelectedContainer(c); },
+                    style: { padding: "10px 12px", borderRadius: "8px", background: isSel ? "rgba(99, 102, 241, 0.18)" : "transparent", border: isSel ? "1px solid #6366f1" : "1px solid transparent", cursor: "pointer", display: "flex", flexDirection: "column", gap: "4px" },
+                  },
+                  h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                    h("span", { style: { fontSize: "13px", fontWeight: 600, color: isSel ? "#fff" : "#c9d1d9" } }, c.name || c.id),
+                    h("span", { style: { padding: "1px 5px", borderRadius: "4px", fontSize: "9px", fontWeight: 600, background: c.isRunning ? "rgba(63, 185, 80, 0.15)" : "rgba(128,128,128,0.1)", color: c.isRunning ? "#3fb950" : "#888" } }, c.isRunning ? "RUNNING" : "STOPPED")
+                  ),
+                  h("span", { style: { fontSize: "11px", color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.image)
+                );
+              })
+            ),
+            h(
+              "div",
+              { style: { flex: 1, display: "flex", flexDirection: "column", background: "#0d1117" } },
+              selectedContainer
+                ? h(
+                    "div",
+                    { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", background: "#161b22", borderBottom: "1px solid rgba(128,128,128,0.2)" } },
+                    h("div", { style: { display: "flex", gap: "10px", alignItems: "center" } }, h("strong", { style: { color: "#fff", fontSize: "13px" } }, selectedContainer.name), h("code", { style: { fontSize: "11px", color: "#8b949e" } }, selectedContainer.status)),
+                    h("div", { style: { display: "flex", gap: "6px" } },
+                      selectedContainer.isRunning
+                        ? h("button", { onClick: function () { handleAction(selectedContainer.id, "stop"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#fff", fontSize: "11px", cursor: "pointer" } }, "Stop")
+                        : h("button", { onClick: function () { handleAction(selectedContainer.id, "start"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "none", background: "#6366f1", color: "#fff", fontSize: "11px", cursor: "pointer" } }, "Start"),
+                      h("button", { onClick: function () { handleAction(selectedContainer.id, "restart"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#fff", fontSize: "11px", cursor: "pointer" } }, "Restart")
+                    )
+                  )
+                : null,
+              h("pre", { style: { flex: 1, margin: 0, padding: "18px 20px", color: "#c9d1d9", fontFamily: "monospace", fontSize: "12px", lineHeight: "1.4", overflowY: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, logs)
+            )
+          )
+        )
+      );
+    }
+
+    function SelectDropdownMenu(props) {
+      var open = props.open, onClose = props.onClose, items = props.items, onSelect = props.onSelect, anchorRef = props.anchorRef, position = props.position;
+      var menuRef = React.useRef(null);
+      var posState = React.useState({ top: 0, left: 0 });
+      var pos = posState[0], setPos = posState[1];
+
+      React.useLayoutEffect(function () {
+        if (!open) return;
+        var menuWidth = 190;
+        var menuHeight = (items ? items.length : 4) * 36 + 10;
+        if (position && typeof position.x === "number") {
+          var top = (position.y + menuHeight > window.innerHeight) ? Math.max(8, position.y - menuHeight) : position.y;
+          var left = (position.x + menuWidth > window.innerWidth) ? Math.max(8, position.x - menuWidth) : position.x;
+          setPos({ top: Math.max(8, top), left: Math.max(8, left) });
+        } else if (anchorRef && anchorRef.current) {
+          var rect = anchorRef.current.getBoundingClientRect();
+          var top2 = (rect.bottom + menuHeight > window.innerHeight) ? (rect.top - menuHeight - 4) : (rect.bottom + 4);
+          var left2 = (rect.right - menuWidth < 10) ? Math.max(10, rect.left) : (rect.right - menuWidth);
+          setPos({ top: Math.max(8, top2), left: Math.max(8, left2) });
+        }
+      }, [open, anchorRef, position, items ? items.length : 0]);
+
+      React.useEffect(function () {
+        if (!open) return;
+        var handlePointerDown = function (e) {
+          if (menuRef.current && !menuRef.current.contains(e.target) && (!anchorRef || !anchorRef.current || !anchorRef.current.contains(e.target))) {
+            onClose();
+          }
+        };
+        document.addEventListener("pointerdown", handlePointerDown);
+        return function () { document.removeEventListener("pointerdown", handlePointerDown); };
+      }, [open, onClose, anchorRef]);
+
+      if (!open) return null;
+
+      var isFixed = Boolean((anchorRef && anchorRef.current) || position);
+      return h(
+        "div",
+        {
+          ref: menuRef,
+          style: {
+            position: isFixed ? "fixed" : "absolute",
+            top: isFixed ? pos.top + "px" : "calc(100% + 4px)",
+            left: isFixed ? pos.left + "px" : "auto",
+            right: isFixed ? "auto" : 0,
+            zIndex: 10000000,
+            minWidth: "190px",
+            background: "var(--dsw-alias-surface-l0, #1e1e2e)",
+            border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
+            borderRadius: "8px",
+            boxShadow: "0 12px 32px rgba(0,0,0,0.65)",
+            padding: "4px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+          },
+          onClick: function (e) { e.stopPropagation(); },
+        },
+        items.map(function (item) {
+          var isDanger = Boolean(item.danger);
+          return h(
+            "button",
+            {
+              key: item.id,
+              type: "button",
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                width: "100%",
+                padding: "7px 10px",
+                borderRadius: "5px",
+                border: "none",
+                background: "transparent",
+                color: isDanger ? "#f85149" : "var(--dsw-alias-label-primary)",
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "background 100ms",
+              },
+              onMouseEnter: function (e) {
+                e.currentTarget.style.background = isDanger ? "rgba(248, 81, 73, 0.15)" : "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
+              },
+              onMouseLeave: function (e) {
+                e.currentTarget.style.background = "transparent";
+              },
+              onClick: function (e) {
+                e.stopPropagation();
+                onSelect(item.id);
+                onClose();
+              },
+            },
+            item.icon ? h("span", { style: { display: "inline-flex", flexShrink: 0 } }, item.icon) : null,
+            h("span", { style: { flex: 1 } }, item.label)
+          );
+        })
+      );
+    }
+
+    // Interactive Tmux Terminal Component (Unified for Main Area, Bottom Panel, and Right Sidebar)
+    function InteractiveTmuxTerminal(props) {
+      var sessionName = props.sessionName || "0";
+      var style = props.style || {};
+      var bufferState = React.useState("Connecting to " + sessionName + "…");
+      var buffer = bufferState[0], setBuffer = bufferState[1];
+      var preRef = React.useRef(null);
+      var containerRef = React.useRef(null);
+      var isFocusedState = React.useState(false);
+      var isFocused = isFocusedState[0], setIsFocused = isFocusedState[1];
+
+      var sendKey = function (key) {
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: sessionName, keys: key, isLiteral: false }),
+        }).then(function () {
+          fetch(QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName))
+            .then(function (r) { return r.json(); })
+            .then(function (res) { if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)"); });
+        });
+      };
+
+      var sendLiteral = function (text) {
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: sessionName, keys: text, isLiteral: true }),
+        }).then(function () {
+          fetch(QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName))
+            .then(function (r) { return r.json(); })
+            .then(function (res) { if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)"); });
+        });
+      };
+
+      var handleKeyDown = function (e) {
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        if (e.key === "Enter") {
+          sendKey("Enter"); e.preventDefault();
+        } else if (e.key === "Backspace") {
+          sendKey("BSpace"); e.preventDefault();
+        } else if (e.key === "Tab") {
+          sendKey("Tab"); e.preventDefault();
+        } else if (e.key === "ArrowUp") {
+          sendKey("Up"); e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          sendKey("Down"); e.preventDefault();
+        } else if (e.key === "ArrowLeft") {
+          sendKey("Left"); e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          sendKey("Right"); e.preventDefault();
+        } else if (e.key === "Escape") {
+          sendKey("Escape"); e.preventDefault();
+        } else if (e.ctrlKey) {
+          if (e.key === "c" || e.key === "C") { sendKey("C-c"); e.preventDefault(); }
+          else if (e.key === "d" || e.key === "D") { sendKey("C-d"); e.preventDefault(); }
+          else if (e.key === "l" || e.key === "L") { sendKey("C-l"); e.preventDefault(); }
+          else if (e.key === "z" || e.key === "Z") { sendKey("C-z"); e.preventDefault(); }
+        } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
+          sendLiteral(e.key);
+          e.preventDefault();
+        }
+      };
+
+      React.useEffect(function () {
+        var load = function () {
+          fetch(QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName))
+            .then(function (r) { return r.json(); })
+            .then(function (res) { if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)"); })
+            .catch(function () {});
+        };
+        load();
+        var timer = setInterval(load, 500);
+        return function () { clearInterval(timer); };
+      }, [sessionName]);
+
+      React.useEffect(function () {
+        if (preRef.current) preRef.current.scrollTop = preRef.current.scrollHeight;
+      }, [buffer]);
+
+      return h(
+        "div",
+        {
+          ref: containerRef,
+          tabIndex: 0,
+          onKeyDown: handleKeyDown,
+          onFocus: function () { setIsFocused(true); },
+          onBlur: function () { setIsFocused(false); },
+          onClick: function () { if (containerRef.current) containerRef.current.focus(); },
+          style: Object.assign({
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            background: "var(--dsw-alias-bg-layer-0, #000000)",
+            outline: isFocused ? "1px solid var(--dsw-alias-primary, #6366f1)" : "none",
+            outlineOffset: "-1px",
+            cursor: "text",
+            position: "relative",
+            minHeight: 0,
+            overflow: "hidden",
+          }, style),
+        },
+        h("pre", {
+          ref: preRef,
+          dangerouslySetInnerHTML: { __html: ansiToHtml(buffer) + '<span style="display:inline-block;width:7px;height:14px;background:#7ee787;margin-left:2px;vertical-align:middle;animation:blink 1s step-start infinite;"></span>' },
+          style: {
+            flex: 1,
+            margin: 0,
+            padding: "12px 16px",
+            color: "var(--dsw-alias-label-primary, #c9d1d9)",
+            fontFamily: "var(--ds-font-mono, 'JetBrains Mono', 'Fira Code', 'Menlo', monospace)",
+            fontSize: "12.5px",
+            lineHeight: "1.48",
+            overflowY: "auto",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            background: "transparent",
+          },
+        })
+      );
+    }
+
+    // Empty Area New Tab Fallback Picker
+    function EmptyAreaNewTabPicker(props) {
+      var areaName = props.areaName || "Area";
+      return h(
+        "div",
+        {
+          style: {
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "16px",
+            padding: "32px",
+            background: "var(--dsw-alias-bg-layer-0, #000000)",
+            color: "var(--dsw-alias-label-primary, #fff)",
+            fontFamily: "var(--ds-font-family, sans-serif)",
+          }
+        },
+        h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" } },
+          h("div", { style: { fontSize: "16px", fontWeight: 600 } }, "Empty " + areaName),
+          h("div", { style: { fontSize: "12.5px", color: "var(--dsw-alias-label-secondary, #888)" } }, "Open a new tab or drag an existing tab here")
+        ),
+        h("div", { style: { display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" } },
+          h("button", {
+            type: "button",
+            onClick: function () {
+              window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: { id: "chat-main", type: "chat", title: "Conversation" } }));
+            },
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 14px",
+              borderRadius: "8px",
+              border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+              color: "inherit",
+              fontSize: "12.5px",
+              fontWeight: 500,
+              cursor: "pointer",
+            }
+          }, h(ChatGlyph, { size: 14 }), "+ New Conversation"),
+          h("button", {
+            type: "button",
+            onClick: function () {
+              var termId = "term-" + Date.now().toString(36);
+              window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: { id: termId, type: "terminal", title: termId, session: "0" } }));
+            },
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 14px",
+              borderRadius: "8px",
+              border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+              color: "inherit",
+              fontSize: "12.5px",
+              fontWeight: 500,
+              cursor: "pointer",
+            }
+          }, h(TerminalsGlyph, { size: 14 }), "+ New Terminal"),
+          h("button", {
+            type: "button",
+            onClick: function () {
+              window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: { id: "container-sandboxes", type: "container", title: "Containers" } }));
+            },
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 14px",
+              borderRadius: "8px",
+              border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+              color: "inherit",
+              fontSize: "12.5px",
+              fontWeight: 500,
+              cursor: "pointer",
+            }
+          }, h(ContainersGlyph, { size: 14 }), "+ New Container")
+        )
+      );
+    }
+
+    // Right Sidebar Dock Component
+    function RightSidebarDock(props) {
+      var isOpenState = React.useState(false);
+      var isOpen = isOpenState[0], setIsOpen = isOpenState[1];
+      var widthState = React.useState(300);
+      var width = widthState[0], setWidth = widthState[1];
+      var tabsState = React.useState([]);
+      var tabs = tabsState[0], setTabs = tabsState[1];
+      var activeTabState = React.useState(null);
+      var activeTab = activeTabState[0], setActiveTab = activeTabState[1];
+      var isResizingState = React.useState(false);
+      var isResizing = isResizingState[0], setIsResizing = isResizingState[1];
+
+      // Broadcast right sidebar width for panel docking
+      React.useEffect(function () {
+        if (typeof window !== "undefined") {
+          window.__dsh_right_sidebar_width__ = isOpen ? width : 0;
+          window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: isOpen, width: isOpen ? width : 0 } }));
+        }
+      }, [isOpen, width]);
+
+      React.useEffect(function () {
+        var onToggle = function () { setIsOpen(function (v) { return !v; }); };
+        var onMoveToRight = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (prev.some(function (t) { return t.id === tab.id; })) return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+          setIsOpen(true);
+        };
+        window.addEventListener("dsh:toggle-right-sidebar", onToggle);
+        window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
+        return function () {
+          window.removeEventListener("dsh:toggle-right-sidebar", onToggle);
+          window.removeEventListener("dsh:tab-moved-to-right", onMoveToRight);
+        };
+      }, []);
+
+      var handleResizeStart = function (e) {
+        e.preventDefault();
+        setIsResizing(true);
+        var startX = e.clientX;
+        var startW = width;
+        var onMove = function (moveEv) {
+          var delta = startX - moveEv.clientX;
+          var nextW = Math.max(180, Math.min(600, startW + delta));
+          setWidth(nextW);
+        };
+        var onUp = function () {
+          setIsResizing(false);
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
+
+      if (!isOpen && tabs.length === 0) return null;
+
+      var activeTabObj = tabs.find(function (t) { return t.id === activeTab; });
+
+      return h(
+        "div",
+        {
+          className: "dsh-right-sidebar-dock",
+          style: {
+            position: "fixed",
+            top: "48px",
+            right: 0,
+            bottom: 0,
+            width: isOpen ? width + "px" : "36px",
+            background: "var(--dsw-alias-bg-layer-0, #000000)",
+            borderLeft: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+            zIndex: 85,
+            display: "flex",
+            flexDirection: "column",
+            transition: isResizing ? "none" : "width 150ms ease",
+          },
+          onDragOver: function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; },
+          onDrop: function (e) {
+            e.preventDefault();
+            try {
+              var raw = e.dataTransfer.getData("text/dsh-tab");
+              if (raw) {
+                var tabData = JSON.parse(raw);
+                window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", { detail: tabData }));
+              }
+            } catch (err) {}
+          },
+        },
+        // Resize handle on left edge
+        isOpen ? h("div", {
+          onPointerDown: handleResizeStart,
+          style: {
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: "-4px",
+            width: "8px",
+            cursor: "col-resize",
+            zIndex: 10,
+          }
+        }) : null,
+        // Header Tab Strip
+        h(
+          "div",
+          {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              height: "38px",
+              padding: "0 6px",
+              background: "var(--dsw-alias-bg-layer-0, #000000)",
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+            }
+          },
+          isOpen ? h(
+            "div",
+            {
+              className: "dsh-top-tab-bar",
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                overflowX: "auto",
+                scrollbarWidth: "none",
+              }
+            },
+            tabs.map(function (t) {
+              var isSel = activeTab === t.id;
+              var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) : (t.type === "container" ? h(ContainersGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }));
+              return h(
+                "div",
+                {
+                  key: t.id,
+                  draggable: true,
+                  onClick: function () { setActiveTab(t.id); },
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: "3px 8px",
+                    borderRadius: "6px",
+                    background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.2))" : "transparent",
+                    border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                    color: isSel ? "#fff" : "var(--dsw-alias-label-secondary, #888)",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                  }
+                },
+                icon,
+                h("span", null, t.title || t.id),
+                h("button", {
+                  type: "button",
+                  onClick: function (e) {
+                    e.stopPropagation();
+                    setTabs(function (prev) { return prev.filter(function (x) { return x.id !== t.id; }); });
+                  },
+                  style: { border: "none", background: "transparent", color: "inherit", cursor: "pointer", padding: "0 2px" }
+                }, "×")
+              );
+            })
+          ) : null,
+          h("button", {
+            type: "button",
+            onClick: function () { setIsOpen(!isOpen); },
+            title: isOpen ? "Collapse Right Dock" : "Expand Right Dock",
+            style: {
+              border: "none",
+              background: "transparent",
+              color: "var(--dsw-alias-label-secondary)",
+              cursor: "pointer",
+              padding: "4px",
+            }
+          }, h(P.IconSideBarOutline16, { size: 14, style: { transform: isOpen ? "rotate(180deg)" : "none" } }))
+        ),
+        // Body Content
+        isOpen ? (
+          activeTabObj && activeTabObj.type === "terminal" ? h(InteractiveTmuxTerminal, { sessionName: activeTabObj.session || activeTabObj.id })
+          : activeTabObj && activeTabObj.type === "container" ? h(FullPageContainersWorkspace, {})
+          : h(EmptyAreaNewTabPicker, { areaName: "Right Dock" })
+        ) : null
+      );
+    }
+
+    function MainViewTerminalOccupant(props) {
+      var sessionName = props.sessionName || "0";
+      var panelHeightState = React.useState(function () {
+        if (typeof window !== "undefined" && window.__dsh_panel_height__) {
+          return window.__dsh_panel_height__;
+        }
+        return "38px";
+      });
+      var panelHeight = panelHeightState[0], setPanelHeight = panelHeightState[1];
+
+      React.useEffect(function () {
+        var onGeom = function (e) {
+          if (e && e.detail && e.detail.height) {
+            setPanelHeight(e.detail.height);
+          }
+        };
+        window.addEventListener("dsh:panel-geometry-changed", onGeom);
+        return function () { window.removeEventListener("dsh:panel-geometry-changed", onGeom); };
+      }, []);
+
+      return h("div", {
+        className: "dsh-mainview-terminal",
+        style: {
+          position: "fixed",
+          top: "48px",
+          left: "var(--dsh-sidebar-width, 240px)",
+          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          bottom: panelHeight,
+          background: "var(--dsw-alias-bg-layer-0, #000000)",
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "var(--ds-font-mono, monospace)",
+        }
+      },
+        h("div", {
+          style: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "8px 16px",
+            background: "var(--dsw-alias-bg-layer-0, #000000)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+          }
+        },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            h(TerminalsGlyph, { size: 14 }),
+            h("strong", { style: { color: "var(--dsw-alias-label-primary, #fff)", fontSize: "13px" } }, "Terminal Session: " + sessionName)
+          ),
+          h("button", {
+            onClick: props.onClose,
+            title: "Switch back to Chat",
+            style: {
+              background: "transparent",
+              border: "none",
+              color: "var(--dsw-alias-label-secondary, #888)",
+              cursor: "pointer",
+              fontSize: "16px",
+              padding: "2px 6px",
+              borderRadius: "4px",
+            }
+          }, "✕")
+        ),
+        h(InteractiveTmuxTerminal, { sessionName: sessionName })
+      );
+    }
+
+    function MainViewContainerOccupant(props) {
+      var panelHeightState = React.useState(function () {
+        if (typeof window !== "undefined" && window.__dsh_panel_height__) {
+          return window.__dsh_panel_height__;
+        }
+        return "38px";
+      });
+      var panelHeight = panelHeightState[0], setPanelHeight = panelHeightState[1];
+
+      React.useEffect(function () {
+        var onGeom = function (e) {
+          if (e && e.detail && e.detail.height) {
+            setPanelHeight(e.detail.height);
+          }
+        };
+        window.addEventListener("dsh:panel-geometry-changed", onGeom);
+        return function () { window.removeEventListener("dsh:panel-geometry-changed", onGeom); };
+      }, []);
+
+      return h("div", {
+        className: "dsh-mainview-container",
+        style: {
+          position: "fixed",
+          top: "48px",
+          left: "var(--dsh-sidebar-width, 240px)",
+          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          bottom: panelHeight,
+          background: "var(--dsw-alias-bg-layer-0, #000000)",
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+        }
+      },
+        h(FullPageContainersWorkspace, { onClose: props.onClose })
+      );
+    }
+
+    function TopConversationTabBar(props) {
+      var topPlusBtnRef = React.useRef(null);
+      var plusOpenState = React.useState(false);
+      var plusOpen = plusOpenState[0], setPlusOpen = plusOpenState[1];
+
+      var tabsState = React.useState([
+        { id: "chat-main", type: "chat", title: "Conversation" }
+      ]);
+      var tabs = tabsState[0], setTabs = tabsState[1];
+      var activeTabState = React.useState("chat-main");
+      var activeTab = activeTabState[0], setActiveTab = activeTabState[1];
+
+      var contextMenuState = React.useState(null); // { tabId, anchorEl }
+      var contextMenu = contextMenuState[0], setContextMenu = contextMenuState[1];
+
+      // Sync active top tab IDs to window global for cross-panel deduplication
+      React.useEffect(function () {
+        if (typeof window !== "undefined") {
+          var map = {};
+          tabs.forEach(function (t) {
+            map[t.id] = true;
+            if (t.session) map[t.session] = true;
+          });
+          window.__dsh_top_tab_ids__ = map;
+          window.dispatchEvent(new CustomEvent("dsh:tabs-changed"));
+        }
+      }, [tabs]);
+
+      React.useEffect(function () {
+        var onTabMovedToTop = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (prev.some(function (t) { return t.id === tab.id; })) return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        };
+        var onTabMovedToBottom = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            var remaining = prev.filter(function (t) { return t.id !== tab.id; });
+            return remaining;
+          });
+          setActiveTab(function (curr) {
+            if (curr === tab.id) return null;
+            return curr;
+          });
+        };
+        window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
+        window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
+        return function () {
+          window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
+          window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
+        };
+      }, []);
+
+      var handleDropOnTop = function (e) {
+        e.preventDefault();
+        try {
+          var raw = e.dataTransfer.getData("text/dsh-tab");
+          if (raw) {
+            var tabData = JSON.parse(raw);
+            window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tabData }));
+          }
+        } catch (err) {}
+      };
+
+      var removeTab = function (tabId, e) {
+        if (e) e.stopPropagation();
+        setTabs(function (prev) {
+          var idx = prev.findIndex(function (t) { return t.id === tabId; });
+          var remaining = prev.filter(function (t) { return t.id !== tabId; });
+          if (activeTab === tabId) {
+            if (remaining.length > 0) {
+              var nextIdx = Math.min(idx, remaining.length - 1);
+              setActiveTab(remaining[nextIdx].id);
+            } else {
+              setActiveTab(null);
+            }
+          }
+          return remaining;
+        });
+      };
+
+      var activeTabObj = tabs.find(function (t) { return t.id === activeTab; });
+      var isMainTermActive = activeTabObj && activeTabObj.type === "terminal";
+      var isMainContActive = activeTabObj && activeTabObj.type === "container";
+      var isMainEmpty = tabs.length === 0;
+
+      return h(
+        Fragment,
+        null,
+        h(
+          "div",
+          {
+            className: "dsh-top-tab-bar",
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+              padding: "2px 4px",
+              borderRadius: "8px",
+              border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              marginLeft: "8px",
+              userSelect: "none",
+            },
+            onDragOver: function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; },
+            onDrop: handleDropOnTop,
+          },
+          tabs.map(function (t) {
+            var isSel = activeTab === t.id;
+            var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) : (t.type === "container" ? h(ContainersGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }));
+            return h(
+              "div",
+              {
+                key: t.id,
+                draggable: true,
+                onDragStart: function (e) {
+                  e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: t.id, type: t.type, title: t.title, session: t.session, from: "top" }));
+                },
+                onClick: function () {
+                  setActiveTab(t.id);
+                  if (t.type === "chat") {
+                    window.dispatchEvent(new CustomEvent("dsh:focus-chat"));
+                  }
+                },
+                onContextMenu: function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setContextMenu({ tab: t, pos: { x: e.clientX, y: e.clientY } });
+                },
+                style: {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "3px 8px",
+                  borderRadius: "5px",
+                  background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                  border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                  color: isSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                  fontSize: "12px",
+                  fontWeight: isSel ? 600 : 400,
+                  cursor: "pointer",
+                  transition: "all 120ms ease",
+                },
+              },
+              icon,
+              h("span", null, t.title || "Tab"),
+              (t.type !== "chat" && t.id !== "chat-main") ? h(
+                "button",
+                {
+                  type: "button",
+                  title: "Close Tab",
+                  onClick: function (e) { removeTab(t.id, e); },
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "14px",
+                    height: "14px",
+                    marginLeft: "2px",
+                    border: "none",
+                    borderRadius: "3px",
+                    background: "transparent",
+                    color: "inherit",
+                    opacity: 0.6,
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  },
+                  onMouseEnter: function (e) { e.currentTarget.style.opacity = "1"; e.currentTarget.style.color = "#f85149"; },
+                  onMouseLeave: function (e) { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.color = "inherit"; },
+                },
+                "×"
+              ) : null
+            );
+          }),
+          h(
+            "div",
+            { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+            h(
+              "button",
+              {
+                ref: topPlusBtnRef,
+                type: "button",
+                title: "New Session / Terminal / Container",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  setPlusOpen(function (v) { return !v; });
+                },
+                style: {
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "22px",
+                  height: "22px",
+                  borderRadius: "4px",
+                  border: "none",
+                  background: "transparent",
+                  color: "var(--dsw-alias-label-secondary)",
+                  cursor: "pointer",
+                },
+                onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
+                onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
+              },
+              h(P.IconPlusOutline16, { size: 13 })
+            ),
+            h(SelectDropdownMenu, {
+              open: plusOpen,
+              anchorRef: topPlusBtnRef,
+              onClose: function () { setPlusOpen(false); },
+              items: [
+                { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+                { id: "terminal", label: "Terminal (Main View)", icon: h(TerminalsGlyph, { size: 13 }) },
+                { id: "container", label: "Container Sandboxes (Main View)", icon: h(ContainersGlyph, { size: 13 }) },
+              ],
+              onSelect: function (actionId) {
+                setPlusOpen(false);
+                if (actionId === "chat") {
+                  window.dispatchEvent(new CustomEvent("dsh:new-session"));
+                  var chatTab = { id: "chat-main", type: "chat", title: "Conversation" };
+                  setTabs(function (prev) {
+                    if (prev.some(function (t) { return t.id === chatTab.id; })) return prev;
+                    return prev.concat([chatTab]);
+                  });
+                  setActiveTab("chat-main");
+                } else if (actionId === "terminal") {
+                  var termName = "term-" + Math.floor(Math.random() * 1000);
+                  var newTab = { id: termName, type: "terminal", title: "Terminal " + termName, session: termName };
+                  fetch(QUOTAS_API + "/tmux/sessions/new", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({ name: termName }),
+                  });
+                  setTabs(function (prev) { return prev.concat([newTab]); });
+                  setActiveTab(newTab.id);
+                  window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: newTab }));
+                } else if (actionId === "container") {
+                  var contTab = { id: "container-sandboxes", type: "container", title: "Docker Sandboxes" };
+                  setTabs(function (prev) {
+                    if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
+                    return prev.concat([contTab]);
+                  });
+                  setActiveTab(contTab.id);
+                  window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: contTab }));
+                }
+              },
+            })
+          ),
+          contextMenu ? h(SelectDropdownMenu, {
+            open: true,
+            position: contextMenu.pos,
+            onClose: function () { setContextMenu(null); },
+            items: [
+              { id: "move-bottom", label: "Move to Bottom Panel", icon: h(P.IconSideBarOutline16, { size: 13 }) },
+              { id: "move-right", label: "Move to Right Dock", icon: h(P.IconSideBarOutline16, { size: 13 }) },
+              contextMenu.tab && contextMenu.tab.type !== "chat" ? { id: "close", label: "Close Tab", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
+            ].filter(Boolean),
+            onSelect: function (act) {
+              var tab = contextMenu.tab;
+              setContextMenu(null);
+              if (act === "move-bottom") {
+                removeTab(tab.id);
+                window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-bottom", { detail: tab }));
+              } else if (act === "move-right") {
+                removeTab(tab.id);
+                window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", { detail: tab }));
+              } else if (act === "close") {
+                removeTab(tab.id);
+              }
+            }
+          }) : null
+        ),
+        isMainEmpty ? h("div", {
+          style: {
+            position: "fixed",
+            top: "48px",
+            left: "var(--dsh-sidebar-width, 240px)",
+            right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+            bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
+            zIndex: 40,
+            display: "flex",
+          }
+        }, h(EmptyAreaNewTabPicker, { areaName: "Main Area" })) : null,
+        isMainTermActive ? h(MainViewTerminalOccupant, { sessionName: activeTabObj.session || activeTabObj.id, onClose: function () { removeTab(activeTabObj.id); } }) : null,
+        isMainContActive ? h(MainViewContainerOccupant, { onClose: function () { removeTab(activeTabObj.id); } }) : null
+      );
+    }
+
+    function RenameTerminalModal(props) {
+      var oldName = props.oldName, onClose = props.onClose, onRenamed = props.onRenamed;
+      var nameState = React.useState(oldName);
+      var name = nameState[0], setName = nameState[1];
+      var savingState = React.useState(false);
+      var saving = savingState[0], setSaving = savingState[1];
+
+      var handleRename = function () {
+        if (!name.trim()) return;
+        setSaving(true);
+        fetch(QUOTAS_API + "/tmux/sessions/rename", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ oldName: oldName, newName: name.trim() }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.success) {
+              onRenamed(name.trim());
+              onClose();
+            } else {
+              alert(res.error || "Rename failed");
+            }
+          })
+          .catch(function (err) { alert(err.message); })
+          .finally(function () { setSaving(false); });
+      };
+
+      return h(
+        "div",
+        {
+          style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999 },
+          onClick: onClose,
+        },
+        h(
+          "div",
+          {
+            style: { width: "380px", padding: "20px", borderRadius: "10px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "12px" },
+            onClick: function (e) { e.stopPropagation(); },
+          },
+          h("h3", { style: { margin: 0, fontSize: "15px", fontWeight: 600 } }, "Rename Terminal Session"),
+          h("input", {
+            value: name,
+            autoFocus: true,
+            onChange: function (e) { setName(e.target.value); },
+            onKeyDown: function (e) { if (e.key === "Enter") handleRename(); else if (e.key === "Escape") onClose(); },
+            style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit", fontSize: "13px" }
+          }),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "4px" } },
+            h("button", { onClick: onClose, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "inherit", cursor: "pointer" } }, "Cancel"),
+            h("button", { onClick: handleRename, disabled: saving, style: { padding: "6px 14px", borderRadius: "6px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, saving ? "Saving…" : "Save")
+          )
+        )
+      );
+    }
+
+    function RepoGlyph(props) {
+      var size = props && props.size ? props.size : 15;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 16 16",
+        fill: "currentColor",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-primary, #6366f1)"
+        }
+      },
+        h("path", {
+          fillRule: "evenodd",
+          clipRule: "evenodd",
+          d: "M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.6-1.2-1.6 1.2a.25.25 0 0 1-.4-.2Z"
+        })
+      );
+    }
+
+    function WorkspaceGlyph(props) {
+      var size = props && props.size ? props.size : 15;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-info, #38bdf8)"
+        }
+      },
+        h("rect", { x: "2", y: "7", width: "20", height: "14", rx: "2", ry: "2" }),
+        h("path", { d: "M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" })
+      );
+    }
+
+    function SparklesGlyph(props) {
+      var size = props.size || 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-block",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-primary, #6366f1)"
+        }
+      },
+        h("path", { d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" })
+      );
+    }
+
+    function AccountsGlyph(props) {
+      var size = props.size || 16;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
+        h("circle", { cx: "12", cy: "7", r: "4" })
+      );
+    }
+
+    function ModelsGlyph(props) {
+      var size = props.size || 16;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" })
+      );
+    }
+
+    function AppsGlyph(props) {
+      var size = props.size || 16;
+      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("rect", { x: "3", y: "3", width: "7", height: "7" }),
+        h("rect", { x: "14", y: "3", width: "7", height: "7" }),
+        h("rect", { x: "14", y: "14", width: "7", height: "7" }),
+        h("rect", { x: "3", y: "14", width: "7", height: "7" })
+      );
+    }
+
+    // Helper Modals
+    function NewSessionModal(props) {
+      var onClose = props.onClose, onCreated = props.onCreated;
+      var nameState = React.useState("");
+      var name = nameState[0], setName = nameState[1];
+      var creatingState = React.useState(false);
+      var creating = creatingState[0], setCreating = creatingState[1];
+
+      var handleCreate = function () {
+        setCreating(true);
+        fetch(QUOTAS_API + "/tmux/sessions/new", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: name }),
+        })
+          .then(function () { onCreated(); onClose(); })
+          .finally(function () { setCreating(false); });
+      };
+
+      return h(
+        "div",
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999 } },
+        h(
+          "div",
+          { style: { width: "440px", padding: "24px", borderRadius: "12px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "14px" } },
+          h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600 } }, "Create New Terminal Session"),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Session Name:"),
+          h("input", { value: name, onChange: function (e) { setName(e.target.value); }, placeholder: "e.g. runner-1, worker-bg", style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" } },
+            h("button", { onClick: onClose, style: { padding: "7px 14px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "inherit", cursor: "pointer" } }, "Cancel"),
+            h("button", { onClick: handleCreate, disabled: creating, style: { padding: "7px 14px", borderRadius: "6px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, creating ? "Creating…" : "Create Session")
+          )
+        )
+      );
+    }
+
+    function EditValueModal(props) {
+      var target = props.target, onClose = props.onClose, onSaved = props.onSaved;
+      var valueState = React.useState("");
+      var value = valueState[0], setValue = valueState[1];
+      var savingState = React.useState(false);
+      var saving = savingState[0], setSaving = savingState[1];
+
+      var handleSave = function () {
+        setSaving(true);
+        fetch(VAULT_API + "/accounts/" + encodeURIComponent(target.ref) + "?account=" + encodeURIComponent(target.account), {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ value: value }),
+        })
+          .then(function () { onSaved(); onClose(); })
+          .finally(function () { setSaving(false); });
+      };
+
+      return h(
+        "div",
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 } },
+        h(
+          "div",
+          { style: { width: "440px", padding: "24px", borderRadius: "12px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "16px" } },
+          h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600 } }, "Edit Credential Value"),
+          h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Updating " + target.ref + " for @" + target.account),
+          h("input", { type: "password", placeholder: "Enter new secret / API key…", value: value, onChange: function (e) { setValue(e.target.value); }, style: { padding: "10px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit", width: "100%", boxSizing: "border-box" } }),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" } },
+            h("button", { onClick: onClose, style: { padding: "7px 14px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "inherit", cursor: "pointer" } }, "Cancel"),
+            h("button", { onClick: handleSave, disabled: saving, style: { padding: "7px 14px", borderRadius: "6px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, saving ? "Saving…" : "Save Secret")
+          )
+        )
+      );
+    }
+
+    function AddKeyModal(props) {
+      var target = props.target, onClose = props.onClose, onSaved = props.onSaved;
+      var prov = target.prov;
+      var refState = React.useState(prov.defaultKeys[0] || (prov.prefixes[0] + "API_KEY"));
+      var ref = refState[0], setRef = refState[1];
+      var accountState = React.useState("default");
+      var account = accountState[0], setAccount = accountState[1];
+      var valueState = React.useState("");
+      var value = valueState[0], setValue = valueState[1];
+      var savingState = React.useState(false);
+      var saving = savingState[0], setSaving = savingState[1];
+
+      var handleSave = function () {
+        setSaving(true);
+        fetch(VAULT_API + "/accounts/" + encodeURIComponent(ref) + "?account=" + encodeURIComponent(account), {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ value: value }),
+        })
+          .then(function () { onSaved(); onClose(); })
+          .finally(function () { setSaving(false); });
+      };
+
+      return h(
+        "div",
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 } },
+        h(
+          "div",
+          { style: { width: "460px", padding: "24px", borderRadius: "12px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "14px" } },
+          h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600 } }, "Add Key for " + prov.name),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Credential Reference:"),
+          h("input", { value: ref, onChange: function (e) { setRef(e.target.value); }, style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Account Profile:"),
+          h("input", { value: account, onChange: function (e) { setAccount(e.target.value); }, style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Secret / Key Value:"),
+          h("input", { type: "password", value: value, onChange: function (e) { setValue(e.target.value); }, placeholder: "Paste key here…", style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" } },
+            h("button", { onClick: onClose, style: { padding: "7px 14px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "inherit", cursor: "pointer" } }, "Cancel"),
+            h("button", { onClick: handleSave, disabled: saving || !ref || !value, style: { padding: "7px 14px", borderRadius: "6px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, saving ? "Adding…" : "Add Key")
+          )
+        )
+      );
+    }
+
+    function AddModelModal(props) {
+      var target = props.target, onClose = props.onClose, onSaved = props.onSaved;
+      var prov = target.prov;
+      var idState = React.useState("");
+      var id = idState[0], setId = idState[1];
+      var nameState = React.useState("");
+      var name = nameState[0], setName = nameState[1];
+      var contextState = React.useState("128k");
+      var context = contextState[0], setContext = contextState[1];
+
+      var handleSave = function () {
+        prov.models.push({ id: id, name: name || id, context: context, tags: ["Custom"] });
+        onSaved(); onClose();
+      };
+
+      return h(
+        "div",
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 } },
+        h(
+          "div",
+          { style: { width: "440px", padding: "24px", borderRadius: "12px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "14px" } },
+          h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600 } }, "Add Custom Model to " + prov.name),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Model ID:"),
+          h("input", { value: id, onChange: function (e) { setId(e.target.value); }, placeholder: "e.g. claude-3-7-sonnet-20250219", style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Display Name:"),
+          h("input", { value: name, onChange: function (e) { setName(e.target.value); }, placeholder: "e.g. Claude 3.7 Sonnet (Latest)", style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Context Window:"),
+          h("input", { value: context, onChange: function (e) { setContext(e.target.value); }, placeholder: "e.g. 200k, 1M", style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit" } }),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" } },
+            h("button", { onClick: onClose, style: { padding: "7px 14px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "inherit", cursor: "pointer" } }, "Cancel"),
+            h("button", { onClick: handleSave, disabled: !id, style: { padding: "7px 14px", borderRadius: "6px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontWeight: 600, cursor: "pointer" } }, "Add Model")
+          )
+        )
+      );
+    }
+
+    function OAuthFlowModal(props) {
+      var target = props.target, onClose = props.onClose;
+      var flowState = React.useState(null);
+      var flow = flowState[0], setFlow = flowState[1];
+
+      React.useEffect(function () {
+        fetch(VAULT_API + "/login/device/start", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ provider: target.providerId }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setFlow(res); });
+      }, [target.providerId]);
+
+      return h(
+        "div",
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 } },
+        h(
+          "div",
+          { style: { width: "460px", padding: "24px", borderRadius: "12px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "16px", textAlign: "center" } },
+          h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600 } }, "Sign In to " + target.label),
+          flow
+            ? h(
+                "div",
+                { style: { display: "flex", flexDirection: "column", gap: "12px" } },
+                h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "1. Copy device code:"),
+                h("code", { style: { fontSize: "22px", fontWeight: 700, letterSpacing: "3px", color: "var(--dsw-alias-primary, #6366f1)" } }, flow.userCode),
+                h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", marginTop: "4px" } }, "2. Authorize in browser:"),
+                h("a", { href: flow.verificationUri, target: "_blank", rel: "noopener noreferrer", style: { display: "inline-block", padding: "8px 16px", borderRadius: "6px", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", textDecoration: "none", fontSize: "13px", fontWeight: 600 } }, "Authorize in Browser ↗")
+              )
+            : h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-tertiary)" } }, "Starting OAuth session…"),
+          h("div", { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } }, h("button", { onClick: onClose, style: { padding: "7px 14px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "inherit", cursor: "pointer" } }, "Done"))
+        )
+      );
+    }
+
+    // 9. UNIFIED FILESYSTEM & WORKSPACES BROWSER
+    function FileViewerModal(props) {
+      var file = props.file, onClose = props.onClose;
+      var loadingState = React.useState(!file.content && !file.error);
+      var loading = loadingState[0], setLoading = loadingState[1];
+      var contentState = React.useState(file.content || "");
+      var content = contentState[0], setContent = contentState[1];
+      var errorState = React.useState(file.error || null);
+      var error = errorState[0], setError = errorState[1];
+
+      React.useEffect(function () {
+        if (!file.content && !file.error) {
+          setLoading(true);
+          fetch(QUOTAS_API + "/fs/read?path=" + encodeURIComponent(file.path))
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+              if (res.error) setError(res.error);
+              else setContent(res.content || "");
+            })
+            .catch(function (err) { setError(err.message); })
+            .finally(function () { setLoading(false); });
+        }
+      }, [file]);
+
+      return h(
+        "div",
+        {
+          style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999, backdropFilter: "blur(2px)" },
+          onClick: onClose,
+        },
+        h(
+          "div",
+          {
+            style: { width: "min(800px, 90vw)", maxHeight: "85vh", display: "flex", flexDirection: "column", borderRadius: "12px", background: "var(--dsw-alias-bg-layer-2, #161b22)", border: "1px solid var(--dsw-alias-border-l2)", boxShadow: "0 12px 36px rgba(0,0,0,0.4)" },
+            onClick: function (e) { e.stopPropagation(); },
+          },
+          // Modal Header
+          h(
+            "div",
+            { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
+            h("div", { style: { display: "flex", alignItems: "center", gap: "8px", minWidth: 0 } },
+              h(FileGlyph, { size: 16 }),
+              h("span", { style: { fontWeight: 600, fontSize: "14px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, file.name),
+              h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, file.path)
+            ),
+            h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+              h("button", {
+                onClick: function () { navigator.clipboard && navigator.clipboard.writeText(content); alert("Copied to clipboard!"); },
+                style: { padding: "4px 8px", borderRadius: "4px", border: "1px solid var(--dsw-alias-border-l1)", background: "transparent", color: "inherit", fontSize: "11px", cursor: "pointer" }
+              }, "Copy"),
+              h("button", {
+                onClick: onClose,
+                style: { padding: "4px 8px", borderRadius: "4px", border: "none", background: "transparent", color: "inherit", fontSize: "14px", cursor: "pointer" }
+              }, "✕")
+            )
+          ),
+          // Modal Body
+          h(
+            "pre",
+            {
+              style: {
+                flex: 1,
+                margin: 0,
+                padding: "16px",
+                overflowY: "auto",
+                maxHeight: "calc(85vh - 70px)",
+                fontFamily: "var(--ds-font-mono, monospace)",
+                fontSize: "12px",
+                lineHeight: "1.5",
+                color: "var(--dsw-alias-label-primary, #e6edf3)",
+                background: "var(--dsw-alias-bg-layer-1, #0d1117)",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+              }
+            },
+            loading ? "Loading file content…" : error ? ("Error: " + error) : content
+          )
+        )
+      );
+    }
+
+    function formatTimeAgo(timestamp) {
+      if (!timestamp) return "";
+      var seconds = Math.floor((Date.now() - timestamp) / 1000);
+      if (seconds < 60) return "now";
+      var minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + "m";
+      var hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + "h";
+      var days = Math.floor(hours / 24);
+      return days + "d";
+    }
+
+    function UnifiedWorkspacesBrowser(props) {
+      ensureTreeStyles();
+      ensureModelPickerDecoration();
+      var wide = Boolean(props && props.wide);
+      var expandSidebar = props && props.expandSidebar;
+
+      var useSessions = props && props.useSessions;
+      var useWorkspaces = props && props.useWorkspaces;
+      var openSession = props && props.open;
+      var startSession = props && props.startSession;
+      var renameSession = props && props.renameSession;
+      var archiveSession = props && props.archiveSession;
+      var forkSession = props && props.forkSession;
+      var createWorkspace = props && props.createWorkspace;
+
+      var sessionList = useSessions ? useSessions(function (s) { return s; }) : { ids: [], byId: {} };
+      var workspaceList = useWorkspaces ? useWorkspaces(function (s) { return s; }) : { items: [] };
+
+      var currentRootState = React.useState("/");
+      var currentRoot = currentRootState[0], setCurrentRoot = currentRootState[1];
+
+      var expandedPathsState = React.useState({ "/": true, "/Users": true, "/Users/user": true, "/Users/user/Projects": true });
+      var expandedPaths = expandedPathsState[0], setExpandedPaths = expandedPathsState[1];
+
+      var isUngroupedOpenState = React.useState(false);
+      var isUngroupedOpen = isUngroupedOpenState[0], setIsUngroupedOpen = isUngroupedOpenState[1];
+
+      var searchQueryState = React.useState("");
+      var searchQuery = searchQueryState[0], setSearchQuery = searchQueryState[1];
+      var showSearchState = React.useState(function () {
+        if (typeof window !== "undefined" && window.localStorage) {
+          return window.localStorage.getItem("dsh_show_sidebar_search") !== "false";
+        }
+        return true;
+      });
+      var showSearch = showSearchState[0], setShowSearch = showSearchState[1];
+
+      React.useEffect(function () {
+        var onToggle = function (e) {
+          if (e && e.detail && e.detail.enabled !== undefined) {
+            setShowSearch(e.detail.enabled);
+          }
+        };
+        window.addEventListener("dsh:sidebar-search-toggle", onToggle);
+        return function () { window.removeEventListener("dsh:sidebar-search-toggle", onToggle); };
+      }, []);
+
+      var dirCacheState = React.useState({});
+      var dirCache = dirCacheState[0], setDirCache = dirCacheState[1];
+
+      var loadingPathsState = React.useState({});
+      var loadingPaths = loadingPathsState[0], setLoadingPaths = loadingPathsState[1];
+
+      var sessionsState = React.useState([]);
+      var sessions = sessionsState[0], setSessions = sessionsState[1];
+
+      var containersState = React.useState([]);
+      var containers = containersState[0], setContainers = containersState[1];
+
+      var plusMenuState = React.useState(null);
+      var plusMenu = plusMenuState[0], setPlusMenu = plusMenuState[1];
+
+      var ellipsisOpenState = React.useState(null);
+      var ellipsisOpen = ellipsisOpenState[0], setEllipsisOpen = ellipsisOpenState[1];
+
+      var expandedSubagentsState = React.useState({});
+      var expandedSubagents = expandedSubagentsState[0], setExpandedSubagents = expandedSubagentsState[1];
+
+      var fileViewerState = React.useState(null);
+      var fileViewer = fileViewerState[0], setFileViewer = fileViewerState[1];
+
+      var renameModalState = React.useState(null);
+      var renameModal = renameModalState[0], setRenameModal = renameModalState[1];
+
+      var toggleSubagentExpand = function (sessionId) {
+        setExpandedSubagents(function (prev) {
+          var n = Object.assign({}, prev);
+          if (n[sessionId]) delete n[sessionId];
+          else n[sessionId] = true;
+          return n;
+        });
+      };
+
+      var fetchDir = React.useCallback(function (dirPath) {
+        if (!dirPath) return;
+        setLoadingPaths(function (prev) { var n = Object.assign({}, prev); n[dirPath] = true; return n; });
+        fetch(QUOTAS_API + "/fs?path=" + encodeURIComponent(dirPath))
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            setDirCache(function (prev) {
+              var n = Object.assign({}, prev);
+              n[dirPath] = res.entries || [];
+              return n;
+            });
+          })
+          .catch(function () {})
+          .finally(function () {
+            setLoadingPaths(function (prev) { var n = Object.assign({}, prev); delete n[dirPath]; return n; });
+          });
+      }, []);
+
+      var loadAll = React.useCallback(function () {
+        fetch(QUOTAS_API + "/tmux/sessions")
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setSessions(res.sessions || []); })
+          .catch(function () {});
+
+        fetch(QUOTAS_API + "/docker/containers")
+          .then(function (r) { return r.json(); })
+          .then(function (res) { setContainers(res.containers || []); })
+          .catch(function () {});
+      }, []);
+
+      // Initial root loading and auto-expanded paths
+      React.useEffect(function () {
+        fetchDir("/");
+        fetchDir("/Users");
+        fetchDir("/Users/user");
+        fetchDir("/Users/user/Projects");
+        loadAll();
+        var timer = setInterval(loadAll, 5000);
+        return function () { clearInterval(timer); };
+      }, [fetchDir, loadAll]);
+
+      // Calculate sessions per directory path and ungrouped sessions
+      var workspaces = (workspaceList && workspaceList.items) ? workspaceList.items : [];
+      var sessionsById = (sessionList && sessionList.byId) ? sessionList.byId : {};
+      var sessionIds = (sessionList && sessionList.ids && sessionList.ids.length > 0)
+        ? sessionList.ids
+        : (sessionList && sessionList.order && sessionList.order.length > 0)
+          ? sessionList.order
+          : Object.keys(sessionsById);
+      var currentSessionId = sessionList ? sessionList.current : undefined;
+
+      var getParentId = function (s) {
+        if (!s) return null;
+        return s.parentId || s.parentSessionId || s.parentSession || s.parent || null;
+      };
+
+      var isSubagentChild = function (s) {
+        var pId = getParentId(s);
+        return Boolean(pId && (sessionsById[pId] || sessionIds.indexOf(pId) !== -1));
+      };
+
+      var getSubagents = function (parentId) {
+        if (!parentId) return [];
+        return sessionIds
+          .map(function (id) { return sessionsById[id]; })
+          .filter(function (s) { return s && getParentId(s) === parentId; })
+          .sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+      };
+
+      var folderSessions = {};
+      var accountedSessionIds = {};
+
+      workspaces.forEach(function (w) {
+        var wPath = w.cwd || w.path;
+        if (!wPath) return;
+        if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
+        if (!folderSessions[wPath]) folderSessions[wPath] = [];
+        (w.sessionIds || []).forEach(function (sId) {
+          var s = sessionsById[sId];
+          if (s) {
+            accountedSessionIds[sId] = true;
+            if (!isSubagentChild(s)) {
+              folderSessions[wPath].push(s);
+            }
+          }
+        });
+      });
+
+      sessionIds.forEach(function (sId) {
+        var s = sessionsById[sId];
+        if (!s) return;
+        if (!accountedSessionIds[sId] && s.workspaceId) {
+          var matchedWs = workspaces.find(function (w) { return w.workspaceId === s.workspaceId; });
+          if (matchedWs) {
+            var wPath = matchedWs.cwd || matchedWs.path;
+            if (wPath) {
+              if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
+              if (!folderSessions[wPath]) folderSessions[wPath] = [];
+              accountedSessionIds[sId] = true;
+              if (!isSubagentChild(s)) {
+                folderSessions[wPath].push(s);
+              }
+            }
+          }
+        }
+      });
+
+      var ungroupedSessions = sessionIds
+        .filter(function (sId) { return !accountedSessionIds[sId] && sessionsById[sId] && !isSubagentChild(sessionsById[sId]); })
+        .map(function (sId) { return sessionsById[sId]; });
+
+      var toggleExpand = function (dirPath) {
+        setExpandedPaths(function (prev) {
+          var n = Object.assign({}, prev);
+          if (n[dirPath]) {
+            delete n[dirPath];
+          } else {
+            n[dirPath] = true;
+            if (!dirCache[dirPath]) {
+              fetchDir(dirPath);
+            }
+          }
+          return n;
+        });
+      };
+
+      var handleNewTerminalInDir = function (dirPath) {
+        var baseName = dirPath.split("/").pop() || "term";
+        var name = prompt("Terminal session name:", baseName + "-" + Math.floor(Math.random() * 1000));
+        if (!name) return;
+        fetch(QUOTAS_API + "/tmux/sessions/new", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: name, cwd: dirPath }),
+        }).then(function () {
+          loadAll();
+          window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: name } }));
+        });
+      };
+
+      var handleStartSessionInDir = function (dirPath) {
+        var existing = workspaces.find(function (w) { return w.path === dirPath; });
+        if (existing) {
+          if (startSession) startSession(existing.workspaceId);
+        } else if (createWorkspace) {
+          createWorkspace({ path: dirPath }).then(function (newW) {
+            if (startSession) startSession(newW ? newW.workspaceId : undefined);
+          }).catch(function () {
+            if (startSession) startSession();
+          });
+        } else if (startSession) {
+          startSession();
+        }
+      };
+
+      if (!wide) {
+        var isRailPlusOpen = plusMenu === "rail";
+        return h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", width: "100%", position: "relative" } },
+          h("div", { style: { position: "relative" } },
+            h("button", {
+              type: "button",
+              className: "dsh-tw-trigger dsh-tw-rail",
+              title: "New Session / Terminal / Container",
+              onClick: function (e) {
+                e.stopPropagation();
+                setPlusMenu(isRailPlusOpen ? null : "rail");
+              },
+            }, h(P.IconPlusOutline16, { size: 18 })),
+            h(SelectDropdownMenu, {
+              open: isRailPlusOpen,
+              onClose: function () { setPlusMenu(null); },
+              items: [
+                { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+                { id: "terminal", label: "Terminal", icon: h(TerminalsGlyph, { size: 13 }) },
+                { id: "container", label: "Container", icon: h(ContainersGlyph, { size: 13 }) },
+              ],
+              onSelect: function (actionId) {
+                setPlusMenu(null);
+                if (actionId === "chat") {
+                  if (startSession) startSession();
+                  else window.dispatchEvent(new CustomEvent("dsh:new-session"));
+                } else if (actionId === "terminal") {
+                  window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
+                } else if (actionId === "container") {
+                  window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+                }
+              }
+            })
+          ),
+          h("button", {
+            type: "button",
+            className: "dsh-tw-trigger dsh-tw-rail",
+            title: "Open Terminal Panel",
+            onClick: function () {
+              window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
+            },
+          }, h(TerminalsGlyph, { size: 18 }))
+        );
+      }
+
+      var liveSessions = sessions.filter(function (s) { return Boolean(s.attached); });
+      var liveContainers = containers.filter(function (c) { return Boolean(c.isRunning); });
+      var totalLive = liveSessions.length + liveContainers.length;
+
+      var renderChatRow = function (chat, padLeft) {
+        var isChatActive = chat.id === currentSessionId;
+        var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("chat::" + chat.id));
+        var subagents = getSubagents(chat.id);
+        var hasSubagents = subagents.length > 0;
+        var isSubExp = Boolean(expandedSubagents[chat.id]);
+
+        return h(
+          "div",
+          { key: "chat-wrapper::" + chat.id, style: { display: "flex", flexDirection: "column", width: "100%" } },
+          h(
+            "div",
+            {
+              key: "chat::" + chat.id,
+              className: "dsh-tree-sessionRow" + (hasSubagents ? " dsh-has-children" : "") + (isChatActive ? " dsh-tree-sessionRowActive" : ""),
+              role: "treeitem",
+              "data-session-id": chat.id,
+              "aria-expanded": hasSubagents ? isSubExp : undefined,
+              style: {
+                paddingLeft: padLeft + "px",
+                height: "30px",
+                color: isChatActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
+                fontWeight: isChatActive ? 600 : 400,
+                cursor: "pointer",
+                position: "relative",
+              },
+              onClick: function () { if (openSession) openSession(chat.id); },
+              onContextMenu: function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                setEllipsisOpen({ id: "chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
+              },
+            },
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" },
+              h(ChatGlyph, { size: 14 })
+            ),
+            hasSubagents ? h("span", {
+              className: "dsh-tree-slot dsh-tree-chevron",
+              title: isSubExp ? "Collapse subagents" : "Expand subagents",
+              onClick: function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSubagentExpand(chat.id);
+              }
+            },
+              h(TriangleRightFill14, {
+                className: "dsh-tree-arrow" + (isSubExp ? " dsh-tree-arrowOpen" : ""),
+                size: 11
+              })
+            ) : null,
+            h("span", {
+              className: "dsh-tree-title",
+              title: chat.title || "Chat Session"
+            }, chat.title || "Untitled Chat"),
+            hasSubagents ? h("span", {
+              style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px", cursor: "pointer" },
+              title: subagents.length + " subagents (click to toggle)",
+              onClick: function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSubagentExpand(chat.id);
+              }
+            }, subagents.length) : null,
+            h("span", { style: { fontSize: "10.5px", color: "var(--dsw-alias-label-tertiary)", marginLeft: "auto", marginRight: "4px", flexShrink: 0 } }, formatTimeAgo(chat.updatedAt)),
+            h("span", { className: "dsh-tree-actions" },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "Chat Actions (…)",
+                onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isMenuOpen ? null : { id: "chat::" + chat.id }); }
+              }, h(P.IconEllipsisOutline16, { size: 13 })),
+              h(SelectDropdownMenu, {
+                open: isMenuOpen,
+                position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
+                onClose: function () { setEllipsisOpen(null); },
+                items: [
+                  { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
+                  { id: "fork", label: "Fork Chat", icon: h(P.IconBranchOutline16, { size: 13 }) },
+                  { id: "archive", label: "Archive Chat", icon: h(TrashGlyph, { size: 13 }), danger: true },
+                ],
+                onSelect: function (actionId) {
+                  if (actionId === "rename") {
+                    var newTitle = prompt("Rename chat:", chat.title || "");
+                    if (newTitle && renameSession) renameSession(chat.id, newTitle);
+                  } else if (actionId === "fork") {
+                    if (forkSession) forkSession(chat.id);
+                  } else if (actionId === "archive") {
+                    if (archiveSession) archiveSession(chat.id);
+                  }
+                }
+              })
+            )
+          ),
+          (hasSubagents && isSubExp) ? h(
+            "div",
+            { style: { display: "flex", flexDirection: "column", width: "100%" } },
+            subagents.map(function (sub) {
+              var isSubActive = sub.id === currentSessionId;
+              var isSubMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("chat::" + sub.id));
+              return h(
+                "div",
+                {
+                  key: "sub::" + sub.id,
+                  className: "dsh-tree-sessionRow dsh-tree-subagentRow" + (isSubActive ? " dsh-tree-sessionRowActive" : ""),
+                  role: "treeitem",
+                  "data-session-id": sub.id,
+                  style: {
+                    paddingLeft: (padLeft + 16) + "px",
+                    height: "28px",
+                    color: isSubActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
+                    cursor: "pointer",
+                  },
+                  onClick: function () { if (openSession) openSession(sub.id); },
+                  onContextMenu: function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEllipsisOpen({ id: "chat::" + sub.id, pos: { x: e.clientX, y: e.clientY } });
+                  },
+                },
+                h("span", { className: "dsh-tree-slot dsh-tree-icon" },
+                  h(SubagentGlyph, { size: 12 })
+                ),
+                h("span", {
+                  className: "dsh-tree-title",
+                  style: { fontSize: "11.5px" },
+                  title: sub.title || "Subagent Session"
+                }, sub.title || "Subagent"),
+                h("span", { style: { fontSize: "10px", color: "var(--dsw-alias-label-tertiary)", marginLeft: "auto", marginRight: "4px", flexShrink: 0 } }, formatTimeAgo(sub.updatedAt)),
+                h("span", { className: "dsh-tree-actions" },
+                  h("button", {
+                    type: "button",
+                    className: "dsh-tree-actionBtn",
+                    title: "Subagent Actions",
+                    onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isSubMenuOpen ? null : { id: "chat::" + sub.id }); }
+                  }, h(P.IconEllipsisOutline16, { size: 12 })),
+                  h(SelectDropdownMenu, {
+                    open: isSubMenuOpen,
+                    position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
+                    onClose: function () { setEllipsisOpen(null); },
+                    items: [
+                      { id: "rename", label: "Rename Subagent", icon: h(EditGlyph, { size: 13 }) },
+                      { id: "archive", label: "Archive Subagent", icon: h(TrashGlyph, { size: 13 }), danger: true },
+                    ],
+                    onSelect: function (actionId) {
+                      if (actionId === "rename") {
+                        var newTitle = prompt("Rename subagent:", sub.title || "");
+                        if (newTitle && renameSession) renameSession(sub.id, newTitle);
+                      } else if (actionId === "archive") {
+                        if (archiveSession) archiveSession(sub.id);
+                      }
+                    }
+                  })
+                )
+              );
+            })
+          ) : null
+        );
+      };
+
+      var renderDirEntries = function (dirPath, depth) {
+        var entries = dirCache[dirPath];
+        var itemLeftPad = 8 + depth * 16;
+
+        if (loadingPaths[dirPath]) {
+          return h("div", { key: "loading-" + dirPath, style: { padding: "4px 8px 4px " + (itemLeftPad + 16) + "px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "Loading…");
+        }
+        if (!entries || entries.length === 0) {
+          return h("div", { key: "empty-" + dirPath, style: { padding: "4px 8px 4px " + (itemLeftPad + 16) + "px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(empty)");
+        }
+
+        var visibleEntries = entries.filter(function (entry) {
+          if (!searchQuery || !searchQuery.trim()) return true;
+          var q = searchQuery.trim().toLowerCase();
+          return (entry.name || "").toLowerCase().indexOf(q) !== -1;
+        });
+
+        if (visibleEntries.length === 0 && searchQuery && searchQuery.trim()) {
+          return null;
+        }
+
+        return visibleEntries.map(function (entry) {
+          var isDir = Boolean(entry.isDirectory);
+          var isExp = Boolean(expandedPaths[entry.path]);
+          var isPlusOpen = plusMenu === entry.path;
+
+          if (isDir) {
+            var chatsInDir = folderSessions[entry.path] || [];
+            var isFolderEllipsisOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("folder::" + entry.path));
+            var isVendorOrInternal = entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'lib' || entry.name === '.turbo';
+            var isWorkspace = !isVendorOrInternal && Boolean(workspaces && workspaces.some(function (w) {
+              var wPath = w.path || w.cwd;
+              if (!wPath) return false;
+              if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
+              var ePath = entry.path;
+              if (ePath && ePath.length > 1 && ePath.endsWith("/")) ePath = ePath.slice(0, -1);
+              return wPath === ePath && ePath !== "/Users/user";
+            }));
+            var isRepo = !isVendorOrInternal && Boolean(entry.isRepo || entry.name === 'dsh-stack');
+
+            return h(
+              "div",
+              { key: entry.path, style: { display: "flex", flexDirection: "column", width: "100%" } },
+              h(
+                "div",
+                {
+                  className: "dsh-tree-projectRow",
+                  role: "treeitem",
+                  style: { position: "relative", paddingLeft: itemLeftPad + "px" },
+                  "aria-expanded": isExp,
+                  onClick: function () { toggleExpand(entry.path); },
+                  onContextMenu: function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEllipsisOpen({ id: "folder::" + entry.path, pos: { x: e.clientX, y: e.clientY } });
+                  },
+                },
+                h("span", { className: "dsh-tree-slot dsh-tree-icon" },
+                  isRepo
+                    ? h(RepoGlyph, { size: 15 })
+                    : (isWorkspace
+                      ? h(WorkspaceGlyph, { size: 15 })
+                      : (isExp ? h(P.IconFolderOpen16, { size: 15 }) : h(P.IconFolderClose16, { size: 15 })))
+                ),
+                h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+                  h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""), size: 11 })
+                ),
+                h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
+                chatsInDir.length > 0 ? h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, chatsInDir.length) : null,
+                h("span", { className: "dsh-tree-actions" },
+                  h("button", {
+                    type: "button",
+                    className: "dsh-tree-actionBtn",
+                    title: "New in Folder (+)",
+                    onClick: function (e) { e.stopPropagation(); setPlusMenu(isPlusOpen ? null : entry.path); }
+                  }, h(P.IconPlusOutline16, { size: 13 })),
+                  h(SelectDropdownMenu, {
+                    open: isPlusOpen,
+                    onClose: function () { setPlusMenu(null); },
+                    items: [
+                      { id: "new-chat", label: "New Chat in this folder", icon: h(ChatGlyph, { size: 13 }) },
+                      { id: "new-term", label: "New Terminal here", icon: h(TerminalsGlyph, { size: 13 }) },
+                      { id: "new-cont", label: "New Container here", icon: h(ContainersGlyph, { size: 13 }) },
+                    ],
+                    onSelect: function (actionId) {
+                      if (actionId === "new-term") handleNewTerminalInDir(entry.path);
+                      else if (actionId === "new-chat") handleStartSessionInDir(entry.path);
+                      else if (actionId === "new-cont") window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { cwd: entry.path } }));
+                    }
+                  }),
+                  h("button", {
+                    type: "button",
+                    className: "dsh-tree-actionBtn",
+                    title: "Folder Actions (…)",
+                    onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isFolderEllipsisOpen ? null : { id: "folder::" + entry.path }); }
+                  }, h(P.IconEllipsisOutline16, { size: 13 })),
+                  h(SelectDropdownMenu, {
+                    open: isFolderEllipsisOpen,
+                    position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
+                    onClose: function () { setEllipsisOpen(null); },
+                    items: [
+                      { id: "set-root", label: "Focus Directory as Root", icon: h(P.IconFolderOpen16, { size: 13 }) },
+                      { id: "open-term", label: "Open Terminal Here", icon: h(TerminalsGlyph, { size: 13 }) },
+                      { id: "cut", label: "Cut Folder", icon: h(CutGlyph, { size: 13 }) },
+                      { id: "copy-path", label: "Copy Path", icon: h(CopyGlyph, { size: 13 }) },
+                      { id: "rename", label: "Rename Folder", icon: h(EditGlyph, { size: 13 }) },
+                      { id: "delete", label: "Delete Folder", icon: h(TrashGlyph, { size: 13 }), danger: true },
+                    ],
+                    onSelect: function (actionId) {
+                      if (actionId === "set-root") {
+                        setCurrentRoot(entry.path);
+                        var exp = {}; exp[entry.path] = true;
+                        setExpandedPaths(exp);
+                        fetchDir(entry.path);
+                      } else if (actionId === "open-term") {
+                        handleNewTerminalInDir(entry.path);
+                      } else if (actionId === "cut" || actionId === "copy-path") {
+                        if (typeof navigator !== "undefined" && navigator.clipboard) {
+                          navigator.clipboard.writeText(entry.path);
+                        }
+                      } else if (actionId === "rename") {
+                        var newN = prompt("Rename folder:", entry.name);
+                        if (newN && newN !== entry.name) {
+                          fetch(QUOTAS_API + "/fs/rename", {
+                            method: "POST",
+                            headers: { "content-type": "application/json" },
+                            body: JSON.stringify({ oldPath: entry.path, newName: newN }),
+                          }).then(function () { fetchDir(dirPath); });
+                        }
+                      } else if (actionId === "delete") {
+                        if (confirm("Delete directory " + entry.name + "?")) {
+                          fetch(QUOTAS_API + "/fs/delete", {
+                            method: "POST",
+                            headers: { "content-type": "application/json" },
+                            body: JSON.stringify({ path: entry.path }),
+                          }).then(function () { fetchDir(dirPath); });
+                        }
+                      }
+                    }
+                  })
+                )
+              ),
+              isExp ? h(
+                "div",
+                { style: { display: "flex", flexDirection: "column", width: "100%" } },
+                // Render chat sessions under this folder (aligned at depth + 1)
+                chatsInDir.map(function (c) { return renderChatRow(c, 8 + (depth + 1) * 16); }),
+                // Render subdirectories and files (aligned at depth + 1)
+                renderDirEntries(entry.path, depth + 1)
+              ) : null
+            );
+          }
+
+          // File Row (aligned at itemLeftPad)
+          return h(
+            "div",
+            {
+              key: entry.path,
+              className: "dsh-tree-sessionRow",
+              role: "treeitem",
+              style: { paddingLeft: itemLeftPad + "px", height: "26px" },
+              onClick: function () { setFileViewer({ path: entry.path, name: entry.name }); },
+            },
+            h("span", { className: "dsh-tree-slot", style: { width: "14px", color: "var(--dsw-alias-label-tertiary)" } },
+              h(FileGlyph, { size: 13 })
+            ),
+            h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px", marginLeft: "4px" }, title: entry.path }, entry.name)
+          );
+        });
+      };
+
+      var filteredUngroupedSessions = ungroupedSessions.filter(function (chat) {
+        if (!searchQuery || !searchQuery.trim()) return true;
+        var q = searchQuery.trim().toLowerCase();
+        return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
+      });
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", width: "100%", height: "100%", overflowY: "auto", gap: "4px", padding: "4px 0" } },
+        // 0. SEARCH INPUT BAR (WHEN ENABLED)
+        showSearch ? h(
+          "div",
+          {
+            className: "dsh-sidebar-search-container",
+            style: {
+              padding: "2px 8px 6px 8px",
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              boxSizing: "border-box",
+            },
+          },
+          h(
+            "div",
+            {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
+                border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+                borderRadius: "6px",
+                padding: "3px 8px",
+                gap: "6px",
+                boxSizing: "border-box",
+              },
+            },
+            h(P.IconSearchOutline16, { size: 13, style: { color: "var(--dsw-alias-label-tertiary, #888)", flexShrink: 0 } }),
+            h("input", {
+              type: "text",
+              value: searchQuery,
+              onChange: function (e) { setSearchQuery(e.target.value); },
+              placeholder: "Search chats & files…",
+              style: {
+                flex: 1,
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-primary, #fff)",
+                fontSize: "12px",
+                outline: "none",
+                fontFamily: "inherit",
+                minWidth: 0,
+              },
+            }),
+            searchQuery ? h(
+              "button",
+              {
+                type: "button",
+                onClick: function () { setSearchQuery(""); },
+                style: {
+                  border: "none",
+                  background: "transparent",
+                  color: "var(--dsw-alias-label-tertiary)",
+                  cursor: "pointer",
+                  padding: 0,
+                  fontSize: "13px",
+                  lineHeight: 1,
+                },
+              },
+              "×"
+            ) : null
+          )
+        ) : null,
+
+        // 1. UNGROUPED SESSIONS SECTION (ALWAYS PROMINENT AT TOP, WITH FOLDED LIVE PROCESSES)
+        h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
+          h(
+            "div",
+            {
+              className: "dsh-tree-projectRow",
+              role: "treeitem",
+              style: { position: "relative", paddingLeft: "8px", fontWeight: 600 },
+              onClick: function () { setIsUngroupedOpen(!isUngroupedOpen); },
+            },
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(ChatGlyph, { size: 14 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isUngroupedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
+            ),
+            h("span", { className: "dsh-tree-title" }, "Ungrouped"),
+            totalLive > 0 ? h("span", {
+              style: { width: "6px", height: "6px", borderRadius: "50%", background: "#3fb950", boxShadow: "0 0 6px #3fb950", marginLeft: "4px", flexShrink: 0 },
+              title: totalLive + " active terminal/container sessions"
+            }) : null,
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, (filteredUngroupedSessions.length + totalLive)),
+            h("span", { className: "dsh-tree-actions" },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "New Session",
+                onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
+              }, h(P.IconPlusOutline16, { size: 13 }))
+            )
+          ),
+          isUngroupedOpen ? h(
+            "div",
+            { style: { display: "flex", flexDirection: "column", width: "100%" } },
+            liveSessions.map(function (s) {
+              return h(
+                "div",
+                {
+                  key: "live::term::" + s.name,
+                  className: "dsh-tree-sessionRow",
+                  style: { height: "28px", paddingLeft: "16px" },
+                  onClick: function () {
+                    window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: s.name } }));
+                  },
+                },
+                h("span", { className: "dsh-tree-slot", style: { width: "14px", color: "var(--dsw-alias-label-tertiary)" } }, h(TerminalsGlyph, { size: 13 })),
+                h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px" } }, s.name),
+                h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", marginLeft: "auto", marginRight: "6px", background: "#3fb950", boxShadow: "0 0 6px #3fb950" } })
+              );
+            }),
+            liveContainers.map(function (c) {
+              return h(
+                "div",
+                {
+                  key: "live::cont::" + c.id,
+                  className: "dsh-tree-sessionRow",
+                  style: { height: "28px", paddingLeft: "16px" },
+                  onClick: function () {
+                    window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: c.id } }));
+                  },
+                },
+                h("span", { className: "dsh-tree-slot", style: { width: "14px", color: "var(--dsw-alias-label-tertiary)" } }, h(ContainersGlyph, { size: 13 })),
+                h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px" } }, c.name || c.id),
+                h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", marginLeft: "auto", marginRight: "6px", background: "#3fb950", boxShadow: "0 0 6px #3fb950" } })
+              );
+            }),
+            filteredUngroupedSessions.length > 0
+              ? filteredUngroupedSessions.map(function (chat) { return renderChatRow(chat, 8); })
+              : ((totalLive === 0) ? h("div", { style: { padding: "4px 8px 4px 28px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, searchQuery ? "(no matching sessions)" : "(no ungrouped sessions)") : null)
+          ) : null
+        ),
+
+        // 4. EXPLORER DIRECTORY TREE (WITH NESTED CHATS)
+        h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", width: "100%", flex: 1 } },
+          // Render chats belonging to currentRoot itself when focused
+          (function () {
+            var cRootClean = currentRoot.length > 1 && currentRoot.endsWith("/") ? currentRoot.slice(0, -1) : currentRoot;
+            var rootChats = folderSessions[cRootClean] || folderSessions[currentRoot] || [];
+            if (rootChats.length === 0) return null;
+            return h(
+              "div",
+              { style: { display: "flex", flexDirection: "column", width: "100%", marginBottom: "4px", paddingBottom: "4px", borderBottom: "1px dashed var(--dsw-alias-border-l1)" } },
+              h(
+                "div",
+                { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 8px", fontSize: "10.5px", fontWeight: 700, color: "var(--dsw-alias-label-secondary)" } },
+                h("span", { style: { textTransform: "uppercase", letterSpacing: "0.5px" } }, "Chats in " + (cRootClean.split("/").pop() || "Root")),
+                h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700 } }, rootChats.length)
+              ),
+              rootChats.map(function (c) { return renderChatRow(c, 8); })
+            );
+          })(),
+          renderDirEntries(currentRoot, 0)
+        ),
+
+        fileViewer ? h(FileViewerModal, { file: fileViewer, onClose: function () { setFileViewer(null); } }) : null,
+        renameModal ? h(RenameTerminalModal, { oldName: renameModal, onClose: function () { setRenameModal(null); }, onRenamed: function () { loadAll(); } }) : null
+      );
+    }
+
+    function GlobalTerminalAndContainerManager() {
+      var panelState = React.useState(null); // { type: "terminal", session: "..." } | { type: "container", id: "..." }
+      var panel = panelState[0], setPanel = panelState[1];
+
+      React.useEffect(function () {
+        var onOpenTerm = function (e) {
+          var sess = (e && e.detail && e.detail.session) ? e.detail.session : "0";
+          setPanel({ type: "terminal", session: sess });
+        };
+        var onOpenCont = function (e) {
+          var id = (e && e.detail && e.detail.id) ? e.detail.id : null;
+          setPanel({ type: "container", id: id });
+        };
+        window.addEventListener("dsh:open-terminal", onOpenTerm);
+        window.addEventListener("dsh:open-container", onOpenCont);
+        return function () {
+          window.removeEventListener("dsh:open-terminal", onOpenTerm);
+          window.removeEventListener("dsh:open-container", onOpenCont);
+        };
+      }, []);
+
+      return h(
+        React.Fragment,
+        null,
+        h(RightSidebarDock, {}),
+        h(BottomTerminalPanel, {
+          initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
+          initialContainerId: panel && panel.type === "container" ? panel.id : undefined,
+          onClose: function () { setPanel(null); }
+        })
+      );
+    }
+
+    function apply(ctx) {
+      ensureModelPickerDecoration();
+      // Injected helper methods for dynamic workspaces and sessions
+      var browserInjected = function () {
+        return {
+          startSession: function (workspaceId) { ctx.workspaces && ctx.workspaces.startSession(workspaceId); },
+          open: function (sessionId) { ctx.sessions && ctx.sessions.open(sessionId); },
+          createWorkspace: function (input) {
+            return ctx.workspaces && ctx.workspaces.create ? ctx.workspaces.create(input) : Promise.resolve();
+          },
+          renameSession: function (sessionId, title) {
+            var session = ctx.sessions && ctx.sessions.binding(sessionId)?.session;
+            return session ? session.rename(title) : Promise.resolve();
+          },
+          archiveSession: function (sessionId) {
+            return ctx.workspaces ? ctx.workspaces.archiveSession(sessionId) : Promise.resolve();
+          },
+          forkSession: function (sessionId) {
+            if (ctx.sessions && ctx.sessions.fork) {
+              ctx.sessions.fork({ sessionId: sessionId, increaseTitle: true }).then(function (childId) { ctx.sessions.open(childId); });
+            }
+          },
+        };
+      };
+
+      // 0. Dynamic Filesystem & Workspaces Browser
+      ctx.slots.inject("sidebar.workspaces", function () {
+        return ctx.slots.register({
+          name: "sidebar.workspaces",
+          priority: -10,
+          order: -10,
+          locale: "sidebar",
+          inject: browserInjected,
+        }, UnifiedWorkspacesBrowser);
+      }, "dsh-providers: dynamic filesystem and workspaces browser");
+
+      // 0b. Global Terminals & Containers Manager
+      ctx.slots.inject("sidebar.footer.action", function () {
+        return ctx.slots.register({
+          name: "sidebar.footer.action",
+          id: "dsh-terminals-manager",
+          order: 999,
+        }, GlobalTerminalAndContainerManager);
+      }, "dsh-providers: global terminals manager");
+
+      // 0c. Top Conversation Tab Bar with Draggable Tabs and Plus Menu
+      ctx.slots.inject("conversation.session.header.actions", function () {
+        return ctx.slots.register({
+          name: "conversation.session.header.actions",
+          id: "dsh-top-tab-bar",
+          order: 0,
+        }, TopConversationTabBar);
+      }, "dsh-providers: top conversation tab bar");
+
+      // 1. Accounts Settings Section (Order 8)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "accounts",
+          priority: -10,
+          order: 8,
+          locale: NS,
+          label: function () { return "Accounts"; },
+          inject: function () { return {}; },
+        }, AccountsSection);
+      }, "dsh-providers: accounts section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "accounts",
+          priority: -10,
+          order: 0,
+        }, AccountsGlyph);
+      }, "dsh-providers: accounts nav glyph");
+
+      // 2. Models Settings Section (Order 9)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "models",
+          priority: -10,
+          order: 9,
+          locale: NS,
+          label: function () { return "Models"; },
+          inject: function () { return {}; },
+        }, ModelsSection);
+      }, "dsh-providers: models section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "models",
+          priority: -10,
+          order: 0,
+        }, ModelsGlyph);
+      }, "dsh-providers: models nav glyph");
+
+      // 3. Apps Settings Section (Order 10)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "apps",
+          priority: -10,
+          order: 10,
+          locale: NS,
+          label: function () { return "Apps"; },
+          inject: function () { return {}; },
+        }, AppsSection);
+      }, "dsh-providers: apps section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "apps",
+          priority: -10,
+          order: 0,
+        }, AppsGlyph);
+      }, "dsh-providers: apps nav glyph");
+
+      // 2. Terminals Settings Section (Order 11)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "terminals",
+          priority: -10,
+          order: 11,
+          locale: NS,
+          label: function () { return "Terminals"; },
+          inject: function () { return {}; },
+        }, TmuxSettingsSection);
+      }, "dsh-providers: terminals configuration section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "terminals",
+          priority: -10,
+          order: 0,
+        }, TerminalsGlyph);
+      }, "dsh-providers: terminals nav glyph");
+
+      // 3. Containers Settings Section (Order 12)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "containers",
+          priority: -10,
+          order: 12,
+          locale: NS,
+          label: function () { return "Containers"; },
+          inject: function () { return {}; },
+        }, DockerSettingsSection);
+      }, "dsh-providers: containers configuration section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "containers",
+          priority: -10,
+          order: 0,
+        }, ContainersGlyph);
+      }, "dsh-providers: containers nav glyph");
+
+      // 4. Tools Settings Section (Order 25)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "tools",
+          priority: -10,
+          order: 25,
+          locale: NS,
+          label: function () { return "Tools"; },
+          inject: function () { return {}; },
+        }, ToolsSection);
+      }, "dsh-providers: tools section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "tools",
+          priority: -10,
+          order: 0,
+        }, ToolsGlyph);
+      }, "dsh-providers: tools nav glyph");
+
+      // 5. Loops Settings Section (Order 26)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "loops",
+          priority: -10,
+          order: 26,
+          locale: NS,
+          label: function () { return "Loops"; },
+          inject: function () { return {}; },
+        }, LoopsSection);
+      }, "dsh-providers: loops section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "loops",
+          priority: -10,
+          order: 0,
+        }, LoopsGlyph);
+      }, "dsh-providers: loops nav glyph");
+
+    }
+
+    exports.apply = apply;
+    exports.inject = ["slots", "locale", "sessions", "workspaces"];
+    return module.exports;
+  },
+});

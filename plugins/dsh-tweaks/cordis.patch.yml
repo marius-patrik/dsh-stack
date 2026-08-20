@@ -1,0 +1,6 @@
+# dsh-tweaks takes over the settings surface. ui-settings-general's host
+# registration of ui-onboarding is replaced by dsh-tweaks's own registration;
+# the welcome-notice step from ui-settings-models continues to write through
+# the same settings API.
+- id: ui-settings-general
+  disabled: true

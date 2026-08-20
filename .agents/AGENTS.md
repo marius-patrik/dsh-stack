@@ -87,9 +87,8 @@ keep the memory files truthful and the todos auditable.
 **Commit + push to GitHub at the end of every phase** so progress is visible.
 A "phase" is any coherent unit of work (a PLAN.md phase, a plugin, a doc round).
 Never sit on uncommitted work across a phase boundary. Commit messages: short
-(`<verb>: <subject>`, e.g. `docs: add AGENTS.md and P7 roadmap`). Submodule
-plugins are committed in their own repos first, then the superproject pin is
-committed + pushed.
+(`<verb>: <subject>`, e.g. `docs: update monorepo architecture`). All plugin
+directories are tracked directly within this single repository (`dsh-stack`).
 
 ## Repo layout
 
@@ -97,21 +96,19 @@ committed + pushed.
 .agents/        this directory — project docs (PLAN, CONTEXT, BACKLOG, AGENTS,
                 PRD, BLOCKED) + workflow hooks + rules + requests
 harness/        pinned deepseek-harness submodule (deepseek-ai/deepseek-harness),
-                KEPT PRISTINE — never edit, never commit changes
-plugins/        one repo per plugin, each a git submodule of this superproject:
-                dsh-dialects, dsh-providers, dsh-credentials, dsh-tweaks,
-                dsh-subscriptions, dsh-desktop, dsh-themes, dsh-formatters,
-                dsh-lsp, dsh-tools, dsh-agents, dsh-repos, dsh-session-modes,
-                dsh-quotas, dsh-tui, dsh-translator
+                KEPT PRISTINE — only submodule in repo, never edit
+plugins/        monorepo plugin packages, directly tracked in this repo:
+                dsh-actions, dsh-agents, dsh-credentials, dsh-dialects,
+                dsh-formatters, dsh-hosts, dsh-loops, dsh-lsp, dsh-providers,
+                dsh-repos, dsh-themes, dsh-tools, dsh-translator, dsh-tui,
+                dsh-tweaks, dsh-voice
 scripts/dsh     homeRoot/command-aware launcher; also owns plugin verb routes
                 (e.g. `dsh accounts` → plugins/dsh-credentials/bin/accounts.mjs)
 ```
 
 ## Plugin conventions
 
-Each plugin is a git repo (submodule here) under `marius-patrik`, named
-`dsh-<purpose>`. Visibility: public unless stated in PLAN.md (only
-`dsh-subscriptions` is private). Scaffold shape (mirror `dsh-tweaks`):
+Each plugin is a package under `plugins/dsh-<purpose>`. Scaffold shape (mirror `dsh-tweaks`):
 
 - `src/*.ts` — TS sources, compiled by `tsc` to `lib/` (`tsconfig.json` as in
   `dsh-tweaks`: NodeNext, strict, `rootDir: src`, `outDir: lib`).

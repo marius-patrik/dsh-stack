@@ -1,0 +1,47 @@
+{
+  "name": "dsh-actions",
+  "description": "Explicit session actions with durable state, tool policy, routing, and reload mechanisms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./src/*": "./src/*",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "slots"
+      ],
+      "platform": "web",
+      "immediately": false
+    }
+  },
+  "scripts": {
+    "build": "tsc && cp client.js lib/client.js",
+    "typecheck": "tsc --noEmit",
+    "test": "node check-plugin.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^22.0.0",
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}

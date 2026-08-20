@@ -31,7 +31,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | ~~`dsh-quotas`~~ | **archived** | **merged into dsh-providers in P12.1** — QuotaRegistry, web routes, auto-refresh, settings section live in `dsh-providers/src/quotas/` |
 | `privatecode` | public | opencode fork (subscription providers, OAuth refresh, TUI rendering); kept as-is (works); NOT modified |
 
-`harness` remains a pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
+All plugins live directly within this single monorepo repository (`dsh-stack`). `harness` remains the sole pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
 ## The mapping (harness plugin -> Andromeda original)
 

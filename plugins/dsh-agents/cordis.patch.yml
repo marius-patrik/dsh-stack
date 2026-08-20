@@ -1,0 +1,8 @@
+# The dsh-agents bundle patch: mounts the agent plugin, whose client half owns
+# the Agents settings section (live preset roster) over the shared
+# settings.section seat.
+
+- insert:
+    - id: agents
+      name: 'dsh-agents'
+      config: {}
