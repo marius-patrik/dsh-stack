@@ -637,4 +637,11 @@ sections owned by tweaks).
 6. **Tab move empty fallback & sequence**: Switch to next tab or empty launcher card when tab moves.
 7. **Settings button click fix & Panel Icon**: Reliable settings trigger & panel dock icon (replace chevrons).
 
+## P21 — Repo Icons, Sidebar Alignment, Pinned & Active, Purge Legacy Layouts (Session 28) [complete]
+
+1. **Repo icon detection in sidebar**: Identify git repositories (.git folder or repo metadata) and render git repo icon instead of folder icon.
+2. **Sidebar item indentation alignment**: Unify padding and alignment so child items beneath folders line up on the exact same vertical baseline as sibling subfolders.
+3. **Rename section to "Pinned & Active"**: Rename "Live Sessions" header to "Pinned & Active".
+4. **Purge legacy sidebar layout**: Completely eliminate old sidebar views so clicking a terminal never causes sidebar regressions.
+
 

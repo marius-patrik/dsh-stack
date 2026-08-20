@@ -302,3 +302,12 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 98 | **Full conversation DOM/content hosting**: Move real conversation content when tab is moved | DONE ✅ | `dsh-providers` | Reparent/host conversation in active area |
 | 99 | **Tab move empty fallback & sequence**: Switch to next tab or empty launcher card when tab moves | DONE ✅ | `dsh-providers` | Clean fallback state when tabs move |
 | 100 | **Settings button click fix & Panel Icon**: Reliable settings trigger & panel dock icon (replace chevrons) | DONE ✅ | `dsh-tweaks` + `dsh-providers` | Panel dock icon and bulletproof settings launcher |
+
+## 17. Session 28 Repo Icons, Sidebar Alignment, Pinned & Active Section, Purge Legacy Layouts (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 101 | **Repo icon detection in sidebar**: Render git repository icon for folders that are git repos | DONE ✅ | `dsh-providers` | Check .git / repo status and render repo glyph |
+| 102 | **Sidebar item indentation alignment**: Child items below a folder line up with sibling subfolders | DONE ✅ | `dsh-providers` | Standardize tree row padding and icon/label gutters |
+| 103 | **Rename section to "Pinned & Active"**: Rename "Live Sessions" section header to "Pinned & Active" | DONE ✅ | `dsh-providers` | Clean section title update |
+| 104 | **Purge legacy sidebar layout**: Permanently remove old sidebar views so clicking terminal never regresses | DONE ✅ | `dsh-providers` | Remove legacy sidebar mode switches and dead views |

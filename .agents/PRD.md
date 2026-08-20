@@ -317,3 +317,16 @@ Product requirements for composer alignment, shell tab unification, and OLED con
    - Closing or moving the active tab seamlessly transitions to the next tab in sequence, or displays the `EmptyAreaNewTabPicker` card with quick actions (+ New Conversation, + New Terminal, + New Container).
 6. **Bulletproof Settings Launcher & Panel Collapse Icon**:
    - Added global document click interception for settings triggers, and replaced chevron collapse buttons with the official panel dock icon.
+
+---
+
+## 17. Repo Icons, Sidebar Alignment, Pinned & Active Section, Purge Legacy Layouts (Session 28)
+
+1. **Repository Icon Recognition**:
+   - Automatically detects Git repositories (.git directory presence or registered workspaces) and renders the dedicated GitHub repository book glyph (`RepoGlyph`) instead of a generic folder icon.
+2. **Unified Baseline Tree Indentation**:
+   - All items under a folder (subfolders, files, nested chats) calculate indentation via `itemLeftPad = 8 + (depth + 1) * 16`, ensuring children line up on the exact same vertical baseline.
+3. **"Pinned & Active" Section Header**:
+   - Renamed the "Live Sessions" header to "Pinned & Active" with live status badges.
+4. **Permanent Purge of Legacy Sidebar Layouts**:
+   - Completely deleted legacy `SidebarTerminalsTree` and `SidebarContainersTree` components, ensuring clicking a terminal in the sidebar dispatches global open events to tabs/panels without ever replacing or regressing the sidebar layout.

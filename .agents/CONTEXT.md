@@ -1847,3 +1847,16 @@ User requested 7 focused refinements across tab destinations, right sidebar, OLE
 7. **Settings Button Fix & Panel Icon**: Bulletproof settings trigger and panel dock icon replacing chevrons.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 28 — August 20, 2026 (Repo Icons, Sidebar Alignment, Pinned & Active Section, Purge Legacy Layouts)
+
+**Context & User Directives:**
+User requested 4 focused improvements in the sidebar (request file `session-28-repo-icons-sidebar-alignment-pinned-active-purge-legacy.md`):
+1. **Repo Icon Detection**: Recognize git repositories in the tree and render a git repo icon instead of a generic folder icon.
+2. **Sidebar Indentation Alignment**: Items beneath a folder must align at the exact same vertical baseline/indentation as sibling subfolders and tree rows.
+3. **Rename Section to "Pinned & Active"**: Rename "Live Sessions" section to "Pinned & Active".
+4. **Purge Legacy Sidebar Layout**: Ensure clicking a terminal never switches/regresses the sidebar to an old legacy layout; purge old sidebar view branches so `UnifiedWorkspacesBrowser` is always active.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.
