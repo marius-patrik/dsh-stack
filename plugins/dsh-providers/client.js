@@ -3167,6 +3167,12 @@ button:hover .dsh-icon-animated,
         return function () { window.removeEventListener("keydown", onKeyDown); };
       }, [content, filePath]);
 
+      var lineCount = (content.match(/\n/g) || []).length + 1;
+      var lineNumbers = [];
+      for (var li = 1; li <= Math.min(lineCount, 5000); li++) {
+        lineNumbers.push(li);
+      }
+
       return h("div", {
         className: "dsh-mainview-monaco",
         style: {
@@ -3175,11 +3181,11 @@ button:hover .dsh-icon-animated,
           left: "var(--dsh-sidebar-width, 240px)",
           right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
-          background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+          background: "var(--dsw-alias-surface-l0, #13141f)",
           zIndex: 50,
           display: "flex",
           flexDirection: "column",
-          fontFamily: "var(--ds-font-mono, monospace)",
+          fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
         }
       },
         h("div", {
@@ -3188,19 +3194,19 @@ button:hover .dsh-icon-animated,
             alignItems: "center",
             justifyContent: "space-between",
             padding: "8px 16px",
-            background: "var(--dsw-alias-bg-layer-1, #161b22)",
-            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+            background: "var(--dsw-alias-surface-l1, #181926)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
             userSelect: "none",
           }
         },
           h("div", { style: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 } },
-            h(FileGlyph, { size: 15 }),
-            h("strong", { style: { color: "var(--dsw-alias-label-primary, #fff)", fontSize: "13px" } }, fileName),
+            h("span", { style: { color: "var(--dsw-alias-primary, #6366f1)", display: "inline-flex" } }, h(FileGlyph, { size: 16 })),
+            h("strong", { style: { color: "var(--dsw-alias-label-primary)", fontSize: "13px", fontWeight: 600 } }, fileName),
             isDirty ? h("span", { title: "Unsaved changes", style: { color: "#eab308", fontSize: "14px", lineHeight: 1 } }, "●") : null,
-            h("span", { style: { color: "var(--dsw-alias-label-tertiary, #8b949e)", fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, filePath)
+            h("span", { style: { color: "var(--dsw-alias-label-tertiary)", fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, filePath)
           ),
           h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
-            statusMsg ? h("span", { style: { fontSize: "12px", color: statusMsg.startsWith("Error") ? "#f85149" : "var(--dsw-alias-primary, #6366f1)" } }, statusMsg) : null,
+            statusMsg ? h("span", { style: { fontSize: "12px", color: statusMsg.startsWith("Error") ? "var(--dsw-alias-state-error-primary, #f85149)" : "var(--dsw-alias-primary, #6366f1)" } }, statusMsg) : null,
             h("button", {
               type: "button",
               onClick: handleSave,
@@ -3209,7 +3215,8 @@ button:hover .dsh-icon-animated,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "5px",
-                padding: "4px 10px",
+                height: "26px",
+                padding: "0 12px",
                 borderRadius: "6px",
                 border: "1px solid var(--dsw-alias-border-l1)",
                 background: isDirty ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
@@ -3218,7 +3225,7 @@ button:hover .dsh-icon-animated,
                 fontWeight: 500,
                 cursor: (saving || !isDirty) ? "default" : "pointer",
                 opacity: (saving || !isDirty) ? 0.6 : 1,
-                transition: "all 120ms",
+                transition: "all 120ms ease",
               }
             }, saving ? "Saving…" : "Save (⌘S)"),
             h("button", {
@@ -3226,14 +3233,21 @@ button:hover .dsh-icon-animated,
               onClick: onClose,
               title: "Close Editor Tab",
               style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                borderRadius: "6px",
                 background: "transparent",
                 border: "none",
-                color: "var(--dsw-alias-label-secondary, #888)",
+                color: "var(--dsw-alias-label-secondary)",
                 cursor: "pointer",
-                fontSize: "16px",
-                padding: "2px 6px",
-                borderRadius: "4px",
-              }
+                fontSize: "14px",
+                transition: "background 100ms, color 100ms",
+              },
+              onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))"; },
+              onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
             }, "✕")
           )
         ),
@@ -3243,31 +3257,49 @@ button:hover .dsh-icon-animated,
             position: "relative",
             display: "flex",
             overflow: "hidden",
-            background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+            background: "var(--dsw-alias-surface-l0, #13141f)",
           }
         },
           loading ? h("div", { style: { padding: "24px", color: "var(--dsw-alias-label-secondary)" } }, "Loading file…") :
-          error ? h("div", { style: { padding: "24px", color: "#f85149" } }, "Error: " + error) :
-          h("textarea", {
-            value: content,
-            onChange: function (e) { setContent(e.target.value); },
-            spellCheck: false,
-            style: {
-              width: "100%",
-              height: "100%",
-              border: "none",
-              outline: "none",
-              resize: "none",
-              padding: "16px 20px",
-              boxSizing: "border-box",
-              fontFamily: "var(--ds-font-mono, monospace)",
-              fontSize: "13px",
-              lineHeight: "1.6",
-              background: "transparent",
-              color: "var(--dsw-alias-label-primary, #e6edf3)",
-              tabSize: 2,
-            }
-          })
+          error ? h("div", { style: { padding: "24px", color: "var(--dsw-alias-state-error-primary, #f85149)" } }, "Error: " + error) :
+          h("div", { style: { display: "flex", width: "100%", height: "100%", overflow: "hidden" } },
+            h("div", {
+              style: {
+                width: "44px",
+                padding: "16px 8px 16px 0",
+                boxSizing: "border-box",
+                textAlign: "right",
+                userSelect: "none",
+                color: "var(--dsw-alias-label-tertiary, #6e7681)",
+                fontFamily: "var(--ds-font-mono, monospace)",
+                fontSize: "12px",
+                lineHeight: "1.6",
+                borderRight: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
+                background: "var(--dsw-alias-surface-l0, #13141f)",
+                opacity: 0.6,
+              }
+            }, lineNumbers.map(function (num) { return h("div", { key: num }, num); })),
+            h("textarea", {
+              value: content,
+              onChange: function (e) { setContent(e.target.value); },
+              spellCheck: false,
+              style: {
+                flex: 1,
+                height: "100%",
+                border: "none",
+                outline: "none",
+                resize: "none",
+                padding: "16px 20px",
+                boxSizing: "border-box",
+                fontFamily: "var(--ds-font-mono, monospace)",
+                fontSize: "13px",
+                lineHeight: "1.6",
+                background: "transparent",
+                color: "var(--dsw-alias-label-primary)",
+                tabSize: 2,
+              }
+            })
+          )
         )
       );
     }
@@ -3349,7 +3381,7 @@ button:hover .dsh-icon-animated,
           left: "var(--dsh-sidebar-width, 240px)",
           right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
-          background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+          background: "var(--dsw-alias-surface-l0, #13141f)",
           zIndex: 50,
           display: "flex",
           flexDirection: "column",
@@ -3361,19 +3393,20 @@ button:hover .dsh-icon-animated,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "10px 18px",
-            background: "var(--dsw-alias-bg-layer-1, #161b22)",
-            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+            padding: "8px 16px",
+            background: "var(--dsw-alias-surface-l1, #181926)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+            userSelect: "none",
           }
         },
-          h("div", { style: { display: "flex", alignItems: "center", gap: "12px" } },
-            h(RepoGlyph, { size: 18 }),
-            h("strong", { style: { color: "var(--dsw-alias-label-primary, #fff)", fontSize: "14px" } }, repoName),
+          h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+            h("span", { style: { color: "var(--dsw-alias-primary, #6366f1)", display: "inline-flex" } }, h(RepoGlyph, { size: 18 })),
+            h("strong", { style: { color: "var(--dsw-alias-label-primary)", fontSize: "14px", fontWeight: 600 } }, repoName),
             h("span", {
               style: {
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "5px",
+                gap: "4px",
                 padding: "2px 8px",
                 borderRadius: "12px",
                 background: "rgba(99, 102, 241, 0.15)",
@@ -3393,13 +3426,19 @@ button:hover .dsh-icon-animated,
               disabled: loading,
               title: "Refresh Git Status",
               style: {
-                padding: "4px 8px",
-                borderRadius: "5px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                height: "26px",
+                padding: "0 10px",
+                borderRadius: "6px",
                 border: "1px solid var(--dsw-alias-border-l1)",
                 background: "transparent",
                 color: "var(--dsw-alias-label-secondary)",
                 cursor: "pointer",
                 fontSize: "12px",
+                fontWeight: 500,
+                transition: "all 120ms ease",
               }
             }, loading ? "Refreshing…" : "↻ Refresh"),
             h("button", {
@@ -3407,13 +3446,21 @@ button:hover .dsh-icon-animated,
               onClick: onClose,
               title: "Close Repo Tab",
               style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                borderRadius: "6px",
                 background: "transparent",
                 border: "none",
                 color: "var(--dsw-alias-label-secondary)",
                 cursor: "pointer",
-                fontSize: "16px",
-                padding: "2px 6px",
-              }
+                fontSize: "14px",
+                transition: "background 100ms, color 100ms",
+              },
+              onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))"; },
+              onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
             }, "✕")
           )
         ),
@@ -3421,10 +3468,10 @@ button:hover .dsh-icon-animated,
           style: {
             display: "flex",
             alignItems: "center",
-            gap: "4px",
-            padding: "6px 18px",
-            background: "var(--dsw-alias-bg-layer-0, #0d1117)",
-            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.08))",
+            gap: "6px",
+            padding: "8px 16px",
+            background: "var(--dsw-alias-surface-l0, #13141f)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
           }
         },
           [
@@ -3438,14 +3485,15 @@ button:hover .dsh-icon-animated,
               type: "button",
               onClick: function () { setActiveTab(subTab.id); },
               style: {
-                padding: "5px 12px",
+                padding: "4px 12px",
                 borderRadius: "6px",
-                border: "none",
-                background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
-                color: isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-secondary, #8b949e)",
-                fontSize: "12.5px",
+                border: "1px solid " + (isSel ? "var(--dsw-alias-primary, #6366f1)" : "transparent"),
+                background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.15))" : "transparent",
+                color: isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-secondary)",
+                fontSize: "12px",
                 fontWeight: isSel ? 600 : 400,
                 cursor: "pointer",
+                transition: "all 120ms ease",
               }
             }, subTab.label);
           })
@@ -3458,9 +3506,9 @@ button:hover .dsh-icon-animated,
                 flexDirection: "column",
                 gap: "10px",
                 padding: "14px",
-                borderRadius: "10px",
-                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+                borderRadius: "8px",
+                background: "var(--dsw-alias-surface-l1, #181926)",
+                border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
               }
             },
               h("input", {
@@ -3475,8 +3523,8 @@ button:hover .dsh-icon-animated,
                   padding: "8px 12px",
                   borderRadius: "6px",
                   border: "1px solid var(--dsw-alias-border-l1)",
-                  background: "var(--dsw-alias-bg-layer-1, #161b22)",
-                  color: "#fff",
+                  background: "var(--dsw-alias-surface-l0, #13141f)",
+                  color: "var(--dsw-alias-label-primary)",
                   fontSize: "13px",
                   outline: "none",
                 }
@@ -3488,7 +3536,8 @@ button:hover .dsh-icon-animated,
                   onClick: handleCommitAndPush,
                   disabled: !commitMsg.trim(),
                   style: {
-                    padding: "6px 14px",
+                    height: "28px",
+                    padding: "0 14px",
                     borderRadius: "6px",
                     border: "none",
                     background: "var(--dsw-alias-primary, #6366f1)",
@@ -3497,8 +3546,9 @@ button:hover .dsh-icon-animated,
                     fontWeight: 600,
                     cursor: commitMsg.trim() ? "pointer" : "default",
                     opacity: commitMsg.trim() ? 1 : 0.5,
+                    transition: "opacity 120ms",
                   }
-                }, "Commit & Push")
+                }, "Commit & Push (⌘Enter)")
               )
             ),
             h("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
@@ -3511,9 +3561,10 @@ button:hover .dsh-icon-animated,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "6px 10px",
+                    padding: "8px 12px",
                     borderRadius: "6px",
-                    background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.03))",
+                    background: "var(--dsw-alias-surface-l1, #181926)",
+                    border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
                     fontSize: "12.5px",
                     fontFamily: "var(--ds-font-mono, monospace)",
                   }
@@ -3522,7 +3573,7 @@ button:hover .dsh-icon-animated,
                   h("span", {
                     style: {
                       fontSize: "11px",
-                      padding: "1px 6px",
+                      padding: "2px 7px",
                       borderRadius: "4px",
                       background: f.status === "added" ? "rgba(34, 197, 94, 0.2)" : (f.status === "untracked" ? "rgba(59, 130, 246, 0.2)" : "rgba(234, 179, 8, 0.2)"),
                       color: f.status === "added" ? "#22c55e" : (f.status === "untracked" ? "#3b82f6" : "#eab308"),
@@ -3541,17 +3592,17 @@ button:hover .dsh-icon-animated,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "8px 12px",
+                  padding: "10px 14px",
                   borderRadius: "6px",
-                  background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.03))",
-                  border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.08))",
+                  background: "var(--dsw-alias-surface-l1, #181926)",
+                  border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12))",
                 }
               },
                 h("div", { style: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 } },
                   h("span", { style: { fontSize: "13px", fontWeight: 500, color: "var(--dsw-alias-label-primary)" } }, c.message),
                   h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, c.author + " • " + c.date)
                 ),
-                h("span", { style: { fontFamily: "var(--ds-font-mono, monospace)", fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600 } }, c.sha)
+                h("span", { style: { fontFamily: "var(--ds-font-mono, monospace)", fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600, background: "rgba(99, 102, 241, 0.1)", padding: "2px 6px", borderRadius: "4px" } }, c.sha)
               );
             })
           ) : null,
@@ -3563,14 +3614,14 @@ button:hover .dsh-icon-animated,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "8px 12px",
+                  padding: "10px 14px",
                   borderRadius: "6px",
-                  background: b.isCurrent ? "rgba(99, 102, 241, 0.15)" : "var(--dsw-alias-surface-l1, rgba(255,255,255,0.03))",
-                  border: b.isCurrent ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                  background: b.isCurrent ? "rgba(99, 102, 241, 0.12)" : "var(--dsw-alias-surface-l1, #181926)",
+                  border: b.isCurrent ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))",
                 }
               },
                 h("span", { style: { fontSize: "13px", fontWeight: b.isCurrent ? 600 : 400, color: b.isCurrent ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)" } }, (b.isCurrent ? "● " : "  ") + b.name),
-                b.isCurrent ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600 } }, "Current") : null
+                b.isCurrent ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600, background: "rgba(99, 102, 241, 0.2)", padding: "2px 6px", borderRadius: "4px" } }, "Current") : null
               );
             })
           ) : null

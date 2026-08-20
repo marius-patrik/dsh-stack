@@ -2101,14 +2101,24 @@ Close`
    - Fixed by guarding `((props && typeof props.renderSlot === 'function') ? props.renderSlot('settings.general.item', {}) : null)` and passing `renderSlot` into section props.
    - Live CDP browser automation test confirmed Settings modal opens cleanly with `isRecovered: false` and all 16 personalization, customization, and integration categories rendering.
 
+6. **Repository Workbench & File Editor Design Token Alignment**:
+   - Polished both `MainViewRepoOccupant` and `MainViewFileEditorOccupant` to natively use DeepSeek Design tokens:
+     - `var(--dsw-alias-surface-l0)`, `var(--dsw-alias-surface-l1)`, `var(--dsw-alias-border-l1)`.
+     - `var(--dsw-alias-label-primary)`, `var(--dsw-alias-label-secondary)`, `var(--dsw-alias-label-tertiary)`.
+     - `var(--dsw-alias-primary, #6366f1)`, `var(--dsw-alias-interactive-bg-hover)`, `var(--dsw-alias-interactive-bg-active)`.
+   - File Editor now features code line numbers gutter, syntax monospace formatting, clean header with breadcrumbs and unsaved changes indicator (`●`), Save (`⌘S`), and hover-responsive close button.
+   - Repository Workbench now features segmented control tab pills (`Changes`, `Commit History`, `Branches`), commit message bar with `⌘Enter` shortcut, clean git status badges, author avatars/initials, and copyable SHA badges.
+
 **Verification**:
-- Headless Chrome CDP automation test suite (`scripts/test-all.mjs`) verified:
+- Headless Chrome CDP automation test suites verified:
   - Settings modal: `modalOpen: true`, `isRecovered: false`, zero React errors.
   - Archived section: `archivedSectionFound: true`, `archivedCount: 34`.
-  - File click: `editorMounted: true`, `headerText: 'package.json'`.
+  - File editor: `editorMounted: true`, `headerText: 'package.json'`, line numbers gutter and syntax fonts matching theme.
+  - Repo workbench: `mounted: true`, `header: 'dsh-stack'`, tabs `['Changes (2)', 'Commit History (25)', 'Branches (3)']`.
 - All 16 plugins passed `check-plugin.mjs`.
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+
 
 
 
