@@ -1920,4 +1920,30 @@ Diagnosed and resolved settings button activation issues:
    - Wrapped `resolveSlotLabel` in try-catch in `makeShellInjected` to prevent potential render crashes from dynamic slot label functions.
    - Hardened `TweaksSettingsRoot` and `SettingsPanel` with fallback renderers and guards for undefined hooks.
 
-**Status:** completed, all 16 plugin test suites passed.
+### Session 29e — August 20, 2026 (Proper Fix for Settings Modal, Explorer Glyphs, & Model Picker Favorites)
+
+1. **Proper Fix for Settings Button & Modal**:
+   - Reverted ad-hoc document capture click listeners and manual portal workarounds in `dsh-tweaks`.
+   - Used harness-native `P.Modal` (`headless: true`) from `@deepseek-ai/dsh-client-ui-primitives` to portal `SettingsPanel` directly to `document.body` with built-in blurred backdrop and `Escape` key handling.
+   - Defensively guarded `useSessions`, `useSections`, and `useOnboardingSteps` in `TweaksSettingsRoot` against undefined hook calls.
+   - Cleaned up `.dsh-tw-trigger` synthetic event handling (`onClick: () => setOpen(true)`).
+
+2. **Repository & Workspace Icons Fix in Explorer Tree**:
+   - Fixed `RepoGlyph` SVG rendering (`fillRule="evenodd"`, `clipRule="evenodd"`, and proper primary tint).
+   - Fixed `WorkspaceGlyph` SVG rendering (project briefcase outline with sky-blue tint).
+   - Robust path normalization and detection checking both server `.git` status and client workspace mappings in `renderDirEntries`.
+
+3. **Model Picker White Wireframe Cube Icon**:
+   - Replaced toolbar button icon with a crisp 3D isometric wireframe cube diagram in clean white.
+   - Installed persistent `ensureModelPickerDecoration()` MutationObserver in `apply(ctx)`.
+   - Removed individual provider brand logos in the model dropdown list for a cleaner, unified presentation.
+
+4. **Favorite Models Feature with Top Grouping**:
+   - Added interactive Star button to each model row in the dropdown menu.
+   - Unstarred state: subtle gray outline (`#888` / `var(--dsw-alias-label-tertiary)`), highlighted on hover.
+   - Starred state: vibrant yellow filled star (`#eab308`).
+   - Persisted favorites in `localStorage` under `'dsh_favorite_models'`.
+   - Dynamically generated a **"★ Favorites"** section at the top of the model menu for instant 1-click model selection.
+
+**Status:** completed, all 16 plugin test suites passed, changes committed and pushed.
+
