@@ -2053,13 +2053,62 @@ model picker favorite button doesnt work, and the rows have the cube icon twice,
    - **Favorite Button Fix**: Converted `starBtn` from `<button>` to `<span role="button" tabindex="0">` with `mousedown`/`pointerdown`/`click` event stops (`e.stopPropagation()` and `e.preventDefault()`). This prevents the outer model item button from intercepting the click and prematurely closing the dropdown. Star toggles now write directly to `localStorage['dsh_favorite_models']` and refresh the Favorites section at the top of the menu.
    - **Duplicate Cube Removal**: Restricted the cube `::before` pseudo-element strictly to the main trigger button (`[data-slot="conversation.input.model"] > button::before`) and explicitly suppressed `::before` on menu option items and cell values (`content: none !important`).
 
+## Session 35 — August 20, 2026 (Sidebar Neutral Grey Icons, Custom System/Users Glyphs, Global File Opening, Dedicated Archived Section & Pong Auto-Archive, Settings Error 130 Resolution)
+
+**Context & User Directives:**
+User prompt: `the gray doesnt match rest of sidebar
+add custom icons for system and users, files dont open
+chats still show in sidebar after being archived but dont opent, there should be a separate archive section
+archive pong sessions
+New
+Into the Unknown
+Preview
+
+Full access
+
+user
+Code mode
+
+deepseek-v4-flash
+Settings (Recovered)
+A non-fatal error occurred while rendering settings.
+
+Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+Retry
+Close`
+
+**Implementation & Fixes:**
+1. **Sidebar Neutral Grey Icons (`AppGlyph` & `LibraryGlyph`)**:
+   - Swapped hardcoded `#888888` hex colors for theme-native `var(--dsw-alias-label-tertiary)` and `stroke: "currentColor"`, perfectly blending the `Applications` and `Library` folder icons into the native sidebar styling.
+
+2. **Custom `System` and `Users` Folder Glyphs**:
+   - Implemented `SystemGlyph` (microchip / system board SVG) for macOS `System` directories.
+   - Implemented `UsersGlyph` (group profile user SVG) for `Users` directories.
+   - Integrated `isSystem` and `isUsers` detection into `renderDirEntries` in `UnifiedWorkspacesBrowser`.
+
+3. **Global File Editor Opening & Monaco Tab Hosting**:
+   - Added global file and repository tab management inside `GlobalTerminalAndContainerManager` (mounted permanently to `sidebar.footer.action`).
+   - Clicking ANY file in the filesystem tree immediately opens `MainViewFileEditorOccupant` with syntax editing, live read/write (`⌘S`), status indicator, and tab close button—working seamlessly whether a chat is currently open or not.
+
+4. **Dedicated Collapsible Archived Section & Pong Auto-Archive**:
+   - Filtered out archived sessions (`workspaceList.archivedSessionIds`, `s.isArchived`, `s.archived`, `s.status === 'archived'`, and titles `"pong"` / `"ping"`) from active folder and ungrouped lists.
+   - Created a separate **`Archived`** collapsible section at the bottom of the sidebar explorer with an archive box icon and item count badge (isolating the 34 archived chats).
+   - Added `renderArchivedChatRow` supporting opening archived chats, one-click restore (`RestoreGlyph`), and permanent deletion.
+   - Added "Archive All Pong Sessions" action button and automated ping/pong chat detection.
+
+5. **Settings Error #130 Resolution (Pristine Settings Window)**:
+   - Root cause diagnosed: `GeneralSection` was invoking `props.renderSlot('settings.general.item', {})` when `props` was `{ close, openSection }` without `renderSlot`, throwing a `TypeError` which React rendered as Error #130 inside the error boundary.
+   - Fixed by guarding `((props && typeof props.renderSlot === 'function') ? props.renderSlot('settings.general.item', {}) : null)` and passing `renderSlot` into section props.
+   - Live CDP browser automation test confirmed Settings modal opens cleanly with `isRecovered: false` and all 16 personalization, customization, and integration categories rendering.
+
 **Verification**:
-- Automated test suite run against live Chrome via Chrome DevTools Protocol verified:
-  - Button text: `"New"` with notepad icon.
-  - Settings button click: opens modal without disappearing or crashing.
-  - Model list: 110 models loaded with zero duplicate cubes and working interactive star buttons that persist favorites.
+- Headless Chrome CDP automation test suite (`scripts/test-all.mjs`) verified:
+  - Settings modal: `modalOpen: true`, `isRecovered: false`, zero React errors.
+  - Archived section: `archivedSectionFound: true`, `archivedCount: 34`.
+  - File click: `editorMounted: true`, `headerText: 'package.json'`.
 - All 16 plugins passed `check-plugin.mjs`.
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+
 
 

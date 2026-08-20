@@ -4021,7 +4021,7 @@ button:hover .dsh-icon-animated,
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-label-secondary, #888888)"
+          color: "var(--dsw-alias-label-tertiary)"
         }
       },
         h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "4" }),
@@ -4047,13 +4047,123 @@ button:hover .dsh-icon-animated,
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-label-secondary, #888888)"
+          color: "var(--dsw-alias-label-tertiary)"
         }
       },
         h("path", { d: "m16 6 4 14" }),
         h("path", { d: "M12 6v14" }),
         h("path", { d: "M8 8v12" }),
         h("path", { d: "M4 4v16" })
+      );
+    }
+
+    function SystemGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-label-tertiary)"
+        }
+      },
+        h("rect", { width: "16", height: "16", x: "4", y: "4", rx: "2" }),
+        h("rect", { width: "6", height: "6", x: "9", y: "9", rx: "1" }),
+        h("path", { d: "M15 2v2" }),
+        h("path", { d: "M15 20v2" }),
+        h("path", { d: "M2 15h2" }),
+        h("path", { d: "M2 9h2" }),
+        h("path", { d: "M20 15h2" }),
+        h("path", { d: "M20 9h2" }),
+        h("path", { d: "M9 2v2" }),
+        h("path", { d: "M9 20v2" })
+      );
+    }
+
+    function UsersGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-label-tertiary)"
+        }
+      },
+        h("path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }),
+        h("circle", { cx: "9", cy: "7", r: "4" }),
+        h("path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }),
+        h("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" })
+      );
+    }
+
+    function ArchiveBoxGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-label-tertiary)"
+        }
+      },
+        h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }),
+        h("path", { d: "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" }),
+        h("path", { d: "M10 12h4" })
+      );
+    }
+
+    function RestoreGlyph(props) {
+      var size = props && props.size ? props.size : 13;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+        }
+      },
+        h("polyline", { points: "1 4 1 10 7 10" }),
+        h("path", { d: "M3.51 15a9 9 0 1 0 2.13-9.36L1 10" })
       );
     }
 
@@ -4561,6 +4671,28 @@ button:hover .dsh-icon-animated,
           .sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
       };
 
+      var archivedSet = new Set();
+      if (workspaceList && workspaceList.archivedSessionIds) {
+        workspaceList.archivedSessionIds.forEach(function (id) { archivedSet.add(id); });
+      }
+      if (workspaceList && workspaceList.global && workspaceList.global.archivedSessionIds) {
+        workspaceList.global.archivedSessionIds.forEach(function (id) { archivedSet.add(id); });
+      }
+      try {
+        var localArchived = JSON.parse(localStorage.getItem('dsh_archived_sessions') || '[]');
+        localArchived.forEach(function (id) { archivedSet.add(id); });
+      } catch (e) {}
+
+      var isArchivedSession = function (s, sId) {
+        if (!s && !sId) return false;
+        var id = sId || (s && s.id);
+        if (id && archivedSet.has(id)) return true;
+        if (s && (s.isArchived || s.archived || s.status === 'archived')) return true;
+        var title = (s && (s.displayTitle || s.title || s.name || '')) || '';
+        if (title.trim().toLowerCase() === 'pong' || title.trim().toLowerCase() === 'ping') return true;
+        return false;
+      };
+
       var folderSessions = {};
       var accountedSessionIds = {};
 
@@ -4573,7 +4705,7 @@ button:hover .dsh-icon-animated,
           var s = sessionsById[sId];
           if (s) {
             accountedSessionIds[sId] = true;
-            if (!isSubagentChild(s)) {
+            if (!isSubagentChild(s) && !isArchivedSession(s, sId)) {
               folderSessions[wPath].push(s);
             }
           }
@@ -4591,7 +4723,7 @@ button:hover .dsh-icon-animated,
               if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
               if (!folderSessions[wPath]) folderSessions[wPath] = [];
               accountedSessionIds[sId] = true;
-              if (!isSubagentChild(s)) {
+              if (!isSubagentChild(s) && !isArchivedSession(s, sId)) {
                 folderSessions[wPath].push(s);
               }
             }
@@ -4600,8 +4732,80 @@ button:hover .dsh-icon-animated,
       });
 
       var ungroupedSessions = sessionIds
-        .filter(function (sId) { return !accountedSessionIds[sId] && sessionsById[sId] && !isSubagentChild(sessionsById[sId]); })
+        .filter(function (sId) {
+          var s = sessionsById[sId];
+          return !accountedSessionIds[sId] && s && !isSubagentChild(s) && !isArchivedSession(s, sId);
+        })
         .map(function (sId) { return sessionsById[sId]; });
+
+      var archivedSessions = sessionIds
+        .map(function (sId) { return sessionsById[sId]; })
+        .filter(function (s) { return s && !isSubagentChild(s) && isArchivedSession(s, s.id); })
+        .sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+
+      var isArchivedOpenState = React.useState(false);
+      var isArchivedOpen = isArchivedOpenState[0], setIsArchivedOpen = isArchivedOpenState[1];
+
+      var handleArchiveChat = function (sessionId) {
+        if (archiveSession) archiveSession(sessionId);
+        archivedSet.add(sessionId);
+        try {
+          localStorage.setItem('dsh_archived_sessions', JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        loadAll();
+      };
+
+      var unarchiveSession = function (sessionId) {
+        archivedSet.delete(sessionId);
+        try {
+          localStorage.setItem('dsh_archived_sessions', JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        fetch(QUOTAS_API + "/sessions/unarchive", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: sessionId }),
+        }).catch(function () {});
+        loadAll();
+      };
+
+      var handleOpenArchivedChat = function (sessionId) {
+        if (openSession) openSession(sessionId);
+        window.dispatchEvent(new CustomEvent("dsh:focus-chat", { detail: { id: sessionId } }));
+      };
+
+      var deletePermanentSession = function (sessionId) {
+        archivedSet.delete(sessionId);
+        try {
+          localStorage.setItem('dsh_archived_sessions', JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        fetch(QUOTAS_API + "/sessions/delete", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: sessionId }),
+        }).catch(function () {});
+        loadAll();
+      };
+
+      var handleArchivePongSessions = function () {
+        sessionIds.forEach(function (id) {
+          var s = sessionsById[id];
+          var title = (s && (s.displayTitle || s.title || s.name || '')) || '';
+          if (title.trim().toLowerCase() === 'pong' || title.trim().toLowerCase() === 'ping') {
+            archivedSet.add(id);
+            if (archiveSession) archiveSession(id);
+          }
+        });
+        try {
+          localStorage.setItem('dsh_archived_sessions', JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
+            loadAll();
+          })
+          .catch(function () { loadAll(); });
+      };
 
       var toggleExpand = function (dirPath) {
         setExpandedPaths(function (prev) {
@@ -4819,7 +5023,7 @@ button:hover .dsh-icon-animated,
                   } else if (actionId === "fork") {
                     if (forkSession) forkSession(chat.id);
                   } else if (actionId === "archive") {
-                    if (archiveSession) archiveSession(chat.id);
+                    handleArchiveChat(chat.id);
                   }
                 }
               })
@@ -4880,7 +5084,7 @@ button:hover .dsh-icon-animated,
                         var newTitle = prompt("Rename subagent:", sub.title || "");
                         if (newTitle && renameSession) renameSession(sub.id, newTitle);
                       } else if (actionId === "archive") {
-                        if (archiveSession) archiveSession(sub.id);
+                        handleArchiveChat(sub.id);
                       }
                     }
                   })
@@ -4888,6 +5092,77 @@ button:hover .dsh-icon-animated,
               );
             })
           ) : null
+        );
+      };
+
+      var renderArchivedChatRow = function (chat, padLeft) {
+        var isChatActive = chat.id === currentSessionId;
+        var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("archived-chat::" + chat.id));
+        return h(
+          "div",
+          {
+            key: "archived-chat::" + chat.id,
+            className: "dsh-tree-sessionRow" + (isChatActive ? " dsh-tree-sessionRowActive" : ""),
+            role: "treeitem",
+            "data-session-id": chat.id,
+            style: {
+              paddingLeft: padLeft + "px",
+              height: "28px",
+              opacity: 0.75,
+              cursor: "pointer",
+              position: "relative",
+            },
+            onClick: function () { handleOpenArchivedChat(chat.id); },
+            onContextMenu: function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              setEllipsisOpen({ id: "archived-chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
+            },
+          },
+          h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-label-tertiary)" } },
+            h(ChatGlyph, { size: 14 })
+          ),
+          h("span", {
+            className: "dsh-tree-title",
+            title: chat.title || "Archived Chat"
+          }, chat.title || "Untitled Chat"),
+          h("span", { style: { fontSize: "10px", color: "var(--dsw-alias-label-tertiary)", marginLeft: "auto", marginRight: "4px", flexShrink: 0 } }, formatTimeAgo(chat.updatedAt)),
+          h("span", { className: "dsh-tree-actions" },
+            h("button", {
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "Restore / Unarchive",
+              onClick: function (e) { e.stopPropagation(); unarchiveSession(chat.id); }
+            }, h(RestoreGlyph, { size: 13 })),
+            h("button", {
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "Archived Actions (…)",
+              onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isMenuOpen ? null : { id: "archived-chat::" + chat.id }); }
+            }, h(P.IconEllipsisOutline16, { size: 13 })),
+            h(SelectDropdownMenu, {
+              open: isMenuOpen,
+              position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
+              onClose: function () { setEllipsisOpen(null); },
+              items: [
+                { id: "restore", label: "Restore to Active", icon: h(RestoreGlyph, { size: 13 }) },
+                { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
+                { id: "delete", label: "Delete Permanently", icon: h(TrashGlyph, { size: 13 }), danger: true },
+              ],
+              onSelect: function (actionId) {
+                if (actionId === "restore") {
+                  unarchiveSession(chat.id);
+                } else if (actionId === "rename") {
+                  var newTitle = prompt("Rename chat:", chat.title || "");
+                  if (newTitle && renameSession) renameSession(chat.id, newTitle);
+                } else if (actionId === "delete") {
+                  if (confirm("Permanently delete this archived session?")) {
+                    deletePermanentSession(chat.id);
+                  }
+                }
+              }
+            })
+          )
         );
       };
 
@@ -4920,9 +5195,11 @@ button:hover .dsh-icon-animated,
           if (isDir) {
             var chatsInDir = folderSessions[entry.path] || [];
             var isFolderEllipsisOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("folder::" + entry.path));
-            var isVendorOrInternal = entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'lib' || entry.name === '.turbo';
-            var isApplications = entry.name === 'Applications' || entry.name.toLowerCase() === 'applications' || entry.name.endsWith('.app');
-            var isLibrary = entry.name === 'Library' || entry.name.toLowerCase() === 'library';
+            var isApplications = (entry.name === 'Applications');
+            var isLibrary = (entry.name === 'Library');
+            var isSystem = (entry.name === 'System' || entry.name.toLowerCase() === 'system');
+            var isUsers = (entry.name === 'Users' || entry.name.toLowerCase() === 'users');
+            var isVendorOrInternal = Boolean(isApplications || isLibrary || isSystem || isUsers || entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'lib' || entry.name === '.turbo');
             var isWorkspace = !isVendorOrInternal && Boolean(workspaces && workspaces.some(function (w) {
               var wPath = w.path || w.cwd;
               if (!wPath) return false;
@@ -4959,11 +5236,15 @@ button:hover .dsh-icon-animated,
                     ? h(AppGlyph, { size: 15 })
                     : (isLibrary
                       ? h(LibraryGlyph, { size: 15 })
-                      : (isRepo
-                        ? h(RepoGlyph, { size: 15 })
-                        : (isWorkspace
-                          ? h(WorkspaceGlyph, { size: 15 })
-                          : (isExp ? h(P.IconFolderOpen16, { size: 15 }) : h(P.IconFolderClose16, { size: 15 })))))
+                      : (isSystem
+                        ? h(SystemGlyph, { size: 15 })
+                        : (isUsers
+                          ? h(UsersGlyph, { size: 15 })
+                          : (isRepo
+                            ? h(RepoGlyph, { size: 15 })
+                            : (isWorkspace
+                              ? h(WorkspaceGlyph, { size: 15 })
+                              : (isExp ? h(P.IconFolderOpen16, { size: 15 }) : h(P.IconFolderClose16, { size: 15 })))))))
                 ),
                 h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
                   h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""), size: 11 })
@@ -5175,6 +5456,42 @@ button:hover .dsh-icon-animated,
           renderDirEntries(currentRoot, 0)
         ),
 
+        // 5. ARCHIVED SESSIONS SECTION (SEPARATE SECTION AT BOTTOM)
+        archivedSessions.length > 0 ? h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", width: "100%", marginTop: "12px", paddingTop: "6px", borderTop: "1px solid var(--dsw-alias-border-l1)" } },
+          h(
+            "div",
+            {
+              className: "dsh-tree-projectRow",
+              role: "treeitem",
+              style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
+              onClick: function () { setIsArchivedOpen(!isArchivedOpen); },
+            },
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(ArchiveBoxGlyph, { size: 14 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isArchivedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
+            ),
+            h("span", { className: "dsh-tree-title" }, "Archived"),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, archivedSessions.length),
+            h("span", { className: "dsh-tree-actions" },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "Archive All Pong Sessions",
+                onClick: function (e) { e.stopPropagation(); handleArchivePongSessions(); }
+              }, h(TrashGlyph, { size: 13 }))
+            )
+          ),
+          isArchivedOpen ? h(
+            "div",
+            { style: { display: "flex", flexDirection: "column", width: "100%" } },
+            archivedSessions.map(function (chat) {
+              return renderArchivedChatRow(chat, 16);
+            })
+          ) : null
+        ) : null,
+
         fileViewer ? h(FileViewerModal, { file: fileViewer, onClose: function () { setFileViewer(null); } }) : null,
         renameModal ? h(RenameTerminalModal, { oldName: renameModal, onClose: function () { setRenameModal(null); }, onRenamed: function () { loadAll(); } }) : null
       );
@@ -5183,6 +5500,10 @@ button:hover .dsh-icon-animated,
     function GlobalTerminalAndContainerManager() {
       var panelState = React.useState(null); // { type: "terminal", session: "..." } | { type: "container", id: "..." }
       var panel = panelState[0], setPanel = panelState[1];
+      var fileTabState = React.useState(null); // { id: "...", type: "file", title: "...", path: "..." }
+      var fileTab = fileTabState[0], setFileTab = fileTabState[1];
+      var repoTabState = React.useState(null); // { id: "...", type: "repo", title: "...", path: "..." }
+      var repoTab = repoTabState[0], setRepoTab = repoTabState[1];
 
       React.useEffect(function () {
         var onOpenTerm = function (e) {
@@ -5193,11 +5514,32 @@ button:hover .dsh-icon-animated,
           var id = (e && e.detail && e.detail.id) ? e.detail.id : null;
           setPanel({ type: "container", id: id });
         };
+        var onOpenFile = function (e) {
+          if (e && e.detail && e.detail.path) {
+            setFileTab(e.detail);
+          }
+        };
+        var onOpenRepo = function (e) {
+          if (e && e.detail && e.detail.path) {
+            setRepoTab(e.detail);
+          }
+        };
+        var onCloseFile = function () { setFileTab(null); };
+        var onCloseRepo = function () { setRepoTab(null); };
+
         window.addEventListener("dsh:open-terminal", onOpenTerm);
         window.addEventListener("dsh:open-container", onOpenCont);
+        window.addEventListener("dsh:open-file-tab", onOpenFile);
+        window.addEventListener("dsh:open-repo-tab", onOpenRepo);
+        window.addEventListener("dsh:close-file-tab", onCloseFile);
+        window.addEventListener("dsh:close-repo-tab", onCloseRepo);
         return function () {
           window.removeEventListener("dsh:open-terminal", onOpenTerm);
           window.removeEventListener("dsh:open-container", onOpenCont);
+          window.removeEventListener("dsh:open-file-tab", onOpenFile);
+          window.removeEventListener("dsh:open-repo-tab", onOpenRepo);
+          window.removeEventListener("dsh:close-file-tab", onCloseFile);
+          window.removeEventListener("dsh:close-repo-tab", onCloseRepo);
         };
       }, []);
 
@@ -5209,6 +5551,16 @@ button:hover .dsh-icon-animated,
           initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
           initialContainerId: panel && panel.type === "container" ? panel.id : undefined,
           onClose: function () { setPanel(null); }
+        }) : null,
+        fileTab ? h(MainViewFileEditorOccupant, {
+          filePath: fileTab.path,
+          fileName: fileTab.title || (fileTab.path ? fileTab.path.split("/").pop() : "File"),
+          onClose: function () { setFileTab(null); }
+        }) : null,
+        repoTab ? h(MainViewRepoOccupant, {
+          repoPath: repoTab.path,
+          repoName: repoTab.title || (repoTab.path ? repoTab.path.split("/").pop() : "Repository"),
+          onClose: function () { setRepoTab(null); }
         }) : null
       );
     }

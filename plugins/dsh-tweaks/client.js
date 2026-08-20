@@ -1192,7 +1192,7 @@ window.__ModuleLoader__.load({
       };
 
       return h('div', { className: 'dsh-tw-section', style: { display: 'flex', flexDirection: 'column', gap: '16px' } },
-        props.renderSlot('settings.general.item', {}),
+        ((props && typeof props.renderSlot === 'function') ? props.renderSlot('settings.general.item', {}) : null),
         h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
           h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
             h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Sidebar Search Bar'),
@@ -1717,7 +1717,7 @@ window.__ModuleLoader__.load({
             className: 'dsh-tw-navTitleRow dsh-tw-draggableHeader',
             onPointerDown: handleHeaderPointerDown,
           },
-            !isNavCollapsed ? h('div', { className: 'dsh-tw-navTitle', id: titleId }, renderSlot('settings.header', {})) : null,
+            !isNavCollapsed ? h('div', { className: 'dsh-tw-navTitle', id: titleId }, (typeof renderSlot === 'function' ? renderSlot('settings.header', {}) : 'Settings')) : null,
             h('button', {
               type: 'button',
               className: 'dsh-tw-navCollapseBtn',
@@ -1746,13 +1746,20 @@ window.__ModuleLoader__.load({
             className: 'dsh-tw-header dsh-tw-draggableHeader',
             onPointerDown: handleHeaderPointerDown,
           },
-            h('div', { className: 'dsh-tw-actions' }, renderSlot('settings.action', {})),
+            h('div', { className: 'dsh-tw-actions' }, (typeof renderSlot === 'function' ? renderSlot('settings.action', {}) : null)),
             h('button', { ref: closeButton, type: 'button', className: 'dsh-tw-close', onClick: onClose },
               h(CloseIcon, { size: 14 }),
-              h('span', { className: 'dsh-tw-hiddenLabel' }, renderSlot('settings.close', {})))),
+              h('span', { className: 'dsh-tw-hiddenLabel' }, (typeof renderSlot === 'function' ? renderSlot('settings.close', {}) : 'Close')))),
           h('div', { className: 'dsh-tw-options' },
-            active !== undefined
-              ? renderSlot('settings.section', { close: onClose, openSection: openSection }, { only: active })
+            active !== undefined && typeof renderSlot === 'function'
+              ? (function () {
+                  try {
+                    return renderSlot('settings.section', { close: onClose, openSection: openSection, renderSlot: renderSlot }, { only: active });
+                  } catch (e) {
+                    console.warn('Failed rendering settings section ' + active, e);
+                    return h('div', { style: { padding: '20px', color: 'var(--dsw-alias-state-error-primary)' } }, 'Section ' + active + ' unavailable');
+                  }
+                })()
               : null))
       );
     }
