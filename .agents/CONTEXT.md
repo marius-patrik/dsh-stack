@@ -2021,10 +2021,45 @@ User prompt: `library and applications folder should be grey and ungrouped folde
 5. **Settings Button & Modal Activation Fix**:
    - Added robust default fallback sections (`general`, `models`, `providers`, `keybinds`, `themes`, `formatters`, `lsp`, `tools`, `agents`, `repos`, `actions`, `voice`) in `TweaksSettingsRoot` if `useSections` returns empty.
    - Verified modal rendering via `P.Modal` (`className: 'dsh-tw-panel'`) with 840px width and proper click event handling.
-6. **Removed Custom Search Input Bar**:
-   - Removed the custom search input box from `UnifiedWorkspacesBrowser` in the sidebar explorer.
-7. **Removed Active/Live Processes from Sidebar**:
-   - Removed live tmux terminal rows and container instances from the Ungrouped section in `UnifiedWorkspacesBrowser`, keeping only genuine chat conversations in Ungrouped and explorer folders.
+## Session 34 — August 20, 2026 (Fix Settings Disappearing Bug via Headless Chrome Automation, Notepad New Button, Animated Lucide Icons, & Model Picker Favorites)
+
+**Context & User Directives:**
+User prompt: `the problem with the settings button is that when its clicked it dissapears instead of opening settings, test yourself via browser automation or something until you really fix it
+reword the big new session button to new and change icon to notepad with pencil, replace all icons with animated lucide ones
+model picker favorite button doesnt work, and the rows have the cube icon twice, remove the one on the right keep it on the left`
+
+**Root Cause Analysis & Fixes:**
+1. **Settings Button Disappearing Root Cause (Diagnosed via Headless Chrome CDP Automation)**:
+   - Automated testing with Chrome DevTools Protocol revealed React Error #130 (`Element type is invalid: expected a string or class/function but got: undefined`) during `SettingsPanel` render.
+   - `SettingsPanel` was referencing undefined primitive exports on `P` (`IconListPenOutline16`, `IconLightOutline16`, `IconSideBarOutline16`, etc.) and `SelectDropdownMenu` was missing a closing brace.
+   - When React threw during modal mounting, it unmounted the entire `sidebar.settings` slot subtree, causing the settings button to vanish.
+   - Fixed by:
+     - Replacing all missing icon references with self-contained, animated Lucide SVGs (`SettingsIcon`, `SidebarCollapseIcon`, `CloseIcon`, `CommandsIcon`, `PaletteIcon`, `AgentPresetIcon`, `EllipsisIcon`, `DownloadIcon`, `BranchIcon`).
+     - Added `SettingsPanelErrorBoundary` wrapping `SettingsPanel` so slot rendering can never crash or unmount the trigger button.
+     - Verified live in headless Chrome: clicking Settings now smoothly opens the 840px modal with all personalization, customization, and integration categories, and the trigger button remains permanently visible.
+
+2. **Reworded New Session Button & Notepad with Pencil Icon**:
+   - Updated button label to `"New"` in both `TweaksSidebarRoot` and `NewSessionButton`.
+   - Created `NotepadPencilGlyph` (Lucide `NotebookPen` / `SquarePen` SVG) with subtle `-6deg` tilt and scale animation on hover.
+
+3. **Animated Lucide Icons Micro-Interactions**:
+   - Added `.dsh-icon-animated` CSS animations:
+     - Notepad/pencil: smooth scale + tilt.
+     - Settings gear: smooth 45° rotation on hover.
+     - Action & folder rows: subtle 1.12× lift.
+     - Star favorite buttons: 1.25× pop on hover.
+
+4. **Model Picker Favorites & Duplicate Cube Removal**:
+   - **Favorite Button Fix**: Converted `starBtn` from `<button>` to `<span role="button" tabindex="0">` with `mousedown`/`pointerdown`/`click` event stops (`e.stopPropagation()` and `e.preventDefault()`). This prevents the outer model item button from intercepting the click and prematurely closing the dropdown. Star toggles now write directly to `localStorage['dsh_favorite_models']` and refresh the Favorites section at the top of the menu.
+   - **Duplicate Cube Removal**: Restricted the cube `::before` pseudo-element strictly to the main trigger button (`[data-slot="conversation.input.model"] > button::before`) and explicitly suppressed `::before` on menu option items and cell values (`content: none !important`).
+
+**Verification**:
+- Automated test suite run against live Chrome via Chrome DevTools Protocol verified:
+  - Button text: `"New"` with notepad icon.
+  - Settings button click: opens modal without disappearing or crashing.
+  - Model list: 110 models loaded with zero duplicate cubes and working interactive star buttons that persist favorites.
+- All 16 plugins passed `check-plugin.mjs`.
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+
 

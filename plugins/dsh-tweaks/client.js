@@ -404,6 +404,7 @@ window.__ModuleLoader__.load({
     var ReactDOM = (typeof window !== 'undefined' && window.ReactDOM) ? window.ReactDOM : null;
     try { if (!ReactDOM) ReactDOM = require('react-dom'); } catch (e) {}
     var P = require('@deepseek-ai/dsh-client-ui-primitives');
+    if (typeof window !== 'undefined') window.__dsh_P = P;
     var slotsModule = require('@deepseek-ai/dsh-client-ui-slots');
     var resolveSlotLabel = slotsModule.resolveSlotLabel;
     var webReact = require('@deepseek-ai/dsh-client-web-react');
@@ -570,6 +571,117 @@ window.__ModuleLoader__.load({
       );
     }
 
+    function SettingsIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated dsh-icon-settings';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z' }),
+        h('circle', { cx: '12', cy: '12', r: '3' })
+      );
+    }
+
+    function SidebarCollapseIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('rect', { width: '18', height: '18', x: '3', y: '3', rx: '2' }),
+        h('path', { d: 'M9 3v18' })
+      );
+    }
+
+    function CloseIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M18 6 6 18' }),
+        h('path', { d: 'm6 6 12 12' })
+      );
+    }
+
+    function CommandsIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'm18 16 4-4-4-4' }),
+        h('path', { d: 'm6 8-4 4 4 4' }),
+        h('path', { d: 'm14.5 4-5 16' })
+      );
+    }
+
+    function PaletteIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('circle', { cx: '13.5', cy: '6.5', r: '.5', fill: 'currentColor' }),
+        h('circle', { cx: '17.5', cy: '10.5', r: '.5', fill: 'currentColor' }),
+        h('circle', { cx: '8.5', cy: '7.5', r: '.5', fill: 'currentColor' }),
+        h('circle', { cx: '6.5', cy: '12.5', r: '.5', fill: 'currentColor' }),
+        h('path', { d: 'M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z' })
+      );
+    }
+
+    function AgentPresetIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M12 8V4H8' }),
+        h('rect', { width: '16', height: '12', x: '4', y: '8', rx: '2' }),
+        h('path', { d: 'M2 14h2' }),
+        h('path', { d: 'M20 14h2' }),
+        h('path', { d: 'M15 13v2' }),
+        h('path', { d: 'M9 13v2' })
+      );
+    }
+
+    function EllipsisIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('circle', { cx: '12', cy: '12', r: '1' }),
+        h('circle', { cx: '19', cy: '12', r: '1' }),
+        h('circle', { cx: '5', cy: '12', r: '1' })
+      );
+    }
+
+    function DownloadIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('path', { d: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' }),
+        h('polyline', { points: '7 10 12 15 17 10' }),
+        h('line', { x1: '12', x2: '12', y1: '15', y2: '3' })
+      );
+    }
+
+    function BranchIcon(props) {
+      var size = props && props.size ? props.size : 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h('svg', {
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
+      },
+        h('line', { x1: '6', x2: '6', y1: '3', y2: '15' }),
+        h('circle', { cx: '18', cy: '6', r: '3' }),
+        h('circle', { cx: '6', cy: '18', r: '3' }),
+        h('path', { d: 'M18 9a9 9 0 0 1-9 9' })
+      );
+    }
+
     function navIcon(id) {
       if (id === 'general') return h(GeneralNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'integrations' || id === 'providers') return h(ProvidersNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
@@ -577,50 +689,172 @@ window.__ModuleLoader__.load({
       if (id === 'terminals') return h(TerminalsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'containers') return h(ContainersNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'models') return h(DataGlyph, { className: 'dsh-tw-navIcon', size: 16 });
-      if (id === 'apps') return h(P.IconListPenOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'apps') return h(CommandsIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'provider-usage') return h(DataGlyph, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'keychain') return h(KeychainNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
-      if (id === 'session-modes' || id === 'actions' || id === 'commands') return h(P.IconListPenOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'session-modes' || id === 'actions' || id === 'commands') return h(CommandsIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'agents') return h(RobotHeadNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
-      if (id === 'themes' || id === 'appearance') return h(P.IconLightOutline16, { className: 'dsh-tw-navIcon', size: 16 });
-      if (id === 'agent-presets' || id === 'modes') return h(P.IconAgentPresetOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'themes' || id === 'appearance') return h(PaletteIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'agent-presets' || id === 'modes') return h(AgentPresetIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'tools') return h(ToolsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'loops') return h(LoopsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'plugins') return h(PlugNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'keybinds' || id === 'keybindings' || id === 'shortcuts') return h(KeyboardNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'hosts') return h(DataGlyph, { className: 'dsh-tw-navIcon', size: 16 });
-      return h(P.IconSettingsOutline16, { className: 'dsh-tw-navIcon', size: 16 });
+      return h(SettingsIcon, { className: 'dsh-tw-navIcon', size: 16 });
     }
 
     // Glyph seat: a registrant's glyph wins; an id with no glyph falls back to
     // the static map so every nav cell keeps a mark.
     function navGlyph(renderSlot, row) {
-      var content = renderSlot('settings.section.icon', {}, { only: row.id });
-      if (content === null || content === undefined) return navIcon(row.id);
-      return content;
+      try {
+        if (typeof renderSlot === 'function') {
+          var content = renderSlot('settings.section.icon', {}, { only: row.id });
+          if (content !== null && content !== undefined) return content;
+        }
+      } catch (err) {}
+      return navIcon(row.id);
+    }
+
+    function NotepadPencilGlyph(props) {
+      var size = props && props.size ? props.size : 16;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "dsh-icon-animated dsh-icon-notepad",
+        style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 }
+      },
+        h("path", { d: "M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" }),
+        h("path", { d: "M2 6h4" }),
+        h("path", { d: "M2 10h4" }),
+        h("path", { d: "M2 14h4" }),
+        h("path", { d: "M2 18h4" }),
+        h("path", { d: "M18.4 2.6a2.12 2.12 0 0 1 3 3L11 16l-4 1 1-4Z" })
+      );
     }
 
     function ChatGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "dsh-icon-animated",
+        style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 }
+      },
         h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
       );
     }
+
     function TerminalsGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "dsh-icon-animated",
+        style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 }
+      },
         h("polyline", { points: "4 17 10 11 4 5" }),
         h("line", { x1: "12", y1: "19", x2: "20", y2: "19" })
       );
     }
+
     function ContainersGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "dsh-icon-animated",
+        style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 }
+      },
         h("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2", ry: "2" }),
         h("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
         h("line", { x1: "12", y1: "17", x2: "12", y2: "21" })
       );
     }
+
+    var SettingsPanelErrorBoundary = (function (_super) {
+      function SettingsPanelErrorBoundary(props) {
+        if (_super && typeof _super === 'function') {
+          try { _super.call(this, props); } catch (e) {}
+        }
+        this.props = props;
+        this.state = { hasError: false, error: null };
+        return this;
+      }
+      if (_super && _super.prototype) {
+        try {
+          Object.setPrototypeOf(SettingsPanelErrorBoundary, _super);
+          SettingsPanelErrorBoundary.prototype = Object.create(_super.prototype);
+          SettingsPanelErrorBoundary.prototype.constructor = SettingsPanelErrorBoundary;
+        } catch (e) {}
+      } else {
+        SettingsPanelErrorBoundary.prototype = {};
+        SettingsPanelErrorBoundary.prototype.setState = function (partial) {
+          if (typeof partial === 'function') {
+            this.state = Object.assign({}, this.state, partial(this.state));
+          } else {
+            this.state = Object.assign({}, this.state, partial);
+          }
+        };
+      }
+      SettingsPanelErrorBoundary.getDerivedStateFromError = function (error) {
+        return { hasError: true, error: error };
+      };
+      SettingsPanelErrorBoundary.prototype.componentDidCatch = function (error, errorInfo) {
+        console.error('SettingsPanel error caught by boundary:', error, errorInfo);
+      };
+      SettingsPanelErrorBoundary.prototype.render = function () {
+        if (this.state && this.state.hasError) {
+          var _this = this;
+          return h('div', {
+            className: 'dsh-tw-panel',
+            style: { padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', color: 'var(--dsw-alias-label-primary)' }
+          },
+            h('h2', { style: { margin: 0, fontSize: '18px', fontWeight: 600 } }, 'Settings (Recovered)'),
+            h('p', { style: { color: 'var(--dsw-alias-state-error-primary)', margin: 0 } }, 'A non-fatal error occurred while rendering settings.'),
+            h('pre', { style: { fontSize: '12px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px', overflow: 'auto' } }, String(this.state.error && this.state.error.message ? this.state.error.message : this.state.error)),
+            h('div', { style: { display: 'flex', gap: '8px' } },
+              h('button', {
+                type: 'button',
+                style: { padding: '6px 14px', borderRadius: '6px', border: 'none', background: 'var(--dsw-alias-primary, #6366f1)', color: '#fff', cursor: 'pointer' },
+                onClick: function () { _this.setState({ hasError: false, error: null }); }
+              }, 'Retry'),
+              h('button', {
+                type: 'button',
+                style: { padding: '6px 14px', borderRadius: '6px', border: '1px solid var(--dsw-alias-border-l2)', background: 'transparent', color: 'inherit', cursor: 'pointer' },
+                onClick: this.props && this.props.onClose
+              }, 'Close')
+            )
+          );
+        }
+        return this.props && this.props.children;
+      };
+      return SettingsPanelErrorBoundary;
+    }(React ? React.Component : undefined));
 
     function SelectDropdownMenu(props) {
       var open = props.open, onClose = props.onClose, items = props.items, onSelect = props.onSelect;
@@ -715,18 +949,18 @@ window.__ModuleLoader__.load({
       };
 
       return h("div", { style: { position: "relative", width: "100%" } },
-        h(P.Tooltip, { label: t("session.new.label"), delayMs: 500, disabled: wide },
+        h(P.Tooltip, { label: "New", delayMs: 500, disabled: wide },
           h("button", {
             type: "button",
             className: "dsh-tw-newSession",
-            "aria-label": t("session.new.label"),
+            "aria-label": "New",
             onClick: function (e) {
               e.stopPropagation();
               setMenuOpen(!menuOpen);
             },
           },
-            h(P.IconPlusOutline16, { size: wide ? 14 : 18 }),
-            wide ? h("span", { className: "dsh-tw-newSessionLabel dsh-tw-wide" }, t("session.new")) : null,
+            h(NotepadPencilGlyph, { size: wide ? 16 : 18 }),
+            wide ? h("span", { className: "dsh-tw-newSessionLabel dsh-tw-wide" }, "New") : null,
             wide ? h(P.IconChevronDownOutline14, { size: 12, style: { marginLeft: "auto", opacity: 0.6 } }) : null
           )
         ),
@@ -867,15 +1101,15 @@ window.__ModuleLoader__.load({
             h('button', { type: 'button', className: 'dsh-tw-iconButton dsh-tw-toggle', 'aria-label': collapsed ? t('toggle.open') : t('toggle.collapse'), onClick: function () { toggleSidebar(); } },
               !wide ? h(P.FishLogo, { className: 'dsh-tw-railFish', size: 24 }) : null,
               h(P.IconPanelLeftOutline16, { className: 'dsh-tw-panelIcon', size: wide ? 16 : 18 })))),
-        h(P.Tooltip, { label: t('session.new.label') || 'New session', delayMs: 500, disabled: wide },
+        h(P.Tooltip, { label: 'New', delayMs: 500, disabled: wide },
           h('button', {
             type: 'button',
             className: 'dsh-tw-newSession' + (!wide ? ' dsh-tw-collapsed' : ''),
-            'aria-label': t('session.new.label') || 'New session',
+            'aria-label': 'New',
             onClick: function () { startSession(); }
           },
-            h(P.IconNewChatOutline16, { size: wide ? 14 : 18 }),
-            wide ? h('span', { className: 'dsh-tw-newSessionLabel dsh-tw-wide' }, t('session.new') || 'New Session') : null
+            h(NotepadPencilGlyph, { size: wide ? 16 : 18 }),
+            wide ? h('span', { className: 'dsh-tw-newSessionLabel dsh-tw-wide' }, 'New') : null
           )
         ),
         h('div', { className: 'dsh-tw-regionArea' },
@@ -1489,7 +1723,7 @@ window.__ModuleLoader__.load({
               className: 'dsh-tw-navCollapseBtn',
               title: isNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar',
               onClick: toggleNavCollapse,
-            }, h(P.IconSideBarOutline16, { size: 16 }))
+            }, h(SidebarCollapseIcon, { size: 16 }))
           ),
           h('div', { className: 'dsh-tw-navList' },
             personalRows.length > 0 ? renderGroupHeader('Personalization', personalRows.length) : null,
@@ -1514,7 +1748,7 @@ window.__ModuleLoader__.load({
           },
             h('div', { className: 'dsh-tw-actions' }, renderSlot('settings.action', {})),
             h('button', { ref: closeButton, type: 'button', className: 'dsh-tw-close', onClick: onClose },
-              h(P.IconCloseOutline16, { size: 14 }),
+              h(CloseIcon, { size: 14 }),
               h('span', { className: 'dsh-tw-hiddenLabel' }, renderSlot('settings.close', {})))),
           h('div', { className: 'dsh-tw-options' },
             active !== undefined
@@ -1636,7 +1870,7 @@ window.__ModuleLoader__.load({
             (renderSlot && typeof renderSlot === 'function')
               ? renderSlot('settings.trigger', { wide: true })
               : h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '8px' } },
-                  h(P.IconSettingsOutline16, { size: 16 }),
+                  h(SettingsIcon, { size: 16 }),
                   h('span', { className: 'dsh-tw-triggerLabel' }, 'Settings')
                 )
           )
@@ -1653,7 +1887,7 @@ window.__ModuleLoader__.load({
                   setOpen(true);
                 },
               },
-                h(P.IconSettingsOutline16, { size: 18 })
+                h(SettingsIcon, { size: 18 })
               )
             ),
         open
@@ -1663,7 +1897,7 @@ window.__ModuleLoader__.load({
             headless: true,
             title: 'Settings',
             className: 'dsh-tw-panel',
-          }, h(SettingsPanel, { rows: rows, renderSlot: renderSlot, activeId: activeId, onSelect: setActiveId, onClose: close, openSection: openSection }))
+          }, h(SettingsPanelErrorBoundary, { onClose: close }, h(SettingsPanel, { rows: rows, renderSlot: renderSlot, activeId: activeId, onSelect: setActiveId, onClose: close, openSection: openSection })))
           : null,
         (onboardingStep !== undefined && renderSlot && typeof renderSlot === 'function')
           ? renderSlot('settings.onboarding', {
@@ -1936,12 +2170,12 @@ window.__ModuleLoader__.load({
           {
             id: 'toggle-view',
             label: isTrajectory ? 'Switch to Chat View' : 'Switch to Trajectory View',
-            icon: h(isTrajectory ? P.IconChatOutline16 : P.IconBranchOutline16, { size: 14 }),
+            icon: h(isTrajectory ? ChatGlyph : BranchIcon, { size: 14 }),
           },
           {
             id: 'download-log',
             label: busy ? 'Exporting log…' : 'Download Session Log',
-            icon: h(P.IconDownloadOutline16, { size: 14 }),
+            icon: h(DownloadIcon, { size: 14 }),
             disabled: busy,
           },
         ];
@@ -1970,7 +2204,7 @@ window.__ModuleLoader__.load({
                 e.stopPropagation();
                 setMenuOpen(!menuOpen);
               },
-            }, h(P.IconEllipsisOutline16, { size: 16 })),
+            }, h(EllipsisIcon, { size: 16 })),
             menuOpen ? h(SelectDropdownMenu, {
               open: true,
               align: 'right',
@@ -2081,7 +2315,7 @@ window.__ModuleLoader__.load({
             },
             onClick: function () { setCollapsed(!collapsed); },
           },
-            h(P.IconGoalOutline16, { size: 14, style: { color: 'var(--dsw-alias-label-secondary)' } }),
+            h(GoalIcon, { size: 14, style: { color: 'var(--dsw-alias-label-secondary)' } }),
             h('span', { style: { fontSize: '13px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Subagents'),
             h('span', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)', marginLeft: '4px' } }, progressStr),
             h('span', {

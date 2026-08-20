@@ -152,8 +152,9 @@ window.__ModuleLoader__.load({
 .dsh-tree-sessionRowActive:hover {
   background: var(--dsw-alias-surface-l2, rgba(255, 255, 255, 0.12)) !important;
 }
-[data-slot="conversation.input.model"] button::before,
-[class*="ModelSelect_trigger"]::before {
+/* Keep cube icon ONLY on the left main model trigger button */
+[data-slot="conversation.input.model"] > button::before,
+button[class*="ModelSelect_trigger"]::before {
   content: '';
   display: inline-block;
   width: 14px;
@@ -164,6 +165,35 @@ window.__ModuleLoader__.load({
   background-color: #ffffff;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* Remove duplicate right-side cube or menu option cube ::before */
+[class*="ModelSelect_menu"] button::before,
+[class*="ModelSelect_menu"] [class*="cell"]::before,
+[class*="ModelSelect_menu"] [class*="option"]::before,
+[class*="ModelSelect_cellValue"]::before,
+[class*="cellValue"]::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Animated Lucide Icon Micro-Interactions */
+.dsh-icon-animated {
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 150ms ease;
+}
+button:hover .dsh-icon-animated,
+.dsh-tree-sessionRow:hover .dsh-icon-animated,
+.dsh-tree-projectRow:hover .dsh-icon-animated {
+  transform: scale(1.12);
+}
+.dsh-tree-sessionRow:hover .dsh-icon-notepad {
+  transform: scale(1.12) rotate(-6deg);
+}
+.dsh-model-star-btn {
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dsh-model-star-btn:hover {
+  transform: scale(1.25);
 }
 .dsh-tree-sessionTitle {
   flex: 1;
@@ -216,8 +246,6 @@ window.__ModuleLoader__.load({
         } catch (e) {}
       };
 
-      var CUBE_WIRE_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="dsh-cube-wire-icon" style="margin-right: 6px; flex-shrink: 0; display: inline-flex; vertical-align: middle;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
-
       var STAR_GRAY_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
       var STAR_GOLD_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
@@ -256,8 +284,9 @@ window.__ModuleLoader__.load({
 
             var starBtn = opt.querySelector('.dsh-model-star-btn');
             if (!starBtn) {
-              starBtn = document.createElement('button');
-              starBtn.type = 'button';
+              starBtn = document.createElement('span');
+              starBtn.setAttribute('role', 'button');
+              starBtn.setAttribute('tabindex', '0');
               starBtn.className = 'dsh-model-star-btn';
               starBtn.style.border = 'none';
               starBtn.style.background = 'transparent';
@@ -269,18 +298,31 @@ window.__ModuleLoader__.load({
               starBtn.style.alignItems = 'center';
               starBtn.style.justifyContent = 'center';
               starBtn.style.flexShrink = '0';
-              starBtn.style.zIndex = '3';
+              starBtn.style.zIndex = '10';
 
-              starBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+              var toggleFav = function (e) {
+                if (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                }
                 var currentFavs = getFavoriteModels();
                 var idx = currentFavs.indexOf(modelKey);
                 if (idx === -1) currentFavs.push(modelKey);
                 else currentFavs.splice(idx, 1);
                 setFavoriteModels(currentFavs);
                 scheduleUpdate();
+              };
+
+              starBtn.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
               });
+              starBtn.addEventListener('pointerdown', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+              });
+              starBtn.addEventListener('click', toggleFav);
 
               var checkEl = opt.querySelector('[class*="check"]');
               if (checkEl) {
@@ -343,9 +385,12 @@ window.__ModuleLoader__.load({
 
               var cloneStar = clone.querySelector('.dsh-model-star-btn');
               if (cloneStar) {
+                cloneStar.addEventListener('mousedown', function (e) { e.preventDefault(); e.stopPropagation(); });
+                cloneStar.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); });
                 cloneStar.addEventListener('click', function (e) {
                   e.preventDefault();
                   e.stopPropagation();
+                  if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
                   var currentFavs = getFavoriteModels();
                   var idx = currentFavs.indexOf(key);
                   if (idx !== -1) {
@@ -5160,11 +5205,11 @@ window.__ModuleLoader__.load({
         React.Fragment,
         null,
         h(RightSidebarDock, {}),
-        h(BottomTerminalPanel, {
+        panel ? h(BottomTerminalPanel, {
           initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
           initialContainerId: panel && panel.type === "container" ? panel.id : undefined,
           onClose: function () { setPanel(null); }
-        })
+        }) : null
       );
     }
 
