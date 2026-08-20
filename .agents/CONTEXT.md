@@ -1896,4 +1896,11 @@ Continuation of Session 29. Finalized the remaining implementation tasks:
 - `plugins/dsh-providers/client.js` — renderChatRow, renderDirEntries, apply sections, ensureModelPickerDecoration
 - `plugins/dsh-tweaks/client.js` — navIcon, INTEGRATION_IDS
 
+### Session 29c — August 20, 2026 (Fix Settings Trigger Shadowing, Portal Modal, and Click Dispatch)
+
+Diagnosed and resolved settings button activation issues:
+1. **Slot priority shadowing**: In Cordis single slots (`sidebar`, `sidebar.settings`, `settings.section:general`), registrations without explicit negative priority were not shadowing harness defaults. Added `priority: -10` to `sidebar`, `sidebar.settings`, and `general` section registrations in `dsh-tweaks`.
+2. **React Portal modal mounting**: `SettingsPanel` now renders `.dsh-tw-overlay` via `ReactDOM.createPortal(modalNode, document.body)` so the fixed modal layer is never trapped inside nested sidebar stacking contexts or overflow constraints.
+3. **Capture-phase document click listener**: Added capture-phase global listener in `TweaksSettingsRoot` intercepting any clicks on `[data-action="open-settings"]`, `.dsh-tw-settingsArea button`, `button.dsh-tw-trigger`, or harness trigger buttons, guaranteeing settings open regardless of DOM hierarchy.
+
 **Status:** completed, all 16 plugin test suites passed.
