@@ -1966,3 +1966,17 @@ User approved comprehensive plan for monorepo migration and major UX additions:
    - Suppress preset badge next to the session title.
 
 **Status:** in progress.
+
+## Session 31 — August 20, 2026 (Master Implementation: Monaco Editor Tabs, Repo Tabs, Applications/Library Icons, Rich Subagents Dock, Settings Fix, Persistent Sidebar & Pong Session Cleanup)
+
+**Context & User Directives:**
+User approved master plan for:
+1. **Archive Pong & Empty Sessions**: Clean up 15 empty/probe test sessions from active workspace into `archivedSessionIds` and add a 1-click "Archive Empty & Pong Sessions" menu action.
+2. **Monaco Editor Tab for Files**: Open files as full Monaco Editor tabs in `TopConversationTabBar` (`type: "file"`) with syntax highlighting, line numbers, editing, dirty indicator, and `Cmd+S` / `Ctrl+S` save via `POST /quotas/api/fs/write`.
+3. **Repository Tabs & Custom GitHub Client Workbench**: Support `type: "repo"` tabs with Git status diffs, branch selector, commit form with "Commit & Push", and commits log.
+4. **Special Icons for Applications & Library**: `AppGlyph` for `Applications` folder, `.app` bundles, and `.exe` binaries; `LibraryGlyph` for `Library` folders.
+5. **Enhanced Subagents Dock**: Match `GoalBar` exact 36px height, 12px border radius, `--dsw-specific-tip` background, mode/role pills, pulse status dots, token usage readouts, and click-to-open subagent conversation (`openChild`).
+6. **Settings Button Fix & Sidebar Persistence**: Modal size fixes with `className: 'dsh-tw-panel'`, global event dispatch, and draggable sidebar resizer with `localStorage` persistence for width and collapse state.
+7. **Unified Tree Rows, Ungrouped Blue Folder & Agent Message Bubbles**: Standard 28px height across all rows, vibrant blue folder icon (`#3b82f6`) on Ungrouped header with 24px child indentation, and agent message bubbles with distinct surface styling (`rgba(255,255,255,0.045)`, 20px radius).
+
+**Status:** completed, all 16 plugin check-plugin test suites passed cleanly.

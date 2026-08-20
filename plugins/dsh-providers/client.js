@@ -3051,6 +3051,488 @@ window.__ModuleLoader__.load({
       );
     }
 
+    function MainViewFileEditorOccupant(props) {
+      var filePath = props.filePath || "";
+      var fileName = props.fileName || (filePath ? filePath.split("/").pop() : "File");
+      var onClose = props.onClose;
+
+      var contentState = React.useState("");
+      var content = contentState[0], setContent = contentState[1];
+      var originalContentState = React.useState("");
+      var originalContent = originalContentState[0], setOriginalContent = originalContentState[1];
+      var loadingState = React.useState(true);
+      var loading = loadingState[0], setLoading = loadingState[1];
+      var savingState = React.useState(false);
+      var saving = savingState[0], setSaving = savingState[1];
+      var errorState = React.useState(null);
+      var error = errorState[0], setError = errorState[1];
+      var statusMsgState = React.useState("");
+      var statusMsg = statusMsgState[0], setStatusMsg = statusMsgState[1];
+
+      var isDirty = content !== originalContent;
+
+      React.useEffect(function () {
+        setLoading(true);
+        setError(null);
+        fetch(QUOTAS_API + "/fs/read?path=" + encodeURIComponent(filePath))
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.error) {
+              setError(res.error);
+            } else {
+              setContent(res.content || "");
+              setOriginalContent(res.content || "");
+            }
+          })
+          .catch(function (err) { setError(err.message); })
+          .finally(function () { setLoading(false); });
+      }, [filePath]);
+
+      var handleSave = function () {
+        if (saving) return;
+        setSaving(true);
+        setStatusMsg("Saving…");
+        fetch(QUOTAS_API + "/fs/write", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: filePath, content: content }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.error) {
+              setStatusMsg("Error: " + res.error);
+            } else {
+              setOriginalContent(content);
+              setStatusMsg("Saved!");
+              setTimeout(function () { setStatusMsg(""); }, 2000);
+            }
+          })
+          .catch(function (err) { setStatusMsg("Save failed: " + err.message); })
+          .finally(function () { setSaving(false); });
+      };
+
+      React.useEffect(function () {
+        var onKeyDown = function (e) {
+          if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+            e.preventDefault();
+            handleSave();
+          }
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return function () { window.removeEventListener("keydown", onKeyDown); };
+      }, [content, filePath]);
+
+      return h("div", {
+        className: "dsh-mainview-monaco",
+        style: {
+          position: "fixed",
+          top: "48px",
+          left: "var(--dsh-sidebar-width, 240px)",
+          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
+          background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "var(--ds-font-mono, monospace)",
+        }
+      },
+        h("div", {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 16px",
+            background: "var(--dsw-alias-bg-layer-1, #161b22)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+            userSelect: "none",
+          }
+        },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "10px", minWidth: 0 } },
+            h(FileGlyph, { size: 15 }),
+            h("strong", { style: { color: "var(--dsw-alias-label-primary, #fff)", fontSize: "13px" } }, fileName),
+            isDirty ? h("span", { title: "Unsaved changes", style: { color: "#eab308", fontSize: "14px", lineHeight: 1 } }, "●") : null,
+            h("span", { style: { color: "var(--dsw-alias-label-tertiary, #8b949e)", fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, filePath)
+          ),
+          h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+            statusMsg ? h("span", { style: { fontSize: "12px", color: statusMsg.startsWith("Error") ? "#f85149" : "var(--dsw-alias-primary, #6366f1)" } }, statusMsg) : null,
+            h("button", {
+              type: "button",
+              onClick: handleSave,
+              disabled: saving || !isDirty,
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                border: "1px solid var(--dsw-alias-border-l1)",
+                background: isDirty ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
+                color: isDirty ? "#fff" : "var(--dsw-alias-label-secondary)",
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: (saving || !isDirty) ? "default" : "pointer",
+                opacity: (saving || !isDirty) ? 0.6 : 1,
+                transition: "all 120ms",
+              }
+            }, saving ? "Saving…" : "Save (⌘S)"),
+            h("button", {
+              type: "button",
+              onClick: onClose,
+              title: "Close Editor Tab",
+              style: {
+                background: "transparent",
+                border: "none",
+                color: "var(--dsw-alias-label-secondary, #888)",
+                cursor: "pointer",
+                fontSize: "16px",
+                padding: "2px 6px",
+                borderRadius: "4px",
+              }
+            }, "✕")
+          )
+        ),
+        h("div", {
+          style: {
+            flex: 1,
+            position: "relative",
+            display: "flex",
+            overflow: "hidden",
+            background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+          }
+        },
+          loading ? h("div", { style: { padding: "24px", color: "var(--dsw-alias-label-secondary)" } }, "Loading file…") :
+          error ? h("div", { style: { padding: "24px", color: "#f85149" } }, "Error: " + error) :
+          h("textarea", {
+            value: content,
+            onChange: function (e) { setContent(e.target.value); },
+            spellCheck: false,
+            style: {
+              width: "100%",
+              height: "100%",
+              border: "none",
+              outline: "none",
+              resize: "none",
+              padding: "16px 20px",
+              boxSizing: "border-box",
+              fontFamily: "var(--ds-font-mono, monospace)",
+              fontSize: "13px",
+              lineHeight: "1.6",
+              background: "transparent",
+              color: "var(--dsw-alias-label-primary, #e6edf3)",
+              tabSize: 2,
+            }
+          })
+        )
+      );
+    }
+
+    function MainViewRepoOccupant(props) {
+      var repoPath = props.repoPath || "";
+      var repoName = props.repoName || (repoPath ? repoPath.split("/").pop() : "Repository");
+      var onClose = props.onClose;
+
+      var tabState = React.useState("changes");
+      var activeTab = tabState[0], setActiveTab = tabState[1];
+
+      var statusState = React.useState({ branch: "main", ahead: 0, behind: 0, files: [] });
+      var status = statusState[0], setStatus = statusState[1];
+      var logState = React.useState([]);
+      var log = logState[0], setLog = logState[1];
+      var branchesState = React.useState([]);
+      var branches = branchesState[0], setBranches = branchesState[1];
+
+      var loadingState = React.useState(false);
+      var loading = loadingState[0], setLoading = loadingState[1];
+      var commitMsgState = React.useState("");
+      var commitMsg = commitMsgState[0], setCommitMsg = commitMsgState[1];
+      var actionStatusState = React.useState("");
+      var actionStatus = actionStatusState[0], setActionStatus = actionStatusState[1];
+
+      var fetchRepoData = function () {
+        setLoading(true);
+        Promise.all([
+          fetch(QUOTAS_API + "/git/status?path=" + encodeURIComponent(repoPath)).then(function (r) { return r.json(); }),
+          fetch(QUOTAS_API + "/git/log?path=" + encodeURIComponent(repoPath)).then(function (r) { return r.json(); }),
+          fetch(QUOTAS_API + "/git/branches?path=" + encodeURIComponent(repoPath)).then(function (r) { return r.json(); })
+        ]).then(function (results) {
+          if (results[0] && !results[0].error) setStatus(results[0]);
+          if (results[1] && results[1].commits) setLog(results[1].commits);
+          if (results[2] && results[2].branches) setBranches(results[2].branches);
+        }).catch(function () {}).finally(function () { setLoading(false); });
+      };
+
+      React.useEffect(function () { fetchRepoData(); }, [repoPath]);
+
+      var handleCommitAndPush = function () {
+        if (!commitMsg.trim()) return;
+        setActionStatus("Committing changes…");
+        fetch(QUOTAS_API + "/git/commit", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: repoPath, message: commitMsg }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.error) {
+              setActionStatus("Commit failed: " + res.error);
+            } else {
+              setActionStatus("Pushing to remote…");
+              return fetch(QUOTAS_API + "/git/push", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ path: repoPath }),
+              });
+            }
+          })
+          .then(function (r) { return r ? r.json() : null; })
+          .then(function (res) {
+            if (res && res.error) setActionStatus("Push info: " + res.error);
+            else setActionStatus("Committed & pushed!");
+            setCommitMsg("");
+            fetchRepoData();
+            setTimeout(function () { setActionStatus(""); }, 3000);
+          })
+          .catch(function (err) { setActionStatus("Action failed: " + err.message); });
+      };
+
+      return h("div", {
+        className: "dsh-mainview-repo",
+        style: {
+          position: "fixed",
+          top: "48px",
+          left: "var(--dsh-sidebar-width, 240px)",
+          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
+          background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
+        }
+      },
+        h("div", {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px 18px",
+            background: "var(--dsw-alias-bg-layer-1, #161b22)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+          }
+        },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "12px" } },
+            h(RepoGlyph, { size: 18 }),
+            h("strong", { style: { color: "var(--dsw-alias-label-primary, #fff)", fontSize: "14px" } }, repoName),
+            h("span", {
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "2px 8px",
+                borderRadius: "12px",
+                background: "rgba(99, 102, 241, 0.15)",
+                color: "var(--dsw-alias-primary, #6366f1)",
+                fontSize: "12px",
+                fontWeight: 600,
+              }
+            }, "⎇ " + (status.branch || "main")),
+            (status.ahead > 0 || status.behind > 0) ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
+              (status.ahead > 0 ? "↑" + status.ahead + " " : "") + (status.behind > 0 ? "↓" + status.behind : "")
+            ) : null
+          ),
+          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            h("button", {
+              type: "button",
+              onClick: fetchRepoData,
+              disabled: loading,
+              title: "Refresh Git Status",
+              style: {
+                padding: "4px 8px",
+                borderRadius: "5px",
+                border: "1px solid var(--dsw-alias-border-l1)",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+                fontSize: "12px",
+              }
+            }, loading ? "Refreshing…" : "↻ Refresh"),
+            h("button", {
+              type: "button",
+              onClick: onClose,
+              title: "Close Repo Tab",
+              style: {
+                background: "transparent",
+                border: "none",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+                fontSize: "16px",
+                padding: "2px 6px",
+              }
+            }, "✕")
+          )
+        ),
+        h("div", {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            padding: "6px 18px",
+            background: "var(--dsw-alias-bg-layer-0, #0d1117)",
+            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.08))",
+          }
+        },
+          [
+            { id: "changes", label: "Changes (" + (status.files ? status.files.length : 0) + ")" },
+            { id: "history", label: "Commit History (" + log.length + ")" },
+            { id: "branches", label: "Branches (" + branches.length + ")" },
+          ].map(function (subTab) {
+            var isSel = activeTab === subTab.id;
+            return h("button", {
+              key: subTab.id,
+              type: "button",
+              onClick: function () { setActiveTab(subTab.id); },
+              style: {
+                padding: "5px 12px",
+                borderRadius: "6px",
+                border: "none",
+                background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                color: isSel ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                fontSize: "12.5px",
+                fontWeight: isSel ? 600 : 400,
+                cursor: "pointer",
+              }
+            }, subTab.label);
+          })
+        ),
+        h("div", { style: { flex: 1, overflowY: "auto", padding: "16px 20px" } },
+          activeTab === "changes" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "16px", maxWidth: "800px" } },
+            h("div", {
+              style: {
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                padding: "14px",
+                borderRadius: "10px",
+                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              }
+            },
+              h("input", {
+                type: "text",
+                placeholder: "Commit message (e.g. fix: update styling)",
+                value: commitMsg,
+                onChange: function (e) { setCommitMsg(e.target.value); },
+                onKeyDown: function (e) { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleCommitAndPush(); },
+                style: {
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--dsw-alias-border-l1)",
+                  background: "var(--dsw-alias-bg-layer-1, #161b22)",
+                  color: "#fff",
+                  fontSize: "13px",
+                  outline: "none",
+                }
+              }),
+              h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                actionStatus ? h("span", { style: { fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)" } }, actionStatus) : h("span", null),
+                h("button", {
+                  type: "button",
+                  onClick: handleCommitAndPush,
+                  disabled: !commitMsg.trim(),
+                  style: {
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: "var(--dsw-alias-primary, #6366f1)",
+                    color: "#fff",
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    cursor: commitMsg.trim() ? "pointer" : "default",
+                    opacity: commitMsg.trim() ? 1 : 0.5,
+                  }
+                }, "Commit & Push")
+              )
+            ),
+            h("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
+              h("span", { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Changed Files:"),
+              (!status.files || status.files.length === 0) ? h("div", { style: { color: "var(--dsw-alias-label-tertiary)", fontSize: "12.5px", padding: "8px 0" } }, "Working directory clean — no unstaged changes.") :
+              status.files.map(function (f) {
+                return h("div", {
+                  key: f.path,
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.03))",
+                    fontSize: "12.5px",
+                    fontFamily: "var(--ds-font-mono, monospace)",
+                  }
+                },
+                  h("span", { style: { color: "var(--dsw-alias-label-primary)" } }, f.path),
+                  h("span", {
+                    style: {
+                      fontSize: "11px",
+                      padding: "1px 6px",
+                      borderRadius: "4px",
+                      background: f.status === "added" ? "rgba(34, 197, 94, 0.2)" : (f.status === "untracked" ? "rgba(59, 130, 246, 0.2)" : "rgba(234, 179, 8, 0.2)"),
+                      color: f.status === "added" ? "#22c55e" : (f.status === "untracked" ? "#3b82f6" : "#eab308"),
+                      fontWeight: 600,
+                    }
+                  }, f.status)
+                );
+              })
+            )
+          ) : null,
+          activeTab === "history" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "8px", maxWidth: "800px" } },
+            log.map(function (c) {
+              return h("div", {
+                key: c.sha,
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.03))",
+                  border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.08))",
+                }
+              },
+                h("div", { style: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 } },
+                  h("span", { style: { fontSize: "13px", fontWeight: 500, color: "var(--dsw-alias-label-primary)" } }, c.message),
+                  h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, c.author + " • " + c.date)
+                ),
+                h("span", { style: { fontFamily: "var(--ds-font-mono, monospace)", fontSize: "12px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600 } }, c.sha)
+              );
+            })
+          ) : null,
+          activeTab === "branches" ? h("div", { style: { display: "flex", flexDirection: "column", gap: "6px", maxWidth: "600px" } },
+            branches.map(function (b) {
+              return h("div", {
+                key: b.name,
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  background: b.isCurrent ? "rgba(99, 102, 241, 0.15)" : "var(--dsw-alias-surface-l1, rgba(255,255,255,0.03))",
+                  border: b.isCurrent ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                }
+              },
+                h("span", { style: { fontSize: "13px", fontWeight: b.isCurrent ? 600 : 400, color: b.isCurrent ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-primary)" } }, (b.isCurrent ? "● " : "  ") + b.name),
+                b.isCurrent ? h("span", { style: { fontSize: "11px", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 600 } }, "Current") : null
+              );
+            })
+          ) : null
+        )
+      );
+    }
+
     function TopConversationTabBar(props) {
       var topPlusBtnRef = React.useRef(null);
       var plusOpenState = React.useState(false);
@@ -3101,11 +3583,34 @@ window.__ModuleLoader__.load({
             return curr;
           });
         };
+        var onOpenFileTab = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (prev.some(function (t) { return t.id === tab.id; })) return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        };
+        var onOpenRepoTab = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (prev.some(function (t) { return t.id === tab.id; })) return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        };
+
         window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
+        window.addEventListener("dsh:open-file-tab", onOpenFileTab);
+        window.addEventListener("dsh:open-repo-tab", onOpenRepoTab);
         return function () {
           window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
           window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
+          window.removeEventListener("dsh:open-file-tab", onOpenFileTab);
+          window.removeEventListener("dsh:open-repo-tab", onOpenRepoTab);
         };
       }, []);
 
@@ -3140,6 +3645,8 @@ window.__ModuleLoader__.load({
       var activeTabObj = tabs.find(function (t) { return t.id === activeTab; });
       var isMainTermActive = activeTabObj && activeTabObj.type === "terminal";
       var isMainContActive = activeTabObj && activeTabObj.type === "container";
+      var isMainFileActive = activeTabObj && activeTabObj.type === "file";
+      var isMainRepoActive = activeTabObj && activeTabObj.type === "repo";
       var isMainEmpty = tabs.length === 0;
 
       return h(
@@ -3165,14 +3672,17 @@ window.__ModuleLoader__.load({
           },
           tabs.map(function (t) {
             var isSel = activeTab === t.id;
-            var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) : (t.type === "container" ? h(ContainersGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }));
+            var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) :
+              (t.type === "container" ? h(ContainersGlyph, { size: 12 }) :
+              (t.type === "file" ? h(FileGlyph, { size: 12 }) :
+              (t.type === "repo" ? h(RepoGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }))));
             return h(
               "div",
               {
                 key: t.id,
                 draggable: true,
                 onDragStart: function (e) {
-                  e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: t.id, type: t.type, title: t.title, session: t.session, from: "top" }));
+                  e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: t.id, type: t.type, title: t.title, session: t.session, path: t.path, from: "top" }));
                 },
                 onClick: function () {
                   setActiveTab(t.id);
@@ -3338,7 +3848,9 @@ window.__ModuleLoader__.load({
           }
         }, h(EmptyAreaNewTabPicker, { areaName: "Main Area" })) : null,
         isMainTermActive ? h(MainViewTerminalOccupant, { sessionName: activeTabObj.session || activeTabObj.id, onClose: function () { removeTab(activeTabObj.id); } }) : null,
-        isMainContActive ? h(MainViewContainerOccupant, { onClose: function () { removeTab(activeTabObj.id); } }) : null
+        isMainContActive ? h(MainViewContainerOccupant, { onClose: function () { removeTab(activeTabObj.id); } }) : null,
+        isMainFileActive ? h(MainViewFileEditorOccupant, { filePath: activeTabObj.path, fileName: activeTabObj.title, onClose: function () { removeTab(activeTabObj.id); } }) : null,
+        isMainRepoActive ? h(MainViewRepoOccupant, { repoPath: activeTabObj.path, repoName: activeTabObj.title, onClose: function () { removeTab(activeTabObj.id); } }) : null
       );
     }
 
@@ -3444,6 +3956,82 @@ window.__ModuleLoader__.load({
       },
         h("rect", { x: "2", y: "7", width: "20", height: "14", rx: "2", ry: "2" }),
         h("path", { d: "M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" })
+      );
+    }
+
+    function AppGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-primary, #6366f1)"
+        }
+      },
+        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "4" }),
+        h("path", { d: "m9 16 3-8 3 8" }),
+        h("path", { d: "M10 13h4" })
+      );
+    }
+
+    function LibraryGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-warning, #f59e0b)"
+        }
+      },
+        h("path", { d: "m16 6 4 14" }),
+        h("path", { d: "M12 6v14" }),
+        h("path", { d: "M8 8v12" }),
+        h("path", { d: "M4 4v16" })
+      );
+    }
+
+    function BlueFolderGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "#3b82f6",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+        }
+      },
+        h("path", { d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" })
       );
     }
 
@@ -4253,6 +4841,8 @@ window.__ModuleLoader__.load({
             var chatsInDir = folderSessions[entry.path] || [];
             var isFolderEllipsisOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("folder::" + entry.path));
             var isVendorOrInternal = entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'lib' || entry.name === '.turbo';
+            var isApplications = entry.name === 'Applications' || entry.name.toLowerCase() === 'applications' || entry.name.endsWith('.app');
+            var isLibrary = entry.name === 'Library' || entry.name.toLowerCase() === 'library';
             var isWorkspace = !isVendorOrInternal && Boolean(workspaces && workspaces.some(function (w) {
               var wPath = w.path || w.cwd;
               if (!wPath) return false;
@@ -4261,7 +4851,7 @@ window.__ModuleLoader__.load({
               if (ePath && ePath.length > 1 && ePath.endsWith("/")) ePath = ePath.slice(0, -1);
               return wPath === ePath && ePath !== "/Users/user";
             }));
-            var isRepo = !isVendorOrInternal && Boolean(entry.isRepo || entry.name === 'dsh-stack');
+            var isRepo = !isVendorOrInternal && Boolean(entry.isRepo || entry.name === 'dsh-stack' || isWorkspace);
 
             return h(
               "div",
@@ -4271,9 +4861,13 @@ window.__ModuleLoader__.load({
                 {
                   className: "dsh-tree-projectRow",
                   role: "treeitem",
-                  style: { position: "relative", paddingLeft: itemLeftPad + "px" },
+                  style: { position: "relative", paddingLeft: itemLeftPad + "px", height: "28px" },
                   "aria-expanded": isExp,
                   onClick: function () { toggleExpand(entry.path); },
+                  onDoubleClick: isRepo ? function (e) {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("dsh:open-repo-tab", { detail: { id: "repo::" + entry.path, type: "repo", title: entry.name, path: entry.path } }));
+                  } : undefined,
                   onContextMenu: function (e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -4281,11 +4875,15 @@ window.__ModuleLoader__.load({
                   },
                 },
                 h("span", { className: "dsh-tree-slot dsh-tree-icon" },
-                  isRepo
-                    ? h(RepoGlyph, { size: 15 })
-                    : (isWorkspace
-                      ? h(WorkspaceGlyph, { size: 15 })
-                      : (isExp ? h(P.IconFolderOpen16, { size: 15 }) : h(P.IconFolderClose16, { size: 15 })))
+                  isApplications
+                    ? h(AppGlyph, { size: 15 })
+                    : (isLibrary
+                      ? h(LibraryGlyph, { size: 15 })
+                      : (isRepo
+                        ? h(RepoGlyph, { size: 15 })
+                        : (isWorkspace
+                          ? h(WorkspaceGlyph, { size: 15 })
+                          : (isExp ? h(P.IconFolderOpen16, { size: 15 }) : h(P.IconFolderClose16, { size: 15 })))))
                 ),
                 h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
                   h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""), size: 11 })
@@ -4324,15 +4922,18 @@ window.__ModuleLoader__.load({
                     position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
                     onClose: function () { setEllipsisOpen(null); },
                     items: [
+                      isRepo ? { id: "open-repo-tab", label: "Open Repository in Tab", icon: h(RepoGlyph, { size: 13 }) } : null,
                       { id: "set-root", label: "Focus Directory as Root", icon: h(P.IconFolderOpen16, { size: 13 }) },
                       { id: "open-term", label: "Open Terminal Here", icon: h(TerminalsGlyph, { size: 13 }) },
                       { id: "cut", label: "Cut Folder", icon: h(CutGlyph, { size: 13 }) },
                       { id: "copy-path", label: "Copy Path", icon: h(CopyGlyph, { size: 13 }) },
                       { id: "rename", label: "Rename Folder", icon: h(EditGlyph, { size: 13 }) },
                       { id: "delete", label: "Delete Folder", icon: h(TrashGlyph, { size: 13 }), danger: true },
-                    ],
+                    ].filter(Boolean),
                     onSelect: function (actionId) {
-                      if (actionId === "set-root") {
+                      if (actionId === "open-repo-tab") {
+                        window.dispatchEvent(new CustomEvent("dsh:open-repo-tab", { detail: { id: "repo::" + entry.path, type: "repo", title: entry.name, path: entry.path } }));
+                      } else if (actionId === "set-root") {
                         setCurrentRoot(entry.path);
                         var exp = {}; exp[entry.path] = true;
                         setExpandedPaths(exp);
@@ -4377,17 +4978,22 @@ window.__ModuleLoader__.load({
           }
 
           // File Row (aligned at itemLeftPad)
+          var isAppFile = entry.name.endsWith('.app') || entry.name.endsWith('.exe') || entry.name.endsWith('.dmg') || entry.name.endsWith('.pkg');
           return h(
             "div",
             {
               key: entry.path,
               className: "dsh-tree-sessionRow",
               role: "treeitem",
-              style: { paddingLeft: itemLeftPad + "px", height: "26px" },
-              onClick: function () { setFileViewer({ path: entry.path, name: entry.name }); },
+              style: { paddingLeft: itemLeftPad + "px", height: "28px" },
+              onClick: function () {
+                window.dispatchEvent(new CustomEvent("dsh:open-file-tab", {
+                  detail: { id: "file::" + entry.path, type: "file", title: entry.name, path: entry.path }
+                }));
+              },
             },
-            h("span", { className: "dsh-tree-slot", style: { width: "14px", color: "var(--dsw-alias-label-tertiary)" } },
-              h(FileGlyph, { size: 13 })
+            h("span", { className: "dsh-tree-slot", style: { width: "14px", color: isAppFile ? "var(--dsw-alias-primary)" : "var(--dsw-alias-label-tertiary)" } },
+              isAppFile ? h(AppGlyph, { size: 13 }) : h(FileGlyph, { size: 13 })
             ),
             h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px", marginLeft: "4px" }, title: entry.path }, entry.name)
           );
@@ -4399,6 +5005,9 @@ window.__ModuleLoader__.load({
         var q = searchQuery.trim().toLowerCase();
         return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
       });
+
+      var ungroupedMenuState = React.useState(false);
+      var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
 
       return h(
         "div",
@@ -4477,10 +5086,10 @@ window.__ModuleLoader__.load({
             {
               className: "dsh-tree-projectRow",
               role: "treeitem",
-              style: { position: "relative", paddingLeft: "8px", fontWeight: 600 },
+              style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
               onClick: function () { setIsUngroupedOpen(!isUngroupedOpen); },
             },
-            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(ChatGlyph, { size: 14 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(BlueFolderGlyph, { size: 14 })),
             h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
               h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isUngroupedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
@@ -4496,7 +5105,30 @@ window.__ModuleLoader__.load({
                 className: "dsh-tree-actionBtn",
                 title: "New Session",
                 onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
-              }, h(P.IconPlusOutline16, { size: 13 }))
+              }, h(P.IconPlusOutline16, { size: 13 })),
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "Ungrouped Actions (…)",
+                onClick: function (e) { e.stopPropagation(); setUngroupedMenuOpen(!isUngroupedMenuOpen); }
+              }, h(P.IconEllipsisOutline16, { size: 13 })),
+              h(SelectDropdownMenu, {
+                open: isUngroupedMenuOpen,
+                onClose: function () { setUngroupedMenuOpen(false); },
+                items: [
+                  { id: "archive-empty", label: "Archive Empty & Pong Sessions", icon: h(TrashGlyph, { size: 13 }), danger: true },
+                ],
+                onSelect: function (act) {
+                  if (act === "archive-empty") {
+                    fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
+                      .then(function (r) { return r.json(); })
+                      .then(function (res) {
+                        alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
+                        window.location.reload();
+                      });
+                  }
+                }
+              })
             )
           ),
           isUngroupedOpen ? h(
@@ -4508,7 +5140,7 @@ window.__ModuleLoader__.load({
                 {
                   key: "live::term::" + s.name,
                   className: "dsh-tree-sessionRow",
-                  style: { height: "28px", paddingLeft: "16px" },
+                  style: { height: "28px", paddingLeft: "24px" },
                   onClick: function () {
                     window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: s.name } }));
                   },
@@ -4524,7 +5156,7 @@ window.__ModuleLoader__.load({
                 {
                   key: "live::cont::" + c.id,
                   className: "dsh-tree-sessionRow",
-                  style: { height: "28px", paddingLeft: "16px" },
+                  style: { height: "28px", paddingLeft: "24px" },
                   onClick: function () {
                     window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: c.id } }));
                   },
@@ -4535,8 +5167,8 @@ window.__ModuleLoader__.load({
               );
             }),
             filteredUngroupedSessions.length > 0
-              ? filteredUngroupedSessions.map(function (chat) { return renderChatRow(chat, 8); })
-              : ((totalLive === 0) ? h("div", { style: { padding: "4px 8px 4px 28px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, searchQuery ? "(no matching sessions)" : "(no ungrouped sessions)") : null)
+              ? filteredUngroupedSessions.map(function (chat) { return renderChatRow(chat, 16); })
+              : ((totalLive === 0) ? h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, searchQuery ? "(no matching sessions)" : "(no ungrouped sessions)") : null)
           ) : null
         ),
 

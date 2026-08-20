@@ -455,7 +455,7 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
               let isRepo = false
               if (isDir && !isVendor) {
                 try {
-                  isRepo = fs.existsSync(path.join(full, '.git'))
+                  isRepo = fs.existsSync(path.join(full, '.git')) || fs.existsSync(path.join(full, '.github')) || fs.existsSync(path.join(full, '.gitmodules'))
                 } catch {}
               }
               entries.push({
@@ -484,7 +484,7 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
         return
       }
 
-      // GET /quotas/api/fs/read — Read file contents for inspector/preview
+      // GET /quotas/api/fs/read — Read file contents for inspector/preview/monaco
       if (pathname === `${QUOTAS_PREFIX}/api/fs/read` && req.method === 'GET') {
         const rawPath = url.searchParams.get('path') || ''
         if (!rawPath) {
@@ -495,15 +495,199 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
         try {
           const stat = fs.statSync(targetPath)
           if (stat.isDirectory()) {
-            sendJson(res, 400, { error: 'Path is a directory, not a file' })
+            sendJson(res, 200, { path: targetPath, name: path.basename(targetPath), isDirectory: true, content: '' })
             return
           }
-          if (stat.size > 1024 * 1024) {
-            sendJson(res, 200, { path: targetPath, name: path.basename(targetPath), size: stat.size, content: '(File exceeds 1MB preview limit)', isTruncated: true })
+          if (stat.size > 2 * 1024 * 1024) {
+            sendJson(res, 200, { path: targetPath, name: path.basename(targetPath), size: stat.size, content: '(File exceeds 2MB preview limit)', isTruncated: true })
             return
           }
           const content = fs.readFileSync(targetPath, 'utf-8')
-          sendJson(res, 200, { path: targetPath, name: path.basename(targetPath), size: stat.size, content })
+          sendJson(res, 200, { path: targetPath, name: path.basename(targetPath), size: stat.size, content, isDirectory: false })
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message })
+        }
+        return
+      }
+
+      // POST /quotas/api/fs/write — Save file contents from monaco editor
+      if (pathname === `${QUOTAS_PREFIX}/api/fs/write` && req.method === 'POST') {
+        let bodyStr = ''
+        req.on('data', (chunk) => { bodyStr += chunk })
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(bodyStr || '{}')
+            const targetPath = path.resolve(data.path || '')
+            if (!targetPath) {
+              sendJson(res, 400, { error: 'Invalid path' })
+              return
+            }
+            fs.writeFileSync(targetPath, data.content || '', 'utf-8')
+            sendJson(res, 200, { success: true, path: targetPath, size: Buffer.byteLength(data.content || '', 'utf-8') })
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message })
+          }
+        })
+        return
+      }
+
+      // GET /quotas/api/git/status — Git status for repository workbench tab
+      if (pathname === `${QUOTAS_PREFIX}/api/git/status` && req.method === 'GET') {
+        const repoPath = url.searchParams.get('path') || ''
+        if (!repoPath) {
+          sendJson(res, 400, { error: 'path parameter required' })
+          return
+        }
+        try {
+          const raw = execSync('git status --porcelain=v1 -b', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+          const lines = raw.split('\n')
+          let branch = 'HEAD'
+          let ahead = 0
+          let behind = 0
+          const files: Array<{ code: string; path: string; staged: boolean; status: string }> = []
+          for (const line of lines) {
+            if (line.startsWith('## ')) {
+              const bInfo = line.slice(3)
+              const match = bInfo.match(/^([^.\s]+)/)
+              if (match && match[1]) branch = match[1]
+              const aheadMatch = bInfo.match(/ahead (\d+)/)
+              if (aheadMatch && aheadMatch[1]) ahead = parseInt(aheadMatch[1], 10)
+              const behindMatch = bInfo.match(/behind (\d+)/)
+              if (behindMatch && behindMatch[1]) behind = parseInt(behindMatch[1], 10)
+            } else if (line.length >= 4) {
+              const x = line[0]
+              const y = line[1]
+              const fPath = line.slice(3).trim()
+              const staged = x !== ' ' && x !== '?'
+              let status = 'modified'
+              if (x === '?' || y === '?') status = 'untracked'
+              else if (x === 'A' || y === 'A') status = 'added'
+              else if (x === 'D' || y === 'D') status = 'deleted'
+              files.push({ code: line.slice(0, 2), path: fPath, staged, status })
+            }
+          }
+          sendJson(res, 200, { repoPath, branch, ahead, behind, files })
+        } catch (err) {
+          sendJson(res, 200, { repoPath, branch: 'unknown', ahead: 0, behind: 0, files: [], error: (err as Error).message })
+        }
+        return
+      }
+
+      // GET /quotas/api/git/log — Recent commits for repository workbench tab
+      if (pathname === `${QUOTAS_PREFIX}/api/git/log` && req.method === 'GET') {
+        const repoPath = url.searchParams.get('path') || ''
+        try {
+          const raw = execSync('git log -n 25 --pretty=format:"%h%x09%an%x09%ar%x09%s"', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+          const commits = raw ? raw.split('\n').map((l) => {
+            const parts = l.split('\t')
+            return { sha: parts[0] || '', author: parts[1] || '', date: parts[2] || '', message: parts[3] || '' }
+          }) : []
+          sendJson(res, 200, { repoPath, commits })
+        } catch (err) {
+          sendJson(res, 200, { repoPath, commits: [], error: (err as Error).message })
+        }
+        return
+      }
+
+      // GET /quotas/api/git/branches — Branch list
+      if (pathname === `${QUOTAS_PREFIX}/api/git/branches` && req.method === 'GET') {
+        const repoPath = url.searchParams.get('path') || ''
+        try {
+          const raw = execSync('git branch -a', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+          let current = 'main'
+          const branches = raw ? raw.split('\n').map((b) => {
+            const isCurrent = b.startsWith('*')
+            const name = b.replace(/^[* ]+/, '').trim()
+            if (isCurrent) current = name
+            return { name, isCurrent }
+          }) : []
+          sendJson(res, 200, { repoPath, current, branches })
+        } catch (err) {
+          sendJson(res, 200, { repoPath, current: 'main', branches: [], error: (err as Error).message })
+        }
+        return
+      }
+
+      // POST /quotas/api/git/commit — Commit changes
+      if (pathname === `${QUOTAS_PREFIX}/api/git/commit` && req.method === 'POST') {
+        let bodyStr = ''
+        req.on('data', (c) => { bodyStr += c })
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(bodyStr || '{}')
+            const repoPath = data.path
+            const msg = data.message || 'Update'
+            execSync('git add -A', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+            const out = execSync(`git commit -m ${JSON.stringify(msg)}`, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+            sendJson(res, 200, { success: true, output: out })
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message })
+          }
+        })
+        return
+      }
+
+      // POST /quotas/api/git/push — Push commits
+      if (pathname === `${QUOTAS_PREFIX}/api/git/push` && req.method === 'POST') {
+        let bodyStr = ''
+        req.on('data', (c) => { bodyStr += c })
+        req.on('end', () => {
+          try {
+            const data = JSON.parse(bodyStr || '{}')
+            const repoPath = data.path
+            const out = execSync('git push', { cwd: repoPath, encoding: 'utf-8', timeout: 15000 }).trim()
+            sendJson(res, 200, { success: true, output: out })
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message })
+          }
+        })
+        return
+      }
+
+      // POST /quotas/api/sessions/archive-pong — Archive empty and pong sessions
+      if (pathname === `${QUOTAS_PREFIX}/api/sessions/archive-pong` && req.method === 'POST') {
+        try {
+          const wsFile = path.join(os.homedir(), '.agents/storages/workspace.json')
+          let archivedCount = 0
+          if (fs.existsSync(wsFile)) {
+            const ws = JSON.parse(fs.readFileSync(wsFile, 'utf8'))
+            const archived = new Set(ws.global?.archivedSessionIds || [])
+            const workspaces = ws.tables?.workspaces || {}
+            for (const [wId, w] of Object.entries(workspaces)) {
+              const activeIds = (w as { sessionIds?: string[] }).sessionIds || []
+              const toKeep: string[] = []
+              for (const id of activeIds) {
+                let isEmpty = true
+                for (const sub of ['--Users-user--', '--Users-user-Projects-dsh-stack--', '--Users-user-agents--']) {
+                  const fPath = path.join(os.homedir(), '.agents/sessions', sub, id, 'session.jsonl.zstd')
+                  if (fs.existsSync(fPath)) {
+                    try {
+                      const zlib = require('node:zlib')
+                      const compressed = fs.readFileSync(fPath)
+                      const decomp = zlib.zstdDecompressSync(compressed)
+                      const lines = decomp.toString('utf8').trim().split('\n')
+                      if (lines.length > 1) {
+                        const text = decomp.toString('utf8').toLowerCase()
+                        if (!text.includes('pong') && !text.includes('ping')) {
+                          isEmpty = false
+                        }
+                      }
+                    } catch {}
+                  }
+                }
+                if (isEmpty) {
+                  archived.add(id)
+                  archivedCount++
+                } else {
+                  toKeep.push(id)
+                }
+              }
+              (w as { sessionIds?: string[] }).sessionIds = toKeep
+            }
+            ws.global.archivedSessionIds = Array.from(archived)
+            fs.writeFileSync(wsFile, JSON.stringify(ws, null, 2), 'utf8')
+          }
+          sendJson(res, 200, { success: true, archivedCount })
         } catch (err) {
           sendJson(res, 500, { error: (err as Error).message })
         }

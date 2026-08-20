@@ -217,8 +217,36 @@ button[class*="AgentPresetLabel"] {
 [data-slot="conversation.session.header.actions"] [data-slot-id="subagent-catalog"],
 [class*="headerActions"] [class*="SubagentCatalog"],
 [class*="headerActions"] [class*="subagent"] {
-  display: none !important;
+/* Agent / Assistant Message Bubbles (differentiated surface color, rounded 20px) */
+div[data-slot="conversation.message.turn"]:has([data-message-role="assistant"]),
+div[class*="messageTurn"]:has([data-message-role="assistant"]),
+div[class*="MessageTurn"]:has([data-message-role="assistant"]),
+div[class*="messageWrapper"][data-role="assistant"],
+div[data-slot="conversation.message.assistant"] {
+  align-self: flex-start !important;
+  max-width: 90% !important;
 }
+
+[data-message-role="assistant"] > div[class*="content"],
+[data-message-role="assistant"] [class*="Message_bubble"],
+[data-message-role="assistant"] [class*="bubble"],
+[data-slot="conversation.message.assistant"] [class*="content"] {
+  background: var(--dsw-alias-surface-l1, rgba(255, 255, 255, 0.045)) !important;
+  border: 1px solid var(--dsw-alias-border-l1, rgba(128, 128, 128, 0.14)) !important;
+  border-radius: 20px !important;
+  padding: 14px 18px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  color: var(--dsw-alias-label-primary) !important;
+}
+
+[data-message-role="user"] > div[class*="content"],
+[data-message-role="user"] [class*="Message_bubble"],
+[data-message-role="user"] [class*="bubble"],
+[data-slot="conversation.message.user"] [class*="content"] {
+  border-radius: 20px !important;
+  padding: 12px 18px !important;
+}
+
 .dsh-subagent-dock-row:hover {
   background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
 }
@@ -695,6 +723,59 @@ window.__ModuleLoader__.load({
       var collapsed = props.collapsed, width = props.width, startSession = props.startSession;
       var toggleSidebar = props.toggleSidebar, t = props.t, renderSlot = props.renderSlot;
       var useSessions = props.useSessions;
+
+      var customWidthState = React.useState(function () {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          var saved = window.localStorage.getItem('dsh_sidebar_width');
+          if (saved) {
+            var num = parseInt(saved, 10);
+            if (!isNaN(num) && num >= 160 && num <= 600) return num;
+          }
+        }
+        return width || 240;
+      });
+      var customWidth = customWidthState[0], setCustomWidth = customWidthState[1];
+
+      React.useEffect(function () {
+        if (typeof document !== 'undefined') {
+          document.documentElement.style.setProperty('--dsh-sidebar-width', (collapsed ? 56 : customWidth) + 'px');
+        }
+      }, [customWidth, collapsed]);
+
+      React.useEffect(function () {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('dsh_sidebar_collapsed', collapsed ? 'true' : 'false');
+        }
+      }, [collapsed]);
+
+      var isResizingRef = React.useRef(false);
+      var handleStartResize = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isResizingRef.current = true;
+        var startX = e.clientX;
+        var startW = customWidth;
+
+        var onMouseMove = function (moveEvent) {
+          if (!isResizingRef.current) return;
+          var delta = moveEvent.clientX - startX;
+          var newW = Math.min(600, Math.max(160, startW + delta));
+          setCustomWidth(newW);
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('dsh_sidebar_width', String(newW));
+          }
+        };
+
+        var onMouseUp = function () {
+          isResizingRef.current = false;
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      };
+
       var settledState = React.useState(collapsed);
       var settled = settledState[0], setSettled = settledState[1];
       React.useEffect(function () {
@@ -704,8 +785,8 @@ window.__ModuleLoader__.load({
       }, [collapsed]);
       var wide = !collapsed || !settled;
 
-      var lastWideWidth = React.useRef(width);
-      if (!collapsed) lastWideWidth.current = width;
+      var lastWideWidth = React.useRef(customWidth);
+      if (!collapsed) lastWideWidth.current = customWidth;
 
       var everWide = React.useRef(!collapsed);
       if (!collapsed) everWide.current = true;
@@ -783,7 +864,7 @@ window.__ModuleLoader__.load({
       if (!wide && everWide.current) className += ' dsh-tw-railIn';
       if (collapsed && wide) className += ' dsh-tw-fading';
       if (!pointerInside) className += ' dsh-tw-quietBars';
-      var style = wide ? { width: collapsed ? lastWideWidth.current : width } : undefined;
+      var style = wide ? { width: collapsed ? 56 : customWidth } : undefined;
 
       return h('div', {
         ref: column,
@@ -792,6 +873,20 @@ window.__ModuleLoader__.load({
         onPointerEnter: function () { cancelLinger(); setPointerInside(true); },
         onPointerLeave: function () { armLinger(); },
       },
+        wide ? h('div', {
+          className: 'dsh-sidebar-resizer',
+          style: {
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: '4px',
+            cursor: 'col-resize',
+            zIndex: 100,
+            transition: 'background 120ms',
+          },
+          onMouseDown: handleStartResize,
+        }) : null,
         h('div', { className: 'dsh-tw-logoRow' },
           wide
             ? h('button', { type: 'button', className: 'dsh-tw-brand dsh-tw-wide', 'aria-label': t('session.new.label'), onClick: function () { startSession(); } }, h(P.BrandWordmark))
@@ -1890,13 +1985,19 @@ window.__ModuleLoader__.load({
           var cId = entry.childSessionId || entry.id;
           var summary = summaries[cId] || {};
           var title = summary.displayTitle || summary.title || entry.name || entry.role || ('Subagent ' + (cId ? cId.slice(0, 6) : ''));
+          var role = (entry.role || entry.mode || summary.role || summary.mode || 'subagent').toLowerCase();
           var isRunning = entry.activity === 'running' || summary.status === 'running';
+          var tokens = summary.usage ? (summary.usage.totalTokens || summary.usage.outputTokens) : null;
+          var tokenStr = tokens ? (tokens > 1000 ? (tokens / 1000).toFixed(1) + 'k tokens' : tokens + ' tokens') : '';
+
           if (isRunning) runningCount++;
           else completedCount++;
           return {
             id: cId,
             title: title,
+            role: role,
             isRunning: isRunning,
+            tokenStr: tokenStr,
             address: entry.address || { parentSessionId: sessionId, childSessionId: cId },
           };
         });
@@ -1906,6 +2007,19 @@ window.__ModuleLoader__.load({
         if (completedCount > 0) progressParts.push(completedCount + ' completed');
         var progressStr = progressParts.join(' · ') || (childList.length + ' subagents');
 
+        var getRoleBadgeStyle = function (role) {
+          if (role.indexOf('plan') !== -1 || role.indexOf('reason') !== -1) {
+            return { bg: 'rgba(99, 102, 241, 0.15)', color: '#818cf8' };
+          } else if (role.indexOf('exec') !== -1) {
+            return { bg: 'rgba(34, 197, 94, 0.15)', color: '#4ade80' };
+          } else if (role.indexOf('research') !== -1) {
+            return { bg: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' };
+          } else if (role.indexOf('orch') !== -1) {
+            return { bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' };
+          }
+          return { bg: 'rgba(128, 128, 128, 0.15)', color: 'var(--dsw-alias-label-secondary)' };
+        };
+
         return h('section', {
           className: 'dsh-subagents-dock',
           style: {
@@ -1913,7 +2027,7 @@ window.__ModuleLoader__.load({
             flex: 'none',
             overflow: 'hidden',
             margin: '0 auto 6px auto',
-            width: 'calc(100% - 24px)',
+            width: '100%',
             maxWidth: '776px',
             border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))',
             borderRadius: '12px',
@@ -1928,7 +2042,7 @@ window.__ModuleLoader__.load({
               gap: '10px',
               width: '100%',
               height: '36px',
-              padding: '0 12px',
+              padding: '4px 5px 4px 12px',
               border: 'none',
               background: 'transparent',
               cursor: 'pointer',
@@ -1965,13 +2079,14 @@ window.__ModuleLoader__.load({
             },
           },
             childList.map(function (sub) {
+              var badge = getRoleBadgeStyle(sub.role);
               return h('div', {
                 key: sub.id,
                 style: {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '4px 8px',
+                  padding: '5px 8px',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontSize: '12.5px',
@@ -1992,10 +2107,24 @@ window.__ModuleLoader__.load({
                     borderRadius: '50%',
                     backgroundColor: sub.isRunning ? 'var(--dsw-alias-state-success-primary, #22c55e)' : 'var(--dsw-alias-label-tertiary, #888)',
                     boxShadow: sub.isRunning ? '0 0 6px rgba(34,197,94,0.6)' : 'none',
+                    flexShrink: 0,
                   },
                 }),
+                h('span', {
+                  style: {
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    fontSize: '10.5px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    background: badge.bg,
+                    color: badge.color,
+                    flexShrink: 0,
+                  }
+                }, sub.role),
                 h('span', { style: { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, sub.title),
-                h('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-tertiary)' } }, sub.isRunning ? 'running' : 'completed')
+                sub.tokenStr ? h('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-tertiary)', flexShrink: 0 } }, sub.tokenStr) : null,
+                h('span', { style: { fontSize: '11px', color: sub.isRunning ? '#4ade80' : 'var(--dsw-alias-label-tertiary)', flexShrink: 0 } }, sub.isRunning ? 'running' : 'done')
               );
             })
           ) : null
