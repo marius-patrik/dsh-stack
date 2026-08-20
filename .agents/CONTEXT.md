@@ -2156,7 +2156,29 @@ the repo tab should show all data this isnt enough full parity with github websi
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
 
+## Session 37 — August 20, 2026 (Fix Settings Modal: Empty Tabs & Double Dialog)
 
+**Context & User Directives:**
+User report: `plugins and general settings tab are empty and there seems to be a second modal behind it`
 
+**Root Cause Analysis:**
+Two bugs found via CDP browser automation with console error capture:
 
+1. **Double dialog (`modalCount: 2`)**: The harness `P.Modal` component (`ui-primitives/Modal.tsx`) creates a portal with `role="dialog"` on its card div. Our `SettingsPanel` div also declared `role: 'dialog'` and `aria-modal: 'true'`, producing two stacked dialog elements and a visible "second modal behind."
+
+2. **Empty section content (`settings.general.item is not declared`)**: In `SettingsPanel`, the `renderSlot('settings.section', { close, openSection, renderSlot })` call passed the *parent's* `renderSlot` as an extra prop. This shadowed the slot system's own `renderSlot` — the one bound to each entry's declared children. So when `GeneralSection` called `props.renderSlot('settings.general.item', {})`, it was using the parent `sidebar.settings` renderSlot which doesn't know about `settings.general.item`, causing the slot system to throw `Er: slot 'settings.general.item' is not declared by this entry's children`. Same crash for `PluginsSettingsSection` calling `renderSlot('settings.plugins.tab', ...)`.
+
+**Fixes Applied (`dsh-tweaks/client.js`):**
+1. Removed `role: 'dialog'` and `aria-modal: 'true'` from the `SettingsPanel` container div (line 1703). The harness `P.Modal` already provides these attributes.
+2. Removed `renderSlot: renderSlot` from the extra props passed to `renderSlot('settings.section', ...)` (line 1755). The slot system now correctly provides each entry's own `renderSlot` bound to its declared children.
+
+**Verification (CDP browser automation):**
+- `modalCount: 1` — single dialog, no second modal visible.
+- General tab content: renders agent preset, permission mode, language, enter behavior, and all 3 custom dsh-tweaks toggles (Sidebar Search Bar, Swap Sidebars, Internal Testing Notice).
+- Plugins tab content: renders "Plugins" heading, intro text, and all 3 plugin cards (Shell, Agent loop, Web search).
+- Accounts tab content: renders Accounts & Credentials with probe health buttons.
+- Console errors during test: **NONE (clean!)**.
+- All 16 plugins passed `check-plugin.mjs`.
+
+**Status:** completed.
 

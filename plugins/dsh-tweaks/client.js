@@ -1702,8 +1702,6 @@ window.__ModuleLoader__.load({
 
       return h('div', {
         className: 'dsh-tw-panel',
-        role: 'dialog',
-        'aria-modal': 'true',
         'aria-labelledby': titleId,
         style: {
           transform: 'translate(' + dialogPos.x + 'px, ' + dialogPos.y + 'px)',
@@ -1754,7 +1752,7 @@ window.__ModuleLoader__.load({
             active !== undefined && typeof renderSlot === 'function'
               ? (function () {
                   try {
-                    return renderSlot('settings.section', { close: onClose, openSection: openSection, renderSlot: renderSlot }, { only: active });
+                    return renderSlot('settings.section', { close: onClose, openSection: openSection }, { only: active });
                   } catch (e) {
                     console.warn('Failed rendering settings section ' + active, e);
                     return h('div', { style: { padding: '20px', color: 'var(--dsw-alias-state-error-primary)' } }, 'Section ' + active + ' unavailable');
