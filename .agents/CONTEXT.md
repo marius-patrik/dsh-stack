@@ -2001,3 +2001,30 @@ User prompt: `/plan closing and opening the sidebar makes it show the native one
    - Full-width button in expanded mode and centered 36×36 icon button with tooltip in rail mode.
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+
+## Session 33 — August 20, 2026 (Icon Colors, Repo Tab Backend, Trajectory View Switcher, Settings Modal, & Sidebar Simplification)
+
+**Context & User Directives:**
+User prompt: `library and applications folder should be grey and ungrouped folder should use the app wide color blurple thats used on the repo and so on icons, the repo tab isnt showing any data and, the switch to trajectory view button doesnt work, settings button still doesnt work, get rid of the custom search input bar, keep the native buttons in the sidebar get rid of any active and live section code`
+
+**Implementation & Fixes:**
+1. **Neutral Grey Icons for Applications & Library Folders**:
+   - Updated `AppGlyph` and `LibraryGlyph` in `plugins/dsh-providers/client.js` from colored fills to neutral grey (`var(--dsw-alias-label-secondary, #888888)`), matching standard directory iconography.
+2. **Blurple Color for Ungrouped Folder**:
+   - Updated `BlueFolderGlyph` to use `color: "var(--dsw-alias-primary, #6366f1)"` with `stroke: "currentColor"`, matching the primary brand color used on repositories and active items.
+3. **Live Data for Repository Workbench Tab**:
+   - Compiled `plugins/dsh-providers` TypeScript sources into `lib/` and restarted the `dsh` web server (PID 93893).
+   - Verified that `/quotas/api/git/status`, `/quotas/api/git/log`, and `/quotas/api/git/branches` return live git status, diff files, branch list, and commit history.
+4. **Trajectory View Switcher Fix**:
+   - Removed the `display: none !important` override on `[class*="tabs"][role="tablist"]` in `plugins/dsh-tweaks/client.js` and added clean tab pill styling.
+   - Updated `handleToggleView()` in `SessionHeaderUtilities` to programmatically trigger tab switching on the native session view tabs and dispatch the session view state.
+5. **Settings Button & Modal Activation Fix**:
+   - Added robust default fallback sections (`general`, `models`, `providers`, `keybinds`, `themes`, `formatters`, `lsp`, `tools`, `agents`, `repos`, `actions`, `voice`) in `TweaksSettingsRoot` if `useSections` returns empty.
+   - Verified modal rendering via `P.Modal` (`className: 'dsh-tw-panel'`) with 840px width and proper click event handling.
+6. **Removed Custom Search Input Bar**:
+   - Removed the custom search input box from `UnifiedWorkspacesBrowser` in the sidebar explorer.
+7. **Removed Active/Live Processes from Sidebar**:
+   - Removed live tmux terminal rows and container instances from the Ungrouped section in `UnifiedWorkspacesBrowser`, keeping only genuine chat conversations in Ungrouped and explorer folders.
+
+**Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+

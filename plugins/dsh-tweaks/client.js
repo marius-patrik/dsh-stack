@@ -207,16 +207,40 @@ div[class*="AgentPresetLabel"],
 button[class*="AgentPresetLabel"] {
   display: none !important;
 }
-/* Hide conversation header tabs (Chat / Trajectory) — view switcher is housed in 3-dots */
-[class*="ConversationSession_tabs"],
-[class*="tabs"][role="tablist"] {
-  display: none !important;
-}
 /* Hide header subagent catalog from session header actions */
 [data-slot="conversation.session.header.actions"] [data-slot-entry="subagent-catalog"],
 [data-slot="conversation.session.header.actions"] [data-slot-id="subagent-catalog"],
 [class*="headerActions"] [class*="SubagentCatalog"],
 [class*="headerActions"] [class*="subagent"] {
+  display: none !important;
+}
+
+/* Conversation Header View Tabs (Chat / Trajectory) */
+[class*="tabs"][role="tablist"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+[class*="tabs"][role="tablist"] button[role="tab"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 3px 10px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--dsw-alias-label-secondary) !important;
+  transition: all 120ms ease !important;
+}
+[class*="tabs"][role="tablist"] button[role="tab"][aria-selected="true"] {
+  background: var(--dsw-alias-interactive-bg-active, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--dsw-alias-label-primary) !important;
+  font-weight: 600 !important;
+}
+
 /* Agent / Assistant Message Bubbles (differentiated surface color, rounded 20px) */
 div[data-slot="conversation.message.turn"]:has([data-message-role="assistant"]),
 div[class*="messageTurn"]:has([data-message-role="assistant"]),
@@ -1537,6 +1561,24 @@ window.__ModuleLoader__.load({
       var rawRows = [];
       if (typeof useSections === 'function') {
         try { rawRows = useSections(function (s) { return s; }) || []; } catch (err) {}
+      } else if (props && Array.isArray(props.sections)) {
+        rawRows = props.sections;
+      }
+      if (!rawRows || rawRows.length === 0) {
+        rawRows = [
+          { id: 'general', label: 'General', order: 0 },
+          { id: 'models', label: 'Models', order: 10 },
+          { id: 'providers', label: 'Providers & Quotas', order: 20 },
+          { id: 'keybinds', label: 'Keybinds', order: 35 },
+          { id: 'themes', label: 'Themes', order: 40 },
+          { id: 'formatters', label: 'Formatters', order: 50 },
+          { id: 'lsp', label: 'Language Servers', order: 60 },
+          { id: 'tools', label: 'Tools', order: 70 },
+          { id: 'agents', label: 'Agents', order: 80 },
+          { id: 'repos', label: 'Repositories', order: 90 },
+          { id: 'actions', label: 'Actions', order: 100 },
+          { id: 'voice', label: 'Voice', order: 110 },
+        ];
       }
       var SUPPRESSED_SECTIONS = new Set(['provider-status', 'provider-usage', 'keychain', 'integrations']);
       var rows = rawRows.filter(function (r) { return r && !SUPPRESSED_SECTIONS.has(r.id); });
@@ -1586,7 +1628,10 @@ window.__ModuleLoader__.load({
             'aria-expanded': open,
             'data-action': 'open-settings',
             title: 'Settings',
-            onClick: function () { setOpen(true); },
+            onClick: function (e) {
+              if (e) { e.preventDefault(); e.stopPropagation(); }
+              setOpen(true);
+            },
           },
             (renderSlot && typeof renderSlot === 'function')
               ? renderSlot('settings.trigger', { wide: true })
@@ -1603,7 +1648,10 @@ window.__ModuleLoader__.load({
                 'aria-expanded': open,
                 'data-action': 'open-settings',
                 'aria-label': 'Settings',
-                onClick: function () { setOpen(true); },
+                onClick: function (e) {
+                  if (e) { e.preventDefault(); e.stopPropagation(); }
+                  setOpen(true);
+                },
               },
                 h(P.IconSettingsOutline16, { size: 18 })
               )
@@ -1614,6 +1662,7 @@ window.__ModuleLoader__.load({
             onClose: close,
             headless: true,
             title: 'Settings',
+            className: 'dsh-tw-panel',
           }, h(SettingsPanel, { rows: rows, renderSlot: renderSlot, activeId: activeId, onSelect: setActiveId, onClose: close, openSection: openSection }))
           : null,
         (onboardingStep !== undefined && renderSlot && typeof renderSlot === 'function')
@@ -1847,6 +1896,16 @@ window.__ModuleLoader__.load({
         var handleToggleView = function () {
           setMenuOpen(false);
           var nextView = isTrajectory ? 'chat' : 'trajectory';
+          var tabs = document.querySelectorAll('[role="tablist"] button[role="tab"], [role="tablist"] button, [role="tab"]');
+          for (var i = 0; i < tabs.length; i++) {
+            var tabBtn = tabs[i];
+            var txt = (tabBtn.textContent || '').trim().toLowerCase();
+            if ((nextView === 'chat' && (txt === 'chat' || txt.includes('chat'))) ||
+                (nextView === 'trajectory' && (txt === 'trajectory' || txt.includes('trajectory')))) {
+              tabBtn.click();
+              return;
+            }
+          }
           if (actions && typeof actions.setView === 'function') {
             actions.setView(nextView);
           } else {

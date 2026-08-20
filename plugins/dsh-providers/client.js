@@ -3976,7 +3976,7 @@ window.__ModuleLoader__.load({
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-primary, #6366f1)"
+          color: "var(--dsw-alias-label-secondary, #888888)"
         }
       },
         h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "4" }),
@@ -4002,7 +4002,7 @@ window.__ModuleLoader__.load({
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-warning, #f59e0b)"
+          color: "var(--dsw-alias-label-secondary, #888888)"
         }
       },
         h("path", { d: "m16 6 4 14" }),
@@ -4019,7 +4019,7 @@ window.__ModuleLoader__.load({
         height: size,
         viewBox: "0 0 24 24",
         fill: "none",
-        stroke: "#3b82f6",
+        stroke: "currentColor",
         strokeWidth: "2",
         strokeLinecap: "round",
         strokeLinejoin: "round",
@@ -4029,6 +4029,7 @@ window.__ModuleLoader__.load({
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
+          color: "var(--dsw-alias-primary, #6366f1)"
         }
       },
         h("path", { d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" })
@@ -5046,72 +5047,7 @@ window.__ModuleLoader__.load({
       return h(
         "div",
         { style: { display: "flex", flexDirection: "column", width: "100%", height: "100%", overflowY: "auto", gap: "4px", padding: "4px 0" } },
-        // 0. SEARCH INPUT BAR (WHEN ENABLED)
-        showSearch ? h(
-          "div",
-          {
-            className: "dsh-sidebar-search-container",
-            style: {
-              padding: "2px 8px 6px 8px",
-              display: "flex",
-              alignItems: "center",
-              width: "100%",
-              boxSizing: "border-box",
-            },
-          },
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-                borderRadius: "6px",
-                padding: "3px 8px",
-                gap: "6px",
-                boxSizing: "border-box",
-              },
-            },
-            h(P.IconSearchOutline16, { size: 13, style: { color: "var(--dsw-alias-label-tertiary, #888)", flexShrink: 0 } }),
-            h("input", {
-              type: "text",
-              value: searchQuery,
-              onChange: function (e) { setSearchQuery(e.target.value); },
-              placeholder: "Search chats & files…",
-              style: {
-                flex: 1,
-                border: "none",
-                background: "transparent",
-                color: "var(--dsw-alias-label-primary, #fff)",
-                fontSize: "12px",
-                outline: "none",
-                fontFamily: "inherit",
-                minWidth: 0,
-              },
-            }),
-            searchQuery ? h(
-              "button",
-              {
-                type: "button",
-                onClick: function () { setSearchQuery(""); },
-                style: {
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--dsw-alias-label-tertiary)",
-                  cursor: "pointer",
-                  padding: 0,
-                  fontSize: "13px",
-                  lineHeight: 1,
-                },
-              },
-              "×"
-            ) : null
-          )
-        ) : null,
-
-        // 1. UNGROUPED SESSIONS SECTION (ALWAYS PROMINENT AT TOP, WITH FOLDED LIVE PROCESSES)
+        // 1. UNGROUPED SESSIONS SECTION (ALWAYS PROMINENT AT TOP)
         h(
           "div",
           { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
@@ -5128,11 +5064,7 @@ window.__ModuleLoader__.load({
               h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isUngroupedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
             h("span", { className: "dsh-tree-title" }, "Ungrouped"),
-            totalLive > 0 ? h("span", {
-              style: { width: "6px", height: "6px", borderRadius: "50%", background: "#3fb950", boxShadow: "0 0 6px #3fb950", marginLeft: "4px", flexShrink: 0 },
-              title: totalLive + " active terminal/container sessions"
-            }) : null,
-            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, (filteredUngroupedSessions.length + totalLive)),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, filteredUngroupedSessions.length),
             h("span", { className: "dsh-tree-actions" },
               h("button", {
                 type: "button",
@@ -5168,41 +5100,9 @@ window.__ModuleLoader__.load({
           isUngroupedOpen ? h(
             "div",
             { style: { display: "flex", flexDirection: "column", width: "100%" } },
-            liveSessions.map(function (s) {
-              return h(
-                "div",
-                {
-                  key: "live::term::" + s.name,
-                  className: "dsh-tree-sessionRow",
-                  style: { height: "28px", paddingLeft: "24px" },
-                  onClick: function () {
-                    window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: s.name } }));
-                  },
-                },
-                h("span", { className: "dsh-tree-slot", style: { width: "14px", color: "var(--dsw-alias-label-tertiary)" } }, h(TerminalsGlyph, { size: 13 })),
-                h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px" } }, s.name),
-                h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", marginLeft: "auto", marginRight: "6px", background: "#3fb950", boxShadow: "0 0 6px #3fb950" } })
-              );
-            }),
-            liveContainers.map(function (c) {
-              return h(
-                "div",
-                {
-                  key: "live::cont::" + c.id,
-                  className: "dsh-tree-sessionRow",
-                  style: { height: "28px", paddingLeft: "24px" },
-                  onClick: function () {
-                    window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: c.id } }));
-                  },
-                },
-                h("span", { className: "dsh-tree-slot", style: { width: "14px", color: "var(--dsw-alias-label-tertiary)" } }, h(ContainersGlyph, { size: 13 })),
-                h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px" } }, c.name || c.id),
-                h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", marginLeft: "auto", marginRight: "6px", background: "#3fb950", boxShadow: "0 0 6px #3fb950" } })
-              );
-            }),
             filteredUngroupedSessions.length > 0
               ? filteredUngroupedSessions.map(function (chat) { return renderChatRow(chat, 16); })
-              : ((totalLive === 0) ? h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, searchQuery ? "(no matching sessions)" : "(no ungrouped sessions)") : null)
+              : h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(no ungrouped sessions)")
           ) : null
         ),
 
