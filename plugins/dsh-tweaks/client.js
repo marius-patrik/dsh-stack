@@ -724,57 +724,19 @@ window.__ModuleLoader__.load({
       var toggleSidebar = props.toggleSidebar, t = props.t, renderSlot = props.renderSlot;
       var useSessions = props.useSessions;
 
-      var customWidthState = React.useState(function () {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          var saved = window.localStorage.getItem('dsh_sidebar_width');
-          if (saved) {
-            var num = parseInt(saved, 10);
-            if (!isNaN(num) && num >= 160 && num <= 600) return num;
-          }
-        }
-        return width || 240;
-      });
-      var customWidth = customWidthState[0], setCustomWidth = customWidthState[1];
+      var currentWidth = width || 240;
 
       React.useEffect(function () {
         if (typeof document !== 'undefined') {
-          document.documentElement.style.setProperty('--dsh-sidebar-width', (collapsed ? 56 : customWidth) + 'px');
+          document.documentElement.style.setProperty('--dsh-sidebar-width', (collapsed ? 56 : currentWidth) + 'px');
         }
-      }, [customWidth, collapsed]);
+      }, [currentWidth, collapsed]);
 
       React.useEffect(function () {
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.setItem('dsh_sidebar_collapsed', collapsed ? 'true' : 'false');
         }
       }, [collapsed]);
-
-      var isResizingRef = React.useRef(false);
-      var handleStartResize = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        isResizingRef.current = true;
-        var startX = e.clientX;
-        var startW = customWidth;
-
-        var onMouseMove = function (moveEvent) {
-          if (!isResizingRef.current) return;
-          var delta = moveEvent.clientX - startX;
-          var newW = Math.min(600, Math.max(160, startW + delta));
-          setCustomWidth(newW);
-          if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.setItem('dsh_sidebar_width', String(newW));
-          }
-        };
-
-        var onMouseUp = function () {
-          isResizingRef.current = false;
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
-        };
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-      };
 
       var settledState = React.useState(collapsed);
       var settled = settledState[0], setSettled = settledState[1];
@@ -785,8 +747,8 @@ window.__ModuleLoader__.load({
       }, [collapsed]);
       var wide = !collapsed || !settled;
 
-      var lastWideWidth = React.useRef(customWidth);
-      if (!collapsed) lastWideWidth.current = customWidth;
+      var lastWideWidth = React.useRef(currentWidth);
+      if (!collapsed) lastWideWidth.current = currentWidth;
 
       var everWide = React.useRef(!collapsed);
       if (!collapsed) everWide.current = true;
@@ -864,7 +826,7 @@ window.__ModuleLoader__.load({
       if (!wide && everWide.current) className += ' dsh-tw-railIn';
       if (collapsed && wide) className += ' dsh-tw-fading';
       if (!pointerInside) className += ' dsh-tw-quietBars';
-      var style = wide ? { width: collapsed ? 56 : customWidth } : undefined;
+      var style = wide ? { width: collapsed ? lastWideWidth.current : currentWidth } : undefined;
 
       return h('div', {
         ref: column,
@@ -873,20 +835,6 @@ window.__ModuleLoader__.load({
         onPointerEnter: function () { cancelLinger(); setPointerInside(true); },
         onPointerLeave: function () { armLinger(); },
       },
-        wide ? h('div', {
-          className: 'dsh-sidebar-resizer',
-          style: {
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: '4px',
-            cursor: 'col-resize',
-            zIndex: 100,
-            transition: 'background 120ms',
-          },
-          onMouseDown: handleStartResize,
-        }) : null,
         h('div', { className: 'dsh-tw-logoRow' },
           wide
             ? h('button', { type: 'button', className: 'dsh-tw-brand dsh-tw-wide', 'aria-label': t('session.new.label'), onClick: function () { startSession(); } }, h(P.BrandWordmark))
