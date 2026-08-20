@@ -258,3 +258,18 @@ Product requirements for composer alignment, shell tab unification, and OLED con
    - Hardened `TriggerContent`, `HeaderContent`, and `CloseLabel` against undefined locale translation helpers and added event propagation guards to ensure settings modal opens reliably.
 9. **Cross-Panel Tab Deduplication**:
    - Unified global tab registry synchronizes top and bottom tab bars so moving or dragging a tab between panels automatically removes it from the origin panel, guaranteeing no duplicate tabs.
+
+---
+
+## 13. Header Menus, Tab Unification & Panel Collapse (Session 24)
+
+1. **Download Session Log in 3-Dots Menu**:
+   - The session export action is hidden behind a clean three-dots (`...`) menu in session header utilities, removing standalone buttons from the top bar.
+2. **Ungrouped Conversations Collapsed by Default**:
+   - Sidebar workspace explorer initializes with the Ungrouped section collapsed by default (`isUngroupedOpen: false`), keeping the folder hierarchy clean on initial launch.
+3. **Unified Tab Styling Across Panels**:
+   - Bottom panel tab strip adopts the exact same sleek pill/capsule design language, font size, padding, and active highlight states as the top conversation tab bar.
+4. **Panel Collapse Toggle & Close Button Removal**:
+   - Replaced maximize button with a dedicated collapse toggle button (`▲` / `▼`) that shrinks the panel to a 38px tab strip or restores it to full height, with the close `×` button removed.
+5. **Terminal Specialized Actions Menu & Right-Click**:
+   - Right-clicking any terminal tab or clicking the trailing three-dots menu provides access to **Refresh Buffer**, **Clear Buffer (Ctrl+L)**, **New Window in Session**, **New Terminal Session**, and **Kill Current Session**.

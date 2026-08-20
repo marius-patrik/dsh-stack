@@ -262,3 +262,13 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 78 | **Provider icons in settings**: Brand SVGs for all provider rows in Settings | DONE ✅ | `dsh-providers` | OpenAI, Anthropic, Gemini, Grok, Kimi, DeepSeek, Zen, Ollama icons |
 | 79 | **Settings button fix**: Fix settings button not opening or disappearing on click | DONE ✅ | `dsh-tweaks` | Fix settings trigger and open state lifecycle |
 | 80 | **Cross-panel tab deduplication & mutual exclusivity**: Tabs moved between top and bottom are removed from source | DONE ✅ | `dsh-providers` | Single unified mutually exclusive tab state |
+
+## 13. Session 24 Header Menus, Tab Unification & Panel Collapse (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 81 | **Download session log in 3-dots context menu**: Hide export button under three-dots menu | DONE ✅ | `harness` + `dsh-tweaks` | Clean session header utility menu |
+| 82 | **Ungrouped chats collapsed by default**: Default `isUngroupedOpen` to `false` in sidebar explorer | DONE ✅ | `dsh-providers` | Start with ungrouped conversations section collapsed |
+| 83 | **Unify panel tabs with top styling**: Align bottom panel tab strip with top capsule/pill tabs | DONE ✅ | `dsh-providers` | Shared visual design for all tabs |
+| 84 | **Panel collapse toggle & remove close button**: Replace maximize with collapse button, remove close | DONE ✅ | `dsh-providers` | Clean panel minimize/expand toggle |
+| 85 | **Terminal specialized actions in 3-dots & right-click**: Refresh buffer & session ops in context/3-dots menus | DONE ✅ | `dsh-providers` | Right-click tab context menu and tab bar trailing three-dots menu |

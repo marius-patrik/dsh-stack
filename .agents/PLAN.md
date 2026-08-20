@@ -605,4 +605,12 @@ sections owned by tweaks).
 8. **Settings button lifecycle fix**: Fix settings button unmounting / not opening on click.
 9. **Cross-panel tab deduplication**: Mutually exclusive tab sets between main view and bottom panel.
 
+## P17 — Header Context Menus, Collapsed Ungrouped, Unified Tabs & Panel Collapse (Session 24) [complete]
+
+1. **Download session log in 3-dots context menu**: Hide standalone export button and place it in a three-dots (`...`) menu in session header actions/utilities.
+2. **Ungrouped chats collapsed by default**: Initialize `isUngroupedOpen` to `false` in `UnifiedWorkspacesBrowser`.
+3. **Unify panel tabs with top styling**: Restyle bottom panel tab strip using the same pill/capsule design language, font, padding, and active indicators as the top tab bar.
+4. **Replace maximize with collapse toggle & remove close button**: Bottom panel header replaces maximize with a collapse/expand toggle and completely removes the close button.
+5. **Terminal specialized actions menu & right-click**: Provide Refresh Buffer, Clear Buffer, Rename, Kill, and New Window under tab right-click and trailing 3-dots tab bar menu.
+
 

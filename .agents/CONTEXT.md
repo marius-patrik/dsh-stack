@@ -1791,3 +1791,17 @@ User requested 9 targeted fixes and UX enhancements across sidebar, tabs, input 
 9. **Cross-panel tab deduplication & mutual exclusivity**: Tabs moved between top and bottom are removed from source to ensure mutually exclusive tab sets.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 24 — August 20, 2026 (Header 3-Dots Export, Collapsed Ungrouped, Unified Tabs & Panel Collapse)
+
+**Context & User Directives:**
+User requested 5 focused UX refinements across session headers, sidebar, bottom panel, and terminal controls (request file `session-24-header-menus-panel-tabs-collapse.md`):
+1. **Download session log in 3-dots context menu**: Hide the raw export button from session header and place it in a three-dots (`...`) menu.
+2. **Ungrouped chats collapsed by default**: Initialize `isUngroupedOpen` state to `false` in `UnifiedWorkspacesBrowser`.
+3. **Unify panel tabs with top styling**: Restyle bottom panel tab strip using the same pill/capsule design language, font, padding, and active indicators as the top tab bar.
+4. **Replace maximize with collapse toggle & remove close button**: Bottom panel header replaces maximize with a collapse/expand toggle and removes the close `×` button.
+5. **Terminal specialized actions menu & right-click**: Provide Refresh Buffer, Clear Buffer, Rename, Kill, and New Window under tab right-click and trailing 3-dots tab bar menu.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.
