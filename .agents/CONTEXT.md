@@ -1980,3 +1980,24 @@ User approved master plan for:
 7. **Unified Tree Rows, Ungrouped Blue Folder & Agent Message Bubbles**: Standard 28px height across all rows, vibrant blue folder icon (`#3b82f6`) on Ungrouped header with 24px child indentation, and agent message bubbles with distinct surface styling (`rgba(255,255,255,0.045)`, 20px radius).
 
 **Status:** completed, all 16 plugin check-plugin test suites passed cleanly.
+
+## Session 32 — August 20, 2026 (Native Sidebar Deep Integration & Collapse/Expand Fix)
+
+**Context & User Directives:**
+User prompt: `/plan closing and opening the sidebar makes it show the native one, make our modifications as much integrated with it as possible`
+
+**Implementation & Refinements:**
+1. **Harmonized `TweaksSidebarRoot`**:
+   - Directly aligned layout, classes, and slot handoffs with Harness `SidebarRoot` architecture and `AppFrame` grid geometry.
+   - Built-in 150ms `COLLAPSE_SETTLE_MS` crossfade with smooth transition between expanded (240px+) and collapsed rail (56px) modes.
+   - Integrated `newSession` button row with label in expanded mode and tooltip on the rail.
+   - Reactive dynamic synchronization of `--dsh-sidebar-width` CSS variable (`(collapsed ? 56 : (width || 240)) + 'px'`).
+2. **Refined Rail Controls in `UnifiedWorkspacesBrowser`**:
+   - Centered 36×36 rail controls with tooltips in collapsed mode.
+   - **Search / Expand button**: clicking immediately re-expands the sidebar via `props.expandSidebar()`.
+   - **Quick Action "+" button**: opens dropdown for Conversation, Terminal, Container.
+   - **Active processes indicator**: pulse badge reflecting running background tmux sessions and containers.
+3. **Refined Settings Trigger (`sidebar.settings`)**:
+   - Full-width button in expanded mode and centered 36×36 icon button with tooltip in rail mode.
+
+**Status:** completed, all 16 plugin check-plugin test suites passed cleanly.

@@ -895,14 +895,25 @@ window.__ModuleLoader__.load({
             h('button', { type: 'button', className: 'dsh-tw-iconButton dsh-tw-toggle', 'aria-label': collapsed ? t('toggle.open') : t('toggle.collapse'), onClick: function () { toggleSidebar(); } },
               !wide ? h(P.FishLogo, { className: 'dsh-tw-railFish', size: 24 }) : null,
               h(P.IconPanelLeftOutline16, { className: 'dsh-tw-panelIcon', size: wide ? 16 : 18 })))),
+        h(P.Tooltip, { label: t('session.new.label') || 'New session', delayMs: 500, disabled: wide },
+          h('button', {
+            type: 'button',
+            className: 'dsh-tw-newSession' + (!wide ? ' dsh-tw-collapsed' : ''),
+            'aria-label': t('session.new.label') || 'New session',
+            onClick: function () { startSession(); }
+          },
+            h(P.IconNewChatOutline16, { size: wide ? 14 : 18 }),
+            wide ? h('span', { className: 'dsh-tw-newSessionLabel dsh-tw-wide' }, t('session.new') || 'New Session') : null
+          )
+        ),
         h('div', { className: 'dsh-tw-regionArea' },
           renderSlot('sidebar.workspaces', {
-            wide,
+            wide: wide,
             expandSidebar: function () { if (collapsed) toggleSidebar(); },
           })),
         h('div', { className: 'dsh-tw-footArea' },
-          h('div', { className: 'dsh-tw-footerActions' }, renderSlot('sidebar.footer.action', { wide })),
-          h('div', { className: 'dsh-tw-settingsArea' }, renderSlot('sidebar.settings', { wide }))));
+          h('div', { className: 'dsh-tw-footerActions' }, renderSlot('sidebar.footer.action', { wide: wide })),
+          h('div', { className: 'dsh-tw-settingsArea' }, renderSlot('sidebar.settings', { wide: wide }))));
     }
 
     function TriggerContent(props) {
@@ -1619,24 +1630,36 @@ window.__ModuleLoader__.load({
       }, []);
 
       return h(Fragment, null,
-        h('button', {
-          type: 'button',
-          className: 'dsh-tw-trigger' + (!wide ? ' dsh-tw-rail' : ''),
-          'aria-haspopup': 'dialog',
-          'aria-expanded': open,
-          'data-action': 'open-settings',
-          title: 'Settings',
-          onClick: function () {
-            setOpen(true);
+        wide
+          ? h('button', {
+            type: 'button',
+            className: 'dsh-tw-trigger',
+            'aria-haspopup': 'dialog',
+            'aria-expanded': open,
+            'data-action': 'open-settings',
+            title: 'Settings',
+            onClick: function () { setOpen(true); },
           },
-        },
-          (renderSlot && typeof renderSlot === 'function')
-            ? renderSlot('settings.trigger', { wide: wide })
-            : h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '8px' } },
-                h(P.IconSettingsOutline16, { size: wide ? 16 : 18 }),
-                wide ? h('span', { className: 'dsh-tw-triggerLabel' }, 'Settings') : null
+            (renderSlot && typeof renderSlot === 'function')
+              ? renderSlot('settings.trigger', { wide: true })
+              : h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '8px' } },
+                  h(P.IconSettingsOutline16, { size: 16 }),
+                  h('span', { className: 'dsh-tw-triggerLabel' }, 'Settings')
+                )
+          )
+          : h(P.Tooltip, { label: 'Settings', delayMs: 500 },
+              h('button', {
+                type: 'button',
+                className: 'dsh-tw-trigger dsh-tw-rail',
+                'aria-haspopup': 'dialog',
+                'aria-expanded': open,
+                'data-action': 'open-settings',
+                'aria-label': 'Settings',
+                onClick: function () { setOpen(true); },
+              },
+                h(P.IconSettingsOutline16, { size: 18 })
               )
-        ),
+            ),
         open
           ? h(P.Modal, {
             open: true,

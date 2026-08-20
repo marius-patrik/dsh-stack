@@ -4603,19 +4603,36 @@ window.__ModuleLoader__.load({
 
       if (!wide) {
         var isRailPlusOpen = plusMenu === "rail";
+        var liveSessions = sessions.filter(function (s) { return Boolean(s.attached); });
+        var liveContainers = containers.filter(function (c) { return Boolean(c.isRunning); });
+        var totalLive = liveSessions.length + liveContainers.length;
+
         return h(
           "div",
           { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", width: "100%", position: "relative" } },
-          h("div", { style: { position: "relative" } },
+          h(P.Tooltip, { label: "Search workspaces & chats", delayMs: 500 },
             h("button", {
               type: "button",
               className: "dsh-tw-trigger dsh-tw-rail",
-              title: "New Session / Terminal / Container",
+              "aria-label": "Search",
               onClick: function (e) {
                 e.stopPropagation();
-                setPlusMenu(isRailPlusOpen ? null : "rail");
+                if (props.expandSidebar) props.expandSidebar();
               },
-            }, h(P.IconPlusOutline16, { size: 18 })),
+            }, h(P.IconSearchOutline16, { size: 18 }))
+          ),
+          h("div", { style: { position: "relative" } },
+            h(P.Tooltip, { label: "New item (chat / terminal / container)", delayMs: 500, disabled: isRailPlusOpen },
+              h("button", {
+                type: "button",
+                className: "dsh-tw-trigger dsh-tw-rail",
+                "aria-label": "New item",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  setPlusMenu(isRailPlusOpen ? null : "rail");
+                },
+              }, h(P.IconPlusOutline16, { size: 18 }))
+            ),
             h(SelectDropdownMenu, {
               open: isRailPlusOpen,
               onClose: function () { setPlusMenu(null); },
@@ -4637,14 +4654,31 @@ window.__ModuleLoader__.load({
               }
             })
           ),
-          h("button", {
-            type: "button",
-            className: "dsh-tw-trigger dsh-tw-rail",
-            title: "Open Terminal Panel",
-            onClick: function () {
-              window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
+          h(P.Tooltip, { label: totalLive > 0 ? ("Active processes: " + totalLive) : "Terminals & Sandboxes", delayMs: 500 },
+            h("button", {
+              type: "button",
+              className: "dsh-tw-trigger dsh-tw-rail",
+              style: { position: "relative" },
+              "aria-label": "Active processes",
+              onClick: function () {
+                window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
+              },
             },
-          }, h(TerminalsGlyph, { size: 18 }))
+              h(TerminalsGlyph, { size: 18 }),
+              totalLive > 0 ? h("span", {
+                style: {
+                  position: "absolute",
+                  top: "6px",
+                  right: "6px",
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  backgroundColor: "#22c55e",
+                  boxShadow: "0 0 6px #22c55e",
+                }
+              }) : null
+            )
+          )
         );
       }
 
