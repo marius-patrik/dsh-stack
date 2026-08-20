@@ -29,6 +29,8 @@
 | 13 | `ses_...` (fix round) | Aug 17 | Bug fixes, docs restructure, remaining work orientation |
 | 14 | `ses_...` (build round) | Aug 17 | Multi-account, dsh-tui, session-modes, quotas, harness fix |
 | 15 | `ses_...` (infra round) | Aug 17 | Harness 400 fix, agents-super restructure, state cleanup, andromeda conversion |
+| 16 | `ses_...` (settings round) | Aug 17 | Providers consolidation, loops, actions, zen provider |
+| 17 | `ses_...` (sidebar round) | Aug 20 | Sidebar full filesystem, dynamic workspaces, nested chats/subagents, input bar |
 
 Prior-session subagent transcripts (all read-only @explore on `/Users/user/Andromeda`):
 - `ses_001d0e49` "Map Andromeda state/CLI surface"
@@ -1722,7 +1724,37 @@ Completed:
   breakpoints on system blocks (dsh-dialects 149aa34) — 90% discount on
   cached system prompt tokens, fewer rate-limit hits.
 
+---
 
+## Session 20 — August 20, 2026 (UI polish, unified tabs, menus, OLED styling)
 
+**Context:** User requested a focused batch of UI/UX improvements across the stack (request file `session-20-ui-polish.md`):
+1. Input bar plus button vertically centered and sized to match the send button (34px).
+2. Input bar placeholder/preview text vertically centered.
+3. Panel plus button gains the unified context dropdown menu (New Chat, New Terminal, New Sandbox).
+4. Collapsed sidebar rail removes the new workspace button, leaving the unified plus button.
+5. Conversation window integrated as a tab in the panel, creating a unified tabbed shell for Conversation / Terminals / Containers.
+6. Header agent preset badge removed since it is displayed in the input bar toolbar.
+7. Session log download button hidden behind a three-dots (`...`) context menu in the session header.
+8. Goal badge/bar OLED styling updated with pure black / dark contrast tokens.
 
+**Status:** completed.
 
+---
+
+## Session 21 — August 20, 2026 (Sidebar Full Filesystem, Dynamic Workspaces, Nested Chats & Subagents, InputBar & Panel Polish)
+
+**Context & User Directives:**
+User requested complete filesystem and chat hierarchy integration in the sidebar, input bar layout fixes, and terminal bottom panel improvements (request file `session-17-sidebar-full-fs-chat-tree-tabs.md`):
+1. **Full Filesystem Navigation**: Sidebar shows full filesystem starting from host root `/`, user home `~`, or `Projects`, with quick switchers and arbitrary directory drill-down.
+2. **Dynamic Workspaces**: Folders dynamically materialize workspaces when starting conversations inside them (`handleStartSessionInDir` / `createWorkspace`).
+3. **Chat Sessions Nested in Folders**: Chat sessions belonging to a workspace folder appear directly inside that folder with `ChatGlyph`, active selection indicator, relative timestamp (`12m`, `2h`), and folder-level chat count badge.
+4. **Chats in Focused Folders**: When focusing a directory as the tree root, its direct chats appear prominently at the top of the tree view under `Chats in <folder>`.
+5. **Ungrouped Chats**: Prominent, collapsible top-level `Ungrouped` section with live count badge and `+` button for creating unscoped sessions.
+6. **Subagent Session Hierarchy**: Subagent sessions (matching `parentId` or `origin: "subagent"`) are nested directly underneath their parent chat sessions with expandable chevrons, count badges, custom `SubagentGlyph` branching icons, and individual actions menus.
+7. **Filesystem Inspection Modal**: Clicking any file opens `FileViewerModal` with 1MB UTF-8 preview, monospace rendering, path breadcrumb, and copy button. Backend endpoints `GET /quotas/api/fs` and `GET /quotas/api/fs/read` implemented in `dsh-providers/src/quotas/web.ts`.
+8. **Input Bar Polish**: Separated input textarea card from bottom toolbar card with `6px` gap. Pinned send button flush right (`flex: 1; min-width: 0;` on `.scroll`). Hidden send button when disabled (`visibility: hidden; cursor: default;`).
+9. **Terminal Bottom Panel Polish**: Embedded `TerminalsGlyph` and `ContainersGlyph` directly inside tab headers, removed standalone status dot markers and bottom bars to maximize active viewing space.
+10. **Cordis Slot Mechanics Fixes**: Resolved single slot collision by applying `priority: -10` in `sidebar.workspaces` registration and removed duplicate child slot declarations. Connected live reactive `useSessions` and `useWorkspaces` observable hooks without static service masking.
+
+**Status:** completed, compiled, and verified (0 plugin errors, 139/170 active plugins).

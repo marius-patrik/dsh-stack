@@ -201,3 +201,15 @@ Via the replaced `TweaksSidebarRoot` / `TweaksWorkspaceBrowser`:
 
 Each phase ships its docs updates in the same commit (docs rule) and commits + pushes
 the owning plugin repo before the superproject pin.
+
+---
+
+## 10. UI polish, unified tabs, and menus (Session 20)
+
+Product requirements for composer alignment, shell tab unification, and OLED contrast:
+
+1. **Input bar geometry**: Centered 34px circle plus button matching the send button, with vertically centered placeholder text in the composer card.
+2. **Context menu parity**: The panel tab bar plus button and the collapsed sidebar rail plus button both open a unified context menu with options for `Conversation`, `Terminal`, and `Container`.
+3. **Unified full-UI panel tabs**: Conversation window lives as a first-class view alongside interactive Terminals and Docker Sandboxes in the bottom panel tab strip, giving a unified multi-tab environment.
+4. **Header declutter**: Preset badge removed from session header (available directly in the input bar toolbar) and session log download button hidden inside an overflow `...` menu.
+5. **OLED theme contrast**: OLED dark mode uses true black `#000000`/`#050505` backgrounds with `#1a1a1a` borders across goal bars, badges, and panel elements.

@@ -15,7 +15,7 @@ All under `marius-patrik`. Plugins are git submodules of the `agents` superproje
 | `agents` | public | superproject: launcher, PLAN, CONTEXT, BACKLOG, gitlinks |
 | `dsh-credentials` | public | account/credential manager (v2 = full vault parity port); **shipped**: multi-account support (resolveFor/resolveAll, account-tagged records, vault CLI --account, ACCOUNT column) |
 | `dsh-dialects` | public | provider wire dialects: openai, claude, gemini, code-assist (shipped + boot-verified) |
-| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes + OpenCode Zen route (`PROVIDER_ROUTES`, `subscription-only`/`all` filter); **P12.1**: absorbs dsh-subscriptions + dsh-quotas (quotas subpackage with QuotaRegistry, web routes, auto-refresh) |
+| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes + OpenCode Zen route (`PROVIDER_ROUTES`, `subscription-only`/`all` filter); **P12.1**: absorbs dsh-subscriptions + dsh-quotas; **P12.9 (shipped)**: Unified dynamic filesystem explorer, folder-nested chats, top-level Ungrouped sessions, nested subagent tree hierarchy, file inspection preview, and live sessions manager (`sidebar.workspaces` single-slot shadowing) |
 | `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
 | ~~`dsh-subscriptions`~~ | **archived** | **merged into dsh-providers in P12.1** — remap.ts lives in `dsh-providers/src/remap.ts` |
 | `dsh-tui` | public | standalone TUI client for dsh (talks to dsh as backend); separate repo, NOT cannibalizing privatecode; **shipped**: HTTP client + readline TUI + slash commands |
@@ -572,4 +572,16 @@ sections owned by tweaks).
 7. P13e create dsh-code ← formatters + lsp + repos.
 8. P13f settings IA final (appearance port, Agents tab merge, nav).
 9. P13g archive retired repos, profile cleanup, docs/PRD promotion.
+
+## P14 — UI Polish, Unified Panel Tabs, and Menus (Session 20) [complete]
+
+1. **Input bar plus button**: Center vertically in `.inputRow` and size to 34px circle matching the send button.
+2. **Message preview text**: Vertically center the placeholder / draft text in the composer card.
+3. **Panel plus button context menu**: Add unified context menu (New Chat, New Terminal, New Container) to the panel tab bar.
+4. **Collapsed sidebar plus button**: Remove new workspace button when sidebar is collapsed; show unified plus button.
+5. **Unified panel tabs (full UI)**: Make Conversation a tab in the panel alongside Terminals and Containers, giving full UI multi-tab management.
+6. **Remove header preset badge**: Remove preset badge from session header (already displayed in input bar).
+7. **Session log export 3-dots menu**: Hide download session log button under a three-dots (`...`) menu.
+8. **Goal badge OLED styling**: Apply OLED dark colors to goal bar background and borders.
+
 

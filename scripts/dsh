@@ -1,18 +1,34 @@
 #!/usr/bin/env bash
-# dsh — homeRoot/command-aware launcher for the pinned harness build.
+# dsh — homeRoot/command-aware launcher and service manager for DeepSeek Harness.
 #
-# Each launch resolves the agent home (`$DSH_HOME`, else `~/.agents`), reads
-# its `settings.yaml` for the `dsh-tweaks:` section, and:
-#   * honors `dsh-tweaks.homeRoot`: if it differs from the current home,
-#     state (profiles, sessions, credentials, settings, vault) is migrated
-#     there additively and the run boots with DSH_HOME set to it;
-#   * appends `dsh-tweaks.command` when the invocation names no subcommand;
-# then execs the harness binary. The launcher re-checks the current path on
-# every launch — there is no stable symlink alias to go stale.
+# Usage:
+#   dsh restart      Gracefully restart the dsh web server and show health
+#   dsh start        Start the dsh web server in the background
+#   dsh stop         Stop the running dsh web server
+#   dsh status       Show process status, URLs (Local + Tailscale), and plugin health
+#   dsh logs [-f]    View or tail the web server logs
+#   dsh <verb>       Plugin verbs (accounts, stats, sessions, share, theme, lsp, formatter, agents)
+#   dsh [args...]    Fall-through to the harness CLI
 set -euo pipefail
 
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bin="$here/../harness/apps/cli/lib/bin.js"
+# Resolve symlink to real location
+source_path="${BASH_SOURCE[0]}"
+while [ -h "$source_path" ]; do
+  dir="$(cd -P "$(dirname "$source_path")" && pwd)"
+  source_path="$(readlink "$source_path")"
+  [[ $source_path != /* ]] && source_path="$dir/$source_path"
+done
+here="$(cd -P "$(dirname "$source_path")" && pwd)"
+harness_dir="$(cd "$here/../harness" && pwd)"
+bin="$harness_dir/apps/cli/lib/bin.js"
+ts_bin="$harness_dir/apps/cli/src/bin.ts"
+log_file="/private/tmp/dsh-web.log"
+port=3080
+
+invoked_name="$(basename "$0")"
+if [[ "$invoked_name" == "dsh-restart" && $# -eq 0 ]]; then
+  set -- "restart"
+fi
 
 # Read the `dsh-tweaks` section of a settings document (homeRoot, command).
 read_tweaks() {
@@ -65,54 +81,207 @@ fi
 
 export DSH_HOME="$home"
 
+get_server_pid() {
+  lsof -ti :"$port" -sTCP:LISTEN 2>/dev/null || true
+}
+
+get_tailscale_info() {
+  if command -v tailscale >/dev/null 2>&1; then
+    local ts_ip
+    ts_ip="$(tailscale ip -4 2>/dev/null || true)"
+    local ts_dns
+    ts_dns="$(tailscale status --json 2>/dev/null | node -e '
+      let d="";
+      process.stdin.on("data", c=>d+=c).on("end", ()=>{
+        try {
+          const j=JSON.parse(d);
+          const self = j.Self || {};
+          const dns = (self.DNSName || "").replace(/\.$/, "");
+          process.stdout.write(dns);
+        } catch(e){}
+      })
+    ' 2>/dev/null || true)"
+    echo "$ts_ip|$ts_dns"
+  else
+    echo "|"
+  fi
+}
+
+do_status() {
+  local pid
+  pid="$(get_server_pid)"
+  if [[ -n "$pid" ]]; then
+    local ts_info
+    ts_info="$(get_tailscale_info)"
+    local ts_ip="${ts_info%%|*}"
+    local ts_dns="${ts_info##*|}"
+    local main_url="http://127.0.0.1:$port"
+    if [[ -n "$ts_dns" ]]; then
+      main_url="http://$ts_dns:$port"
+    elif [[ -n "$ts_ip" ]]; then
+      main_url="http://$ts_ip:$port"
+    fi
+    echo "● dsh web server is running (PID: $pid)"
+    echo "  Address: $main_url"
+    echo "  Logs:    $log_file"
+
+    # Query health check via Typert
+    local inventory
+    inventory="$(curl -s --max-time 3 -X POST "http://127.0.0.1:$port/api/pluginInventory/list" \
+      -H 'Content-Type: application/json' \
+      -d '{"type":"client-request","rpcId":"status","method":"pluginInventory/list","payload":{"args":{}}}' 2>/dev/null || true)"
+    if [[ -n "$inventory" ]]; then
+      node -e "
+        try {
+          const res = JSON.parse(process.argv[1]).result;
+          if (res && res.ok) {
+            const entries = res.value.entries || [];
+            const active = entries.filter(e => e.fiberPhase === 'active').length;
+            const failed = entries.filter(e => e.fiberPhase === 'failed');
+            console.log('  Plugins:       ' + active + '/' + entries.length + ' active (' + failed.length + ' failed)');
+            if (failed.length > 0) {
+              failed.slice(0, 5).forEach(f => console.log('    ✗ Failed: ' + f.entryId + ' (' + f.moduleName + ')'));
+            }
+          }
+        } catch(e) {}
+      " "$inventory"
+    fi
+  else
+    echo "○ dsh web server is not running (port $port is free)"
+  fi
+}
+
+do_stop() {
+  local pid
+  pid="$(get_server_pid)"
+  if [[ -z "$pid" ]]; then
+    echo "dsh: web server is not running on port $port"
+    return 0
+  fi
+  echo "dsh: stopping web server (PID: $pid)..."
+  kill -TERM "$pid" 2>/dev/null || true
+  local count=0
+  while [[ -n "$(get_server_pid)" && "$count" -lt 30 ]]; do
+    sleep 0.2
+    count=$((count + 1))
+  done
+  if [[ -n "$(get_server_pid)" ]]; then
+    echo "dsh: force killing PID $pid..."
+    kill -9 "$pid" 2>/dev/null || true
+    sleep 0.5
+  fi
+  echo "dsh: web server stopped."
+}
+
+do_start() {
+  local pid
+  pid="$(get_server_pid)"
+  if [[ -n "$pid" ]]; then
+    echo "dsh: web server is already running (PID: $pid on port $port)"
+    return 0
+  fi
+  echo "dsh: starting web server on port $port..."
+  (cd "$harness_dir" && nohup node --import tsx/esm "$ts_bin" web --port "$port" > "$log_file" 2>&1 &)
+  
+  local count=0
+  while [[ -z "$(get_server_pid)" && "$count" -lt 50 ]]; do
+    sleep 0.2
+    count=$((count + 1))
+  done
+  
+  pid="$(get_server_pid)"
+  if [[ -n "$pid" ]]; then
+    echo "dsh: web server started successfully (PID: $pid)"
+    do_status
+  else
+    echo "dsh: failed to start web server. Check logs: $log_file" >&2
+    tail -n 20 "$log_file" >&2
+    return 1
+  fi
+}
+
+do_restart() {
+  echo "dsh: restarting web server..."
+  do_stop
+  do_start
+}
+
+do_logs() {
+  if [[ ! -f "$log_file" ]]; then
+    echo "dsh: no log file found at $log_file"
+    return 0
+  fi
+  if [[ $# -eq 0 ]]; then
+    tail -n 50 "$log_file"
+  elif [[ "${1:-}" == "-f" || "${1:-}" == "--follow" ]]; then
+    shift
+    tail -f "$@" "$log_file"
+  else
+    tail "$@" "$log_file"
+  fi
+}
+
+# --- Subcommand routing ---
+
+if [[ "${1:-}" == "status" ]]; then
+  do_status
+  exit 0
+fi
+
+if [[ "${1:-}" == "restart" ]]; then
+  do_restart
+  exit 0
+fi
+
+if [[ "${1:-}" == "start" ]]; then
+  do_start
+  exit 0
+fi
+
+if [[ "${1:-}" == "stop" ]]; then
+  do_stop
+  exit 0
+fi
+
+if [[ "${1:-}" == "logs" || "${1:-}" == "log" ]]; then
+  shift
+  do_logs "$@"
+  exit 0
+fi
+
 if [[ "${1:-}" == "accounts" ]]; then
-  # The `accounts` verb is the dsh-credentials owner surface, served by the
-  # plugin CLI against the same vault ctx.accounts resolves. Everything else
-  # falls through to the harness CLI.
   shift
   exec node "$here/../plugins/dsh-credentials/bin/accounts.mjs" "$@"
 fi
 
 if [[ "${1:-}" == "stats" || "${1:-}" == "sessions" || "${1:-}" == "share" ]]; then
-  # Observability + share verbs are the dsh-tweaks owner surface: they read
-  # the same home the harness boots (DSH_HOME already exported above) and the
-  # same projection cache / share route the web profile composes.
   verb="${1}"
   shift
   exec node "$here/../plugins/dsh-tweaks/bin/${verb}.mjs" "$@"
 fi
 
 if [[ "${1:-}" == "theme" ]]; then
-  # The `theme` verb is the dsh-themes owner surface: it reads the same home
-  # the harness boots and the same `dsh-themes` settings section the plugin
-  # composes (root, catalogUrl, active). Falls through to the harness CLI
-  # otherwise (the harness owns no `theme` subcommand).
   shift
   exec node "$here/../plugins/dsh-themes/bin/theme.mjs" "$@"
 fi
 
 if [[ "${1:-}" == "lsp" ]]; then
-  # The `lsp` verb is the dsh-lsp owner surface: it reads/writes the same home
-  # the harness boots and the same `dsh-lsp` settings section the plugin
-  # composes (the LSP server table). Falls through otherwise.
   shift
   exec node "$here/../plugins/dsh-lsp/bin/lsp.mjs" "$@"
 fi
 
 if [[ "${1:-}" == "formatter" ]]; then
-  # The `formatter` verb is the dsh-formatters owner surface: it reads/writes
-  # the same home the harness boots and the same `dsh-formatters` settings
-  # section the plugin composes (formatter table + auto-format toggle).
   shift
   exec node "$here/../plugins/dsh-formatters/bin/formatter.mjs" "$@"
 fi
 
 if [[ "${1:-}" == "agents" ]]; then
-  # The `agents` verb is the dsh-agents owner surface: it reads/writes the
-  # same home the harness boots and the same `dsh-agents` settings section
-  # the plugin composes (persona authoring root + default base preset).
   shift
   exec node "$here/../plugins/dsh-agents/bin/agents.mjs" "$@"
 fi
 
-exec node "$bin" "$@"
+if [[ -f "$ts_bin" ]]; then
+  exec node --import tsx/esm "$ts_bin" "$@"
+else
+  exec node "$bin" "$@"
+fi

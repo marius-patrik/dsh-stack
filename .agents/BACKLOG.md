@@ -225,10 +225,19 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 57 | Providers | **Antigravity model picking** — user rejects "server-determined" conclusion: the Antigravity CLI has a picker, so the client must signal the model; find the mechanism (config id derivation, request field); FALLBACK: use the CLI fake-PTY wrapper (as used for login) as the transport for chat + model selection | L | OPEN | `dsh-integrations` | supersedes Claude commit 6db23b1 conclusion |
 
 
-Supersedes P12.1/P12.2 scope (the merge is bigger now) and P12.4 naming
-(actions becomes a tweaks module, plugin disappears). Standing rule: do NOT
-start P13 while the big-pickle session (opencode PID 2059) is live in
-dsh-providers/dsh-quotas/dsh-credentials/dsh-tweaks.
+## 10. Session 20 UI Polish (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 58 | **Input bar plus button**: Center vertically in `.inputRow` and size to 34px circle matching the send button | DONE ✅ | `harness` + `dsh-tweaks` | Matches 34px send button size and vertically centers in input card |
+| 59 | **Message placeholder/preview text**: Vertically center "Message the agent" text in composer | DONE ✅ | `harness` + `dsh-tweaks` | Fix uneven padding / row alignment |
+| 60 | **Panel plus button context menu**: Add unified menu (New Chat, New Terminal, New Container) | DONE ✅ | `dsh-providers` | Dropdown menu on panel plus button matching sidebar |
+| 61 | **Collapsed sidebar plus button**: Remove new workspace button; show unified plus button | DONE ✅ | `dsh-providers` + `harness` | Clean collapsed rail with unified plus button |
+| 62 | **Unified panel tabs (full UI)**: Make Conversation a first-class panel tab alongside Terminals and Containers | DONE ✅ | `dsh-providers` | Full UI multi-tab management (Conversation, Terminals, Sandboxes) |
+| 63 | **Remove header preset badge**: Remove preset badge from session header | DONE ✅ | `harness` | Preset selector lives in input bar toolbar |
+| 64 | **Session log download 3-dots menu**: Hide download button under three-dots context menu | DONE ✅ | `harness` | Streamlined session header utilities |
+| 65 | **Goal badge OLED styling**: True OLED dark background and borders for goal bar | DONE ✅ | `dsh-themes` | `#000000`/`#050505` background and `#1a1a1a` border in OLED mode |
+
 
 
 
