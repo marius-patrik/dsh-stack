@@ -234,3 +234,27 @@ Product requirements for composer alignment, shell tab unification, and OLED con
 6. **Main Conversation Top Tab Bar & Cross-Panel Drag-and-Drop**:
    - The top of the main conversation area features a dedicated tab strip showing the active conversation, custom tabs, close buttons, and a plus button.
    - HTML5 drag-and-drop enables dragging tabs between the top conversation area and the bottom terminal panel.
+
+---
+
+## 12. Sidebar Polish, Menus, Centering, Main Tabs & Settings Fix (Session 23)
+
+1. **Sidebar Chat Context & 3-Dots Hover Menu**:
+   - Right-clicking on any conversation or subagent row opens a context menu with **Rename Conversation** and **Archive Session**.
+   - Hovering over any chat row reveals a dedicated three-dots (`...`) button with dropdown options to **Rename Chat**, **Fork Chat**, and **Archive Chat**.
+2. **Folder Hover Management Layout**:
+   - Folder row hover actions feature a **+** button (New Chat, New Terminal, New Container) alongside a **...** (three-dots) action menu containing **Focus Directory as Root**, **Open Terminal Here**, **Cut Folder**, **Copy Path**, **Rename Folder**, and **Delete Folder**.
+3. **Sidebar Visual Consistency & Typography**:
+   - Standardized 12px font size, 30px row height, consistent 14px hierarchy depth indentation, and clean icon-label spacing across workspaces, folders, chats, and subagent trees.
+4. **Input Bar Strict Vertical Centering**:
+   - Vertical flex alignment centers the 34px plus button, composer draft input/placeholder, and send button strictly along the horizontal centerline.
+5. **Main View Standalone Terminal & Container Tabs**:
+   - Opening a Terminal or Container from the top main tab bar launches and renders it directly in the main view area without opening the bottom panel.
+6. **Purge Top Header Preset Badge**:
+   - Removed any remaining agent preset badges from the top session header, keeping preset selection centralized in the input bar toolbar.
+7. **Brand SVG Provider Icons in Settings**:
+   - Distinct brand SVG glyphs for all model providers (Google Gemini / Antigravity, Anthropic Claude, OpenAI, DeepSeek, Grok, Kimi, Ollama, GitHub, etc.) rendered in Settings > Providers.
+8. **Settings Button Lifecycle Fix**:
+   - Hardened `TriggerContent`, `HeaderContent`, and `CloseLabel` against undefined locale translation helpers and added event propagation guards to ensure settings modal opens reliably.
+9. **Cross-Panel Tab Deduplication**:
+   - Unified global tab registry synchronizes top and bottom tab bars so moving or dragging a tab between panels automatically removes it from the origin panel, guaranteeing no duplicate tabs.

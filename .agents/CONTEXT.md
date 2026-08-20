@@ -1773,3 +1773,21 @@ User requested 6 major interactive shell enhancements (request file `session-22-
 6. **Main conversation top tab bar & cross-panel tab drag**: Top tab bar with plus button, active conversation tab, and HTML5 drag-and-drop support across top conversation bar and bottom panel.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 23 — August 20, 2026 (Sidebar Polish, Folder/Chat Menus, Centering, Main Tabs & Settings Fix)
+
+**Context & User Directives:**
+User requested 9 targeted fixes and UX enhancements across sidebar, tabs, input bar, and settings (request file `session-23-sidebar-polish-tabs-settings-fix.md`):
+1. **Sidebar chat context & 3-dots hover menu**: Right click on chat row shows Rename and Archive; hover 3-dots menu is preserved with those actions.
+2. **Sidebar visual consistency**: Clean, unified font sizing (12px), uniform row heights (30px), and clear hierarchical indentation.
+3. **Folder hover 3-dots menu**: Replace terminal button with a 3-dots button next to `+` containing Focus, Open Terminal, Cut, Copy Path, Rename, Delete, and New Chat.
+4. **Input bar plus button & draft centering**: Strict vertical center alignment of plus button and input placeholder/text.
+5. **Main view standalone plus menu**: Opening Terminal or Container via main view top tab bar opens/renders directly in main view area without opening bottom panel.
+6. **Remove top preset badge**: Fully purge any top session header preset badge.
+7. **Brand SVG provider icons in settings**: Add SVG logos for all providers in Settings > Providers.
+8. **Settings button fix**: Fix settings button unmounting / not opening on click.
+9. **Cross-panel tab deduplication & mutual exclusivity**: Tabs moved between top and bottom are removed from source to ensure mutually exclusive tab sets.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.

@@ -248,3 +248,17 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 69 | **Context menu Cut/Copy/Paste/Close/Rename**: Rich clipboard + contextual close/rename for items | DONE ✅ | `dsh-tweaks` | Full context menu options matching modern desktop UX |
 | 70 | **Panel plus menu z-index fix**: Elevate dropdown z-index above terminal/webview | DONE ✅ | `dsh-providers` | High z-index (10000000) & fixed anchor pos for clean dropdown overlay |
 | 71 | **Top conversation tab bar & Drag-and-Drop**: Top tab bar with plus button & cross-panel tab drag | DONE ✅ | `dsh-providers` + `dsh-tweaks` | Drag tabs between main conversation top bar and bottom panel |
+
+## 12. Session 23 Sidebar Polish, Menus, Centering, Main Tabs & Settings Fix (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 72 | **Sidebar chat right click + hover 3-dots**: Context menu with Rename/Archive and hover 3-dots button | DONE ✅ | `dsh-providers` + `dsh-tweaks` | Chat row hover 3-dots & right click menu with rename/archive |
+| 73 | **Sidebar visual consistency**: Clean & unify font sizes (12px), row heights (30px), and indentation steps | DONE ✅ | `dsh-providers` | Unified typography and layout hierarchy |
+| 74 | **Folder hover 3-dots menu**: Replace terminal button with 3-dots button next to plus containing folder actions | DONE ✅ | `dsh-providers` | Focus, terminal, cut, copy path, rename, delete, new chat in 3-dots menu |
+| 75 | **Input bar plus button & draft centering**: Strict vertical centering of plus button and input placeholder | DONE ✅ | `harness` + `dsh-tweaks` | Flex alignment and line-height centering |
+| 76 | **Main view plus opens in main view**: Open terminal/container directly in top area when launched from top plus | DONE ✅ | `dsh-providers` | Standalone main view terminal / container rendering |
+| 77 | **Remove top preset badge**: Fully purge any top session header preset badge | DONE ✅ | `harness` + `dsh-agents` | Badge only shown in input bar toolbar |
+| 78 | **Provider icons in settings**: Brand SVGs for all provider rows in Settings | DONE ✅ | `dsh-providers` | OpenAI, Anthropic, Gemini, Grok, Kimi, DeepSeek, Zen, Ollama icons |
+| 79 | **Settings button fix**: Fix settings button not opening or disappearing on click | DONE ✅ | `dsh-tweaks` | Fix settings trigger and open state lifecycle |
+| 80 | **Cross-panel tab deduplication & mutual exclusivity**: Tabs moved between top and bottom are removed from source | DONE ✅ | `dsh-providers` | Single unified mutually exclusive tab state |

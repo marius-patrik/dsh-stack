@@ -593,4 +593,16 @@ sections owned by tweaks).
 5. **Panel plus dropdown z-index fix**: Ensure dropdown menus render above xterm and sandboxes (`z-index: 10000000` with fixed viewport anchor calculation).
 6. **Main conversation top tab bar & cross-panel tab drag**: Top tab bar with plus button, tab switching, and drag-and-drop between top and bottom panels.
 
+## P16 — Sidebar Visuals, Folder/Chat Menus, Centering, Main Tabs & Settings Fix (Session 23) [complete]
+
+1. **Sidebar chat context & 3-dots hover menu**: Right click menu with Rename & Archive; maintain hover 3-dots menu on all chat rows.
+2. **Unified sidebar visual system**: Consistent 12px fonts, 30px row heights, and proportional hierarchy indentation across folders, chats, ungrouped, and subagents.
+3. **Folder hover 3-dots menu**: Replace terminal button with a 3-dots button next to `+` with focus, terminal, cut, copy path, rename, delete, new chat.
+4. **Input bar plus button & draft vertical centering**: Fix vertical alignment in `.inputRow` and composer card.
+5. **Main view standalone plus menu**: Opening a Terminal or Container via top tab bar renders directly in the main view area without opening the bottom panel.
+6. **Purge top header preset badge**: Ensure preset badge is fully removed from top chrome.
+7. **Brand SVG provider icons in settings**: Add SVG logos for all providers in Settings > Providers.
+8. **Settings button lifecycle fix**: Fix settings button unmounting / not opening on click.
+9. **Cross-panel tab deduplication**: Mutually exclusive tab sets between main view and bottom panel.
+
 
