@@ -238,6 +238,13 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 64 | **Session log download 3-dots menu**: Hide download button under three-dots context menu | DONE ✅ | `harness` | Streamlined session header utilities |
 | 65 | **Goal badge OLED styling**: True OLED dark background and borders for goal bar | DONE ✅ | `dsh-themes` | `#000000`/`#050505` background and `#1a1a1a` border in OLED mode |
 
+## 11. Session 22 Settings Shell, Mobile Layout, Drag-and-Drop Tabs & Context Menus (2026-08-20, user)
 
-
-
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 66 | **Settings sidebar collapsible & resizable**: Resizable nav rail (drag width) and collapse toggle | DONE ✅ | `dsh-tweaks` | Adjustable settings sidebar width with collapse to rail |
+| 67 | **Main sidebar mobile full width**: Expand to full viewport width on screens <= 768px | DONE ✅ | `dsh-tweaks` | Mobile responsive full-screen drawer |
+| 68 | **Draggable settings modal**: Drag settings window across viewport via header | DONE ✅ | `dsh-tweaks` | Header drag handle with mouse coordinates tracking |
+| 69 | **Context menu Cut/Copy/Paste/Close/Rename**: Rich clipboard + contextual close/rename for items | DONE ✅ | `dsh-tweaks` | Full context menu options matching modern desktop UX |
+| 70 | **Panel plus menu z-index fix**: Elevate dropdown z-index above terminal/webview | DONE ✅ | `dsh-providers` | High z-index (10000000) & fixed anchor pos for clean dropdown overlay |
+| 71 | **Top conversation tab bar & Drag-and-Drop**: Top tab bar with plus button & cross-panel tab drag | DONE ✅ | `dsh-providers` + `dsh-tweaks` | Drag tabs between main conversation top bar and bottom panel |

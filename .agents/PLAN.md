@@ -584,4 +584,13 @@ sections owned by tweaks).
 7. **Session log export 3-dots menu**: Hide download session log button under a three-dots (`...`) menu.
 8. **Goal badge OLED styling**: Apply OLED dark colors to goal bar background and borders.
 
+## P15 — Settings Shell, Mobile Layout, Drag-and-Drop Tabs & Context Menus (Session 22) [complete]
+
+1. **Settings sidebar collapsable & resizable**: Resizable nav rail (`.dsh-tw-nav`) with drag handle and collapse toggle on settings modal.
+2. **Mobile sidebar full width**: On screens <= 768px, sidebar expands to full viewport width (`100vw`).
+3. **Draggable settings modal**: Enable dragging the settings dialog across the screen by header.
+4. **Enhanced context menu**: Cut, Copy, Paste, plus context-aware Close and Rename for sessions and workspaces.
+5. **Panel plus dropdown z-index fix**: Ensure dropdown menus render above xterm and sandboxes (`z-index: 10000000` with fixed viewport anchor calculation).
+6. **Main conversation top tab bar & cross-panel tab drag**: Top tab bar with plus button, tab switching, and drag-and-drop between top and bottom panels.
+
 

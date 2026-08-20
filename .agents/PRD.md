@@ -213,3 +213,24 @@ Product requirements for composer alignment, shell tab unification, and OLED con
 3. **Unified full-UI panel tabs**: Conversation window lives as a first-class view alongside interactive Terminals and Docker Sandboxes in the bottom panel tab strip, giving a unified multi-tab environment.
 4. **Header declutter**: Preset badge removed from session header (available directly in the input bar toolbar) and session log download button hidden inside an overflow `...` menu.
 5. **OLED theme contrast**: OLED dark mode uses true black `#000000`/`#050505` backgrounds with `#1a1a1a` borders across goal bars, badges, and panel elements.
+
+---
+
+## 11. Settings Shell, Mobile Layout, Drag-and-Drop Tabs & Context Menus (Session 22)
+
+1. **Settings Sidebar Collapsible & Resizable**:
+   - The settings navigation rail (`.dsh-tw-nav`) supports dynamic drag-to-resize within the range of 130px to 380px, persisting the chosen width to `localStorage`.
+   - A dedicated collapse toggle button in the header collapses the navigation rail into a compact 56px icon-only rail with hover tooltips.
+2. **Mobile Viewport Full Width**:
+   - On screens `<= 768px`, the expanded main sidebar transitions into a full viewport width overlay (`100vw` / `100vh`) with drawer aesthetics.
+   - The settings dialog expands to full screen on mobile devices.
+3. **Draggable Settings Modal**:
+   - The settings dialog (`.dsh-tw-panel`) supports drag-to-reposition across the viewport via pointer capture on its title bar and header area.
+4. **Rich Right-Click Context Menu**:
+   - Context menu provides standard clipboard commands: **Cut**, **Copy**, and **Paste**.
+   - Contextually detects clicked elements to offer **Rename** and **Close / Archive** on sessions, and **Rename** and **Delete** on workspace folders.
+5. **Dropdown Menu Z-Index & Viewport Clamping**:
+   - Plus button dropdown menus (`SelectDropdownMenu`) compute fixed viewport bounds and render with elevated stacking context (`z-index: 10000000`), preventing clipping by terminal canvas or iframe layers.
+6. **Main Conversation Top Tab Bar & Cross-Panel Drag-and-Drop**:
+   - The top of the main conversation area features a dedicated tab strip showing the active conversation, custom tabs, close buttons, and a plus button.
+   - HTML5 drag-and-drop enables dragging tabs between the top conversation area and the bottom terminal panel.

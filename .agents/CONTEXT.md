@@ -1758,3 +1758,18 @@ User requested complete filesystem and chat hierarchy integration in the sidebar
 10. **Cordis Slot Mechanics Fixes**: Resolved single slot collision by applying `priority: -10` in `sidebar.workspaces` registration and removed duplicate child slot declarations. Connected live reactive `useSessions` and `useWorkspaces` observable hooks without static service masking.
 
 **Status:** completed, compiled, and verified (0 plugin errors, 139/170 active plugins).
+
+---
+
+## Session 22 — August 20, 2026 (Settings Shell, Mobile Layout, Drag-and-Drop Tabs & Context Menus)
+
+**Context & User Directives:**
+User requested 6 major interactive shell enhancements (request file `session-22-settings-shell-tabs-dnd.md`):
+1. **Settings sidebar collapsable & resizable**: Resizable nav rail (`.dsh-tw-nav`) with drag-to-resize handle (130px–380px) and collapse toggle button to mini rail with tooltips.
+2. **Main sidebar mobile full width**: On screens <= 768px, sidebar expands to `100vw` full screen width overlay drawer.
+3. **Draggable settings modal**: Enable dragging the settings dialog across the screen by pointer capture on its header and title bar.
+4. **Enhanced context menu**: Cut, Copy, Paste clipboard actions, plus context-aware Close and Rename for sessions and workspaces.
+5. **Panel plus dropdown z-index fix**: Elevate dropdown z-index (`z-index: 10000000`) with fixed viewport coordinate calculations so it never renders under terminal canvases or webview iframes.
+6. **Main conversation top tab bar & cross-panel tab drag**: Top tab bar with plus button, active conversation tab, and HTML5 drag-and-drop support across top conversation bar and bottom panel.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.
