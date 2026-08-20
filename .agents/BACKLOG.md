@@ -290,3 +290,15 @@ End-state repo map (everything else gets archived with deprecation notices):
 |---|---|---|---|---|
 | 92 | **Conversation content moves with tab**: Render conversation view in bottom panel when tab is moved/active in bottom | DONE ✅ | `dsh-providers` | Allow full-height conversation view in bottom panel without 38px restriction |
 | 93 | **Auto-expand collapsed panel on tab click**: Clicking any tab in collapsed panel expands it | DONE ✅ | `dsh-providers` | Expand panel on tab click when isCollapsed is true |
+
+## 16. Session 27 Tab Destinations, Right Sidebar, OLED, Terminal Unification & Panel Icon (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 94 | **Tab context move destinations**: Move to Main Area, Bottom Panel, Left/Right Sidebar | DONE ✅ | `dsh-providers` | Move actions in right-click and 3-dots menus |
+| 95 | **Collapsible Right Sidebar dock**: Add right sidebar that can host tabs | DONE ✅ | `dsh-providers` | Resizable/collapsible dock on right |
+| 96 | **Panel OLED black styling**: Respect pure OLED black in tab bar headers and containers | DONE ✅ | `dsh-providers` + `dsh-tweaks` | Pure #000000 / oled background variables |
+| 97 | **Main view terminal unification**: Unify main view terminal with bottom terminal component (no fake input) | DONE ✅ | `dsh-providers` | Interactive tmux session component in main area |
+| 98 | **Full conversation DOM/content hosting**: Move real conversation content when tab is moved | DONE ✅ | `dsh-providers` | Reparent/host conversation in active area |
+| 99 | **Tab move empty fallback & sequence**: Switch to next tab or empty launcher card when tab moves | DONE ✅ | `dsh-providers` | Clean fallback state when tabs move |
+| 100 | **Settings button click fix & Panel Icon**: Reliable settings trigger & panel dock icon (replace chevrons) | DONE ✅ | `dsh-tweaks` + `dsh-providers` | Panel dock icon and bulletproof settings launcher |

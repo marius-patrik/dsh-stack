@@ -1831,3 +1831,19 @@ User requested 2 specific interactions for tab management and panel behavior (re
 2. **Auto-expand collapsed panel on tab click**: Clicking any tab button in `BottomTerminalPanel` when `isCollapsed = true` automatically expands the panel.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 27 — August 20, 2026 (Tab Move Destinations, Right Sidebar, OLED, Terminal Unification & Panel Icon)
+
+**Context & User Directives:**
+User requested 7 focused refinements across tab destinations, right sidebar, OLED styling, terminal component unification, fallback states, settings trigger, and panel icons (request file `session-27-tab-destinations-right-sidebar-oled-settings-panel-icon.md`):
+1. **Tab Context Move Destinations**: Add Move to Main Area, Move to Bottom Panel, Move to Left Sidebar, Move to Right Sidebar in right-click & 3-dots menus.
+2. **Right Sidebar Dock**: Collapsible/resizable dock on the right side of the workspace to host tabs.
+3. **Panel OLED Black Theme**: Pure black OLED styling for panel tab bar and containers.
+4. **Main View Terminal Unification**: Remove fake input bar; use identical interactive tmux terminal in main area.
+5. **Full Conversation DOM/Content Hosting**: Reparent/render live conversation in whichever area/panel the tab is active in.
+6. **Tab Move Fallback**: Switch to next tab or empty launcher card with all window options when the active tab moves.
+7. **Settings Button Fix & Panel Icon**: Bulletproof settings trigger and panel dock icon replacing chevrons.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.

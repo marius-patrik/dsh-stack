@@ -627,4 +627,14 @@ sections owned by tweaks).
 1. **Conversation content moves with tab**: When conversation tab is moved or active in bottom panel, render full conversation content in the bottom panel without arbitrary 38px clamp.
 2. **Auto-expand collapsed panel on tab click**: Clicking any tab button in `BottomTerminalPanel` automatically expands the panel if collapsed.
 
+## P20 — Tab Destinations, Right Sidebar, OLED, Terminal Unification & Panel Icon (Session 27) [complete]
+
+1. **Tab context move destinations**: Move to Main Area, Bottom Panel, Left/Right Sidebar in tab menus.
+2. **Collapsible Right Sidebar dock**: Add right dock that can host tabs.
+3. **Panel OLED black styling**: Respect pure OLED black in tab bar headers and containers.
+4. **Main view terminal unification**: Render identical interactive tmux terminal component in main area without fake input bar.
+5. **Full conversation DOM/content hosting**: Move real conversation content when tab is moved.
+6. **Tab move empty fallback & sequence**: Switch to next tab or empty launcher card when tab moves.
+7. **Settings button click fix & Panel Icon**: Reliable settings trigger & panel dock icon (replace chevrons).
+
 

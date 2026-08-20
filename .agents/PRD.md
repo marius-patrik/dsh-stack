@@ -300,3 +300,20 @@ Product requirements for composer alignment, shell tab unification, and OLED con
    - Moving or selecting the Conversation tab in the bottom panel allows full height rendering without artificial 38px height clamping, and dynamically docks main view occupants (Terminal/Container) to the top boundary of the bottom panel.
 2. **Auto-Expand Collapsed Panel on Tab Click**:
    - Clicking any tab (Terminal, Container, Conversation), plus menu item, or dropping a tab into the bottom panel immediately expands the panel from its 38px collapsed state.
+
+---
+
+## 16. Tab Destinations, Right Sidebar, OLED, Terminal Unification & Panel Icon (Session 27)
+
+1. **Tab Context Move Destinations**:
+   - Right-click context menus and 3-dots actions menus support moving tabs across all workspace docking targets: Main Area, Bottom Panel, and Right Sidebar Dock.
+2. **Collapsible & Resizable Right Sidebar Dock**:
+   - Built a dedicated right sidebar dock with its own drag/drop tab strip, resizing handle, and support for interactive terminals, containers, and fallback new-tab cards.
+3. **Pure OLED Black Theme Styling**:
+   - Bottom panel tab bar, right dock, and occupant backgrounds use pure `#000000` / OLED theme variables with subtle translucent borders.
+4. **Main View Terminal Unification**:
+   - Replaced pseudo-terminal overlay with the unified `InteractiveTmuxTerminal` component, featuring direct tmux keystroke handling, scrolling, and zero fake form inputs.
+5. **Empty Area Fallback & Tab Sequence Navigation**:
+   - Closing or moving the active tab seamlessly transitions to the next tab in sequence, or displays the `EmptyAreaNewTabPicker` card with quick actions (+ New Conversation, + New Terminal, + New Container).
+6. **Bulletproof Settings Launcher & Panel Collapse Icon**:
+   - Added global document click interception for settings triggers, and replaced chevron collapse buttons with the official panel dock icon.
