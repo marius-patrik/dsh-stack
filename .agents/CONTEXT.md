@@ -1820,3 +1820,14 @@ User requested 6 targeted improvements across sidebar, input bar, skill cleaning
 6. **Panel background & edge alignment**: Fix gap behind panel and align edges with sidebar and centerCol.
 
 **Status:** completed, all 15 plugin test suites passed, committed & pushed.
+
+---
+
+## Session 26 — August 20, 2026 (Conversation Content Move with Tab & Auto-Expand Collapsed Panel)
+
+**Context & User Directives:**
+User requested 2 specific interactions for tab management and panel behavior (request file `session-26-conversation-content-move-and-collapsed-tab-expand.md`):
+1. **Conversation tab content moves with tab**: Moving or activating Conversation tab in the bottom panel must host and render the conversation view inside the bottom panel with full height capabilities.
+2. **Auto-expand collapsed panel on tab click**: Clicking any tab button in `BottomTerminalPanel` when `isCollapsed = true` automatically expands the panel.
+
+**Status:** completed, all 15 plugin test suites passed, committed & pushed.

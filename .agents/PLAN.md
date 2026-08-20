@@ -622,4 +622,9 @@ sections owned by tweaks).
 5. **Remove duplicate conversation tab from panel**: Only show terminal/containers in panel when chat is in main.
 6. **Panel background & edge alignment**: Fix gap behind panel and align edges with sidebar and centerCol.
 
+## P19 — Conversation Content Move with Tab & Auto-Expand Collapsed Panel (Session 26) [complete]
+
+1. **Conversation content moves with tab**: When conversation tab is moved or active in bottom panel, render full conversation content in the bottom panel without arbitrary 38px clamp.
+2. **Auto-expand collapsed panel on tab click**: Clicking any tab button in `BottomTerminalPanel` automatically expands the panel if collapsed.
+
 

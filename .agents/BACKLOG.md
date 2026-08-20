@@ -283,3 +283,10 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 89 | **Settings button click fix**: Reliable open/trigger of settings dialog from sidebar and all buttons | DONE ✅ | `dsh-tweaks` | Fix click propagation and dialog state mount |
 | 90 | **Remove duplicate conversation tab from panel**: Only show terminal/containers in panel when chat is in main | DONE ✅ | `dsh-providers` | Prevent duplicate conversation tab |
 | 91 | **Panel background & edge alignment**: Fix gap behind panel and align edges with sidebar and centerCol | DONE ✅ | `dsh-providers` | Seamless docking and alignment |
+
+## 15. Session 26 Conversation Content Move with Tab & Auto-Expand Collapsed Panel (2026-08-20, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 92 | **Conversation content moves with tab**: Render conversation view in bottom panel when tab is moved/active in bottom | DONE ✅ | `dsh-providers` | Allow full-height conversation view in bottom panel without 38px restriction |
+| 93 | **Auto-expand collapsed panel on tab click**: Clicking any tab in collapsed panel expands it | DONE ✅ | `dsh-providers` | Expand panel on tab click when isCollapsed is true |

@@ -291,3 +291,12 @@ Product requirements for composer alignment, shell tab unification, and OLED con
    - Automatically suppresses duplicate Conversation tabs from the bottom panel when the conversation is active in the main workspace view.
 6. **Pixel-Perfect Panel Edge Alignment & Solid Background**:
    - Docking offsets align seamlessly with the center column bounding box, with `paddingBottom` spacing preventing layout gaps or transparency behind the bottom panel.
+
+---
+
+## 15. Conversation Content Move & Auto-Expand Collapsed Panel (Session 26)
+
+1. **Conversation Content Move with Tab**:
+   - Moving or selecting the Conversation tab in the bottom panel allows full height rendering without artificial 38px height clamping, and dynamically docks main view occupants (Terminal/Container) to the top boundary of the bottom panel.
+2. **Auto-Expand Collapsed Panel on Tab Click**:
+   - Clicking any tab (Terminal, Container, Conversation), plus menu item, or dropping a tab into the bottom panel immediately expands the panel from its 38px collapsed state.
