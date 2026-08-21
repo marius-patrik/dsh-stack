@@ -2720,3 +2720,19 @@ User prompt:
    - Fits seamlessly in the 300px secondary sidebar, bottom panel dock, and main area with native container lists, status badges, start/stop/restart controls, and real-time logs.
 
 **Status:** completed, all 80 package test suites green.
+
+## Session 57 — August 21, 2026 (Button Hover Scale Purge & Universal Animated Lucide Icons)
+
+**Context & User Directives:**
+`get rid ofd buttons hover scaling and make sure every single ui icon is using lucide-animated and actualyl animates`
+
+**Accomplished Refinements:**
+1. **Complete Purge of Button Hover Scaling**:
+   - Removed all `transform: scale(...)` hover rules across `dsh-tweaks`, `dsh-providers`, and other plugin styles.
+   - Buttons, tree rows, star favorites, and triggers no longer pop-scale or shift layout on hover.
+2. **Universal Lucide Animated Icons**:
+   - Ensured all 35+ UI glyph components across workspaces, sidebar, top tab bar, bottom panel, right dock, search, and settings are standard Lucide SVG paths.
+   - Each glyph component attaches `.dsh-icon-animated` and dedicated class (`.dsh-icon-refresh`, `.dsh-icon-trash`, `.dsh-icon-edit`, `.dsh-icon-plus`, `.dsh-icon-pin`, `.dsh-icon-search`, `.dsh-icon-sliders`, `.dsh-icon-terminal`, `.dsh-icon-folder`, `.dsh-icon-containers`, `.dsh-icon-chat`, `.dsh-icon-subagent`, `.dsh-icon-pass`, `.dsh-icon-tools`, `.dsh-icon-mic`, `.dsh-icon-dock`, `.dsh-icon-branch`, `.dsh-icon-eye`, `.dsh-icon-copy`, `.dsh-icon-cut`, `.dsh-icon-ellipsis`).
+   - Implemented smooth, scale-free micro-animations (rotations, lid tilts, slider shifts, pulse, and cursor translations) on hover and interaction.
+
+**Status:** completed, all 80 package test suites green.

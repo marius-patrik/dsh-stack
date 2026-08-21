@@ -122,14 +122,11 @@ const SHELL_CSS = `
 .dsh-tw-hiddenLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .dsh-tw-section { display: flex; flex-direction: column; width: 100%; }
 .dsh-tw-section > [data-slot='settings.general.item'] > :last-child { border-bottom: none; }
-.dsh-tw-action { display: flex; min-width: 0; align-items: center; gap: 8px; }
-.dsh-tw-error { max-width: 180px; overflow: hidden; color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
-.dsh-icon-animated, svg:not([class*="badge"]) { transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease; will-change: transform; }
-button:hover svg, a:hover svg, .dsh-tree-sessionRow:hover svg, .dsh-tree-projectRow:hover svg, .dsh-tw-navCell:hover svg, .dsh-tw-trigger:hover svg, [role="button"]:hover svg, [role="tab"]:hover svg { transform: scale(1.18); }
-.dsh-icon-settings:hover, button:hover .dsh-icon-settings, .dsh-tw-trigger:hover .dsh-icon-settings, button:hover [data-icon="settings"], button:hover svg[class*="gear"], button:hover svg[class*="settings"] { transform: scale(1.22) rotate(45deg) !important; }
-.dsh-icon-refresh:hover, button:hover .dsh-icon-refresh, button:hover [data-icon="refresh"], button:hover svg[class*="refresh"], button:hover svg[class*="reload"] { transform: scale(1.22) rotate(180deg) !important; }
-button:hover .dsh-icon-rocket, button:hover [data-icon="rocket"] { transform: scale(1.25) translateY(-2px) rotate(-12deg) !important; }
-.dsh-tree-sessionRow:hover svg[class*="notepad"], .dsh-tree-sessionRow:hover .dsh-icon-notepad { transform: scale(1.2) rotate(-8deg) !important; }
+.dsh-icon-animated, svg:not([class*="badge"]) { transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease; }
+.dsh-icon-settings:hover, button:hover .dsh-icon-settings, .dsh-tw-trigger:hover .dsh-icon-settings, button:hover [data-icon="settings"], button:hover svg[class*="gear"], button:hover svg[class*="settings"] { transform: rotate(45deg) !important; }
+.dsh-icon-refresh:hover, button:hover .dsh-icon-refresh, button:hover [data-icon="refresh"], button:hover svg[class*="refresh"], button:hover svg[class*="reload"] { transform: rotate(180deg) !important; }
+button:hover .dsh-icon-rocket, button:hover [data-icon="rocket"] { transform: translateY(-2px) rotate(-12deg) !important; }
+.dsh-tree-sessionRow:hover svg[class*="notepad"], .dsh-tree-sessionRow:hover .dsh-icon-notepad { transform: rotate(-8deg) !important; }
 [class*="inputRow"] {
   display: flex !important;
   align-items: center !important;
