@@ -1982,11 +1982,9 @@ button:hover .dsh-icon-animated,
                 } catch (err) {}
               },
             },
-            // 0. Conversation Tab (suppressed if open in top main bar)
+            // 0. Conversation Tab (rendered ONLY IF explicitly moved to bottom panel)
             (function () {
-              var topMap = (typeof window !== "undefined" && window.__dsh_top_tab_ids__) ? window.__dsh_top_tab_ids__ : {};
-              if (topMap["chat-main"] || topMap["chat"]) return null;
-              var isChatSel = activeView === "chat";
+              if (activeView !== "chat") return null;
               return h(
                 "div",
                 {
@@ -2012,18 +2010,41 @@ button:hover .dsh-icon-animated,
                     gap: "5px",
                     padding: "3px 8px",
                     borderRadius: "5px",
-                    background: isChatSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
-                    border: isChatSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
-                    color: isChatSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                    background: "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))",
+                    border: "1px solid var(--dsw-alias-primary, #6366f1)",
+                    color: "var(--dsw-alias-label-primary, #fff)",
                     fontSize: "12px",
-                    fontWeight: isChatSel ? 600 : 400,
+                    fontWeight: 600,
                     cursor: "pointer",
                     transition: "all 120ms ease",
                     whiteSpace: "nowrap",
                   },
                 },
                 h(ChatGlyph, { size: 12 }),
-                h("span", null, "Conversation")
+                h("span", null, "Conversation"),
+                h("button", {
+                  type: "button",
+                  title: "Restore to Top Tab Bar",
+                  onClick: function (e) {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: { id: "chat-main", type: "chat", title: "Conversation" } }));
+                  },
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "14px",
+                    height: "14px",
+                    marginLeft: "2px",
+                    border: "none",
+                    borderRadius: "3px",
+                    background: "transparent",
+                    color: "inherit",
+                    opacity: 0.6,
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }
+                }, "×")
               );
             })(),
             // 1. Terminal Tabs (filtered against Top Tab Bar for deduplication)
@@ -4649,6 +4670,7 @@ button:hover .dsh-icon-animated,
         });
       };
 
+      var bounds = useCenterBounds();
       var activeTabObj = tabs.find(function (t) { return t.id === activeTab; });
       var isMainTermActive = activeTabObj && activeTabObj.type === "terminal";
       var isMainContActive = activeTabObj && activeTabObj.type === "container";
@@ -4664,14 +4686,18 @@ button:hover .dsh-icon-animated,
           {
             className: "dsh-top-tab-bar",
             style: {
-              display: "inline-flex",
+              position: "fixed",
+              top: bounds.top + "px",
+              left: bounds.left + "px",
+              right: bounds.right + "px",
+              height: "36px",
+              display: "flex",
               alignItems: "center",
               gap: "4px",
-              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
-              padding: "2px 4px",
-              borderRadius: "8px",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-              marginLeft: "8px",
+              background: "var(--dsw-alias-surface-l0, #13141f)",
+              padding: "0 10px",
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+              zIndex: 55,
               userSelect: "none",
             },
             onDragOver: function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; },
@@ -5228,6 +5254,66 @@ button:hover .dsh-icon-animated,
         }
       },
         h("path", { d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" })
+      );
+    }
+
+    function FolderPlusGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", {
+        width: size,
+        height: size,
+        className: className,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: Object.assign({
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+        }, (props && props.style) || {})
+      },
+        h("path", { d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" }),
+        h("line", { x1: "12", y1: "10", x2: "12", y2: "16" }),
+        h("line", { x1: "9", y1: "13", x2: "15", y2: "13" })
+      );
+    }
+
+    function SlidersGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", {
+        width: size,
+        height: size,
+        className: className,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: Object.assign({
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+        }, (props && props.style) || {})
+      },
+        h("line", { x1: "4", y1: "21", x2: "4", y2: "14" }),
+        h("line", { x1: "4", y1: "10", x2: "4", y2: "3" }),
+        h("line", { x1: "12", y1: "21", x2: "12", y2: "12" }),
+        h("line", { x1: "12", y1: "8", x2: "12", y2: "3" }),
+        h("line", { x1: "20", y1: "21", x2: "20", y2: "16" }),
+        h("line", { x1: "20", y1: "12", x2: "20", y2: "3" }),
+        h("line", { x1: "1", y1: "14", x2: "7", y2: "14" }),
+        h("line", { x1: "9", y1: "8", x2: "15", y2: "8" }),
+        h("line", { x1: "17", y1: "16", x2: "23", y2: "16" })
       );
     }
 
@@ -7064,12 +7150,156 @@ button:hover .dsh-icon-animated,
       var filteredActiveChatSessions = activeChatSessions.filter(filterBySearch);
       var filteredUngroupedSessions = ungroupedSessions.filter(filterBySearch);
 
+      var searchExpandedState = React.useState(false);
+      var searchExpanded = searchExpandedState[0], setSearchExpanded = searchExpandedState[1];
+      var searchInputRef = React.useRef(null);
+
+      var viewOptionsOpenState = React.useState(false);
+      var viewOptionsOpen = viewOptionsOpenState[0], setViewOptionsOpen = viewOptionsOpenState[1];
+      var viewOptionsBtnRef = React.useRef(null);
+
+      var addWsMenuOpenState = React.useState(false);
+      var addWsMenuOpen = addWsMenuOpenState[0], setAddWsMenuOpen = addWsMenuOpenState[1];
+      var addWsBtnRef = React.useRef(null);
+
       var ungroupedMenuState = React.useState(false);
       var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
 
       return h(
         "div",
-        { style: { display: "flex", flexDirection: "column", width: "100%", height: "100%", overflowY: "auto", gap: "4px", padding: "4px 0" } },
+        { style: { display: "flex", flexDirection: "column", width: "100%", height: "100%", overflowY: "auto", gap: "4px", padding: "0 0 4px 0" } },
+
+        // 0. NATIVE SIDEBAR HEADER: Title, Search, View Options, Add Workspace
+        h(
+          "div",
+          {
+            className: "dsh-sidebar-section-header",
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "6px 8px 8px 10px",
+              minHeight: "36px",
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+              userSelect: "none",
+            }
+          },
+          // Left: Section Title or Search Input
+          searchExpanded ? h(
+            "div",
+            { style: { display: "flex", alignItems: "center", flex: 1, gap: "6px", background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.06))", padding: "2px 8px", borderRadius: "6px", border: "1px solid var(--dsw-alias-primary, #6366f1)" } },
+            h(SearchGlyph, { size: 13, style: { color: "var(--dsw-alias-label-secondary)" } }),
+            h("input", {
+              ref: searchInputRef,
+              type: "text",
+              placeholder: "Search chats, files…",
+              value: searchQuery,
+              onChange: function (e) { setSearchQuery(e.target.value); },
+              onKeyDown: function (e) { if (e.key === "Escape") { setSearchQuery(""); setSearchExpanded(false); } },
+              style: {
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "var(--dsw-alias-label-primary)",
+                fontSize: "12px",
+                width: "100%",
+              }
+            }),
+            h("button", {
+              type: "button",
+              onClick: function () { setSearchQuery(""); setSearchExpanded(false); },
+              style: { background: "transparent", border: "none", color: "var(--dsw-alias-label-tertiary)", cursor: "pointer", fontSize: "12px", padding: 0 }
+            }, "✕")
+          ) : h(
+            "span",
+            { style: { fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--dsw-alias-label-secondary)" } },
+            "Workspaces"
+          ),
+          // Right: Action Buttons (Search, View Options, Add Workspace)
+          !searchExpanded ? h(
+            "div",
+            { style: { display: "flex", alignItems: "center", gap: "2px" } },
+            // Search Trigger Button
+            h(P.Tooltip, { label: "Search workspaces & chats", delayMs: 400 },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center" },
+                onClick: function () {
+                  setSearchExpanded(true);
+                  setTimeout(function () { if (searchInputRef.current) searchInputRef.current.focus(); }, 50);
+                }
+              }, h(SearchGlyph, { size: 14 }))
+            ),
+            // View Options Menu
+            h(P.Tooltip, { label: "View Options", delayMs: 400 },
+              h("button", {
+                ref: viewOptionsBtnRef,
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center" },
+                onClick: function () { setViewOptionsOpen(!viewOptionsOpen); }
+              }, h(SlidersGlyph, { size: 14 }))
+            ),
+            viewOptionsOpen ? h(SelectDropdownMenu, {
+              open: viewOptionsOpen,
+              anchorRef: viewOptionsBtnRef,
+              onClose: function () { setViewOptionsOpen(false); },
+              items: [
+                { id: "archive-empty", label: "Archive Empty & Pong Sessions", icon: h(TrashGlyph, { size: 13 }), danger: true },
+              ],
+              onSelect: function (act) {
+                setViewOptionsOpen(false);
+                if (act === "archive-empty") {
+                  handleArchivePongSessions();
+                }
+              }
+            }) : null,
+            // Add Workspace Button (native folder plus)
+            h(P.Tooltip, { label: "Add Workspace Folder…", delayMs: 400 },
+              h("button", {
+                ref: addWsBtnRef,
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--dsw-alias-primary, #6366f1)" },
+                onClick: function () { setAddWsMenuOpen(!addWsMenuOpen); }
+              }, h(FolderPlusGlyph, { size: 14 }))
+            ),
+            addWsMenuOpen ? h(SelectDropdownMenu, {
+              open: addWsMenuOpen,
+              anchorRef: addWsBtnRef,
+              onClose: function () { setAddWsMenuOpen(false); },
+              items: [
+                { id: "pick-folder", label: "Open Folder as Workspace…", icon: h(FolderGlyph, { size: 13 }) },
+                { id: "new-folder", label: "Create New Workspace Directory…", icon: h(FolderPlusGlyph, { size: 13 }) },
+                { id: "new-chat", label: "New Unscoped Chat", icon: h(ChatGlyph, { size: 13 }) },
+                { id: "new-term", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
+              ],
+              onSelect: function (act) {
+                setAddWsMenuOpen(false);
+                if (act === "pick-folder" || act === "new-folder") {
+                  var defaultPath = "/Users/user/Projects";
+                  var p = prompt("Enter directory path for new Workspace:", defaultPath);
+                  if (p && p.trim()) {
+                    var cleanP = p.trim();
+                    if (createWorkspace) {
+                      createWorkspace({ path: cleanP }).then(function (w) {
+                        if (startSession) startSession(w ? w.workspaceId : undefined);
+                        loadAll();
+                      });
+                    } else {
+                      handleStartSessionInDir(cleanP);
+                    }
+                  }
+                } else if (act === "new-chat") {
+                  if (startSession) startSession();
+                } else if (act === "new-term") {
+                  window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
+                }
+              }
+            }) : null
+          ) : null
+        ),
 
         // 1. PINNED SESSIONS SECTION (TOP)
         h(
@@ -7418,6 +7648,7 @@ button:hover .dsh-icon-animated,
       return h(
         React.Fragment,
         null,
+        h(TopConversationTabBar, {}),
         h(RightSidebarDock, {}),
         panel ? h(BottomTerminalPanel, {
           initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
@@ -7480,23 +7711,14 @@ button:hover .dsh-icon-animated,
         }, UnifiedWorkspacesBrowser);
       }, "dsh-providers: dynamic filesystem and workspaces browser");
 
-      // 0b. Global Terminals & Containers Manager
+      // 0b. Global Terminals & Containers Manager + Top Tab Bar
       ctx.slots.inject("sidebar.footer.action", function () {
         return ctx.slots.register({
           name: "sidebar.footer.action",
           id: "dsh-terminals-manager",
           order: 999,
         }, GlobalTerminalAndContainerManager);
-      }, "dsh-providers: global terminals manager");
-
-      // 0c. Top Conversation Tab Bar with Draggable Tabs and Plus Menu
-      ctx.slots.inject("conversation.session.header.actions", function () {
-        return ctx.slots.register({
-          name: "conversation.session.header.actions",
-          id: "dsh-top-tab-bar",
-          order: 0,
-        }, TopConversationTabBar);
-      }, "dsh-providers: top conversation tab bar");
+      }, "dsh-providers: global terminals manager and top tab bar");
 
       // 1. Accounts Settings Section (Order 8)
       ctx.slots.inject("settings.section", function () {

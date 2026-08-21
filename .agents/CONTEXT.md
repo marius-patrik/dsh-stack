@@ -2673,3 +2673,26 @@ User prompt:
    - Integrated continuous event listeners (`resize`, `pointermove`, `dsh:right-sidebar-changed`) so that dragging the secondary sidebar drag handle immediately updates all main view occupants (`MainViewTerminalOccupant`, `MainViewContainerOccupant`, `MainViewFileEditorOccupant`, `MainViewRepoOccupant`, `EmptyAreaNewTabPicker`) in real time with 0ms lag and zero column overlap.
 
 **Status:** completed, all 80 package test suites green.
+
+## Session 55 — August 21, 2026 (Restored Native Sidebar Action Buttons & Full Top Main Tab Bar Strip)
+
+**Context & User Directives:**
+User prompt:
+`restore the natibe sidebar buttons for search new workspace and so on`
+`conversation tab still wrong`
+
+**Accomplished Refinements:**
+1. **Restored Native Sidebar Header Action Buttons**:
+   - Added dedicated `dsh-sidebar-section-header` at the top of `UnifiedWorkspacesBrowser`:
+     - **Title**: `Workspaces` in uppercase muted label.
+     - **Search Trigger & Input**: Search button expanding real-time query input filtering workspaces, folders, and chats with escape/clear button.
+     - **View Options Menu**: View options button with `SlidersGlyph` dropdown for quick filters and pong-cleanup actions.
+     - **Add Workspace Folder**: `FolderPlusGlyph` button with dropdown to open folder as workspace, create new workspace directory, start new unscoped chat, or spawn a terminal session.
+2. **Dedicated Full-Width Top Tab Bar Above Main Area**:
+   - Mounted `TopConversationTabBar` globally in `GlobalTerminalAndContainerManager` spanning the full width of the center column (`bounds.left` to `bounds.right` at `bounds.top`).
+   - Active `[ 💬 Conversation ]` tab renders at the top of the main area above the chat session by default.
+   - Clean drag-and-drop and context-menu mobility to bottom panel or right dock.
+3. **Bottom Panel Tab Isolation**:
+   - Removed default Conversation tab from `BottomTerminalPanel`. The bottom panel tab strip only shows Terminals and Sandboxes unless Conversation is explicitly moved down to the bottom panel.
+
+**Status:** completed, all 80 package test suites green.
