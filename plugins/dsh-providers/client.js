@@ -2868,13 +2868,25 @@ button:hover .dsh-icon-animated,
       var isResizingState = React.useState(false);
       var isResizing = isResizingState[0], setIsResizing = isResizingState[1];
 
-      // Broadcast right sidebar width for panel docking
+      // Broadcast right sidebar width and adjust centerCol layout bounds
       React.useEffect(function () {
+        var currentRightWidth = isOpen ? width : (tabs.length > 0 ? 36 : 0);
         if (typeof window !== "undefined") {
-          window.__dsh_right_sidebar_width__ = isOpen ? width : 0;
-          window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: isOpen, width: isOpen ? width : 0 } }));
+          window.__dsh_right_sidebar_width__ = currentRightWidth;
+          window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: isOpen, width: currentRightWidth } }));
         }
-      }, [isOpen, width]);
+        var centerCol = document.querySelector('div[class*="centerCol"], [class*="centerCol"]');
+        if (centerCol) {
+          centerCol.style.marginRight = currentRightWidth + "px";
+          centerCol.style.transition = isResizing ? "none" : "margin-right 150ms ease";
+        }
+        return function () {
+          var col = document.querySelector('div[class*="centerCol"], [class*="centerCol"]');
+          if (col) {
+            col.style.marginRight = "0px";
+          }
+        };
+      }, [isOpen, width, tabs.length, isResizing]);
 
       React.useEffect(function () {
         var onToggle = function () { setIsOpen(function (v) { return !v; }); };
@@ -3046,26 +3058,27 @@ button:hover .dsh-icon-animated,
 
     function getCenterBounds() {
       if (typeof document === "undefined") return { left: 240, right: 0, top: 48 };
-      var centerEl = document.querySelector('div[class*="centerCol"]');
-      if (centerEl && centerEl.getBoundingClientRect) {
-        var cRect = centerEl.getBoundingClientRect();
-        if (cRect.width > 0) {
-          return {
-            left: cRect.left,
-            right: Math.max(0, window.innerWidth - cRect.right),
-            top: cRect.top || 48,
-          };
-        }
-      }
       var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
       var detailsEl = document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]');
       var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
+      var effectiveRight = Math.max(customRight, detailsW);
+
       var sidebarEl = document.querySelector('div[class*="sidebarCol"]');
-      var sidebarW = (sidebarEl && sidebarEl.getBoundingClientRect) ? sidebarEl.getBoundingClientRect().right : 240;
+      var centerEl = document.querySelector('div[class*="centerCol"]');
+      var left = 240;
+      var top = 48;
+
+      if (sidebarEl && sidebarEl.getBoundingClientRect && sidebarEl.getBoundingClientRect().width > 0) {
+        left = sidebarEl.getBoundingClientRect().right || 240;
+      } else if (centerEl && centerEl.getBoundingClientRect) {
+        left = centerEl.getBoundingClientRect().left || 240;
+        top = centerEl.getBoundingClientRect().top || 48;
+      }
+
       return {
-        left: sidebarW || 240,
-        right: Math.max(customRight, detailsW),
-        top: 48,
+        left: left,
+        right: effectiveRight,
+        top: top,
       };
     }
 
@@ -3123,7 +3136,7 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-terminal",
         style: {
           position: "fixed",
-          top: bounds.top + "px",
+          top: (bounds.top + 36) + "px",
           left: bounds.left + "px",
           right: bounds.right + "px",
           bottom: panelHeight,
@@ -3190,7 +3203,7 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-container",
         style: {
           position: "fixed",
-          top: bounds.top + "px",
+          top: (bounds.top + 36) + "px",
           left: bounds.left + "px",
           right: bounds.right + "px",
           bottom: panelHeight,
@@ -3286,7 +3299,7 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-monaco",
         style: {
           position: "fixed",
-          top: bounds.top + "px",
+          top: (bounds.top + 36) + "px",
           left: bounds.left + "px",
           right: bounds.right + "px",
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
@@ -3609,7 +3622,7 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-repo",
         style: {
           position: "fixed",
-          top: bounds.top + "px",
+          top: (bounds.top + 36) + "px",
           left: bounds.left + "px",
           right: bounds.right + "px",
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
@@ -4891,24 +4904,9 @@ button:hover .dsh-icon-animated,
         isMainEmpty ? h("div", {
           style: {
             position: "fixed",
-            top: (function () {
-              var centerEl = document.querySelector('div[class*="centerCol"]');
-              return (centerEl && centerEl.getBoundingClientRect) ? centerEl.getBoundingClientRect().top || 48 : 48;
-            })() + "px",
-            left: (function () {
-              var centerEl = document.querySelector('div[class*="centerCol"]');
-              return (centerEl && centerEl.getBoundingClientRect) ? centerEl.getBoundingClientRect().left || 240 : 240;
-            })() + "px",
-            right: (function () {
-              var centerEl = document.querySelector('div[class*="centerCol"]');
-              if (centerEl && centerEl.getBoundingClientRect && centerEl.getBoundingClientRect().width > 0) {
-                return Math.max(0, window.innerWidth - centerEl.getBoundingClientRect().right) + "px";
-              }
-              var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
-              var detailsEl = (typeof document !== "undefined") ? document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]') : null;
-              var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
-              return Math.max(customRight, detailsW) + "px";
-            })(),
+            top: (bounds.top + 36) + "px",
+            left: bounds.left + "px",
+            right: bounds.right + "px",
             bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
             zIndex: 40,
             display: "flex",
