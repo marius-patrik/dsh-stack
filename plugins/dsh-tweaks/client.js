@@ -1535,7 +1535,7 @@ window.__ModuleLoader__.load({
             h('h2', { style: { margin: '0 0 4px', fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Harness Plugins (' + pluginList.length + ')'),
             h('p', { style: { margin: 0, fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' } }, 'Monorepo plugins extending the DeepSeek Harness platform.')
           ),
-          h('span', { style: { padding: '3px 10px', borderRadius: '12px', background: 'rgba(63, 185, 80, 0.15)', color: '#3fb950', fontSize: '12px', fontWeight: 700 } }, '16/16 Active')
+          h('span', { style: { padding: '3px 10px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.15)', color: '#6366f1', fontSize: '12px', fontWeight: 700 } }, '16/16 Active')
         ),
         h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '12px' } },
           pluginList.map(function (p) {
@@ -1554,7 +1554,7 @@ window.__ModuleLoader__.load({
             },
               h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
                 h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
-                  h('span', { style: { width: '8px', height: '8px', borderRadius: '50%', background: '#3fb950', boxShadow: '0 0 6px rgba(63,185,80,0.5)' } }),
+                  h('span', { style: { width: '8px', height: '8px', borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 6px rgba(99, 102, 241, 0.5)' } }),
                   h('strong', { style: { fontSize: '14px', color: 'var(--dsw-alias-label-primary)' } }, p.name)
                 ),
                 h('span', { style: { fontSize: '11px', padding: '1px 6px', borderRadius: '4px', background: 'rgba(128,128,128,0.15)', color: 'var(--dsw-alias-label-secondary)', fontFamily: 'var(--ds-font-mono, monospace)' } }, 'v' + p.version)
@@ -2798,11 +2798,11 @@ window.__ModuleLoader__.load({
           if (role.indexOf('plan') !== -1 || role.indexOf('reason') !== -1) {
             return { bg: 'rgba(99, 102, 241, 0.15)', color: '#818cf8' };
           } else if (role.indexOf('exec') !== -1) {
-            return { bg: 'rgba(34, 197, 94, 0.15)', color: '#4ade80' };
+            return { bg: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' };
           } else if (role.indexOf('research') !== -1) {
-            return { bg: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' };
+            return { bg: 'rgba(128, 128, 128, 0.15)', color: 'var(--dsw-alias-label-secondary)' };
           } else if (role.indexOf('orch') !== -1) {
-            return { bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' };
+            return { bg: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' };
           }
           return { bg: 'rgba(128, 128, 128, 0.15)', color: 'var(--dsw-alias-label-secondary)' };
         };
@@ -2892,8 +2892,8 @@ window.__ModuleLoader__.load({
                     width: '7px',
                     height: '7px',
                     borderRadius: '50%',
-                    backgroundColor: sub.isRunning ? 'var(--dsw-alias-state-success-primary, #22c55e)' : 'var(--dsw-alias-label-tertiary, #888)',
-                    boxShadow: sub.isRunning ? '0 0 6px rgba(34,197,94,0.6)' : 'none',
+                    backgroundColor: sub.isRunning ? '#6366f1' : 'var(--dsw-alias-label-tertiary, #888)',
+                    boxShadow: sub.isRunning ? '0 0 6px rgba(99,102,241,0.6)' : 'none',
                     flexShrink: 0,
                   },
                 }),
@@ -2911,7 +2911,7 @@ window.__ModuleLoader__.load({
                 }, sub.role),
                 h('span', { style: { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, sub.title),
                 sub.tokenStr ? h('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-tertiary)', flexShrink: 0 } }, sub.tokenStr) : null,
-                h('span', { style: { fontSize: '11px', color: sub.isRunning ? '#4ade80' : 'var(--dsw-alias-label-tertiary)', flexShrink: 0 } }, sub.isRunning ? 'running' : 'done')
+                h('span', { style: { fontSize: '11px', color: sub.isRunning ? '#6366f1' : 'var(--dsw-alias-label-tertiary)', flexShrink: 0 } }, sub.isRunning ? 'running' : 'done')
               );
             })
           ) : null

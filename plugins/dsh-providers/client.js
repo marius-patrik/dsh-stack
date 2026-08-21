@@ -950,98 +950,40 @@ button:hover .dsh-icon-animated,
     }
 
     function ProviderBrandIcon(props) {
-      var id = props.id || "";
-      var size = props.size || 20;
-      var style = Object.assign({ display: "inline-flex", alignItems: "center", justifyContent: "center", width: size + "px", height: size + "px", flexShrink: 0 }, props.style || {});
+      var id = (props.id || "").toLowerCase();
+      var size = props.size || 18;
 
-      if (id === "antigravity" || id === "google") {
-        return h("span", { style: style, title: "Google Gemini / Antigravity" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("path", { d: "M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z", fill: "url(#gemini-grad)", stroke: "#6366f1", strokeWidth: "1.2" }),
-            h("defs", null,
-              h("linearGradient", { id: "gemini-grad", x1: "2", y1: "2", x2: "22", y2: "22", gradientUnits: "userSpaceOnUse" },
-                h("stop", { stopColor: "#4285F4" }),
-                h("stop", { offset: "0.5", stopColor: "#9B72CB" }),
-                h("stop", { offset: "1", stopColor: "#D96570" })
-              )
-            )
-          )
-        );
+      var appPath = null;
+      if (id === "cursor") appPath = "/Applications/Cursor.app";
+      else if (id === "vscode" || id === "code") appPath = "/Applications/Visual Studio Code.app";
+      else if (id === "chrome" || id === "google") appPath = "/Applications/Google Chrome.app";
+      else if (id === "safari") appPath = "/Applications/Safari.app";
+      else if (id === "terminal" || id === "tmux") appPath = "/System/Applications/Utilities/Terminal.app";
+
+      if (appPath) {
+        return h("img", {
+          src: "/quotas/api/fs/icon?path=" + encodeURIComponent(appPath),
+          width: size,
+          height: size,
+          alt: id,
+          className: "dsh-icon-animated",
+          style: {
+            width: size + "px",
+            height: size + "px",
+            objectFit: "contain",
+            display: "inline-flex",
+            verticalAlign: "middle",
+            flexShrink: 0,
+            borderRadius: "3px",
+          },
+          onError: function (e) {
+            e.currentTarget.style.display = "none";
+          }
+        });
       }
-      if (id === "anthropic") {
-        return h("span", { style: style, title: "Anthropic Claude" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#cc785c" }),
-            h("path", { d: "M14.5 7L9.5 17M9.5 7L14.5 17M7 13.5H17", stroke: "#ffffff", strokeWidth: "2", strokeLinecap: "round" })
-          )
-        );
-      }
-      if (id === "openai") {
-        return h("span", { style: style, title: "OpenAI ChatGPT" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#10a37f" }),
-            h("circle", { cx: "12", cy: "12", r: "5.5", stroke: "#ffffff", strokeWidth: "1.8" }),
-            h("path", { d: "M12 6.5V17.5M6.5 12H17.5", stroke: "#ffffff", strokeWidth: "1.5" })
-          )
-        );
-      }
-      if (id === "deepseek") {
-        return h("span", { style: style, title: "DeepSeek" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#0066FF" }),
-            h("path", { d: "M7 16C7 11 11 8 17 8C17 13 13 16 7 16Z", fill: "#ffffff" }),
-            h("circle", { cx: "10", cy: "12", r: "1.5", fill: "#0066FF" })
-          )
-        );
-      }
-      if (id === "grok") {
-        return h("span", { style: style, title: "xAI Grok" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#000000", stroke: "#333", strokeWidth: "1" }),
-            h("path", { d: "M6 6L18 18M18 6L6 18", stroke: "#ffffff", strokeWidth: "2.2", strokeLinecap: "round" })
-          )
-        );
-      }
-      if (id === "kimi") {
-        return h("span", { style: style, title: "Moonshot Kimi" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#0052D9" }),
-            h("path", { d: "M7 6V18M7 12L17 6M7 12L17 18", stroke: "#ffffff", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" })
-          )
-        );
-      }
-      if (id === "ollama") {
-        return h("span", { style: style, title: "Ollama Local" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#1e1e2e", stroke: "#585b70", strokeWidth: "1" }),
-            h("circle", { cx: "9", cy: "11", r: "2", fill: "#fab387" }),
-            h("circle", { cx: "15", cy: "11", r: "2", fill: "#fab387" }),
-            h("path", { d: "M9 16C10.5 17.5 13.5 17.5 15 16", stroke: "#cdd6f4", strokeWidth: "1.5", strokeLinecap: "round" })
-          )
-        );
-      }
-      if (id === "cursor") {
-        return h("span", { style: style, title: "Cursor" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#111" }),
-            h("path", { d: "M7 7L17 17M17 7L7 17", stroke: "#38bdf8", strokeWidth: "2", strokeLinecap: "round" })
-          )
-        );
-      }
-      if (id === "github") {
-        return h("span", { style: style, title: "GitHub" },
-          h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none" },
-            h("rect", { width: "24", height: "24", rx: "5", fill: "#24292e" }),
-            h("path", { d: "M12 4C7.58 4 4 7.58 4 12C4 15.54 6.29 18.53 9.47 19.59C9.87 19.66 10.02 19.42 10.02 19.21V17.87C7.8 18.35 7.33 16.8 7.33 16.8C6.97 15.89 6.45 15.65 6.45 15.65C5.72 15.15 6.51 15.16 6.51 15.16C7.32 15.22 7.74 15.99 7.74 15.99C8.46 17.22 9.62 16.87 10.08 16.66C10.15 16.14 10.36 15.78 10.59 15.58C8.82 15.38 6.95 14.69 6.95 11.64C6.95 10.77 7.26 10.06 7.77 9.51C7.69 9.31 7.42 8.5 7.85 7.41C7.85 7.41 8.52 7.2 10.05 8.23C10.69 8.05 11.37 7.96 12.05 7.96C12.73 7.96 13.41 8.05 14.05 8.23C15.58 7.2 16.25 7.41 16.25 7.41C16.68 8.5 16.41 9.31 16.33 9.51C16.84 10.06 17.15 10.77 17.15 11.64C17.15 14.7 15.27 15.38 13.5 15.57C13.78 15.81 14.04 16.29 14.04 17.03V19.21C14.04 19.42 14.19 19.67 14.59 19.59C17.77 18.53 20.06 15.54 20.06 12C20.06 7.58 16.48 4 12 4Z", fill: "#ffffff" })
-          )
-        );
-      }
-      return h("span", { style: style },
-        h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
-          h("circle", { cx: "12", cy: "12", r: "10" }),
-          h("path", { d: "M12 6v6l4 2" })
-        )
-      );
+
+      // If no real native macOS app icon exists on disk, render nothing
+      return null;
     }
 
     // 1a. SETTINGS: ACCOUNTS SECTION
@@ -1190,7 +1132,7 @@ button:hover .dsh-icon-animated,
                 h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
                   h("div", { style: { display: "flex", gap: "8px", alignItems: "baseline" } },
                     h("span", { style: { fontSize: "15px", fontWeight: 700, color: "var(--dsw-alias-label-primary)" } }, "Antigravity Multi-Pool Runtime"),
-                    h("span", { style: { padding: "2px 7px", borderRadius: "10px", fontSize: "10px", fontWeight: 600, background: "rgba(63, 185, 80, 0.15)", color: "#3fb950" } }, antigravityQuotas.status || "Active")
+                    h("span", { style: { padding: "2px 7px", borderRadius: "10px", fontSize: "10px", fontWeight: 600, background: "rgba(99, 102, 241, 0.15)", color: "#6366f1" } }, antigravityQuotas.status || "Active")
                   ),
                   h("div", { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } }, "Context: " + (antigravityQuotas.contextWindow || "1M tokens"))
                 )
@@ -1264,7 +1206,7 @@ button:hover .dsh-icon-animated,
                       h(ProviderBrandIcon, { id: prov.id, size: 14 }),
                       h("span", { style: { fontSize: "13px", fontWeight: 600 } }, m.name)
                     ),
-                    m.isDefault ? h("span", { style: { padding: "1px 5px", borderRadius: "3px", fontSize: "9px", fontWeight: 700, background: "#3fb950", color: "#fff" } }, "DEFAULT") : null
+                    m.isDefault ? h("span", { style: { padding: "1px 5px", borderRadius: "3px", fontSize: "9px", fontWeight: 700, background: "#6366f1", color: "#fff" } }, "DEFAULT") : null
                   ),
                   h("code", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, m.id),
                   h("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "2px" } },
@@ -1318,7 +1260,7 @@ button:hover .dsh-icon-animated,
                 h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Local offline LLM runner on http://127.0.0.1:11434")
               )
             ),
-            h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: ollamaMeta ? "rgba(63, 185, 80, 0.15)" : "rgba(128,128,128,0.15)", color: ollamaMeta ? "#3fb950" : "var(--dsw-alias-label-secondary)" } }, ollamaMeta ? "ONLINE" : "STANDBY")
+            h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: ollamaMeta ? "rgba(99, 102, 241, 0.15)" : "rgba(128,128,128,0.15)", color: ollamaMeta ? "#6366f1" : "var(--dsw-alias-label-secondary)" } }, ollamaMeta ? "ONLINE" : "STANDBY")
           ),
           ollamaMeta ? h("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
             h("div", { style: { fontSize: "12px", fontWeight: 600 } }, "Installed Local Models:"),
@@ -1354,7 +1296,7 @@ button:hover .dsh-icon-animated,
               h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Neural text-to-speech (Edge TTS, OpenAI, ElevenLabs) and audio controls")
             )
           ),
-          h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "rgba(63, 185, 80, 0.15)", color: "#3fb950" } }, "ACTIVE")
+          h("span", { style: { padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "rgba(99, 102, 241, 0.15)", color: "#6366f1" } }, "ACTIVE")
         )
       );
     }
@@ -1509,7 +1451,7 @@ button:hover .dsh-icon-animated,
                 ),
                 h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, t.desc)
               ),
-              h("span", { style: { padding: "4px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: t.perm === "Auto-Approve" ? "rgba(63, 185, 80, 0.15)" : "rgba(217, 119, 6, 0.15)", color: t.perm === "Auto-Approve" ? "#3fb950" : "#d97706" } }, t.perm)
+              h("span", { style: { padding: "4px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: t.perm === "Auto-Approve" ? "rgba(99, 102, 241, 0.15)" : "rgba(128, 128, 128, 0.15)", color: t.perm === "Auto-Approve" ? "#6366f1" : "var(--dsw-alias-label-secondary)" } }, t.perm)
             );
           })
         )
@@ -1542,7 +1484,7 @@ button:hover .dsh-icon-animated,
               h("div", { style: { display: "flex", flexDirection: "column", gap: "4px" } },
                 h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
                   h("strong", { style: { fontSize: "14px" } }, loop.name),
-                  h("span", { style: { padding: "1px 6px", borderRadius: "4px", fontSize: "10px", background: "rgba(63, 185, 80, 0.15)", color: "#3fb950", fontWeight: 600 } }, loop.status)
+                  h("span", { style: { padding: "1px 6px", borderRadius: "4px", fontSize: "10px", background: "rgba(99, 102, 241, 0.15)", color: "#6366f1", fontWeight: 600 } }, loop.status)
                 ),
                 h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, loop.desc),
                 h("div", { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "Interval: " + loop.interval)
@@ -3081,8 +3023,38 @@ button:hover .dsh-icon-animated,
       );
     }
 
+    function getRightSidebarWidth() {
+      var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
+      var detailsEl = (typeof document !== "undefined") ? document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]') : null;
+      var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
+      return Math.max(customRight, detailsW);
+    }
+
+    function useRightSidebarWidth() {
+      var widthState = React.useState(getRightSidebarWidth);
+      var w = widthState[0], setW = widthState[1];
+
+      React.useEffect(function () {
+        var update = function () {
+          var nextW = getRightSidebarWidth();
+          setW(function (prev) { return prev !== nextW ? nextW : prev; });
+        };
+        window.addEventListener("dsh:right-sidebar-changed", update);
+        window.addEventListener("resize", update);
+        var timer = setInterval(update, 200);
+        return function () {
+          window.removeEventListener("dsh:right-sidebar-changed", update);
+          window.removeEventListener("resize", update);
+          clearInterval(timer);
+        };
+      }, []);
+
+      return w;
+    }
+
     function MainViewTerminalOccupant(props) {
       var sessionName = props.sessionName || "0";
+      var rightWidth = useRightSidebarWidth();
       var panelHeightState = React.useState(function () {
         if (typeof window !== "undefined" && window.__dsh_panel_height__) {
           return window.__dsh_panel_height__;
@@ -3107,7 +3079,7 @@ button:hover .dsh-icon-animated,
           position: "fixed",
           top: "48px",
           left: "var(--dsh-sidebar-width, 240px)",
-          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          right: rightWidth + "px",
           bottom: panelHeight,
           background: "var(--dsw-alias-bg-layer-0, #000000)",
           zIndex: 50,
@@ -3149,6 +3121,7 @@ button:hover .dsh-icon-animated,
     }
 
     function MainViewContainerOccupant(props) {
+      var rightWidth = useRightSidebarWidth();
       var panelHeightState = React.useState(function () {
         if (typeof window !== "undefined" && window.__dsh_panel_height__) {
           return window.__dsh_panel_height__;
@@ -3173,7 +3146,7 @@ button:hover .dsh-icon-animated,
           position: "fixed",
           top: "48px",
           left: "var(--dsh-sidebar-width, 240px)",
-          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          right: rightWidth + "px",
           bottom: panelHeight,
           background: "var(--dsw-alias-bg-layer-0, #000000)",
           zIndex: 50,
@@ -3189,6 +3162,7 @@ button:hover .dsh-icon-animated,
       var filePath = props.filePath || "";
       var fileName = props.fileName || (filePath ? filePath.split("/").pop() : "File");
       var onClose = props.onClose;
+      var rightWidth = useRightSidebarWidth();
 
       var contentState = React.useState("");
       var content = contentState[0], setContent = contentState[1];
@@ -3268,7 +3242,7 @@ button:hover .dsh-icon-animated,
           position: "fixed",
           top: "48px",
           left: "var(--dsh-sidebar-width, 240px)",
-          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          right: rightWidth + "px",
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
           background: "var(--dsw-alias-surface-l0, #13141f)",
           zIndex: 50,
@@ -3583,6 +3557,7 @@ button:hover .dsh-icon-animated,
       var repoDisplayName = (overview && overview.owner && overview.repoName)
         ? (overview.owner + " / " + overview.repoName)
         : repoName;
+      var rightWidth = useRightSidebarWidth();
 
       return h("div", {
         className: "dsh-mainview-repo",
@@ -3590,7 +3565,7 @@ button:hover .dsh-icon-animated,
           position: "fixed",
           top: "48px",
           left: "var(--dsh-sidebar-width, 240px)",
-          right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+          right: rightWidth + "px",
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
           background: "var(--dsw-alias-surface-l0, #13141f)",
           zIndex: 50,
@@ -4848,7 +4823,12 @@ button:hover .dsh-icon-animated,
             position: "fixed",
             top: "48px",
             left: "var(--dsh-sidebar-width, 240px)",
-            right: (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ + "px" : 0,
+            right: (function () {
+              var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
+              var detailsEl = (typeof document !== "undefined") ? document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]') : null;
+              var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
+              return Math.max(customRight, detailsW) + "px";
+            })(),
             bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
             zIndex: 40,
             display: "flex",
@@ -5015,65 +4995,65 @@ button:hover .dsh-icon-animated,
       // 1. Safari
       if (raw.includes("safari")) {
         return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#007aff", stroke: "#0051a8" }),
+          h("circle", { cx: "12", cy: "12", r: "10", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("polygon", { points: "16,8 13.5,13.5 8,16 10.5,10.5", fill: "#ffffff", stroke: "#ffffff", strokeWidth: "1" }),
-          h("circle", { cx: "12", cy: "12", r: "1.5", fill: "#ff3b30" }),
+          h("circle", { cx: "12", cy: "12", r: "1.5", fill: "#6366f1" }),
         ]);
       }
 
       // 2. Google Chrome / Chromium
       if (raw.includes("chrome") || raw.includes("chromium")) {
         return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#ffffff", stroke: "#ea4335" }),
-          h("circle", { cx: "12", cy: "12", r: "4.5", fill: "#4285f4" }),
-          h("path", { d: "M12 2a10 10 0 0 1 8.66 5H12", stroke: "#ea4335", strokeWidth: "2", fill: "none" }),
-          h("path", { d: "M20.66 7a10 10 0 0 1-5 13.66L12 12", stroke: "#fbbc05", strokeWidth: "2", fill: "none" }),
-          h("path", { d: "M3.34 7l4.33 7.5L12 12", stroke: "#34a853", strokeWidth: "2", fill: "none" }),
+          h("circle", { cx: "12", cy: "12", r: "10", fill: "#18181b", stroke: "#888888" }),
+          h("circle", { cx: "12", cy: "12", r: "4.5", fill: "#6366f1" }),
+          h("path", { d: "M12 2a10 10 0 0 1 8.66 5H12", stroke: "#ffffff", strokeWidth: "2", fill: "none" }),
+          h("path", { d: "M20.66 7a10 10 0 0 1-5 13.66L12 12", stroke: "#888888", strokeWidth: "2", fill: "none" }),
+          h("path", { d: "M3.34 7l4.33 7.5L12 12", stroke: "#6366f1", strokeWidth: "2", fill: "none" }),
         ]);
       }
 
       // 3. Firefox
       if (raw.includes("firefox")) {
         return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#ff7139" }),
-          h("path", { d: "M6 16c2-4 6-6 10-4 1 1 2 3 2 5-1 3-4 5-7 5-4 0-7-3-5-6z", fill: "#ff9400" }),
-          h("circle", { cx: "12", cy: "12", r: "4", fill: "#0060df" }),
+          h("circle", { cx: "12", cy: "12", r: "10", fill: "#18181b", stroke: "#888888" }),
+          h("path", { d: "M6 16c2-4 6-6 10-4 1 1 2 3 2 5-1 3-4 5-7 5-4 0-7-3-5-6z", fill: "#6366f1" }),
+          h("circle", { cx: "12", cy: "12", r: "4", fill: "#ffffff" }),
         ]);
       }
 
       // 4. Arc Browser
       if (raw.includes("arc")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "6", fill: "#ff4d6d" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "6", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "M6 18c0-6 4.5-10.5 10.5-10.5", stroke: "#ffffff", strokeWidth: "2.5" }),
-          h("circle", { cx: "16.5", cy: "7.5", r: "2", fill: "#ffe66d" }),
+          h("circle", { cx: "16.5", cy: "7.5", r: "2", fill: "#6366f1" }),
         ]);
       }
 
       // 5. Xcode
       if (raw.includes("xcode")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#157efb" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "m7 17 6-6", stroke: "#ffffff", strokeWidth: "2.5" }),
           h("path", { d: "m12 7 5 5", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "m14 5 3 3", stroke: "#cce4ff", strokeWidth: "2" }),
+          h("path", { d: "m14 5 3 3", stroke: "#888888", strokeWidth: "2" }),
         ]);
       }
 
       // 6. VS Code / Code / Cursor / Antigravity / IDE
       if (raw.includes("code") || raw.includes("cursor") || raw.includes("antigravity") || raw.includes("vsc")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#007acc" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "m15.5 4-8 6.5 8 6.5", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "m17 7 3 2.5v5L17 17", stroke: "#61afef", strokeWidth: "2" }),
+          h("path", { d: "m17 7 3 2.5v5L17 17", stroke: "#6366f1", strokeWidth: "2" }),
         ]);
       }
 
       // 7. Terminal / iTerm / Alacritty / Ghostty / Kitty / Warp
       if (raw.includes("term") || raw.includes("alacritty") || raw.includes("ghostty") || raw.includes("kitty") || raw.includes("warp") || raw.includes("console")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#1c1c1e", stroke: "#3a3a3c" }),
-          h("path", { d: "m6 8 4 4-4 4", stroke: "#30d158", strokeWidth: "2" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "rgba(128,128,128,0.3)" }),
+          h("path", { d: "m6 8 4 4-4 4", stroke: "#6366f1", strokeWidth: "2" }),
           h("line", { x1: "12", y1: "16", x2: "18", y2: "16", stroke: "#ffffff", strokeWidth: "2" }),
         ]);
       }
@@ -5081,38 +5061,38 @@ button:hover .dsh-icon-animated,
       // 8. Slack
       if (raw.includes("slack")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#4a154b" }),
-          h("circle", { cx: "8", cy: "8", r: "2", fill: "#ecb22e" }),
-          h("circle", { cx: "16", cy: "8", r: "2", fill: "#2eb67d" }),
-          h("circle", { cx: "16", cy: "16", r: "2", fill: "#e01e5a" }),
-          h("circle", { cx: "8", cy: "16", r: "2", fill: "#36c5f0" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
+          h("circle", { cx: "8", cy: "8", r: "2", fill: "#6366f1" }),
+          h("circle", { cx: "16", cy: "8", r: "2", fill: "#ffffff" }),
+          h("circle", { cx: "16", cy: "16", r: "2", fill: "#6366f1" }),
+          h("circle", { cx: "8", cy: "16", r: "2", fill: "#888888" }),
         ]);
       }
 
       // 9. Discord
       if (raw.includes("discord")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#5865f2" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "M7 9c2-1 4-1 5 0 2-1 4-1 5 0 1 3 1 6 0 8-1 1-3 1-4 0l-1-1-1 1c-1 1-3 1-4 0-1-2-1-5 0-8z", fill: "#ffffff" }),
-          h("circle", { cx: "9.5", cy: "12.5", r: "1", fill: "#5865f2" }),
-          h("circle", { cx: "14.5", cy: "12.5", r: "1", fill: "#5865f2" }),
+          h("circle", { cx: "9.5", cy: "12.5", r: "1", fill: "#6366f1" }),
+          h("circle", { cx: "14.5", cy: "12.5", r: "1", fill: "#6366f1" }),
         ]);
       }
 
       // 10. Spotify
       if (raw.includes("spotify")) {
         return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#1ed760" }),
-          h("path", { d: "M6.5 9.5c3.5-1 7.5-.5 11 1", stroke: "#000000", strokeWidth: "2" }),
-          h("path", { d: "M7.5 12.5c3-.8 6.5-.4 9.5.8", stroke: "#000000", strokeWidth: "1.75" }),
-          h("path", { d: "M8.5 15.5c2.5-.6 5.5-.3 7.5.7", stroke: "#000000", strokeWidth: "1.5" }),
+          h("circle", { cx: "12", cy: "12", r: "10", fill: "#18181b", stroke: "#888888" }),
+          h("path", { d: "M6.5 9.5c3.5-1 7.5-.5 11 1", stroke: "#ffffff", strokeWidth: "2" }),
+          h("path", { d: "M7.5 12.5c3-.8 6.5-.4 9.5.8", stroke: "#6366f1", strokeWidth: "1.75" }),
+          h("path", { d: "M8.5 15.5c2.5-.6 5.5-.3 7.5.7", stroke: "#888888", strokeWidth: "1.5" }),
         ]);
       }
 
       // 11. Music / Apple Music
       if (raw.includes("music")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#fc3c44" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "M9 18V9l9-2v9", stroke: "#ffffff", strokeWidth: "2" }),
           h("circle", { cx: "7.5", cy: "17.5", r: "2.5", fill: "#ffffff" }),
           h("circle", { cx: "16.5", cy: "15.5", r: "2.5", fill: "#ffffff" }),
@@ -5122,16 +5102,16 @@ button:hover .dsh-icon-animated,
       // 12. Mail
       if (raw.includes("mail")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#007aff" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
           h("rect", { width: "14", height: "10", x: "5", y: "7", rx: "2", stroke: "#ffffff", strokeWidth: "1.5" }),
-          h("path", { d: "m5 8 7 5 7-5", stroke: "#ffffff", strokeWidth: "1.5" }),
+          h("path", { d: "m5 8 7 5 7-5", stroke: "#6366f1", strokeWidth: "1.5" }),
         ]);
       }
 
       // 13. Messages
       if (raw.includes("messages") || raw.includes("chat")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#34c759" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "M6 8a5 5 0 0 1 9-3 5 5 0 0 1 3 5c0 2-1 4-3 5l-2 3v-2a5 5 0 0 1-7-8z", fill: "#ffffff" }),
         ]);
       }
@@ -5139,62 +5119,62 @@ button:hover .dsh-icon-animated,
       // 14. Notes
       if (raw.includes("notes") || raw.includes("reminders")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#f5c518" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
           h("line", { x1: "6", y1: "8", x2: "18", y2: "8", stroke: "#ffffff", strokeWidth: "2" }),
-          h("line", { x1: "6", y1: "12", x2: "18", y2: "12", stroke: "#ffffff", strokeWidth: "2" }),
-          h("line", { x1: "6", y1: "16", x2: "14", y2: "16", stroke: "#ffffff", strokeWidth: "2" }),
+          h("line", { x1: "6", y1: "12", x2: "18", y2: "12", stroke: "#6366f1", strokeWidth: "2" }),
+          h("line", { x1: "6", y1: "16", x2: "14", y2: "16", stroke: "#888888", strokeWidth: "2" }),
         ]);
       }
 
       // 15. System Settings / Preferences
       if (raw.includes("setting") || raw.includes("preference") || raw.includes("config")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#8e8e93" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
           h("circle", { cx: "12", cy: "12", r: "3.5", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "M12 4v2m0 12v2M4 12h2m12 0h2m-2.6-6.4-1.4 1.4m-8 8-1.4 1.4m0-10.8 1.4 1.4m8 8 1.4 1.4", stroke: "#ffffff", strokeWidth: "2" }),
+          h("path", { d: "M12 4v2m0 12v2M4 12h2m12 0h2m-2.6-6.4-1.4 1.4m-8 8-1.4 1.4m0-10.8 1.4 1.4m8 8 1.4 1.4", stroke: "#888888", strokeWidth: "2" }),
         ]);
       }
 
       // 16. Finder
       if (raw.includes("finder")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#157efb" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "M6 9c2 0 3-2 3-4", stroke: "#ffffff", strokeWidth: "1.75" }),
           h("path", { d: "M18 9c-2 0-3-2-3-4", stroke: "#ffffff", strokeWidth: "1.75" }),
           h("path", { d: "M7 15c2 2 8 2 10 0", stroke: "#ffffff", strokeWidth: "2" }),
-          h("line", { x1: "12", y1: "10", x2: "12", y2: "13", stroke: "#ffffff", strokeWidth: "2" }),
+          h("line", { x1: "12", y1: "10", x2: "12", y2: "13", stroke: "#6366f1", strokeWidth: "2" }),
         ]);
       }
 
       // 17. Docker
       if (raw.includes("docker") || raw.includes("orbstack")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#0db7ed" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
           h("path", { d: "M4 14c2-4 8-4 12 0 1-1 3 0 4 1-1 3-5 5-9 5-5 0-8-3-7-6z", fill: "#ffffff" }),
-          h("rect", { x: "7", y: "9", width: "2.5", height: "2", fill: "#ffffff" }),
-          h("rect", { x: "10.5", y: "9", width: "2.5", height: "2", fill: "#ffffff" }),
-          h("rect", { x: "10.5", y: "6.5", width: "2.5", height: "2", fill: "#ffffff" }),
+          h("rect", { x: "7", y: "9", width: "2.5", height: "2", fill: "#6366f1" }),
+          h("rect", { x: "10.5", y: "9", width: "2.5", height: "2", fill: "#6366f1" }),
+          h("rect", { x: "10.5", y: "6.5", width: "2.5", height: "2", fill: "#6366f1" }),
         ]);
       }
 
       // 18. Figma
       if (raw.includes("figma")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#1e1e1e" }),
-          h("circle", { cx: "9", cy: "7", r: "2.5", fill: "#f24e1e" }),
-          h("circle", { cx: "15", cy: "7", r: "2.5", fill: "#ff7262" }),
-          h("circle", { cx: "15", cy: "12", r: "2.5", fill: "#1abcfe" }),
-          h("circle", { cx: "9", cy: "12", r: "2.5", fill: "#a259ff" }),
-          h("circle", { cx: "9", cy: "17", r: "2.5", fill: "#0acf83" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
+          h("circle", { cx: "9", cy: "7", r: "2.5", fill: "#6366f1" }),
+          h("circle", { cx: "15", cy: "7", r: "2.5", fill: "#ffffff" }),
+          h("circle", { cx: "15", cy: "12", r: "2.5", fill: "#6366f1" }),
+          h("circle", { cx: "9", cy: "12", r: "2.5", fill: "#888888" }),
+          h("circle", { cx: "9", cy: "17", r: "2.5", fill: "#ffffff" }),
         ]);
       }
 
       // 19. GitHub / Desktop
       if (raw.includes("github")) {
         return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#24292e" }),
+          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
           h("circle", { cx: "12", cy: "12", r: "6", fill: "#ffffff" }),
-          h("path", { d: "M9 16c1-2 5-2 6 0", stroke: "#24292e", strokeWidth: "1.5" }),
+          h("path", { d: "M9 16c1-2 5-2 6 0", stroke: "#6366f1", strokeWidth: "1.5" }),
         ]);
       }
 
@@ -5401,7 +5381,7 @@ button:hover .dsh-icon-animated,
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-warning, #f59e0b)"
+          color: "var(--dsw-alias-primary, #6366f1)"
         }
       },
         h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }),
@@ -5428,7 +5408,7 @@ button:hover .dsh-icon-animated,
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-success, #22c55e)"
+          color: "var(--dsw-alias-primary, #6366f1)"
         }
       },
         h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" })
@@ -6753,8 +6733,8 @@ button:hover .dsh-icon-animated,
                   width: "6px",
                   height: "6px",
                   borderRadius: "50%",
-                  backgroundColor: "#22c55e",
-                  boxShadow: "0 0 6px #22c55e",
+                  backgroundColor: "#6366f1",
+                  boxShadow: "0 0 6px rgba(99, 102, 241, 0.6)",
                 }
               }) : null
             )
@@ -6802,7 +6782,7 @@ button:hover .dsh-icon-animated,
             (function () {
               var isPinned = isPinnedSession(chat, chat.id);
               if (isPinned) {
-                return h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-warning, #f59e0b)" } },
+                return h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-primary, #6366f1)" } },
                   h(PinGlyph, { size: 13 })
                 );
               }
@@ -7240,7 +7220,7 @@ button:hover .dsh-icon-animated,
               h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isPinnedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
             h("span", { className: "dsh-tree-title" }, "Pinned"),
-            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(245, 158, 11, 0.15)", color: "var(--dsw-alias-warning, #f59e0b)", fontWeight: 700, marginLeft: "4px" } }, filteredPinnedSessions.length),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, filteredPinnedSessions.length),
             h("span", { className: "dsh-tree-actions" },
               h("button", {
                 type: "button",
@@ -7277,7 +7257,7 @@ button:hover .dsh-icon-animated,
               h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isActiveOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
             h("span", { className: "dsh-tree-title" }, "Active"),
-            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(34, 197, 94, 0.15)", color: "var(--dsw-alias-success, #22c55e)", fontWeight: 700, marginLeft: "4px" } }, totalActiveCount),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, totalActiveCount),
             h("span", { className: "dsh-tree-actions" },
               h("button", {
                 type: "button",
@@ -7310,9 +7290,9 @@ button:hover .dsh-icon-animated,
                           window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sess.name } }));
                         }
                       },
-                      h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "#22c55e" } }, h(TerminalsGlyph, { size: 13 })),
+                      h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-primary, #6366f1)" } }, h(TerminalsGlyph, { size: 13 })),
                       h("span", { className: "dsh-tree-title", style: { fontSize: "12px" } }, "Terminal: " + sess.name),
-                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(34, 197, 94, 0.2)", color: "#22c55e", fontWeight: 700, marginLeft: "auto" } }, "RUNNING")
+                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "auto" } }, "RUNNING")
                     );
                   }),
                   liveContainers.map(function (cont) {
@@ -7327,9 +7307,9 @@ button:hover .dsh-icon-animated,
                           window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: cont.id } }));
                         }
                       },
-                      h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "#38bdf8" } }, h(ContainersGlyph, { size: 13 })),
+                      h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-primary, #6366f1)" } }, h(ContainersGlyph, { size: 13 })),
                       h("span", { className: "dsh-tree-title", style: { fontSize: "12px" } }, "Container: " + (cont.name || cont.image || cont.id.slice(0, 12))),
-                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(56, 189, 248, 0.2)", color: "#38bdf8", fontWeight: 700, marginLeft: "auto" } }, "LIVE")
+                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "auto" } }, "LIVE")
                     );
                   })
                 )
