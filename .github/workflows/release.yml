@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Automated SemVer Tag & Release
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci') && !contains(github.event.head_commit.message, 'chore(release)')"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Determine Next SemVer Version
+        id: versioning
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
+          echo "Latest tag: $latest_tag"
+          
+          # Determine version bump based on commit messages since last tag
+          commits=$(git log "${latest_tag}..HEAD" --oneline)
+          
+          bump="patch"
+          if echo "$commits" | grep -qE "^[a-f0-9]+ feat(\([^\)]+\))?!:"; then
+            bump="major"
+          elif echo "$commits" | grep -qE "^[a-f0-9]+ feat"; then
+            bump="minor"
+          elif echo "$commits" | grep -qE "^[a-f0-9]+ fix"; then
+            bump="patch"
+          fi
+          
+          # Parse version numbers
+          raw_ver="${latest_tag#v}"
+          IFS='.' read -r major minor patch <<< "$raw_ver"
+          
+          if [ "$bump" = "major" ]; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif [ "$bump" = "minor" ]; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+          
+          next_version="v${major}.${minor}.${patch}"
+          echo "Next version: $next_version"
+          echo "tag=$next_version" >> $GITHUB_OUTPUT
+
+      - name: Create Git Tag & Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.versioning.outputs.tag }}
+          name: Release ${{ steps.versioning.outputs.tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

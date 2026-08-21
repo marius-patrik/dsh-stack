@@ -10,19 +10,17 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 echo "Running plugin check-plugin suites..."
 
 failed=""
-for plugin_dir in "$REPO_ROOT"/plugins/*/; do
-  plugin_name="$(basename "$plugin_dir")"
-  check_file="$plugin_dir/check-plugin.mjs"
-  if [ -f "$check_file" ]; then
-    echo -n "  $plugin_name... "
-    if (cd "$plugin_dir" && node check-plugin.mjs) > /dev/null 2>&1; then
-      echo "ok"
-    else
-      echo "FAILED"
-      failed="$failed $plugin_name"
-    fi
+while IFS= read -r check_file; do
+  pkg_dir="$(dirname "$check_file")"
+  rel_name="${pkg_dir#"$REPO_ROOT"/plugins/}"
+  echo -n "  $rel_name... "
+  if (cd "$pkg_dir" && node check-plugin.mjs) > /dev/null 2>&1; then
+    echo "ok"
+  else
+    echo "FAILED"
+    failed="$failed $rel_name"
   fi
-done
+done < <(find "$REPO_ROOT/plugins" -name "check-plugin.mjs" | sort)
 
 if [ -n "$failed" ]; then
   echo ""

@@ -2550,4 +2550,26 @@ All architectural design plans and blueprints approved by the user:
 - **Phase 7**: Universal VCS Workbench & Forges (`plugins/vcs/`: `workbench-core`, `git-driver`, `sapling-driver`, `github-forge`, `gitlab-forge`, `forgejo-forge`).
 - **Phase 8**: GitHub Actions CI & SemVer Release Workflows (`.github/workflows/ci.yml`, `.github/workflows/release.yml`) & verification of all test suites.
 
-**Status:** in progress.
+**Verification & Accomplished Evidence:**
+1. **Phase 1: Native App Icon Extraction & Strict Tri-Color Sidebar**:
+   - `GET /quotas/api/fs/icon?path=...` implemented with `sips` for native macOS `.app` icon extraction and cached PNG rendering with SVG fallback.
+   - Strict tri-color palette (Gray, White, Blurple `#6366f1` / `rgba(99, 102, 241, 0.15)`) active across sidebar rows.
+2. **Phase 2: Core Domain Pack (`plugins/core/`)**:
+   - `plugin-manager`, `providers-registry`, `integrations-registry`, `vault-credentials`, `sidebar-tree`, `settings-dialog`, `keybindings`, and `@stack/pack-core` umbrella built and tested.
+3. **Phase 3: UX Domain Pack (`plugins/ux/`)**:
+   - `tab-manager`, `code-editor`, `icon-engine` (with nested `packs/lucide-animated`), `theme-studio`, `voice-synthesis`, `terminal-client`, and `@stack/pack-ux` umbrella built and tested.
+4. **Phase 4: Integrations Domain Pack (`plugins/integrations/`)**:
+   - `tmux-terminal` with all 16 CLI harnesses (`claude`, `kimi`, `antigravity`, `codex`, `cursor`, `grok`, `hermes`, `ollama`, `github-cli`, `git-cli`, `sapling-cli`, `code-cli`, `bun-cli`, `pnpm-cli`, `npm-cli`, `nvm-cli`).
+   - `package-managers`, `code-server`, `providers` (4 direct APIs), `docker-sandbox`, `lsp-client` (5 language servers), `code-formatters`, `mesh-hosts`, and `@stack/pack-integrations` umbrella built and tested.
+5. **Phase 5: Cognitive Agents Domain Pack (`plugins/agents/`)**:
+   - `personas`, `actions`, `commands`, `tools`, `loops`, `skills`, `translator`, and `@stack/pack-agents` umbrella built and tested.
+6. **Phase 6: Wire Protocols & Dialects (`plugins/ai/`)**:
+   - `protocol-dialects` and `@stack/pack-ai` umbrella built and tested.
+7. **Phase 7: VCS & Forges (`plugins/vcs/`)**:
+   - `workbench-core`, `git-driver`, `sapling-driver`, `github-forge`, `gitlab-forge`, `forgejo-forge`, and `@stack/pack-vcs` umbrella built and tested.
+8. **Phase 8: GitHub Actions CI & SemVer Release Workflows**:
+   - Added `.github/workflows/ci.yml` and `.github/workflows/release.yml`.
+   - Updated `.agents/hooks/pre-push` for recursive test suite discovery; all 80 package test suites pass cleanly with 0 errors.
+
+**Status:** completed, all 80 test suites green.
+

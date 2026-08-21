@@ -14,12 +14,12 @@ All plugins live directly within this single monorepo repository (`dsh-stack`). 
 
 | Domain Pack | Role & Packages | Status |
 |---|---|---|
-| **`plugins/core/`** (`@stack/pack-core`) | Foundation, Shell & Abstractions: `plugin-manager`, `providers-registry`, `integrations-registry`, `vault-credentials`, `sidebar-tree`, `settings-dialog`, `keybindings` | [in progress] |
-| **`plugins/ux/`** (`@stack/pack-ux`) | Presentation, UI & Media: `tab-manager`, `code-editor`, `icon-engine` (with nested `packs/lucide-animated`), `theme-studio`, `voice-synthesis`, `terminal-client` | [in progress] |
-| **`plugins/agents/`** (`@stack/pack-agents`) | Cognitive Agent Systems: `personas` (Subagents Dock), `actions`, `commands` (slash autocomplete), `tools` (MCP & tools registry), `loops`, `skills`, `translator` | [in progress] |
-| **`plugins/ai/`** (`@stack/pack-ai`) | Wire Protocols & Serializers: `protocol-dialects` | [in progress] |
-| **`plugins/integrations/`** (`@stack/pack-integrations`) | Sandboxes, Tools & Providers: `tmux-terminal` (with 16 CLI harnesses), `package-managers`, `code-server`, `providers` (direct API), `docker-sandbox`, `lsp-client` (with 5 language servers), `code-formatters`, `mesh-hosts` | [in progress] |
-| **`plugins/vcs/`** (`@stack/pack-vcs`) | Version Control & Forges: `workbench-core` (diff viewer & 100% offline local repos), `git-driver`, `sapling-driver`, `github-forge`, `gitlab-forge`, `forgejo-forge` | [in progress] |
+| **`plugins/core/`** (`@stack/pack-core`) | Foundation, Shell & Abstractions: `plugin-manager`, `providers-registry`, `integrations-registry`, `vault-credentials`, `sidebar-tree`, `settings-dialog`, `keybindings` | [complete] |
+| **`plugins/ux/`** (`@stack/pack-ux`) | Presentation, UI & Media: `tab-manager`, `code-editor`, `icon-engine` (with nested `packs/lucide-animated`), `theme-studio`, `voice-synthesis`, `terminal-client` | [complete] |
+| **`plugins/agents/`** (`@stack/pack-agents`) | Cognitive Agent Systems: `personas` (Subagents Dock), `actions`, `commands` (slash autocomplete), `tools` (MCP & tools registry), `loops`, `skills`, `translator` | [complete] |
+| **`plugins/ai/`** (`@stack/pack-ai`) | Wire Protocols & Serializers: `protocol-dialects` | [complete] |
+| **`plugins/integrations/`** (`@stack/pack-integrations`) | Sandboxes, Tools & Providers: `tmux-terminal` (with 16 CLI harnesses), `package-managers`, `code-server`, `providers` (direct API), `docker-sandbox`, `lsp-client` (with 5 language servers), `code-formatters`, `mesh-hosts` | [complete] |
+| **`plugins/vcs/`** (`@stack/pack-vcs`) | Version Control & Forges: `workbench-core` (diff viewer & 100% offline local repos), `git-driver`, `sapling-driver`, `github-forge`, `gitlab-forge`, `forgejo-forge` | [complete] |
 
 
 ## The mapping (harness plugin -> Andromeda original)
