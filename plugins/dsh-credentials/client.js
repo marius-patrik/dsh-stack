@@ -146,34 +146,28 @@ window.__ModuleLoader__.load({
     ];
 
     /**
-     * Dedicated Keychain Glyph: Keyring + Key + Fob
+     * Dedicated Keychain Glyph: Lucide KeyRound / ShieldCheck
      */
     function KeychainGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h(
         "svg",
         {
           width: size,
           height: size,
           className: className,
-          viewBox: "0 0 16 16",
+          viewBox: "0 0 24 24",
           fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
           xmlns: "http://www.w3.org/2000/svg",
           "aria-hidden": "true",
         },
-        h("circle", { cx: "5.5", cy: "5.5", r: "3.25", stroke: "currentColor", strokeWidth: "1.25" }),
-        h("circle", { cx: "5.5", cy: "5.5", r: "1.25", fill: "currentColor" }),
-        h("path", { d: "M8 8L13.5 13.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
-        h("path", { d: "M10.5 10.5L12 9", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
-        h("path", { d: "M12 12L13.5 10.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
-        h("path", {
-          d: "M3.5 8L2.5 12.5C2.4 13 2.8 13.5 3.3 13.5H4.7C5.2 13.5 5.6 13 5.5 12.5L4.5 8",
-          stroke: "currentColor",
-          strokeWidth: "1.1",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        })
+        h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
+        h("path", { d: "m9 12 2 2 4-4" })
       );
     }
 

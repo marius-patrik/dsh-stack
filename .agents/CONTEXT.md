@@ -2381,3 +2381,45 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 44 — August 21, 2026 (Full Vertical & Corner Window Resizing & Animated Lucide React Icons)
+
+**Context & User Directives:**
+- `the settings are only resizable horizontolly should be verticaly as well and full via corner, ALL icons should be animated lucide react icon`
+
+**Design & Implementation:**
+1. **Full Vertical & Corner Settings Window Resizing**:
+   - Upgraded `.dsh-tw-panel`, `.dsh-tw-nav`, `.dsh-tw-navList`, `.dsh-tw-content`, and `.dsh-tw-options` CSS to flex and stretch to 100% height dynamically with `min-height: 340px` and `min-width: 480px`.
+   - Upgraded window resize handles with generous hitboxes:
+     - **Bottom-Right Corner (`se`)**: `32x32px` grab area (`cursor: nwse-resize`, `z-index: 40`) with clean diagonal grip lines to resize width and height simultaneously.
+     - **Bottom Edge (`s`)**: `12px` height bar (`cursor: ns-resize`, `z-index: 30`) to expand/contract height smoothly.
+     - **Right Edge (`e`)**: `12px` width bar (`cursor: ew-resize`, `z-index: 30`) to expand/contract width smoothly.
+   - Synchronized width and height values into `localStorage` keys `dsh_settings_window_width` and `dsh_settings_window_height`.
+2. **ALL Icons Upgraded to Animated Lucide React Icons**:
+   - Replaced all legacy 16x16 icon shapes with standard 24x24 Lucide React SVG vectors across `dsh-tweaks`, `dsh-providers`, and `dsh-credentials`:
+     - `SlidersHorizontal` (General)
+     - `HardDrive` (Providers / Drive)
+     - `Terminal` (Terminals / Actions)
+     - `Boxes` (Containers)
+     - `Blocks` (Plugins)
+     - `Wrench` (Tools)
+     - `RefreshCw` (Loops / Refresh)
+     - `Bot` (Agents)
+     - `Keyboard` (Keybinds)
+     - `Layers` (Models / Data)
+     - `ShieldCheck` / `KeyRound` (Keychain / Accounts)
+     - `ChevronRight` (Navigation expander)
+     - `MessageSquare` (Chat)
+     - `GitBranch` (Trajectory)
+     - `Trash2`, `Pencil`, `FileCode`, `Network`, `Scissors`, `Copy`
+   - Added class `dsh-icon-animated` to all icons with smooth cubic-bezier transitions on scale, rotation, and stroke on parent/button hover.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- CDP end-to-end automated browser testing verified:
+  - Settings window bottom edge drag expands height freely (`heightAfterVerticalDrag: 655px`).
+  - Corner drag expands both width and height simultaneously (`942px x 655px`).
+  - All 17+ icons render in full Lucide React 24x24 viewBox with `.dsh-icon-animated` active.
+- Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
+
+**Status:** completed.

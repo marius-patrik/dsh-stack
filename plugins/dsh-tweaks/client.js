@@ -92,8 +92,8 @@ const SHELL_CSS = `
 .dsh-tw-trigger.dsh-tw-rail { width: 36px; height: 36px; margin: 4px 0; justify-content: center; gap: 0; padding: 0; border-radius: 50%; }
 .dsh-tw-overlay { position: fixed; inset: 0; z-index: 1000000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .dsh-tw-mask { position: absolute; inset: 0; background: transparent !important; backdrop-filter: none !important; pointer-events: auto; }
-.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; min-width: 540px; min-height: 400px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.18)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
-.dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; }
+.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; flex-direction: row; min-width: 480px; min-height: 340px; border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.18)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
+.dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; height: 100%; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; overflow: hidden; }
 .dsh-tw-nav.dsh-tw-navCollapsed { width: 56px !important; padding: 18px 6px 0; }
 .dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navLabel { display: none; }
 .dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navGroupHeader { display: none; }
@@ -106,23 +106,27 @@ const SHELL_CSS = `
 .dsh-tw-navTitle { font-size: 16px; line-height: 24px; font-weight: 500; color: var(--dsw-alias-label-primary); }
 .dsh-tw-navCollapseBtn { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: none; border-radius: 6px; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; }
 .dsh-tw-navCollapseBtn:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
-.dsh-tw-navList { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+.dsh-tw-navList { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; padding-bottom: 12px; }
 .dsh-tw-navCell { display: flex; align-items: center; gap: 8px; height: 38px; padding: 8px 12px; box-sizing: border-box; border: none; border-radius: 10px; background: transparent; cursor: pointer; font-family: inherit; font-size: 14px; line-height: 22px; font-weight: 400; color: var(--dsw-alias-label-primary); text-align: left; transition: background 100ms; }
 .dsh-tw-navCell:hover { background: var(--dsw-specific-sidebar-nav-item-hover); }
 .dsh-tw-navCell.dsh-tw-active { background: var(--dsw-specific-sidebar-nav-item-active); }
 .dsh-tw-navIcon { flex: none; display: inline-flex; align-items: center; justify-content: center; }
 .dsh-tw-navLabel { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.dsh-tw-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dsh-tw-content { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 .dsh-tw-header { flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; height: 54px; padding: 20px 14px 8px 10px; box-sizing: border-box; }
 .dsh-tw-actions { min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-left: auto; }
 .dsh-tw-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: none; border-radius: 28px; background: transparent; cursor: pointer; color: var(--dsw-alias-label-primary); }
 .dsh-tw-close:hover { background: var(--dsw-alias-interactive-bg-hover); }
-.dsh-tw-options { flex: 1; min-height: 0; padding: 0 24px 24px; overflow-y: auto; }
+.dsh-tw-options { flex: 1; min-height: 0; height: 100%; padding: 0 24px 24px; overflow-y: auto; }
 .dsh-tw-hiddenLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .dsh-tw-section { display: flex; flex-direction: column; width: 100%; }
 .dsh-tw-section > [data-slot='settings.general.item'] > :last-child { border-bottom: none; }
 .dsh-tw-action { display: flex; min-width: 0; align-items: center; gap: 8px; }
 .dsh-tw-error { max-width: 180px; overflow: hidden; color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.dsh-icon-animated { transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease; will-change: transform; }
+button:hover .dsh-icon-animated, .dsh-tw-navCell:hover .dsh-icon-animated, .dsh-tw-trigger:hover .dsh-icon-animated, .dsh-tree-sessionRow:hover .dsh-icon-animated, .dsh-tree-projectRow:hover .dsh-icon-animated, .dsh-header-ellipsis-btn:hover .dsh-icon-animated { transform: scale(1.18); }
+.dsh-icon-settings:hover, button:hover .dsh-icon-settings, .dsh-tw-trigger:hover .dsh-icon-settings { transform: scale(1.2) rotate(35deg) !important; }
+.dsh-icon-refresh:hover, button:hover .dsh-icon-refresh { transform: scale(1.2) rotate(180deg) !important; }
 [class*="inputRow"] {
   display: flex !important;
   align-items: center !important;
@@ -468,160 +472,165 @@ window.__ModuleLoader__.load({
 
     function KeychainNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('circle', { cx: '5.5', cy: '5.5', r: '3.25', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('circle', { cx: '5.5', cy: '5.5', r: '1.25', fill: 'currentColor' }),
-        h('path', { d: 'M8 8L13.5 13.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M10.5 10.5L12 9', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M12 12L13.5 10.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M3.5 8L2.5 12.5C2.4 13 2.8 13.5 3.3 13.5H4.7C5.2 13.5 5.6 13 5.5 12.5L4.5 8', stroke: 'currentColor', strokeWidth: '1.1', strokeLinecap: 'round', strokeLinejoin: 'round' })
+        h('path', { d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' }),
+        h('path', { d: 'm9 12 2 2 4-4' })
       );
     }
 
     function ProvidersNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M2 4L8 1.5L14 4L8 6.5L2 4Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
-        h('path', { d: 'M2 8L8 10.5L14 8', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-        h('path', { d: 'M2 12L8 14.5L14 12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' })
+        h('line', { x1: '22', x2: '2', y1: '12', y2: '12' }),
+        h('path', { d: 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z' }),
+        h('line', { x1: '6', x2: '6.01', y1: '16', y2: '16' }),
+        h('line', { x1: '10', x2: '10.01', y1: '16', y2: '16' })
       );
     }
 
     function GeneralNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M2 4h12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('circle', { cx: '5.5', cy: '4', r: '2', fill: 'var(--dsw-alias-surface-l0, #1e1e2e)', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('path', { d: 'M2 8h12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('circle', { cx: '10.5', cy: '8', r: '2', fill: 'var(--dsw-alias-surface-l0, #1e1e2e)', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('path', { d: 'M2 12h12', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('circle', { cx: '6.5', cy: '12', r: '2', fill: 'var(--dsw-alias-surface-l0, #1e1e2e)', stroke: 'currentColor', strokeWidth: '1.25' })
+        h('line', { x1: '21', x2: '14', y1: '4', y2: '4' }),
+        h('line', { x1: '10', x2: '3', y1: '4', y2: '4' }),
+        h('line', { x1: '21', x2: '12', y1: '12', y2: '12' }),
+        h('line', { x1: '8', x2: '3', y1: '12', y2: '12' }),
+        h('line', { x1: '21', x2: '16', y1: '20', y2: '20' }),
+        h('line', { x1: '12', x2: '3', y1: '20', y2: '20' }),
+        h('line', { x1: '14', x2: '14', y1: '2', y2: '6' }),
+        h('line', { x1: '8', x2: '8', y1: '10', y2: '14' }),
+        h('line', { x1: '16', x2: '16', y1: '18', y2: '22' })
       );
     }
+
     function TerminalsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M3 4.5L6.5 8L3 11.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-        h('path', { d: 'M8 12.5H13', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+        h('polyline', { points: '4 17 10 11 4 5' }),
+        h('line', { x1: '12', x2: '20', y1: '19', y2: '19' })
       );
     }
 
     function ContainersNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M8 1.5L14 4.5V11.5L8 14.5L2 11.5V4.5L8 1.5Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
-        h('path', { d: 'M8 1.5V14.5', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('path', { d: 'M14 4.5L8 8L2 4.5', stroke: 'currentColor', strokeWidth: '1.25' })
+        h('path', { d: 'M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z' }),
+        h('path', { d: 'm7 16.5-4.74-2.85' }),
+        h('path', { d: 'm7 16.5 5-3' }),
+        h('path', { d: 'M7 16.5v5.17' }),
+        h('path', { d: 'M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z' }),
+        h('path', { d: 'm17 16.5-5-3' }),
+        h('path', { d: 'm17 16.5 4.74-2.85' }),
+        h('path', { d: 'M17 16.5v5.17' }),
+        h('path', { d: 'M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z' }),
+        h('path', { d: 'M12 8 7.26 5.15' }),
+        h('path', { d: 'm12 8 4.74-2.85' }),
+        h('path', { d: 'M12 13.5V8' })
       );
     }
 
     function PlugNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M5.5 2V4.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M10.5 2V4.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M3.5 4.5H12.5V8C12.5 10.4853 10.4853 12.5 8 12.5C5.51472 12.5 3.5 10.4853 3.5 8V4.5Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
-        h('path', { d: 'M8 12.5V15', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+        h('rect', { width: '7', height: '7', x: '14', y: '3', rx: '1' }),
+        h('path', { d: 'M10 21V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H3' })
       );
     }
 
     function ToolsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M13.5 2.5L10 6L11 7L14.5 3.5C14.8 3.2 14.8 2.8 14.5 2.5C14.2 2.2 13.8 2.2 13.5 2.5Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
-        h('path', { d: 'M10 6L4.5 11.5L2 14L4.5 11.5L10 6Z', stroke: 'currentColor', strokeWidth: '1.25', strokeLinejoin: 'round' }),
-        h('path', { d: 'M2 14L4.5 13.5L2.5 11.5L2 14Z', fill: 'currentColor' }),
-        h('path', { d: 'M6.5 4.5L8 3L10.5 5.5L9 7', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+        h('path', { d: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z' })
       );
     }
 
     function LoopsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated dsh-icon-refresh';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M2.5 8C2.5 5 4.5 3 8 3C11 3 13.5 5.2 13.5 8', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M11.5 5.5L13.5 8L15.5 5.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-        h('path', { d: 'M13.5 8C13.5 11 11.5 13 8 13C5 13 2.5 10.8 2.5 8', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M4.5 10.5L2.5 8L0.5 10.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round', strokeLinejoin: 'round' })
+        h('path', { d: 'M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8' }),
+        h('path', { d: 'M21 3v5h-5' }),
+        h('path', { d: 'M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16' }),
+        h('path', { d: 'M8 16H3v5' })
       );
     }
 
     function TriangleRightFill14(props) {
       var size = props && props.size ? props.size : 14;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       var style = props && props.style ? props.style : undefined;
       return h('svg', {
-        width: size, height: size, className: className, style: style, viewBox: '0 0 14 14', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, style: style, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', {
-          d: 'M4.25 2.82782L4.25 11.1722C4.25 11.6622 4.84243 11.9076 5.18891 11.5611L9.36109 7.38891C9.57588 7.17412 9.57588 6.82588 9.36109 6.61109L5.18891 2.43891C4.84243 2.09243 4.25 2.33782 4.25 2.82782Z',
-          fill: 'currentColor',
-        })
+        h('polyline', { points: '9 18 15 12 9 6' })
       );
     }
 
     function RobotHeadNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('path', { d: 'M8 1V3.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('circle', { cx: '8', cy: '1.5', r: '1', fill: 'currentColor' }),
-        h('rect', { x: '2.5', y: '3.5', width: '11', height: '10', rx: '2.5', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('circle', { cx: '5.5', cy: '7.5', r: '1.2', fill: 'currentColor' }),
-        h('circle', { cx: '10.5', cy: '7.5', r: '1.2', fill: 'currentColor' }),
-        h('path', { d: 'M5.5 10.5H10.5', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' }),
-        h('path', { d: 'M1 7.5H2.5M13.5 7.5H15', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+        h('path', { d: 'M12 8V4H8' }),
+        h('rect', { width: '16', height: '12', x: '4', y: '8', rx: '2' }),
+        h('path', { d: 'M2 14h2' }),
+        h('path', { d: 'M20 14h2' }),
+        h('path', { d: 'M15 13v2' }),
+        h('path', { d: 'M9 13v2' })
       );
     }
 
     function KeyboardNavIcon(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('rect', { x: '1.5', y: '3.5', width: '13', height: '9', rx: '2', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('circle', { cx: '4.5', cy: '6.5', r: '0.8', fill: 'currentColor' }),
-        h('circle', { cx: '8', cy: '6.5', r: '0.8', fill: 'currentColor' }),
-        h('circle', { cx: '11.5', cy: '6.5', r: '0.8', fill: 'currentColor' }),
-        h('path', { d: 'M5 9.5H11', stroke: 'currentColor', strokeWidth: '1.25', strokeLinecap: 'round' })
+        h('rect', { width: '20', height: '16', x: '2', y: '4', rx: '2' }),
+        h('path', { d: 'M6 8h.01' }),
+        h('path', { d: 'M10 8h.01' }),
+        h('path', { d: 'M14 8h.01' }),
+        h('path', { d: 'M18 8h.01' }),
+        h('path', { d: 'M8 12h.01' }),
+        h('path', { d: 'M12 12h.01' }),
+        h('path', { d: 'M16 12h.01' }),
+        h('path', { d: 'M7 16h10' })
       );
     }
 
     function DataGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h('svg', {
-        width: size, height: size, className: className, viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true',
+        width: size, height: size, className: className, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true',
       },
-        h('ellipse', { cx: '8', cy: '3.5', rx: '6', ry: '2', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('path', { d: 'M2 3.5V8C2 9.1 4.7 10 8 10C11.3 10 14 9.1 14 8V3.5', stroke: 'currentColor', strokeWidth: '1.25' }),
-        h('path', { d: 'M2 8V12.5C2 13.6 4.7 14.5 8 14.5C11.3 14.5 14 13.6 14 12.5V8', stroke: 'currentColor', strokeWidth: '1.25' })
+        h('polygon', { points: '12 2 2 7 12 12 22 7 12 2' }),
+        h('polyline', { points: '2 17 12 22 22 17' }),
+        h('polyline', { points: '2 12 12 17 22 12' })
       );
     }
 
@@ -1819,8 +1828,8 @@ window.__ModuleLoader__.load({
         if (typeof window !== 'undefined' && window.localStorage) {
           var savedW = parseInt(window.localStorage.getItem('dsh_settings_window_width'), 10);
           var savedH = parseInt(window.localStorage.getItem('dsh_settings_window_height'), 10);
-          if (!isNaN(savedW) && savedW >= 540 && savedW <= (window.innerWidth - 32)) w = savedW;
-          if (!isNaN(savedH) && savedH >= 400 && savedH <= (window.innerHeight - 32)) h = savedH;
+          if (!isNaN(savedW) && savedW >= 480 && savedW <= (window.innerWidth - 16)) w = savedW;
+          if (!isNaN(savedH) && savedH >= 340 && savedH <= (window.innerHeight - 16)) h = savedH;
         }
         return { w: w, h: h };
       });
@@ -1872,10 +1881,10 @@ window.__ModuleLoader__.load({
           var nextH = startH;
 
           if (direction.indexOf('e') !== -1) {
-            nextW = Math.max(540, Math.min(window.innerWidth - 32, startW + deltaX));
+            nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
           }
           if (direction.indexOf('s') !== -1) {
-            nextH = Math.max(400, Math.min(window.innerHeight - 32, startH + deltaY));
+            nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
           }
 
           setWindowSize({ w: nextW, h: nextH });
@@ -2080,25 +2089,25 @@ window.__ModuleLoader__.load({
         h('div', {
           className: 'dsh-tw-window-resize-handle dsh-tw-resize-corner',
           onPointerDown: function (e) { handleWindowResizePointerDown(e, 'se'); },
-          title: 'Drag to resize settings window',
+          title: 'Drag corner to resize settings window',
           style: {
             position: 'absolute',
             right: 0,
             bottom: 0,
-            width: '20px',
-            height: '20px',
+            width: '32px',
+            height: '32px',
             cursor: 'nwse-resize',
-            zIndex: 30,
+            zIndex: 40,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'flex-end',
-            padding: '4px',
+            padding: '6px',
             boxSizing: 'border-box',
             userSelect: 'none',
           },
         },
-          h('svg', { width: 10, height: 10, viewBox: '0 0 10 10', fill: 'none', 'aria-hidden': 'true', style: { opacity: 0.45, color: 'var(--dsw-alias-label-secondary)' } },
-            h('path', { d: 'M9 1L1 9M9 5L5 9M9 9L9 9', stroke: 'currentColor', strokeWidth: '1.5', strokeLinecap: 'round' })
+          h('svg', { width: 14, height: 14, viewBox: '0 0 14 14', fill: 'none', 'aria-hidden': 'true', style: { opacity: 0.55, color: 'var(--dsw-alias-label-secondary)' } },
+            h('path', { d: 'M12 2L2 12M12 6L6 12M12 10L10 12', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round' })
           )
         ),
         // Right Edge Resize Handle
@@ -2110,10 +2119,10 @@ window.__ModuleLoader__.load({
             position: 'absolute',
             top: 0,
             right: 0,
-            bottom: '20px',
-            width: '6px',
+            bottom: '32px',
+            width: '12px',
             cursor: 'ew-resize',
-            zIndex: 25,
+            zIndex: 30,
           },
         }),
         // Bottom Edge Resize Handle
@@ -2125,10 +2134,10 @@ window.__ModuleLoader__.load({
             position: 'absolute',
             left: 0,
             bottom: 0,
-            right: '20px',
-            height: '6px',
+            right: '32px',
+            height: '12px',
             cursor: 'ns-resize',
-            zIndex: 25,
+            zIndex: 30,
           },
         })
       );

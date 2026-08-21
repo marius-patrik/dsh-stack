@@ -601,173 +601,184 @@ button:hover .dsh-icon-animated,
 
     function ProvidersGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M2 4L8 1.5L14 4L8 6.5L2 4Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
-        h("path", { d: "M2 8L8 10.5L14 8", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" }),
-        h("path", { d: "M2 12L8 14.5L14 12", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+        h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
+        h("path", { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" }),
+        h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
+        h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" })
       );
     }
 
     function TerminalsGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M3 4.5L6.5 8L3 11.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" }),
-        h("path", { d: "M8 12.5H13", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" })
+        h("polyline", { points: "4 17 10 11 4 5" }),
+        h("line", { x1: "12", x2: "20", y1: "19", y2: "19" })
       );
     }
 
     function ContainersGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M8 1.5L14 4.5V11.5L8 14.5L2 11.5V4.5L8 1.5Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
-        h("path", { d: "M8 1.5V14.5", stroke: "currentColor", strokeWidth: "1.25" }),
-        h("path", { d: "M14 4.5L8 8L2 4.5", stroke: "currentColor", strokeWidth: "1.25" })
+        h("path", { d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z" }),
+        h("path", { d: "m7 16.5-4.74-2.85" }),
+        h("path", { d: "m7 16.5 5-3" }),
+        h("path", { d: "M7 16.5v5.17" }),
+        h("path", { d: "M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z" }),
+        h("path", { d: "m17 16.5-5-3" }),
+        h("path", { d: "m17 16.5 4.74-2.85" }),
+        h("path", { d: "M17 16.5v5.17" }),
+        h("path", { d: "M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z" }),
+        h("path", { d: "M12 8 7.26 5.15" }),
+        h("path", { d: "m12 8 4.74-2.85" }),
+        h("path", { d: "M12 13.5V8" })
       );
     }
 
     function ToolsGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M13.5 2.5L10 6L11 7L14.5 3.5C14.8 3.2 14.8 2.8 14.5 2.5C14.2 2.2 13.8 2.2 13.5 2.5Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
-        h("path", { d: "M10 6L4.5 11.5L2 14L4.5 11.5L10 6Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" }),
-        h("path", { d: "M2 14L4.5 13.5L2.5 11.5L2 14Z", fill: "currentColor" }),
-        h("path", { d: "M6.5 4.5L8 3L10.5 5.5L9 7", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" })
+        h("path", { d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" })
       );
     }
 
     function LoopsGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated dsh-icon-refresh';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M2.5 8C2.5 5 4.5 3 8 3C11 3 13.5 5.2 13.5 8", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
-        h("path", { d: "M11.5 5.5L13.5 8L15.5 5.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" }),
-        h("path", { d: "M13.5 8C13.5 11 11.5 13 8 13C5 13 2.5 10.8 2.5 8", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
-        h("path", { d: "M4.5 10.5L2.5 8L0.5 10.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+        h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
+        h("path", { d: "M21 3v5h-5" }),
+        h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
+        h("path", { d: "M8 16H3v5" })
       );
     }
 
     function TriangleRightFill14(props) {
       var size = props && props.size ? props.size : 14;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       var style = props && props.style ? props.style : undefined;
       return h("svg", {
-        width: size, height: size, className: className, style: style, viewBox: "0 0 14 14", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, style: style, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", {
-          d: "M4.25 2.82782L4.25 11.1722C4.25 11.6622 4.84243 11.9076 5.18891 11.5611L9.36109 7.38891C9.57588 7.17412 9.57588 6.82588 9.36109 6.61109L5.18891 2.43891C4.84243 2.09243 4.25 2.33782 4.25 2.82782Z",
-          fill: "currentColor",
-        })
+        h("polyline", { points: "9 18 15 12 9 6" })
       );
     }
 
     function PassGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("circle", { cx: "5.5", cy: "6.5", r: "3.5", stroke: "currentColor", strokeWidth: "1.25" }),
-        h("path", { d: "M8.5 8.5L14 14M11 11L13 13M12.5 9.5L14.5 11.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" })
+        h("circle", { cx: "7.5", cy: "15.5", r: "5.5" }),
+        h("path", { d: "m21 2-9.6 9.6" }),
+        h("path", { d: "m15.5 7.5 3 3L22 7l-3-3" })
       );
     }
 
     function DataGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("ellipse", { cx: "8", cy: "3.5", rx: "6", ry: "2", stroke: "currentColor", strokeWidth: "1.25" }),
-        h("path", { d: "M2 3.5V8C2 9.1 4.7 10 8 10C11.3 10 14 9.1 14 8V3.5", stroke: "currentColor", strokeWidth: "1.25" }),
-        h("path", { d: "M2 8V12.5C2 13.6 4.7 14.5 8 14.5C11.3 14.5 14 13.6 14 12.5V8", stroke: "currentColor", strokeWidth: "1.25" })
+        h("polygon", { points: "12 2 2 7 12 12 22 7 12 2" }),
+        h("polyline", { points: "2 17 12 22 22 17" }),
+        h("polyline", { points: "2 12 12 17 22 12" })
       );
     }
 
     function ChatGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", {
-          d: "M2.5 3C2.5 2.17 3.17 1.5 4 1.5H12C12.83 1.5 13.5 2.17 13.5 3V10C13.5 10.83 12.83 11.5 12 11.5H6L3 14.5V11.5H4C3.17 11.5 2.5 10.83 2.5 10V3Z",
-          stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round"
-        })
+        h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
       );
     }
 
     function RefreshGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated dsh-icon-refresh';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M2.5 8C2.5 4.96 4.96 2.5 8 2.5C10.5 2.5 12.6 4.14 13.3 6.4M13.5 8C13.5 11.04 11.04 13.5 8 13.5C5.5 13.5 3.4 11.86 2.7 9.6", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round" }),
-        h("path", { d: "M14 3.5V6.5H11M2 12.5V9.5H5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+        h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
+        h("path", { d: "M21 3v5h-5" }),
+        h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
+        h("path", { d: "M8 16H3v5" })
       );
     }
 
     function TrashGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M3 4.5H13M6 4.5V3C6 2.45 6.45 2 7 2H9C9.55 2 10 2.45 10 3V4.5M4 4.5L4.8 13.2C4.85 13.65 5.23 14 5.68 14H10.32C10.77 14 11.15 13.65 11.2 13.2L12 4.5", stroke: "currentColor", strokeWidth: "1.25", strokeLinecap: "round", strokeLinejoin: "round" })
+        h("path", { d: "M3 6h18" }),
+        h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
+        h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
+        h("line", { x1: "10", x2: "10", y1: "11", y2: "17" }),
+        h("line", { x1: "14", x2: "14", y1: "11", y2: "17" })
       );
     }
 
     function EditGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z", stroke: "currentColor", strokeWidth: "1.25", strokeLinejoin: "round" })
+        h("path", { d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" }),
+        h("path", { d: "m15 5 4 4" })
       );
     }
 
     function FileGlyph(props) {
       var size = props && props.size ? props.size : 14;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("path", { d: "M4 1.5h5.5l4 4V14.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1z", stroke: "currentColor", strokeWidth: "1.2", strokeLinecap: "round", strokeLinejoin: "round" }),
-        h("polyline", { points: "9.5 1.5 9.5 5.5 13.5 5.5", stroke: "currentColor", strokeWidth: "1.2", strokeLinecap: "round", strokeLinejoin: "round" })
+        h("path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" }),
+        h("path", { d: "M14 2v4a2 2 0 0 0 2 2h4" })
       );
     }
 
     function SubagentGlyph(props) {
       var size = props && props.size ? props.size : 12;
-      var className = props && props.className ? props.className : undefined;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
-        width: size, height: size, className: className, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true",
+        width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
       },
-        h("circle", { cx: "4", cy: "4", r: "2", stroke: "currentColor", strokeWidth: "1.2" }),
-        h("circle", { cx: "4", cy: "12", r: "2", stroke: "currentColor", strokeWidth: "1.2" }),
-        h("circle", { cx: "12", cy: "8", r: "2", stroke: "currentColor", strokeWidth: "1.2" }),
-        h("path", { d: "M4 6v4M4 8h6", stroke: "currentColor", strokeWidth: "1.2", strokeLinecap: "round" })
+        h("circle", { cx: "12", cy: "18", r: "3" }),
+        h("circle", { cx: "6", cy: "6", r: "3" }),
+        h("circle", { cx: "18", cy: "6", r: "3" }),
+        h("path", { d: "M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9" }),
+        h("path", { d: "M12 12v3" })
       );
     }
 
     function CutGlyph(props) {
       var size = (props && props.size) ? props.size : 13;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
         h("circle", { cx: "6", cy: "6", r: "3" }),
         h("circle", { cx: "6", cy: "18", r: "3" }),
         h("line", { x1: "20", y1: "4", x2: "8.12", y2: "15.88" }),
@@ -778,7 +789,8 @@ button:hover .dsh-icon-animated,
 
     function CopyGlyph(props) {
       var size = (props && props.size) ? props.size : 13;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
         h("rect", { x: "9", y: "9", width: "13", height: "13", rx: "2", ry: "2" }),
         h("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })
       );
