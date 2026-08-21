@@ -90,10 +90,9 @@ const SHELL_CSS = `
 .dsh-tw-trigger { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; margin: 2px 0; padding: 6px 10px; box-sizing: border-box; border: none; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; color: var(--dsw-alias-label-primary); font-family: inherit; font-size: 13.5px; line-height: 20px; font-weight: 500; user-select: none; transition: background 120ms ease; }
 .dsh-tw-trigger:hover { background: var(--dsw-alias-interactive-bg-hover); }
 .dsh-tw-trigger.dsh-tw-rail { width: 36px; height: 36px; margin: 4px 0; justify-content: center; gap: 0; padding: 0; border-radius: 50%; }
-.dsh-tw-triggerLabel { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.dsh-tw-overlay { position: fixed; inset: 0; z-index: 1000000; display: flex; align-items: center; justify-content: center; }
-.dsh-tw-mask { position: absolute; inset: 0; background: var(--dsw-alias-bg-mask-1); backdrop-filter: var(--dsw-mask-blur); }
-.dsh-tw-panel { position: relative; z-index: 1; display: flex; width: 840px; height: min(800px, calc(100vh - 48px)); max-width: calc(100vw - 48px); border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: var(--dsw-shadow-lv3); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.15)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
+.dsh-tw-overlay { position: fixed; inset: 0; z-index: 1000000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.dsh-tw-mask { position: absolute; inset: 0; background: transparent !important; backdrop-filter: none !important; pointer-events: auto; }
+.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; width: 840px; height: min(800px, calc(100vh - 48px)); max-width: calc(100vw - 48px); border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.18)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
 .dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; }
 .dsh-tw-nav.dsh-tw-navCollapsed { width: 56px !important; padding: 18px 6px 0; }
 .dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navLabel { display: none; }
@@ -1210,6 +1209,37 @@ window.__ModuleLoader__.load({
       });
       var searchEnabled = searchState[0], setSearchEnabled = searchState[1];
 
+      var swapSidebarsState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return false;
+        return window.localStorage.getItem('dsh_swap_sidebars') === 'true';
+      });
+      var swapSidebars = swapSidebarsState[0], setSwapSidebars = swapSidebarsState[1];
+
+      var defaultModeState = React.useState(function () {
+        try { return localStorage.getItem('dsh_default_preset') || 'code'; } catch (e) { return 'code'; }
+      });
+      var defaultMode = defaultModeState[0], setDefaultMode = defaultModeState[1];
+
+      var permissionState = React.useState(function () {
+        try { return localStorage.getItem('dsh_permission_preset') || 'danger-full-access'; } catch (e) { return 'danger-full-access'; }
+      });
+      var permissionPreset = permissionState[0], setPermissionPreset = permissionState[1];
+
+      var enterBehaviorState = React.useState(function () {
+        try { return localStorage.getItem('dsh_send_on_enter') !== 'false'; } catch (e) { return true; }
+      });
+      var sendOnEnter = enterBehaviorState[0], setSendOnEnter = enterBehaviorState[1];
+
+      var showThinkingState = React.useState(function () {
+        try { return localStorage.getItem('dsh_show_reasoning_trace') !== 'false'; } catch (e) { return true; }
+      });
+      var showThinking = showThinkingState[0], setShowThinking = showThinkingState[1];
+
+      var autoScrollState = React.useState(function () {
+        try { return localStorage.getItem('dsh_auto_scroll_stream') !== 'false'; } catch (e) { return true; }
+      });
+      var autoScroll = autoScrollState[0], setAutoScroll = autoScrollState[1];
+
       var handleToggleNotice = function (e) {
         var checked = e.target.checked;
         setNoticeEnabled(checked);
@@ -1227,12 +1257,6 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var swapSidebarsState = React.useState(function () {
-        if (typeof window === 'undefined' || !window.localStorage) return false;
-        return window.localStorage.getItem('dsh_swap_sidebars') === 'true';
-      });
-      var swapSidebars = swapSidebarsState[0], setSwapSidebars = swapSidebarsState[1];
-
       var handleToggleSwapSidebars = function (e) {
         var checked = e.target.checked;
         setSwapSidebars(checked);
@@ -1246,8 +1270,99 @@ window.__ModuleLoader__.load({
         }
       };
 
-      return h('div', { className: 'dsh-tw-section', style: { display: 'flex', flexDirection: 'column', gap: '16px' } },
-        ((props && typeof props.renderSlot === 'function') ? props.renderSlot('settings.general.item', {}) : null),
+      return h('div', { className: 'dsh-tw-section', style: { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '780px' } },
+        h('div', null,
+          h('h2', { style: { margin: '0 0 4px', fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'General Preferences'),
+          h('p', { style: { margin: 0, fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' } }, 'Configure default modes, execution permissions, chat composer behavior, and window layout.')
+        ),
+        // 1. Default Mode Picker
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Default Agent Preset / Mode'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Preset applied when creating new conversation sessions')
+          ),
+          h('select', {
+            value: defaultMode,
+            onChange: function (e) {
+              setDefaultMode(e.target.value);
+              try { localStorage.setItem('dsh_default_preset', e.target.value); } catch (err) {}
+            },
+            style: { padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)', fontSize: '13px', cursor: 'pointer' }
+          },
+            h('option', { value: 'code' }, 'Code (Pair Programmer)'),
+            h('option', { value: 'architect' }, 'Architect (Design & Plan)'),
+            h('option', { value: 'ask' }, 'Ask (Quick Q&A)'),
+            h('option', { value: 'standard' }, 'Standard (Full Harness)')
+          )
+        ),
+        // 2. Permission Preset
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Execution Permission Level'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Control tool invocation and shell command execution permissions')
+          ),
+          h('select', {
+            value: permissionPreset,
+            onChange: function (e) {
+              setPermissionPreset(e.target.value);
+              try { localStorage.setItem('dsh_permission_preset', e.target.value); } catch (err) {}
+            },
+            style: { padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)', fontSize: '13px', cursor: 'pointer' }
+          },
+            h('option', { value: 'danger-full-access' }, 'Full Access (Autonomous Execution)'),
+            h('option', { value: 'confirm-destructive' }, 'Confirm Destructive Actions'),
+            h('option', { value: 'read-only' }, 'Read-Only (Ask for edits)')
+          )
+        ),
+        // 3. Enter Key Behavior
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Send Message on Enter'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'When disabled, Cmd+Enter sends and Enter adds a new line')
+          ),
+          h('input', {
+            type: 'checkbox',
+            checked: sendOnEnter,
+            onChange: function (e) {
+              setSendOnEnter(e.target.checked);
+              try { localStorage.setItem('dsh_send_on_enter', e.target.checked ? 'true' : 'false'); } catch (err) {}
+            },
+            style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        ),
+        // 4. Stream Reasoning Trace
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Show Thinking & Reasoning Trace'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Display collapsible model internal thinking trace during agent responses')
+          ),
+          h('input', {
+            type: 'checkbox',
+            checked: showThinking,
+            onChange: function (e) {
+              setShowThinking(e.target.checked);
+              try { localStorage.setItem('dsh_show_reasoning_trace', e.target.checked ? 'true' : 'false'); } catch (err) {}
+            },
+            style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        ),
+        // 5. Auto Scroll
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Auto-Scroll During Stream'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Automatically follow new message tokens to bottom of chat')
+          ),
+          h('input', {
+            type: 'checkbox',
+            checked: autoScroll,
+            onChange: function (e) {
+              setAutoScroll(e.target.checked);
+              try { localStorage.setItem('dsh_auto_scroll_stream', e.target.checked ? 'true' : 'false'); } catch (err) {}
+            },
+            style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        ),
+        // 6. Sidebar Search
         h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
           h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
             h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Sidebar Search Bar'),
@@ -1260,6 +1375,7 @@ window.__ModuleLoader__.load({
             style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
           })
         ),
+        // 7. Swap Sidebars
         h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
           h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
             h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Swap Main & Secondary Sidebars'),
@@ -1272,6 +1388,7 @@ window.__ModuleLoader__.load({
             style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
           })
         ),
+        // 8. Internal Testing Notice
         h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
           h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
             h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Internal Testing Notice'),
@@ -1282,6 +1399,90 @@ window.__ModuleLoader__.load({
             checked: noticeEnabled,
             onChange: handleToggleNotice,
             style: { width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--dsw-alias-primary, #6366f1)' },
+          })
+        )
+      );
+    }
+
+    function PluginsSettingsSection() {
+      var pluginList = [
+        { id: 'dsh-actions', name: 'Actions & Shortcuts', desc: 'Session modes, slash commands, hotkey actions', version: '0.1.0' },
+        { id: 'dsh-agents', name: 'Agents & Personas', desc: 'Custom agent personas, system prompts, role rosters', version: '0.1.0' },
+        { id: 'dsh-credentials', name: 'Credentials Vault', desc: 'Encrypted API key vault with biometric & hardware lock', version: '0.1.0' },
+        { id: 'dsh-dialects', name: 'Dialect Transforms', desc: 'Multi-dialect prompt templates and model translation', version: '0.1.0' },
+        { id: 'dsh-formatters', name: 'Code Formatters', desc: 'Multi-language code formatting on file edit', version: '0.1.0' },
+        { id: 'dsh-hosts', name: 'Deploy & Cluster', desc: 'Multi-machine cluster nodes, remote deploy, mesh ingress', version: '0.1.0' },
+        { id: 'dsh-loops', name: 'Autonomous Work Loops', desc: 'Background agent loops, continuous build, DarkFactory', version: '0.1.0' },
+        { id: 'dsh-lsp', name: 'Language Server Protocol', desc: 'Real-time typechecking, diagnostics, symbol outline', version: '0.1.0' },
+        { id: 'dsh-providers', name: 'Providers & Workspaces', desc: 'Filesystem explorer, monorepo hierarchy, tabs & models', version: '0.1.0' },
+        { id: 'dsh-repos', name: 'Repository Parity', desc: 'Full GitHub repository parity: code, diffs, commits, branches', version: '0.1.0' },
+        { id: 'dsh-themes', name: 'Themes & Appearance', desc: 'OLED pitch black, accent colors, theme switching', version: '0.1.0' },
+        { id: 'dsh-tools', name: 'Tools & MCP Engine', desc: 'Tool registry, Model Context Protocol server connectors', version: '0.1.0' },
+        { id: 'dsh-translator', name: 'Real-time Translator', desc: 'Cross-language translation for assistant dialogues', version: '0.1.0' },
+        { id: 'dsh-tui', name: 'Terminal UI (TUI)', desc: 'Terminal user interface with split panes and interactive controls', version: '0.1.0' },
+        { id: 'dsh-tweaks', name: 'UI & Layout Tweaks', desc: 'Layout customizer, keybind recorder, settings manager', version: '0.1.0' },
+        { id: 'dsh-voice', name: 'Voice & Speech Engine', desc: 'Voice input speech-to-text and audio response playback', version: '0.1.0' },
+      ];
+
+      var reloadingState = React.useState(null);
+      var reloadingId = reloadingState[0], setReloadingId = reloadingState[1];
+
+      var handleReloadPlugin = function (pId) {
+        setReloadingId(pId);
+        setTimeout(function () {
+          setReloadingId(null);
+        }, 600);
+      };
+
+      return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '800px' } },
+        h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+          h('div', null,
+            h('h2', { style: { margin: '0 0 4px', fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Harness Plugins (' + pluginList.length + ')'),
+            h('p', { style: { margin: 0, fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' } }, 'Monorepo plugins extending the DeepSeek Harness platform.')
+          ),
+          h('span', { style: { padding: '3px 10px', borderRadius: '12px', background: 'rgba(63, 185, 80, 0.15)', color: '#3fb950', fontSize: '12px', fontWeight: 700 } }, '16/16 Active')
+        ),
+        h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '12px' } },
+          pluginList.map(function (p) {
+            var isReloading = reloadingId === p.id;
+            return h('div', {
+              key: p.id,
+              style: {
+                padding: '14px 16px',
+                borderRadius: '10px',
+                border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))',
+                background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }
+            },
+              h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+                h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                  h('span', { style: { width: '8px', height: '8px', borderRadius: '50%', background: '#3fb950', boxShadow: '0 0 6px rgba(63,185,80,0.5)' } }),
+                  h('strong', { style: { fontSize: '14px', color: 'var(--dsw-alias-label-primary)' } }, p.name)
+                ),
+                h('span', { style: { fontSize: '11px', padding: '1px 6px', borderRadius: '4px', background: 'rgba(128,128,128,0.15)', color: 'var(--dsw-alias-label-secondary)', fontFamily: 'var(--ds-font-mono, monospace)' } }, 'v' + p.version)
+              ),
+              h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)', lineHeight: '18px' } }, p.desc),
+              h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', paddingTop: '8px', borderTop: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))' } },
+                h('code', { style: { fontSize: '11px', color: 'var(--dsw-alias-primary, #6366f1)' } }, p.id),
+                h('button', {
+                  type: 'button',
+                  onClick: function () { handleReloadPlugin(p.id); },
+                  disabled: isReloading,
+                  style: {
+                    padding: '3px 8px',
+                    borderRadius: '5px',
+                    border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.2))',
+                    background: 'transparent',
+                    color: 'var(--dsw-alias-label-secondary)',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                  }
+                }, isReloading ? 'Reloaded ✔' : 'Reload')
+              )
+            );
           })
         )
       );
@@ -2178,6 +2379,17 @@ window.__ModuleLoader__.load({
           inject: function () { return {}; },
         }, KeybindsSettingsSection);
       }, 'dsh-tweaks: keybinds section');
+
+      ctx.slots.inject('settings.section', function () {
+        return ctx.slots.register({
+          name: 'settings.section',
+          id: 'plugins',
+          priority: -10,
+          order: 30,
+          label: function () { return 'Plugins'; },
+          inject: function () { return {}; },
+        }, PluginsSettingsSection);
+      }, 'dsh-tweaks: plugins section');
 
       // Harness-owned sections cannot register a glyph from their own bundles
       // (the harness checkout is kept pristine), so dsh-tweaks owns the three

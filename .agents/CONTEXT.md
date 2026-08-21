@@ -2279,3 +2279,53 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 41 — August 21, 2026 (Application Icons in Filesystem, Deploy Management in Settings, Settings Polish, and Transparent Modal Backdrop)
+
+**Context & User Directives:**
+- `most .apps dont show icons`
+- `make it so deploy is fully managed in settings`
+- `polish all settings tabs so they allow full configuration and make sure it works`
+- `remove the black background from settings modal`
+
+**Design & Implementation:**
+1. **Application Icons for macOS `.app` Bundles & Applications**:
+   - Implemented [`renderAppIcon(appName, size)`](file:///Users/user/Projects/dsh-stack/plugins/dsh-providers/client.js#L4880-L5085) in `plugins/dsh-providers/client.js` with rich SVG icons for all standard desktop/developer applications:
+     - 🌐 Safari (Compass dial with needle in blue)
+     - 🌐 Google Chrome / Chromium (Multi-colored target)
+     - 🦊 Firefox (Orange flame fox)
+     - 🌀 Arc (Gradient arc)
+     - 💻 Xcode (Blue blueprint and hammer)
+     - 📝 VS Code / Cursor / Code / Antigravity (Editor chevron in blue/purple)
+     - ⬛ Terminal / iTerm / Alacritty / Ghostty / Kitty / Warp (Shell prompt `>_`)
+     - 💬 Slack (Hash mark with multi-color dots)
+     - 🎮 Discord (Blurple controller)
+     - 🎵 Spotify / Apple Music (Sound waves / Double music note)
+     - ✉️ Mail / Messages (Envelopes / Speech bubbles)
+     - ⚙️ System Settings (Gear)
+     - 📁 Finder (Two-tone macOS face)
+     - 🐳 Docker (Whale and containers)
+     - 🎨 Figma (Multi-color droplet layers)
+     - 🐙 GitHub Desktop (Octocat silhouette)
+     - 📱 Generic `.app`: Polished macOS rounded rectangle application icon.
+   - Updated `renderDirEntries` and file rows in `dsh-providers/client.js` to detect `isAppBundle` on directory bundles and render branded app icons.
+2. **Full Deploy Management in Settings**:
+   - Upgraded `dsh-hosts` settings section into a first-class **`Deploy`** management hub ([`DeploySettingsSection`](file:///Users/user/Projects/dsh-stack/plugins/dsh-hosts/client.js#L75-L420)) with `DeployGlyph` (rocket icon) at order 10:
+     - **Cluster & Nodes**: List connected devices, view online status, 1-click automated worker node deploy command.
+     - **Git & Continuous Deployment**: Git remote target repo, branch selector, continuous deployment automation notice, "Deploy Now" action.
+     - **Mesh & Ingress**: Permanent Tailscale URL, copy button, synced files indicator.
+     - **Deploy Logs**: Real-time deployment and daemon log stream console.
+3. **Polished All Settings Tabs**:
+   - **General**: Added controls for default agent preset/mode (`code`, `architect`, `ask`, `standard`), permission preset (`danger-full-access`, `confirm-destructive`, `read-only`), enter-key send behavior, reasoning trace visibility toggle, auto-scroll toggle, search bar toggle, sidebar swap toggle, and testing notice toggle.
+   - **Plugins**: Created dedicated `PluginsSettingsSection` in `plugins/dsh-tweaks/client.js` listing all 16 plugins with active status, version badges, descriptions, and interactive reload triggers.
+   - **Keybinds**: Configurable shortcut recorder with live keypress capture and reset.
+   - **Models, Accounts, Terminals, Containers, Tools, Appearance**: Full forms and state persistence verified.
+4. **Transparent Modal Backdrop**:
+   - Set `.dsh-tw-mask` background to `transparent !important` and `backdrop-filter: none !important` in `plugins/dsh-tweaks/client.js`.
+   - Settings window floats cleanly with a smooth drop shadow over the workspace without darkening or blacking out the background.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
+
+**Status:** completed.
