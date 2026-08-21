@@ -2182,3 +2182,34 @@ Two bugs found via CDP browser automation with console error capture:
 
 **Status:** completed.
 
+## Session 38 — August 21, 2026 (Settings Draggable Modal Cutout Fix, Deduplicate Models Tab, and Sidebar Tree Hierarchy)
+
+**Context & User Directives:**
+1. `the draggable settings window is inside the native modal only cutout inside, there is two models tabs in settings`
+2. `top level of the sidebar tree should be host machine and then drive`
+
+**Root Cause Analysis & Design:**
+1. **Draggable Settings Modal Cutout**: When `P.Modal` wrapped `SettingsPanel`, `P.Modal` rendered its own fixed-size card box with `overflow: hidden`, padding, and border. When `SettingsPanel` was dragged via `transform: translate(x, y)`, it moved inside the parent card box and was clipped by its `overflow: hidden` boundary.
+   - **Fix**: Replaced `P.Modal` in `TweaksSettingsRoot` (`dsh-tweaks/client.js`) with `ReactDOM.createPortal` rendering a full-screen `.dsh-tw-overlay` + `.dsh-tw-mask` and a single draggable `.dsh-tw-panel` with `role="dialog"` and `aria-modal="true"`. Dragging now translates the window freely across the entire screen over the backdrop blur mask with zero clipping.
+2. **Duplicate "Models" Tabs**: Both `ui-settings-models` (harness) and `dsh-providers` registered into the Cordis list slot `settings.section` with `id: "models"`. `useSections` collected both entries into `rawRows`.
+   - **Fix**: Added deduplication by `id` on `rawRows` in `TweaksSettingsRoot` (`dsh-tweaks/client.js`), ensuring only one unique Models tab appears in the navigation rail.
+3. **Sidebar Tree Hierarchy (Host Machine & Drive)**: The workspace tree previously rendered root `/` directories (`Applications`, `Library`, `System`, `Users`) directly under `Ungrouped`.
+   - **Fix**: In `UnifiedWorkspacesBrowser` (`dsh-providers/client.js`), introduced top-level `Host Machine` root with `HostMachineGlyph` SVG icon, containing `Macintosh HD` (Drive) with `HardDriveGlyph` SVG icon, containing root chats and the directory hierarchy (`renderDirEntries(currentRoot, 2)`).
+4. **Environment / symlink hygiene**: Fixed stale pre-monorepo symlinks in `node_modules/@deepseek-ai` pointing to `/Users/user/agents/harness` by re-pointing them to `/Users/user/Projects/dsh-stack/harness`.
+
+**Verification (CDP Browser Automation):**
+- **Sidebar Tree Hierarchy**:
+  - `Ungrouped` (`paddingLeft: 8px`)
+  - `Host Machine` (`paddingLeft: 8px`, `ariaExpanded: true`)
+  - `Macintosh HD` (`paddingLeft: 24px`, `ariaExpanded: true`)
+  - `Applications`, `bin`, `cores`, `dev`, `Library`, `Users`, etc. (`paddingLeft: 40px`, `ariaExpanded: false`)
+- **Settings Modal Dialog**:
+  - `dialogCount: 1`
+  - `hasOverlay: true`, `hasMask: true`, `panelParentClass: "dsh-tw-overlay"`
+  - Dragging translates window across full viewport without cutout/clipping
+- **Settings Nav Rows**:
+  - `modelsCount: 1` (duplicate Models tab eliminated)
+- **Console Errors**: Clean / 0 errors.
+- **Plugin Test Suites**: All 16 plugins passed `check-plugin.mjs`.
+
+**Status:** completed.

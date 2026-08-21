@@ -5064,6 +5064,59 @@ button:hover .dsh-icon-animated,
       );
     }
 
+    function HostMachineGlyph(props) {
+      var size = props && props.size ? props.size : 15;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-primary, #6366f1)"
+        }
+      },
+        h("rect", { width: "20", height: "14", x: "2", y: "3", rx: "2" }),
+        h("line", { x1: "8", x2: "16", y1: "21", y2: "21" }),
+        h("line", { x1: "12", x2: "12", y1: "17", y2: "21" })
+      );
+    }
+
+    function HardDriveGlyph(props) {
+      var size = props && props.size ? props.size : 15;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-label-secondary, #94a3b8)"
+        }
+      },
+        h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
+        h("path", { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" }),
+        h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
+        h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" })
+      );
+    }
+
     function SparklesGlyph(props) {
       var size = props.size || 14;
       return h("svg", {
@@ -5412,6 +5465,12 @@ button:hover .dsh-icon-animated,
 
       var currentRootState = React.useState("/");
       var currentRoot = currentRootState[0], setCurrentRoot = currentRootState[1];
+
+      var isHostOpenState = React.useState(true);
+      var isHostOpen = isHostOpenState[0], setIsHostOpen = isHostOpenState[1];
+
+      var isDriveOpenState = React.useState(true);
+      var isDriveOpen = isDriveOpenState[0], setIsDriveOpen = isDriveOpenState[1];
 
       var expandedPathsState = React.useState({ "/": true, "/Users": true, "/Users/user": true, "/Users/user/Projects": true });
       var expandedPaths = expandedPathsState[0], setExpandedPaths = expandedPathsState[1];
@@ -6303,28 +6362,85 @@ button:hover .dsh-icon-animated,
           ) : null
         ),
 
-        // 4. EXPLORER DIRECTORY TREE (WITH NESTED CHATS)
+        // 4. EXPLORER DIRECTORY TREE: Host Machine -> Macintosh HD (Drive) -> Filesystem Hierarchy
         h(
           "div",
           { style: { display: "flex", flexDirection: "column", width: "100%", flex: 1 } },
-          // Render chats belonging to currentRoot itself when focused
-          (function () {
-            var cRootClean = currentRoot.length > 1 && currentRoot.endsWith("/") ? currentRoot.slice(0, -1) : currentRoot;
-            var rootChats = folderSessions[cRootClean] || folderSessions[currentRoot] || [];
-            if (rootChats.length === 0) return null;
-            return h(
+          // Top Level: Host Machine
+          h(
+            "div",
+            {
+              className: "dsh-tree-projectRow",
+              role: "treeitem",
+              style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
+              "aria-expanded": isHostOpen,
+              onClick: function () { setIsHostOpen(!isHostOpen); },
+            },
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(HostMachineGlyph, { size: 15 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isHostOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
+            ),
+            h("span", { className: "dsh-tree-title" }, "Host Machine"),
+            h("span", { className: "dsh-tree-actions" },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "New Terminal on Host",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  handleNewTerminalInDir("/");
+                }
+              }, h(TerminalsGlyph, { size: 13 }))
+            )
+          ),
+          isHostOpen ? h(
+            "div",
+            { style: { display: "flex", flexDirection: "column", width: "100%" } },
+            // Level 2: Drive (Macintosh HD)
+            h(
               "div",
-              { style: { display: "flex", flexDirection: "column", width: "100%", marginBottom: "4px", paddingBottom: "4px", borderBottom: "1px dashed var(--dsw-alias-border-l1)" } },
-              h(
-                "div",
-                { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 8px", fontSize: "10.5px", fontWeight: 700, color: "var(--dsw-alias-label-secondary)" } },
-                h("span", { style: { textTransform: "uppercase", letterSpacing: "0.5px" } }, "Chats in " + (cRootClean.split("/").pop() || "Root")),
-                h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700 } }, rootChats.length)
+              {
+                className: "dsh-tree-projectRow",
+                role: "treeitem",
+                style: { position: "relative", paddingLeft: "24px", fontWeight: 500, height: "28px" },
+                "aria-expanded": isDriveOpen,
+                onClick: function () { setIsDriveOpen(!isDriveOpen); },
+              },
+              h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(HardDriveGlyph, { size: 15 })),
+              h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+                h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isDriveOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
               ),
-              rootChats.map(function (c) { return renderChatRow(c, 8); })
-            );
-          })(),
-          renderDirEntries(currentRoot, 0)
+              h("span", { className: "dsh-tree-title" }, "Macintosh HD"),
+              h("span", { className: "dsh-tree-actions" },
+                h("button", {
+                  type: "button",
+                  className: "dsh-tree-actionBtn",
+                  title: "New Chat in Root",
+                  onClick: function (e) {
+                    e.stopPropagation();
+                    handleStartSessionInDir("/");
+                  }
+                }, h(P.IconPlusOutline16, { size: 13 }))
+              )
+            ),
+            isDriveOpen ? h(
+              "div",
+              { style: { display: "flex", flexDirection: "column", width: "100%" } },
+              // Render chats belonging to root
+              (function () {
+                var cRootClean = currentRoot.length > 1 && currentRoot.endsWith("/") ? currentRoot.slice(0, -1) : currentRoot;
+                var rootChats = folderSessions[cRootClean] || folderSessions[currentRoot] || [];
+                if (rootChats.length === 0) return null;
+                return h(
+                  "div",
+                  { style: { display: "flex", flexDirection: "column", width: "100%", marginBottom: "4px", paddingBottom: "4px", borderBottom: "1px dashed var(--dsw-alias-border-l1)" } },
+                  rootChats.map(function (c) { return renderChatRow(c, 40); })
+                );
+              })(),
+              // Render directory entries starting from depth 2 (paddingLeft = 8 + 2 * 16 = 40px)
+              renderDirEntries(currentRoot, 2)
+            ) : null
+          ) : null
         ),
 
         // 5. ARCHIVED SESSIONS SECTION (SEPARATE SECTION AT BOTTOM)

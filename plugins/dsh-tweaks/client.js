@@ -1702,6 +1702,8 @@ window.__ModuleLoader__.load({
 
       return h('div', {
         className: 'dsh-tw-panel',
+        role: 'dialog',
+        'aria-modal': 'true',
         'aria-labelledby': titleId,
         style: {
           transform: 'translate(' + dialogPos.x + 'px, ' + dialogPos.y + 'px)',
@@ -1820,7 +1822,14 @@ window.__ModuleLoader__.load({
         ];
       }
       var SUPPRESSED_SECTIONS = new Set(['provider-status', 'provider-usage', 'keychain', 'integrations']);
-      var rows = rawRows.filter(function (r) { return r && !SUPPRESSED_SECTIONS.has(r.id); });
+      var seenIds = new Set();
+      var rows = [];
+      for (var k = 0; k < rawRows.length; k++) {
+        var r = rawRows[k];
+        if (!r || !r.id || SUPPRESSED_SECTIONS.has(r.id) || seenIds.has(r.id)) continue;
+        seenIds.add(r.id);
+        rows.push(r);
+      }
 
       var onboardingSteps = [];
       if (typeof useOnboardingSteps === 'function') {
@@ -1896,13 +1905,33 @@ window.__ModuleLoader__.load({
               )
             ),
         open
-          ? h(P.Modal, {
-            open: true,
-            onClose: close,
-            headless: true,
-            title: 'Settings',
-            className: 'dsh-tw-panel',
-          }, h(SettingsPanelErrorBoundary, { onClose: close }, h(SettingsPanel, { rows: rows, renderSlot: renderSlot, activeId: activeId, onSelect: setActiveId, onClose: close, openSection: openSection })))
+          ? (ReactDOM && typeof ReactDOM.createPortal === 'function' && typeof document !== 'undefined'
+              ? ReactDOM.createPortal(
+                  h('div', { className: 'dsh-tw-overlay', role: 'presentation' },
+                    h('div', { className: 'dsh-tw-mask', 'aria-hidden': 'true', onClick: close }),
+                    h(SettingsPanelErrorBoundary, { onClose: close },
+                      h(SettingsPanel, {
+                        rows: rows,
+                        renderSlot: renderSlot,
+                        activeId: activeId,
+                        onSelect: setActiveId,
+                        onClose: close,
+                        openSection: openSection,
+                      })
+                    )
+                  ),
+                  document.body
+                )
+              : h(SettingsPanelErrorBoundary, { onClose: close },
+                  h(SettingsPanel, {
+                    rows: rows,
+                    renderSlot: renderSlot,
+                    activeId: activeId,
+                    onSelect: setActiveId,
+                    onClose: close,
+                    openSection: openSection,
+                  })
+                ))
           : null,
         (onboardingStep !== undefined && renderSlot && typeof renderSlot === 'function')
           ? renderSlot('settings.onboarding', {
