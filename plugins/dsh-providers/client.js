@@ -5064,6 +5064,55 @@ button:hover .dsh-icon-animated,
       );
     }
 
+    function PinGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-warning, #f59e0b)"
+        }
+      },
+        h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }),
+        h("path", { d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" })
+      );
+    }
+
+    function ActiveGlyph(props) {
+      var size = props && props.size ? props.size : 14;
+      return h("svg", {
+        width: size,
+        height: size,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          color: "var(--dsw-alias-success, #22c55e)"
+        }
+      },
+        h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" })
+      );
+    }
+
     function HostMachineGlyph(props) {
       var size = props && props.size ? props.size : 15;
       return h("svg", {
@@ -5466,6 +5515,12 @@ button:hover .dsh-icon-animated,
       var currentRootState = React.useState("/");
       var currentRoot = currentRootState[0], setCurrentRoot = currentRootState[1];
 
+      var isPinnedOpenState = React.useState(true);
+      var isPinnedOpen = isPinnedOpenState[0], setIsPinnedOpen = isPinnedOpenState[1];
+
+      var isActiveOpenState = React.useState(true);
+      var isActiveOpen = isActiveOpenState[0], setIsActiveOpen = isActiveOpenState[1];
+
       var isHostOpenState = React.useState(true);
       var isHostOpen = isHostOpenState[0], setIsHostOpen = isHostOpenState[1];
 
@@ -5475,7 +5530,7 @@ button:hover .dsh-icon-animated,
       var expandedPathsState = React.useState({ "/": true, "/Users": true, "/Users/user": true, "/Users/user/Projects": true });
       var expandedPaths = expandedPathsState[0], setExpandedPaths = expandedPathsState[1];
 
-      var isUngroupedOpenState = React.useState(false);
+      var isUngroupedOpenState = React.useState(true);
       var isUngroupedOpen = isUngroupedOpenState[0], setIsUngroupedOpen = isUngroupedOpenState[1];
 
       var searchQueryState = React.useState("");
@@ -5623,6 +5678,48 @@ button:hover .dsh-icon-animated,
         return false;
       };
 
+      var pinnedSet = new Set();
+      try {
+        var localPinned = JSON.parse(localStorage.getItem('dsh_pinned_sessions') || '[]');
+        localPinned.forEach(function (id) { pinnedSet.add(id); });
+      } catch (e) {}
+
+      var isPinnedSession = function (s, sId) {
+        if (!s && !sId) return false;
+        var id = sId || (s && s.id);
+        if (id && pinnedSet.has(id)) return true;
+        if (s && (s.isPinned || s.pinned || s.favorite)) return true;
+        return false;
+      };
+
+      var togglePinSession = function (sessionId) {
+        if (pinnedSet.has(sessionId)) {
+          pinnedSet.delete(sessionId);
+        } else {
+          pinnedSet.add(sessionId);
+        }
+        try {
+          localStorage.setItem('dsh_pinned_sessions', JSON.stringify(Array.from(pinnedSet)));
+        } catch (e) {}
+        loadAll();
+      };
+
+      var pinnedSessions = sessionIds
+        .map(function (sId) { return sessionsById[sId]; })
+        .filter(function (s) { return s && !isSubagentChild(s) && !isArchivedSession(s, s.id) && isPinnedSession(s, s.id); })
+        .sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+
+      var liveSessions = sessions.filter(function (s) { return Boolean(s.attached); });
+      var liveContainers = containers.filter(function (c) { return Boolean(c.isRunning); });
+      var activeChatSessions = sessionIds
+        .map(function (sId) { return sessionsById[sId]; })
+        .filter(function (s) {
+          if (!s || isSubagentChild(s) || isArchivedSession(s, s.id)) return false;
+          return s.busy === true || s.running === true || s.status === 'busy' || s.status === 'running' || s.phase === 'running';
+        })
+        .sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+      var totalActiveCount = activeChatSessions.length + liveSessions.length + liveContainers.length;
+
       var folderSessions = {};
       var accountedSessionIds = {};
 
@@ -5664,7 +5761,7 @@ button:hover .dsh-icon-animated,
       var ungroupedSessions = sessionIds
         .filter(function (sId) {
           var s = sessionsById[sId];
-          return !accountedSessionIds[sId] && s && !isSubagentChild(s) && !isArchivedSession(s, sId);
+          return !accountedSessionIds[sId] && s && !isSubagentChild(s) && !isArchivedSession(s, sId) && !isPinnedSession(s, sId);
         })
         .map(function (sId) { return sessionsById[sId]; });
 
@@ -5899,9 +5996,17 @@ button:hover .dsh-icon-animated,
                 setEllipsisOpen({ id: "chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
               },
             },
-            h("span", { className: "dsh-tree-slot dsh-tree-icon" },
-              h(ChatGlyph, { size: 14 })
-            ),
+            (function () {
+              var isPinned = isPinnedSession(chat, chat.id);
+              if (isPinned) {
+                return h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-warning, #f59e0b)" } },
+                  h(PinGlyph, { size: 13 })
+                );
+              }
+              return h("span", { className: "dsh-tree-slot dsh-tree-icon" },
+                h(ChatGlyph, { size: 14 })
+              );
+            })(),
             hasSubagents ? h("span", {
               className: "dsh-tree-slot dsh-tree-chevron",
               title: isSubExp ? "Collapse subagents" : "Expand subagents",
@@ -5942,12 +6047,15 @@ button:hover .dsh-icon-animated,
                 position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
                 onClose: function () { setEllipsisOpen(null); },
                 items: [
+                  { id: isPinnedSession(chat, chat.id) ? "unpin" : "pin", label: isPinnedSession(chat, chat.id) ? "Unpin Chat" : "Pin Chat", icon: h(PinGlyph, { size: 13 }) },
                   { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
                   { id: "fork", label: "Fork Chat", icon: h(P.IconBranchOutline16, { size: 13 }) },
                   { id: "archive", label: "Archive Chat", icon: h(TrashGlyph, { size: 13 }), danger: true },
                 ],
                 onSelect: function (actionId) {
-                  if (actionId === "rename") {
+                  if (actionId === "pin" || actionId === "unpin") {
+                    togglePinSession(chat.id);
+                  } else if (actionId === "rename") {
                     var newTitle = prompt("Rename chat:", chat.title || "");
                     if (newTitle && renameSession) renameSession(chat.id, newTitle);
                   } else if (actionId === "fork") {
@@ -6291,11 +6399,15 @@ button:hover .dsh-icon-animated,
         });
       };
 
-      var filteredUngroupedSessions = ungroupedSessions.filter(function (chat) {
+      var filterBySearch = function (chat) {
         if (!searchQuery || !searchQuery.trim()) return true;
         var q = searchQuery.trim().toLowerCase();
         return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
-      });
+      };
+
+      var filteredPinnedSessions = pinnedSessions.filter(filterBySearch);
+      var filteredActiveChatSessions = activeChatSessions.filter(filterBySearch);
+      var filteredUngroupedSessions = ungroupedSessions.filter(filterBySearch);
 
       var ungroupedMenuState = React.useState(false);
       var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
@@ -6303,7 +6415,8 @@ button:hover .dsh-icon-animated,
       return h(
         "div",
         { style: { display: "flex", flexDirection: "column", width: "100%", height: "100%", overflowY: "auto", gap: "4px", padding: "4px 0" } },
-        // 1. UNGROUPED SESSIONS SECTION (ALWAYS PROMINENT AT TOP)
+
+        // 1. PINNED SESSIONS SECTION (TOP)
         h(
           "div",
           { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
@@ -6313,59 +6426,115 @@ button:hover .dsh-icon-animated,
               className: "dsh-tree-projectRow",
               role: "treeitem",
               style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
-              onClick: function () { setIsUngroupedOpen(!isUngroupedOpen); },
+              "aria-expanded": isPinnedOpen,
+              onClick: function () { setIsPinnedOpen(!isPinnedOpen); },
             },
-            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(BlueFolderGlyph, { size: 14 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(PinGlyph, { size: 14 })),
             h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
-              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isUngroupedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
+              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isPinnedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
-            h("span", { className: "dsh-tree-title" }, "Ungrouped"),
-            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, filteredUngroupedSessions.length),
+            h("span", { className: "dsh-tree-title" }, "Pinned"),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(245, 158, 11, 0.15)", color: "var(--dsw-alias-warning, #f59e0b)", fontWeight: 700, marginLeft: "4px" } }, filteredPinnedSessions.length),
             h("span", { className: "dsh-tree-actions" },
               h("button", {
                 type: "button",
                 className: "dsh-tree-actionBtn",
                 title: "New Session",
                 onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
-              }, h(P.IconPlusOutline16, { size: 13 })),
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "Ungrouped Actions (…)",
-                onClick: function (e) { e.stopPropagation(); setUngroupedMenuOpen(!isUngroupedMenuOpen); }
-              }, h(P.IconEllipsisOutline16, { size: 13 })),
-              h(SelectDropdownMenu, {
-                open: isUngroupedMenuOpen,
-                onClose: function () { setUngroupedMenuOpen(false); },
-                items: [
-                  { id: "archive-empty", label: "Archive Empty & Pong Sessions", icon: h(TrashGlyph, { size: 13 }), danger: true },
-                ],
-                onSelect: function (act) {
-                  if (act === "archive-empty") {
-                    fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
-                      .then(function (r) { return r.json(); })
-                      .then(function (res) {
-                        alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
-                        window.location.reload();
-                      });
-                  }
-                }
-              })
+              }, h(P.IconPlusOutline16, { size: 13 }))
             )
           ),
-          isUngroupedOpen ? h(
+          isPinnedOpen ? h(
             "div",
             { style: { display: "flex", flexDirection: "column", width: "100%" } },
-            filteredUngroupedSessions.length > 0
-              ? filteredUngroupedSessions.map(function (chat) { return renderChatRow(chat, 16); })
-              : h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(no ungrouped sessions)")
+            filteredPinnedSessions.length > 0
+              ? filteredPinnedSessions.map(function (chat) { return renderChatRow(chat, 16); })
+              : h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(no pinned sessions)")
           ) : null
         ),
 
-        // 4. EXPLORER DIRECTORY TREE: Host Machine -> Macintosh HD (Drive) -> Filesystem Hierarchy
+        // 2. ACTIVE / LIVE SECTION
         h(
           "div",
-          { style: { display: "flex", flexDirection: "column", width: "100%", flex: 1 } },
+          { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
+          h(
+            "div",
+            {
+              className: "dsh-tree-projectRow",
+              role: "treeitem",
+              style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
+              "aria-expanded": isActiveOpen,
+              onClick: function () { setIsActiveOpen(!isActiveOpen); },
+            },
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(ActiveGlyph, { size: 14 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isActiveOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
+            ),
+            h("span", { className: "dsh-tree-title" }, "Active"),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(34, 197, 94, 0.15)", color: "var(--dsw-alias-success, #22c55e)", fontWeight: 700, marginLeft: "4px" } }, totalActiveCount),
+            h("span", { className: "dsh-tree-actions" },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "New Terminal",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
+                }
+              }, h(TerminalsGlyph, { size: 13 }))
+            )
+          ),
+          isActiveOpen ? h(
+            "div",
+            { style: { display: "flex", flexDirection: "column", width: "100%" } },
+            (filteredActiveChatSessions.length > 0 || liveSessions.length > 0 || liveContainers.length > 0)
+              ? h(
+                  React.Fragment,
+                  null,
+                  filteredActiveChatSessions.map(function (chat) { return renderChatRow(chat, 16); }),
+                  liveSessions.map(function (sess) {
+                    return h(
+                      "div",
+                      {
+                        key: "live-term::" + sess.name,
+                        className: "dsh-tree-sessionRow",
+                        role: "treeitem",
+                        style: { paddingLeft: "16px", height: "28px", cursor: "pointer" },
+                        onClick: function () {
+                          window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sess.name } }));
+                        }
+                      },
+                      h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "#22c55e" } }, h(TerminalsGlyph, { size: 13 })),
+                      h("span", { className: "dsh-tree-title", style: { fontSize: "12px" } }, "Terminal: " + sess.name),
+                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(34, 197, 94, 0.2)", color: "#22c55e", fontWeight: 700, marginLeft: "auto" } }, "RUNNING")
+                    );
+                  }),
+                  liveContainers.map(function (cont) {
+                    return h(
+                      "div",
+                      {
+                        key: "live-cont::" + cont.id,
+                        className: "dsh-tree-sessionRow",
+                        role: "treeitem",
+                        style: { paddingLeft: "16px", height: "28px", cursor: "pointer" },
+                        onClick: function () {
+                          window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: cont.id } }));
+                        }
+                      },
+                      h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "#38bdf8" } }, h(ContainersGlyph, { size: 13 })),
+                      h("span", { className: "dsh-tree-title", style: { fontSize: "12px" } }, "Container: " + (cont.name || cont.image || cont.id.slice(0, 12))),
+                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(56, 189, 248, 0.2)", color: "#38bdf8", fontWeight: 700, marginLeft: "auto" } }, "LIVE")
+                    );
+                  })
+                )
+              : h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(no active processes)")
+          ) : null
+        ),
+
+        // 3. HOSTS SECTION (Host Machine -> Macintosh HD -> Filesystem Directory Hierarchy)
+        h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", width: "100%", flex: 1, margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
           // Top Level: Host Machine
           h(
             "div",
@@ -6443,6 +6612,66 @@ button:hover .dsh-icon-animated,
           ) : null
         ),
 
+        // 4. UNGROUPED SESSIONS SECTION
+        h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px" } },
+          h(
+            "div",
+            {
+              className: "dsh-tree-projectRow",
+              role: "treeitem",
+              style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
+              "aria-expanded": isUngroupedOpen,
+              onClick: function () { setIsUngroupedOpen(!isUngroupedOpen); },
+            },
+            h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(BlueFolderGlyph, { size: 14 })),
+            h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
+              h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isUngroupedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
+            ),
+            h("span", { className: "dsh-tree-title" }, "Ungrouped"),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, filteredUngroupedSessions.length),
+            h("span", { className: "dsh-tree-actions" },
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "New Session",
+                onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
+              }, h(P.IconPlusOutline16, { size: 13 })),
+              h("button", {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "Ungrouped Actions (…)",
+                onClick: function (e) { e.stopPropagation(); setUngroupedMenuOpen(!isUngroupedMenuOpen); }
+              }, h(P.IconEllipsisOutline16, { size: 13 })),
+              h(SelectDropdownMenu, {
+                open: isUngroupedMenuOpen,
+                onClose: function () { setUngroupedMenuOpen(false); },
+                items: [
+                  { id: "archive-empty", label: "Archive Empty & Pong Sessions", icon: h(TrashGlyph, { size: 13 }), danger: true },
+                ],
+                onSelect: function (act) {
+                  if (act === "archive-empty") {
+                    fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
+                      .then(function (r) { return r.json(); })
+                      .then(function (res) {
+                        alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
+                        window.location.reload();
+                      });
+                  }
+                }
+              })
+            )
+          ),
+          isUngroupedOpen ? h(
+            "div",
+            { style: { display: "flex", flexDirection: "column", width: "100%" } },
+            filteredUngroupedSessions.length > 0
+              ? filteredUngroupedSessions.map(function (chat) { return renderChatRow(chat, 16); })
+              : h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(no ungrouped sessions)")
+          ) : null
+        ),
+
         // 5. ARCHIVED SESSIONS SECTION (SEPARATE SECTION AT BOTTOM)
         archivedSessions.length > 0 ? h(
           "div",
@@ -6453,6 +6682,7 @@ button:hover .dsh-icon-animated,
               className: "dsh-tree-projectRow",
               role: "treeitem",
               style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
+              "aria-expanded": isArchivedOpen,
               onClick: function () { setIsArchivedOpen(!isArchivedOpen); },
             },
             h("span", { className: "dsh-tree-slot dsh-tree-icon" }, h(ArchiveBoxGlyph, { size: 14 })),

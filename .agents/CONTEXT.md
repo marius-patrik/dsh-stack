@@ -2213,3 +2213,39 @@ Two bugs found via CDP browser automation with console error capture:
 - **Plugin Test Suites**: All 16 plugins passed `check-plugin.mjs`.
 
 **Status:** completed.
+
+## Session 39 — August 21, 2026 (Separate Pinned and Live Sections with Sidebar Section Ordering)
+
+**Context & User Directives:**
+- `actually there should be separate pinned and live sections one for each so its pinned active hosts ungrouped archived`
+
+**Design & Implementation:**
+1. **Defined 5 Sidebar Tree Sections in Exact Requested Order**:
+   1. **Pinned** (`📌 Pinned`):
+      - Lists favorite/pinned chat sessions stored in localStorage (`dsh_pinned_sessions`) or model metadata.
+      - Collapsible with `isPinnedOpen` (default `true`), badge count, plus action to start a new chat.
+      - Each chat row shows a warning-accented `PinGlyph` when pinned.
+      - Added "Pin Chat" / "Unpin Chat" item to the ellipsis menu and context menu for instant toggling.
+   2. **Active** (`⚡ Active` / Live):
+      - Lists running background agent sessions (`s.busy === true` or `s.running === true`), active attached tmux terminals, and running Docker containers.
+      - Collapsible with `isActiveOpen` (default `true`), green pulse status badge, quick terminal launcher.
+      - Direct click on active terminal row opens terminal panel; click on container opens container inspector.
+   3. **Hosts** (`🖥️ Hosts`):
+      - Top level: **`Host Machine`** (with `HostMachineGlyph`, expand chevron, new terminal quick-action).
+      - Level 1: **`Macintosh HD`** (Drive, with `HardDriveGlyph`, expand chevron, new chat quick-action).
+      - Level 2+: Root `/` directory hierarchy and folder-nested chats.
+   4. **Ungrouped** (`📁 Ungrouped`):
+      - Lists standard conversation sessions that are not pinned, not active, and not workspace-nested.
+      - Collapsible with `isUngroupedOpen` (default `true`), folder glyph, session count badge, plus and archive actions.
+   5. **Archived** (`📦 Archived`):
+      - Collapsible bottom section for archived chats with unarchive and delete affordances.
+2. **SVG Glyphs Added**:
+   - `PinGlyph`: Clean SVG pin glyph for section header and pinned chat status indicator.
+   - `ActiveGlyph`: Pulse/activity waveform glyph for the Active section.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly.
+- Syntactically verified `plugins/dsh-providers/client.js` and `plugins/dsh-providers/lib/client.js`.
+- Verified dsh server healthy on port 3080 with 115/143 active plugins and 0 failures.
+
+**Status:** completed.
