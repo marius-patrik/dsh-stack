@@ -4630,15 +4630,34 @@ button:hover .dsh-icon-animated,
           setActiveTab(tab.id);
         };
 
+        var onFocusChat = function (e) {
+          var chatTab = { id: "chat-main", type: "chat", title: (e && e.detail && e.detail.title) || "Conversation" };
+          setTabs(function (prev) {
+            var exists = prev.find(function (t) { return t.id === "chat-main" || t.type === "chat"; });
+            if (exists) {
+              return prev.map(function (t) {
+                if (t.id === "chat-main" || t.type === "chat") {
+                  return Object.assign({}, t, { title: (e && e.detail && e.detail.title) || t.title || "Conversation" });
+                }
+                return t;
+              });
+            }
+            return [chatTab].concat(prev);
+          });
+          setActiveTab("chat-main");
+        };
+
         window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
         window.addEventListener("dsh:open-file-tab", onOpenFileTab);
         window.addEventListener("dsh:open-repo-tab", onOpenRepoTab);
+        window.addEventListener("dsh:focus-chat", onFocusChat);
         return function () {
           window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
           window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
           window.removeEventListener("dsh:open-file-tab", onOpenFileTab);
           window.removeEventListener("dsh:open-repo-tab", onOpenRepoTab);
+          window.removeEventListener("dsh:focus-chat", onFocusChat);
         };
       }, []);
 
@@ -6533,9 +6552,15 @@ button:hover .dsh-icon-animated,
         loadAll();
       };
 
-      var handleOpenArchivedChat = function (sessionId) {
-        if (openSession) openSession(sessionId);
-        window.dispatchEvent(new CustomEvent("dsh:focus-chat", { detail: { id: sessionId } }));
+      var handleOpenChat = function (sessionId, sessionTitle) {
+        if (!sessionId) return;
+        if (openSession) {
+          try { openSession(sessionId); } catch (e) {}
+        }
+        if (typeof window !== "undefined" && window.__dsh_ctx__ && window.__dsh_ctx__.sessions) {
+          try { window.__dsh_ctx__.sessions.open(sessionId); } catch (e) {}
+        }
+        window.dispatchEvent(new CustomEvent("dsh:focus-chat", { detail: { id: sessionId, title: sessionTitle || "Conversation" } }));
       };
 
       var deletePermanentSession = function (sessionId) {
@@ -6727,7 +6752,7 @@ button:hover .dsh-icon-animated,
                 cursor: "pointer",
                 position: "relative",
               },
-              onClick: function () { if (openSession) openSession(chat.id); },
+              onClick: function () { handleOpenChat(chat.id, chat.title); },
               onContextMenu: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -6824,7 +6849,7 @@ button:hover .dsh-icon-animated,
                     color: isSubActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
                     cursor: "pointer",
                   },
-                  onClick: function () { if (openSession) openSession(sub.id); },
+                  onClick: function () { handleOpenChat(sub.id, sub.title); },
                   onContextMenu: function (e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -6888,7 +6913,7 @@ button:hover .dsh-icon-animated,
               cursor: "pointer",
               position: "relative",
             },
-            onClick: function () { handleOpenArchivedChat(chat.id); },
+            onClick: function () { handleOpenChat(chat.id, chat.title); },
             onContextMenu: function (e) {
               e.preventDefault();
               e.stopPropagation();
@@ -7674,6 +7699,7 @@ button:hover .dsh-icon-animated,
 
     function apply(ctx) {
       if (typeof window !== "undefined") {
+        window.__dsh_ctx__ = ctx;
         window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
       }
       ensureModelPickerDecoration();
