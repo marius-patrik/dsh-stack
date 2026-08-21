@@ -6928,6 +6928,21 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var renameModalState = React.useState(null);
       var renameModal = renameModalState[0], setRenameModal = renameModalState[1];
 
+      var searchExpandedState = React.useState(false);
+      var searchExpanded = searchExpandedState[0], setSearchExpanded = searchExpandedState[1];
+      var searchInputRef = React.useRef(null);
+
+      var viewOptionsOpenState = React.useState(false);
+      var viewOptionsOpen = viewOptionsOpenState[0], setViewOptionsOpen = viewOptionsOpenState[1];
+      var viewOptionsBtnRef = React.useRef(null);
+
+      var addWsMenuOpenState = React.useState(false);
+      var addWsMenuOpen = addWsMenuOpenState[0], setAddWsMenuOpen = addWsMenuOpenState[1];
+      var addWsBtnRef = React.useRef(null);
+
+      var ungroupedMenuState = React.useState(false);
+      var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
+
       var toggleSubagentExpand = function (sessionId) {
         setExpandedSubagents(function (prev) {
           var n = Object.assign({}, prev);
@@ -7841,21 +7856,6 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var filteredPinnedSessions = pinnedSessions.filter(filterBySearch);
       var filteredActiveChatSessions = activeChatSessions.filter(filterBySearch);
       var filteredUngroupedSessions = ungroupedSessions.filter(filterBySearch);
-
-      var searchExpandedState = React.useState(false);
-      var searchExpanded = searchExpandedState[0], setSearchExpanded = searchExpandedState[1];
-      var searchInputRef = React.useRef(null);
-
-      var viewOptionsOpenState = React.useState(false);
-      var viewOptionsOpen = viewOptionsOpenState[0], setViewOptionsOpen = viewOptionsOpenState[1];
-      var viewOptionsBtnRef = React.useRef(null);
-
-      var addWsMenuOpenState = React.useState(false);
-      var addWsMenuOpen = addWsMenuOpenState[0], setAddWsMenuOpen = addWsMenuOpenState[1];
-      var addWsBtnRef = React.useRef(null);
-
-      var ungroupedMenuState = React.useState(false);
-      var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
 
       return h(
         "div",
