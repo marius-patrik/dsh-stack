@@ -5445,6 +5445,478 @@ button:hover .dsh-icon-animated,
       );
     }
 
+    function IconsGlyph(props) {
+      var size = props.size || 16;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", {
+        width: size,
+        height: size,
+        className: className,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      },
+        h("path", { d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" })
+      );
+    }
+
+    var LUCIDE_ICONS_CATALOG = {
+      // System & OS
+      "Folder": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" })); } },
+      "FolderGit2": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" }), h("circle", { cx: "12", cy: "13", r: "2" })); } },
+      "HardDrive": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }), h("path", { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" }), h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }), h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" })); } },
+      "Server": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { width: "20", height: "8", x: "2", y: "2", rx: "2", ry: "2" }), h("rect", { width: "20", height: "8", x: "2", y: "14", rx: "2", ry: "2" }), h("line", { x1: "6", x2: "6.01", y1: "6", y2: "6" }), h("line", { x1: "6", x2: "6.01", y1: "18", y2: "18" })); } },
+      "Cpu": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { width: "16", height: "16", x: "4", y: "4", rx: "2" }), h("rect", { width: "6", height: "6", x: "9", y: "9", rx: "1" }), h("path", { d: "M15 2v2" }), h("path", { d: "M15 20v2" }), h("path", { d: "M2 15h2" }), h("path", { d: "M2 9h2" }), h("path", { d: "M20 15h2" }), h("path", { d: "M20 9h2" }), h("path", { d: "M9 2v2" }), h("path", { d: "M9 20v2" })); } },
+      "AppWindow": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { x: "2", y: "4", width: "20", height: "16", rx: "2" }), h("path", { d: "M10 4v4" }), h("path", { d: "M2 8h20" }), h("path", { d: "M6 4v4" })); } },
+      "Library": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "m16 6 4 14" }), h("path", { d: "M12 6v14" }), h("path", { d: "M8 8v12" }), h("path", { d: "M4 4v16" })); } },
+      "Users": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }), h("circle", { cx: "9", cy: "7", r: "4" }), h("path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }), h("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" })); } },
+      "Archive": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }), h("path", { d: "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" }), h("path", { d: "M10 12h4" })); } },
+      "RotateCcw": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }), h("path", { d: "M3 3v5h5" })); } },
+      "Pin": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }), h("path", { d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" })); } },
+      "Activity": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" })); } },
+      "ShieldCheck": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }), h("path", { d: "m9 12 2 2 4-4" })); } },
+      "KeyRound": { category: "System & OS", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" }), h("circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor" })); } },
+
+      // Development & Files
+      "Terminal": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("polyline", { points: "4 17 10 11 4 5" }), h("line", { x1: "12", x2: "20", y1: "19", y2: "19" })); } },
+      "FileCode": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" }), h("polyline", { points: "14 2 14 8 20 8" }), h("path", { d: "m10 13-2 2 2 2" }), h("path", { d: "m14 17 2-2-2-2" })); } },
+      "Code": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("polyline", { points: "16 18 22 12 16 6" }), h("polyline", { points: "8 6 2 12 8 18" })); } },
+      "FileText": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" }), h("polyline", { points: "14 2 14 8 20 8" }), h("line", { x1: "16", x2: "8", y1: "13", y2: "13" }), h("line", { x1: "16", x2: "8", y1: "17", y2: "17" }), h("line", { x1: "10", x2: "8", y1: "9", y2: "9" })); } },
+      "Database": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("ellipse", { cx: "12", cy: "5", rx: "9", ry: "3" }), h("path", { d: "M3 5V19A9 3 0 0 0 21 19V5" }), h("path", { d: "M3 12A9 3 0 0 0 21 12" })); } },
+      "Braces": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1" }), h("path", { d: "M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" })); } },
+      "Boxes": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z" }), h("path", { d: "M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z" }), h("path", { d: "M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z" })); } },
+      "GitFork": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("circle", { cx: "12", cy: "18", r: "3" }), h("circle", { cx: "6", cy: "6", r: "3" }), h("circle", { cx: "18", cy: "6", r: "3" }), h("path", { d: "M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" }), h("path", { d: "M12 12v3" })); } },
+      "GitBranch": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }), h("circle", { cx: "18", cy: "6", r: "3" }), h("circle", { cx: "6", cy: "18", r: "3" }), h("path", { d: "M18 9a9 9 0 0 1-9 9" })); } },
+      "Hammer": { category: "Development", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9" }), h("path", { d: "M17.64 15 22 10.64" }), h("path", { d: "m20.91 3.26-1.57-1.57a2.12 2.12 0 0 0-3 0l-5.63 5.63 4.57 4.57 5.63-5.63a2.12 2.12 0 0 0 0-3z" })); } },
+
+      // Agents & Modes
+      "Bot": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M12 8V4H8" }), h("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }), h("path", { d: "M2 14h2" }), h("path", { d: "M20 14h2" }), h("path", { d: "M15 13v2" }), h("path", { d: "M9 13v2" })); } },
+      "Brain": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-5.04Z" }), h("path", { d: "M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-5.04Z" })); } },
+      "Sparkles": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" })); } },
+      "Calendar": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", ry: "2" }), h("line", { x1: "16", x2: "16", y1: "2", y2: "6" }), h("line", { x1: "8", x2: "8", y1: "2", y2: "6" }), h("line", { x1: "3", x2: "21", y1: "10", y2: "10" })); } },
+      "PlayCircle": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("circle", { cx: "12", cy: "12", r: "10" }), h("polygon", { points: "10 8 16 12 10 16 10 8" })); } },
+      "Network": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { x: "16", y: "16", width: "6", height: "6", rx: "1" }), h("rect", { x: "2", y: "16", width: "6", height: "6", rx: "1" }), h("rect", { x: "9", y: "2", width: "6", height: "6", rx: "1" }), h("path", { d: "M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" }), h("path", { d: "M12 12V8" })); } },
+      "CheckSquare": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("polyline", { points: "9 11 12 14 22 4" }), h("path", { d: "M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" })); } },
+      "RefreshCw": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }), h("path", { d: "M21 3v5h-5" }), h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }), h("path", { d: "M8 16H3v5" })); } },
+      "Wrench": { category: "Agents & Roles", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" })); } },
+
+      // UI & Media
+      "SlidersHorizontal": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("line", { x1: "21", x2: "14", y1: "4", y2: "4" }), h("line", { x1: "10", x2: "3", y1: "4", y2: "4" }), h("line", { x1: "21", x2: "12", y1: "12", y2: "12" }), h("line", { x1: "8", x2: "3", y1: "12", y2: "12" }), h("line", { x1: "21", x2: "16", y1: "20", y2: "20" }), h("line", { x1: "12", x2: "3", y1: "20", y2: "20" }), h("line", { x1: "14", x2: "14", y1: "2", y2: "6" }), h("line", { x1: "8", x2: "8", y1: "10", y2: "14" }), h("line", { x1: "16", x2: "16", y1: "18", y2: "22" })); } },
+      "Palette": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }), h("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }), h("circle", { cx: "8.5", cy: "7.5", r: ".5", fill: "currentColor" }), h("circle", { cx: "6.5", cy: "12.5", r: ".5", fill: "currentColor" }), h("path", { d: "M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" })); } },
+      "MessageSquare": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })); } },
+      "Image": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2" }), h("circle", { cx: "9", cy: "9", r: "2" }), h("path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" })); } },
+      "Globe": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("circle", { cx: "12", cy: "12", r: "10" }), h("line", { x1: "2", x2: "22", y1: "12", y2: "12" }), h("path", { d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" })); } },
+      "Compass": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("circle", { cx: "12", cy: "12", r: "10" }), h("polygon", { points: "16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" })); } },
+      "Music": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M9 18V5l12-2v13" }), h("circle", { cx: "6", cy: "18", r: "3" }), h("circle", { cx: "18", cy: "16", r: "3" })); } },
+      "Trash2": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M3 6h18" }), h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }), h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }), h("line", { x1: "10", x2: "10", y1: "11", y2: "17" }), h("line", { x1: "14", x2: "14", y1: "11", y2: "17" })); } },
+      "Pencil": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" }), h("path", { d: "m15 5 4 4" })); } },
+      "Copy": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2" }), h("path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" })); } },
+      "Scissors": { category: "UI & Media", render: function (s, c) { return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, h("circle", { cx: "6", cy: "6", r: "3" }), h("circle", { cx: "6", cy: "18", r: "3" }), h("line", { x1: "20", x2: "8.12", y1: "4", y2: "15.88" }), h("line", { x1: "14.47", x2: "20", y1: "14.48", y2: "20" }), h("line", { x1: "8.12", x2: "12", y1: "8.12", y2: "12" })); } }
+    };
+
+    function renderCatalogIcon(iconName, size, className) {
+      var s = size || 16;
+      var c = (className ? className + " " : "") + "dsh-icon-animated";
+      if (LUCIDE_ICONS_CATALOG[iconName] && typeof LUCIDE_ICONS_CATALOG[iconName].render === "function") {
+        return LUCIDE_ICONS_CATALOG[iconName].render(s, c);
+      }
+      return h("svg", { width: s, height: s, className: c, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" })
+      );
+    }
+
+    var DEFAULT_ICON_MAPPINGS = {
+      extensions: {
+        ".ts": "FileCode",
+        ".tsx": "FileCode",
+        ".js": "FileCode",
+        ".jsx": "FileCode",
+        ".py": "Code",
+        ".json": "Braces",
+        ".md": "FileText",
+        ".rs": "Cpu",
+        ".go": "Cpu",
+        ".sh": "Terminal",
+        ".sql": "Database",
+        ".env": "KeyRound",
+        ".yaml": "FileText",
+        ".yml": "FileText",
+        ".png": "Image",
+        ".jpg": "Image",
+        ".svg": "Sparkles"
+      },
+      folders: {
+        "Applications": "AppWindow",
+        "Library": "Library",
+        "System": "Cpu",
+        "Users": "Users",
+        "Projects": "GitFork",
+        "Archive": "Archive",
+        "Hosts": "Server",
+        "Drives": "HardDrive",
+        "Pinned": "Pin",
+        "Active": "Activity",
+        "Ungrouped": "Folder"
+      },
+      apps: {
+        "Terminal": "Terminal",
+        "Finder": "AppWindow",
+        "Docker": "Boxes",
+        "VSCode": "Code",
+        "Xcode": "Hammer",
+        "Chrome": "Globe",
+        "Safari": "Compass",
+        "Slack": "MessageSquare",
+        "Discord": "MessageSquare",
+        "Music": "Music",
+        "Spotify": "Music",
+        "Notes": "FileText",
+        "Settings": "SlidersHorizontal",
+        "GitHub": "GitFork"
+      },
+      agents: {
+        "Code": "Code",
+        "Planning": "Calendar",
+        "Reasoning": "Brain",
+        "Execution": "PlayCircle",
+        "Orchestration": "Network",
+        "Review": "CheckSquare",
+        "Reflection": "Sparkles",
+        "DarkFactory": "Bot"
+      }
+    };
+
+    function loadCustomIconMappings() {
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          var raw = window.localStorage.getItem("dsh_custom_icon_mappings");
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            return Object.assign({}, DEFAULT_ICON_MAPPINGS, parsed);
+          }
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
+    }
+
+    function saveCustomIconMappings(mappings) {
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_custom_icon_mappings", JSON.stringify(mappings));
+          window.dispatchEvent(new CustomEvent("dsh:icon-mappings-changed", { detail: mappings }));
+        }
+      } catch (e) {}
+    }
+
+    // Global resolver
+    if (typeof window !== "undefined") {
+      window.__dsh_get_icon_for__ = function (type, key) {
+        var mappings = loadCustomIconMappings();
+        var category = mappings && mappings[type];
+        if (category && category[key]) return category[key];
+        return null;
+      };
+    }
+
+    function IconsSection() {
+      var mappingsState = React.useState(loadCustomIconMappings);
+      var mappings = mappingsState[0], setMappings = mappingsState[1];
+
+      var activeTabState = React.useState("catalog");
+      var activeTab = activeTabState[0], setActiveTab = activeTabState[1];
+
+      var activeMappingCategoryState = React.useState("extensions");
+      var activeMappingCategory = activeMappingCategoryState[0], setActiveMappingCategory = activeMappingCategoryState[1];
+
+      var searchState = React.useState("");
+      var search = searchState[0], setSearch = searchState[1];
+
+      var catalogCategoryState = React.useState("All");
+      var catalogCategory = catalogCategoryState[0], setCatalogCategory = catalogCategoryState[1];
+
+      var newTargetState = React.useState("");
+      var newTarget = newTargetState[0], setNewTarget = newTargetState[1];
+
+      var newIconState = React.useState("Sparkles");
+      var newIcon = newIconState[0], setNewIcon = newIconState[1];
+
+      var iconKeys = Object.keys(LUCIDE_ICONS_CATALOG);
+      var filteredIcons = iconKeys.filter(function (k) {
+        var matchCat = catalogCategory === "All" || LUCIDE_ICONS_CATALOG[k].category.toLowerCase().includes(catalogCategory.toLowerCase());
+        var matchSearch = !search || k.toLowerCase().includes(search.toLowerCase()) || LUCIDE_ICONS_CATALOG[k].category.toLowerCase().includes(search.toLowerCase());
+        return matchCat && matchSearch;
+      });
+
+      var handleAddMapping = function () {
+        if (!newTarget.trim()) return;
+        var next = JSON.parse(JSON.stringify(mappings));
+        if (!next[activeMappingCategory]) next[activeMappingCategory] = {};
+        next[activeMappingCategory][newTarget.trim()] = newIcon;
+        setMappings(next);
+        saveCustomIconMappings(next);
+        setNewTarget("");
+      };
+
+      var handleRemoveMapping = function (key) {
+        var next = JSON.parse(JSON.stringify(mappings));
+        if (next[activeMappingCategory] && next[activeMappingCategory][key]) {
+          delete next[activeMappingCategory][key];
+          setMappings(next);
+          saveCustomIconMappings(next);
+        }
+      };
+
+      var handleResetCategory = function () {
+        var next = JSON.parse(JSON.stringify(mappings));
+        next[activeMappingCategory] = Object.assign({}, DEFAULT_ICON_MAPPINGS[activeMappingCategory]);
+        setMappings(next);
+        saveCustomIconMappings(next);
+      };
+
+      var handleResetAll = function () {
+        var next = JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
+        setMappings(next);
+        saveCustomIconMappings(next);
+      };
+
+      var currentCategoryMappings = (mappings && mappings[activeMappingCategory]) || {};
+      var mappingKeys = Object.keys(currentCategoryMappings);
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0", maxWidth: "900px" } },
+        // Header
+        h(
+          "div",
+          { style: { borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))", paddingBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+          h("div", null,
+            h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, "Icon Catalog & Custom Mappings"),
+            h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Explore the library of animated Lucide icons and configure dynamic mappings for extensions, directories, applications, and agent roles.")
+          ),
+          h("div", { style: { display: "flex", gap: "6px", background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.08))", padding: "3px", borderRadius: "8px", border: "1px solid var(--dsw-alias-border-l1)" } },
+            h("button", {
+              type: "button",
+              onClick: function () { setActiveTab("catalog"); },
+              style: { padding: "6px 14px", borderRadius: "6px", border: "none", background: activeTab === "catalog" ? "var(--dsw-alias-surface-l2, #333)" : "transparent", color: activeTab === "catalog" ? "var(--dsw-alias-label-primary)" : "var(--dsw-alias-label-secondary)", fontWeight: activeTab === "catalog" ? 600 : 400, fontSize: "12px", cursor: "pointer" }
+            }, "Icon Catalog (" + iconKeys.length + ")"),
+            h("button", {
+              type: "button",
+              onClick: function () { setActiveTab("mappings"); },
+              style: { padding: "6px 14px", borderRadius: "6px", border: "none", background: activeTab === "mappings" ? "var(--dsw-alias-surface-l2, #333)" : "transparent", color: activeTab === "mappings" ? "var(--dsw-alias-label-primary)" : "var(--dsw-alias-label-secondary)", fontWeight: activeTab === "mappings" ? 600 : 400, fontSize: "12px", cursor: "pointer" }
+            }, "Custom Mappings")
+          )
+        ),
+
+        // Tab 1: Catalog
+        activeTab === "catalog" ? h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          // Controls
+          h(
+            "div",
+            { style: { display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" } },
+            h("input", {
+              type: "text",
+              placeholder: "Search icons by name or tag (e.g. folder, brain, docker)...",
+              value: search,
+              onChange: function (e) { setSearch(e.target.value); },
+              style: { flex: "1 1 240px", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit", fontSize: "13px" }
+            }),
+            h("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap" } },
+              ["All", "System", "Development", "Agents", "UI"].map(function (cat) {
+                return h("button", {
+                  key: cat,
+                  type: "button",
+                  onClick: function () { setCatalogCategory(cat); },
+                  style: {
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid " + (catalogCategory === cat ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-border-l1)"),
+                    background: catalogCategory === cat ? "rgba(99, 102, 241, 0.15)" : "var(--dsw-alias-surface-l1)",
+                    color: catalogCategory === cat ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-secondary)",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    cursor: "pointer"
+                  }
+                }, cat);
+              })
+            )
+          ),
+          // Grid
+          h(
+            "div",
+            { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "10px" } },
+            filteredIcons.map(function (k) {
+              return h(
+                "div",
+                {
+                  key: k,
+                  onClick: function () {
+                    setNewIcon(k);
+                    setActiveTab("mappings");
+                  },
+                  title: "Click to map " + k,
+                  style: {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "16px 10px",
+                    borderRadius: "10px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "var(--dsw-alias-surface-l1)",
+                    cursor: "pointer",
+                    transition: "all 120ms ease",
+                    userSelect: "none"
+                  },
+                  onMouseEnter: function (e) {
+                    e.currentTarget.style.borderColor = "var(--dsw-alias-primary, #6366f1)";
+                    e.currentTarget.style.background = "var(--dsw-alias-surface-l2)";
+                  },
+                  onMouseLeave: function (e) {
+                    e.currentTarget.style.borderColor = "var(--dsw-alias-border-l1)";
+                    e.currentTarget.style.background = "var(--dsw-alias-surface-l1)";
+                  }
+                },
+                renderCatalogIcon(k, 28, "dsh-icon-animated"),
+                h("div", { style: { fontSize: "12px", fontWeight: 600, color: "var(--dsw-alias-label-primary)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", width: "100%" } }, k),
+                h("div", { style: { fontSize: "10px", color: "var(--dsw-alias-label-tertiary)" } }, LUCIDE_ICONS_CATALOG[k].category)
+              );
+            })
+          )
+        ) : null,
+
+        // Tab 2: Custom Mappings
+        activeTab === "mappings" ? h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          // Category Selector
+          h(
+            "div",
+            { style: { display: "flex", gap: "8px", borderBottom: "1px solid var(--dsw-alias-border-l1)", paddingBottom: "10px", overflowX: "auto" } },
+            [
+              { id: "extensions", label: "File Extensions (.ts, .py)" },
+              { id: "folders", label: "Folders & Categories" },
+              { id: "apps", label: "Applications (Terminal, Docker)" },
+              { id: "agents", label: "Agent Roles (Code, Planning)" }
+            ].map(function (tab) {
+              var isSel = activeMappingCategory === tab.id;
+              return h("button", {
+                key: tab.id,
+                type: "button",
+                onClick: function () { setActiveMappingCategory(tab.id); },
+                style: {
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: isSel ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
+                  color: isSel ? "#ffffff" : "var(--dsw-alias-label-secondary)",
+                  fontWeight: isSel ? 600 : 400,
+                  fontSize: "12px",
+                  cursor: "pointer"
+                }
+              }, tab.label);
+            })
+          ),
+
+          // Add New Mapping Card
+          h(
+            "div",
+            { style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" } },
+            h("div", { style: { fontSize: "13px", fontWeight: 600 } }, "Add / Override Mapping for " + activeMappingCategory),
+            h("div", { style: { display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" } },
+              h("input", {
+                type: "text",
+                placeholder: activeMappingCategory === "extensions" ? "e.g. .vue, .graphql, .swift" : (activeMappingCategory === "apps" ? "e.g. Spotify, Notion" : "e.g. Documentation, Architect"),
+                value: newTarget,
+                onChange: function (e) { setNewTarget(e.target.value); },
+                style: { flex: "1 1 200px", padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit", fontSize: "13px" }
+              }),
+              h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                renderCatalogIcon(newIcon, 22),
+                h("select", {
+                  value: newIcon,
+                  onChange: function (e) { setNewIcon(e.target.value); },
+                  style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l2)", color: "inherit", fontSize: "13px", cursor: "pointer" }
+                },
+                  iconKeys.map(function (k) {
+                    return h("option", { key: k, value: k }, k + " (" + LUCIDE_ICONS_CATALOG[k].category + ")");
+                  })
+                )
+              ),
+              h("button", {
+                type: "button",
+                onClick: handleAddMapping,
+                style: { padding: "8px 16px", borderRadius: "6px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#ffffff", fontWeight: 600, fontSize: "13px", cursor: "pointer" }
+              }, "Save Mapping")
+            )
+          ),
+
+          // Active Mappings Table
+          h(
+            "div",
+            { style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", overflow: "hidden" } },
+            h("div", { style: { padding: "10px 16px", background: "var(--dsw-alias-surface-l2)", borderBottom: "1px solid var(--dsw-alias-border-l1)", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+              h("span", { style: { fontSize: "12px", fontWeight: 600 } }, "Configured Rules (" + mappingKeys.length + ")"),
+              h("button", {
+                type: "button",
+                onClick: handleResetCategory,
+                style: { padding: "3px 8px", borderRadius: "4px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" }
+              }, "Reset Category to Defaults")
+            ),
+            h(
+              "div",
+              { style: { display: "flex", flexDirection: "column", maxHeight: "380px", overflowY: "auto" } },
+              mappingKeys.length === 0
+                ? h("div", { style: { padding: "24px", textAlign: "center", color: "var(--dsw-alias-label-tertiary)", fontSize: "13px" } }, "No mappings configured for this category.")
+                : mappingKeys.map(function (targetKey) {
+                    var assignedIcon = currentCategoryMappings[targetKey];
+                    return h(
+                      "div",
+                      {
+                        key: targetKey,
+                        style: {
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "10px 16px",
+                          borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.1))"
+                        }
+                      },
+                      h("div", { style: { display: "flex", alignItems: "center", gap: "12px" } },
+                        renderCatalogIcon(assignedIcon, 20),
+                        h("div", null,
+                          h("span", { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } }, targetKey),
+                          h("span", { style: { marginLeft: "8px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "→ " + assignedIcon)
+                        )
+                      ),
+                      h("button", {
+                        type: "button",
+                        onClick: function () { handleRemoveMapping(targetKey); },
+                        style: { padding: "4px 8px", borderRadius: "4px", border: "none", background: "transparent", color: "var(--dsw-alias-state-error-primary, #ef4444)", fontSize: "12px", cursor: "pointer" }
+                      }, "Delete")
+                    );
+                  })
+            )
+          ),
+
+          // Footer Actions
+          h(
+            "div",
+            { style: { display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "8px" } },
+            h("button", {
+              type: "button",
+              onClick: handleResetAll,
+              style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "12px", cursor: "pointer" }
+            }, "Reset All Mappings to Factory Defaults")
+          )
+        ) : null
+      );
+    }
+
     // Helper Modals
     function NewSessionModal(props) {
       var onClose = props.onClose, onCreated = props.onCreated;
@@ -7223,6 +7695,28 @@ button:hover .dsh-icon-animated,
           order: 0,
         }, LoopsGlyph);
       }, "dsh-providers: loops nav glyph");
+
+      // 6. Icons Settings Section (Order 7)
+      ctx.slots.inject("settings.section", function () {
+        return ctx.slots.register({
+          name: "settings.section",
+          id: "icons",
+          priority: -10,
+          order: 7,
+          locale: NS,
+          label: function () { return "Icons"; },
+          inject: function () { return {}; },
+        }, IconsSection);
+      }, "dsh-providers: icons section");
+
+      ctx.slots.inject("settings.section.icon", function () {
+        return ctx.slots.register({
+          name: "settings.section.icon",
+          id: "icons",
+          priority: -10,
+          order: 0,
+        }, IconsGlyph);
+      }, "dsh-providers: icons nav glyph");
 
     }
 

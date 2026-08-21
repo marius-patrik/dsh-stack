@@ -2451,3 +2451,40 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 46 — August 21, 2026 (Settings "Icons" Tab, Full Custom Icon Catalog & Dynamic Mappings Manager)
+
+**Context & User Directives:**
+- `add an icons tab to setttings that shows all custom icons and allows configuring the mapping`
+
+**Design & Implementation:**
+1. **Registered "Icons" Tab in Settings Navigation**:
+   - Registered `settings.section` with ID `icons` and label `Icons` (Order 7 in `dsh-providers`).
+   - Registered `settings.section.icon` with Lucide `Sparkles` / `Palette` animated vector glyph.
+   - In `dsh-tweaks`, placed `icons` in the `PERSONALIZATION_IDS` group right under General and Appearance.
+2. **Built Interactive "Icons" Section (`IconsSection`)**:
+   - **Icon Catalog Sub-Tab (44+ Lucide Icons)**:
+     - Visual grid of all custom animated Lucide 24x24 icons grouped into categories: System & OS, Development & Files, Agents & Roles, and UI & Media.
+     - Search filter box and category filter chips (All, System, Development, Agents, UI) with instant filtering.
+     - Click any icon card to inspect or quick-assign it as a custom mapping rule.
+   - **Custom Mappings Sub-Tab**:
+     - Dedicated category tabs for:
+       1. **File Extensions**: `.ts`, `.tsx`, `.js`, `.jsx`, `.py`, `.json`, `.md`, `.rs`, `.go`, `.sh`, `.sql`, `.env`, `.png`, `.jpg`, `.svg`.
+       2. **Folders & Categories**: `Applications`, `Library`, `System`, `Users`, `Projects`, `Archive`, `Hosts`, `Drives`, `Pinned`, `Active`, `Ungrouped`.
+       3. **Applications**: `Terminal`, `Finder`, `Docker`, `VSCode`, `Xcode`, `Chrome`, `Safari`, `Slack`, `Discord`, `Music`, `Spotify`, `Notes`, `Settings`, `GitHub`.
+       4. **Agent Roles**: `Code`, `Planning`, `Reasoning`, `Execution`, `Orchestration`, `Review`, `Reflection`, `DarkFactory`.
+     - "Add / Override Mapping" form with interactive pattern input, category selector, visual icon dropdown, and "Save Mapping" action.
+     - Active Mappings table with live preview, delete action, "Reset Category to Defaults", and "Reset All Mappings to Factory Defaults".
+3. **Persistence & Global Integration**:
+   - Stored in `localStorage` key `dsh_custom_icon_mappings`.
+   - Dispatches `dsh:icon-mappings-changed` event and exposes global `window.__dsh_get_icon_for__(type, key)` resolver for real-time dynamic icon resolution across the sidebar tree, monaco editor tabs, and application rows.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- CDP end-to-end automated browser testing verified:
+  - "Icons" navigation tab appears in Settings panel under Personalization.
+  - Clicking "Icons" opens the Icons section with "Icon Catalog" displaying 44 Lucide icon cards and category filters.
+  - Switching to "Custom Mappings" displays active mapping rules with add/edit/delete capability.
+- Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
+
+**Status:** completed.

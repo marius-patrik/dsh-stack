@@ -803,6 +803,7 @@ window.__ModuleLoader__.load({
       if (id === 'session-modes' || id === 'actions' || id === 'commands') return h(CommandsIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'agents') return h(RobotHeadNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'themes' || id === 'appearance') return h(PaletteIcon, { className: 'dsh-tw-navIcon', size: 16 });
+      if (id === 'icons') return h(PaletteIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'agent-presets' || id === 'modes') return h(AgentPresetIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'tools') return h(ToolsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
       if (id === 'loops') return h(LoopsNavIcon, { className: 'dsh-tw-navIcon', size: 16 });
@@ -1822,7 +1823,7 @@ window.__ModuleLoader__.load({
       var closeButton = React.useRef(null);
       React.useEffect(function () { if (closeButton.current) closeButton.current.focus(); }, []);
 
-      var PERSONALIZATION_IDS = new Set(['general', 'themes', 'appearance', 'keybinds', 'keybindings']);
+      var PERSONALIZATION_IDS = new Set(['general', 'themes', 'appearance', 'icons', 'keybinds', 'keybindings']);
       var CUSTOMIZATION_IDS = new Set(['agents', 'actions', 'session-modes', 'commands', 'agent-presets', 'modes', 'tools', 'loops', 'plugins']);
       var INTEGRATION_IDS = new Set(['providers', 'accounts', 'models', 'apps', 'hosts', 'terminals', 'containers']);
 
@@ -1834,6 +1835,7 @@ window.__ModuleLoader__.load({
       for (var rIdx = 0; rIdx < rows.length; rIdx++) {
         var r = rows[rIdx];
         if (r.id === 'themes') r = Object.assign({}, r, { label: 'Appearance' });
+        if (r.id === 'icons') r = Object.assign({}, r, { label: 'Icons' });
         if (r.id === 'providers') r = Object.assign({}, r, { label: 'Providers' });
         if (r.id === 'agent-presets') r = Object.assign({}, r, { label: 'Modes' });
         if (r.id === 'actions' || r.id === 'session-modes') r = Object.assign({}, r, { label: 'Commands' });
