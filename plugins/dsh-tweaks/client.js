@@ -92,7 +92,8 @@ const SHELL_CSS = `
 .dsh-tw-trigger.dsh-tw-rail { width: 36px; height: 36px; margin: 4px 0; justify-content: center; gap: 0; padding: 0; border-radius: 50%; }
 .dsh-tw-overlay { position: fixed; inset: 0; z-index: 1000000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .dsh-tw-mask { position: absolute; inset: 0; background: transparent !important; backdrop-filter: none !important; pointer-events: auto; }
-.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; flex-direction: row; min-width: 480px; min-height: 340px; border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.18)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
+.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; flex-direction: row; min-width: 480px; min-height: 340px; border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.14) !important; border: 1.5px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.22)) !important; --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
+:root[data-theme="oled"] .dsh-tw-panel, body[data-theme="oled"] .dsh-tw-panel { background: #050505 !important; border: 1.5px solid #333333 !important; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95), 0 0 0 1px #222222 !important; }
 .dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; height: 100%; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; overflow: hidden; }
 .dsh-tw-nav.dsh-tw-navCollapsed { width: 56px !important; padding: 18px 6px 0; }
 .dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navLabel { display: none; }
@@ -123,10 +124,12 @@ const SHELL_CSS = `
 .dsh-tw-section > [data-slot='settings.general.item'] > :last-child { border-bottom: none; }
 .dsh-tw-action { display: flex; min-width: 0; align-items: center; gap: 8px; }
 .dsh-tw-error { max-width: 180px; overflow: hidden; color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
-.dsh-icon-animated { transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease; will-change: transform; }
-button:hover .dsh-icon-animated, .dsh-tw-navCell:hover .dsh-icon-animated, .dsh-tw-trigger:hover .dsh-icon-animated, .dsh-tree-sessionRow:hover .dsh-icon-animated, .dsh-tree-projectRow:hover .dsh-icon-animated, .dsh-header-ellipsis-btn:hover .dsh-icon-animated { transform: scale(1.18); }
-.dsh-icon-settings:hover, button:hover .dsh-icon-settings, .dsh-tw-trigger:hover .dsh-icon-settings { transform: scale(1.2) rotate(35deg) !important; }
-.dsh-icon-refresh:hover, button:hover .dsh-icon-refresh { transform: scale(1.2) rotate(180deg) !important; }
+.dsh-icon-animated, svg:not([class*="badge"]) { transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease; will-change: transform; }
+button:hover svg, a:hover svg, .dsh-tree-sessionRow:hover svg, .dsh-tree-projectRow:hover svg, .dsh-tw-navCell:hover svg, .dsh-tw-trigger:hover svg, [role="button"]:hover svg, [role="tab"]:hover svg { transform: scale(1.18); }
+.dsh-icon-settings:hover, button:hover .dsh-icon-settings, .dsh-tw-trigger:hover .dsh-icon-settings, button:hover [data-icon="settings"], button:hover svg[class*="gear"], button:hover svg[class*="settings"] { transform: scale(1.22) rotate(45deg) !important; }
+.dsh-icon-refresh:hover, button:hover .dsh-icon-refresh, button:hover [data-icon="refresh"], button:hover svg[class*="refresh"], button:hover svg[class*="reload"] { transform: scale(1.22) rotate(180deg) !important; }
+button:hover .dsh-icon-rocket, button:hover [data-icon="rocket"] { transform: scale(1.25) translateY(-2px) rotate(-12deg) !important; }
+.dsh-tree-sessionRow:hover svg[class*="notepad"], .dsh-tree-sessionRow:hover .dsh-icon-notepad { transform: scale(1.2) rotate(-8deg) !important; }
 [class*="inputRow"] {
   display: flex !important;
   align-items: center !important;
@@ -229,7 +232,7 @@ div[data-slot-id="tabs"],
   display: none !important;
 }
 
-/* Agent / Assistant Message Bubbles (differentiated surface color, rounded 20px) */
+/* Agent / Assistant Message Bubbles: Distinct Blurple Surface & Border */
 div[data-slot="conversation.message.turn"]:has([data-message-role="assistant"]),
 div[class*="messageTurn"]:has([data-message-role="assistant"]),
 div[class*="MessageTurn"]:has([data-message-role="assistant"]),
@@ -242,31 +245,52 @@ div[data-slot="conversation.message.assistant"] {
 [data-message-role="assistant"] > div[class*="content"],
 [data-message-role="assistant"] [class*="Message_bubble"],
 [data-message-role="assistant"] [class*="bubble"],
-[data-slot="conversation.message.assistant"] [class*="content"] {
-  background: var(--dsw-specific-bubble, var(--dsw-alias-surface-l1, rgba(255, 255, 255, 0.045))) !important;
-  border: 1px solid var(--dsw-alias-border-l1, rgba(128, 128, 128, 0.14)) !important;
+[data-slot="conversation.message.assistant"] [class*="content"],
+[class*="AssistantMarkdown_root"],
+[class*="AssistantNodeView"] {
+  background: rgba(99, 102, 241, 0.14) !important;
+  border: 1.5px solid rgba(99, 102, 241, 0.38) !important;
   border-radius: 20px !important;
   padding: 14px 18px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08) !important;
   color: var(--dsw-alias-label-primary) !important;
+  align-self: flex-start !important;
+  max-width: 88% !important;
 }
 
 [data-message-role="user"] > div[class*="content"],
 [data-message-role="user"] [class*="Message_bubble"],
 [data-message-role="user"] [class*="bubble"],
-[data-slot="conversation.message.user"] [class*="content"] {
+[data-slot="conversation.message.user"] [class*="content"],
+[class*="MessageItem_userRow"] [class*="bubble"],
+[class*="userRow"] [class*="bubble"],
+[class*="userStack"] [class*="bubble"] {
   background: var(--dsw-specific-user-bubble, var(--dsw-alias-interactive-bg-active, rgba(255, 255, 255, 0.08))) !important;
-  border: 1px solid var(--dsw-alias-border-l1, rgba(128, 128, 128, 0.14)) !important;
+  border: 1px solid var(--dsw-alias-border-l1, rgba(128, 128, 128, 0.18)) !important;
   border-radius: 20px !important;
   padding: 12px 18px !important;
   color: var(--dsw-alias-label-primary) !important;
+  align-self: flex-end !important;
+  max-width: 82% !important;
+}
+
+/* Floating Input Bar Capsule Bubble */
+[class*="InputBar_card"],
+[class*="inputBar_card"],
+[class*="InputBar_root"] [class*="card"],
+div[data-conversation-composer-card],
+div[class*="composerCard"] {
+  border-radius: 22px !important;
+  background: var(--dsw-specific-input-major, var(--dsw-alias-surface-l1, #181825)) !important;
+  border: 1.5px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.14)) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* OLED theme rules for message bubbles, user bubbles, and goal display */
 :root[data-theme="oled"],
 body[data-theme="oled"],
 [data-theme="oled"] {
-  --dsw-specific-input-major: #000000 !important;
+  --dsw-specific-input-major: #080808 !important;
   --dsw-specific-tip: #000000 !important;
   --dsw-alias-surface-l0: #000000 !important;
   --dsw-alias-surface-l1: #050505 !important;
@@ -277,7 +301,7 @@ body[data-theme="oled"],
   --dsw-alias-border-l1: #161616 !important;
   --dsw-alias-border-l2: #1e1e1e !important;
   --dsw-alias-border-l2-darkmode-thin: #1a1a1a !important;
-  --dsw-specific-bubble: #060606 !important;
+  --dsw-specific-bubble: rgba(99, 102, 241, 0.12) !important;
   --dsw-specific-user-bubble: #0f0f0f !important;
   --dsw-specific-bubble-highlight: #141414 !important;
 }
@@ -286,26 +310,47 @@ body[data-theme="oled"],
 :root[data-theme="oled"] [data-message-role="assistant"] [class*="Message_bubble"],
 :root[data-theme="oled"] [data-message-role="assistant"] [class*="bubble"],
 :root[data-theme="oled"] [data-slot="conversation.message.assistant"] [class*="content"],
+:root[data-theme="oled"] [class*="AssistantMarkdown_root"],
+:root[data-theme="oled"] [class*="AssistantNodeView"],
 body[data-theme="oled"] [data-message-role="assistant"] > div[class*="content"],
 body[data-theme="oled"] [data-message-role="assistant"] [class*="Message_bubble"],
 body[data-theme="oled"] [data-message-role="assistant"] [class*="bubble"],
-body[data-theme="oled"] [data-slot="conversation.message.assistant"] [class*="content"] {
-  background: #060606 !important;
-  border-color: #181818 !important;
-  box-shadow: none !important;
+body[data-theme="oled"] [data-slot="conversation.message.assistant"] [class*="content"],
+body[data-theme="oled"] [class*="AssistantMarkdown_root"],
+body[data-theme="oled"] [class*="AssistantNodeView"] {
+  background: rgba(99, 102, 241, 0.12) !important;
+  border: 1.5px solid rgba(99, 102, 241, 0.32) !important;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.06) !important;
 }
 
 :root[data-theme="oled"] [data-message-role="user"] > div[class*="content"],
 :root[data-theme="oled"] [data-message-role="user"] [class*="Message_bubble"],
 :root[data-theme="oled"] [data-message-role="user"] [class*="bubble"],
 :root[data-theme="oled"] [data-slot="conversation.message.user"] [class*="content"],
+:root[data-theme="oled"] [class*="MessageItem_userRow"] [class*="bubble"],
+:root[data-theme="oled"] [class*="userRow"] [class*="bubble"],
+:root[data-theme="oled"] [class*="userStack"] [class*="bubble"],
 body[data-theme="oled"] [data-message-role="user"] > div[class*="content"],
 body[data-theme="oled"] [data-message-role="user"] [class*="Message_bubble"],
 body[data-theme="oled"] [data-message-role="user"] [class*="bubble"],
-body[data-theme="oled"] [data-slot="conversation.message.user"] [class*="content"] {
+body[data-theme="oled"] [data-slot="conversation.message.user"] [class*="content"],
+body[data-theme="oled"] [class*="MessageItem_userRow"] [class*="bubble"],
+body[data-theme="oled"] [class*="userRow"] [class*="bubble"],
+body[data-theme="oled"] [class*="userStack"] [class*="bubble"] {
   background: #0f0f0f !important;
-  border-color: #202020 !important;
+  border-color: #222222 !important;
   box-shadow: none !important;
+}
+
+:root[data-theme="oled"] [class*="InputBar_card"],
+:root[data-theme="oled"] [class*="inputBar_card"],
+:root[data-theme="oled"] [class*="InputBar_root"] [class*="card"],
+body[data-theme="oled"] [class*="InputBar_card"],
+body[data-theme="oled"] [class*="inputBar_card"],
+body[data-theme="oled"] [class*="InputBar_root"] [class*="card"] {
+  background: #080808 !important;
+  border: 1.5px solid #222222 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
 }
 
 :root[data-theme="oled"] [data-goal-bar],

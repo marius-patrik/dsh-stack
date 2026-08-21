@@ -2423,3 +2423,31 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 45 — August 21, 2026 (Blurple Assistant Bubbles, OLED/Main User Bubbles, Settings Border, Input Capsule, Universal Lucide Animated Icons)
+
+**Context & User Directives:**
+- `assistant messages should be in bubbless, blurple for assistant oled/main for user, border settings doesnt work - setttings window should have border input bar displays toolbar input bar itself bubbless .. lucide-animated icons sorry and replace ALL barealy any changed`
+
+**Design & Implementation:**
+1. **Assistant Message Bubbles (Blurple Tint)**:
+   - Wrapped assistant responses (`[class*="AssistantMarkdown_root"]`, `[class*="AssistantMarkdown_body"]`, `[class*="AssistantNodeView"]`, `[data-message-role="assistant"]`) in left-aligned bubbles with `border-radius: 20px`, padding `14px 18px`, blurple surface `rgba(99, 102, 241, 0.14)` (OLED `rgba(99, 102, 241, 0.12)`), and blurple accent border `1.5px solid rgba(99, 102, 241, 0.38)`.
+2. **User Message Bubbles (OLED / Main Theme)**:
+   - User messages styled in right-aligned bubbles with `border-radius: 20px`, padding `12px 18px`, OLED `#0f0f0f` with `#222222` border in OLED mode, and `var(--dsw-alias-surface-l1)` in main theme.
+3. **Settings Window Crisp Border**:
+   - Enhanced `.dsh-tw-panel` with prominent border `1.5px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.22))` and dual-depth drop shadow (`0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.14)`), with OLED `#333333` border and deep shadow.
+4. **Input Bar Floating Capsule Bubble**:
+   - Composer card (`.card`, `[class*="InputBar_card"]`) unified as a floating capsule bubble with `border-radius: 22px`, housing textarea and toolbar controls seamlessly.
+5. **Universal Lucide Animated Icons Everywhere**:
+   - Upgraded all icons in sidebar tree (Library, System, Users, Archive, Restore, Folder, Pin, Active, HostMachine, HardDrive, Sparkles, Accounts, Models, Apps, Deploy) and applied universal cubic-bezier hover micro-interactions (`.dsh-icon-animated`, `transform: scale(1.18)`, rotation on settings/refresh).
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- CDP end-to-end automated browser testing verified:
+  - User bubbles render with `border-radius: 20px`, padding `12px 18px`.
+  - Input card renders as floating capsule with `border-radius: 22px`.
+  - Settings window renders with visible border and `0 24px 64px` dual-layer shadow.
+  - 73/73 SVGs across the document have `.dsh-icon-animated` transitions and Lucide React vectors.
+- Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
+
+**Status:** completed.

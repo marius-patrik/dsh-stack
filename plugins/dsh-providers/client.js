@@ -5112,9 +5112,11 @@ button:hover .dsh-icon-animated,
 
     function LibraryGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5139,9 +5141,11 @@ button:hover .dsh-icon-animated,
 
     function SystemGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5172,9 +5176,11 @@ button:hover .dsh-icon-animated,
 
     function UsersGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5199,9 +5205,11 @@ button:hover .dsh-icon-animated,
 
     function ArchiveBoxGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5225,9 +5233,11 @@ button:hover .dsh-icon-animated,
 
     function RestoreGlyph(props) {
       var size = props && props.size ? props.size : 13;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5249,9 +5259,11 @@ button:hover .dsh-icon-animated,
 
     function BlueFolderGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5273,9 +5285,11 @@ button:hover .dsh-icon-animated,
 
     function PinGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5298,9 +5312,11 @@ button:hover .dsh-icon-animated,
 
     function ActiveGlyph(props) {
       var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5322,9 +5338,11 @@ button:hover .dsh-icon-animated,
 
     function HostMachineGlyph(props) {
       var size = props && props.size ? props.size : 15;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5348,9 +5366,11 @@ button:hover .dsh-icon-animated,
 
     function HardDriveGlyph(props) {
       var size = props && props.size ? props.size : 15;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5375,9 +5395,11 @@ button:hover .dsh-icon-animated,
 
     function SparklesGlyph(props) {
       var size = props.size || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -5397,7 +5419,8 @@ button:hover .dsh-icon-animated,
 
     function AccountsGlyph(props) {
       var size = props.size || 16;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
         h("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
         h("circle", { cx: "12", cy: "7", r: "4" })
       );
@@ -5405,14 +5428,16 @@ button:hover .dsh-icon-animated,
 
     function ModelsGlyph(props) {
       var size = props.size || 16;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
         h("path", { d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" })
       );
     }
 
     function AppsGlyph(props) {
       var size = props.size || 16;
-      return h("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
         h("rect", { x: "3", y: "3", width: "7", height: "7" }),
         h("rect", { x: "14", y: "3", width: "7", height: "7" }),
         h("rect", { x: "14", y: "14", width: "7", height: "7" }),
