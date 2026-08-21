@@ -2879,4 +2879,30 @@ User prompt:
      - Lucide animated keyframes: `true`
    - All 84 plugin check suites passed 100% ok.
 
+## Session 66 — August 22, 2026 (Swapped Sidebars CSS Grid Layout and Column Track Fix)
+
+**Context & User Directives:**
+1. `sidebar still broken when swapped`
+
+**Accomplished Refinements & Verifications:**
+1. **CSS Grid Track Sizing for Swapped Layout**:
+   - Diagnosed root cause: `[class*="frame"]` in harness layout uses CSS Grid with inline track definition `style="grid-template-columns: ${cols.sidebar}px minmax(0, 1fr) ${cols.details}px"`. When `body.dsh-sidebars-swapped` was active, setting `order: 3` placed `sidebarCol` into the 3rd track (which was `0px` wide when details were closed), crushing the sidebar to `0px`/`1px` width.
+   - Added CSS Grid track override in `dsh-tweaks`:
+     `body.dsh-sidebars-swapped [class*="frame"] { grid-template-columns: var(--dsh-secondary-sidebar-width, 0px) minmax(0, 1fr) var(--dsh-sidebar-width, 240px) !important; }`
+2. **Explicit Grid Column Placements**:
+   - `detailsCol` / `.dsh-right-sidebar-dock`: `grid-column: 1 !important; order: 1 !important; left: 0 !important; right: auto !important;`
+   - `centerCol`: `grid-column: 2 !important; order: 2 !important; margin: 0 !important;`
+   - `sidebarCol` / `.dsh-tw-root`: `grid-column: 3 !important; order: 3 !important; width: var(--dsh-sidebar-width, 240px) !important; left: auto !important; right: 0 !important;`
+   - `.dsh-tw-navResizer`: `right: auto !important; left: -4px !important;`
+3. **Dynamic CSS Variable Management & Bounds Computation**:
+   - In `RightSidebarDock`, set `--dsh-secondary-sidebar-width` on `document.documentElement` dynamically based on state (`isOpen ? width : (tabs.length > 0 ? 36 : 0)`).
+   - In `getCenterBounds()`, read `centerEl.getBoundingClientRect()` directly, ensuring top header tabs (`TopConversationTabBar`), bottom panels, and occupants align pixel-perfect with `centerCol` in standard, swapped rail, swapped wide, and dual-sidebar open states.
+4. **Chrome Headless CDP & Pre-Push Suite Verification**:
+   - Standard layout: sidebar at `[0, 56px]`, center at `[56px, 756px]`, top bar at `[56px, 756px]`.
+   - Swapped rail: sidebar at `[700px, 757px]`, center at `[0, 700px]`, top bar at `[0, 700px]`.
+   - Swapped wide: sidebar at `[476px, 757px]`, center at `[0, 476px]`, top bar at `[0, 476px]`.
+   - Dual-open (Secondary Sidebar left, Main Sidebar right): secondary sidebar at `[0, 301px]`, center at `[300px, 476px]`, main sidebar at `[476px, 757px]`, top bar at `[300px, 476px]`.
+   - All 84 plugin check suites passed 100% ok.
+
+
 

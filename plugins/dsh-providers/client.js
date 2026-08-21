@@ -3274,32 +3274,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var isMenuOpen = menuOpenState[0], setMenuOpen = menuOpenState[1];
       var menuBtnRef = React.useRef(null);
 
-      // Broadcast secondary sidebar width and adjust centerCol layout bounds
+      // Broadcast secondary sidebar width and adjust layout bounds
       React.useEffect(function () {
         var currentRightWidth = isOpen ? width : (tabs.length > 0 ? 36 : 0);
         if (typeof window !== "undefined") {
           window.__dsh_right_sidebar_width__ = currentRightWidth;
+          if (typeof document !== "undefined") {
+            document.documentElement.style.setProperty('--dsh-secondary-sidebar-width', currentRightWidth + 'px');
+          }
           window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: isOpen, width: currentRightWidth } }));
         }
-        var centerCol = document.querySelector('div[class*="centerCol"], [class*="centerCol"]');
-        var isSwapped = typeof document !== "undefined" && document.body.classList.contains("dsh-sidebars-swapped");
-        if (centerCol) {
-          if (isSwapped) {
-            centerCol.style.marginLeft = currentRightWidth + "px";
-            centerCol.style.marginRight = "0px";
-          } else {
-            centerCol.style.marginRight = currentRightWidth + "px";
-            centerCol.style.marginLeft = "0px";
-          }
-          centerCol.style.transition = isResizing ? "none" : "margin 150ms ease";
-        }
-        return function () {
-          var col = document.querySelector('div[class*="centerCol"], [class*="centerCol"]');
-          if (col) {
-            col.style.marginRight = "0px";
-            col.style.marginLeft = "0px";
-          }
-        };
       }, [isOpen, width, tabs.length, isResizing]);
 
       React.useEffect(function () {
@@ -3535,6 +3519,17 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
     function getCenterBounds() {
       if (typeof document === "undefined") return { left: 240, right: 0, top: 0 };
+      var centerEl = document.querySelector('div[class*="centerCol"], [class*="centerCol"], main');
+      if (centerEl && centerEl.getBoundingClientRect) {
+        var rect = centerEl.getBoundingClientRect();
+        if (rect.width > 0) {
+          return {
+            left: Math.max(0, Math.round(rect.left)),
+            right: Math.max(0, Math.round(window.innerWidth - rect.right)),
+            top: Math.max(0, Math.round(rect.top))
+          };
+        }
+      }
       var isSwapped = document.body.classList.contains("dsh-sidebars-swapped");
       var customSecondary = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
       var detailsEl = document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]');
@@ -3544,24 +3539,18 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var sidebarEl = document.querySelector('div[class*="sidebarCol"]');
       var primaryW = (sidebarEl && sidebarEl.getBoundingClientRect && sidebarEl.getBoundingClientRect().width > 0) ? sidebarEl.getBoundingClientRect().width : 240;
 
-      var centerEl = document.querySelector('div[class*="centerCol"], div[data-slot="conversation"], main');
-      var top = 0;
-      if (centerEl && centerEl.getBoundingClientRect) {
-        top = Math.max(0, centerEl.getBoundingClientRect().top);
-      }
-
       if (isSwapped) {
         return {
           left: secondaryW,
           right: primaryW,
-          top: top
+          top: 0
         };
       }
 
       return {
         left: primaryW,
         right: secondaryW,
-        top: top,
+        top: 0,
       };
     }
 

@@ -502,29 +502,50 @@ body[data-theme="oled"] [class*="agentGoal"] {
   background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
   color: var(--dsw-alias-label-primary) !important;
 }
-body.dsh-sidebars-swapped div[class*="sidebarCol"],
-body.dsh-sidebars-swapped .dsh-tw-root {
-  order: 3 !important;
-  left: auto !important;
-  right: 0 !important;
-  border-right: none !important;
-  border-left: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
-}
-body.dsh-sidebars-swapped div[class*="centerCol"] {
-  order: 2 !important;
+body.dsh-sidebars-swapped [class*="frame"] {
+  grid-template-columns: var(--dsh-secondary-sidebar-width, 0px) minmax(0, 1fr) var(--dsh-sidebar-width, 240px) !important;
 }
 body.dsh-sidebars-swapped div[class*="detailsCol"],
 body.dsh-sidebars-swapped .dsh-right-sidebar-dock {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
   order: 1 !important;
   right: auto !important;
   left: 0 !important;
   border-left: none !important;
   border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
 }
+body.dsh-sidebars-swapped div[class*="centerCol"] {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  order: 2 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+body.dsh-sidebars-swapped div[class*="sidebarCol"],
+body.dsh-sidebars-swapped .dsh-tw-root {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  order: 3 !important;
+  width: var(--dsh-sidebar-width, 240px) !important;
+  left: auto !important;
+  right: 0 !important;
+  border-right: none !important;
+  border-left: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+}
 body.dsh-sidebars-swapped .dsh-mainview-terminal,
-body.dsh-sidebars-swapped .dsh-mainview-container {
+body.dsh-sidebars-swapped .dsh-mainview-container,
+body.dsh-sidebars-swapped .dsh-mainview-monaco {
   left: var(--dsh-secondary-sidebar-width, 0px) !important;
   right: var(--dsh-sidebar-width, 240px) !important;
+}
+body.dsh-sidebars-swapped .dsh-top-conversation-header {
+  left: var(--dsh-secondary-sidebar-width, 0px) !important;
+  right: var(--dsh-sidebar-width, 240px) !important;
+}
+body.dsh-sidebars-swapped .dsh-tw-navResizer {
+  right: auto !important;
+  left: -4px !important;
 }
 button[class*="sessionLogButton"],
 [data-slot="conversation.session.header.utilities"] > button[class*="sessionLogButton"] {
