@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # pre-push hook — validates plugin check suites before push
 #
 # Install: .agents/hooks/install.sh
