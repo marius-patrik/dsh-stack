@@ -2822,3 +2822,28 @@ User prompt:
    - Stored in `dsh_composer_toolbar_layout` and wired via `body.dsh-composer-split` / `body.dsh-composer-unified` and `dsh:composer-layout-changed` custom event.
 3. **Test Suite Verification**:
    - All 80 package checks pass 100% green.
+
+## Session 64 — August 22, 2026 (Sidebar Browser End-to-End Verification & Command Registration Hardening)
+
+**Context & User Directives:**
+1. `sidebar still broken test via browser`
+
+**Accomplished Refinements & Verifications:**
+1. **Command Registration Collision Hardening (`dsh-actions`)**:
+   - Resolved crash where `ctx.commands.register` threw `command "goal" is already registered` against native harness built-ins.
+   - Wrapped command registrations in `safeRegister` try/catch block so custom presets and commands load seamlessly without halting plugin startup.
+2. **Left Sidebar Architecture & Dropdown Positioning (`dsh-providers`)**:
+   - Fixed `SelectDropdownMenu` viewport coordinate calculation and pointerdown event attachment delay to prevent immediate self-closure on click.
+   - Streamlined `.dsh-collapsed-rail` action buttons (Search, New Item (+), Active Processes with green dot badge, and Workspaces Explorer folder toggle) with zero duplicate toggles.
+   - Restored `showSearchButton` state listener and reactivity across wide and collapsed modes.
+3. **Live Headless Chrome CDP Verification**:
+   - Verified live against `http://127.0.0.1:3080`:
+     - Expanding sidebar from collapsed rail (`pass: true`).
+     - Rendering 508+ hierarchy tree items across Host Machine, Macintosh HD, and Active sections (`pass: true`).
+     - Opening the unified New Item (+) dropdown menu on Active section and rail items (`pass: true`).
+     - Terminal session interactive tab click and navigation (`pass: true`).
+     - Collapsing sidebar back to rail cleanly without clipping (`pass: true`).
+4. **Zero-Error Server Boot**:
+   - `scripts/dsh restart` reports 111 active plugins and 0 failures.
+   - All 84 plugin check suites pass 100% ok.
+

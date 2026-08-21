@@ -2834,33 +2834,43 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
           var top2 = (rect.bottom + menuHeight > window.innerHeight) ? (rect.top - menuHeight - 4) : (rect.bottom + 4);
           var left2 = (rect.right - menuWidth < 10) ? Math.max(10, rect.left) : (rect.right - menuWidth);
           setPos({ top: Math.max(8, top2), left: Math.max(8, left2) });
+        } else if (menuRef.current && menuRef.current.parentElement) {
+          var rect3 = menuRef.current.parentElement.getBoundingClientRect();
+          var top3 = (rect3.bottom + menuHeight > window.innerHeight) ? (rect3.top - menuHeight - 4) : (rect3.bottom + 4);
+          var left3 = (rect3.right - menuWidth < 10) ? Math.max(10, rect3.left) : (rect3.right - menuWidth);
+          setPos({ top: Math.max(8, top3), left: Math.max(8, left3) });
         }
       }, [open, anchorRef, position, items ? items.length : 0]);
 
       React.useEffect(function () {
         if (!open) return;
         var handlePointerDown = function (e) {
-          if (menuRef.current && !menuRef.current.contains(e.target) && (!anchorRef || !anchorRef.current || !anchorRef.current.contains(e.target))) {
+          if (menuRef.current && !menuRef.current.contains(e.target)) {
+            if (anchorRef && anchorRef.current && anchorRef.current.contains(e.target)) return;
+            if (menuRef.current.parentElement && menuRef.current.parentElement.contains(e.target)) return;
             onClose();
           }
         };
-        document.addEventListener("pointerdown", handlePointerDown);
-        return function () { document.removeEventListener("pointerdown", handlePointerDown); };
+        var timer = setTimeout(function () {
+          document.addEventListener("pointerdown", handlePointerDown);
+        }, 30);
+        return function () {
+          clearTimeout(timer);
+          document.removeEventListener("pointerdown", handlePointerDown);
+        };
       }, [open, onClose, anchorRef]);
 
       if (!open) return null;
 
-      var isFixed = Boolean((anchorRef && anchorRef.current) || position);
       return h(
         "div",
         {
           ref: menuRef,
           style: {
-            position: isFixed ? "fixed" : "absolute",
-            top: isFixed ? pos.top + "px" : "calc(100% + 4px)",
-            left: isFixed ? pos.left + "px" : "auto",
-            right: isFixed ? "auto" : 0,
-            zIndex: 10000000,
+            position: "fixed",
+            top: pos.top + "px",
+            left: pos.left + "px",
+            zIndex: 99999999,
             minWidth: "190px",
             background: "var(--dsw-alias-surface-l0, #1e1e2e)",
             border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
@@ -6916,6 +6926,21 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var ungroupedMenuState = React.useState(false);
       var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
 
+      var showSearchButtonState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return true;
+        return window.localStorage.getItem('dsh_show_sidebar_search') !== 'false';
+      });
+      var showSearchButton = showSearchButtonState[0], setShowSearchButton = showSearchButtonState[1];
+
+      React.useEffect(function () {
+        var onSearchToggle = function (e) {
+          var enabled = (e && e.detail && e.detail.enabled !== undefined) ? e.detail.enabled : (localStorage.getItem('dsh_show_sidebar_search') !== 'false');
+          setShowSearchButton(enabled);
+        };
+        window.addEventListener('dsh:sidebar-search-toggle', onSearchToggle);
+        return function () { window.removeEventListener('dsh:sidebar-search-toggle', onSearchToggle); };
+      }, []);
+
       var toggleSubagentExpand = function (sessionId) {
         setExpandedSubagents(function (prev) {
           var n = Object.assign({}, prev);
@@ -7250,34 +7275,14 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "8px",
+              gap: "6px",
               width: "100%",
               height: "100%",
-              paddingTop: "6px",
+              paddingTop: "4px",
               position: "relative"
             }
           },
-          // 1. Dedicated Expand Rail Toggle
-          h("button", {
-            type: "button",
-            className: "dsh-tree-actionBtn dsh-rail-btn",
-            title: "Expand Sidebar",
-            "aria-label": "Expand Sidebar",
-            style: {
-              width: "32px",
-              height: "32px",
-              borderRadius: "7px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.06))",
-              color: "var(--dsw-alias-label-primary)",
-              cursor: "pointer"
-            },
-            onClick: handleExpand
-          }, h(DockToggleGlyph, { size: 18 })),
-
-          // 2. Search Button
+          // 1. Search Button
           showSearchButton ? h("button", {
             type: "button",
             className: "dsh-tree-actionBtn dsh-rail-btn",
@@ -7300,14 +7305,14 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
                 if (searchInputRef.current) searchInputRef.current.focus();
               }, 150);
             }
-          }, h(SearchGlyph, { size: 18 })) : null,
+          }, h(SearchGlyph, { size: 17 })) : null,
 
-          // 3. New Item Plus Button
+          // 2. New Item Plus Button
           h("div", { style: { position: "relative" } },
             h("button", {
               type: "button",
               className: "dsh-tree-actionBtn dsh-rail-btn",
-              title: "New Item",
+              title: "New Item (+)",
               "aria-label": "New Item",
               style: {
                 width: "32px",
@@ -7323,14 +7328,15 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
                 e.stopPropagation();
                 setPlusMenu(isRailPlusOpen ? null : "rail");
               }
-            }, h(PlusGlyph, { size: 18 })),
+            }, h(PlusGlyph, { size: 17 })),
             h(SelectDropdownMenu, {
               open: isRailPlusOpen,
               onClose: function () { setPlusMenu(null); },
               items: [
                 { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
-                { id: "terminal", label: "Terminal", icon: h(TerminalsGlyph, { size: 13 }) },
-                { id: "container", label: "Container", icon: h(ContainersGlyph, { size: 13 }) },
+                { id: "terminal", label: "Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
+                { id: "container", label: "Sandbox Container", icon: h(ContainersGlyph, { size: 13 }) },
+                { id: "open-workspace", label: "Open Workspace…", icon: h(BlueFolderGlyph, { size: 13 }) },
               ],
               onSelect: function (actionId) {
                 setPlusMenu(null);
@@ -7341,12 +7347,14 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
                   window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
                 } else if (actionId === "container") {
                   window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+                } else if (actionId === "open-workspace") {
+                  handleExpand();
                 }
               }
             })
           ),
 
-          // 4. Terminals / Sandboxes Processes
+          // 3. Terminals / Sandboxes Processes
           h("button", {
             type: "button",
             className: "dsh-tree-actionBtn dsh-rail-btn",
@@ -7367,20 +7375,39 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
               window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
             }
           },
-            h(TerminalsGlyph, { size: 18 }),
+            h(TerminalsGlyph, { size: 17 }),
             totalLive > 0 ? h("span", {
               style: {
                 position: "absolute",
-                top: "4px",
-                right: "4px",
+                top: "6px",
+                right: "6px",
                 width: "6px",
                 height: "6px",
                 borderRadius: "50%",
-                backgroundColor: "#6366f1",
-                boxShadow: "0 0 6px rgba(99, 102, 241, 0.6)"
+                background: "#3fb950",
+                boxShadow: "0 0 4px #3fb950"
               }
             }) : null
-          )
+          ),
+
+          // 4. Workspaces Folder Quick Toggle
+          h("button", {
+            type: "button",
+            className: "dsh-tree-actionBtn dsh-rail-btn",
+            title: "Workspaces Explorer",
+            "aria-label": "Workspaces Explorer",
+            style: {
+              width: "32px",
+              height: "32px",
+              borderRadius: "7px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--dsw-alias-label-secondary)",
+              cursor: "pointer"
+            },
+            onClick: handleExpand
+          }, h(BlueFolderGlyph, { size: 17 }))
         );
       }
 
@@ -7389,7 +7416,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var totalLive = liveSessions.length + liveContainers.length;
 
       var renderUnifiedPlusButton = function (targetDir, anchorKey) {
-        var isMenuOpen = plusMenu === anchorKey;
+        var isMenuOpen = Boolean(plusMenu && (plusMenu === anchorKey || plusMenu.key === anchorKey));
         var path = targetDir || currentRoot || "/Users/user/Projects";
 
         return h("div", { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
@@ -7399,12 +7426,17 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
             title: "New Item (+)",
             "aria-label": "New Item",
             onClick: function (e) {
+              e.preventDefault();
               e.stopPropagation();
-              setPlusMenu(isMenuOpen ? null : anchorKey);
+              var rect = e.currentTarget.getBoundingClientRect();
+              var posX = Math.max(10, Math.min(window.innerWidth - 200, rect.right - 190));
+              var posY = rect.bottom + 4;
+              setPlusMenu(isMenuOpen ? null : { key: anchorKey, pos: { x: posX, y: posY } });
             }
           }, h(PlusGlyph, { size: 13 })),
-          h(SelectDropdownMenu, {
-            open: isMenuOpen,
+          isMenuOpen ? h(SelectDropdownMenu, {
+            open: true,
+            position: (plusMenu && plusMenu.pos) ? plusMenu.pos : null,
             onClose: function () { setPlusMenu(null); },
             items: [
               { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
@@ -7449,7 +7481,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
                 handleArchivePongSessions();
               }
             }
-          })
+          }) : null
         );
       };
 

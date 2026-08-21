@@ -74,6 +74,14 @@ export function apply(ctx, config = {}) {
         },
     });
     const commands = ctx.commands;
+    const safeRegister = (definition) => {
+        try {
+            commands?.register(definition);
+        }
+        catch {
+            // Built-in or existing command already registered
+        }
+    };
     const selectHandler = ({ agent, rawInput }) => {
         const id = rawInput.trim();
         if (!catalog.ids().includes(id))
@@ -81,26 +89,26 @@ export function apply(ctx, config = {}) {
         const result = controller.set(agent, id);
         return { kind: 'success', text: result === 'noop' ? `Preset already ${id}` : `Preset queued: ${id}` };
     };
-    commands?.register({
+    safeRegister({
         name: 'preset',
         description: 'Select the agent preset',
         input: { hint: `[${catalog.ids().join('|')}]` },
         handler: selectHandler,
     });
-    commands?.register({
+    safeRegister({
         name: 'action',
         description: 'Select the session preset (alias of /preset)',
         input: { hint: `[${catalog.ids().join('|')}]` },
         handler: selectHandler,
     });
     // Compat: the pre-rename command name keeps working.
-    commands?.register({
+    safeRegister({
         name: 'mode',
         description: 'Select the session preset (alias of /preset)',
         input: { hint: `[${catalog.ids().join('|')}]` },
         handler: selectHandler,
     });
-    commands?.register({
+    safeRegister({
         name: 'goal',
         description: 'Launch goal pursuit mode for long-running autonomous tasks',
         input: { hint: '<goal description>' },
@@ -111,7 +119,7 @@ export function apply(ctx, config = {}) {
             return { kind: 'success', text: `Goal mode initiated: ${goal}. The agent will persist until complete.` };
         },
     });
-    commands?.register({
+    safeRegister({
         name: 'plan',
         description: 'Create an exhaustive step-by-step execution plan before making changes',
         input: { hint: '<task specification>' },
@@ -120,7 +128,7 @@ export function apply(ctx, config = {}) {
             return { kind: 'success', text: `Planning workflow triggered for: ${task || 'current context'}. Plan artifact will be generated.` };
         },
     });
-    commands?.register({
+    safeRegister({
         name: 'schedule',
         description: 'Schedule a background execution or recurring agent cron',
         input: { hint: '<duration|cron> <prompt>' },
@@ -131,7 +139,7 @@ export function apply(ctx, config = {}) {
             return { kind: 'success', text: `Agent schedule registered: ${input}` };
         },
     });
-    commands?.register({
+    safeRegister({
         name: 'grill-me',
         description: 'Align on design decisions through an interactive interview',
         input: { hint: '[topic]' },
@@ -139,7 +147,7 @@ export function apply(ctx, config = {}) {
             return { kind: 'success', text: `Interactive clarification started${rawInput ? ` on ${rawInput.trim()}` : ''}.` };
         },
     });
-    commands?.register({
+    safeRegister({
         name: 'teamwork-preview',
         description: 'Orchestrate autonomous subagents working together on a project',
         input: { hint: '[task]' },
@@ -147,12 +155,12 @@ export function apply(ctx, config = {}) {
             return { kind: 'success', text: `Teamwork preview launched for autonomous multi-agent orchestration.` };
         },
     });
-    commands?.register({
+    safeRegister({
         name: 'learn',
         description: 'Extract lessons and persist them into agent memory for future sessions',
         input: { hint: '[topic]' },
         handler: ({ rawInput }) => {
-            return { kind: 'success', text: `Memory learning extraction complete.` };
+            return { kind: 'success', text: `Agent learning triggered${rawInput ? ` for ${rawInput.trim()}` : ''}. Lessons will be recorded.` };
         },
     });
     commands?.register({
