@@ -2434,7 +2434,7 @@ button:hover .dsh-icon-animated,
     }
     var FullPageTerminalsWorkspace = BottomTerminalPanel;
 
-    // 7. FULL-PAGE CONTAINERS WORKSPACE
+    // 7. DOCKABLE CONTAINERS WORKSPACE
     function FullPageContainersWorkspace(props) {
       var onClose = props.onClose;
       var initialContainerId = props.initialContainerId;
@@ -2446,6 +2446,22 @@ button:hover .dsh-icon-animated,
       var logs = logsState[0], setLogs = logsState[1];
       var actionState = React.useState({});
       var actionMap = actionState[0], setActionMap = actionState[1];
+      var containerRef = React.useRef(null);
+      var isNarrowState = React.useState(false);
+      var isNarrow = isNarrowState[0], setIsNarrow = isNarrowState[1];
+
+      React.useLayoutEffect(function () {
+        if (!containerRef.current) return;
+        var checkWidth = function () {
+          if (containerRef.current) {
+            setIsNarrow(containerRef.current.clientWidth < 420);
+          }
+        };
+        checkWidth();
+        var obs = new ResizeObserver(checkWidth);
+        obs.observe(containerRef.current);
+        return function () { obs.disconnect(); };
+      }, []);
 
       var loadContainers = React.useCallback(function () {
         fetch(QUOTAS_API + "/docker/containers")
@@ -2461,6 +2477,9 @@ button:hover .dsh-icon-animated,
                 setSelectedContainer(list[0]);
               }
             }
+          })
+          .catch(function (err) {
+            setData({ containers: [], loading: false, error: err.message });
           });
       }, [selectedContainer, initialContainerId]);
 
@@ -2468,7 +2487,8 @@ button:hover .dsh-icon-animated,
         if (!cId) return;
         fetch(QUOTAS_API + "/docker/containers/logs?id=" + encodeURIComponent(cId))
           .then(function (r) { return r.json(); })
-          .then(function (res) { setLogs(res.logs || "(no logs)"); });
+          .then(function (res) { setLogs(res.logs || "(no logs)"); })
+          .catch(function (err) { setLogs("Error loading logs: " + err.message); });
       }, []);
 
       React.useEffect(function () { loadContainers(); }, [loadContainers]);
@@ -2487,61 +2507,193 @@ button:hover .dsh-icon-animated,
 
       return h(
         "div",
-        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999 } },
+        {
+          ref: containerRef,
+          className: "dsh-containers-workspace",
+          style: {
+            width: "100%",
+            height: "100%",
+            background: "var(--dsw-alias-bg-layer-0, #000000)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            color: "var(--dsw-alias-label-primary, #fff)",
+            fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
+          }
+        },
+        // Header
         h(
           "div",
-          { style: { width: "92vw", height: "88vh", borderRadius: "14px", background: "#0e1117", border: "1px solid rgba(128,128,128,0.25)", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.7)" } },
-          h(
-            "div",
-            { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(128,128,128,0.2)", background: "#161b22" } },
-            h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } }, h(ContainersGlyph, { size: 18 }), h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600, color: "#fff" } }, "Docker Container Sandboxes")),
-            h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
-              h("button", { onClick: function () { if (selectedContainer) loadLogs(selectedContainer.id); }, style: { padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, h(RefreshGlyph, { size: 14 })),
-              h("button", { onClick: onClose, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, "Close ✕")
-            )
+          {
+            style: {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "8px 12px",
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              background: "var(--dsw-alias-bg-layer-0, #000000)",
+              flexShrink: 0,
+            }
+          },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            h(ContainersGlyph, { size: 14 }),
+            h("strong", { style: { fontSize: "12.5px", fontWeight: 600, color: "var(--dsw-alias-label-primary, #fff)" } }, "Docker Sandboxes"),
+            h("span", { style: { fontSize: "10.5px", padding: "1px 6px", borderRadius: "10px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700 } }, data.containers.length)
           ),
+          h("div", { style: { display: "flex", alignItems: "center", gap: "6px" } },
+            h("button", {
+              type: "button",
+              onClick: function () { if (selectedContainer) loadLogs(selectedContainer.id); else loadContainers(); },
+              title: "Refresh",
+              style: {
+                padding: "3px 7px",
+                borderRadius: "4px",
+                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.15))",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary, #888)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+              }
+            }, h(RefreshGlyph, { size: 12 })),
+            onClose ? h("button", {
+              type: "button",
+              onClick: onClose,
+              title: "Close",
+              style: {
+                padding: "2px 6px",
+                borderRadius: "4px",
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary, #888)",
+                cursor: "pointer",
+                fontSize: "14px",
+              }
+            }, "✕") : null
+          )
+        ),
+        // Content Area (adaptive row / column based on container width)
+        h(
+          "div",
+          {
+            style: {
+              display: "flex",
+              flex: 1,
+              overflow: "hidden",
+              flexDirection: isNarrow ? "column" : "row",
+            }
+          },
+          // Container List
           h(
             "div",
-            { style: { display: "flex", flex: 1, overflow: "hidden" } },
-            h(
-              "div",
-              { style: { width: "280px", borderRight: "1px solid rgba(128,128,128,0.2)", background: "#11141a", display: "flex", flexDirection: "column", padding: "10px", gap: "6px", overflowY: "auto" } },
-              h("div", { style: { fontSize: "10px", fontWeight: 700, color: "#8b949e", textTransform: "uppercase", letterSpacing: "0.5px", padding: "6px 8px" } }, "Containers (" + data.containers.length + ")"),
-              data.containers.map(function (c) {
-                var isSel = selectedContainer && selectedContainer.id === c.id;
-                return h(
-                  "div",
-                  {
-                    key: c.id,
-                    onClick: function () { setSelectedContainer(c); },
-                    style: { padding: "10px 12px", borderRadius: "8px", background: isSel ? "rgba(99, 102, 241, 0.18)" : "transparent", border: isSel ? "1px solid #6366f1" : "1px solid transparent", cursor: "pointer", display: "flex", flexDirection: "column", gap: "4px" },
+            {
+              style: {
+                width: isNarrow ? "100%" : "200px",
+                maxHeight: isNarrow ? "130px" : "100%",
+                borderRight: isNarrow ? "none" : "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+                borderBottom: isNarrow ? "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))" : "none",
+                background: "var(--dsw-alias-bg-layer-0, #000000)",
+                display: "flex",
+                flexDirection: "column",
+                padding: "6px",
+                gap: "4px",
+                overflowY: "auto",
+                flexShrink: 0,
+              }
+            },
+            data.containers.length === 0 ? h("div", { style: { padding: "12px 8px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary, #666)", textAlign: "center" } }, "No containers found") : null,
+            data.containers.map(function (c) {
+              var isSel = selectedContainer && selectedContainer.id === c.id;
+              return h(
+                "div",
+                {
+                  key: c.id,
+                  onClick: function () { setSelectedContainer(c); },
+                  style: {
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                    border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px",
                   },
-                  h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
-                    h("span", { style: { fontSize: "13px", fontWeight: 600, color: isSel ? "#fff" : "#c9d1d9" } }, c.name || c.id),
-                    h("span", { style: { padding: "1px 5px", borderRadius: "4px", fontSize: "9px", fontWeight: 600, background: c.isRunning ? "rgba(63, 185, 80, 0.15)" : "rgba(128,128,128,0.1)", color: c.isRunning ? "#3fb950" : "#888" } }, c.isRunning ? "RUNNING" : "STOPPED")
-                  ),
-                  h("span", { style: { fontSize: "11px", color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.image)
-                );
-              })
-            ),
-            h(
+                },
+                h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                  h("span", { style: { fontSize: "12px", fontWeight: 600, color: isSel ? "#fff" : "var(--dsw-alias-label-primary, #ccc)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.name || c.id.substring(0, 12)),
+                  h("span", { style: { padding: "1px 4px", borderRadius: "3px", fontSize: "8.5px", fontWeight: 700, background: c.isRunning ? "rgba(99, 102, 241, 0.2)" : "rgba(128,128,128,0.15)", color: c.isRunning ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-tertiary, #888)" } }, c.isRunning ? "RUNNING" : "STOPPED")
+                ),
+                h("span", { style: { fontSize: "10.5px", color: "var(--dsw-alias-label-tertiary, #777)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.image)
+              );
+            })
+          ),
+          // Selected Container Details & Logs
+          h(
+            "div",
+            {
+              style: {
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                background: "var(--dsw-alias-bg-layer-0, #000000)",
+                overflow: "hidden",
+              }
+            },
+            selectedContainer ? h(
               "div",
-              { style: { flex: 1, display: "flex", flexDirection: "column", background: "#0d1117" } },
-              selectedContainer
-                ? h(
-                    "div",
-                    { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", background: "#161b22", borderBottom: "1px solid rgba(128,128,128,0.2)" } },
-                    h("div", { style: { display: "flex", gap: "10px", alignItems: "center" } }, h("strong", { style: { color: "#fff", fontSize: "13px" } }, selectedContainer.name), h("code", { style: { fontSize: "11px", color: "#8b949e" } }, selectedContainer.status)),
-                    h("div", { style: { display: "flex", gap: "6px" } },
-                      selectedContainer.isRunning
-                        ? h("button", { onClick: function () { handleAction(selectedContainer.id, "stop"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#fff", fontSize: "11px", cursor: "pointer" } }, "Stop")
-                        : h("button", { onClick: function () { handleAction(selectedContainer.id, "start"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "none", background: "#6366f1", color: "#fff", fontSize: "11px", cursor: "pointer" } }, "Start"),
-                      h("button", { onClick: function () { handleAction(selectedContainer.id, "restart"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#fff", fontSize: "11px", cursor: "pointer" } }, "Restart")
-                    )
-                  )
-                : null,
-              h("pre", { style: { flex: 1, margin: 0, padding: "18px 20px", color: "#c9d1d9", fontFamily: "monospace", fontSize: "12px", lineHeight: "1.4", overflowY: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, logs)
-            )
+              {
+                style: {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "6px 10px",
+                  background: "var(--dsw-alias-bg-layer-0, #000000)",
+                  borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+                  flexShrink: 0,
+                  gap: "6px",
+                  flexWrap: "wrap",
+                }
+              },
+              h("div", { style: { display: "flex", gap: "6px", alignItems: "center", minWidth: 0 } },
+                h("strong", { style: { color: "#fff", fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, selectedContainer.name || selectedContainer.id.substring(0, 12)),
+                h("code", { style: { fontSize: "10px", color: "var(--dsw-alias-label-secondary, #888)" } }, selectedContainer.status || "")
+              ),
+              h("div", { style: { display: "flex", gap: "4px", flexShrink: 0 } },
+                selectedContainer.isRunning
+                  ? h("button", {
+                      type: "button",
+                      onClick: function () { handleAction(selectedContainer.id, "stop"); },
+                      style: { padding: "2px 8px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: "#fff", fontSize: "10.5px", cursor: "pointer" }
+                    }, "Stop")
+                  : h("button", {
+                      type: "button",
+                      onClick: function () { handleAction(selectedContainer.id, "start"); },
+                      style: { padding: "2px 8px", borderRadius: "4px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontSize: "10.5px", fontWeight: 600, cursor: "pointer" }
+                    }, "Start"),
+                h("button", {
+                  type: "button",
+                  onClick: function () { handleAction(selectedContainer.id, "restart"); },
+                  style: { padding: "2px 8px", borderRadius: "4px", border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.15))", background: "transparent", color: "var(--dsw-alias-label-secondary, #888)", fontSize: "10.5px", cursor: "pointer" }
+                }, "Restart")
+              )
+            ) : null,
+            // Container Logs Console
+            h("pre", {
+              style: {
+                flex: 1,
+                margin: 0,
+                padding: "10px 12px",
+                color: "var(--dsw-alias-label-primary, #c9d1d9)",
+                fontFamily: "var(--ds-font-mono, monospace)",
+                fontSize: "11px",
+                lineHeight: "1.4",
+                overflowY: "auto",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+                background: "var(--dsw-alias-bg-layer-1, #080808)",
+              }
+            }, logs)
           )
         )
       );
