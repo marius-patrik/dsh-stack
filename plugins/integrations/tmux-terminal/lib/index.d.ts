@@ -7,13 +7,27 @@ export interface TmuxSession {
     id: string;
     name: string;
     command: string;
+    cwd: string;
     running: boolean;
+    history: string[];
+    createdAt: number;
 }
 export declare class TmuxService {
+    private ctx;
     private sessions;
-    createSession(name: string, command?: string): TmuxSession;
+    constructor(ctx: Context);
+    createSession(name: string, command?: string, cwd?: string): TmuxSession;
+    sendInput(id: string, input: string): boolean;
+    captureOutput(id: string, linesCount?: number): string;
     listSessions(): TmuxSession[];
-    killSession(id: string): void;
+    killSession(id: string): boolean;
+    private registerTmuxTools;
 }
-export declare const Config: Schema<Schemastery.ObjectS<{}>, Schemastery.ObjectT<{}>>;
-export declare function apply(ctx: Context): void;
+export declare const Config: Schema<Schemastery.ObjectS<{
+    shell: Schema<string, string>;
+    scrollback: Schema<number, number>;
+}>, Schemastery.ObjectT<{
+    shell: Schema<string, string>;
+    scrollback: Schema<number, number>;
+}>>;
+export declare function apply(ctx: Context, config: any): void;
