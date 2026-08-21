@@ -2532,34 +2532,51 @@ window.__ModuleLoader__.load({
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
       function SessionHeaderUtilities(props) {
         var sessionId = props.sessionId;
-        var useSession = props.useSession;
-        var actions = props.actions;
-        var session = (typeof useSession === 'function') ? useSession(function (s) { return s; }) : null;
-        var currentView = session && session.view ? session.view : 'chat';
-        var isTrajectory = currentView === 'trajectory';
         var menuState = React.useState(false);
         var menuOpen = menuState[0], setMenuOpen = menuState[1];
         var busyState = React.useState(false);
         var busy = busyState[0], setBusy = busyState[1];
+        var trajState = React.useState(false);
+        var isTrajectory = trajState[0], setIsTrajectory = trajState[1];
+
+        var checkIsTrajectory = function () {
+          var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
+          if (activeTab) {
+            var txt = (activeTab.textContent || '').trim().toLowerCase();
+            return txt === 'trajectory' || txt.includes('trajectory') || txt === '轨迹' || txt.includes('轨迹');
+          }
+          return Boolean(document.querySelector('[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]'));
+        };
+
+        React.useEffect(function () {
+          var update = function () { setIsTrajectory(checkIsTrajectory()); };
+          update();
+          var timer = setInterval(update, 400);
+          return function () { clearInterval(timer); };
+        }, []);
 
         var handleToggleView = function () {
           setMenuOpen(false);
-          var nextView = isTrajectory ? 'chat' : 'trajectory';
-          var tabs = document.querySelectorAll('[role="tablist"] button[role="tab"], [role="tablist"] button, [role="tab"]');
-          for (var i = 0; i < tabs.length; i++) {
-            var tabBtn = tabs[i];
-            var txt = (tabBtn.textContent || '').trim().toLowerCase();
-            if ((nextView === 'chat' && (txt === 'chat' || txt.includes('chat'))) ||
-                (nextView === 'trajectory' && (txt === 'trajectory' || txt.includes('trajectory')))) {
-              tabBtn.click();
-              return;
-            }
-          }
-          if (actions && typeof actions.setView === 'function') {
-            actions.setView(nextView);
+          var onTrajectoryNow = checkIsTrajectory();
+          var targetName = onTrajectoryNow ? 'chat' : 'trajectory';
+
+          var allTabs = Array.from(document.querySelectorAll('[role="tab"], [role="tablist"] button'));
+          var targetBtn = allTabs.find(function (b) {
+            var t = (b.textContent || '').trim().toLowerCase();
+            return (targetName === 'chat' && (t === 'chat' || t.includes('chat') || t === '对话' || t.includes('对话'))) ||
+                   (targetName === 'trajectory' && (t === 'trajectory' || t.includes('trajectory') || t === '轨迹' || t.includes('轨迹')));
+          });
+
+          if (targetBtn) {
+            targetBtn.click();
           } else {
-            window.dispatchEvent(new CustomEvent('dsh:set-session-view', { detail: { sessionId: sessionId, view: nextView } }));
+            var inactiveBtn = allTabs.find(function (b) { return b.getAttribute('aria-selected') !== 'true'; });
+            if (inactiveBtn) inactiveBtn.click();
           }
+
+          setTimeout(function () {
+            setIsTrajectory(checkIsTrajectory());
+          }, 80);
         };
 
         var handleDownloadLog = function () {
@@ -2595,68 +2612,41 @@ window.__ModuleLoader__.load({
           },
         ];
 
-        return h(Fragment, null,
+        return h('div', { style: { position: 'relative', display: 'inline-flex', alignItems: 'center' } },
           h('button', {
             type: 'button',
-            className: 'dsh-header-view-toggle-btn',
-            title: isTrajectory ? 'Switch to Chat' : 'Switch to Trajectory',
-            'aria-label': isTrajectory ? 'Switch to Chat' : 'Switch to Trajectory',
+            className: 'dsh-header-ellipsis-btn',
+            title: 'Session Options (…)',
+            'aria-label': 'Session Options',
             style: {
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '0 10px',
+              justifyContent: 'center',
+              width: '28px',
               height: '28px',
               borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: 500,
+              border: 'none',
+              background: menuOpen ? 'var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.08))' : 'transparent',
+              color: 'var(--dsw-alias-label-secondary)',
               cursor: 'pointer',
-              border: '1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))',
-              background: isTrajectory ? 'var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.15))' : 'var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.04))',
-              color: isTrajectory ? 'var(--dsw-alias-primary, #6366f1)' : 'var(--dsw-alias-label-secondary)',
-              marginRight: '6px',
-              transition: 'all 120ms ease',
+              transition: 'background 100ms, color 100ms',
             },
-            onClick: handleToggleView,
-          },
-            h(isTrajectory ? ChatGlyph : BranchIcon, { size: 13 }),
-            h('span', null, isTrajectory ? 'Chat' : 'Trajectory')
-          ),
-          h('div', { style: { position: 'relative', display: 'inline-flex', alignItems: 'center' } },
-            h('button', {
-              type: 'button',
-              className: 'dsh-header-ellipsis-btn',
-              title: 'Session Options (…)',
-              'aria-label': 'Session Options',
-              style: {
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '28px',
-                height: '28px',
-                borderRadius: '6px',
-                border: 'none',
-                background: menuOpen ? 'var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.08))' : 'transparent',
-                color: 'var(--dsw-alias-label-secondary)',
-                cursor: 'pointer',
-                transition: 'background 100ms, color 100ms',
-              },
-              onClick: function (e) {
-                e.stopPropagation();
-                setMenuOpen(!menuOpen);
-              },
-            }, h(EllipsisIcon, { size: 16 })),
-            menuOpen ? h(SelectDropdownMenu, {
-              open: true,
-              align: 'right',
-              onClose: function () { setMenuOpen(false); },
-              items: items,
-              onSelect: function (id) {
-                if (id === 'toggle-view') handleToggleView();
-                else if (id === 'download-log') handleDownloadLog();
-              },
-            }) : null
-          )
+            onClick: function (e) {
+              e.stopPropagation();
+              setIsTrajectory(checkIsTrajectory());
+              setMenuOpen(!menuOpen);
+            },
+          }, h(EllipsisIcon, { size: 16 })),
+          menuOpen ? h(SelectDropdownMenu, {
+            open: true,
+            align: 'right',
+            onClose: function () { setMenuOpen(false); },
+            items: items,
+            onSelect: function (id) {
+              if (id === 'toggle-view') handleToggleView();
+              else if (id === 'download-log') handleDownloadLog();
+            },
+          }) : null
         );
       }
 

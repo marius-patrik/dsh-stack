@@ -2355,3 +2355,29 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 43 — August 21, 2026 (Fix Trajectory View Switch Back to Chat & Remove Redundant Button)
+
+**Context & User Directives:**
+- `still cant switch back to chat from trajectory and you added a second button next to the 3 dots one`
+
+**Design & Implementation:**
+1. **Removed Redundant Header Button**:
+   - Removed `.dsh-header-view-toggle-btn` from `SessionHeaderUtilities` in `plugins/dsh-tweaks/client.js`.
+   - The session header utilities now cleanly features only the single 3-dots `…` menu button.
+2. **Reliable Trajectory <-> Chat Bidirectional View Switcher**:
+   - Implemented real-time DOM-based active view detection (`checkIsTrajectory()`) checking `[role="tab"][aria-selected="true"]` and active view containers.
+   - 3-dots dropdown menu item dynamically updates:
+     - On **Chat view**: "Switch to Trajectory View" with branch glyph.
+     - On **Trajectory view**: "Switch to Chat View" with chat bubble glyph.
+   - Triggering the menu item accurately targets and clicks the underlying view tab in the DOM (`Chat` or `Trajectory`), switching views instantly in both directions.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- CDP end-to-end automated browser testing verified:
+  - Header utilities renders only the single 3-dots button (0 redundant extra buttons).
+  - From Chat view -> Click 3-dots -> Click "Switch to Trajectory View" -> active tab updates to Trajectory (`activeTabAfterTrajClick: 'Trajectory'`).
+  - From Trajectory view -> Click 3-dots -> Menu displays "Switch to Chat View" -> Click "Switch to Chat View" -> active tab updates back to Chat (`finalActiveTab: 'Chat'`).
+- Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
+
+**Status:** completed.
