@@ -3,6 +3,7 @@ import { execSync, execFileSync } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
+import * as crypto from 'node:crypto'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import type { QuotaRegistry, QuotaSnapshot } from './index.js'
@@ -527,7 +528,6 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
           if (!fs.existsSync(cacheDir)) {
             fs.mkdirSync(cacheDir, { recursive: true })
           }
-          const crypto = require('node:crypto')
           const hash = crypto.createHash('md5').update(targetPath).digest('hex')
           const cachePng = path.join(cacheDir, `${hash}.png`)
 

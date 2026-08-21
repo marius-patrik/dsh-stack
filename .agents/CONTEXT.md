@@ -2609,3 +2609,14 @@ Execution of the comprehensive audit and production implementations for:
 - Typechecking verified across all packages.
 
 **Status:** completed, all 80 test suites green.
+
+## Session 51 — August 21, 2026 (Live Runtime Icon Extraction Fix & End-to-End Verification)
+
+**Context & Verification:**
+1. Fixed ESM crypto import in `plugins/dsh-providers/src/quotas/web.ts` for native macOS `.app` icon extraction.
+2. Verified live HTTP 200 PNG responses for `GET /quotas/api/fs/icon?path=/Applications/Safari.app` and `GET /quotas/api/fs/icon?path=/System/Applications/Utilities/Terminal.app`.
+3. Verified symlink tree in `node_modules/@stack/*` linking all 56 atomic packages and 6 domain packs.
+4. Server restart verified with 111 active plugins and 0 failures.
+5. All 80 package checks pass cleanly via `.agents/hooks/pre-push`.
+
+**Status:** completed, all 80 test suites green.
