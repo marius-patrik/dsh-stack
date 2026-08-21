@@ -2329,3 +2329,29 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 42 — August 21, 2026 (Resizable Settings Window with Persistence and Multi-Edge Drag Handles)
+
+**Context & User Directives:**
+- `make the settings window resizable`
+
+**Design & Implementation:**
+1. **Dynamic Dimensions & LocalStorage Persistence**:
+   - Added `windowSizeState` (`w`, `h`) inside [`SettingsPanel`](file:///Users/user/Projects/dsh-stack/plugins/dsh-tweaks/client.js#L1813-L1865) initializing from `localStorage.getItem('dsh_settings_window_width')` and `dsh_settings_window_height` with safe bounds:
+     - Minimum width: `540px`, Maximum width: `calc(100vw - 32px)`
+     - Minimum height: `400px`, Maximum height: `calc(100vh - 32px)`
+   - Updated `.dsh-tw-panel` CSS rules and inline styles to dynamically resize width and height with smooth 60fps responsiveness.
+2. **Interactive Window Resize Handles**:
+   - **Bottom-Right Corner (`se`)**: Interactive corner handle with diagonal grip stripes (`cursor: nwse-resize`) allowing simultaneous resizing of both width and height.
+   - **Right Edge (`e`)**: Edge resize bar (`cursor: ew-resize`) for horizontal width expansion.
+   - **Bottom Edge (`s`)**: Edge resize bar (`cursor: ns-resize`) for vertical height expansion.
+   - Added `userSelect: (isResizing || isWindowResizing) ? 'none' : 'auto'` to prevent text selection interference during mouse drags.
+3. **Responsive Internal Layout**:
+   - Settings left navigation rail and right content body reflow seamlessly across any window size chosen by the user.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- CDP testing verified `.dsh-tw-panel` renders dynamic dimensions, all 3 resize handles (`.dsh-tw-resize-corner`, `.dsh-tw-resize-e`, `.dsh-tw-resize-s`) are active, pointer dragging resizes the window, and dimensions persist to `localStorage`.
+- Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
+
+**Status:** completed.

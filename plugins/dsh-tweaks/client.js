@@ -92,7 +92,7 @@ const SHELL_CSS = `
 .dsh-tw-trigger.dsh-tw-rail { width: 36px; height: 36px; margin: 4px 0; justify-content: center; gap: 0; padding: 0; border-radius: 50%; }
 .dsh-tw-overlay { position: fixed; inset: 0; z-index: 1000000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .dsh-tw-mask { position: absolute; inset: 0; background: transparent !important; backdrop-filter: none !important; pointer-events: auto; }
-.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; width: 840px; height: min(800px, calc(100vh - 48px)); max-width: calc(100vw - 48px); border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.18)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
+.dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; min-width: 540px; min-height: 400px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); border: 1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.18)); --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
 .dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; }
 .dsh-tw-nav.dsh-tw-navCollapsed { width: 56px !important; padding: 18px 6px 0; }
 .dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navLabel { display: none; }
@@ -1813,6 +1813,21 @@ window.__ModuleLoader__.load({
       });
       var isNavCollapsed = navCollapsedState[0], setIsNavCollapsed = navCollapsedState[1];
 
+      var windowSizeState = React.useState(function () {
+        var w = 860;
+        var h = Math.min(800, (typeof window !== 'undefined' ? window.innerHeight - 60 : 760));
+        if (typeof window !== 'undefined' && window.localStorage) {
+          var savedW = parseInt(window.localStorage.getItem('dsh_settings_window_width'), 10);
+          var savedH = parseInt(window.localStorage.getItem('dsh_settings_window_height'), 10);
+          if (!isNaN(savedW) && savedW >= 540 && savedW <= (window.innerWidth - 32)) w = savedW;
+          if (!isNaN(savedH) && savedH >= 400 && savedH <= (window.innerHeight - 32)) h = savedH;
+        }
+        return { w: w, h: h };
+      });
+      var windowSize = windowSizeState[0], setWindowSize = windowSizeState[1];
+      var isWindowResizingState = React.useState(false);
+      var isWindowResizing = isWindowResizingState[0], setIsWindowResizing = isWindowResizingState[1];
+
       var isResizingState = React.useState(false);
       var isResizing = isResizingState[0], setIsResizing = isResizingState[1];
 
@@ -1833,6 +1848,45 @@ window.__ModuleLoader__.load({
           });
         };
         var onUp = function () {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+        };
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+      };
+
+      // Resize settings window handler (direction: 'se', 'e', 's')
+      var handleWindowResizePointerDown = function (e, direction) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsWindowResizing(true);
+        var startX = e.clientX;
+        var startY = e.clientY;
+        var startW = windowSize.w;
+        var startH = windowSize.h;
+
+        var onMove = function (moveEv) {
+          var deltaX = moveEv.clientX - startX;
+          var deltaY = moveEv.clientY - startY;
+          var nextW = startW;
+          var nextH = startH;
+
+          if (direction.indexOf('e') !== -1) {
+            nextW = Math.max(540, Math.min(window.innerWidth - 32, startW + deltaX));
+          }
+          if (direction.indexOf('s') !== -1) {
+            nextH = Math.max(400, Math.min(window.innerHeight - 32, startH + deltaY));
+          }
+
+          setWindowSize({ w: nextW, h: nextH });
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('dsh_settings_window_width', String(nextW));
+            window.localStorage.setItem('dsh_settings_window_height', String(nextH));
+          }
+        };
+
+        var onUp = function () {
+          setIsWindowResizing(false);
           document.removeEventListener('pointermove', onMove);
           document.removeEventListener('pointerup', onUp);
         };
@@ -1962,7 +2016,12 @@ window.__ModuleLoader__.load({
         'aria-modal': 'true',
         'aria-labelledby': titleId,
         style: {
+          width: windowSize.w + 'px',
+          height: windowSize.h + 'px',
+          maxWidth: 'calc(100vw - 32px)',
+          maxHeight: 'calc(100vh - 32px)',
           transform: 'translate(' + dialogPos.x + 'px, ' + dialogPos.y + 'px)',
+          userSelect: (isResizing || isWindowResizing) ? 'none' : 'auto',
         },
       },
         h('nav', {
@@ -2016,7 +2075,62 @@ window.__ModuleLoader__.load({
                     return h('div', { style: { padding: '20px', color: 'var(--dsw-alias-state-error-primary)' } }, 'Section ' + active + ' unavailable');
                   }
                 })()
-              : null))
+              : null)),
+        // Bottom-Right Corner Resize Handle
+        h('div', {
+          className: 'dsh-tw-window-resize-handle dsh-tw-resize-corner',
+          onPointerDown: function (e) { handleWindowResizePointerDown(e, 'se'); },
+          title: 'Drag to resize settings window',
+          style: {
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            width: '20px',
+            height: '20px',
+            cursor: 'nwse-resize',
+            zIndex: 30,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'flex-end',
+            padding: '4px',
+            boxSizing: 'border-box',
+            userSelect: 'none',
+          },
+        },
+          h('svg', { width: 10, height: 10, viewBox: '0 0 10 10', fill: 'none', 'aria-hidden': 'true', style: { opacity: 0.45, color: 'var(--dsw-alias-label-secondary)' } },
+            h('path', { d: 'M9 1L1 9M9 5L5 9M9 9L9 9', stroke: 'currentColor', strokeWidth: '1.5', strokeLinecap: 'round' })
+          )
+        ),
+        // Right Edge Resize Handle
+        h('div', {
+          className: 'dsh-tw-window-resize-handle dsh-tw-resize-e',
+          onPointerDown: function (e) { handleWindowResizePointerDown(e, 'e'); },
+          title: 'Drag right edge to resize width',
+          style: {
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: '20px',
+            width: '6px',
+            cursor: 'ew-resize',
+            zIndex: 25,
+          },
+        }),
+        // Bottom Edge Resize Handle
+        h('div', {
+          className: 'dsh-tw-window-resize-handle dsh-tw-resize-s',
+          onPointerDown: function (e) { handleWindowResizePointerDown(e, 's'); },
+          title: 'Drag bottom edge to resize height',
+          style: {
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            right: '20px',
+            height: '6px',
+            cursor: 'ns-resize',
+            zIndex: 25,
+          },
+        })
       );
     }
 
