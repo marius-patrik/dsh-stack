@@ -90,34 +90,53 @@ window.__ModuleLoader__.load({
 				el.textContent = '\n' +
 					':root, body, [data-theme="oled"] {\n' +
 					'  --dsw-specific-input-major: #000000 !important;\n' +
-					'  --dsw-specific-tip: #050505 !important;\n' +
+					'  --dsw-specific-tip: #000000 !important;\n' +
 					'  --dsw-alias-surface-l0: #000000 !important;\n' +
+					'  --dsw-alias-surface-l1: #050505 !important;\n' +
+					'  --dsw-alias-surface-l2: #0a0a0a !important;\n' +
 					'  --dsw-alias-bg-base: #000000 !important;\n' +
 					'  --dsw-alias-bg-layer-1: #000000 !important;\n' +
-					'  --dsw-alias-bg-layer-2: #0a0a0a !important;\n' +
+					'  --dsw-alias-bg-layer-2: #050505 !important;\n' +
+					'  --dsw-alias-border-l1: #161616 !important;\n' +
+					'  --dsw-alias-border-l2: #1e1e1e !important;\n' +
 					'  --dsw-alias-border-l2-darkmode-thin: #1a1a1a !important;\n' +
-					'  --dsw-specific-bubble: #111111 !important;\n' +
-					'  --dsw-specific-bubble-highlight: #1a1a1a !important;\n' +
-					'  --dsw-alias-markdown-code-block-banner: #0a0a0a !important;\n' +
-					'  --dsw-alias-markdown-inline-code: #0e0e0e !important;\n' +
-					'  --dsw-alias-markdown-placeholder: #0a0a0a !important;\n' +
-					'  --dsw-alias-markdown-tag: #0a0a0a !important;\n' +
+					'  --dsw-specific-bubble: #060606 !important;\n' +
+					'  --dsw-specific-user-bubble: #0f0f0f !important;\n' +
+					'  --dsw-specific-bubble-highlight: #141414 !important;\n' +
+					'  --dsw-alias-markdown-code-block-banner: #050505 !important;\n' +
+					'  --dsw-alias-markdown-inline-code: #0a0a0a !important;\n' +
+					'  --dsw-alias-markdown-placeholder: #050505 !important;\n' +
+					'  --dsw-alias-markdown-tag: #050505 !important;\n' +
 					'  --dsw-alias-tooltip-bg: #0a0a0a !important;\n' +
 					'}\n' +
 					'[class*="card"] {\n' +
 					'  background: #000000 !important;\n' +
-					'  border-color: #1c1c1c !important;\n' +
+					'  border-color: #1a1a1a !important;\n' +
 					'  box-shadow: 0 10px 36px rgba(0,0,0,0.95) !important;\n' +
 					'}\n' +
-					'[class*="bubble"] {\n' +
-					'  background: #111111 !important;\n' +
+					'[data-message-role="assistant"] > div[class*="content"],\n' +
+					'[data-message-role="assistant"] [class*="Message_bubble"],\n' +
+					'[data-message-role="assistant"] [class*="bubble"],\n' +
+					'[data-slot="conversation.message.assistant"] [class*="content"] {\n' +
+					'  background: #060606 !important;\n' +
+					'  border-color: #181818 !important;\n' +
+					'  box-shadow: none !important;\n' +
+					'}\n' +
+					'[data-message-role="user"] > div[class*="content"],\n' +
+					'[data-message-role="user"] [class*="Message_bubble"],\n' +
+					'[data-message-role="user"] [class*="bubble"],\n' +
+					'[data-slot="conversation.message.user"] [class*="content"] {\n' +
+					'  background: #0f0f0f !important;\n' +
+					'  border-color: #202020 !important;\n' +
+					'  box-shadow: none !important;\n' +
 					'}\n' +
 					'[class*="modes"], [class*="tools"], [class*="select"] {\n' +
 					'  background-color: transparent !important;\n' +
 					'}\n' +
-					'[data-goal-bar], [data-goal-bar] > div, [class*="GoalBar_bar"], [class*="GoalBar_dock"], [class*="goal-bar"] {\n' +
-					'  background: #050505 !important;\n' +
+					'[data-goal-bar], [data-goal-bar] > div, [class*="GoalBar"], [class*="goal-bar"], [class*="goalDisplay"], [class*="GoalDisplay"], [class*="AgentGoal"], [class*="agentGoal"] {\n' +
+					'  background: #000000 !important;\n' +
 					'  border-color: #1a1a1a !important;\n' +
+					'  box-shadow: none !important;\n' +
 					'}\n' +
 					'[data-goal-bar] input, [class*="GoalBar"] input {\n' +
 					'  background: transparent !important;\n' +

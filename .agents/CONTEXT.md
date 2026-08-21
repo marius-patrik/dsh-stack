@@ -2249,3 +2249,33 @@ Two bugs found via CDP browser automation with console error capture:
 - Verified dsh server healthy on port 3080 with 115/143 active plugins and 0 failures.
 
 **Status:** completed.
+
+## Session 40 — August 21, 2026 (Trajectory View Toggle Button, Remove Header Tabs, Blurple Archived Icon, and OLED Respect for Bubbles and Goals)
+
+**Context & User Directives:**
+- `whne 0on trajectoery view the button should change to switch to chat, you didnt remove the tabs, make the archived icon blurple , also incoming message bubbles, goal display and user bubbless dont respect oled`
+
+**Design & Implementation:**
+1. **Trajectory / Chat View Switcher Button**:
+   - In `SessionHeaderUtilities` (`plugins/dsh-tweaks/client.js`), added a direct header toggle button (`dsh-header-view-toggle-btn`) adjacent to the 3-dots menu.
+   - When on **Chat View**: displays `Trajectory` with `BranchIcon` and tooltip "Switch to Trajectory".
+   - When on **Trajectory View**: dynamically changes to `Chat` with `ChatGlyph` and tooltip "Switch to Chat".
+   - Clicking toggles between `chat` and `trajectory` views seamlessly via `actions.setView` and `dsh:set-session-view` event.
+   - Updated the 3-dots action menu item to match: "Switch to Chat View" vs "Switch to Trajectory View".
+2. **Removed Default Header Tabs**:
+   - Added global CSS overrides in `plugins/dsh-tweaks/client.js` hiding all instances of `[role="tablist"]`, `[class*="tabs"]`, `div[data-slot="conversation.session.header.tabs"]`, `div[data-slot-entry="tabs"]`, and `div[data-slot-id="tabs"]`.
+3. **Blurple Archived Icon & Badge**:
+   - Updated `ArchiveBoxGlyph` in `plugins/dsh-providers/client.js` to use blurple primary color: `var(--dsw-alias-primary, #6366f1)`.
+   - Updated the Archived section badge background and text to match blurple accent styling (`rgba(99, 102, 241, 0.15)` and `#6366f1`).
+4. **OLED Theme Respect for Message Bubbles, User Bubbles, and Goal Displays**:
+   - In `plugins/dsh-tweaks/client.js` and `plugins/dsh-themes/client.js`:
+     - Configured assistant incoming bubbles to use `--dsw-specific-bubble` (`#060606` in OLED) with border `#181818`.
+     - Configured user message bubbles to use `--dsw-specific-user-bubble` (`#0f0f0f` in OLED) with border `#202020`.
+     - Configured goal displays (`[data-goal-bar]`, `[class*="GoalBar"]`, `[class*="goal-bar"]`, `[class*="goalDisplay"]`, `[class*="AgentGoal"]`) to use true pitch black `#000000` background and `#1a1a1a` border without box-shadow glow.
+     - Ensured OLED mode overrides have top specificity across `:root[data-theme="oled"]`, `body[data-theme="oled"]`, and `[data-theme="oled"]`.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- Restarted dsh web server on port 3080: 111 active plugins, 0 failures.
+
+**Status:** completed.

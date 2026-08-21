@@ -215,30 +215,15 @@ button[class*="AgentPresetLabel"] {
   display: none !important;
 }
 
-/* Conversation Header View Tabs (Chat / Trajectory) */
-[class*="tabs"][role="tablist"] {
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-}
-[class*="tabs"][role="tablist"] button[role="tab"] {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 3px 10px !important;
-  border-radius: 6px !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--dsw-alias-label-secondary) !important;
-  transition: all 120ms ease !important;
-}
-[class*="tabs"][role="tablist"] button[role="tab"][aria-selected="true"] {
-  background: var(--dsw-alias-interactive-bg-active, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--dsw-alias-label-primary) !important;
-  font-weight: 600 !important;
+/* Hide default conversation header view tabs (Chat / Trajectory tablist) */
+[class*="tabs"][role="tablist"],
+[class*="tabs"][class*="header"],
+div[data-slot="conversation.session.header.tabs"],
+div[data-slot-entry="tabs"],
+div[data-slot-id="tabs"],
+[class*="conversationSessionHeader"] [role="tablist"],
+[class*="headerActions"] [role="tablist"] {
+  display: none !important;
 }
 
 /* Agent / Assistant Message Bubbles (differentiated surface color, rounded 20px) */
@@ -255,7 +240,7 @@ div[data-slot="conversation.message.assistant"] {
 [data-message-role="assistant"] [class*="Message_bubble"],
 [data-message-role="assistant"] [class*="bubble"],
 [data-slot="conversation.message.assistant"] [class*="content"] {
-  background: var(--dsw-alias-surface-l1, rgba(255, 255, 255, 0.045)) !important;
+  background: var(--dsw-specific-bubble, var(--dsw-alias-surface-l1, rgba(255, 255, 255, 0.045))) !important;
   border: 1px solid var(--dsw-alias-border-l1, rgba(128, 128, 128, 0.14)) !important;
   border-radius: 20px !important;
   padding: 14px 18px !important;
@@ -267,8 +252,78 @@ div[data-slot="conversation.message.assistant"] {
 [data-message-role="user"] [class*="Message_bubble"],
 [data-message-role="user"] [class*="bubble"],
 [data-slot="conversation.message.user"] [class*="content"] {
+  background: var(--dsw-specific-user-bubble, var(--dsw-alias-interactive-bg-active, rgba(255, 255, 255, 0.08))) !important;
+  border: 1px solid var(--dsw-alias-border-l1, rgba(128, 128, 128, 0.14)) !important;
   border-radius: 20px !important;
   padding: 12px 18px !important;
+  color: var(--dsw-alias-label-primary) !important;
+}
+
+/* OLED theme rules for message bubbles, user bubbles, and goal display */
+:root[data-theme="oled"],
+body[data-theme="oled"],
+[data-theme="oled"] {
+  --dsw-specific-input-major: #000000 !important;
+  --dsw-specific-tip: #000000 !important;
+  --dsw-alias-surface-l0: #000000 !important;
+  --dsw-alias-surface-l1: #050505 !important;
+  --dsw-alias-surface-l2: #0a0a0a !important;
+  --dsw-alias-bg-base: #000000 !important;
+  --dsw-alias-bg-layer-1: #000000 !important;
+  --dsw-alias-bg-layer-2: #050505 !important;
+  --dsw-alias-border-l1: #161616 !important;
+  --dsw-alias-border-l2: #1e1e1e !important;
+  --dsw-alias-border-l2-darkmode-thin: #1a1a1a !important;
+  --dsw-specific-bubble: #060606 !important;
+  --dsw-specific-user-bubble: #0f0f0f !important;
+  --dsw-specific-bubble-highlight: #141414 !important;
+}
+
+:root[data-theme="oled"] [data-message-role="assistant"] > div[class*="content"],
+:root[data-theme="oled"] [data-message-role="assistant"] [class*="Message_bubble"],
+:root[data-theme="oled"] [data-message-role="assistant"] [class*="bubble"],
+:root[data-theme="oled"] [data-slot="conversation.message.assistant"] [class*="content"],
+body[data-theme="oled"] [data-message-role="assistant"] > div[class*="content"],
+body[data-theme="oled"] [data-message-role="assistant"] [class*="Message_bubble"],
+body[data-theme="oled"] [data-message-role="assistant"] [class*="bubble"],
+body[data-theme="oled"] [data-slot="conversation.message.assistant"] [class*="content"] {
+  background: #060606 !important;
+  border-color: #181818 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="oled"] [data-message-role="user"] > div[class*="content"],
+:root[data-theme="oled"] [data-message-role="user"] [class*="Message_bubble"],
+:root[data-theme="oled"] [data-message-role="user"] [class*="bubble"],
+:root[data-theme="oled"] [data-slot="conversation.message.user"] [class*="content"],
+body[data-theme="oled"] [data-message-role="user"] > div[class*="content"],
+body[data-theme="oled"] [data-message-role="user"] [class*="Message_bubble"],
+body[data-theme="oled"] [data-message-role="user"] [class*="bubble"],
+body[data-theme="oled"] [data-slot="conversation.message.user"] [class*="content"] {
+  background: #0f0f0f !important;
+  border-color: #202020 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="oled"] [data-goal-bar],
+:root[data-theme="oled"] [data-goal-bar] > div,
+:root[data-theme="oled"] [class*="GoalBar"],
+:root[data-theme="oled"] [class*="goal-bar"],
+:root[data-theme="oled"] [class*="goalDisplay"],
+:root[data-theme="oled"] [class*="GoalDisplay"],
+:root[data-theme="oled"] [class*="AgentGoal"],
+:root[data-theme="oled"] [class*="agentGoal"],
+body[data-theme="oled"] [data-goal-bar],
+body[data-theme="oled"] [data-goal-bar] > div,
+body[data-theme="oled"] [class*="GoalBar"],
+body[data-theme="oled"] [class*="goal-bar"],
+body[data-theme="oled"] [class*="goalDisplay"],
+body[data-theme="oled"] [class*="GoalDisplay"],
+body[data-theme="oled"] [class*="AgentGoal"],
+body[data-theme="oled"] [class*="agentGoal"] {
+  background: #000000 !important;
+  border-color: #1a1a1a !important;
+  box-shadow: none !important;
 }
 
 .dsh-subagent-dock-row:hover {
@@ -2215,6 +2270,32 @@ window.__ModuleLoader__.load({
         ];
 
         return h(Fragment, null,
+          h('button', {
+            type: 'button',
+            className: 'dsh-header-view-toggle-btn',
+            title: isTrajectory ? 'Switch to Chat' : 'Switch to Trajectory',
+            'aria-label': isTrajectory ? 'Switch to Chat' : 'Switch to Trajectory',
+            style: {
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0 10px',
+              height: '28px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              border: '1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))',
+              background: isTrajectory ? 'var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.15))' : 'var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.04))',
+              color: isTrajectory ? 'var(--dsw-alias-primary, #6366f1)' : 'var(--dsw-alias-label-secondary)',
+              marginRight: '6px',
+              transition: 'all 120ms ease',
+            },
+            onClick: handleToggleView,
+          },
+            h(isTrajectory ? ChatGlyph : BranchIcon, { size: 13 }),
+            h('span', null, isTrajectory ? 'Chat' : 'Trajectory')
+          ),
           h('div', { style: { position: 'relative', display: 'inline-flex', alignItems: 'center' } },
             h('button', {
               type: 'button',

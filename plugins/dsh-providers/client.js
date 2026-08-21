@@ -5007,7 +5007,7 @@ button:hover .dsh-icon-animated,
           justifyContent: "center",
           verticalAlign: "middle",
           flexShrink: 0,
-          color: "var(--dsw-alias-label-tertiary)"
+          color: "var(--dsw-alias-primary, #6366f1)"
         }
       },
         h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }),
@@ -6690,7 +6690,7 @@ button:hover .dsh-icon-animated,
               h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isArchivedOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
             h("span", { className: "dsh-tree-title" }, "Archived"),
-            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, archivedSessions.length),
+            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, archivedSessions.length),
             h("span", { className: "dsh-tree-actions" },
               h("button", {
                 type: "button",
