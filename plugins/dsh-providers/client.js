@@ -7627,10 +7627,6 @@ button:hover .dsh-icon-animated,
     function GlobalTerminalAndContainerManager() {
       var panelState = React.useState(null); // { type: "terminal", session: "..." } | { type: "container", id: "..." }
       var panel = panelState[0], setPanel = panelState[1];
-      var fileTabState = React.useState(null); // { id: "...", type: "file", title: "...", path: "..." }
-      var fileTab = fileTabState[0], setFileTab = fileTabState[1];
-      var repoTabState = React.useState(null); // { id: "...", type: "repo", title: "...", path: "..." }
-      var repoTab = repoTabState[0], setRepoTab = repoTabState[1];
 
       React.useEffect(function () {
         var onOpenTerm = function (e) {
@@ -7641,32 +7637,12 @@ button:hover .dsh-icon-animated,
           var id = (e && e.detail && e.detail.id) ? e.detail.id : null;
           setPanel({ type: "container", id: id });
         };
-        var onOpenFile = function (e) {
-          if (e && e.detail && e.detail.path) {
-            setFileTab(e.detail);
-          }
-        };
-        var onOpenRepo = function (e) {
-          if (e && e.detail && e.detail.path) {
-            setRepoTab(e.detail);
-          }
-        };
-        var onCloseFile = function () { setFileTab(null); };
-        var onCloseRepo = function () { setRepoTab(null); };
 
         window.addEventListener("dsh:open-terminal", onOpenTerm);
         window.addEventListener("dsh:open-container", onOpenCont);
-        window.addEventListener("dsh:open-file-tab", onOpenFile);
-        window.addEventListener("dsh:open-repo-tab", onOpenRepo);
-        window.addEventListener("dsh:close-file-tab", onCloseFile);
-        window.addEventListener("dsh:close-repo-tab", onCloseRepo);
         return function () {
           window.removeEventListener("dsh:open-terminal", onOpenTerm);
           window.removeEventListener("dsh:open-container", onOpenCont);
-          window.removeEventListener("dsh:open-file-tab", onOpenFile);
-          window.removeEventListener("dsh:open-repo-tab", onOpenRepo);
-          window.removeEventListener("dsh:close-file-tab", onCloseFile);
-          window.removeEventListener("dsh:close-repo-tab", onCloseRepo);
         };
       }, []);
 
@@ -7679,16 +7655,6 @@ button:hover .dsh-icon-animated,
           initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
           initialContainerId: panel && panel.type === "container" ? panel.id : undefined,
           onClose: function () { setPanel(null); }
-        }) : null,
-        fileTab ? h(MainViewFileEditorOccupant, {
-          filePath: fileTab.path,
-          fileName: fileTab.title || (fileTab.path ? fileTab.path.split("/").pop() : "File"),
-          onClose: function () { setFileTab(null); }
-        }) : null,
-        repoTab ? h(MainViewRepoOccupant, {
-          repoPath: repoTab.path,
-          repoName: repoTab.title || (repoTab.path ? repoTab.path.split("/").pop() : "Repository"),
-          onClose: function () { setRepoTab(null); }
         }) : null
       );
     }
