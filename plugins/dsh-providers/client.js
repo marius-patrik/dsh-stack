@@ -2726,57 +2726,6 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
             fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
           }
         },
-        // Header
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "8px 12px",
-              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-              background: "var(--dsw-alias-bg-layer-0, #000000)",
-              flexShrink: 0,
-            }
-          },
-          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
-            h(ContainersGlyph, { size: 14 }),
-            h("strong", { style: { fontSize: "12.5px", fontWeight: 600, color: "var(--dsw-alias-label-primary, #fff)" } }, "Docker Sandboxes"),
-            h("span", { style: { fontSize: "10.5px", padding: "1px 6px", borderRadius: "10px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700 } }, data.containers.length)
-          ),
-          h("div", { style: { display: "flex", alignItems: "center", gap: "6px" } },
-            h("button", {
-              type: "button",
-              onClick: function () { if (selectedContainer) loadLogs(selectedContainer.id); else loadContainers(); },
-              title: "Refresh",
-              style: {
-                padding: "3px 7px",
-                borderRadius: "4px",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.15))",
-                background: "transparent",
-                color: "var(--dsw-alias-label-secondary, #888)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-              }
-            }, h(RefreshGlyph, { size: 12 })),
-            onClose ? h("button", {
-              type: "button",
-              onClick: onClose,
-              title: "Close",
-              style: {
-                padding: "2px 6px",
-                borderRadius: "4px",
-                border: "none",
-                background: "transparent",
-                color: "var(--dsw-alias-label-secondary, #888)",
-                cursor: "pointer",
-                fontSize: "14px",
-              }
-            }, "✕") : null
-          )
-        ),
         // Content Area (adaptive row / column based on container width)
         h(
           "div",
@@ -3448,7 +3397,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
     }
 
     function getCenterBounds() {
-      if (typeof document === "undefined") return { left: 240, right: 0, top: 48 };
+      if (typeof document === "undefined") return { left: 240, right: 0, top: 0 };
       var isSwapped = document.body.classList.contains("dsh-sidebars-swapped");
       var customSecondary = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
       var detailsEl = document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]');
@@ -3458,10 +3407,10 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var sidebarEl = document.querySelector('div[class*="sidebarCol"]');
       var primaryW = (sidebarEl && sidebarEl.getBoundingClientRect && sidebarEl.getBoundingClientRect().width > 0) ? sidebarEl.getBoundingClientRect().width : 240;
 
-      var centerEl = document.querySelector('div[class*="centerCol"]');
-      var top = 48;
+      var centerEl = document.querySelector('div[class*="centerCol"], div[data-slot="conversation"], main');
+      var top = 0;
       if (centerEl && centerEl.getBoundingClientRect) {
-        top = centerEl.getBoundingClientRect().top || 48;
+        top = Math.max(0, centerEl.getBoundingClientRect().top);
       }
 
       if (isSwapped) {
@@ -3533,7 +3482,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
         className: "dsh-mainview-terminal",
         style: {
           position: "fixed",
-          top: (bounds.top + 36) + "px",
+          top: (bounds.top + 38) + "px",
           left: bounds.left + "px",
           right: bounds.right + "px",
           bottom: panelHeight,
@@ -3544,34 +3493,6 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
           fontFamily: "var(--ds-font-mono, monospace)",
         }
       },
-        h("div", {
-          style: {
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px 16px",
-            background: "var(--dsw-alias-bg-layer-0, #000000)",
-            borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-          }
-        },
-          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
-            h(TerminalsGlyph, { size: 14 }),
-            h("strong", { style: { color: "var(--dsw-alias-label-primary, #fff)", fontSize: "13px" } }, "Terminal Session: " + sessionName)
-          ),
-          h("button", {
-            onClick: props.onClose,
-            title: "Switch back to Chat",
-            style: {
-              background: "transparent",
-              border: "none",
-              color: "var(--dsw-alias-label-secondary, #888)",
-              cursor: "pointer",
-              fontSize: "16px",
-              padding: "2px 6px",
-              borderRadius: "4px",
-            }
-          }, "✕")
-        ),
         h(InteractiveTmuxTerminal, { sessionName: sessionName })
       );
     }
