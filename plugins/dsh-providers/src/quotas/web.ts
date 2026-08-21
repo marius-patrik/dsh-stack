@@ -510,6 +510,85 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
         return
       }
 
+      // GET /quotas/api/fs/icon — Native application & executable icon extraction via sips
+      if (pathname === `${QUOTAS_PREFIX}/api/fs/icon` && req.method === 'GET') {
+        const rawPath = url.searchParams.get('path') || ''
+        if (!rawPath) {
+          sendJson(res, 400, { error: 'path parameter required' })
+          return
+        }
+        const targetPath = path.resolve(rawPath)
+        try {
+          if (!fs.existsSync(targetPath)) {
+            sendJson(res, 404, { error: 'File not found' })
+            return
+          }
+          const cacheDir = path.join(os.homedir(), '.agents/cache/app-icons')
+          if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true })
+          }
+          const crypto = require('node:crypto')
+          const hash = crypto.createHash('md5').update(targetPath).digest('hex')
+          const cachePng = path.join(cacheDir, `${hash}.png`)
+
+          if (fs.existsSync(cachePng)) {
+            res.writeHead(200, {
+              'content-type': 'image/png',
+              'cache-control': 'public, max-age=86400',
+            })
+            fs.createReadStream(cachePng).pipe(res)
+            return
+          }
+
+          let icnsPath: string | null = null
+          if (targetPath.endsWith('.app')) {
+            const infoPlist = path.join(targetPath, 'Contents/Info.plist')
+            if (fs.existsSync(infoPlist)) {
+              try {
+                let iconName = execSync(`defaults read "${infoPlist}" CFBundleIconFile 2>/dev/null`, { encoding: 'utf-8' }).trim()
+                if (iconName) {
+                  if (!iconName.endsWith('.icns')) iconName += '.icns'
+                  const candidate = path.join(targetPath, 'Contents/Resources', iconName)
+                  if (fs.existsSync(candidate)) icnsPath = candidate
+                }
+              } catch {}
+            }
+            if (!icnsPath) {
+              const resDir = path.join(targetPath, 'Contents/Resources')
+              if (fs.existsSync(resDir)) {
+                try {
+                  const files = fs.readdirSync(resDir)
+                  const icns = files.find((f) => f.endsWith('.icns'))
+                  if (icns) icnsPath = path.join(resDir, icns)
+                } catch {}
+              }
+            }
+          } else if (targetPath.endsWith('.icns')) {
+            icnsPath = targetPath
+          }
+
+          if (icnsPath && fs.existsSync(icnsPath)) {
+            try {
+              execSync(`sips -s format png -z 32 32 "${icnsPath}" --out "${cachePng}" 2>/dev/null`)
+              if (fs.existsSync(cachePng)) {
+                res.writeHead(200, {
+                  'content-type': 'image/png',
+                  'cache-control': 'public, max-age=86400',
+                })
+                fs.createReadStream(cachePng).pipe(res)
+                return
+              }
+            } catch {}
+          }
+
+          sendJson(res, 404, { error: 'No icon available for target' })
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message })
+        }
+        return
+      }
+
+
       // POST /quotas/api/fs/write — Save file contents from monaco editor
       if (pathname === `${QUOTAS_PREFIX}/api/fs/write` && req.method === 'POST') {
         let bodyStr = ''

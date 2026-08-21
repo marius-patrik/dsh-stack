@@ -8,30 +8,19 @@ and the state files stay in Andromeda as port-source for future plugins.
 
 ## Repos
 
-All under `marius-patrik`. Plugins are git submodules of the `agents` superproject.
+## 6 Domain Packs & 56 Atomic Plugins Architecture (Approved)
 
-| Repo | Visibility | Role |
+All plugins live directly within this single monorepo repository (`dsh-stack`). `harness/` remains the sole pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
+
+| Domain Pack | Role & Packages | Status |
 |---|---|---|
-| `agents` | public | superproject: launcher, PLAN, CONTEXT, BACKLOG, gitlinks |
-| `dsh-credentials` | public | account/credential manager (v2 = full vault parity port); **shipped**: multi-account support (resolveFor/resolveAll, account-tagged records, vault CLI --account, ACCOUNT column) |
-| `dsh-dialects` | public | provider wire dialects: openai, claude, gemini, code-assist (shipped + boot-verified) |
-| `dsh-providers` | public | LLM provider adapters (shipped + boot-verified); **P7**: 5 sub routes + 8 API-key routes + OpenCode Zen route (`PROVIDER_ROUTES`, `subscription-only`/`all` filter); **P12.1**: absorbs dsh-subscriptions + dsh-quotas; **P12.9 (shipped)**: Unified dynamic filesystem explorer, folder-nested chats, top-level Ungrouped sessions, nested subagent tree hierarchy, file inspection preview, and live sessions manager (`sidebar.workspaces` single-slot shadowing) |
-| `dsh-tweaks` | public | state-folder (homeRoot) + command config (shipped + boot-verified); v2 shipped: share links, observability verbs, session UX |
-| ~~`dsh-subscriptions`~~ | **archived** | **merged into dsh-providers in P12.1** — remap.ts lives in `dsh-providers/src/remap.ts` |
-| `dsh-tui` | public | standalone TUI client for dsh (talks to dsh as backend); separate repo, NOT cannibalizing privatecode; **shipped**: HTTP client + readline TUI + slash commands |
-| `dsh-desktop` | public | **P3 shipped**: Tauri v2 thin shell + lifecycle plugin (readiness route, settings) |
-| `dsh-themes` | public | **P4 shipped**: VS Code/TextMate theme store + Open VSX catalog + `/themes.json` route + browser theme bundle + `dsh theme` CLI |
-| `dsh-formatters` | public | **P5 shipped**: formatter table + `format` tool + auto-format-on-edit + `dsh formatter` CLI |
-| `dsh-lsp` | public | **P5 shipped**: LSP server table + `Lsp` def + `lsp-stdio`/`tool-lsp` mounts + `dsh lsp` CLI |
-| `dsh-tools` | public | **P6c shipped**: config-file custom tools (settings registry + subprocess execution + `dsh tool` CLI) |
-| `dsh-agents` | public | **P6d shipped**: custom agents as JSON/MD persona files materialized into agent presets (`dsh agents` CLI) |
-| `dsh-repos` | public | **P6b shipped**: repo workflows — branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN` (`dsh repos` CLI) |
-| `dsh-actions` | public | action controller (renamed from dsh-session-modes in P12.4): durable action state, tool policy, model routing, bounded agent assist, file-based actions under `.agents/actions` |
-| `dsh-loops` | public | **P12.8**: goal-based loops from `.agents/loops` — criteria + workflows, deterministic step orchestration, agent tools + settings section |
-| ~~`dsh-quotas`~~ | **archived** | **merged into dsh-providers in P12.1** — QuotaRegistry, web routes, auto-refresh, settings section live in `dsh-providers/src/quotas/` |
-| `privatecode` | public | opencode fork (subscription providers, OAuth refresh, TUI rendering); kept as-is (works); NOT modified |
+| **`plugins/core/`** (`@stack/pack-core`) | Foundation, Shell & Abstractions: `plugin-manager`, `providers-registry`, `integrations-registry`, `vault-credentials`, `sidebar-tree`, `settings-dialog`, `keybindings` | [in progress] |
+| **`plugins/ux/`** (`@stack/pack-ux`) | Presentation, UI & Media: `tab-manager`, `code-editor`, `icon-engine` (with nested `packs/lucide-animated`), `theme-studio`, `voice-synthesis`, `terminal-client` | [in progress] |
+| **`plugins/agents/`** (`@stack/pack-agents`) | Cognitive Agent Systems: `personas` (Subagents Dock), `actions`, `commands` (slash autocomplete), `tools` (MCP & tools registry), `loops`, `skills`, `translator` | [in progress] |
+| **`plugins/ai/`** (`@stack/pack-ai`) | Wire Protocols & Serializers: `protocol-dialects` | [in progress] |
+| **`plugins/integrations/`** (`@stack/pack-integrations`) | Sandboxes, Tools & Providers: `tmux-terminal` (with 16 CLI harnesses), `package-managers`, `code-server`, `providers` (direct API), `docker-sandbox`, `lsp-client` (with 5 language servers), `code-formatters`, `mesh-hosts` | [in progress] |
+| **`plugins/vcs/`** (`@stack/pack-vcs`) | Version Control & Forges: `workbench-core` (diff viewer & 100% offline local repos), `git-driver`, `sapling-driver`, `github-forge`, `gitlab-forge`, `forgejo-forge` | [in progress] |
 
-All plugins live directly within this single monorepo repository (`dsh-stack`). `harness` remains the sole pinned submodule of `deepseek-ai/deepseek-harness`, kept pristine.
 
 ## The mapping (harness plugin -> Andromeda original)
 

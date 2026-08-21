@@ -4964,9 +4964,32 @@ button:hover .dsh-icon-animated,
       );
     }
 
-    function renderAppIcon(appName, size) {
+    function renderAppIcon(appName, size, filePath) {
       var s = size || 15;
       var raw = (appName || "").toLowerCase().replace(/\.app$/, "").trim();
+      var targetPath = filePath || (appName && appName.indexOf("/") !== -1 ? appName : null);
+
+      if (targetPath) {
+        return h("img", {
+          src: "/quotas/api/fs/icon?path=" + encodeURIComponent(targetPath),
+          width: s,
+          height: s,
+          alt: appName,
+          className: "dsh-icon-animated",
+          style: {
+            width: s + "px",
+            height: s + "px",
+            objectFit: "contain",
+            display: "inline-flex",
+            verticalAlign: "middle",
+            flexShrink: 0,
+            borderRadius: "3px",
+          },
+          onError: function (e) {
+            e.target.style.display = "none";
+          }
+        });
+      }
 
       // Helper for SVG wrapper
       var svgWrap = function (children, style) {
@@ -4978,6 +5001,7 @@ button:hover .dsh-icon-animated,
           strokeWidth: "1.75",
           strokeLinecap: "round",
           strokeLinejoin: "round",
+          className: "dsh-icon-animated",
           style: Object.assign({
             display: "inline-flex",
             alignItems: "center",
@@ -7051,7 +7075,7 @@ button:hover .dsh-icon-animated,
                 },
                 h("span", { className: "dsh-tree-slot dsh-tree-icon" },
                   isAppBundle
-                    ? renderAppIcon(entry.name, 16)
+                    ? renderAppIcon(entry.name, 16, entry.path)
                     : (isApplications
                       ? h(AppGlyph, { size: 15 })
                       : (isLibrary
@@ -7174,7 +7198,7 @@ button:hover .dsh-icon-animated,
               },
             },
             h("span", { className: "dsh-tree-slot", style: { width: "16px", color: isAppFile ? "var(--dsw-alias-primary)" : "var(--dsw-alias-label-tertiary)" } },
-              isAppFile ? renderAppIcon(entry.name, 15) : h(FileGlyph, { size: 13 })
+              isAppFile ? renderAppIcon(entry.name, 15, entry.path) : h(FileGlyph, { size: 13 })
             ),
             h("span", { className: "dsh-tree-sessionTitle", style: { fontSize: "12px", marginLeft: "4px" }, title: entry.path }, entry.name)
           );
