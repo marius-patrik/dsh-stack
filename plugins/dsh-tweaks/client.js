@@ -510,10 +510,13 @@ body.dsh-sidebars-swapped .dsh-right-sidebar-dock {
   grid-column: 1 !important;
   grid-row: 1 !important;
   order: 1 !important;
+  width: var(--dsh-secondary-sidebar-width, 0px) !important;
+  max-width: var(--dsh-secondary-sidebar-width, 0px) !important;
   right: auto !important;
   left: 0 !important;
   border-left: none !important;
-  border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+  border-right: none !important;
+  overflow: hidden !important;
 }
 body.dsh-sidebars-swapped div[class*="centerCol"] {
   grid-column: 2 !important;
@@ -1412,19 +1415,19 @@ window.__ModuleLoader__.load({
                 className: "dsh-tw-panelIcon dsh-icon-animated"
               },
                 h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
-                h("path", { d: "M9 3v18" })
+                h("path", { d: (typeof document !== 'undefined' && document.body.classList.contains('dsh-sidebars-swapped')) ? "M15 3v18" : "M9 3v18" })
               )))),
-        h(P.Tooltip, { label: 'New', delayMs: 500, disabled: wide },
+        wide ? h(P.Tooltip, { label: 'New', delayMs: 500 },
           h('button', {
             type: 'button',
-            className: 'dsh-tw-newSession' + (!wide ? ' dsh-tw-collapsed' : ''),
+            className: 'dsh-tw-newSession',
             'aria-label': 'New',
             onClick: function () { startSession(); }
           },
-            h(NotepadPencilGlyph, { size: wide ? 16 : 18 }),
-            wide ? h('span', { className: 'dsh-tw-newSessionLabel dsh-tw-wide' }, 'New') : null
+            h(NotepadPencilGlyph, { size: 16 }),
+            h('span', { className: 'dsh-tw-newSessionLabel dsh-tw-wide' }, 'New')
           )
-        ),
+        ) : null,
         h('div', { className: 'dsh-tw-regionArea' },
           (typeof window !== "undefined" && window.__dsh_UnifiedWorkspacesBrowser)
             ? h(window.__dsh_UnifiedWorkspacesBrowser, {

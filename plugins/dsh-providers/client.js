@@ -3276,13 +3276,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
       // Broadcast secondary sidebar width and adjust layout bounds
       React.useEffect(function () {
-        var currentRightWidth = isOpen ? width : (tabs.length > 0 ? 36 : 0);
+        var currentRightWidth = (isOpen && tabs.length > 0) ? width : 0;
         if (typeof window !== "undefined") {
           window.__dsh_right_sidebar_width__ = currentRightWidth;
           if (typeof document !== "undefined") {
             document.documentElement.style.setProperty('--dsh-secondary-sidebar-width', currentRightWidth + 'px');
           }
-          window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: isOpen, width: currentRightWidth } }));
+          window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: (isOpen && tabs.length > 0), width: currentRightWidth } }));
         }
       }, [isOpen, width, tabs.length, isResizing]);
 
@@ -3342,7 +3342,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         document.addEventListener("pointerup", onUp);
       };
 
-      if (!isOpen && tabs.length === 0) return null;
+      if (!isOpen || tabs.length === 0) return null;
 
       var activeTabObj = tabs.find(function (t) { return t.id === activeTab; });
 
@@ -7326,10 +7326,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       };
 
       if (!wide) {
-        var isRailPlusOpen = plusMenu === "rail";
+        var isRailPlusOpen = Boolean(plusMenu === "rail" || (plusMenu && plusMenu.key === "rail"));
         var liveSessions = sessions.filter(function (s) { return Boolean(s.attached); });
         var liveContainers = containers.filter(function (c) { return Boolean(c.isRunning); });
         var totalLive = liveSessions.length + liveContainers.length;
+        var railPlusBtnRef = React.useRef(null);
 
         var handleExpand = function (e) {
           if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -7362,17 +7363,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           showSearchButton ? h("button", {
             type: "button",
             className: "dsh-tree-actionBtn dsh-rail-btn",
-            title: "Search Workspaces & Chats",
+            title: "Search workspaces & chats",
             "aria-label": "Search",
             style: {
-              width: "32px",
-              height: "32px",
-              borderRadius: "7px",
+              width: "34px",
+              height: "34px",
+              borderRadius: "8px",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--dsw-alias-label-secondary)",
-              cursor: "pointer"
+              color: "var(--dsw-alias-label-primary, #ffffff)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "background 120ms ease"
             },
             onClick: function (e) {
               handleExpand(e);
@@ -7381,32 +7385,42 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 if (searchInputRef.current) searchInputRef.current.focus();
               }, 150);
             }
-          }, h(SearchGlyph, { size: 17 })) : null,
+          }, h(SearchGlyph, { size: 16, className: "dsh-icon-search dsh-icon-animated" })) : null,
 
           // 2. New Item Plus Button
           h("div", { style: { position: "relative" } },
             h("button", {
+              ref: railPlusBtnRef,
               type: "button",
               className: "dsh-tree-actionBtn dsh-rail-btn",
               title: "New Item (+)",
               "aria-label": "New Item",
               style: {
-                width: "32px",
-                height: "32px",
-                borderRadius: "7px",
+                width: "34px",
+                height: "34px",
+                borderRadius: "8px",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "var(--dsw-alias-primary, #6366f1)",
-                cursor: "pointer"
+                color: "var(--dsw-alias-label-primary, #ffffff)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                transition: "background 120ms ease"
               },
               onClick: function (e) {
                 e.stopPropagation();
-                setPlusMenu(isRailPlusOpen ? null : "rail");
+                var rect = e.currentTarget.getBoundingClientRect();
+                var isSwapped = typeof document !== "undefined" && document.body.classList.contains("dsh-sidebars-swapped");
+                var posX = isSwapped ? (rect.left - 194) : (rect.right + 4);
+                var posY = rect.top;
+                setPlusMenu(isRailPlusOpen ? null : { key: "rail", pos: { x: Math.max(8, posX), y: Math.max(8, posY) } });
               }
-            }, h(PlusGlyph, { size: 17 })),
-            h(SelectDropdownMenu, {
-              open: isRailPlusOpen,
+            }, h(PlusGlyph, { size: 16, className: "dsh-icon-plus dsh-icon-animated" })),
+            isRailPlusOpen ? h(SelectDropdownMenu, {
+              open: true,
+              position: (plusMenu && plusMenu.pos) ? plusMenu.pos : null,
+              anchorRef: railPlusBtnRef,
               onClose: function () { setPlusMenu(null); },
               items: [
                 { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
@@ -7427,31 +7441,34 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   handleExpand();
                 }
               }
-            })
+            }) : null
           ),
 
-          // 3. Terminals / Sandboxes Processes
+          // 3. Terminals / Sandboxes Active Processes
           h("button", {
             type: "button",
             className: "dsh-tree-actionBtn dsh-rail-btn",
             title: totalLive > 0 ? ("Active processes (" + totalLive + ")") : "Terminals & Sandboxes",
             "aria-label": "Terminals & Sandboxes",
             style: {
-              width: "32px",
-              height: "32px",
-              borderRadius: "7px",
+              width: "34px",
+              height: "34px",
+              borderRadius: "8px",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
-              color: "var(--dsw-alias-label-secondary)",
-              cursor: "pointer"
+              color: "var(--dsw-alias-label-primary, #ffffff)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "background 120ms ease"
             },
             onClick: function () {
               window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
             }
           },
-            h(TerminalsGlyph, { size: 17 }),
+            h(TerminalsGlyph, { size: 16, className: "dsh-icon-terminal dsh-icon-animated" }),
             totalLive > 0 ? h("span", {
               style: {
                 position: "absolute",
@@ -7473,17 +7490,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             title: "Workspaces Explorer",
             "aria-label": "Workspaces Explorer",
             style: {
-              width: "32px",
-              height: "32px",
-              borderRadius: "7px",
+              width: "34px",
+              height: "34px",
+              borderRadius: "8px",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--dsw-alias-label-secondary)",
-              cursor: "pointer"
+              color: "var(--dsw-alias-label-primary, #ffffff)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "background 120ms ease"
             },
             onClick: handleExpand
-          }, h(BlueFolderGlyph, { size: 17 }))
+          }, h(BlueFolderGlyph, { size: 16, className: "dsh-icon-folder dsh-icon-animated" }))
         );
       }
 

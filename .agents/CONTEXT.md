@@ -2898,11 +2898,34 @@ User prompt:
    - In `RightSidebarDock`, set `--dsh-secondary-sidebar-width` on `document.documentElement` dynamically based on state (`isOpen ? width : (tabs.length > 0 ? 36 : 0)`).
    - In `getCenterBounds()`, read `centerEl.getBoundingClientRect()` directly, ensuring top header tabs (`TopConversationTabBar`), bottom panels, and occupants align pixel-perfect with `centerCol` in standard, swapped rail, swapped wide, and dual-sidebar open states.
 4. **Chrome Headless CDP & Pre-Push Suite Verification**:
-   - Standard layout: sidebar at `[0, 56px]`, center at `[56px, 756px]`, top bar at `[56px, 756px]`.
-   - Swapped rail: sidebar at `[700px, 757px]`, center at `[0, 700px]`, top bar at `[0, 700px]`.
-   - Swapped wide: sidebar at `[476px, 757px]`, center at `[0, 476px]`, top bar at `[0, 476px]`.
-   - Dual-open (Secondary Sidebar left, Main Sidebar right): secondary sidebar at `[0, 301px]`, center at `[300px, 476px]`, main sidebar at `[476px, 757px]`, top bar at `[300px, 476px]`.
+## Session 67 — August 22, 2026 (Collapsed Rail Parity, Swapped Consistency & Details Dock Cleanup)
+
+**Context & User Directives:**
+1. `are all over the place they should match uncollapsed sidebar buttons with icons and funcitons and match each other with styling white and sizes and so on buttons dont make sense when sidebars are swapped`
+2. `collapsed sidebar buttons are all over the place they should match uncollapsed sidebar buttons with icons and funcitons and match each other with styling white and sizes and so on buttons dont make sense when sidebars are swapped`
+3. `there is some weird details sidebar why did yo uadd it`
+
+**Accomplished Refinements & Verifications:**
+1. **Unwanted Details Dock / Column Removed**:
+   - In `RightSidebarDock`, when `tabs.length === 0`, set `--dsh-secondary-sidebar-width` to `0px` and return `null` immediately.
+   - Updated `detailsCol` in `dsh-tweaks` CSS with `width: var(--dsh-secondary-sidebar-width, 0px) !important; max-width: var(--dsh-secondary-sidebar-width, 0px) !important; overflow: hidden !important; border: none !important;` so zero empty space or columns render when no details tabs are active.
+2. **Collapsed Rail & Wide Sidebar Action Button Parity**:
+   - Standardized all rail buttons to uniform `34px x 34px`, `8px` corner radius, clean white icon color `var(--dsw-alias-label-primary)`, transparent background, and subtle hover states (`var(--dsw-alias-interactive-bg-hover)`).
+   - Deduplicated `dsh-tw-newSession` in collapsed rail so only one primary New Item (+) button exists with uniform styling.
+   - Structured 1:1 action set:
+     - Search button (`SearchGlyph`, 16px) -> expands sidebar and focuses search input.
+     - New Item (+) button (`PlusGlyph`, 16px) -> opens unified creation menu.
+     - Terminals / Active Processes button (`TerminalsGlyph`, 16px, subtle green dot if active) -> focuses terminal in bottom panel.
+     - Workspaces Explorer button (`BlueFolderGlyph`, 16px) -> expands sidebar to workspaces tree.
+3. **Swapped Sidebar Physical & Semantic Truth**:
+   - Fixed panel toggle icon SVG to render the divider line on the right side (`x=15`) when `body.dsh-sidebars-swapped` is active, matching the physical layout.
+   - Positioned collapsed rail dropdown menus and tooltips to pop inwards (`x = rect.left - 194`), preventing right viewport edge clipping.
+4. **Live Chrome CDP & Pre-Push Suite Verification**:
+   - Standard mode: sidebar `[0, 56px]`, center `[56px, 756px]`, detailsWidth `0px`.
+   - Swapped mode: sidebar `[700px, 757px]`, center `[0, 700px]`, details dock `false` (0px).
+   - Rail buttons: all verified `34px x 34px`, `rgb(249, 250, 251)` white, 100% responsive.
    - All 84 plugin check suites passed 100% ok.
+
 
 
 

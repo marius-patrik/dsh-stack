@@ -633,17 +633,18 @@ sections owned by tweaks).
 3. **Rename section to "Pinned & Active"**: Rename "Live Sessions" header to "Pinned & Active".
 4. **Purge legacy sidebar layout**: Completely eliminate old sidebar views so clicking a terminal never causes sidebar regressions.
 
-## P22 — Full UI Polish, Settings Split, Secondary Sidebar & Context Menus (Session 29) [in progress]
+## P23 — Collapsed Rail Parity, Swapped Consistency & Details Dock Cleanup (Session 67) [in progress]
 
-1. **Settings Button Fix & High Z-Index**: Eliminate double-toggle capture conflict in `TweaksSettingsRoot`, set `z-index: 1000000`.
-2. **Accurate Git Repository Detection**: Strictly verify `.git` presence on the filesystem; remove workspace fallback for repo icon.
-3. **Sidebar Terminal & Container Click Handlers**: Attach reactive event listeners in `BottomTerminalPanel` to auto-expand and switch views.
-4. **Toolbar Model Picker vs Dropdown Menu**: Generic model icon on toolbar trigger button, individual provider brand icons in dropdown options.
-5. **Unclosable Conversation Tab**: Omit close button on conversation tabs in top and panel bars.
-6. **Split Settings into Accounts, Models, and Apps**: Dedicated sections (Accounts, Models, Apps) with brand icons across all provider rows.
-7. **Harmonize Subagent Collapse Style**: Standardize `renderChatRow` slot structure to match folders (`[Icon] [Chevron] [Title] [Count Pill] [Actions]`).
-8. **Right-Click Context Menu Parity**: Anchor `SelectDropdownMenu` to `(e.clientX, e.clientY)` with full 3-dots actions.
-9. **Secondary Sidebar & Sidebar Swap Setting**: Add sidebar swap toggle in Personalization settings to switch Main Sidebar and Secondary Sidebar sides.
-10. **Remove Top Preset Badge**: Permanently suppress `conversation.session.header.actions` preset badges via global CSS & slot filters.
+1. **Eliminate Unwanted Details Dock / Empty Column**:
+   - In `RightSidebarDock`, when `tabs.length === 0`, set `--dsh-secondary-sidebar-width` to `0px` and suppress empty dock rendering so that no unwanted details column appears in either standard or swapped modes.
+   - Set `detailsCol` to `0px` width when no details tabs are active.
+2. **Harmonize Collapsed Rail and Wide Sidebar Buttons**:
+   - Standardize all rail buttons to `34px x 34px`, `8px` radius, clean white `var(--dsw-alias-label-primary)`, and uniform subtle hover backgrounds.
+   - Deduplicate `dsh-tw-newSession` in collapsed rail so that there is only one primary New button.
+   - Ensure clean 1:1 action matching: Search, New Item (+), Active Processes, Workspaces Explorer, and Settings.
+3. **Swapped Sidebar Direction & Semantic Parity**:
+   - Correct panel toggle icon representation when docked on the right side.
+   - Ensure `SelectDropdownMenu`, tooltips, and popovers anchor and pop inwards towards the center of the viewport.
+
 
 

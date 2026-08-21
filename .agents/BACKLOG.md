@@ -334,5 +334,11 @@ End-state repo map (everything else gets archived with deprecation notices):
 | 110 | **Split Settings into Accounts, Models, and Apps**: Dedicated sections with brand icons | IN PROGRESS | `dsh-providers` + `dsh-tweaks` | Accounts (8), Models (9), Apps (10) |
 | 111 | **Harmonize Subagent Collapse Style**: Sessions with subagents match folder collapse visuals | IN PROGRESS | `dsh-providers` | Standardized slot order and chevron style |
 | 112 | **Right-Click Context Menu Parity**: Right-click opens at cursor position with full 3-dots actions | IN PROGRESS | `dsh-providers` | Cursor-anchored SelectDropdownMenu |
-| 113 | **Secondary Sidebar & Sidebar Swap Setting**: Add sidebar swap toggle in Personalization | IN PROGRESS | `dsh-tweaks` + `dsh-providers` | Swap Main (right) and Secondary (left) sidebars |
-| 114 | **Remove Top Preset Badge**: Permanently suppress preset badges at top of conversation area | IN PROGRESS | `dsh-tweaks` | Suppress conversation.session.header.actions badge |
+## 19. Session 67 Collapsed Sidebar Parity, Swapped Consistency & Details Dock Cleanup (2026-08-22, user)
+
+| # | Directive | Status | Owner | Note |
+|---|---|---|---|---|
+| 115 | **Eliminate Unwanted Details Sidebar Dock**: Only show secondary dock when tabs are explicitly moved into it | IN PROGRESS | `dsh-providers` | Collapse width to 0px and suppress empty state when 0 tabs |
+| 116 | **Harmonize Collapsed Rail & Uncollapsed Sidebar Buttons**: 1:1 match of icons, 34px size, white colors, and functions | IN PROGRESS | `dsh-tweaks` + `dsh-providers` | Deduplicate New session buttons, uniform 34px rounded buttons, Lucide icons |
+| 117 | **Swapped Sidebar Direction & Semantic Parity**: Fix collapse/expand direction icons and popover anchors when swapped | IN PROGRESS | `dsh-tweaks` + `dsh-providers` | Panel toggle arrows and popover menus pop inwards properly |
+
