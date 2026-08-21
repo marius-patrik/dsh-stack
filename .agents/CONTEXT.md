@@ -2804,3 +2804,21 @@ User prompt:
    - Removed `FileViewerModal` and popup dialogs. All files, repositories, terminals, and containers render cleanly as tabs.
 5. **Test Suite Verification**:
    - All 80 package checks pass 100% green.
+
+## Session 63 — August 22, 2026 (Tmux Exit Auto-Closes Terminal Tab & Composer Toolbar Layout Setting)
+
+**Context & User Directives:**
+1. `exiting tmux should close terminal tab`
+2. `add setting to choose between unified input bar or split toolbar`
+
+**Accomplished Refinements:**
+1. **Tmux Exit Auto-Closes Terminal Tab**:
+   - In `InteractiveTmuxTerminal`, added automatic exit detection for 404/410 status and session termination errors (when typing `exit`, `Ctrl+D`, or ending a process).
+   - Automatically invokes `onClose()` and dispatches `dsh:close-terminal-tab`, cleanly removing the tab and restoring focus to the primary chat across top tab bar, bottom panel, and secondary sidebar.
+2. **Composer Toolbar Layout Setting**:
+   - Added **Composer Toolbar Layout** selector in General Preferences (`plugins/dsh-tweaks/client.js`) offering:
+     - `Unified Input Bar (Inline)`
+     - `Split Toolbar (Dedicated Bar)`
+   - Stored in `dsh_composer_toolbar_layout` and wired via `body.dsh-composer-split` / `body.dsh-composer-unified` and `dsh:composer-layout-changed` custom event.
+3. **Test Suite Verification**:
+   - All 80 package checks pass 100% green.

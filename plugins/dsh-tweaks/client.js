@@ -545,6 +545,28 @@ div[class*="conversationScroll"],
 div[class*="scrollPort"] {
   padding-top: 38px !important;
 }
+/* Composer Toolbar Layout: Split vs Unified */
+body.dsh-composer-split div[class*="promptForm"],
+body.dsh-composer-split form[class*="prompt"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+body.dsh-composer-split div[class*="promptActions"],
+body.dsh-composer-split div[class*="promptToolbar"] {
+  order: -1 !important;
+  border-bottom: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 4px !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+}
+body.dsh-composer-unified div[class*="promptActions"],
+body.dsh-composer-unified div[class*="promptToolbar"] {
+  display: inline-flex !important;
+  align-items: center !important;
+}
 @media (max-width: 768px) {
   .dsh-tw-root.dsh-tw-wide {
     position: fixed !important;
@@ -1523,10 +1545,49 @@ window.__ModuleLoader__.load({
         }
       };
 
+      var composerLayoutState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return 'unified';
+        return window.localStorage.getItem('dsh_composer_toolbar_layout') || 'unified';
+      });
+      var composerLayout = composerLayoutState[0], setComposerLayout = composerLayoutState[1];
+
+      var handleSelectComposerLayout = function (e) {
+        var val = e.target.value;
+        setComposerLayout(val);
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('dsh_composer_toolbar_layout', val);
+          window.dispatchEvent(new CustomEvent('dsh:composer-layout-changed', { detail: { layout: val } }));
+          if (document.body) {
+            if (val === 'split') {
+              document.body.classList.add('dsh-composer-split');
+              document.body.classList.remove('dsh-composer-unified');
+            } else {
+              document.body.classList.add('dsh-composer-unified');
+              document.body.classList.remove('dsh-composer-split');
+            }
+          }
+        }
+      };
+
       return h('div', { className: 'dsh-tw-section', style: { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '780px' } },
         h('div', null,
           h('h2', { style: { margin: '0 0 4px', fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'General Preferences'),
           h('p', { style: { margin: 0, fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' } }, 'Configure default presets, execution permissions, chat composer behavior, and window layout.')
+        ),
+        // 0. Composer Toolbar Layout Setting
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '3px' } },
+            h('div', { style: { fontSize: '14px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, 'Composer Toolbar Layout'),
+            h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary)' } }, 'Choose between a unified single input line or a split top toolbar')
+          ),
+          h('select', {
+            value: composerLayout,
+            onChange: handleSelectComposerLayout,
+            style: { padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)', fontSize: '13px', cursor: 'pointer' }
+          },
+            h('option', { value: 'unified' }, 'Unified Input Bar (Inline)'),
+            h('option', { value: 'split' }, 'Split Toolbar (Dedicated Bar)')
+          )
         ),
         // 1. Default Preset Picker
         h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', background: 'var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))', border: '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))' } },

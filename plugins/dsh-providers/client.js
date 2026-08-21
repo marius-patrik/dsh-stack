@@ -2979,12 +2979,42 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
         }
       };
 
+      var handleSessionExited = function () {
+        if (props.onClose) {
+          props.onClose();
+        }
+        window.dispatchEvent(new CustomEvent("dsh:close-terminal-tab", { detail: { id: sessionName, session: sessionName } }));
+      };
+
       React.useEffect(function () {
+        var consecutiveErrors = 0;
         var load = function () {
           fetch(QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName))
-            .then(function (r) { return r.json(); })
-            .then(function (res) { if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)"); })
-            .catch(function () {});
+            .then(function (r) {
+              if (r.status === 404 || r.status === 410) {
+                handleSessionExited();
+                return null;
+              }
+              return r.json();
+            })
+            .then(function (res) {
+              if (!res) return;
+              if (res.error && (res.error.indexOf("not found") !== -1 || res.error.indexOf("failed") !== -1 || res.error.indexOf("no server") !== -1 || res.error.indexOf("exited") !== -1)) {
+                consecutiveErrors++;
+                if (consecutiveErrors >= 2) {
+                  handleSessionExited();
+                }
+                return;
+              }
+              consecutiveErrors = 0;
+              if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
+            })
+            .catch(function () {
+              consecutiveErrors++;
+              if (consecutiveErrors >= 3) {
+                handleSessionExited();
+              }
+            });
         };
         load();
         var timer = setInterval(load, 500);
@@ -5040,6 +5070,26 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
           setActiveTab("chat-main");
         };
 
+        var onCloseTerminalTab = function (e) {
+          var sess = (e && e.detail) ? (e.detail.session || e.detail.id) : null;
+          if (!sess) return;
+          setTabs(function (prev) {
+            var tabToRemove = prev.find(function (t) { return t.type === "terminal" && (t.session === sess || t.id === sess); });
+            if (tabToRemove) {
+              var idx = prev.findIndex(function (t) { return t.id === tabToRemove.id; });
+              var remaining = prev.filter(function (t) { return t.id !== tabToRemove.id; });
+              setActiveTab(function (cur) {
+                if (cur === tabToRemove.id) {
+                  return remaining.length > 0 ? remaining[Math.min(idx, remaining.length - 1)].id : "chat-main";
+                }
+                return cur;
+              });
+              return remaining;
+            }
+            return prev;
+          });
+        };
+
         window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
         window.addEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
@@ -5048,6 +5098,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
         window.addEventListener("dsh:open-terminal", onOpenTerminal);
         window.addEventListener("dsh:open-container", onOpenContainer);
         window.addEventListener("dsh:focus-chat", onFocusChat);
+        window.addEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
         return function () {
           window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
           window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
@@ -5057,6 +5108,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
           window.removeEventListener("dsh:open-terminal", onOpenTerminal);
           window.removeEventListener("dsh:open-container", onOpenContainer);
           window.removeEventListener("dsh:focus-chat", onFocusChat);
+          window.removeEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
         };
       }, []);
 
