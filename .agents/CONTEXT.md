@@ -2696,3 +2696,27 @@ User prompt:
    - Removed default Conversation tab from `BottomTerminalPanel`. The bottom panel tab strip only shows Terminals and Sandboxes unless Conversation is explicitly moved down to the bottom panel.
 
 **Status:** completed, all 80 package test suites green.
+
+## Session 56 — August 21, 2026 (Sidebar Chat Opening, Dynamic Tab Switching, Right Panel Bounds & Dockable Containers)
+
+**Context & User Directives:**
+1. `chass in sidebar cant be opened`
+2. `when repo editor is open there is a conversation tab but it doesnt actually do anything`
+3. `main area is still behind right panel`
+4. `I tried moving containers to secondary sidebar and istead its in a modal`
+
+**Accomplished Refinements:**
+1. **Sidebar Chat Opening (`handleOpenChat`)**:
+   - Implemented `handleOpenChat(sessionId, sessionTitle)` in `UnifiedWorkspacesBrowser` with multiple fallbacks (`props.open`, `window.__dsh_ctx__.sessions.open`).
+   - Dispatches `dsh:focus-chat` and updates `TopConversationTabBar` so clicking any chat, subagent, or archived session row immediately opens and focuses the conversation in the main view.
+2. **Repo & File Occupant Tab Lifecycle Centralization**:
+   - Eliminated duplicate local state (`repoTab`, `fileTab`) in `GlobalTerminalAndContainerManager` that was unconditionally rendering repo/file viewers over the main area.
+   - Centralized occupant rendering inside `TopConversationTabBar` so switching to `[ 💬 Conversation ]` immediately unmounts the repo/file occupant.
+3. **Right Sidebar Dock Bounds & Center Column Geometry**:
+   - `RightSidebarDock` dynamically manages `centerCol.style.marginRight = currentRightWidth + "px"`, preventing native chat messages and composer input from slipping under the right panel.
+   - `getCenterBounds()` correctly includes `effectiveRight = Math.max(customRight, detailsW)`, properly sizing top tab bar and fixed occupants.
+4. **Dockable Containers Workspace**:
+   - Rebuilt `FullPageContainersWorkspace` from a fixed viewport modal into a responsive, dockable in-pane component.
+   - Fits seamlessly in the 300px secondary sidebar, bottom panel dock, and main area with native container lists, status badges, start/stop/restart controls, and real-time logs.
+
+**Status:** completed, all 80 package test suites green.
