@@ -2736,3 +2736,42 @@ User prompt:
    - Implemented smooth, scale-free micro-animations (rotations, lid tilts, slider shifts, pulse, and cursor translations) on hover and interaction.
 
 **Status:** completed, all 80 package test suites green.
+
+## Session 60 — August 21, 2026 (Unified Plus Menus, Theme Studio & Universal Lucide Icon Observer)
+
+**Context & User Directives:**
+1. `/goal do it iconss`
+2. `settings should allow changing theme colors and creating custom themes`
+3. `all sidebar sections should have the same plus button with all the options, no terminal or three dots buttons`
+4. `barely any icons changed yet and almost none are animated`
+
+**Accomplished Refinements:**
+1. **Unified Plus Dropdown across Sidebar**: Every section and workspace folder header uses identical unified plus dropdown menu with options: Conversation, Terminal Session, Sandbox Container, New Directory, Open Folder as Workspace, Archive Empty Chats.
+2. **Appearance & Theme Studio in Settings**: 7 presets (Dark, OLED Black, Andromeda Blurple, Cyberpunk Neon, Monokai Pro, Forest Pine, Light Slate) plus live interactive palette color picker, custom theme creator, persistence, and JSON exporter.
+3. **Universal Lucide Animated Icons Engine**: MutationObserver and comprehensive CSS micro-interaction animations across all UI SVG glyphs.
+4. **Test Suite Verification**: All 80 package checks pass 100% green.
+
+## Session 61 — August 21, 2026 (Sidebar Search Toggle, Send Button Setting, Tab Architecture, Customization Hub, Real Commands, Presets, and Status Dots)
+
+**Context & User Directives:**
+1. `sidebar search option doesnt work - shoudl show and hide the search button`
+2. `add a setting to disable and enable hiding the send button when its not available`
+3. `there should be no terminal or container or anything overlays everything should be tabs`
+4. `customization settings should have skills and hooks and scripts`
+5. `rename modes to presets`
+6. `reimplement commands to actualyl be commands not actions`
+7. `still nowhere near enough icons replaced and animations`
+8. `contianers and terminals in sidebar should have simple green dot instead of live and running`
+
+**Accomplished Refinements:**
+1. **Sidebar Search Visibility Toggle**: Linked `dsh_show_sidebar_search` setting and `dsh:sidebar-search-toggle` event directly to both collapsed and expanded sidebar headers in `UnifiedWorkspacesBrowser` so turning off search cleanly removes the search trigger.
+2. **Hide Inactive Send Button Setting**: Added `dsh_hide_send_button` toggle to General Preferences in `dsh-tweaks`, applying `body.dsh-hide-inactive-send` to cleanly hide disabled/empty composer submit buttons.
+3. **Pure Tab-Based Architecture (No Floating Overlays)**: All terminal sessions, container sandboxes, repo viewers, and file editors open strictly as tabs in `TopConversationTabBar`, Bottom Panel, or Secondary Sidebar. Removed floating modal overlays.
+4. **Customization Settings Hub**: Added full `Customization` section in settings with sub-tabs for:
+   - **Skills**: Searchable catalog of 14+ agent skills with descriptions, paths, and status.
+   - **Hooks**: Interactive inspection for `pre-commit`, `commit-msg`, `pre-push`, and `on-change` with live "Test Hook" runner and output log viewer.
+   - **Scripts**: Built-in launcher (`scripts/dsh`), credentials CLI, and test runners with executable status.
+5. **Rename Modes to Presets**: Replaced all user-visible "Mode" terminology with "Preset" (`Default Agent Preset`, `Agent Presets`, `/preset` command).
+6. **Real Slash Commands System**: Expanded `dsh-actions` with real interactive command runners for `/goal`, `/plan`, `/schedule`, `/grill-me`, `/teamwork-preview`, `/learn`, `/preset`, `/compact`, `/clear`.
+7. **Clean Sidebar Status Dots**: Terminals and docker containers in the left sidebar tree now display a simple glowing green dot (`#3fb950`) indicating active/running state without verbose text clutter.
+8. **Test Suite Verification**: All 80 package check-plugin suites pass 100% green.

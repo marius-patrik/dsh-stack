@@ -152,7 +152,7 @@ window.__ModuleLoader__.load({
 .dsh-tree-sessionRowActive:hover {
   background: var(--dsw-alias-surface-l2, rgba(255, 255, 255, 0.12)) !important;
 }
-/* Keep cube icon ONLY on the left main model trigger button */
+/* Model Picker trigger icon (Single Lucide Cube in pure crisp white) */
 [data-slot="conversation.input.model"] > button::before,
 button[class*="ModelSelect_trigger"]::before {
   content: '';
@@ -162,9 +162,15 @@ button[class*="ModelSelect_trigger"]::before {
   margin-right: 6px;
   flex-shrink: 0;
   vertical-align: middle;
-  background-color: #ffffff;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
+  background-color: var(--dsw-alias-label-primary, #ffffff) !important;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* Prevent duplicate icons inside the trigger button */
+[data-slot="conversation.input.model"] > button > svg:first-child,
+button[class*="ModelSelect_trigger"] > svg:not(:last-child) {
+  display: none !important;
 }
 
 /* Remove duplicate right-side cube or menu option cube ::before */
@@ -177,125 +183,133 @@ button[class*="ModelSelect_trigger"]::before {
   display: none !important;
 }
 
-/* Animated Lucide Icon Micro-Interactions (No button/element scaling) */
+/* Universal Animated Lucide Icons */
+svg:not([class*="badge"]),
 .dsh-icon-animated {
-  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 150ms ease, opacity 150ms ease;
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease, opacity 180ms ease !important;
   transform-origin: center center;
 }
 
-button:hover .dsh-icon-refresh,
-.dsh-tree-actionBtn:hover .dsh-icon-refresh,
-.dsh-icon-refresh:hover {
-  transform: rotate(180deg);
+button:hover svg:not([class*="badge"]),
+a:hover svg:not([class*="badge"]),
+[role="button"]:hover svg:not([class*="badge"]),
+[role="menuitem"]:hover svg:not([class*="badge"]),
+[role="tab"]:hover svg:not([class*="badge"]),
+.dsh-tree-projectRow:hover svg:not([class*="badge"]),
+.dsh-tree-sessionRow:hover svg:not([class*="badge"]) {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease !important;
 }
 
-button:hover .dsh-icon-trash,
-.dsh-tree-actionBtn:hover .dsh-icon-trash,
-.dsh-icon-trash:hover {
-  transform: rotate(-12deg);
+/* Refresh / Sync / Reload */
+button:hover svg[class*="refresh"], button:hover svg[class*="reload"], button:hover svg[class*="loop"],
+button:hover .dsh-icon-refresh, .dsh-icon-refresh:hover, [role="button"]:hover svg[class*="refresh"] {
+  transform: rotate(180deg) !important;
 }
 
-button:hover .dsh-icon-edit,
-.dsh-tree-actionBtn:hover .dsh-icon-edit,
-.dsh-icon-edit:hover {
-  transform: rotate(-15deg);
+/* Trash / Delete */
+button:hover svg[class*="trash"], button:hover svg[class*="delete"],
+button:hover .dsh-icon-trash, .dsh-icon-trash:hover, [role="button"]:hover svg[class*="trash"] {
+  transform: rotate(-15deg) !important;
 }
 
-button:hover .dsh-icon-plus,
-.dsh-tree-actionBtn:hover .dsh-icon-plus,
-.dsh-icon-plus:hover {
-  transform: rotate(90deg);
+/* Edit / Pencil */
+button:hover svg[class*="edit"], button:hover svg[class*="pencil"],
+button:hover .dsh-icon-edit, .dsh-icon-edit:hover, [role="button"]:hover svg[class*="edit"] {
+  transform: rotate(-15deg) !important;
 }
 
-button:hover .dsh-icon-pin,
-.dsh-tree-sessionRow:hover .dsh-icon-pin,
-.dsh-icon-pin:hover {
-  transform: rotate(-18deg);
+/* Plus / Add / New */
+button:hover svg[class*="plus"], button:hover svg[class*="add"],
+button:hover .dsh-icon-plus, .dsh-icon-plus:hover, [role="button"]:hover svg[class*="plus"] {
+  transform: rotate(90deg) !important;
 }
 
-button:hover .dsh-icon-search,
-.dsh-icon-search:hover {
-  transform: rotate(-12deg);
+/* Pin */
+button:hover svg[class*="pin"], .dsh-tree-sessionRow:hover svg[class*="pin"],
+button:hover .dsh-icon-pin, .dsh-icon-pin:hover, [role="button"]:hover svg[class*="pin"] {
+  transform: rotate(-18deg) !important;
 }
 
-button:hover .dsh-icon-sliders,
-.dsh-icon-sliders:hover {
-  transform: translateY(-1.5px);
+/* Search */
+button:hover svg[class*="search"], button:hover .dsh-icon-search, .dsh-icon-search:hover, [role="button"]:hover svg[class*="search"] {
+  transform: rotate(-12deg) !important;
 }
 
-button:hover .dsh-icon-terminal,
-.dsh-tree-sessionRow:hover .dsh-icon-terminal,
-.dsh-icon-terminal:hover {
-  transform: translateX(1.5px);
+/* Settings / Sliders / Gear */
+button:hover svg[class*="setting"], button:hover svg[class*="gear"], button:hover svg[class*="slider"],
+button:hover .dsh-icon-sliders, button:hover .dsh-icon-settings, .dsh-icon-sliders:hover, .dsh-icon-settings:hover, [role="button"]:hover svg[class*="setting"] {
+  transform: rotate(45deg) !important;
 }
 
-button:hover .dsh-icon-folder,
-button:hover .dsh-icon-folder-plus,
-.dsh-tree-projectRow:hover .dsh-icon-folder,
-.dsh-icon-folder:hover {
-  transform: translateY(-1px);
+/* Terminal / Code / Prompt */
+button:hover svg[class*="terminal"], button:hover svg[class*="code"], .dsh-tree-sessionRow:hover svg[class*="terminal"],
+button:hover .dsh-icon-terminal, .dsh-icon-terminal:hover, [role="button"]:hover svg[class*="terminal"] {
+  transform: translateX(2px) !important;
 }
 
-button:hover .dsh-icon-containers,
-.dsh-icon-containers:hover {
-  transform: translateY(-1.5px);
+/* Folder */
+button:hover svg[class*="folder"], .dsh-tree-projectRow:hover svg[class*="folder"],
+button:hover .dsh-icon-folder, .dsh-icon-folder:hover, [role="button"]:hover svg[class*="folder"] {
+  transform: translateY(-1.5px) !important;
 }
 
-button:hover .dsh-icon-chat,
-.dsh-tree-sessionRow:hover .dsh-icon-chat,
-.dsh-icon-chat:hover {
-  transform: translateY(-1px);
+/* Containers / Box / Cube */
+button:hover svg[class*="container"], button:hover svg[class*="box"], button:hover svg[class*="cube"],
+button:hover .dsh-icon-containers, .dsh-icon-containers:hover, [role="button"]:hover svg[class*="container"] {
+  transform: translateY(-1.5px) !important;
 }
 
-button:hover .dsh-icon-subagent,
-.dsh-tree-subagentRow:hover .dsh-icon-subagent,
-.dsh-icon-subagent:hover {
-  transform: translateY(-1px);
+/* Chat / Conversation / Message */
+button:hover svg[class*="chat"], button:hover svg[class*="message"], .dsh-tree-sessionRow:hover svg[class*="chat"],
+button:hover .dsh-icon-chat, .dsh-icon-chat:hover, [role="button"]:hover svg[class*="chat"] {
+  transform: translateY(-1px) !important;
 }
 
-button:hover .dsh-icon-pass,
-.dsh-icon-pass:hover {
-  transform: rotate(15deg);
+/* Mic / Voice */
+button:hover svg[class*="mic"], button:hover svg[class*="voice"], button:hover svg[class*="audio"],
+button:hover .dsh-icon-mic, .dsh-icon-mic:hover, [role="button"]:hover svg[class*="mic"] {
+  transform: translateY(-1px) !important;
 }
 
-button:hover .dsh-icon-tools,
-.dsh-icon-tools:hover {
-  transform: rotate(-15deg);
+/* Dock / Panel Toggle */
+button:hover svg[class*="dock"], button:hover svg[class*="panel"],
+button:hover .dsh-icon-dock, .dsh-icon-dock:hover, [role="button"]:hover svg[class*="dock"] {
+  transform: translateX(1.5px) !important;
 }
 
-button:hover .dsh-icon-mic,
-.dsh-icon-mic:hover {
-  transform: translateY(-1px);
+/* Branch / Git */
+button:hover svg[class*="branch"], button:hover svg[class*="git"],
+button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover svg[class*="branch"] {
+  transform: rotate(15deg) !important;
 }
 
-button:hover .dsh-icon-dock,
-.dsh-icon-dock:hover {
-  transform: translateX(1px);
+/* Eye / Preview */
+button:hover svg[class*="eye"], button:hover svg[class*="view"],
+button:hover .dsh-icon-eye, .dsh-icon-eye:hover, [role="button"]:hover svg[class*="eye"] {
+  transform: translateY(-1px) !important;
 }
 
-button:hover .dsh-icon-branch,
-.dsh-icon-branch:hover {
-  transform: translateY(-1px);
+/* Copy */
+button:hover svg[class*="copy"], button:hover .dsh-icon-copy, .dsh-icon-copy:hover, [role="button"]:hover svg[class*="copy"] {
+  transform: translateY(-1px) !important;
 }
 
-button:hover .dsh-icon-eye,
-.dsh-icon-eye:hover {
-  transform: translateY(-1px);
+/* Cut / Scissors */
+button:hover svg[class*="cut"], button:hover svg[class*="scissors"], button:hover .dsh-icon-cut, .dsh-icon-cut:hover, [role="button"]:hover svg[class*="cut"] {
+  transform: rotate(-15deg) !important;
 }
 
-button:hover .dsh-icon-copy,
-.dsh-icon-copy:hover {
-  transform: translateY(-1px);
+/* Ellipsis / More */
+button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hover .dsh-icon-ellipsis, .dsh-icon-ellipsis:hover, [role="button"]:hover svg[class*="ellipsis"] {
+  transform: rotate(90deg) !important;
 }
 
-button:hover .dsh-icon-cut,
-.dsh-icon-cut:hover {
-  transform: rotate(-10deg);
+/* Chevron / Arrow */
+.dsh-tree-projectRow:hover .dsh-tree-arrow, .dsh-tree-projectRow:hover svg[class*="chevron"], .dsh-tree-projectRow:hover svg[class*="arrow"] {
+  transform: translateX(1.5px) !important;
 }
-
-button:hover .dsh-icon-ellipsis,
-.dsh-icon-ellipsis:hover {
-  transform: rotate(90deg);
+.dsh-tree-projectRow:hover .dsh-tree-arrowOpen {
+  transform: rotate(90deg) translateY(-1px) !important;
 }
 
 .dsh-model-star-btn {
@@ -388,6 +402,14 @@ button:hover .dsh-icon-ellipsis,
           var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
           var favOptionsMap = {};
 
+          var stopAll = function (e) {
+            if (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+            }
+          };
+
           options.forEach(function (opt) {
             if (opt.closest('.dsh-favorites-group')) return;
 
@@ -408,22 +430,20 @@ button:hover .dsh-icon-ellipsis,
               starBtn.className = 'dsh-model-star-btn';
               starBtn.style.border = 'none';
               starBtn.style.background = 'transparent';
-              starBtn.style.padding = '2px 6px';
+              starBtn.style.padding = '0';
+              starBtn.style.width = '20px';
+              starBtn.style.height = '20px';
               starBtn.style.cursor = 'pointer';
-              starBtn.style.marginLeft = 'auto';
-              starBtn.style.marginRight = '4px';
               starBtn.style.display = 'inline-flex';
               starBtn.style.alignItems = 'center';
               starBtn.style.justifyContent = 'center';
+              starBtn.style.flex = '0 0 20px';
               starBtn.style.flexShrink = '0';
+              starBtn.style.marginLeft = 'auto';
               starBtn.style.zIndex = '10';
 
               var toggleFav = function (e) {
-                if (e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
-                }
+                stopAll(e);
                 var currentFavs = getFavoriteModels();
                 var idx = currentFavs.indexOf(modelKey);
                 if (idx === -1) currentFavs.push(modelKey);
@@ -432,21 +452,34 @@ button:hover .dsh-icon-ellipsis,
                 scheduleUpdate();
               };
 
-              starBtn.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-              });
-              starBtn.addEventListener('pointerdown', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-              });
-              starBtn.addEventListener('click', toggleFav);
+              starBtn.addEventListener('pointerdown', function (e) { stopAll(e); toggleFav(e); });
+              starBtn.addEventListener('mousedown', function (e) { stopAll(e); });
+              starBtn.addEventListener('pointerup', function (e) { stopAll(e); });
+              starBtn.addEventListener('mouseup', function (e) { stopAll(e); });
+              starBtn.addEventListener('click', function (e) { stopAll(e); });
 
+              var copyEl = opt.querySelector('[class*="optionCopy"]');
               var checkEl = opt.querySelector('[class*="check"]');
               if (checkEl) {
                 opt.insertBefore(starBtn, checkEl);
+                if (!checkEl.querySelector('svg') && !checkEl.textContent.trim()) {
+                  checkEl.style.display = 'none';
+                } else {
+                  checkEl.style.display = 'grid';
+                }
+              } else if (copyEl && copyEl.nextSibling) {
+                opt.insertBefore(starBtn, copyEl.nextSibling);
               } else {
                 opt.appendChild(starBtn);
+              }
+            } else {
+              var checkElExisting = opt.querySelector('[class*="check"]');
+              if (checkElExisting) {
+                if (!checkElExisting.querySelector('svg') && !checkElExisting.textContent.trim()) {
+                  checkElExisting.style.display = 'none';
+                } else {
+                  checkElExisting.style.display = 'grid';
+                }
               }
             }
 
@@ -468,13 +501,13 @@ button:hover .dsh-icon-ellipsis,
               existingFavGroup.setAttribute('role', 'group');
               existingFavGroup.style.display = 'flex';
               existingFavGroup.style.flexDirection = 'column';
-              existingFavGroup.style.marginBottom = '8px';
-              existingFavGroup.style.paddingBottom = '6px';
+              existingFavGroup.style.marginBottom = '6px';
+              existingFavGroup.style.paddingBottom = '4px';
               existingFavGroup.style.borderBottom = '1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))';
 
               var titleDiv = document.createElement('div');
               titleDiv.className = 'dsh-favorites-title';
-              titleDiv.style.padding = '4px 12px 2px';
+              titleDiv.style.padding = '4px 10px 2px';
               titleDiv.style.fontSize = '10.5px';
               titleDiv.style.fontWeight = '700';
               titleDiv.style.color = '#eab308';
@@ -497,18 +530,15 @@ button:hover .dsh-icon-ellipsis,
               if (!origOpt) return;
               var clone = origOpt.cloneNode(true);
               clone.className = origOpt.className + ' dsh-fav-cloned-option';
-              clone.addEventListener('click', function () {
+              clone.addEventListener('click', function (e) {
+                if (e.target.closest('.dsh-model-star-btn')) return;
                 origOpt.click();
               });
 
               var cloneStar = clone.querySelector('.dsh-model-star-btn');
               if (cloneStar) {
-                cloneStar.addEventListener('mousedown', function (e) { e.preventDefault(); e.stopPropagation(); });
-                cloneStar.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); });
-                cloneStar.addEventListener('click', function (e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                var handleCloneToggle = function (e) {
+                  stopAll(e);
                   var currentFavs = getFavoriteModels();
                   var idx = currentFavs.indexOf(key);
                   if (idx !== -1) {
@@ -516,7 +546,21 @@ button:hover .dsh-icon-ellipsis,
                     setFavoriteModels(currentFavs);
                     scheduleUpdate();
                   }
-                });
+                };
+                cloneStar.addEventListener('pointerdown', function (e) { stopAll(e); handleCloneToggle(e); });
+                cloneStar.addEventListener('mousedown', function (e) { stopAll(e); });
+                cloneStar.addEventListener('pointerup', function (e) { stopAll(e); });
+                cloneStar.addEventListener('mouseup', function (e) { stopAll(e); });
+                cloneStar.addEventListener('click', function (e) { stopAll(e); });
+              }
+
+              var cloneCheck = clone.querySelector('[class*="check"]');
+              if (cloneCheck) {
+                if (!cloneCheck.querySelector('svg') && !cloneCheck.textContent.trim()) {
+                  cloneCheck.style.display = 'none';
+                } else {
+                  cloneCheck.style.display = 'grid';
+                }
               }
               existingFavGroup.appendChild(clone);
             });
@@ -2263,7 +2307,36 @@ button:hover .dsh-icon-ellipsis,
                   },
                   h(ContainersGlyph, { size: 12 }),
                   h("span", null, c.name || c.id.substring(0, 12)),
-                  h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: c.isRunning ? "#3fb950" : "#888", marginLeft: "2px" } })
+                  h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: c.isRunning ? "#3fb950" : "#888", marginLeft: "2px" } }),
+                  h("button", {
+                    type: "button",
+                    title: "Close Container View",
+                    onClick: function (e) {
+                      e.stopPropagation();
+                      setContainers(function (prev) { return prev.filter(function (x) { return x.id !== c.id; }); });
+                      if (selectedContainer === c.id) {
+                        setActiveView("terminal");
+                      }
+                    },
+                    style: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "14px",
+                      height: "14px",
+                      marginLeft: "2px",
+                      padding: 0,
+                      border: "none",
+                      borderRadius: "3px",
+                      background: "transparent",
+                      color: "inherit",
+                      opacity: 0.6,
+                      cursor: "pointer",
+                      fontSize: "12px",
+                    },
+                    onMouseEnter: function (e) { e.currentTarget.style.opacity = "1"; e.currentTarget.style.color = "#f85149"; },
+                    onMouseLeave: function (e) { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.color = "inherit"; },
+                  }, "×")
                 );
               });
             })(),
@@ -2399,23 +2472,29 @@ button:hover .dsh-icon-ellipsis,
                 onClose: function () { setTabActionsOpen(false); },
                 items: [
                   { id: "move-top", label: "Move to Main Area", icon: h(EyeGlyph, { size: 13 }) },
-                  { id: "move-right", label: "Move to Right Dock", icon: h(DockToggleGlyph, { size: 13 }) },
-                  { id: "refresh", label: "Refresh Buffer", icon: h(RefreshGlyph, { size: 13 }) },
-                  { id: "clear", label: "Clear Buffer (Ctrl+L)", icon: h(TrashGlyph, { size: 13 }) },
-                  { id: "new-window", label: "New Window in Session", icon: h(PlusGlyph, { size: 13 }) },
-                  { id: "new-session", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
-                  { id: "kill", label: "Kill Current Session", icon: h(TrashGlyph, { size: 13 }), danger: true },
-                ],
+                  { id: "move-right", label: "Move to Secondary Sidebar", icon: h(DockToggleGlyph, { size: 13 }) },
+                  activeView === "terminal" ? { id: "refresh", label: "Refresh Buffer", icon: h(RefreshGlyph, { size: 13 }) } : null,
+                  activeView === "terminal" ? { id: "clear", label: "Clear Buffer (Ctrl+L)", icon: h(TrashGlyph, { size: 13 }) } : null,
+                  activeView === "terminal" ? { id: "new-window", label: "New Window in Session", icon: h(PlusGlyph, { size: 13 }) } : null,
+                  activeView === "terminal" ? { id: "new-session", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) } : null,
+                  activeView === "terminal" ? { id: "kill", label: "Kill Current Session", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
+                  activeView === "container" && selectedContainer ? { id: "stop-container", label: "Stop Container", icon: h(TrashGlyph, { size: 13 }) } : null,
+                  activeView === "container" && selectedContainer ? { id: "start-container", label: "Start Container", icon: h(PlusGlyph, { size: 13 }) } : null,
+                ].filter(Boolean),
                 onSelect: function (actionId) {
                   setTabActionsOpen(false);
                   if (actionId === "move-top") {
                     if (activeView === "terminal" && selectedSession) {
+                      var targetSess = selectedSession;
+                      setSessions(function (prev) { return prev.filter(function (s) { return s.name !== targetSess; }); });
                       window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", {
-                        detail: { id: selectedSession, type: "terminal", title: selectedSession, session: selectedSession }
+                        detail: { id: targetSess, type: "terminal", title: targetSess, session: targetSess }
                       }));
                     } else if (activeView === "container" && selectedContainer) {
+                      var targetCont = selectedContainer;
+                      setContainers(function (prev) { return prev.filter(function (c) { return c.id !== targetCont; }); });
                       window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", {
-                        detail: { id: selectedContainer, type: "container", title: selectedContainer }
+                        detail: { id: targetCont, type: "container", title: targetCont }
                       }));
                     } else if (activeView === "chat") {
                       window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", {
@@ -2424,14 +2503,22 @@ button:hover .dsh-icon-ellipsis,
                     }
                   } else if (actionId === "move-right") {
                     if (activeView === "terminal" && selectedSession) {
+                      var targetS = selectedSession;
+                      setSessions(function (prev) { return prev.filter(function (s) { return s.name !== targetS; }); });
                       window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", {
-                        detail: { id: selectedSession, type: "terminal", title: selectedSession, session: selectedSession }
+                        detail: { id: targetS, type: "terminal", title: targetS, session: targetS }
                       }));
                     } else if (activeView === "container" && selectedContainer) {
+                      var targetC = selectedContainer;
+                      setContainers(function (prev) { return prev.filter(function (c) { return c.id !== targetC; }); });
                       window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", {
-                        detail: { id: selectedContainer, type: "container", title: selectedContainer }
+                        detail: { id: targetC, type: "container", title: targetC }
                       }));
                     }
+                  } else if (actionId === "stop-container" && selectedContainer) {
+                    fetch(QUOTAS_API + "/docker/containers/action", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: selectedContainer, action: "stop" }) });
+                  } else if (actionId === "start-container" && selectedContainer) {
+                    fetch(QUOTAS_API + "/docker/containers/action", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: selectedContainer, action: "start" }) });
                   } else if (actionId === "refresh") {
                     loadBuffer(selectedSession);
                   } else if (actionId === "clear") {
@@ -2758,44 +2845,6 @@ button:hover .dsh-icon-ellipsis,
                 overflow: "hidden",
               }
             },
-            selectedContainer ? h(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "6px 10px",
-                  background: "var(--dsw-alias-bg-layer-0, #000000)",
-                  borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-                  flexShrink: 0,
-                  gap: "6px",
-                  flexWrap: "wrap",
-                }
-              },
-              h("div", { style: { display: "flex", gap: "6px", alignItems: "center", minWidth: 0 } },
-                h("strong", { style: { color: "#fff", fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, selectedContainer.name || selectedContainer.id.substring(0, 12)),
-                h("code", { style: { fontSize: "10px", color: "var(--dsw-alias-label-secondary, #888)" } }, selectedContainer.status || "")
-              ),
-              h("div", { style: { display: "flex", gap: "4px", flexShrink: 0 } },
-                selectedContainer.isRunning
-                  ? h("button", {
-                      type: "button",
-                      onClick: function () { handleAction(selectedContainer.id, "stop"); },
-                      style: { padding: "2px 8px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: "#fff", fontSize: "10.5px", cursor: "pointer" }
-                    }, "Stop")
-                  : h("button", {
-                      type: "button",
-                      onClick: function () { handleAction(selectedContainer.id, "start"); },
-                      style: { padding: "2px 8px", borderRadius: "4px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontSize: "10.5px", fontWeight: 600, cursor: "pointer" }
-                    }, "Start"),
-                h("button", {
-                  type: "button",
-                  onClick: function () { handleAction(selectedContainer.id, "restart"); },
-                  style: { padding: "2px 8px", borderRadius: "4px", border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.15))", background: "transparent", color: "var(--dsw-alias-label-secondary, #888)", fontSize: "10.5px", cursor: "pointer" }
-                }, "Restart")
-              )
-            ) : null,
             // Container Logs Console
             h("pre", {
               style: {
@@ -3125,7 +3174,7 @@ button:hover .dsh-icon-ellipsis,
       );
     }
 
-    // Right Sidebar Dock Component
+    // Secondary Sidebar Dock Component
     function RightSidebarDock(props) {
       var isOpenState = React.useState(false);
       var isOpen = isOpenState[0], setIsOpen = isOpenState[1];
@@ -3137,8 +3186,11 @@ button:hover .dsh-icon-ellipsis,
       var activeTab = activeTabState[0], setActiveTab = activeTabState[1];
       var isResizingState = React.useState(false);
       var isResizing = isResizingState[0], setIsResizing = isResizingState[1];
+      var menuOpenState = React.useState(false);
+      var isMenuOpen = menuOpenState[0], setMenuOpen = menuOpenState[1];
+      var menuBtnRef = React.useRef(null);
 
-      // Broadcast right sidebar width and adjust centerCol layout bounds
+      // Broadcast secondary sidebar width and adjust centerCol layout bounds
       React.useEffect(function () {
         var currentRightWidth = isOpen ? width : (tabs.length > 0 ? 36 : 0);
         if (typeof window !== "undefined") {
@@ -3146,14 +3198,22 @@ button:hover .dsh-icon-ellipsis,
           window.dispatchEvent(new CustomEvent("dsh:right-sidebar-changed", { detail: { open: isOpen, width: currentRightWidth } }));
         }
         var centerCol = document.querySelector('div[class*="centerCol"], [class*="centerCol"]');
+        var isSwapped = typeof document !== "undefined" && document.body.classList.contains("dsh-sidebars-swapped");
         if (centerCol) {
-          centerCol.style.marginRight = currentRightWidth + "px";
-          centerCol.style.transition = isResizing ? "none" : "margin-right 150ms ease";
+          if (isSwapped) {
+            centerCol.style.marginLeft = currentRightWidth + "px";
+            centerCol.style.marginRight = "0px";
+          } else {
+            centerCol.style.marginRight = currentRightWidth + "px";
+            centerCol.style.marginLeft = "0px";
+          }
+          centerCol.style.transition = isResizing ? "none" : "margin 150ms ease";
         }
         return function () {
           var col = document.querySelector('div[class*="centerCol"], [class*="centerCol"]');
           if (col) {
             col.style.marginRight = "0px";
+            col.style.marginLeft = "0px";
           }
         };
       }, [isOpen, width, tabs.length, isResizing]);
@@ -3170,11 +3230,25 @@ button:hover .dsh-icon-ellipsis,
           setActiveTab(tab.id);
           setIsOpen(true);
         };
+        var onMoveToTop = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) { return prev.filter(function (t) { return t.id !== tab.id; }); });
+        };
+        var onMoveToBottom = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) { return prev.filter(function (t) { return t.id !== tab.id; }); });
+        };
         window.addEventListener("dsh:toggle-right-sidebar", onToggle);
         window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
+        window.addEventListener("dsh:tab-moved-to-top", onMoveToTop);
+        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
         return function () {
           window.removeEventListener("dsh:toggle-right-sidebar", onToggle);
           window.removeEventListener("dsh:tab-moved-to-right", onMoveToRight);
+          window.removeEventListener("dsh:tab-moved-to-top", onMoveToTop);
+          window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
         };
       }, []);
 
@@ -3183,8 +3257,9 @@ button:hover .dsh-icon-ellipsis,
         setIsResizing(true);
         var startX = e.clientX;
         var startW = width;
+        var isSwapped = typeof document !== "undefined" && document.body.classList.contains("dsh-sidebars-swapped");
         var onMove = function (moveEv) {
-          var delta = startX - moveEv.clientX;
+          var delta = isSwapped ? (moveEv.clientX - startX) : (startX - moveEv.clientX);
           var nextW = Math.max(180, Math.min(600, startW + delta));
           setWidth(nextW);
         };
@@ -3230,7 +3305,7 @@ button:hover .dsh-icon-ellipsis,
             } catch (err) {}
           },
         },
-        // Resize handle on left edge
+        // Resize handle on edge
         isOpen ? h("div", {
           onPointerDown: handleResizeStart,
           style: {
@@ -3304,50 +3379,102 @@ button:hover .dsh-icon-ellipsis,
               );
             })
           ) : null,
-          h("button", {
-            type: "button",
-            onClick: function () { setIsOpen(!isOpen); },
-            title: isOpen ? "Collapse Right Dock" : "Expand Right Dock",
-            style: {
-              border: "none",
-              background: "transparent",
-              color: "var(--dsw-alias-label-secondary)",
-              cursor: "pointer",
-              padding: "4px",
-            }
-          }, h(DockToggleGlyph, { size: 14, style: { transform: isOpen ? "rotate(180deg)" : "none" } }))
+          h("div", { style: { display: "flex", alignItems: "center", gap: "2px" } },
+            isOpen ? h("div", { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+              h("button", {
+                ref: menuBtnRef,
+                type: "button",
+                onClick: function () { setMenuOpen(!isMenuOpen); },
+                title: "Secondary Sidebar Actions (…)",
+                style: {
+                  border: "none",
+                  background: "transparent",
+                  color: "var(--dsw-alias-label-secondary)",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                }
+              }, h(EllipsisGlyph, { size: 14 })),
+              h(SelectDropdownMenu, {
+                open: isMenuOpen,
+                anchorRef: menuBtnRef,
+                onClose: function () { setMenuOpen(false); },
+                items: [
+                  activeTabObj ? { id: "move-top", label: "Move Tab to Main Area", icon: h(EyeGlyph, { size: 13 }) } : null,
+                  activeTabObj ? { id: "move-bottom", label: "Move Tab to Bottom Panel", icon: h(DockToggleGlyph, { size: 13 }) } : null,
+                  activeTabObj ? { id: "close-tab", label: "Close Active Tab", icon: h(TrashGlyph, { size: 13 }) } : null,
+                  { id: "collapse", label: "Collapse Secondary Sidebar", icon: h(DockToggleGlyph, { size: 13 }) },
+                ].filter(Boolean),
+                onSelect: function (act) {
+                  setMenuOpen(false);
+                  if (act === "move-top" && activeTabObj) {
+                    var tab = activeTabObj;
+                    setTabs(function (prev) { return prev.filter(function (t) { return t.id !== tab.id; }); });
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tab }));
+                  } else if (act === "move-bottom" && activeTabObj) {
+                    var tabB = activeTabObj;
+                    setTabs(function (prev) { return prev.filter(function (t) { return t.id !== tabB.id; }); });
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-bottom", { detail: tabB }));
+                  } else if (act === "close-tab" && activeTabObj) {
+                    setTabs(function (prev) { return prev.filter(function (t) { return t.id !== activeTabObj.id; }); });
+                  } else if (act === "collapse") {
+                    setIsOpen(false);
+                  }
+                }
+              })
+            ) : null,
+            h("button", {
+              type: "button",
+              onClick: function () { setIsOpen(!isOpen); },
+              title: isOpen ? "Collapse Secondary Sidebar" : "Expand Secondary Sidebar",
+              style: {
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+                padding: "4px",
+              }
+            }, h(DockToggleGlyph, { size: 14, style: { transform: isOpen ? "rotate(180deg)" : "none" } }))
+          )
         ),
         // Body Content
         isOpen ? (
           activeTabObj && activeTabObj.type === "terminal" ? h(InteractiveTmuxTerminal, { sessionName: activeTabObj.session || activeTabObj.id })
           : activeTabObj && activeTabObj.type === "container" ? h(FullPageContainersWorkspace, {})
-          : h(EmptyAreaNewTabPicker, { areaName: "Right Dock" })
+          : h(EmptyAreaNewTabPicker, { areaName: "Secondary Sidebar" })
         ) : null
       );
     }
 
     function getCenterBounds() {
       if (typeof document === "undefined") return { left: 240, right: 0, top: 48 };
-      var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
+      var isSwapped = document.body.classList.contains("dsh-sidebars-swapped");
+      var customSecondary = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
       var detailsEl = document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]');
       var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
-      var effectiveRight = Math.max(customRight, detailsW);
+      var secondaryW = Math.max(customSecondary, detailsW);
 
       var sidebarEl = document.querySelector('div[class*="sidebarCol"]');
-      var centerEl = document.querySelector('div[class*="centerCol"]');
-      var left = 240;
-      var top = 48;
+      var primaryW = (sidebarEl && sidebarEl.getBoundingClientRect && sidebarEl.getBoundingClientRect().width > 0) ? sidebarEl.getBoundingClientRect().width : 240;
 
-      if (sidebarEl && sidebarEl.getBoundingClientRect && sidebarEl.getBoundingClientRect().width > 0) {
-        left = sidebarEl.getBoundingClientRect().right || 240;
-      } else if (centerEl && centerEl.getBoundingClientRect) {
-        left = centerEl.getBoundingClientRect().left || 240;
+      var centerEl = document.querySelector('div[class*="centerCol"]');
+      var top = 48;
+      if (centerEl && centerEl.getBoundingClientRect) {
         top = centerEl.getBoundingClientRect().top || 48;
       }
 
+      if (isSwapped) {
+        return {
+          left: secondaryW,
+          right: primaryW,
+          top: top
+        };
+      }
+
       return {
-        left: left,
-        right: effectiveRight,
+        left: primaryW,
+        right: secondaryW,
         top: top,
       };
     }
@@ -4849,8 +4976,12 @@ button:hover .dsh-icon-ellipsis,
       var plusOpenState = React.useState(false);
       var plusOpen = plusOpenState[0], setPlusOpen = plusOpenState[1];
 
+      var topEllipsisBtnRef = React.useRef(null);
+      var topMenuOpenState = React.useState(false);
+      var isTopMenuOpen = topMenuOpenState[0], setTopMenuOpen = topMenuOpenState[1];
+
       var tabsState = React.useState([
-        { id: "chat-main", type: "chat", title: "Conversation" }
+        { id: "chat-main", type: "chat", title: (typeof window !== "undefined" && window.__dsh_current_session_title__) ? window.__dsh_current_session_title__ : "Conversation" }
       ]);
       var tabs = tabsState[0], setTabs = tabsState[1];
       var activeTabState = React.useState("chat-main");
@@ -4872,6 +5003,32 @@ button:hover .dsh-icon-ellipsis,
         }
       }, [tabs]);
 
+      // Sync live chat title from active session or document
+      React.useEffect(function () {
+        var updateTitle = function () {
+          var title = (typeof window !== "undefined" && window.__dsh_current_session_title__) ? window.__dsh_current_session_title__ : null;
+          if (!title && typeof document !== "undefined") {
+            var activeSessionRow = document.querySelector('.dsh-tree-sessionRowActive .dsh-tree-sessionTitle, .dsh-tree-sessionRowActive .dsh-tree-title');
+            if (activeSessionRow && activeSessionRow.textContent) {
+              title = activeSessionRow.textContent.trim();
+            }
+          }
+          if (title) {
+            setTabs(function (prev) {
+              return prev.map(function (t) {
+                if (t.id === "chat-main" || t.type === "chat") {
+                  if (t.title !== title) return Object.assign({}, t, { title: title });
+                }
+                return t;
+              });
+            });
+          }
+        };
+        updateTitle();
+        var timer = setInterval(updateTitle, 500);
+        return function () { clearInterval(timer); };
+      }, []);
+
       React.useEffect(function () {
         var onTabMovedToTop = function (e) {
           var tab = e.detail;
@@ -4888,6 +5045,17 @@ button:hover .dsh-icon-ellipsis,
           setTabs(function (prev) {
             var remaining = prev.filter(function (t) { return t.id !== tab.id; });
             return remaining;
+          });
+          setActiveTab(function (curr) {
+            if (curr === tab.id) return null;
+            return curr;
+          });
+        };
+        var onTabMovedToRight = function (e) {
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            return prev.filter(function (t) { return t.id !== tab.id; });
           });
           setActiveTab(function (curr) {
             if (curr === tab.id) return null;
@@ -4913,14 +5081,35 @@ button:hover .dsh-icon-ellipsis,
           setActiveTab(tab.id);
         };
 
+        var onOpenTerminal = function (e) {
+          var sess = (e && e.detail && e.detail.session) || "0";
+          var termTab = { id: sess, type: "terminal", title: "Terminal: " + sess, session: sess };
+          setTabs(function (prev) {
+            if (prev.some(function (t) { return t.id === termTab.id; })) return prev;
+            return prev.concat([termTab]);
+          });
+          setActiveTab(termTab.id);
+        };
+
+        var onOpenContainer = function (e) {
+          var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
+          var contTab = { id: cId, type: "container", title: (e && e.detail && e.detail.title) || (cId === "container-sandboxes" ? "Docker Sandboxes" : "Container: " + cId.slice(0, 8)) };
+          setTabs(function (prev) {
+            if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
+            return prev.concat([contTab]);
+          });
+          setActiveTab(contTab.id);
+        };
+
         var onFocusChat = function (e) {
-          var chatTab = { id: "chat-main", type: "chat", title: (e && e.detail && e.detail.title) || "Conversation" };
+          var tTitle = (e && e.detail && e.detail.title) || (typeof window !== "undefined" && window.__dsh_current_session_title__) || "Conversation";
+          var chatTab = { id: "chat-main", type: "chat", title: tTitle };
           setTabs(function (prev) {
             var exists = prev.find(function (t) { return t.id === "chat-main" || t.type === "chat"; });
             if (exists) {
               return prev.map(function (t) {
                 if (t.id === "chat-main" || t.type === "chat") {
-                  return Object.assign({}, t, { title: (e && e.detail && e.detail.title) || t.title || "Conversation" });
+                  return Object.assign({}, t, { title: tTitle });
                 }
                 return t;
               });
@@ -4932,14 +5121,20 @@ button:hover .dsh-icon-ellipsis,
 
         window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
+        window.addEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
         window.addEventListener("dsh:open-file-tab", onOpenFileTab);
         window.addEventListener("dsh:open-repo-tab", onOpenRepoTab);
+        window.addEventListener("dsh:open-terminal", onOpenTerminal);
+        window.addEventListener("dsh:open-container", onOpenContainer);
         window.addEventListener("dsh:focus-chat", onFocusChat);
         return function () {
           window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
           window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
+          window.removeEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
           window.removeEventListener("dsh:open-file-tab", onOpenFileTab);
           window.removeEventListener("dsh:open-repo-tab", onOpenRepoTab);
+          window.removeEventListener("dsh:open-terminal", onOpenTerminal);
+          window.removeEventListener("dsh:open-container", onOpenContainer);
           window.removeEventListener("dsh:focus-chat", onFocusChat);
         };
       }, []);
@@ -4972,6 +5167,47 @@ button:hover .dsh-icon-ellipsis,
         });
       };
 
+      var checkIsTrajectory = function () {
+        var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
+        if (activeTabEl) {
+          var txt = (activeTabEl.textContent || '').trim().toLowerCase();
+          return txt === 'trajectory' || txt.includes('trajectory') || txt === '轨迹' || txt.includes('轨迹');
+        }
+        return Boolean(document.querySelector('[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]'));
+      };
+
+      var handleToggleView = function () {
+        var onTrajectoryNow = checkIsTrajectory();
+        var targetName = onTrajectoryNow ? 'chat' : 'trajectory';
+        var allTabs = Array.from(document.querySelectorAll('[role="tab"], [role="tablist"] button'));
+        var targetBtn = allTabs.find(function (b) {
+          var t = (b.textContent || '').trim().toLowerCase();
+          return (targetName === 'chat' && (t === 'chat' || t.includes('chat') || t === '对话' || t.includes('对话'))) ||
+                 (targetName === 'trajectory' && (t === 'trajectory' || t.includes('trajectory') || t === '轨迹' || t.includes('轨迹')));
+        });
+        if (targetBtn) {
+          targetBtn.click();
+        } else {
+          var inactiveBtn = allTabs.find(function (b) { return b.getAttribute('aria-selected') !== 'true'; });
+          if (inactiveBtn) inactiveBtn.click();
+        }
+      };
+
+      var handleDownloadSessionLog = function () {
+        try {
+          var activeSessId = (typeof window !== "undefined" && window.__dsh_current_session_id__) ? window.__dsh_current_session_id__ : "";
+          var exportUrl = '/api/session.export?id=' + encodeURIComponent(activeSessId || '');
+          var a = document.createElement('a');
+          a.href = exportUrl;
+          a.download = (activeSessId || 'session') + '.jsonl';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () {
+            if (a.parentNode) a.parentNode.removeChild(a);
+          }, 1000);
+        } catch (e) {}
+      };
+
       var bounds = useCenterBounds();
       var activeTabObj = tabs.find(function (t) { return t.id === activeTab; });
       var isMainTermActive = activeTabObj && activeTabObj.type === "terminal";
@@ -4995,7 +5231,7 @@ button:hover .dsh-icon-ellipsis,
               height: "36px",
               display: "flex",
               alignItems: "center",
-              gap: "4px",
+              justifyContent: "space-between",
               background: "var(--dsw-alias-surface-l0, #13141f)",
               padding: "0 10px",
               borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
@@ -5005,147 +5241,219 @@ button:hover .dsh-icon-ellipsis,
             onDragOver: function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; },
             onDrop: handleDropOnTop,
           },
-          tabs.map(function (t) {
-            var isSel = activeTab === t.id;
-            var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) :
-              (t.type === "container" ? h(ContainersGlyph, { size: 12 }) :
-              (t.type === "file" ? h(FileGlyph, { size: 12 }) :
-              (t.type === "repo" ? h(RepoGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }))));
-            return h(
+          // Left Tabs List & New Tab Plus
+          h(
+            "div",
+            { style: { display: "flex", alignItems: "center", gap: "4px", overflowX: "auto", scrollbarWidth: "none" } },
+            tabs.map(function (t) {
+              var isSel = activeTab === t.id;
+              var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) :
+                (t.type === "container" ? h(ContainersGlyph, { size: 12 }) :
+                (t.type === "file" ? h(FileGlyph, { size: 12 }) :
+                (t.type === "repo" ? h(RepoGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }))));
+              return h(
+                "div",
+                {
+                  key: t.id,
+                  draggable: true,
+                  onDragStart: function (e) {
+                    e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: t.id, type: t.type, title: t.title, session: t.session, path: t.path, from: "top" }));
+                  },
+                  onClick: function () {
+                    setActiveTab(t.id);
+                    if (t.type === "chat") {
+                      window.dispatchEvent(new CustomEvent("dsh:focus-chat"));
+                    }
+                  },
+                  onContextMenu: function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setContextMenu({ tab: t, pos: { x: e.clientX, y: e.clientY } });
+                  },
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "3px 8px",
+                    borderRadius: "5px",
+                    background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
+                    border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
+                    color: isSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
+                    fontSize: "12px",
+                    fontWeight: isSel ? 600 : 400,
+                    cursor: "pointer",
+                    transition: "all 120ms ease",
+                    maxWidth: "200px",
+                  },
+                },
+                icon,
+                h("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, t.title || "Tab"),
+                (t.type !== "chat" && t.id !== "chat-main") ? h(
+                  "button",
+                  {
+                    type: "button",
+                    title: "Close Tab",
+                    onClick: function (e) { removeTab(t.id, e); },
+                    style: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "14px",
+                      height: "14px",
+                      marginLeft: "2px",
+                      border: "none",
+                      borderRadius: "3px",
+                      background: "transparent",
+                      color: "inherit",
+                      opacity: 0.6,
+                      cursor: "pointer",
+                      fontSize: "12px",
+                    },
+                    onMouseEnter: function (e) { e.currentTarget.style.opacity = "1"; e.currentTarget.style.color = "#f85149"; },
+                    onMouseLeave: function (e) { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.color = "inherit"; },
+                  },
+                  "×"
+                ) : null
+              );
+            }),
+            h(
               "div",
-              {
-                key: t.id,
-                draggable: true,
-                onDragStart: function (e) {
-                  e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: t.id, type: t.type, title: t.title, session: t.session, path: t.path, from: "top" }));
-                },
-                onClick: function () {
-                  setActiveTab(t.id);
-                  if (t.type === "chat") {
-                    window.dispatchEvent(new CustomEvent("dsh:focus-chat"));
-                  }
-                },
-                onContextMenu: function (e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setContextMenu({ tab: t, pos: { x: e.clientX, y: e.clientY } });
-                },
-                style: {
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  padding: "3px 8px",
-                  borderRadius: "5px",
-                  background: isSel ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))" : "transparent",
-                  border: isSel ? "1px solid var(--dsw-alias-primary, #6366f1)" : "1px solid transparent",
-                  color: isSel ? "var(--dsw-alias-label-primary, #fff)" : "var(--dsw-alias-label-secondary, #8b949e)",
-                  fontSize: "12px",
-                  fontWeight: isSel ? 600 : 400,
-                  cursor: "pointer",
-                  transition: "all 120ms ease",
-                },
-              },
-              icon,
-              h("span", null, t.title || "Tab"),
-              (t.type !== "chat" && t.id !== "chat-main") ? h(
+              { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+              h(
                 "button",
                 {
+                  ref: topPlusBtnRef,
                   type: "button",
-                  title: "Close Tab",
-                  onClick: function (e) { removeTab(t.id, e); },
+                  title: "New Session / Terminal / Container",
+                  onClick: function (e) {
+                    e.stopPropagation();
+                    setPlusOpen(function (v) { return !v; });
+                  },
                   style: {
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "14px",
-                    height: "14px",
-                    marginLeft: "2px",
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "4px",
                     border: "none",
-                    borderRadius: "3px",
                     background: "transparent",
-                    color: "inherit",
-                    opacity: 0.6,
+                    color: "var(--dsw-alias-label-secondary)",
                     cursor: "pointer",
-                    fontSize: "12px",
                   },
-                  onMouseEnter: function (e) { e.currentTarget.style.opacity = "1"; e.currentTarget.style.color = "#f85149"; },
-                  onMouseLeave: function (e) { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.color = "inherit"; },
+                  onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
+                  onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
                 },
-                "×"
-              ) : null
-            );
-          }),
+                h(PlusGlyph, { size: 13 })
+              ),
+              h(SelectDropdownMenu, {
+                open: plusOpen,
+                anchorRef: topPlusBtnRef,
+                onClose: function () { setPlusOpen(false); },
+                items: [
+                  { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+                  { id: "terminal", label: "Terminal (Main View)", icon: h(TerminalsGlyph, { size: 13 }) },
+                  { id: "container", label: "Container Sandboxes (Main View)", icon: h(ContainersGlyph, { size: 13 }) },
+                ],
+                onSelect: function (actionId) {
+                  setPlusOpen(false);
+                  if (actionId === "chat") {
+                    window.dispatchEvent(new CustomEvent("dsh:new-session"));
+                    var chatTab = { id: "chat-main", type: "chat", title: (typeof window !== "undefined" && window.__dsh_current_session_title__) || "Conversation" };
+                    setTabs(function (prev) {
+                      if (prev.some(function (t) { return t.id === chatTab.id; })) return prev;
+                      return prev.concat([chatTab]);
+                    });
+                    setActiveTab("chat-main");
+                  } else if (actionId === "terminal") {
+                    var termName = "term-" + Math.floor(Math.random() * 1000);
+                    var newTab = { id: termName, type: "terminal", title: "Terminal " + termName, session: termName };
+                    fetch(QUOTAS_API + "/tmux/sessions/new", {
+                      method: "POST",
+                      headers: { "content-type": "application/json" },
+                      body: JSON.stringify({ name: termName }),
+                    });
+                    setTabs(function (prev) { return prev.concat([newTab]); });
+                    setActiveTab(newTab.id);
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: newTab }));
+                  } else if (actionId === "container") {
+                    var contTab = { id: "container-sandboxes", type: "container", title: "Docker Sandboxes" };
+                    setTabs(function (prev) {
+                      if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
+                      return prev.concat([contTab]);
+                    });
+                    setActiveTab(contTab.id);
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: contTab }));
+                  }
+                },
+              })
+            )
+          ),
+          // Right Controls: 3-dots Session / Area Options Menu
           h(
             "div",
-            { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+            { style: { display: "flex", alignItems: "center", gap: "2px" } },
             h(
-              "button",
-              {
-                ref: topPlusBtnRef,
-                type: "button",
-                title: "New Session / Terminal / Container",
-                onClick: function (e) {
-                  e.stopPropagation();
-                  setPlusOpen(function (v) { return !v; });
+              "div",
+              { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+              h(
+                "button",
+                {
+                  ref: topEllipsisBtnRef,
+                  type: "button",
+                  title: "Main Area Options (…)",
+                  onClick: function (e) {
+                    e.stopPropagation();
+                    setTopMenuOpen(!isTopMenuOpen);
+                  },
+                  style: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "26px",
+                    height: "26px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--dsw-alias-label-secondary)",
+                    cursor: "pointer",
+                  },
+                  onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
+                  onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
                 },
-                style: {
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "22px",
-                  height: "22px",
-                  borderRadius: "4px",
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--dsw-alias-label-secondary)",
-                  cursor: "pointer",
-                },
-                onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
-                onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
-              },
-              h(PlusGlyph, { size: 13 })
-            ),
-            h(SelectDropdownMenu, {
-              open: plusOpen,
-              anchorRef: topPlusBtnRef,
-              onClose: function () { setPlusOpen(false); },
-              items: [
-                { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
-                { id: "terminal", label: "Terminal (Main View)", icon: h(TerminalsGlyph, { size: 13 }) },
-                { id: "container", label: "Container Sandboxes (Main View)", icon: h(ContainersGlyph, { size: 13 }) },
-              ],
-              onSelect: function (actionId) {
-                setPlusOpen(false);
-                if (actionId === "chat") {
-                  window.dispatchEvent(new CustomEvent("dsh:new-session"));
-                  var chatTab = { id: "chat-main", type: "chat", title: "Conversation" };
-                  setTabs(function (prev) {
-                    if (prev.some(function (t) { return t.id === chatTab.id; })) return prev;
-                    return prev.concat([chatTab]);
-                  });
-                  setActiveTab("chat-main");
-                } else if (actionId === "terminal") {
-                  var termName = "term-" + Math.floor(Math.random() * 1000);
-                  var newTab = { id: termName, type: "terminal", title: "Terminal " + termName, session: termName };
-                  fetch(QUOTAS_API + "/tmux/sessions/new", {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    body: JSON.stringify({ name: termName }),
-                  });
-                  setTabs(function (prev) { return prev.concat([newTab]); });
-                  setActiveTab(newTab.id);
-                  window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: newTab }));
-                } else if (actionId === "container") {
-                  var contTab = { id: "container-sandboxes", type: "container", title: "Docker Sandboxes" };
-                  setTabs(function (prev) {
-                    if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
-                    return prev.concat([contTab]);
-                  });
-                  setActiveTab(contTab.id);
-                  window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: contTab }));
+                h(EllipsisGlyph, { size: 14 })
+              ),
+              h(SelectDropdownMenu, {
+                open: isTopMenuOpen,
+                anchorRef: topEllipsisBtnRef,
+                onClose: function () { setTopMenuOpen(false); },
+                items: [
+                  { id: "toggle-view", label: checkIsTrajectory() ? "Switch to Chat View" : "Switch to Trajectory View", icon: h(ChatGlyph, { size: 13 }) },
+                  { id: "download-log", label: "Download Session Log", icon: h(FolderOpenGlyph, { size: 13 }) },
+                  activeTabObj ? { id: "move-bottom", label: "Move Tab to Bottom Panel", icon: h(DockToggleGlyph, { size: 13 }) } : null,
+                  activeTabObj ? { id: "move-right", label: "Move Tab to Secondary Sidebar", icon: h(DockToggleGlyph, { size: 13 }) } : null,
+                  (activeTabObj && activeTabObj.type !== "chat") ? { id: "close-tab", label: "Close Active Tab", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
+                ].filter(Boolean),
+                onSelect: function (act) {
+                  setTopMenuOpen(false);
+                  if (act === "toggle-view") {
+                    handleToggleView();
+                  } else if (act === "download-log") {
+                    handleDownloadSessionLog();
+                  } else if (act === "move-bottom" && activeTabObj) {
+                    var tab = activeTabObj;
+                    removeTab(tab.id);
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-bottom", { detail: tab }));
+                  } else if (act === "move-right" && activeTabObj) {
+                    var tabR = activeTabObj;
+                    removeTab(tabR.id);
+                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-right", { detail: tabR }));
+                  } else if (act === "close-tab" && activeTabObj) {
+                    removeTab(activeTabObj.id);
+                  }
                 }
-              },
-            })
+              })
+            )
           ),
           contextMenu ? h(SelectDropdownMenu, {
             open: true,
@@ -5153,7 +5461,7 @@ button:hover .dsh-icon-ellipsis,
             onClose: function () { setContextMenu(null); },
             items: [
               { id: "move-bottom", label: "Move to Bottom Panel", icon: h(DockToggleGlyph, { size: 13 }) },
-              { id: "move-right", label: "Move to Right Dock", icon: h(DockToggleGlyph, { size: 13 }) },
+              { id: "move-right", label: "Move to Secondary Sidebar", icon: h(DockToggleGlyph, { size: 13 }) },
               contextMenu.tab && contextMenu.tab.type !== "chat" ? { id: "close", label: "Close Tab", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
             ].filter(Boolean),
             onSelect: function (act) {
@@ -6602,6 +6910,21 @@ button:hover .dsh-icon-ellipsis,
       var fileViewerState = React.useState(null);
       var fileViewer = fileViewerState[0], setFileViewer = fileViewerState[1];
 
+      var showSearchButtonState = React.useState(function () {
+        if (typeof window === 'undefined' || !window.localStorage) return true;
+        return window.localStorage.getItem('dsh_show_sidebar_search') !== 'false';
+      });
+      var showSearchButton = showSearchButtonState[0], setShowSearchButton = showSearchButtonState[1];
+
+      React.useEffect(function () {
+        var onSearchToggle = function (e) {
+          var enabled = (e && e.detail && e.detail.enabled !== undefined) ? e.detail.enabled : (localStorage.getItem('dsh_show_sidebar_search') !== 'false');
+          setShowSearchButton(enabled);
+        };
+        window.addEventListener('dsh:sidebar-search-toggle', onSearchToggle);
+        return function () { window.removeEventListener('dsh:sidebar-search-toggle', onSearchToggle); };
+      }, []);
+
       var renameModalState = React.useState(null);
       var renameModal = renameModalState[0], setRenameModal = renameModalState[1];
 
@@ -6822,6 +7145,10 @@ button:hover .dsh-icon-ellipsis,
 
       var handleOpenChat = function (sessionId, sessionTitle) {
         if (!sessionId) return;
+        if (typeof window !== "undefined") {
+          window.__dsh_current_session_id__ = sessionId;
+          if (sessionTitle) window.__dsh_current_session_title__ = sessionTitle;
+        }
         if (openSession) {
           try { openSession(sessionId); } catch (e) {}
         }
@@ -6915,32 +7242,100 @@ button:hover .dsh-icon-ellipsis,
         var liveContainers = containers.filter(function (c) { return Boolean(c.isRunning); });
         var totalLive = liveSessions.length + liveContainers.length;
 
+        var handleExpand = function (e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (typeof expandSidebar === "function") {
+            expandSidebar();
+          } else if (props && typeof props.expandSidebar === "function") {
+            props.expandSidebar();
+          } else {
+            var toggleBtn = document.querySelector('button[class*="toggle"], button[aria-label*="sidebar"], button[aria-label*="Sidebar"]');
+            if (toggleBtn) toggleBtn.click();
+          }
+        };
+
         return h(
           "div",
-          { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", width: "100%", position: "relative" } },
-          h(P.Tooltip, { label: "Search workspaces & chats", delayMs: 500 },
+          {
+            className: "dsh-collapsed-rail",
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "8px",
+              width: "100%",
+              height: "100%",
+              paddingTop: "6px",
+              position: "relative"
+            }
+          },
+          // 1. Dedicated Expand Rail Toggle
+          h("button", {
+            type: "button",
+            className: "dsh-tree-actionBtn dsh-rail-btn",
+            title: "Expand Sidebar",
+            "aria-label": "Expand Sidebar",
+            style: {
+              width: "32px",
+              height: "32px",
+              borderRadius: "7px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.06))",
+              color: "var(--dsw-alias-label-primary)",
+              cursor: "pointer"
+            },
+            onClick: handleExpand
+          }, h(DockToggleGlyph, { size: 18 })),
+
+          // 2. Search Button
+          showSearchButton ? h("button", {
+            type: "button",
+            className: "dsh-tree-actionBtn dsh-rail-btn",
+            title: "Search Workspaces & Chats",
+            "aria-label": "Search",
+            style: {
+              width: "32px",
+              height: "32px",
+              borderRadius: "7px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--dsw-alias-label-secondary)",
+              cursor: "pointer"
+            },
+            onClick: function (e) {
+              handleExpand(e);
+              setTimeout(function () {
+                setSearchExpanded(true);
+                if (searchInputRef.current) searchInputRef.current.focus();
+              }, 150);
+            }
+          }, h(SearchGlyph, { size: 18 })) : null,
+
+          // 3. New Item Plus Button
+          h("div", { style: { position: "relative" } },
             h("button", {
               type: "button",
-              className: "dsh-tw-trigger dsh-tw-rail",
-              "aria-label": "Search",
+              className: "dsh-tree-actionBtn dsh-rail-btn",
+              title: "New Item",
+              "aria-label": "New Item",
+              style: {
+                width: "32px",
+                height: "32px",
+                borderRadius: "7px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--dsw-alias-primary, #6366f1)",
+                cursor: "pointer"
+              },
               onClick: function (e) {
                 e.stopPropagation();
-                if (props.expandSidebar) props.expandSidebar();
-              },
-            }, h(SearchGlyph, { size: 18 }))
-          ),
-          h("div", { style: { position: "relative" } },
-            h(P.Tooltip, { label: "New item (chat / terminal / container)", delayMs: 500, disabled: isRailPlusOpen },
-              h("button", {
-                type: "button",
-                className: "dsh-tw-trigger dsh-tw-rail",
-                "aria-label": "New item",
-                onClick: function (e) {
-                  e.stopPropagation();
-                  setPlusMenu(isRailPlusOpen ? null : "rail");
-                },
-              }, h(PlusGlyph, { size: 18 }))
-            ),
+                setPlusMenu(isRailPlusOpen ? null : "rail");
+              }
+            }, h(PlusGlyph, { size: 18 })),
             h(SelectDropdownMenu, {
               open: isRailPlusOpen,
               onClose: function () { setPlusMenu(null); },
@@ -6962,30 +7357,41 @@ button:hover .dsh-icon-ellipsis,
               }
             })
           ),
-          h(P.Tooltip, { label: totalLive > 0 ? ("Active processes: " + totalLive) : "Terminals & Sandboxes", delayMs: 500 },
-            h("button", {
-              type: "button",
-              className: "dsh-tw-trigger dsh-tw-rail",
-              style: { position: "relative" },
-              "aria-label": "Active processes",
-              onClick: function () {
-                window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
-              },
+
+          // 4. Terminals / Sandboxes Processes
+          h("button", {
+            type: "button",
+            className: "dsh-tree-actionBtn dsh-rail-btn",
+            title: totalLive > 0 ? ("Active processes (" + totalLive + ")") : "Terminals & Sandboxes",
+            "aria-label": "Terminals & Sandboxes",
+            style: {
+              width: "32px",
+              height: "32px",
+              borderRadius: "7px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              color: "var(--dsw-alias-label-secondary)",
+              cursor: "pointer"
             },
-              h(TerminalsGlyph, { size: 18 }),
-              totalLive > 0 ? h("span", {
-                style: {
-                  position: "absolute",
-                  top: "6px",
-                  right: "6px",
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  backgroundColor: "#6366f1",
-                  boxShadow: "0 0 6px rgba(99, 102, 241, 0.6)",
-                }
-              }) : null
-            )
+            onClick: function () {
+              window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: sessions[0] ? sessions[0].name : "0" } }));
+            }
+          },
+            h(TerminalsGlyph, { size: 18 }),
+            totalLive > 0 ? h("span", {
+              style: {
+                position: "absolute",
+                top: "4px",
+                right: "4px",
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                backgroundColor: "#6366f1",
+                boxShadow: "0 0 6px rgba(99, 102, 241, 0.6)"
+              }
+            }) : null
           )
         );
       }
@@ -6993,6 +7399,71 @@ button:hover .dsh-icon-ellipsis,
       var liveSessions = sessions.filter(function (s) { return Boolean(s.attached); });
       var liveContainers = containers.filter(function (c) { return Boolean(c.isRunning); });
       var totalLive = liveSessions.length + liveContainers.length;
+
+      var renderUnifiedPlusButton = function (targetDir, anchorKey) {
+        var isMenuOpen = plusMenu === anchorKey;
+        var path = targetDir || currentRoot || "/Users/user/Projects";
+
+        return h("div", { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+          h("button", {
+            type: "button",
+            className: "dsh-tree-actionBtn",
+            title: "New Item (+)",
+            "aria-label": "New Item",
+            onClick: function (e) {
+              e.stopPropagation();
+              setPlusMenu(isMenuOpen ? null : anchorKey);
+            }
+          }, h(PlusGlyph, { size: 13 })),
+          h(SelectDropdownMenu, {
+            open: isMenuOpen,
+            onClose: function () { setPlusMenu(null); },
+            items: [
+              { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+              { id: "terminal", label: "Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
+              { id: "container", label: "Sandbox Container", icon: h(ContainersGlyph, { size: 13 }) },
+              { id: "new-folder", label: "New Directory…", icon: h(FolderPlusGlyph, { size: 13 }) },
+              { id: "open-workspace", label: "Open Folder as Workspace…", icon: h(BlueFolderGlyph, { size: 13 }) },
+              { id: "archive-empty", label: "Archive Empty Chats", icon: h(TrashGlyph, { size: 13 }), danger: true }
+            ],
+            onSelect: function (actionId) {
+              setPlusMenu(null);
+              if (actionId === "chat") {
+                handleStartSessionInDir(path);
+              } else if (actionId === "terminal") {
+                handleNewTerminalInDir(path);
+              } else if (actionId === "container") {
+                window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { cwd: path } }));
+              } else if (actionId === "new-folder") {
+                var dirName = prompt("New directory name in " + path + ":");
+                if (dirName && dirName.trim()) {
+                  fetch(QUOTAS_API + "/fs/mkdir", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({ path: path + "/" + dirName.trim() })
+                  }).then(function () { loadAll(); });
+                }
+              } else if (actionId === "open-workspace") {
+                var defaultPath = path || "/Users/user/Projects";
+                var p = prompt("Enter directory path for new Workspace:", defaultPath);
+                if (p && p.trim()) {
+                  var cleanP = p.trim();
+                  if (createWorkspace) {
+                    createWorkspace({ path: cleanP }).then(function (w) {
+                      if (startSession) startSession(w ? w.workspaceId : undefined);
+                      loadAll();
+                    });
+                  } else {
+                    handleStartSessionInDir(cleanP);
+                  }
+                }
+              } else if (actionId === "archive-empty") {
+                handleArchivePongSessions();
+              }
+            }
+          })
+        );
+      };
 
       var renderChatRow = function (chat, padLeft) {
         var isChatActive = chat.id === currentSessionId;
@@ -7324,79 +7795,7 @@ button:hover .dsh-icon-ellipsis,
                 h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
                 chatsInDir.length > 0 ? h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, chatsInDir.length) : null,
                 h("span", { className: "dsh-tree-actions" },
-                  h("button", {
-                    type: "button",
-                    className: "dsh-tree-actionBtn",
-                    title: "New in Folder (+)",
-                    onClick: function (e) { e.stopPropagation(); setPlusMenu(isPlusOpen ? null : entry.path); }
-                  }, h(PlusGlyph, { size: 13 })),
-                  h(SelectDropdownMenu, {
-                    open: isPlusOpen,
-                    onClose: function () { setPlusMenu(null); },
-                    items: [
-                      { id: "new-chat", label: "New Chat in this folder", icon: h(ChatGlyph, { size: 13 }) },
-                      { id: "new-term", label: "New Terminal here", icon: h(TerminalsGlyph, { size: 13 }) },
-                      { id: "new-cont", label: "New Container here", icon: h(ContainersGlyph, { size: 13 }) },
-                    ],
-                    onSelect: function (actionId) {
-                      if (actionId === "new-term") handleNewTerminalInDir(entry.path);
-                      else if (actionId === "new-chat") handleStartSessionInDir(entry.path);
-                      else if (actionId === "new-cont") window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { cwd: entry.path } }));
-                    }
-                  }),
-                  h("button", {
-                    type: "button",
-                    className: "dsh-tree-actionBtn",
-                    title: "Folder Actions (…)",
-                    onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isFolderEllipsisOpen ? null : { id: "folder::" + entry.path }); }
-                  }, h(EllipsisGlyph, { size: 13 })),
-                  h(SelectDropdownMenu, {
-                    open: isFolderEllipsisOpen,
-                    position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
-                    onClose: function () { setEllipsisOpen(null); },
-                    items: [
-                      isRepo ? { id: "open-repo-tab", label: "Open Repository in Tab", icon: h(RepoGlyph, { size: 13 }) } : null,
-                      { id: "set-root", label: "Focus Directory as Root", icon: h(FolderOpenGlyph, { size: 13 }) },
-                      { id: "open-term", label: "Open Terminal Here", icon: h(TerminalsGlyph, { size: 13 }) },
-                      { id: "cut", label: "Cut Folder", icon: h(CutGlyph, { size: 13 }) },
-                      { id: "copy-path", label: "Copy Path", icon: h(CopyGlyph, { size: 13 }) },
-                      { id: "rename", label: "Rename Folder", icon: h(EditGlyph, { size: 13 }) },
-                      { id: "delete", label: "Delete Folder", icon: h(TrashGlyph, { size: 13 }), danger: true },
-                    ].filter(Boolean),
-                    onSelect: function (actionId) {
-                      if (actionId === "open-repo-tab") {
-                        window.dispatchEvent(new CustomEvent("dsh:open-repo-tab", { detail: { id: "repo::" + entry.path, type: "repo", title: entry.name, path: entry.path } }));
-                      } else if (actionId === "set-root") {
-                        setCurrentRoot(entry.path);
-                        var exp = {}; exp[entry.path] = true;
-                        setExpandedPaths(exp);
-                        fetchDir(entry.path);
-                      } else if (actionId === "open-term") {
-                        handleNewTerminalInDir(entry.path);
-                      } else if (actionId === "cut" || actionId === "copy-path") {
-                        if (typeof navigator !== "undefined" && navigator.clipboard) {
-                          navigator.clipboard.writeText(entry.path);
-                        }
-                      } else if (actionId === "rename") {
-                        var newN = prompt("Rename folder:", entry.name);
-                        if (newN && newN !== entry.name) {
-                          fetch(QUOTAS_API + "/fs/rename", {
-                            method: "POST",
-                            headers: { "content-type": "application/json" },
-                            body: JSON.stringify({ oldPath: entry.path, newName: newN }),
-                          }).then(function () { fetchDir(dirPath); });
-                        }
-                      } else if (actionId === "delete") {
-                        if (confirm("Delete directory " + entry.name + "?")) {
-                          fetch(QUOTAS_API + "/fs/delete", {
-                            method: "POST",
-                            headers: { "content-type": "application/json" },
-                            body: JSON.stringify({ path: entry.path }),
-                          }).then(function () { fetchDir(dirPath); });
-                        }
-                      }
-                    }
-                  })
+                  renderUnifiedPlusButton(entry.path, "folder-plus::" + entry.path)
                 )
               ),
               isExp ? h(
@@ -7460,7 +7859,20 @@ button:hover .dsh-icon-ellipsis,
 
       return h(
         "div",
-        { style: { display: "flex", flexDirection: "column", width: "100%", height: "100%", overflowY: "auto", gap: "4px", padding: "0 0 4px 0" } },
+        {
+          className: "dsh-sidebar-tree-container",
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            alignItems: "stretch",
+            width: "100%",
+            height: "100%",
+            overflowY: "auto",
+            gap: "2px",
+            padding: "0 0 8px 0"
+          }
+        },
 
         // 0. NATIVE SIDEBAR HEADER: Title, Search, View Options, Add Workspace
         h(
@@ -7473,6 +7885,7 @@ button:hover .dsh-icon-ellipsis,
               justifyContent: "space-between",
               padding: "6px 8px 8px 10px",
               minHeight: "36px",
+              flex: "0 0 auto",
               borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
               userSelect: "none",
             }
@@ -7513,27 +7926,27 @@ button:hover .dsh-icon-ellipsis,
             "div",
             { style: { display: "flex", alignItems: "center", gap: "2px" } },
             // Search Trigger Button
-            h(P.Tooltip, { label: "Search workspaces & chats", delayMs: 400 },
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center" },
-                onClick: function () {
-                  setSearchExpanded(true);
-                  setTimeout(function () { if (searchInputRef.current) searchInputRef.current.focus(); }, 50);
-                }
-              }, h(SearchGlyph, { size: 14 }))
-            ),
+            showSearchButton ? h("button", {
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "Search workspaces & chats",
+              "aria-label": "Search",
+              style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center" },
+              onClick: function () {
+                setSearchExpanded(true);
+                setTimeout(function () { if (searchInputRef.current) searchInputRef.current.focus(); }, 50);
+              }
+            }, h(SearchGlyph, { size: 14 })) : null,
             // View Options Menu
-            h(P.Tooltip, { label: "View Options", delayMs: 400 },
-              h("button", {
-                ref: viewOptionsBtnRef,
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center" },
-                onClick: function () { setViewOptionsOpen(!viewOptionsOpen); }
-              }, h(SlidersGlyph, { size: 14 }))
-            ),
+            h("button", {
+              ref: viewOptionsBtnRef,
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "View Options",
+              "aria-label": "View Options",
+              style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center" },
+              onClick: function () { setViewOptionsOpen(!viewOptionsOpen); }
+            }, h(SlidersGlyph, { size: 14 })),
             viewOptionsOpen ? h(SelectDropdownMenu, {
               open: viewOptionsOpen,
               anchorRef: viewOptionsBtnRef,
@@ -7548,56 +7961,15 @@ button:hover .dsh-icon-ellipsis,
                 }
               }
             }) : null,
-            // Add Workspace Button (native folder plus)
-            h(P.Tooltip, { label: "Add Workspace Folder…", delayMs: 400 },
-              h("button", {
-                ref: addWsBtnRef,
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                style: { width: "26px", height: "26px", borderRadius: "5px", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--dsw-alias-primary, #6366f1)" },
-                onClick: function () { setAddWsMenuOpen(!addWsMenuOpen); }
-              }, h(FolderPlusGlyph, { size: 14 }))
-            ),
-            addWsMenuOpen ? h(SelectDropdownMenu, {
-              open: addWsMenuOpen,
-              anchorRef: addWsBtnRef,
-              onClose: function () { setAddWsMenuOpen(false); },
-              items: [
-                { id: "pick-folder", label: "Open Folder as Workspace…", icon: h(FolderGlyph, { size: 13 }) },
-                { id: "new-folder", label: "Create New Workspace Directory…", icon: h(FolderPlusGlyph, { size: 13 }) },
-                { id: "new-chat", label: "New Unscoped Chat", icon: h(ChatGlyph, { size: 13 }) },
-                { id: "new-term", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
-              ],
-              onSelect: function (act) {
-                setAddWsMenuOpen(false);
-                if (act === "pick-folder" || act === "new-folder") {
-                  var defaultPath = "/Users/user/Projects";
-                  var p = prompt("Enter directory path for new Workspace:", defaultPath);
-                  if (p && p.trim()) {
-                    var cleanP = p.trim();
-                    if (createWorkspace) {
-                      createWorkspace({ path: cleanP }).then(function (w) {
-                        if (startSession) startSession(w ? w.workspaceId : undefined);
-                        loadAll();
-                      });
-                    } else {
-                      handleStartSessionInDir(cleanP);
-                    }
-                  }
-                } else if (act === "new-chat") {
-                  if (startSession) startSession();
-                } else if (act === "new-term") {
-                  window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
-                }
-              }
-            }) : null
+            // Add Workspace Button (unified plus dropdown)
+            renderUnifiedPlusButton("/Users/user/Projects", "root-ws")
           ) : null
         ),
 
-        // 1. PINNED SESSIONS SECTION (TOP)
-        h(
+        // 1. PINNED SESSIONS SECTION (TOP) - ONLY RENDER IF PINNED ITEMS EXIST
+        filteredPinnedSessions.length > 0 ? h(
           "div",
-          { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
+          { style: { display: "flex", flexDirection: "column", width: "100%", flex: "0 0 auto", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
           h(
             "div",
             {
@@ -7614,27 +7986,20 @@ button:hover .dsh-icon-ellipsis,
             h("span", { className: "dsh-tree-title" }, "Pinned"),
             h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, filteredPinnedSessions.length),
             h("span", { className: "dsh-tree-actions" },
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "New Session",
-                onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
-              }, h(PlusGlyph, { size: 13 }))
+              renderUnifiedPlusButton(null, "pinned-plus")
             )
           ),
           isPinnedOpen ? h(
             "div",
             { style: { display: "flex", flexDirection: "column", width: "100%" } },
-            filteredPinnedSessions.length > 0
-              ? filteredPinnedSessions.map(function (chat) { return renderChatRow(chat, 16); })
-              : h("div", { style: { padding: "4px 8px 4px 24px", fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } }, "(no pinned sessions)")
+            filteredPinnedSessions.map(function (chat) { return renderChatRow(chat, 16); })
           ) : null
-        ),
+        ) : null,
 
         // 2. ACTIVE / LIVE SECTION
         h(
           "div",
-          { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
+          { style: { display: "flex", flexDirection: "column", width: "100%", flex: "0 0 auto", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
           h(
             "div",
             {
@@ -7651,15 +8016,7 @@ button:hover .dsh-icon-ellipsis,
             h("span", { className: "dsh-tree-title" }, "Active"),
             h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, totalActiveCount),
             h("span", { className: "dsh-tree-actions" },
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "New Terminal",
-                onClick: function (e) {
-                  e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
-                }
-              }, h(TerminalsGlyph, { size: 13 }))
+              renderUnifiedPlusButton(null, "active-plus")
             )
           ),
           isActiveOpen ? h(
@@ -7684,7 +8041,7 @@ button:hover .dsh-icon-ellipsis,
                       },
                       h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-primary, #6366f1)" } }, h(TerminalsGlyph, { size: 13 })),
                       h("span", { className: "dsh-tree-title", style: { fontSize: "12px" } }, "Terminal: " + sess.name),
-                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "auto" } }, "RUNNING")
+                      h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: "#3fb950", marginLeft: "auto", flexShrink: 0, boxShadow: "0 0 5px rgba(63, 185, 80, 0.5)" } })
                     );
                   }),
                   liveContainers.map(function (cont) {
@@ -7701,7 +8058,7 @@ button:hover .dsh-icon-ellipsis,
                       },
                       h("span", { className: "dsh-tree-slot dsh-tree-icon", style: { color: "var(--dsw-alias-primary, #6366f1)" } }, h(ContainersGlyph, { size: 13 })),
                       h("span", { className: "dsh-tree-title", style: { fontSize: "12px" } }, "Container: " + (cont.name || cont.image || cont.id.slice(0, 12))),
-                      h("span", { style: { fontSize: "9px", padding: "1px 5px", borderRadius: "4px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "auto" } }, "LIVE")
+                      h("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: "#3fb950", marginLeft: "auto", flexShrink: 0, boxShadow: "0 0 5px rgba(63, 185, 80, 0.5)" } })
                     );
                   })
                 )
@@ -7712,7 +8069,7 @@ button:hover .dsh-icon-ellipsis,
         // 3. HOSTS SECTION (Host Machine -> Macintosh HD -> Filesystem Directory Hierarchy)
         h(
           "div",
-          { style: { display: "flex", flexDirection: "column", width: "100%", flex: 1, margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
+          { style: { display: "flex", flexDirection: "column", width: "100%", flex: "0 0 auto", margin: "2px 0 4px 0", paddingBottom: "4px", borderBottom: "1px solid var(--dsw-alias-border-l1)" } },
           // Top Level: Host Machine
           h(
             "div",
@@ -7729,15 +8086,7 @@ button:hover .dsh-icon-ellipsis,
             ),
             h("span", { className: "dsh-tree-title" }, "Host Machine"),
             h("span", { className: "dsh-tree-actions" },
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "New Terminal on Host",
-                onClick: function (e) {
-                  e.stopPropagation();
-                  handleNewTerminalInDir("/");
-                }
-              }, h(TerminalsGlyph, { size: 13 }))
+              renderUnifiedPlusButton("/", "host-plus")
             )
           ),
           isHostOpen ? h(
@@ -7759,15 +8108,7 @@ button:hover .dsh-icon-ellipsis,
               ),
               h("span", { className: "dsh-tree-title" }, "Macintosh HD"),
               h("span", { className: "dsh-tree-actions" },
-                h("button", {
-                  type: "button",
-                  className: "dsh-tree-actionBtn",
-                  title: "New Chat in Root",
-                  onClick: function (e) {
-                    e.stopPropagation();
-                    handleStartSessionInDir("/");
-                  }
-                }, h(PlusGlyph, { size: 13 }))
+                renderUnifiedPlusButton("/", "drive-plus")
               )
             ),
             isDriveOpen ? h(
@@ -7793,7 +8134,7 @@ button:hover .dsh-icon-ellipsis,
         // 4. UNGROUPED SESSIONS SECTION
         h(
           "div",
-          { style: { display: "flex", flexDirection: "column", width: "100%", margin: "2px 0 4px 0", paddingBottom: "4px" } },
+          { style: { display: "flex", flexDirection: "column", width: "100%", flex: "0 0 auto", margin: "2px 0 4px 0", paddingBottom: "4px" } },
           h(
             "div",
             {
@@ -7810,35 +8151,7 @@ button:hover .dsh-icon-ellipsis,
             h("span", { className: "dsh-tree-title" }, "Ungrouped"),
             h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)", fontWeight: 700, marginLeft: "4px" } }, filteredUngroupedSessions.length),
             h("span", { className: "dsh-tree-actions" },
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "New Session",
-                onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
-              }, h(PlusGlyph, { size: 13 })),
-              h("button", {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "Ungrouped Actions (…)",
-                onClick: function (e) { e.stopPropagation(); setUngroupedMenuOpen(!isUngroupedMenuOpen); }
-              }, h(EllipsisGlyph, { size: 13 })),
-              h(SelectDropdownMenu, {
-                open: isUngroupedMenuOpen,
-                onClose: function () { setUngroupedMenuOpen(false); },
-                items: [
-                  { id: "archive-empty", label: "Archive Empty & Pong Sessions", icon: h(TrashGlyph, { size: 13 }), danger: true },
-                ],
-                onSelect: function (act) {
-                  if (act === "archive-empty") {
-                    fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
-                      .then(function (r) { return r.json(); })
-                      .then(function (res) {
-                        alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
-                        window.location.reload();
-                      });
-                  }
-                }
-              })
+              renderUnifiedPlusButton(null, "ungrouped-plus")
             )
           ),
           isUngroupedOpen ? h(

@@ -45,10 +45,14 @@ plugin.apply(ctx, {
   tools: { shell: ['bash'] },
   routes: { shell: { provider: 'test-provider', model: 'test-model' } },
 })
-assert.equal(commands.length, 2)
-assert.equal(commands[0].name, 'action')
-assert.equal(commands[1].name, 'mode')
-assert.deepEqual(commands[0].handler({ agent, rawInput: 'shell' }), { kind: 'success', text: 'Action queued: shell' })
+assert.ok(commands.length >= 2)
+const actionCmd = commands.find((c) => c.name === 'action')
+const modeCmd = commands.find((c) => c.name === 'mode')
+const presetCmd = commands.find((c) => c.name === 'preset')
+assert.ok(actionCmd)
+assert.ok(modeCmd)
+assert.ok(presetCmd)
+assert.deepEqual(actionCmd.handler({ agent, rawInput: 'shell' }), { kind: 'success', text: 'Preset queued: shell' })
 
 const preStep = listeners.get('agent/pre-step')
 assert.equal(typeof preStep, 'function')
