@@ -13,10 +13,19 @@
 
 One agent stack, everything a harness plugin. The harness checkout (`harness/`) is
 the upstream source, pinned and kept **pristine** — no forks, no source edits. All
-UI/behavior extension flows through a single abstraction owned by **`dsh-tweaks`**,
-implemented with the harness's own endorsed composition mechanism (slot shadowing +
-profile patch "disable + insert" rows). Every other plugin registers into seams that
-dsh-tweaks declares; no plugin other than dsh-tweaks touches harness internals.
+UI/behavior extension flows through 6 cohesive Domain Packs (`core/`, `ux/`, `agents/`,
+`ai/`, `integrations/`, `vcs/`) comprising 56 atomic, single-responsibility Cordis
+packages.
+
+### 1.1 The 6 Domain Packs Architecture
+
+1. **`core/`** (`@stack/pack-core`): Universal plugin manager & DAG resolver (`plugin-manager`), provider abstraction (`providers-registry`), integrations registry (`integrations-registry`), encrypted vault (`vault-credentials`), 5-tier navigation tree with native `.app` icon extraction via `sips` (`sidebar-tree`), draggable/resizable modal frame (`settings-dialog`), and global keybindings (`keybindings`).
+2. **`ux/`** (`@stack/pack-ux`): Universal tab manager & split-window manager (`tab-manager`), rich Monaco-based editor (`code-editor`), icon pipeline (`icon-engine` with 1,105 `packs/lucide-animated` SVGs), theme studio (`theme-studio`), voice engine (`voice-synthesis`), and TUI client (`terminal-client`).
+3. **`agents/`** (`@stack/pack-agents`): Agent personas & subagents dock (`personas`), action modes (`actions`), slash command autocomplete (`commands`), tools & MCP connector (`tools`), DarkFactory loops (`loops`), dynamic skills loader (`skills`), and prompt translator (`translator`).
+4. **`ai/`** (`@stack/pack-ai`): Protocol dialects & wire serializers (`protocol-dialects`).
+5. **`integrations/`** (`@stack/pack-integrations`): tmux session daemon (`tmux-terminal`) hosting 16 interactive CLI harnesses (`claude`, `kimi`, `antigravity`, `codex`, `cursor`, `grok`, `hermes`, `ollama`, `github-cli`, `git-cli`, `sapling-cli`, `code-cli`, `bun-cli`, `pnpm-cli`, `npm-cli`, `nvm-cli`), runtime engine (`package-managers`), self-hosted VS Code server (`code-server`), 4 direct API adapters (`providers/`), Docker containers (`docker-sandbox`), LSP client with 5 language servers (`lsp-client/servers/*`), formatters (`code-formatters`), and Tailscale discovery (`mesh-hosts`).
+6. **`vcs/`** (`@stack/pack-vcs`): Repository workbench UI (`workbench-core`), local/remote Git and Sapling drivers (`git-driver`, `sapling-driver`), and forges (`github-forge`, `gitlab-forge`, `forgejo-forge`).
+
 
 ### 1.1 The abstraction layer (Option A)
 

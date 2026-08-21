@@ -14,23 +14,49 @@ Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness
   - `hooks/` — pre-commit, commit-msg, pre-push workflow enforcement.
 - `harness/` — pinned checkout of `deepseek-ai/deepseek-harness` (only git submodule, source of truth, kept pristine).
 - `plugins/` — monorepo plugin packages, directly tracked in this repository:
-  - `dsh-actions/` — background jobs, actions, and terminal process execution.
-  - `dsh-agents/` — custom agents as JSON/MD persona files materialized as agent presets: base composition spliced, live roster, `/persona` command, `dsh agents` CLI.
-  - `dsh-credentials/` — account/credential manager (v2: full vault parity port).
-  - `dsh-dialects/` — provider wire-protocol abstraction (bundled: openai, claude, gemini, code-assist).
-  - `dsh-formatters/` — per-extension formatter commands: `format` tool + auto-format-on-edit + `dsh formatter` CLI.
-  - `dsh-hosts/` — multi-node remote host synchronization.
-  - `dsh-loops/` — goal-based deterministic loops and criteria execution.
-  - `dsh-lsp/` — LSP server table for the harness LSP seam: `mergeServers`, `Lsp` def + `lsp-stdio`/`tool-lsp` mounts, `dsh lsp` CLI.
-  - `dsh-providers/` — LLM provider adapters: 14 routes (5 subscription + 8 API-key + OpenCode Zen); quotas subpackage (QuotaRegistry, web routes, auto-refresh, settings).
-  - `dsh-repos/` — repo workflows: branch/commit/push/PR consuming `GITHUB_OAUTH_TOKEN`, `dsh repos` CLI.
-  - `dsh-themes/` — VS Code/TextMate themes: store + Open VSX catalog, `/themes.json` route, browser bundle, `dsh theme` CLI.
-  - `dsh-tools/` — config-file custom tools: `dsh-tools.tools` map → `ctx.tools` entries, `{name}` placeholders, `dsh tool` CLI.
-  - `dsh-translator/` — session and skill schema translation.
-  - `dsh-tui/` — standalone TUI client for dsh.
-  - `dsh-tweaks/` — harness extension layer: 3-dots conversation menu with view switcher (Chat/Trajectory) and log export, Subagents input dock above input bar, sidebar/workspaces/settings occupants, and plugin-facing seams.
-  - `dsh-voice/` — browser speech-to-text & model-assisted TTS engine.
-- `scripts/dsh` — launcher: checks current state home, adjusts to configured root, execs the harness binary. Routes plugin verbs: `accounts` (dsh-credentials), `stats`/`sessions`/`share` (dsh-tweaks), `theme` (dsh-themes), `lsp` (dsh-lsp), `formatter` (dsh-formatters), `agents` (dsh-agents).
+  - **`core/`** (`@stack/pack-core`): Foundation, Shell & Abstractions Pack:
+    - `plugin-manager/` (`@stack/plugin-manager`): Universal plugin registry, DAG resolver & optional dependencies.
+    - `providers-registry/` (`@stack/providers-registry`): Provider abstraction, quota probes & model favorites.
+    - `integrations-registry/` (`@stack/integrations-registry`): Integrations health & lifecycle registry.
+    - `vault-credentials/` (`@stack/vault-credentials`): Encrypted secrets vault & OAuth service.
+    - `sidebar-tree/` (`@stack/sidebar-tree`): 5-tier navigation tree with native `.app` icon extraction (`sips`) & strict tri-color palette.
+    - `settings-dialog/` (`@stack/settings-dialog`): Draggable/resizable settings modal & navigation rails.
+    - `keybindings/` (`@stack/keybindings`): Keyboard shortcuts engine & recorder.
+  - **`ux/`** (`@stack/pack-ux`): Presentation, UI & Media Pack:
+    - `tab-manager/` (`@stack/tab-manager`): Universal tab bar, split window docking, bottom drawer panel, right-click tab menus.
+    - `code-editor/` (`@stack/code-editor`): Monaco-powered multi-file tab editor & split diff viewer.
+    - `icon-engine/` (`@stack/icon-engine`): Universal icon resolution pipeline & native app `sips` loader.
+      - `packs/lucide-animated/` (`@stack/icon-pack-lucide`): 1,105 animated SVG icon components.
+    - `theme-studio/` (`@stack/theme-studio`): VS Code/TextMate themes & Open VSX catalog.
+    - `voice-synthesis/` (`@stack/voice-synthesis`): Web Speech API & Whisper neural speech engine.
+    - `terminal-client/` (`@stack/terminal-client`): Standalone TUI client binary.
+  - **`agents/`** (`@stack/pack-agents`): Cognitive Agent Systems Pack:
+    - `personas/` (`@stack/personas`): Agent personas roster & Subagents Dock.
+    - `actions/` (`@stack/actions`): Session action modes & tool execution policies.
+    - `commands/` (`@stack/commands`): Slash commands engine & input autocomplete.
+    - `tools/` (`@stack/tools`): Universal tool registry & MCP connectors (`ctx.tools`).
+    - `loops/` (`@stack/loops`): DarkFactory autonomous goal loops.
+    - `skills/` (`@stack/skills`): Dynamic agent skill loader (`.agents/skills/`).
+    - `translator/` (`@stack/translator`): Cross-provider prompt and session serializer.
+  - **`ai/`** (`@stack/pack-ai`): Wire Protocols & Model Dialects Pack:
+    - `protocol-dialects/` (`@stack/protocol-dialects`): Wire protocol serializers (OpenAI, Claude, Gemini, Kimi, Code Assist).
+  - **`integrations/`** (`@stack/pack-integrations`): Integrations, Sandboxes, Tools & Providers Pack:
+    - `tmux-terminal/` (`@stack/tmux-terminal`): tmux session daemon & 16 CLI harnesses (`claude`, `kimi`, `antigravity`, `codex`, `cursor`, `grok`, `hermes`, `ollama`, `github-cli`, `git-cli`, `sapling-cli`, `code-cli`, `bun-cli`, `pnpm-cli`, `npm-cli`, `nvm-cli`).
+    - `package-managers/` (`@stack/package-managers`): Multi-runtime engine (Bun, pnpm, npm, yarn, Cargo, uv/pip) & Node version switcher.
+    - `code-server/` (`@stack/code-server`): Self-hosted VS Code server manager & iframe proxy.
+    - `providers/` (`@stack/pack-direct-providers`): Direct API providers (`openai-api`, `gemini-studio`, `zen-gateway`, `deepseek-official`).
+    - `docker-sandbox/` (`@stack/docker-sandbox`): Container sandboxes & logs inspector.
+    - `lsp-client/` (`@stack/lsp-client`): Language server protocol client & servers (`typescript`, `python`, `rust`, `golang`, `json-yaml`).
+    - `code-formatters/` (`@stack/code-formatters`): Multi-language source formatters.
+    - `mesh-hosts/` (`@stack/mesh-hosts`): Tailscale mesh discovery.
+  - **`vcs/`** (`@stack/pack-vcs`): Version Control & Forges Pack:
+    - `workbench-core/` (`@stack/workbench-core`): Repository workbench, diff viewer & 100% offline local repos.
+    - `git-driver/` (`@stack/git-driver`): Git driver (requires `git-cli`).
+    - `sapling-driver/` (`@stack/sapling-driver`): Sapling driver (requires `sapling-cli`).
+    - `github-forge/` (`@stack/github-forge`): GitHub forge adapter (requires `github-cli`).
+    - `gitlab-forge/` (`@stack/gitlab-forge`): GitLab forge adapter.
+    - `forgejo-forge/` (`@stack/forgejo-forge`): Forgejo/Gitea self-hosted forge adapter.
+
 
 ## State
 

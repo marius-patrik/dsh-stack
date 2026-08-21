@@ -51,13 +51,23 @@ CC/Codex hooks compat, E2B sandbox, session replay, everything-as-config-plugin.
 
 ---
 
-## 3. Already shipped (knocked off — check these first)
+## 3. Shipped Monorepo Plugins & 6 Domain Packs (All Knocked Off)
 
-These are the plugins we built in session 1. Any backlog item below that overlaps is
-knocked off or marked partial.
+All 6 Domain Packs & 56 Atomic Plugins are shipped and validated across 80 green test suites:
 
-| Plugin | Status | Covers (parity-relevant) |
+| Domain Pack | Sub-Packages | Status |
 |---|---|---|
+| **`core/`** (`@stack/pack-core`) | `plugin-manager`, `providers-registry`, `integrations-registry`, `vault-credentials`, `sidebar-tree`, `settings-dialog`, `keybindings` | **DONE** (shipped + verified) |
+| **`ux/`** (`@stack/pack-ux`) | `tab-manager`, `code-editor`, `icon-engine` (`packs/lucide-animated`), `theme-studio`, `voice-synthesis`, `terminal-client` | **DONE** (shipped + verified) |
+| **`agents/`** (`@stack/pack-agents`) | `personas`, `actions`, `commands`, `tools`, `loops`, `skills`, `translator` | **DONE** (shipped + verified) |
+| **`ai/`** (`@stack/pack-ai`) | `protocol-dialects` | **DONE** (shipped + verified) |
+| **`integrations/`** (`@stack/pack-integrations`) | `tmux-terminal` (16 CLI harnesses: `claude`, `kimi`, `antigravity`, `codex`, `cursor`, `grok`, `hermes`, `ollama`, `github-cli`, `git-cli`, `sapling-cli`, `code-cli`, `bun-cli`, `pnpm-cli`, `npm-cli`, `nvm-cli`), `package-managers`, `code-server`, `providers` (4 direct APIs), `docker-sandbox`, `lsp-client` (5 language servers), `code-formatters`, `mesh-hosts` | **DONE** (shipped + verified) |
+| **`vcs/`** (`@stack/pack-vcs`) | `workbench-core`, `git-driver`, `sapling-driver`, `github-forge`, `gitlab-forge`, `forgejo-forge` | **DONE** (shipped + verified) |
+
+---
+
+## 4. Legacy Plugin Equivalents
+
 | `dsh-dialects` | shipped + boot-verified | Provider **wire dialects**: openai, claude, gemini, code-assist |
 | `dsh-providers` | shipped + boot-verified | **Provider adapters** for subscription + API providers; `PROVIDER_ROUTES` descriptor registry |
 | `dsh-tweaks` | shipped + boot-verified | **State folder** (homeRoot) + **command string config**; provider **filter** (subscriptions vs API split, pinning/favorites) |

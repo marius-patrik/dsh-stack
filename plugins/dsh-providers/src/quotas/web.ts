@@ -545,7 +545,7 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
             const infoPlist = path.join(targetPath, 'Contents/Info.plist')
             if (fs.existsSync(infoPlist)) {
               try {
-                let iconName = execSync(`defaults read "${infoPlist}" CFBundleIconFile 2>/dev/null`, { encoding: 'utf-8' }).trim()
+                let iconName = execFileSync('defaults', ['read', infoPlist, 'CFBundleIconFile'], { encoding: 'utf-8', timeout: 2000 }).trim()
                 if (iconName) {
                   if (!iconName.endsWith('.icns')) iconName += '.icns'
                   const candidate = path.join(targetPath, 'Contents/Resources', iconName)
@@ -569,7 +569,7 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
 
           if (icnsPath && fs.existsSync(icnsPath)) {
             try {
-              execSync(`sips -s format png -z 32 32 "${icnsPath}" --out "${cachePng}" 2>/dev/null`)
+              execFileSync('sips', ['-s', 'format', 'png', '-z', '32', '32', icnsPath, '--out', cachePng], { timeout: 3000 })
               if (fs.existsSync(cachePng)) {
                 res.writeHead(200, {
                   'content-type': 'image/png',
@@ -914,8 +914,8 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
             const repoPath = data.path
             const branch = data.branch
             const isNew = Boolean(data.create)
-            const cmd = isNew ? `git checkout -b "${branch}"` : `git checkout "${branch}"`
-            const out = execSync(cmd, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+            const args = isNew ? ['checkout', '-b', branch] : ['checkout', branch]
+            const out = execFileSync('git', args, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
             sendJson(res, 200, { success: true, output: out })
           } catch (err) {
             sendJson(res, 500, { error: (err as Error).message })
@@ -934,10 +934,10 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
             const repoPath = data.path
             const file = data.file
             if (file) {
-              execSync(`git checkout -- "${file}"`, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+              execFileSync('git', ['checkout', '--', file], { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
             } else {
-              execSync('git checkout -- .', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
-              execSync('git clean -fd', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+              execFileSync('git', ['checkout', '--', '.'], { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+              execFileSync('git', ['clean', '-fd'], { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
             }
             sendJson(res, 200, { success: true })
           } catch (err) {
@@ -955,7 +955,7 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
           try {
             const data = JSON.parse(bodyStr || '{}')
             const repoPath = data.path
-            const out = execSync('git stash', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+            const out = execFileSync('git', ['stash'], { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
             sendJson(res, 200, { success: true, output: out })
           } catch (err) {
             sendJson(res, 500, { error: (err as Error).message })
@@ -973,8 +973,8 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
             const data = JSON.parse(bodyStr || '{}')
             const repoPath = data.path
             const msg = data.message || 'Update'
-            execSync('git add -A', { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
-            const out = execSync(`git commit -m ${JSON.stringify(msg)}`, { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
+            execFileSync('git', ['add', '-A'], { cwd: repoPath, encoding: 'utf-8', timeout: 5000 })
+            const out = execFileSync('git', ['commit', '-m', msg], { cwd: repoPath, encoding: 'utf-8', timeout: 5000 }).trim()
             sendJson(res, 200, { success: true, output: out })
           } catch (err) {
             sendJson(res, 500, { error: (err as Error).message })
@@ -991,7 +991,7 @@ function makeQuotaHandler(registry: QuotaRegistry): (req: IncomingMessage, res: 
           try {
             const data = JSON.parse(bodyStr || '{}')
             const repoPath = data.path
-            const out = execSync('git push', { cwd: repoPath, encoding: 'utf-8', timeout: 15000 }).trim()
+            const out = execFileSync('git', ['push'], { cwd: repoPath, encoding: 'utf-8', timeout: 15000 }).trim()
             sendJson(res, 200, { success: true, output: out })
           } catch (err) {
             sendJson(res, 500, { error: (err as Error).message })
