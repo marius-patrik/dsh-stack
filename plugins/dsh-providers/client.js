@@ -4981,33 +4981,6 @@ button:hover .dsh-icon-animated,
 
     function renderAppIcon(appName, size, filePath) {
       var s = size || 15;
-      var raw = (appName || "").toLowerCase().replace(/\.app$/, "").trim();
-      var targetPath = filePath || (appName && appName.indexOf("/") !== -1 ? appName : null);
-
-      if (targetPath) {
-        return h("img", {
-          src: "/quotas/api/fs/icon?path=" + encodeURIComponent(targetPath),
-          width: s,
-          height: s,
-          alt: appName,
-          className: "dsh-icon-animated",
-          style: {
-            width: s + "px",
-            height: s + "px",
-            objectFit: "contain",
-            display: "inline-flex",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            borderRadius: "3px",
-          },
-          onError: function (e) {
-            e.target.style.display = "none";
-          }
-        });
-      }
-
-    function renderAppIcon(appName, size, filePath) {
-      var s = size || 15;
       var raw = (appName || "").trim();
       var cleanName = raw.replace(/\.app$/i, "").trim();
 
