@@ -1346,9 +1346,17 @@ window.__ModuleLoader__.load({
           }
         };
 
+        var onExpandSidebar = function () {
+          if (collapsed) toggleSidebar();
+        };
+
         window.addEventListener('keydown', onKeyDown, { capture: true });
-        return function () { window.removeEventListener('keydown', onKeyDown, { capture: true }); };
-      }, [toggleSidebar]);
+        window.addEventListener('dsh:expand-sidebar', onExpandSidebar);
+        return function () {
+          window.removeEventListener('keydown', onKeyDown, { capture: true });
+          window.removeEventListener('dsh:expand-sidebar', onExpandSidebar);
+        };
+      }, [toggleSidebar, collapsed]);
 
       var className = 'dsh-tw-root';
       if (!wide) className += ' dsh-tw-collapsed';

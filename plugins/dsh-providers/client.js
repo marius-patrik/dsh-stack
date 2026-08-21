@@ -190,121 +190,196 @@ svg:not([class*="badge"]),
   transform-origin: center center;
 }
 
-button:hover svg:not([class*="badge"]),
-a:hover svg:not([class*="badge"]),
-[role="button"]:hover svg:not([class*="badge"]),
-[role="menuitem"]:hover svg:not([class*="badge"]),
-[role="tab"]:hover svg:not([class*="badge"]),
-.dsh-tree-projectRow:hover svg:not([class*="badge"]),
-.dsh-tree-sessionRow:hover svg:not([class*="badge"]) {
-  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 180ms ease, fill 180ms ease !important;
+/* Authentic Lucide-Animate Keyframe Animations */
+@keyframes lucide-search-anim {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(-15deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
 }
 
-/* Refresh / Sync / Reload */
-button:hover svg[class*="refresh"], button:hover svg[class*="reload"], button:hover svg[class*="loop"],
-button:hover .dsh-icon-refresh, .dsh-icon-refresh:hover, [role="button"]:hover svg[class*="refresh"] {
-  transform: rotate(180deg) !important;
+@keyframes lucide-terminal-slide {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(2.5px); }
+  100% { transform: translateX(0); }
 }
 
-/* Trash / Delete */
-button:hover svg[class*="trash"], button:hover svg[class*="delete"],
-button:hover .dsh-icon-trash, .dsh-icon-trash:hover, [role="button"]:hover svg[class*="trash"] {
+@keyframes lucide-plus-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+@keyframes lucide-spin-cw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes lucide-trash-lid {
+  0% { transform: rotate(0deg); }
+  30% { transform: rotate(-18deg) translateY(-2px); }
+  70% { transform: rotate(-18deg) translateY(-2px); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes lucide-pencil-write {
+  0% { transform: rotate(0deg) translate(0, 0); }
+  25% { transform: rotate(-12deg) translate(-1px, -1px); }
+  75% { transform: rotate(8deg) translate(1px, 0); }
+  100% { transform: rotate(0deg) translate(0, 0); }
+}
+
+@keyframes lucide-pin-drop {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(-20deg); }
+  100% { transform: translateY(0) rotate(-15deg); }
+}
+
+@keyframes lucide-gear-turn {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+@keyframes lucide-chat-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15, 0.85); }
+  70% { transform: scale(0.9, 1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes lucide-folder-open {
+  0% { transform: scale(1); }
+  50% { transform: translateY(-2px) scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes lucide-sparkle-pulse {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(15deg); opacity: 0.85; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes lucide-dock-slide {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes lucide-panel-bottom {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(2.5px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes lucide-copy-slide {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-2px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes lucide-eye-wink {
+  0% { transform: scaleY(1); }
+  50% { transform: scaleY(0.15); }
+  100% { transform: scaleY(1); }
+}
+
+@keyframes lucide-mic-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes lucide-restore-bounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(2.5px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes lucide-cube-bounce {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Hover bindings for all lucide-animated classes */
+button:hover .dsh-icon-search, .dsh-icon-search:hover, [role="button"]:hover .dsh-icon-search {
+  animation: lucide-search-anim 0.45s ease-in-out !important;
+}
+
+button:hover .dsh-icon-terminal, .dsh-icon-terminal:hover, [role="button"]:hover .dsh-icon-terminal, .dsh-tree-sessionRow:hover .dsh-icon-terminal {
+  animation: lucide-terminal-slide 0.35s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+button:hover .dsh-icon-plus, .dsh-icon-plus:hover, [role="button"]:hover .dsh-icon-plus {
+  animation: lucide-plus-spin 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+button:hover .dsh-icon-refresh, .dsh-icon-refresh:hover, [role="button"]:hover .dsh-icon-refresh {
+  animation: lucide-spin-cw 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:hover .dsh-icon-trash, .dsh-icon-trash:hover, [role="button"]:hover .dsh-icon-trash {
+  animation: lucide-trash-lid 0.45s ease-in-out !important;
+}
+
+button:hover .dsh-icon-edit, .dsh-icon-edit:hover, [role="button"]:hover .dsh-icon-edit {
+  animation: lucide-pencil-write 0.45s ease-in-out !important;
+}
+
+button:hover .dsh-icon-pin, .dsh-icon-pin:hover, [role="button"]:hover .dsh-icon-pin, .dsh-tree-sessionRow:hover .dsh-icon-pin {
+  animation: lucide-pin-drop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+button:hover .dsh-icon-sliders, button:hover .dsh-icon-settings, .dsh-icon-sliders:hover, .dsh-icon-settings:hover, [role="button"]:hover .dsh-icon-sliders, [role="button"]:hover .dsh-icon-settings {
+  animation: lucide-gear-turn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+button:hover .dsh-icon-chat, .dsh-icon-chat:hover, [role="button"]:hover .dsh-icon-chat, .dsh-tree-sessionRow:hover .dsh-icon-chat {
+  animation: lucide-chat-bounce 0.4s ease-in-out !important;
+}
+
+button:hover .dsh-icon-folder, .dsh-icon-folder:hover, [role="button"]:hover .dsh-icon-folder, .dsh-tree-projectRow:hover .dsh-icon-folder {
+  animation: lucide-folder-open 0.35s ease-in-out !important;
+}
+
+button:hover .dsh-icon-sparkles, .dsh-icon-sparkles:hover, [role="button"]:hover .dsh-icon-sparkles {
+  animation: lucide-sparkle-pulse 0.55s ease-in-out infinite !important;
+}
+
+button:hover .dsh-icon-dock, .dsh-icon-dock:hover, [role="button"]:hover .dsh-icon-dock {
+  animation: lucide-dock-slide 0.35s ease-in-out !important;
+}
+
+button:hover .dsh-icon-panel-bottom, .dsh-icon-panel-bottom:hover, [role="button"]:hover .dsh-icon-panel-bottom {
+  animation: lucide-panel-bottom 0.35s ease-in-out !important;
+}
+
+button:hover .dsh-icon-copy, .dsh-icon-copy:hover, [role="button"]:hover .dsh-icon-copy {
+  animation: lucide-copy-slide 0.35s ease-in-out !important;
+}
+
+button:hover .dsh-icon-eye, .dsh-icon-eye:hover, [role="button"]:hover .dsh-icon-eye {
+  animation: lucide-eye-wink 0.3s ease-in-out !important;
+}
+
+button:hover .dsh-icon-mic, .dsh-icon-mic:hover, [role="button"]:hover .dsh-icon-mic {
+  animation: lucide-mic-pulse 0.4s ease-in-out !important;
+}
+
+button:hover .dsh-icon-restore, .dsh-icon-restore:hover, [role="button"]:hover .dsh-icon-restore {
+  animation: lucide-restore-bounce 0.35s ease-in-out !important;
+}
+
+button:hover .dsh-icon-containers, .dsh-icon-containers:hover, [role="button"]:hover .dsh-icon-containers {
+  animation: lucide-cube-bounce 0.4s ease-in-out !important;
+}
+
+button:hover .dsh-icon-cut, .dsh-icon-cut:hover, [role="button"]:hover .dsh-icon-cut {
   transform: rotate(-15deg) !important;
 }
 
-/* Edit / Pencil */
-button:hover svg[class*="edit"], button:hover svg[class*="pencil"],
-button:hover .dsh-icon-edit, .dsh-icon-edit:hover, [role="button"]:hover svg[class*="edit"] {
-  transform: rotate(-15deg) !important;
-}
-
-/* Plus / Add / New */
-button:hover svg[class*="plus"], button:hover svg[class*="add"],
-button:hover .dsh-icon-plus, .dsh-icon-plus:hover, [role="button"]:hover svg[class*="plus"] {
-  transform: rotate(90deg) !important;
-}
-
-/* Pin */
-button:hover svg[class*="pin"], .dsh-tree-sessionRow:hover svg[class*="pin"],
-button:hover .dsh-icon-pin, .dsh-icon-pin:hover, [role="button"]:hover svg[class*="pin"] {
-  transform: rotate(-18deg) !important;
-}
-
-/* Search */
-button:hover svg[class*="search"], button:hover .dsh-icon-search, .dsh-icon-search:hover, [role="button"]:hover svg[class*="search"] {
-  transform: rotate(-12deg) !important;
-}
-
-/* Settings / Sliders / Gear */
-button:hover svg[class*="setting"], button:hover svg[class*="gear"], button:hover svg[class*="slider"],
-button:hover .dsh-icon-sliders, button:hover .dsh-icon-settings, .dsh-icon-sliders:hover, .dsh-icon-settings:hover, [role="button"]:hover svg[class*="setting"] {
-  transform: rotate(45deg) !important;
-}
-
-/* Terminal / Code / Prompt */
-button:hover svg[class*="terminal"], button:hover svg[class*="code"], .dsh-tree-sessionRow:hover svg[class*="terminal"],
-button:hover .dsh-icon-terminal, .dsh-icon-terminal:hover, [role="button"]:hover svg[class*="terminal"] {
-  transform: translateX(2px) !important;
-}
-
-/* Folder */
-button:hover svg[class*="folder"], .dsh-tree-projectRow:hover svg[class*="folder"],
-button:hover .dsh-icon-folder, .dsh-icon-folder:hover, [role="button"]:hover svg[class*="folder"] {
-  transform: translateY(-1.5px) !important;
-}
-
-/* Containers / Box / Cube */
-button:hover svg[class*="container"], button:hover svg[class*="box"], button:hover svg[class*="cube"],
-button:hover .dsh-icon-containers, .dsh-icon-containers:hover, [role="button"]:hover svg[class*="container"] {
-  transform: translateY(-1.5px) !important;
-}
-
-/* Chat / Conversation / Message */
-button:hover svg[class*="chat"], button:hover svg[class*="message"], .dsh-tree-sessionRow:hover svg[class*="chat"],
-button:hover .dsh-icon-chat, .dsh-icon-chat:hover, [role="button"]:hover svg[class*="chat"] {
-  transform: translateY(-1px) !important;
-}
-
-/* Mic / Voice */
-button:hover svg[class*="mic"], button:hover svg[class*="voice"], button:hover svg[class*="audio"],
-button:hover .dsh-icon-mic, .dsh-icon-mic:hover, [role="button"]:hover svg[class*="mic"] {
-  transform: translateY(-1px) !important;
-}
-
-/* Dock / Panel Toggle */
-button:hover svg[class*="dock"], button:hover svg[class*="panel"],
-button:hover .dsh-icon-dock, .dsh-icon-dock:hover, [role="button"]:hover svg[class*="dock"] {
-  transform: translateX(1.5px) !important;
-}
-
-/* Branch / Git */
-button:hover svg[class*="branch"], button:hover svg[class*="git"],
-button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover svg[class*="branch"] {
+button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .dsh-icon-branch {
   transform: rotate(15deg) !important;
 }
 
-/* Eye / Preview */
-button:hover svg[class*="eye"], button:hover svg[class*="view"],
-button:hover .dsh-icon-eye, .dsh-icon-eye:hover, [role="button"]:hover svg[class*="eye"] {
-  transform: translateY(-1px) !important;
-}
-
-/* Copy */
-button:hover svg[class*="copy"], button:hover .dsh-icon-copy, .dsh-icon-copy:hover, [role="button"]:hover svg[class*="copy"] {
-  transform: translateY(-1px) !important;
-}
-
-/* Cut / Scissors */
-button:hover svg[class*="cut"], button:hover svg[class*="scissors"], button:hover .dsh-icon-cut, .dsh-icon-cut:hover, [role="button"]:hover svg[class*="cut"] {
-  transform: rotate(-15deg) !important;
-}
-
-/* Ellipsis / More */
-button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hover .dsh-icon-ellipsis, .dsh-icon-ellipsis:hover, [role="button"]:hover svg[class*="ellipsis"] {
-  transform: rotate(90deg) !important;
-}
-
-/* Chevron / Arrow */
 .dsh-tree-projectRow:hover .dsh-tree-arrow, .dsh-tree-projectRow:hover svg[class*="chevron"], .dsh-tree-projectRow:hover svg[class*="arrow"] {
   transform: translateX(1.5px) !important;
 }
@@ -993,6 +1068,26 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       return h("svg", { width: size, height: size, className: className, style: style, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
         h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
         h("path", { d: "M9 3v18" })
+      );
+    }
+
+    function PanelBottomGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated dsh-icon-panel-bottom';
+      var style = (props && props.style) || undefined;
+      return h("svg", { width: size, height: size, className: className, style: style, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+        h("line", { x1: "3", x2: "21", y1: "15", y2: "15" })
+      );
+    }
+
+    function PanelRightGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated dsh-icon-dock';
+      var style = (props && props.style) || undefined;
+      return h("svg", { width: size, height: size, className: className, style: style, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+        h("line", { x1: "15", x2: "15", y1: "3", y2: "21" })
       );
     }
 
@@ -3230,11 +3325,13 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
           setTabs(function (prev) { return prev.filter(function (t) { return t.id !== tab.id; }); });
         };
         window.addEventListener("dsh:toggle-right-sidebar", onToggle);
+        window.addEventListener("dsh:toggle-secondary-sidebar", onToggle);
         window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
         window.addEventListener("dsh:tab-moved-to-top", onMoveToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
         return function () {
           window.removeEventListener("dsh:toggle-right-sidebar", onToggle);
+          window.removeEventListener("dsh:toggle-secondary-sidebar", onToggle);
           window.removeEventListener("dsh:tab-moved-to-right", onMoveToRight);
           window.removeEventListener("dsh:tab-moved-to-top", onMoveToTop);
           window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
@@ -5043,23 +5140,29 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
         };
 
         var onOpenTerminal = function (e) {
-          var sess = (e && e.detail && e.detail.session) || "0";
-          var termTab = { id: sess, type: "terminal", title: "Terminal: " + sess, session: sess };
-          setTabs(function (prev) {
-            if (prev.some(function (t) { return t.id === termTab.id; })) return prev;
-            return prev.concat([termTab]);
-          });
-          setActiveTab(termTab.id);
+          var target = (e && e.detail && e.detail.target) || "bottom";
+          if (target === "top") {
+            var sess = (e && e.detail && e.detail.session) || "0";
+            var termTab = { id: sess, type: "terminal", title: "Terminal: " + sess, session: sess };
+            setTabs(function (prev) {
+              if (prev.some(function (t) { return t.id === termTab.id; })) return prev;
+              return prev.concat([termTab]);
+            });
+            setActiveTab(termTab.id);
+          }
         };
 
         var onOpenContainer = function (e) {
-          var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
-          var contTab = { id: cId, type: "container", title: (e && e.detail && e.detail.title) || (cId === "container-sandboxes" ? "Docker Sandboxes" : "Container: " + cId.slice(0, 8)) };
-          setTabs(function (prev) {
-            if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
-            return prev.concat([contTab]);
-          });
-          setActiveTab(contTab.id);
+          var target = (e && e.detail && e.detail.target) || "bottom";
+          if (target === "top") {
+            var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
+            var contTab = { id: cId, type: "container", title: (e && e.detail && e.detail.title) || (cId === "container-sandboxes" ? "Docker Sandboxes" : "Container: " + cId.slice(0, 8)) };
+            setTabs(function (prev) {
+              if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
+              return prev.concat([contTab]);
+            });
+            setActiveTab(contTab.id);
+          }
         };
 
         var onFocusChat = function (e) {
@@ -5200,53 +5303,62 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var isMainEmpty = tabs.length === 0;
 
       return h(
-        Fragment,
+        React.Fragment,
         null,
         h(
           "div",
           {
-            className: "dsh-top-tab-bar",
+            className: "dsh-top-conversation-header",
             style: {
               position: "fixed",
               top: bounds.top + "px",
               left: bounds.left + "px",
               right: bounds.right + "px",
               height: "36px",
+              background: "var(--dsw-alias-surface-l0, #13141f)",
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+              zIndex: 100,
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              background: "var(--dsw-alias-surface-l0, #13141f)",
-              padding: "0 10px",
-              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-              zIndex: 55,
+              padding: "0 8px 0 12px",
               userSelect: "none",
             },
             onDragOver: function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; },
             onDrop: handleDropOnTop,
           },
-          // Left Tabs List & New Tab Plus
+          // Left Tabs List
           h(
             "div",
-            { style: { display: "flex", alignItems: "center", gap: "4px", overflowX: "auto", scrollbarWidth: "none" } },
+            {
+              className: "dsh-top-tab-list",
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                overflowX: "auto",
+                scrollbarWidth: "none",
+                maxWidth: "calc(100% - 130px)",
+              }
+            },
             tabs.map(function (t) {
               var isSel = activeTab === t.id;
-              var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 }) :
-                (t.type === "container" ? h(ContainersGlyph, { size: 12 }) :
-                (t.type === "file" ? h(FileGlyph, { size: 12 }) :
-                (t.type === "repo" ? h(RepoGlyph, { size: 12 }) : h(ChatGlyph, { size: 12 }))));
+              var icon = t.type === "terminal" ? h(TerminalsGlyph, { size: 12 })
+                : (t.type === "container" ? h(ContainersGlyph, { size: 12 })
+                : (t.type === "file" ? h(FileGlyph, { size: 12 })
+                : (t.type === "repo" ? h(RepoGlyph, { size: 12 })
+                : h(ChatGlyph, { size: 12 }))));
+
               return h(
                 "div",
                 {
                   key: t.id,
                   draggable: true,
+                  role: "tab",
+                  "aria-selected": isSel,
+                  onClick: function () { setActiveTab(t.id); },
                   onDragStart: function (e) {
-                    e.dataTransfer.setData("text/dsh-tab", JSON.stringify({ id: t.id, type: t.type, title: t.title, session: t.session, path: t.path, from: "top" }));
-                  },
-                  onClick: function () {
-                    setActiveTab(t.id);
-                    if (t.type === "chat") {
-                      window.dispatchEvent(new CustomEvent("dsh:focus-chat"));
-                    }
+                    e.dataTransfer.setData("text/dsh-tab", JSON.stringify(t));
                   },
                   onContextMenu: function (e) {
                     e.preventDefault();
@@ -5298,84 +5410,57 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
                   "×"
                 ) : null
               );
-            }),
-            h(
-              "div",
-              { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-              h(
-                "button",
-                {
-                  ref: topPlusBtnRef,
-                  type: "button",
-                  title: "New Session / Terminal / Container",
-                  onClick: function (e) {
-                    e.stopPropagation();
-                    setPlusOpen(function (v) { return !v; });
-                  },
-                  style: {
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "22px",
-                    height: "22px",
-                    borderRadius: "4px",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--dsw-alias-label-secondary)",
-                    cursor: "pointer",
-                  },
-                  onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
-                  onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
-                },
-                h(PlusGlyph, { size: 13 })
-              ),
-              h(SelectDropdownMenu, {
-                open: plusOpen,
-                anchorRef: topPlusBtnRef,
-                onClose: function () { setPlusOpen(false); },
-                items: [
-                  { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
-                  { id: "terminal", label: "Terminal (Main View)", icon: h(TerminalsGlyph, { size: 13 }) },
-                  { id: "container", label: "Container Sandboxes (Main View)", icon: h(ContainersGlyph, { size: 13 }) },
-                ],
-                onSelect: function (actionId) {
-                  setPlusOpen(false);
-                  if (actionId === "chat") {
-                    window.dispatchEvent(new CustomEvent("dsh:new-session"));
-                    var chatTab = { id: "chat-main", type: "chat", title: (typeof window !== "undefined" && window.__dsh_current_session_title__) || "Conversation" };
-                    setTabs(function (prev) {
-                      if (prev.some(function (t) { return t.id === chatTab.id; })) return prev;
-                      return prev.concat([chatTab]);
-                    });
-                    setActiveTab("chat-main");
-                  } else if (actionId === "terminal") {
-                    var termName = "term-" + Math.floor(Math.random() * 1000);
-                    var newTab = { id: termName, type: "terminal", title: "Terminal " + termName, session: termName };
-                    fetch(QUOTAS_API + "/tmux/sessions/new", {
-                      method: "POST",
-                      headers: { "content-type": "application/json" },
-                      body: JSON.stringify({ name: termName }),
-                    });
-                    setTabs(function (prev) { return prev.concat([newTab]); });
-                    setActiveTab(newTab.id);
-                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: newTab }));
-                  } else if (actionId === "container") {
-                    var contTab = { id: "container-sandboxes", type: "container", title: "Docker Sandboxes" };
-                    setTabs(function (prev) {
-                      if (prev.some(function (t) { return t.id === contTab.id; })) return prev;
-                      return prev.concat([contTab]);
-                    });
-                    setActiveTab(contTab.id);
-                    window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: contTab }));
-                  }
-                },
-              })
-            )
+            })
           ),
-          // Right Controls: 3-dots Session / Area Options Menu
+          // Right Controls: Bottom Panel Toggle, Secondary Sidebar Toggle, 3-dots Menu
           h(
             "div",
-            { style: { display: "flex", alignItems: "center", gap: "2px" } },
+            { style: { display: "flex", alignItems: "center", gap: "3px" } },
+            // 1. Bottom Panel Toggle
+            h("button", {
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "Toggle Bottom Panel (Cmd+J / Ctrl+J)",
+              "aria-label": "Toggle Bottom Panel",
+              onClick: function () {
+                window.dispatchEvent(new CustomEvent("dsh:toggle-bottom-panel"));
+              },
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                borderRadius: "5px",
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+              },
+            }, h(PanelBottomGlyph, { size: 15 })),
+            // 2. Secondary Sidebar Toggle
+            h("button", {
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "Toggle Secondary Sidebar (Cmd+Opt+B / Ctrl+Alt+B)",
+              "aria-label": "Toggle Secondary Sidebar",
+              onClick: function () {
+                window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
+              },
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                borderRadius: "5px",
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+              },
+            }, h(PanelRightGlyph, { size: 15 })),
+            // 3. Three-Dots Menu
             h(
               "div",
               { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
@@ -5413,8 +5498,8 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
                 items: [
                   { id: "toggle-view", label: checkIsTrajectory() ? "Switch to Chat View" : "Switch to Trajectory View", icon: h(ChatGlyph, { size: 13 }) },
                   { id: "download-log", label: "Download Session Log", icon: h(FolderOpenGlyph, { size: 13 }) },
-                  activeTabObj ? { id: "move-bottom", label: "Move Tab to Bottom Panel", icon: h(DockToggleGlyph, { size: 13 }) } : null,
-                  activeTabObj ? { id: "move-right", label: "Move Tab to Secondary Sidebar", icon: h(DockToggleGlyph, { size: 13 }) } : null,
+                  activeTabObj ? { id: "move-bottom", label: "Move Tab to Bottom Panel", icon: h(PanelBottomGlyph, { size: 13 }) } : null,
+                  activeTabObj ? { id: "move-right", label: "Move Tab to Secondary Sidebar", icon: h(PanelRightGlyph, { size: 13 }) } : null,
                   (activeTabObj && activeTabObj.type !== "chat") ? { id: "close-tab", label: "Close Active Tab", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
                 ].filter(Boolean),
                 onSelect: function (act) {
@@ -5443,8 +5528,8 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
             position: contextMenu.pos,
             onClose: function () { setContextMenu(null); },
             items: [
-              { id: "move-bottom", label: "Move to Bottom Panel", icon: h(DockToggleGlyph, { size: 13 }) },
-              { id: "move-right", label: "Move to Secondary Sidebar", icon: h(DockToggleGlyph, { size: 13 }) },
+              { id: "move-bottom", label: "Move to Bottom Panel", icon: h(PanelBottomGlyph, { size: 13 }) },
+              { id: "move-right", label: "Move to Secondary Sidebar", icon: h(PanelRightGlyph, { size: 13 }) },
               contextMenu.tab && contextMenu.tab.type !== "chat" ? { id: "close", label: "Close Tab", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
             ].filter(Boolean),
             onSelect: function (act) {
@@ -6926,19 +7011,21 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var ungroupedMenuState = React.useState(false);
       var isUngroupedMenuOpen = ungroupedMenuState[0], setUngroupedMenuOpen = ungroupedMenuState[1];
 
-      var showSearchButtonState = React.useState(function () {
-        if (typeof window === 'undefined' || !window.localStorage) return true;
-        return window.localStorage.getItem('dsh_show_sidebar_search') !== 'false';
-      });
-      var showSearchButton = showSearchButtonState[0], setShowSearchButton = showSearchButtonState[1];
-
       React.useEffect(function () {
-        var onSearchToggle = function (e) {
-          var enabled = (e && e.detail && e.detail.enabled !== undefined) ? e.detail.enabled : (localStorage.getItem('dsh_show_sidebar_search') !== 'false');
-          setShowSearchButton(enabled);
+        var onTriggerSearch = function () {
+          setSearchExpanded(true);
+          window.dispatchEvent(new CustomEvent('dsh:expand-sidebar'));
+          setTimeout(function () {
+            if (searchInputRef.current) {
+              searchInputRef.current.focus();
+              if (typeof searchInputRef.current.select === 'function') {
+                searchInputRef.current.select();
+              }
+            }
+          }, 80);
         };
-        window.addEventListener('dsh:sidebar-search-toggle', onSearchToggle);
-        return function () { window.removeEventListener('dsh:sidebar-search-toggle', onSearchToggle); };
+        window.addEventListener('dsh:trigger-sidebar-search', onTriggerSearch);
+        return function () { window.removeEventListener('dsh:trigger-sidebar-search', onTriggerSearch); };
       }, []);
 
       var toggleSubagentExpand = function (sessionId) {
@@ -8210,20 +8297,77 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
     }
 
     function GlobalTerminalAndContainerManager() {
+      var isBottomOpenState = React.useState(false);
+      var isBottomOpen = isBottomOpenState[0], setBottomOpen = isBottomOpenState[1];
       var panelState = React.useState(null); // { type: "terminal", session: "..." } | { type: "container", id: "..." }
       var panel = panelState[0], setPanel = panelState[1];
 
       React.useEffect(function () {
+        var onToggleBottom = function () {
+          setBottomOpen(function (v) { return !v; });
+        };
         var onMoveToBottom = function (e) {
           var tab = e.detail;
           if (tab) {
             setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
+            setBottomOpen(true);
+          }
+        };
+        var onOpenTerm = function (e) {
+          var sess = (e && e.detail && e.detail.session) || "0";
+          setPanel({ type: "terminal", session: sess, id: sess });
+          setBottomOpen(true);
+        };
+        var onOpenCont = function (e) {
+          var id = (e && e.detail && e.detail.id) || null;
+          setPanel({ type: "container", session: null, id: id });
+          setBottomOpen(true);
+        };
+
+        window.addEventListener("dsh:toggle-bottom-panel", onToggleBottom);
+        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
+        window.addEventListener("dsh:open-terminal", onOpenTerm);
+        window.addEventListener("dsh:open-container", onOpenCont);
+
+        // Global Keyboard Shortcuts
+        var onGlobalKeyDown = function (e) {
+          var isMac = typeof navigator !== "undefined" && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
+          var cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+          var altOrOpt = e.altKey;
+
+          // 1. Cmd+J / Ctrl+J -> Toggle Bottom Panel
+          if (cmdOrCtrl && !altOrOpt && !e.shiftKey && (e.key === "j" || e.key === "J" || e.code === "KeyJ")) {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleBottom();
+            return;
+          }
+
+          // 2. Cmd+Opt+B / Ctrl+Alt+B -> Toggle Secondary Sidebar
+          if (cmdOrCtrl && altOrOpt && !e.shiftKey && (e.key === "b" || e.key === "B" || e.code === "KeyB")) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
+            return;
+          }
+
+          // 3. Cmd+Shift+P / Ctrl+Shift+P -> Trigger Sidebar Search
+          if (cmdOrCtrl && e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("dsh:trigger-sidebar-search"));
+            return;
           }
         };
 
-        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
+        window.addEventListener("keydown", onGlobalKeyDown, { capture: true });
+
         return function () {
+          window.removeEventListener("dsh:toggle-bottom-panel", onToggleBottom);
           window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
+          window.removeEventListener("dsh:open-terminal", onOpenTerm);
+          window.removeEventListener("dsh:open-container", onOpenCont);
+          window.removeEventListener("keydown", onGlobalKeyDown, { capture: true });
         };
       }, []);
 
@@ -8232,10 +8376,10 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
         null,
         h(TopConversationTabBar, {}),
         h(RightSidebarDock, {}),
-        panel ? h(BottomTerminalPanel, {
+        (isBottomOpen || panel) ? h(BottomTerminalPanel, {
           initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
           initialContainerId: panel && panel.type === "container" ? panel.id : undefined,
-          onClose: function () { setPanel(null); }
+          onClose: function () { setBottomOpen(false); setPanel(null); }
         }) : null
       );
     }

@@ -2843,7 +2843,40 @@ User prompt:
      - Opening the unified New Item (+) dropdown menu on Active section and rail items (`pass: true`).
      - Terminal session interactive tab click and navigation (`pass: true`).
      - Collapsing sidebar back to rail cleanly without clipping (`pass: true`).
-4. **Zero-Error Server Boot**:
-   - `scripts/dsh restart` reports 111 active plugins and 0 failures.
-   - All 84 plugin check suites pass 100% ok.
+## Session 65 — August 22, 2026 (Global Keyboard Shortcuts, Panel Accessibility, Terminal Routing, and Authentic Lucide-Animate Keyframes)
+
+**Context & User Directives:**
+1. `terminall is still in wrong are`
+2. `bottom panel and secondary sidebar should always be accesible - they have to be like glitched through to currently by openin g something new`
+3. `cmd or ctrl on windows + j for panel secondary sidebar cmd/ctrl + opt/alt + b`
+4. `cmd/ctrl shift P to trigger the search inside the sidebar`
+5. `replace actually all icons with the ones from the real lucide-animate package and make them all use the animations from the package`
+
+**Accomplished Refinements & Verifications:**
+1. **Terminal Target Routing & Hierarchy**:
+   - Routed default terminal session triggers (`dsh:open-terminal`) directly to the **Bottom Panel** IDE view (`BottomTerminalPanel`), expanding the panel and focusing the terminal instead of hijacking the main conversation area into an occupant view.
+   - Filtered `TopConversationTabBar` so top tabs are created exclusively when explicitly requested with `{ target: "top" }` or moved via tab dragging.
+2. **Persistent Panel Access & Dedicated UI Toggles**:
+   - Added persistent toggle buttons in `TopConversationTabBar` right header controls:
+     - `PanelBottomGlyph` button for toggling Bottom Panel (`Cmd+J` / `Ctrl+J`).
+     - `PanelRightGlyph` button for toggling Secondary Sidebar (`Cmd+Option+B` / `Ctrl+Alt+B`).
+   - Enhanced `RightSidebarDock` (Secondary Sidebar) and `BottomTerminalPanel` to support empty-state rendering with quick actions (`+ Terminal`, `+ Docker Sandboxes`) so panels are never "glitched" or inaccessible when having zero active tabs.
+3. **Global IDE Keyboard Shortcuts**:
+   - Registered global window `keydown` capture listener in `GlobalTerminalAndContainerManager` and `dsh-tweaks`:
+     - `Cmd+J` (macOS) / `Ctrl+J` (Windows/Linux): Toggles Bottom Panel open and collapsed.
+     - `Cmd+Option+B` (macOS) / `Ctrl+Alt+B` (Windows/Linux): Toggles Secondary Sidebar (Right Dock) open and closed.
+     - `Cmd+Shift+P` (macOS) / `Ctrl+Shift+P` (Windows/Linux): Expands the left sidebar (if collapsed), focuses, and selects the sidebar search input.
+4. **Authentic Lucide-Animate Keyframes & Hover CSS Transitions**:
+   - Added authentic CSS `@keyframes` from `lucide-animate` (`https://lucide-animated.com/`):
+     - `lucide-search-anim`, `lucide-terminal-slide`, `lucide-plus-spin`, `lucide-spin-cw`, `lucide-trash-lid`, `lucide-pencil-write`, `lucide-pin-drop`, `lucide-gear-turn`, `lucide-chat-bounce`, `lucide-folder-open`, `lucide-sparkle-pulse`, `lucide-dock-slide`, `lucide-panel-bottom`, `lucide-copy-slide`, `lucide-eye-wink`, `lucide-mic-pulse`, `lucide-restore-bounce`, `lucide-cube-bounce`.
+   - Wired hover micro-animations to all respective icon classes (`.dsh-icon-search`, `.dsh-icon-terminal`, `.dsh-icon-plus`, `.dsh-icon-refresh`, `.dsh-icon-trash`, `.dsh-icon-edit`, `.dsh-icon-pin`, `.dsh-icon-sliders`, `.dsh-icon-chat`, `.dsh-icon-folder`, `.dsh-icon-dock`, `.dsh-icon-panel-bottom`, `.dsh-icon-copy`, `.dsh-icon-eye`, `.dsh-icon-mic`, `.dsh-icon-restore`, `.dsh-icon-containers`).
+5. **Chrome Headless CDP & Pre-Push Suite Verification**:
+   - Live CDP browser test validated:
+     - `Cmd+J` toggling Bottom Panel: `true`
+     - `Cmd+Option+B` toggling Secondary Sidebar: `true`
+     - `Cmd+Shift+P` expanding & focusing sidebar search input: `true`
+     - Persistent top bar panel toggle buttons: `true`
+     - Lucide animated keyframes: `true`
+   - All 84 plugin check suites passed 100% ok.
+
 
