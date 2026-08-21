@@ -3023,38 +3023,63 @@ button:hover .dsh-icon-animated,
       );
     }
 
-    function getRightSidebarWidth() {
+    function getCenterBounds() {
+      if (typeof document === "undefined") return { left: 240, right: 0, top: 48 };
+      var centerEl = document.querySelector('div[class*="centerCol"]');
+      if (centerEl && centerEl.getBoundingClientRect) {
+        var cRect = centerEl.getBoundingClientRect();
+        if (cRect.width > 0) {
+          return {
+            left: cRect.left,
+            right: Math.max(0, window.innerWidth - cRect.right),
+            top: cRect.top || 48,
+          };
+        }
+      }
       var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
-      var detailsEl = (typeof document !== "undefined") ? document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]') : null;
+      var detailsEl = document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]');
       var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
-      return Math.max(customRight, detailsW);
+      var sidebarEl = document.querySelector('div[class*="sidebarCol"]');
+      var sidebarW = (sidebarEl && sidebarEl.getBoundingClientRect) ? sidebarEl.getBoundingClientRect().right : 240;
+      return {
+        left: sidebarW || 240,
+        right: Math.max(customRight, detailsW),
+        top: 48,
+      };
     }
 
-    function useRightSidebarWidth() {
-      var widthState = React.useState(getRightSidebarWidth);
-      var w = widthState[0], setW = widthState[1];
+    function useCenterBounds() {
+      var boundsState = React.useState(getCenterBounds);
+      var bounds = boundsState[0], setBounds = boundsState[1];
 
       React.useEffect(function () {
         var update = function () {
-          var nextW = getRightSidebarWidth();
-          setW(function (prev) { return prev !== nextW ? nextW : prev; });
+          var next = getCenterBounds();
+          setBounds(function (prev) {
+            if (prev.left !== next.left || prev.right !== next.right || prev.top !== next.top) {
+              return next;
+            }
+            return prev;
+          });
         };
         window.addEventListener("dsh:right-sidebar-changed", update);
         window.addEventListener("resize", update);
-        var timer = setInterval(update, 200);
+        window.addEventListener("pointermove", update);
+        var timer = setInterval(update, 100);
         return function () {
           window.removeEventListener("dsh:right-sidebar-changed", update);
           window.removeEventListener("resize", update);
+          window.removeEventListener("pointermove", update);
           clearInterval(timer);
         };
       }, []);
 
-      return w;
+      return bounds;
     }
 
     function MainViewTerminalOccupant(props) {
       var sessionName = props.sessionName || "0";
-      var rightWidth = useRightSidebarWidth();
+      var bounds = useCenterBounds();
       var panelHeightState = React.useState(function () {
         if (typeof window !== "undefined" && window.__dsh_panel_height__) {
           return window.__dsh_panel_height__;
@@ -3077,9 +3102,9 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-terminal",
         style: {
           position: "fixed",
-          top: "48px",
-          left: "var(--dsh-sidebar-width, 240px)",
-          right: rightWidth + "px",
+          top: bounds.top + "px",
+          left: bounds.left + "px",
+          right: bounds.right + "px",
           bottom: panelHeight,
           background: "var(--dsw-alias-bg-layer-0, #000000)",
           zIndex: 50,
@@ -3121,7 +3146,7 @@ button:hover .dsh-icon-animated,
     }
 
     function MainViewContainerOccupant(props) {
-      var rightWidth = useRightSidebarWidth();
+      var bounds = useCenterBounds();
       var panelHeightState = React.useState(function () {
         if (typeof window !== "undefined" && window.__dsh_panel_height__) {
           return window.__dsh_panel_height__;
@@ -3144,9 +3169,9 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-container",
         style: {
           position: "fixed",
-          top: "48px",
-          left: "var(--dsh-sidebar-width, 240px)",
-          right: rightWidth + "px",
+          top: bounds.top + "px",
+          left: bounds.left + "px",
+          right: bounds.right + "px",
           bottom: panelHeight,
           background: "var(--dsw-alias-bg-layer-0, #000000)",
           zIndex: 50,
@@ -3162,7 +3187,7 @@ button:hover .dsh-icon-animated,
       var filePath = props.filePath || "";
       var fileName = props.fileName || (filePath ? filePath.split("/").pop() : "File");
       var onClose = props.onClose;
-      var rightWidth = useRightSidebarWidth();
+      var bounds = useCenterBounds();
 
       var contentState = React.useState("");
       var content = contentState[0], setContent = contentState[1];
@@ -3240,9 +3265,9 @@ button:hover .dsh-icon-animated,
         className: "dsh-mainview-monaco",
         style: {
           position: "fixed",
-          top: "48px",
-          left: "var(--dsh-sidebar-width, 240px)",
-          right: rightWidth + "px",
+          top: bounds.top + "px",
+          left: bounds.left + "px",
+          right: bounds.right + "px",
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
           background: "var(--dsw-alias-surface-l0, #13141f)",
           zIndex: 50,
@@ -3557,15 +3582,15 @@ button:hover .dsh-icon-animated,
       var repoDisplayName = (overview && overview.owner && overview.repoName)
         ? (overview.owner + " / " + overview.repoName)
         : repoName;
-      var rightWidth = useRightSidebarWidth();
+      var bounds = useCenterBounds();
 
       return h("div", {
         className: "dsh-mainview-repo",
         style: {
           position: "fixed",
-          top: "48px",
-          left: "var(--dsh-sidebar-width, 240px)",
-          right: rightWidth + "px",
+          top: bounds.top + "px",
+          left: bounds.left + "px",
+          right: bounds.right + "px",
           bottom: (typeof window !== "undefined" && window.__dsh_panel_height__) ? window.__dsh_panel_height__ : "38px",
           background: "var(--dsw-alias-surface-l0, #13141f)",
           zIndex: 50,
@@ -4821,9 +4846,19 @@ button:hover .dsh-icon-animated,
         isMainEmpty ? h("div", {
           style: {
             position: "fixed",
-            top: "48px",
-            left: "var(--dsh-sidebar-width, 240px)",
+            top: (function () {
+              var centerEl = document.querySelector('div[class*="centerCol"]');
+              return (centerEl && centerEl.getBoundingClientRect) ? centerEl.getBoundingClientRect().top || 48 : 48;
+            })() + "px",
+            left: (function () {
+              var centerEl = document.querySelector('div[class*="centerCol"]');
+              return (centerEl && centerEl.getBoundingClientRect) ? centerEl.getBoundingClientRect().left || 240 : 240;
+            })() + "px",
             right: (function () {
+              var centerEl = document.querySelector('div[class*="centerCol"]');
+              if (centerEl && centerEl.getBoundingClientRect && centerEl.getBoundingClientRect().width > 0) {
+                return Math.max(0, window.innerWidth - centerEl.getBoundingClientRect().right) + "px";
+              }
               var customRight = (typeof window !== "undefined" && window.__dsh_right_sidebar_width__) ? window.__dsh_right_sidebar_width__ : 0;
               var detailsEl = (typeof document !== "undefined") ? document.querySelector('div[class*="detailsCol"], div[class*="details"], div[data-details]') : null;
               var detailsW = (detailsEl && detailsEl.getBoundingClientRect) ? detailsEl.getBoundingClientRect().width : 0;
@@ -4971,218 +5006,79 @@ button:hover .dsh-icon-animated,
         });
       }
 
-      // Helper for SVG wrapper
-      var svgWrap = function (children, style) {
-        return h("svg", {
+    function renderAppIcon(appName, size, filePath) {
+      var s = size || 15;
+      var raw = (appName || "").trim();
+      var cleanName = raw.replace(/\.app$/i, "").trim();
+
+      if (filePath) {
+        return h("img", {
+          src: "/quotas/api/fs/icon?path=" + encodeURIComponent(filePath),
           width: s,
           height: s,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          strokeWidth: "1.75",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
+          alt: appName,
           className: "dsh-icon-animated",
-          style: Object.assign({
+          style: {
+            width: s + "px",
+            height: s + "px",
+            objectFit: "contain",
             display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
             verticalAlign: "middle",
             flexShrink: 0,
-          }, style)
-        }, children);
-      };
-
-      // 1. Safari
-      if (raw.includes("safari")) {
-        return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("polygon", { points: "16,8 13.5,13.5 8,16 10.5,10.5", fill: "#ffffff", stroke: "#ffffff", strokeWidth: "1" }),
-          h("circle", { cx: "12", cy: "12", r: "1.5", fill: "#6366f1" }),
-        ]);
+            borderRadius: "3px",
+          },
+          onError: function (e) {
+            e.target.style.display = "none";
+          }
+        });
       }
 
-      // 2. Google Chrome / Chromium
-      if (raw.includes("chrome") || raw.includes("chromium")) {
-        return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#18181b", stroke: "#888888" }),
-          h("circle", { cx: "12", cy: "12", r: "4.5", fill: "#6366f1" }),
-          h("path", { d: "M12 2a10 10 0 0 1 8.66 5H12", stroke: "#ffffff", strokeWidth: "2", fill: "none" }),
-          h("path", { d: "M20.66 7a10 10 0 0 1-5 13.66L12 12", stroke: "#888888", strokeWidth: "2", fill: "none" }),
-          h("path", { d: "M3.34 7l4.33 7.5L12 12", stroke: "#6366f1", strokeWidth: "2", fill: "none" }),
-        ]);
+      if (raw.startsWith("/") && raw.includes(".app")) {
+        return h("img", {
+          src: "/quotas/api/fs/icon?path=" + encodeURIComponent(raw),
+          width: s,
+          height: s,
+          alt: appName,
+          className: "dsh-icon-animated",
+          style: {
+            width: s + "px",
+            height: s + "px",
+            objectFit: "contain",
+            display: "inline-flex",
+            verticalAlign: "middle",
+            flexShrink: 0,
+            borderRadius: "3px",
+          },
+          onError: function (e) {
+            e.target.style.display = "none";
+          }
+        });
       }
 
-      // 3. Firefox
-      if (raw.includes("firefox")) {
-        return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#18181b", stroke: "#888888" }),
-          h("path", { d: "M6 16c2-4 6-6 10-4 1 1 2 3 2 5-1 3-4 5-7 5-4 0-7-3-5-6z", fill: "#6366f1" }),
-          h("circle", { cx: "12", cy: "12", r: "4", fill: "#ffffff" }),
-        ]);
+      if (cleanName) {
+        var resolvedPath = "/Applications/" + cleanName + ".app";
+        return h("img", {
+          src: "/quotas/api/fs/icon?path=" + encodeURIComponent(resolvedPath),
+          width: s,
+          height: s,
+          alt: appName,
+          className: "dsh-icon-animated",
+          style: {
+            width: s + "px",
+            height: s + "px",
+            objectFit: "contain",
+            display: "inline-flex",
+            verticalAlign: "middle",
+            flexShrink: 0,
+            borderRadius: "3px",
+          },
+          onError: function (e) {
+            e.target.style.display = "none";
+          }
+        });
       }
 
-      // 4. Arc Browser
-      if (raw.includes("arc")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "6", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "M6 18c0-6 4.5-10.5 10.5-10.5", stroke: "#ffffff", strokeWidth: "2.5" }),
-          h("circle", { cx: "16.5", cy: "7.5", r: "2", fill: "#6366f1" }),
-        ]);
-      }
-
-      // 5. Xcode
-      if (raw.includes("xcode")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "m7 17 6-6", stroke: "#ffffff", strokeWidth: "2.5" }),
-          h("path", { d: "m12 7 5 5", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "m14 5 3 3", stroke: "#888888", strokeWidth: "2" }),
-        ]);
-      }
-
-      // 6. VS Code / Code / Cursor / Antigravity / IDE
-      if (raw.includes("code") || raw.includes("cursor") || raw.includes("antigravity") || raw.includes("vsc")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "m15.5 4-8 6.5 8 6.5", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "m17 7 3 2.5v5L17 17", stroke: "#6366f1", strokeWidth: "2" }),
-        ]);
-      }
-
-      // 7. Terminal / iTerm / Alacritty / Ghostty / Kitty / Warp
-      if (raw.includes("term") || raw.includes("alacritty") || raw.includes("ghostty") || raw.includes("kitty") || raw.includes("warp") || raw.includes("console")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "rgba(128,128,128,0.3)" }),
-          h("path", { d: "m6 8 4 4-4 4", stroke: "#6366f1", strokeWidth: "2" }),
-          h("line", { x1: "12", y1: "16", x2: "18", y2: "16", stroke: "#ffffff", strokeWidth: "2" }),
-        ]);
-      }
-
-      // 8. Slack
-      if (raw.includes("slack")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
-          h("circle", { cx: "8", cy: "8", r: "2", fill: "#6366f1" }),
-          h("circle", { cx: "16", cy: "8", r: "2", fill: "#ffffff" }),
-          h("circle", { cx: "16", cy: "16", r: "2", fill: "#6366f1" }),
-          h("circle", { cx: "8", cy: "16", r: "2", fill: "#888888" }),
-        ]);
-      }
-
-      // 9. Discord
-      if (raw.includes("discord")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "M7 9c2-1 4-1 5 0 2-1 4-1 5 0 1 3 1 6 0 8-1 1-3 1-4 0l-1-1-1 1c-1 1-3 1-4 0-1-2-1-5 0-8z", fill: "#ffffff" }),
-          h("circle", { cx: "9.5", cy: "12.5", r: "1", fill: "#6366f1" }),
-          h("circle", { cx: "14.5", cy: "12.5", r: "1", fill: "#6366f1" }),
-        ]);
-      }
-
-      // 10. Spotify
-      if (raw.includes("spotify")) {
-        return svgWrap([
-          h("circle", { cx: "12", cy: "12", r: "10", fill: "#18181b", stroke: "#888888" }),
-          h("path", { d: "M6.5 9.5c3.5-1 7.5-.5 11 1", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "M7.5 12.5c3-.8 6.5-.4 9.5.8", stroke: "#6366f1", strokeWidth: "1.75" }),
-          h("path", { d: "M8.5 15.5c2.5-.6 5.5-.3 7.5.7", stroke: "#888888", strokeWidth: "1.5" }),
-        ]);
-      }
-
-      // 11. Music / Apple Music
-      if (raw.includes("music")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "M9 18V9l9-2v9", stroke: "#ffffff", strokeWidth: "2" }),
-          h("circle", { cx: "7.5", cy: "17.5", r: "2.5", fill: "#ffffff" }),
-          h("circle", { cx: "16.5", cy: "15.5", r: "2.5", fill: "#ffffff" }),
-        ]);
-      }
-
-      // 12. Mail
-      if (raw.includes("mail")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
-          h("rect", { width: "14", height: "10", x: "5", y: "7", rx: "2", stroke: "#ffffff", strokeWidth: "1.5" }),
-          h("path", { d: "m5 8 7 5 7-5", stroke: "#6366f1", strokeWidth: "1.5" }),
-        ]);
-      }
-
-      // 13. Messages
-      if (raw.includes("messages") || raw.includes("chat")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "M6 8a5 5 0 0 1 9-3 5 5 0 0 1 3 5c0 2-1 4-3 5l-2 3v-2a5 5 0 0 1-7-8z", fill: "#ffffff" }),
-        ]);
-      }
-
-      // 14. Notes
-      if (raw.includes("notes") || raw.includes("reminders")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
-          h("line", { x1: "6", y1: "8", x2: "18", y2: "8", stroke: "#ffffff", strokeWidth: "2" }),
-          h("line", { x1: "6", y1: "12", x2: "18", y2: "12", stroke: "#6366f1", strokeWidth: "2" }),
-          h("line", { x1: "6", y1: "16", x2: "14", y2: "16", stroke: "#888888", strokeWidth: "2" }),
-        ]);
-      }
-
-      // 15. System Settings / Preferences
-      if (raw.includes("setting") || raw.includes("preference") || raw.includes("config")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
-          h("circle", { cx: "12", cy: "12", r: "3.5", stroke: "#ffffff", strokeWidth: "2" }),
-          h("path", { d: "M12 4v2m0 12v2M4 12h2m12 0h2m-2.6-6.4-1.4 1.4m-8 8-1.4 1.4m0-10.8 1.4 1.4m8 8 1.4 1.4", stroke: "#888888", strokeWidth: "2" }),
-        ]);
-      }
-
-      // 16. Finder
-      if (raw.includes("finder")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "M6 9c2 0 3-2 3-4", stroke: "#ffffff", strokeWidth: "1.75" }),
-          h("path", { d: "M18 9c-2 0-3-2-3-4", stroke: "#ffffff", strokeWidth: "1.75" }),
-          h("path", { d: "M7 15c2 2 8 2 10 0", stroke: "#ffffff", strokeWidth: "2" }),
-          h("line", { x1: "12", y1: "10", x2: "12", y2: "13", stroke: "#6366f1", strokeWidth: "2" }),
-        ]);
-      }
-
-      // 17. Docker
-      if (raw.includes("docker") || raw.includes("orbstack")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "rgba(99, 102, 241, 0.15)", stroke: "#6366f1" }),
-          h("path", { d: "M4 14c2-4 8-4 12 0 1-1 3 0 4 1-1 3-5 5-9 5-5 0-8-3-7-6z", fill: "#ffffff" }),
-          h("rect", { x: "7", y: "9", width: "2.5", height: "2", fill: "#6366f1" }),
-          h("rect", { x: "10.5", y: "9", width: "2.5", height: "2", fill: "#6366f1" }),
-          h("rect", { x: "10.5", y: "6.5", width: "2.5", height: "2", fill: "#6366f1" }),
-        ]);
-      }
-
-      // 18. Figma
-      if (raw.includes("figma")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
-          h("circle", { cx: "9", cy: "7", r: "2.5", fill: "#6366f1" }),
-          h("circle", { cx: "15", cy: "7", r: "2.5", fill: "#ffffff" }),
-          h("circle", { cx: "15", cy: "12", r: "2.5", fill: "#6366f1" }),
-          h("circle", { cx: "9", cy: "12", r: "2.5", fill: "#888888" }),
-          h("circle", { cx: "9", cy: "17", r: "2.5", fill: "#ffffff" }),
-        ]);
-      }
-
-      // 19. GitHub / Desktop
-      if (raw.includes("github")) {
-        return svgWrap([
-          h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#18181b", stroke: "#888888" }),
-          h("circle", { cx: "12", cy: "12", r: "6", fill: "#ffffff" }),
-          h("path", { d: "M9 16c1-2 5-2 6 0", stroke: "#6366f1", strokeWidth: "1.5" }),
-        ]);
-      }
-
-      // Default macOS App Icon (Polished Indigo Rounded App Icon with star glyph)
-      return svgWrap([
-        h("rect", { width: "20", height: "20", x: "2", y: "2", rx: "5", fill: "#6366f1", stroke: "#4f46e5" }),
-        h("path", { d: "m12 6 1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4L6.2 10.2l4-.6z", fill: "#ffffff" }),
-      ]);
+      return null;
     }
 
     function AppGlyph(props) {

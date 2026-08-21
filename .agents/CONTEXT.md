@@ -2660,3 +2660,16 @@ User prompt:
    - The Main Area strictly respects the secondary sidebar width side-by-side — NEVER overlapping or rendering below it.
 
 **Status:** completed, all 80 package test suites green.
+
+## Session 54 — August 21, 2026 (Complete Native App Icon Fallback Purge & Live Center Column Bounds)
+
+**Accomplished Refinements:**
+1. **Complete Purge of Hand-Drawn SVG App Icons in `renderAppIcon`**:
+   - Removed all 19 legacy cartoonish hand-drawn SVGs from `renderAppIcon`.
+   - All macOS applications dynamically resolve their real icon PNG from `/quotas/api/fs/icon?path=...` via standard macOS application bundle candidate locations (`/Applications/*.app`, `/System/Applications/*.app`, etc.).
+   - Returns `null` if no native app bundle exists on disk.
+2. **Live Center Column Viewport Bounding (`useCenterBounds`)**:
+   - Implemented real-time `getCenterBounds()` and `useCenterBounds()` measuring `centerCol` directly in viewport space (`left`, `right`, `top`).
+   - Integrated continuous event listeners (`resize`, `pointermove`, `dsh:right-sidebar-changed`) so that dragging the secondary sidebar drag handle immediately updates all main view occupants (`MainViewTerminalOccupant`, `MainViewContainerOccupant`, `MainViewFileEditorOccupant`, `MainViewRepoOccupant`, `EmptyAreaNewTabPicker`) in real time with 0ms lag and zero column overlap.
+
+**Status:** completed, all 80 package test suites green.
