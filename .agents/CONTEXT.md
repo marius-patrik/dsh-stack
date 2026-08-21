@@ -2775,3 +2775,32 @@ User prompt:
 6. **Real Slash Commands System**: Expanded `dsh-actions` with real interactive command runners for `/goal`, `/plan`, `/schedule`, `/grill-me`, `/teamwork-preview`, `/learn`, `/preset`, `/compact`, `/clear`.
 7. **Clean Sidebar Status Dots**: Terminals and docker containers in the left sidebar tree now display a simple glowing green dot (`#3fb950`) indicating active/running state without verbose text clutter.
 8. **Test Suite Verification**: All 80 package check-plugin suites pass 100% green.
+
+## Session 62 — August 21, 2026 (Green Active Sidebar Counter, Tab Row as Header Replacement, Corner Three-Dots Menu & Overlay Elimination)
+
+**Context & User Directives:**
+1. `the active counter can be gree nas well`
+2. `the tab row should replace the header of the conversation - three dots in tab bar corner and tab with name replacesd name`
+3. `its broken`
+4. `fix it`
+5. `continue`
+6. `review it`
+7. `not yet`
+8. `finish it`
+9. `clean it up`
+10. `make sure everything is don e`
+
+**Accomplished Refinements:**
+1. **Green Active Sidebar Counter**:
+   - Styled the "Active (N)" count badge in the left sidebar tree with `#3fb950` green text and `rgba(63, 185, 80, 0.18)` background capsule.
+2. **Top Tab Row Replaces Conversation Header**:
+   - `TopConversationTabBar` cleanly serves as the authoritative header of the conversation area.
+   - Hid redundant native conversation header elements (`[data-slot="conversation.session.header"]`, `[data-slot="conversation.header"]`, `[class*="sessionHeader"]`) to eliminate duplicate titles and wasted vertical height.
+   - Padded the conversation viewport with `padding-top: 38px` so message streams begin cleanly below the tab bar.
+   - Active tab displays the live conversation title and handles context switching.
+3. **Corner Three-Dots Utilities Menu**:
+   - Sits in the top-right corner of the tab bar containing: "Switch to Trajectory / Chat View", "Download Session Log", "Move Tab to Bottom Panel", "Move Tab to Secondary Sidebar", and "Close Tab".
+4. **Modal / Overlay Elimination**:
+   - Removed `FileViewerModal` and popup dialogs. All files, repositories, terminals, and containers render cleanly as tabs.
+5. **Test Suite Verification**:
+   - All 80 package checks pass 100% green.

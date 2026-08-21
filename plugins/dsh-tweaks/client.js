@@ -533,6 +533,18 @@ button[class*="sessionLogButton"],
 [data-slot="conversation.session.header.utilities"] [class*="ellipsisButton"] {
   display: inline-flex !important;
 }
+[data-slot="conversation.session.header"],
+[data-slot="conversation.header"],
+[class*="SessionHeader"],
+[class*="sessionHeader"],
+header[class*="header"] {
+  display: none !important;
+}
+[data-conversation-scroll],
+div[class*="conversationScroll"],
+div[class*="scrollPort"] {
+  padding-top: 38px !important;
+}
 @media (max-width: 768px) {
   .dsh-tw-root.dsh-tw-wide {
     position: fixed !important;

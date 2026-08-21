@@ -8014,7 +8014,7 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
               h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isActiveOpen ? " dsh-tree-arrowOpen" : ""), size: 11 })
             ),
             h("span", { className: "dsh-tree-title" }, "Active"),
-            h("span", { style: { padding: "1px 5px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)", fontWeight: 700, marginLeft: "4px" } }, totalActiveCount),
+            h("span", { style: { padding: "1px 6px", borderRadius: "8px", fontSize: "9.5px", background: "rgba(63, 185, 80, 0.18)", color: "#3fb950", fontWeight: 700, marginLeft: "4px" } }, totalActiveCount),
             h("span", { className: "dsh-tree-actions" },
               renderUnifiedPlusButton(null, "active-plus")
             )
@@ -8200,7 +8200,6 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
           ) : null
         ) : null,
 
-        fileViewer ? h(FileViewerModal, { file: fileViewer, onClose: function () { setFileViewer(null); } }) : null,
         renameModal ? h(RenameTerminalModal, { oldName: renameModal, onClose: function () { setRenameModal(null); }, onRenamed: function () { loadAll(); } }) : null
       );
     }
@@ -8210,20 +8209,16 @@ button:hover svg[class*="ellipsis"], button:hover svg[class*="more"], button:hov
       var panel = panelState[0], setPanel = panelState[1];
 
       React.useEffect(function () {
-        var onOpenTerm = function (e) {
-          var sess = (e && e.detail && e.detail.session) ? e.detail.session : "0";
-          setPanel({ type: "terminal", session: sess });
-        };
-        var onOpenCont = function (e) {
-          var id = (e && e.detail && e.detail.id) ? e.detail.id : null;
-          setPanel({ type: "container", id: id });
+        var onMoveToBottom = function (e) {
+          var tab = e.detail;
+          if (tab) {
+            setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
+          }
         };
 
-        window.addEventListener("dsh:open-terminal", onOpenTerm);
-        window.addEventListener("dsh:open-container", onOpenCont);
+        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
         return function () {
-          window.removeEventListener("dsh:open-terminal", onOpenTerm);
-          window.removeEventListener("dsh:open-container", onOpenCont);
+          window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
         };
       }, []);
 
