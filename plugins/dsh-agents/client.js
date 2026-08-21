@@ -23,10 +23,27 @@ window.__ModuleLoader__.load({
 		 * Re-running the bundle (HMR / entry refresh) is idempotent through the
 		 * slot ledger.
 		 */
-		function AgentsGlyph() {
+		function AgentsGlyph(props) {
 			var React = require("react");
-			var P = require("@deepseek-ai/dsh-client-ui-primitives");
-			return React.createElement(P.IconGoalOutline16, { size: 16, className: "dsh-agents-navGlyph" });
+			var size = (props && props.size) || 16;
+			return React.createElement("svg", {
+				width: size,
+				height: size,
+				viewBox: "0 0 24 24",
+				fill: "none",
+				stroke: "currentColor",
+				strokeWidth: "2",
+				strokeLinecap: "round",
+				strokeLinejoin: "round",
+				className: "dsh-agents-navGlyph dsh-icon-animated"
+			},
+				React.createElement("path", { d: "M12 8V4H8" }),
+				React.createElement("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
+				React.createElement("path", { d: "M2 14h2" }),
+				React.createElement("path", { d: "M20 14h2" }),
+				React.createElement("path", { d: "M15 13v2" }),
+				React.createElement("path", { d: "M9 13v2" })
+			);
 		}
 		function AgentsSection(props) {
 			var React = require("react");
@@ -90,14 +107,26 @@ window.__ModuleLoader__.load({
 			var projection = typeof useProjection === "function" ? useProjection("persona") : undefined;
 			var personaId = projection && typeof projection.personaId === "string" && projection.personaId !== "" ? projection.personaId : "";
 			if (personaId === "") return null;
-			var P = require("@deepseek-ai/dsh-client-ui-primitives");
 			var label = typeof nameFor === "function" ? nameFor(personaId) : personaId;
 			return h("button", {
 				type: "button",
 				title: "Persona: " + label + (projection.pending ? " (switching)" : ""),
 				style: { display: "flex", alignItems: "center", gap: "6px", border: "1px solid var(--dsw-alias-border-l2)", borderRadius: "999px", padding: "2px 10px", background: "transparent", color: "var(--dsw-alias-label-primary)", fontSize: "12px", cursor: "default" },
 			}, [
-				h(P.IconPersonalizationOutline16, { size: 12, className: "dsh-agents-personaGlyph" }),
+				h("svg", {
+					width: 13,
+					height: 13,
+					viewBox: "0 0 24 24",
+					fill: "none",
+					stroke: "currentColor",
+					strokeWidth: "2",
+					strokeLinecap: "round",
+					strokeLinejoin: "round",
+					className: "dsh-agents-personaGlyph dsh-icon-animated"
+				},
+					h("path", { d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" }),
+					h("circle", { cx: "12", cy: "7", r: "4" })
+				),
 				h("span", { style: { maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, label),
 			]);
 		}

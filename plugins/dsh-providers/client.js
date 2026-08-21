@@ -796,6 +796,83 @@ button:hover .dsh-icon-animated,
       );
     }
 
+    function PlusGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M5 12h14" }),
+        h("path", { d: "M12 5v14" })
+      );
+    }
+
+    function EllipsisGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("circle", { cx: "12", cy: "12", r: "1" }),
+        h("circle", { cx: "19", cy: "12", r: "1" }),
+        h("circle", { cx: "5", cy: "12", r: "1" })
+      );
+    }
+
+    function EyeGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" }),
+        h("circle", { cx: "12", cy: "12", r: "3" })
+      );
+    }
+
+    function DockToggleGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      var style = (props && props.style) || undefined;
+      return h("svg", { width: size, height: size, className: className, style: style, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+        h("path", { d: "M9 3v18" })
+      );
+    }
+
+    function BranchGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
+        h("circle", { cx: "18", cy: "6", r: "3" }),
+        h("circle", { cx: "6", cy: "18", r: "3" }),
+        h("path", { d: "M18 9a9 9 0 0 1-9 9" })
+      );
+    }
+
+    function FolderOpenGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" })
+      );
+    }
+
+    function SearchGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("circle", { cx: "11", cy: "11", r: "8" }),
+        h("path", { d: "m21 21-4.3-4.3" })
+      );
+    }
+
+    function MicGlyph(props) {
+      var size = (props && props.size) || 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      var style = (props && props.style) || undefined;
+      return h("svg", { width: size, height: size, className: className, style: style, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" }),
+        h("path", { d: "M19 10v2a7 7 0 0 1-14 0v-2" }),
+        h("line", { x1: "12", x2: "12", y1: "19", y2: "22" })
+      );
+    }
+
     function formatTokenCount(num) {
       if (num === undefined || num === null || isNaN(num)) return "0";
       if (num >= 1000000000) return (num / 1000000000).toFixed(1) + "B";
@@ -1052,8 +1129,8 @@ button:hover .dsh-icon-animated,
             h("div", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } }, "Manage AI platform API keys, subscription OAuth logins, and real sliding window token quotas.")
           ),
           h("div", { style: { display: "flex", gap: "8px" } },
-            h("button", { onClick: handleProbeAll, disabled: probing.all, style: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "7px", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", border: "none", fontSize: "12px", fontWeight: 600, cursor: probing.all ? "wait" : "pointer" } }, h(P.IconRefreshOutline16, { size: 14 }), probing.all ? "Probing All…" : "Probe All Health"),
-            h("button", { onClick: load, style: { display: "inline-flex", alignItems: "center", padding: "7px 12px", borderRadius: "7px", background: "var(--dsw-alias-surface-l2, rgba(128,128,128,0.1))", border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.2))", color: "var(--dsw-alias-label-primary)", cursor: "pointer" } }, h(P.IconRefreshOutline16, { size: 14 }))
+            h("button", { onClick: handleProbeAll, disabled: probing.all, style: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", borderRadius: "7px", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", border: "none", fontSize: "12px", fontWeight: 600, cursor: probing.all ? "wait" : "pointer" } }, h(RefreshGlyph, { size: 14 }), probing.all ? "Probing All…" : "Probe All Health"),
+            h("button", { onClick: load, style: { display: "inline-flex", alignItems: "center", padding: "7px 12px", borderRadius: "7px", background: "var(--dsw-alias-surface-l2, rgba(128,128,128,0.1))", border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.2))", color: "var(--dsw-alias-label-primary)", cursor: "pointer" } }, h(RefreshGlyph, { size: 14 }))
           )
         ),
         PROVIDERS_CATALOG.filter(function (p) { return p.category === "ai" || p.hasSubscription || p.prefixes.length > 0; }).map(function (prov) {
@@ -1271,7 +1348,7 @@ button:hover .dsh-icon-animated,
           "div",
           { style: { borderRadius: "10px", border: "1px solid var(--dsw-alias-border-l1)", background: "var(--dsw-alias-surface-l1)", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
           h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
-            h(P.IconMicrophoneOutline16, { size: 22, style: { color: "#6366f1" } }),
+            h(MicGlyph, { size: 22, style: { color: "#6366f1" } }),
             h("div", null,
               h("div", { style: { fontSize: "15px", fontWeight: 600 } }, "Voice & Audio Synthesis Engine"),
               h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "Neural text-to-speech (Edge TTS, OpenAI, ElevenLabs) and audio controls")
@@ -2140,7 +2217,7 @@ button:hover .dsh-icon-animated,
                     onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
                     onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
                   },
-                  h(P.IconPlusOutline16, { size: 13 })
+                  h(PlusGlyph, { size: 13 })
                 ),
                 h(SelectDropdownMenu, {
                   open: panelPlusMenuOpen,
@@ -2234,17 +2311,17 @@ button:hover .dsh-icon-animated,
                 },
                 onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
                 onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
-              }, h(P.IconEllipsisOutline16, { size: 14 })),
+              }, h(EllipsisGlyph, { size: 14 })),
               h(SelectDropdownMenu, {
                 open: tabActionsOpen,
                 anchorRef: tabActionsBtnRef,
                 onClose: function () { setTabActionsOpen(false); },
                 items: [
-                  { id: "move-top", label: "Move to Main Area", icon: h(P.IconEyeOutline16, { size: 13 }) },
-                  { id: "move-right", label: "Move to Right Dock", icon: h(P.IconSideBarOutline16, { size: 13 }) },
-                  { id: "refresh", label: "Refresh Buffer", icon: h(P.IconRefreshOutline16, { size: 13 }) },
+                  { id: "move-top", label: "Move to Main Area", icon: h(EyeGlyph, { size: 13 }) },
+                  { id: "move-right", label: "Move to Right Dock", icon: h(DockToggleGlyph, { size: 13 }) },
+                  { id: "refresh", label: "Refresh Buffer", icon: h(RefreshGlyph, { size: 13 }) },
                   { id: "clear", label: "Clear Buffer (Ctrl+L)", icon: h(TrashGlyph, { size: 13 }) },
-                  { id: "new-window", label: "New Window in Session", icon: h(P.IconPlusOutline16, { size: 13 }) },
+                  { id: "new-window", label: "New Window in Session", icon: h(PlusGlyph, { size: 13 }) },
                   { id: "new-session", label: "New Terminal Session", icon: h(TerminalsGlyph, { size: 13 }) },
                   { id: "kill", label: "Kill Current Session", icon: h(TrashGlyph, { size: 13 }), danger: true },
                 ],
@@ -2308,7 +2385,7 @@ button:hover .dsh-icon-animated,
               },
               onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
               onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
-            }, h(P.IconSideBarOutline16, {
+            }, h(DockToggleGlyph, {
               size: 14,
               style: {
                 transform: isCollapsed ? "rotate(-90deg)" : "rotate(90deg)",
@@ -2366,7 +2443,7 @@ button:hover .dsh-icon-animated,
                     ? h("button", { onClick: function () { handleContainerAction(selCont.id, "stop"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid rgba(248, 81, 73, 0.3)", background: "rgba(248, 81, 73, 0.08)", color: "#f85149", fontSize: "11px", fontWeight: 500, cursor: "pointer" } }, "Stop")
                     : h("button", { onClick: function () { handleContainerAction(selCont.id, "start"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "none", background: "var(--dsw-alias-primary, #6366f1)", color: "#fff", fontSize: "11px", fontWeight: 500, cursor: "pointer" } }, "Start"),
                   h("button", { onClick: function () { handleContainerAction(selCont.id, "restart"); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l1)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" } }, "Restart"),
-                  h("button", { onClick: function () { loadContainerLogs(selCont.id); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l1)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" } }, h(P.IconRefreshOutline16, { size: 12 }))
+                  h("button", { onClick: function () { loadContainerLogs(selCont.id); }, style: { padding: "4px 10px", borderRadius: "5px", border: "1px solid var(--dsw-alias-border-l1)", background: "transparent", color: "var(--dsw-alias-label-secondary)", fontSize: "11px", cursor: "pointer" } }, h(RefreshGlyph, { size: 12 }))
                 )
               ),
               // Container logs
@@ -2456,7 +2533,7 @@ button:hover .dsh-icon-animated,
             { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: "1px solid rgba(128,128,128,0.2)", background: "#161b22" } },
             h("div", { style: { display: "flex", alignItems: "center", gap: "10px" } }, h(ContainersGlyph, { size: 18 }), h("h3", { style: { margin: 0, fontSize: "16px", fontWeight: 600, color: "#fff" } }, "Docker Container Sandboxes")),
             h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
-              h("button", { onClick: function () { if (selectedContainer) loadLogs(selectedContainer.id); }, style: { padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, h(P.IconRefreshOutline16, { size: 14 })),
+              h("button", { onClick: function () { if (selectedContainer) loadLogs(selectedContainer.id); }, style: { padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, h(RefreshGlyph, { size: 14 })),
               h("button", { onClick: onClose, style: { padding: "6px 12px", borderRadius: "6px", border: "1px solid rgba(128,128,128,0.3)", background: "transparent", color: "#ccc", cursor: "pointer" } }, "Close ✕")
             )
           ),
@@ -2993,7 +3070,7 @@ button:hover .dsh-icon-animated,
               cursor: "pointer",
               padding: "4px",
             }
-          }, h(P.IconSideBarOutline16, { size: 14, style: { transform: isOpen ? "rotate(180deg)" : "none" } }))
+          }, h(DockToggleGlyph, { size: 14, style: { transform: isOpen ? "rotate(180deg)" : "none" } }))
         ),
         // Body Content
         isOpen ? (
@@ -4010,7 +4087,7 @@ button:hover .dsh-icon-animated,
                       }
                     },
                       h("span", { style: { color: isDir ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-tertiary)", display: "inline-flex" } },
-                        isDir ? h(P.IconFolderClose16, { size: 15 }) : h(FileGlyph, { size: 15 })
+                        isDir ? h(FolderOpenGlyph, { size: 15 }) : h(FileGlyph, { size: 15 })
                       ),
                       h("span", {
                         style: {
@@ -4698,7 +4775,7 @@ button:hover .dsh-icon-animated,
                 onMouseEnter: function (e) { e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)"; },
                 onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; },
               },
-              h(P.IconPlusOutline16, { size: 13 })
+              h(PlusGlyph, { size: 13 })
             ),
             h(SelectDropdownMenu, {
               open: plusOpen,
@@ -4747,8 +4824,8 @@ button:hover .dsh-icon-animated,
             position: contextMenu.pos,
             onClose: function () { setContextMenu(null); },
             items: [
-              { id: "move-bottom", label: "Move to Bottom Panel", icon: h(P.IconSideBarOutline16, { size: 13 }) },
-              { id: "move-right", label: "Move to Right Dock", icon: h(P.IconSideBarOutline16, { size: 13 }) },
+              { id: "move-bottom", label: "Move to Bottom Panel", icon: h(DockToggleGlyph, { size: 13 }) },
+              { id: "move-right", label: "Move to Right Dock", icon: h(DockToggleGlyph, { size: 13 }) },
               contextMenu.tab && contextMenu.tab.type !== "chat" ? { id: "close", label: "Close Tab", icon: h(TrashGlyph, { size: 13 }), danger: true } : null,
             ].filter(Boolean),
             onSelect: function (act) {
@@ -4801,35 +4878,26 @@ button:hover .dsh-icon-animated,
         })
           .then(function (r) { return r.json(); })
           .then(function (res) {
-            if (res.success) {
-              onRenamed(name.trim());
-              onClose();
-            } else {
-              alert(res.error || "Rename failed");
-            }
+            if (res.ok) onRenamed();
+            else alert("Failed to rename session: " + (res.error || "Unknown error"));
           })
-          .catch(function (err) { alert(err.message); })
-          .finally(function () { setSaving(false); });
+          .catch(function (e) { alert("Error: " + e.message); })
+          .finally(function () { setSaving(false); onClose(); });
       };
 
       return h(
         "div",
-        {
-          style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999 },
-          onClick: onClose,
-        },
+        { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999 } },
         h(
           "div",
-          {
-            style: { width: "380px", padding: "20px", borderRadius: "10px", background: "var(--dsw-alias-surface-l0, #1e1e2e)", border: "1px solid var(--dsw-alias-border-l2)", display: "flex", flexDirection: "column", gap: "12px" },
-            onClick: function (e) { e.stopPropagation(); },
-          },
+          { style: { width: "360px", padding: "20px", borderRadius: "10px", background: "var(--dsw-alias-bg-layer-2, #1c2128)", border: "1px solid var(--dsw-alias-border-l1)", display: "flex", flexDirection: "column", gap: "14px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" } },
           h("h3", { style: { margin: 0, fontSize: "15px", fontWeight: 600 } }, "Rename Terminal Session"),
           h("input", {
+            type: "text",
             value: name,
-            autoFocus: true,
             onChange: function (e) { setName(e.target.value); },
-            onKeyDown: function (e) { if (e.key === "Enter") handleRename(); else if (e.key === "Escape") onClose(); },
+            onKeyDown: function (e) { if (e.key === "Enter") handleRename(); },
+            autoFocus: true,
             style: { padding: "8px 12px", borderRadius: "6px", border: "1px solid var(--dsw-alias-border-l2)", background: "var(--dsw-alias-surface-l1)", color: "inherit", fontSize: "13px" }
           }),
           h("div", { style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "4px" } },
@@ -4842,11 +4910,17 @@ button:hover .dsh-icon-animated,
 
     function RepoGlyph(props) {
       var size = props && props.size ? props.size : 15;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
-        viewBox: "0 0 16 16",
-        fill: "currentColor",
+        className: className,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
         style: {
           display: "inline-flex",
           alignItems: "center",
@@ -4856,19 +4930,20 @@ button:hover .dsh-icon-animated,
           color: "var(--dsw-alias-primary, #6366f1)"
         }
       },
-        h("path", {
-          fillRule: "evenodd",
-          clipRule: "evenodd",
-          d: "M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.6-1.2-1.6 1.2a.25.25 0 0 1-.4-.2Z"
-        })
+        h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
+        h("circle", { cx: "18", cy: "6", r: "3" }),
+        h("circle", { cx: "6", cy: "18", r: "3" }),
+        h("path", { d: "M18 9a9 9 0 0 1-9 9" })
       );
     }
 
     function WorkspaceGlyph(props) {
       var size = props && props.size ? props.size : 15;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
       return h("svg", {
         width: size,
         height: size,
+        className: className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",
@@ -6213,8 +6288,8 @@ button:hover .dsh-icon-animated,
       var forkSession = props && props.forkSession;
       var createWorkspace = props && props.createWorkspace;
 
-      var sessionList = useSessions ? useSessions(function (s) { return s; }) : { ids: [], byId: {} };
-      var workspaceList = useWorkspaces ? useWorkspaces(function (s) { return s; }) : { items: [] };
+      var sessionList = (typeof useSessions === "function") ? (function () { try { return useSessions(function (s) { return s; }) || { ids: [], byId: {} }; } catch (e) { return { ids: [], byId: {} }; } })() : { ids: [], byId: {} };
+      var workspaceList = (typeof useWorkspaces === "function") ? (function () { try { return useWorkspaces(function (s) { return s; }) || { items: [] }; } catch (e) { return { items: [] }; } })() : { items: [] };
 
       var currentRootState = React.useState("/");
       var currentRoot = currentRootState[0], setCurrentRoot = currentRootState[1];
@@ -6600,7 +6675,7 @@ button:hover .dsh-icon-animated,
                 e.stopPropagation();
                 if (props.expandSidebar) props.expandSidebar();
               },
-            }, h(P.IconSearchOutline16, { size: 18 }))
+            }, h(SearchGlyph, { size: 18 }))
           ),
           h("div", { style: { position: "relative" } },
             h(P.Tooltip, { label: "New item (chat / terminal / container)", delayMs: 500, disabled: isRailPlusOpen },
@@ -6612,7 +6687,7 @@ button:hover .dsh-icon-animated,
                   e.stopPropagation();
                   setPlusMenu(isRailPlusOpen ? null : "rail");
                 },
-              }, h(P.IconPlusOutline16, { size: 18 }))
+              }, h(PlusGlyph, { size: 18 }))
             ),
             h(SelectDropdownMenu, {
               open: isRailPlusOpen,
@@ -6745,7 +6820,7 @@ button:hover .dsh-icon-animated,
                 className: "dsh-tree-actionBtn",
                 title: "Chat Actions (…)",
                 onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isMenuOpen ? null : { id: "chat::" + chat.id }); }
-              }, h(P.IconEllipsisOutline16, { size: 13 })),
+              }, h(EllipsisGlyph, { size: 13 })),
               h(SelectDropdownMenu, {
                 open: isMenuOpen,
                 position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
@@ -6753,7 +6828,7 @@ button:hover .dsh-icon-animated,
                 items: [
                   { id: isPinnedSession(chat, chat.id) ? "unpin" : "pin", label: isPinnedSession(chat, chat.id) ? "Unpin Chat" : "Pin Chat", icon: h(PinGlyph, { size: 13 }) },
                   { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
-                  { id: "fork", label: "Fork Chat", icon: h(P.IconBranchOutline16, { size: 13 }) },
+                  { id: "fork", label: "Fork Chat", icon: h(BranchGlyph, { size: 13 }) },
                   { id: "archive", label: "Archive Chat", icon: h(TrashGlyph, { size: 13 }), danger: true },
                 ],
                 onSelect: function (actionId) {
@@ -6812,7 +6887,7 @@ button:hover .dsh-icon-animated,
                     className: "dsh-tree-actionBtn",
                     title: "Subagent Actions",
                     onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isSubMenuOpen ? null : { id: "chat::" + sub.id }); }
-                  }, h(P.IconEllipsisOutline16, { size: 12 })),
+                  }, h(EllipsisGlyph, { size: 12 })),
                   h(SelectDropdownMenu, {
                     open: isSubMenuOpen,
                     position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
@@ -6881,7 +6956,7 @@ button:hover .dsh-icon-animated,
               className: "dsh-tree-actionBtn",
               title: "Archived Actions (…)",
               onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isMenuOpen ? null : { id: "archived-chat::" + chat.id }); }
-            }, h(P.IconEllipsisOutline16, { size: 13 })),
+            }, h(EllipsisGlyph, { size: 13 })),
             h(SelectDropdownMenu, {
               open: isMenuOpen,
               position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
@@ -6937,6 +7012,7 @@ button:hover .dsh-icon-animated,
           if (isDir) {
             var chatsInDir = folderSessions[entry.path] || [];
             var isFolderEllipsisOpen = Boolean(ellipsisOpen && ellipsisOpen.id === ("folder::" + entry.path));
+            var isAppBundle = Boolean(entry.name && (entry.name.endsWith('.app') || entry.name.endsWith('.dmg') || entry.name.endsWith('.pkg')));
             var isApplications = (entry.name === 'Applications');
             var isLibrary = (entry.name === 'Library');
             var isSystem = (entry.name === 'System' || entry.name.toLowerCase() === 'system');
@@ -6988,7 +7064,7 @@ button:hover .dsh-icon-animated,
                               ? h(RepoGlyph, { size: 15 })
                               : (isWorkspace
                                 ? h(WorkspaceGlyph, { size: 15 })
-                                : (isExp ? h(P.IconFolderOpen16, { size: 15 }) : h(P.IconFolderClose16, { size: 15 }))))))))
+                                : (isExp ? h(FolderOpenGlyph, { size: 15 }) : h(FolderOpenGlyph, { size: 15 }))))))))
                 ),
                 h("span", { className: "dsh-tree-slot dsh-tree-chevron" },
                   h(TriangleRightFill14, { className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""), size: 11 })
@@ -7001,7 +7077,7 @@ button:hover .dsh-icon-animated,
                     className: "dsh-tree-actionBtn",
                     title: "New in Folder (+)",
                     onClick: function (e) { e.stopPropagation(); setPlusMenu(isPlusOpen ? null : entry.path); }
-                  }, h(P.IconPlusOutline16, { size: 13 })),
+                  }, h(PlusGlyph, { size: 13 })),
                   h(SelectDropdownMenu, {
                     open: isPlusOpen,
                     onClose: function () { setPlusMenu(null); },
@@ -7021,14 +7097,14 @@ button:hover .dsh-icon-animated,
                     className: "dsh-tree-actionBtn",
                     title: "Folder Actions (…)",
                     onClick: function (e) { e.stopPropagation(); setEllipsisOpen(isFolderEllipsisOpen ? null : { id: "folder::" + entry.path }); }
-                  }, h(P.IconEllipsisOutline16, { size: 13 })),
+                  }, h(EllipsisGlyph, { size: 13 })),
                   h(SelectDropdownMenu, {
                     open: isFolderEllipsisOpen,
                     position: (ellipsisOpen && ellipsisOpen.pos) ? ellipsisOpen.pos : null,
                     onClose: function () { setEllipsisOpen(null); },
                     items: [
                       isRepo ? { id: "open-repo-tab", label: "Open Repository in Tab", icon: h(RepoGlyph, { size: 13 }) } : null,
-                      { id: "set-root", label: "Focus Directory as Root", icon: h(P.IconFolderOpen16, { size: 13 }) },
+                      { id: "set-root", label: "Focus Directory as Root", icon: h(FolderOpenGlyph, { size: 13 }) },
                       { id: "open-term", label: "Open Terminal Here", icon: h(TerminalsGlyph, { size: 13 }) },
                       { id: "cut", label: "Cut Folder", icon: h(CutGlyph, { size: 13 }) },
                       { id: "copy-path", label: "Copy Path", icon: h(CopyGlyph, { size: 13 }) },
@@ -7147,7 +7223,7 @@ button:hover .dsh-icon-animated,
                 className: "dsh-tree-actionBtn",
                 title: "New Session",
                 onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
-              }, h(P.IconPlusOutline16, { size: 13 }))
+              }, h(PlusGlyph, { size: 13 }))
             )
           ),
           isPinnedOpen ? h(
@@ -7295,7 +7371,7 @@ button:hover .dsh-icon-animated,
                     e.stopPropagation();
                     handleStartSessionInDir("/");
                   }
-                }, h(P.IconPlusOutline16, { size: 13 }))
+                }, h(PlusGlyph, { size: 13 }))
               )
             ),
             isDriveOpen ? h(
@@ -7343,13 +7419,13 @@ button:hover .dsh-icon-animated,
                 className: "dsh-tree-actionBtn",
                 title: "New Session",
                 onClick: function (e) { e.stopPropagation(); if (startSession) startSession(); }
-              }, h(P.IconPlusOutline16, { size: 13 })),
+              }, h(PlusGlyph, { size: 13 })),
               h("button", {
                 type: "button",
                 className: "dsh-tree-actionBtn",
                 title: "Ungrouped Actions (…)",
                 onClick: function (e) { e.stopPropagation(); setUngroupedMenuOpen(!isUngroupedMenuOpen); }
-              }, h(P.IconEllipsisOutline16, { size: 13 })),
+              }, h(EllipsisGlyph, { size: 13 })),
               h(SelectDropdownMenu, {
                 open: isUngroupedMenuOpen,
                 onClose: function () { setUngroupedMenuOpen(false); },
@@ -7488,7 +7564,14 @@ button:hover .dsh-icon-animated,
       );
     }
 
+    if (typeof window !== "undefined") {
+      window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
+    }
+
     function apply(ctx) {
+      if (typeof window !== "undefined") {
+        window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
+      }
       ensureModelPickerDecoration();
       // Injected helper methods for dynamic workspaces and sessions
       var browserInjected = function () {
@@ -7517,8 +7600,8 @@ button:hover .dsh-icon-animated,
       ctx.slots.inject("sidebar.workspaces", function () {
         return ctx.slots.register({
           name: "sidebar.workspaces",
-          priority: -10,
-          order: -10,
+          priority: -100,
+          order: 0,
           locale: "sidebar",
           inject: browserInjected,
         }, UnifiedWorkspacesBrowser);

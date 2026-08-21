@@ -2488,3 +2488,36 @@ Two bugs found via CDP browser automation with console error capture:
 - Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
 
 **Status:** completed.
+
+## Session 47 — August 21, 2026 (Universal Lucide Animated Icons Migration & 5-Tier Sidebar Restoration)
+
+**Context & User Directives:**
+- `https://lucide-animated.com/ these?`
+- `still not all icons there are old ones from you so there must be code for it review everything same for the sidebar it regressed again`
+
+**Key Implementations & Resolutions:**
+1. **Universal Lucide Animated Icons Migration (100% Complete Across All Plugins)**:
+   - Comprehensive audit replaced ALL legacy `@deepseek-ai/dsh-client-ui-primitives` `P.Icon...16` / Octicon shapes across `dsh-actions`, `dsh-agents`, `dsh-credentials`, `dsh-themes`, `dsh-tweaks`, and `dsh-providers`.
+   - All icons now use standard 24x24 SVG vectors matching [lucide-animated.com](https://lucide-animated.com/) with `strokeWidth: 2`, `fill: "none"`, `stroke: "currentColor"`, and the `.dsh-icon-animated` CSS micro-interaction class.
+   - Grep search confirmed **0** remaining `P.Icon` references anywhere in `plugins/`.
+2. **Sidebar Direct Rendering & 5-Tier Tree Architecture Restoration**:
+   - Diagnosed root cause of sidebar fallback: removed broken `useSessions` override from `dsh-tweaks` `sidebarInjected` and wired `TweaksSidebarRoot` to directly render `UnifiedWorkspacesBrowser`.
+   - Restored and verified complete 5-tier sidebar tree hierarchy:
+     1. **Pinned**
+     2. **Active** (Live chats, running tmux terminals, active Docker containers)
+     3. **Host Machine** (`Macintosh HD` -> live filesystem tree with `.app` bundles, repositories, workspaces)
+     4. **Ungrouped**
+     5. **Archived**
+3. **Resilient Safe Data Access**:
+   - Guarded `useSessions` and `useWorkspaces` with try-catch safe invocations to prevent any potential runtime crashes.
+   - Fixed missing `isAppBundle` variable definition in directory entry renderer.
+
+**Verification:**
+- All 16 plugins passed `check-plugin.mjs` test suites cleanly (16/16 ok).
+- CDP end-to-end browser automation verified:
+  - Sidebar tree renders all 5 sections: Pinned, Active, Host Machine (Macintosh HD), Ungrouped, Archived.
+  - Over 1,100 animated Lucide icons render live on the page (`animatedIcons: 1105`).
+  - Zero console errors during initial mount and interactions.
+- Restarted dsh web server on port 3080: 115 active plugins, 0 failures.
+
+**Status:** completed.

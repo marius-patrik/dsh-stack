@@ -1070,7 +1070,7 @@ window.__ModuleLoader__.load({
           },
             h(NotepadPencilGlyph, { size: wide ? 16 : 18 }),
             wide ? h("span", { className: "dsh-tw-newSessionLabel dsh-tw-wide" }, "New") : null,
-            wide ? h(P.IconChevronDownOutline14, { size: 12, style: { marginLeft: "auto", opacity: 0.6 } }) : null
+            wide ? h("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", className: "dsh-icon-animated", style: { marginLeft: "auto", opacity: 0.6 } }, h("polyline", { points: "6 9 12 15 18 9" })) : null
           )
         ),
         h(SelectDropdownMenu, {
@@ -1209,7 +1209,20 @@ window.__ModuleLoader__.load({
           h(P.Tooltip, { label: collapsed ? t('toggle.open') : t('toggle.collapse'), delayMs: 500 },
             h('button', { type: 'button', className: 'dsh-tw-iconButton dsh-tw-toggle', 'aria-label': collapsed ? t('toggle.open') : t('toggle.collapse'), onClick: function () { toggleSidebar(); } },
               !wide ? h(P.FishLogo, { className: 'dsh-tw-railFish', size: 24 }) : null,
-              h(P.IconPanelLeftOutline16, { className: 'dsh-tw-panelIcon', size: wide ? 16 : 18 })))),
+              h("svg", {
+                width: wide ? 16 : 18,
+                height: wide ? 16 : 18,
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                className: "dsh-tw-panelIcon dsh-icon-animated"
+              },
+                h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+                h("path", { d: "M9 3v18" })
+              )))),
         h(P.Tooltip, { label: 'New', delayMs: 500, disabled: wide },
           h('button', {
             type: 'button',
@@ -1222,10 +1235,23 @@ window.__ModuleLoader__.load({
           )
         ),
         h('div', { className: 'dsh-tw-regionArea' },
-          renderSlot('sidebar.workspaces', {
-            wide: wide,
-            expandSidebar: function () { if (collapsed) toggleSidebar(); },
-          })),
+          (typeof window !== "undefined" && window.__dsh_UnifiedWorkspacesBrowser)
+            ? h(window.__dsh_UnifiedWorkspacesBrowser, {
+                wide: wide,
+                expandSidebar: function () { if (collapsed) toggleSidebar(); },
+                useSessions: props.useSessions,
+                useWorkspaces: props.useWorkspaces,
+                startSession: props.startSession,
+                open: props.open,
+                renameSession: props.renameSession,
+                archiveSession: props.archiveSession,
+                forkSession: props.forkSession,
+                createWorkspace: props.createWorkspace,
+              })
+            : renderSlot('sidebar.workspaces', {
+                wide: wide,
+                expandSidebar: function () { if (collapsed) toggleSidebar(); },
+              })),
         h('div', { className: 'dsh-tw-footArea' },
           h('div', { className: 'dsh-tw-footerActions' }, renderSlot('sidebar.footer.action', { wide: wide })),
           h('div', { className: 'dsh-tw-settingsArea' }, renderSlot('sidebar.settings', { wide: wide }))));
@@ -1236,7 +1262,21 @@ window.__ModuleLoader__.load({
       var t = props && props.t;
       var label = (typeof t === 'function') ? t('trigger') : 'Settings';
       return h(Fragment, null,
-        h(P.IconSettingsOutline16, { size: wide ? 16 : 18 }),
+        h("svg", {
+          width: wide ? 16 : 18,
+          height: wide ? 16 : 18,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          className: "dsh-icon-animated dsh-icon-spinOnHover",
+          style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 }
+        },
+          h("path", { d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" }),
+          h("circle", { cx: "12", cy: "12", r: "3" })
+        ),
         wide ? h('span', { className: 'dsh-tw-triggerLabel', style: { marginLeft: '8px' } }, label || 'Settings') : null
       );
     }
@@ -2460,10 +2500,6 @@ window.__ModuleLoader__.load({
         return {
           startSession: startSession,
           toggleSidebar: function () { ctx.layout.toggleSidebar(); },
-          useSessions: function (selector) {
-            var s = ctx.get('sessions') || ctx.sessions;
-            return s ? s.useSessions(selector) : { byId: {}, order: [], phase: 'ready' };
-          },
         };
       };
       ctx.slots.inject('sidebar', function () {

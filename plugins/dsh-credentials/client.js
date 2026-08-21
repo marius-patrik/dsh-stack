@@ -171,6 +171,92 @@ window.__ModuleLoader__.load({
       );
     }
 
+    function PlusIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M5 12h14" }),
+        h("path", { d: "M12 5v14" })
+      );
+    }
+
+    function LinkIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }),
+        h("path", { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" })
+      );
+    }
+
+    function EyeIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" }),
+        h("circle", { cx: "12", cy: "12", r: "3" })
+      );
+    }
+
+    function DownloadIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+        h("polyline", { points: "7 10 12 15 17 10" }),
+        h("line", { x1: "12", x2: "12", y1: "15", y2: "3" })
+      );
+    }
+
+    function RefreshIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
+        h("path", { d: "M21 3v5h-5" }),
+        h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
+        h("path", { d: "M8 16H3v5" })
+      );
+    }
+
+    function CheckIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("polyline", { points: "20 6 9 17 4 12" })
+      );
+    }
+
+    function ChevronRightIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("polyline", { points: "9 18 15 12 9 6" })
+      );
+    }
+
+    function ExternalLinkIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M15 3h6v6" }),
+        h("path", { d: "M10 14 21 3" }),
+        h("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" })
+      );
+    }
+
+    function TrashIcon(props) {
+      var size = props && props.size ? props.size : 14;
+      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+        h("path", { d: "M3 6h18" }),
+        h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
+        h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
+        h("line", { x1: "10", x2: "10", y1: "11", y2: "17" }),
+        h("line", { x1: "14", x2: "14", y1: "11", y2: "17" })
+      );
+    }
+
     function createVaultStore() {
       var listeners = new Set();
       var state = { rows: [], snapshots: {}, status: "idle", error: null };
@@ -646,7 +732,7 @@ window.__ModuleLoader__.load({
                 cursor: "pointer",
               },
             },
-            h(P.IconPlusOutline16, { size: 14 }),
+            h(PlusIcon, { size: 14 }),
             "Add Secret"
           ),
           h(
@@ -662,23 +748,20 @@ window.__ModuleLoader__.load({
                 borderRadius: "6px",
                 border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
                 background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
-                color: "inherit",
+                color: "var(--dsw-alias-label-primary)",
                 fontSize: "12px",
+                fontWeight: 500,
                 cursor: "pointer",
               },
             },
-            h(P.IconLinkOutline14, { size: 14 }),
-            "Sign In / OAuth"
+            h(LinkIcon, { size: 14 }),
+            "Connect OAuth"
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () {
-                globalVaultStore.probeAll().then(function () {
-                  showToast("Probed all endpoints for live health & quotas!");
-                });
-              },
+              onClick: function () { setShowInspectModal(true); },
               style: {
                 display: "inline-flex",
                 alignItems: "center",
@@ -687,24 +770,20 @@ window.__ModuleLoader__.load({
                 borderRadius: "6px",
                 border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
                 background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
-                color: "inherit",
+                color: "var(--dsw-alias-label-primary)",
                 fontSize: "12px",
+                fontWeight: 500,
                 cursor: "pointer",
               },
             },
-            h(P.IconInspectOutline12, { size: 14 }),
-            "Probe All Health"
+            h(EyeIcon, { size: 14 }),
+            "Inspect Vault"
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () {
-                globalVaultStore.importLocal().then(function (res) {
-                  var count = (res && res.imported && res.imported.length) || 0;
-                  showToast(count > 0 ? "Imported " + count + " secrets from local CLI tools!" : "No new local secrets found.");
-                });
-              },
+              onClick: function () { setShowBackupModal(true); },
               style: {
                 display: "inline-flex",
                 alignItems: "center",
@@ -713,34 +792,39 @@ window.__ModuleLoader__.load({
                 borderRadius: "6px",
                 border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
                 background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
-                color: "inherit",
+                color: "var(--dsw-alias-label-primary)",
                 fontSize: "12px",
+                fontWeight: 500,
                 cursor: "pointer",
               },
             },
-            h(P.IconDownloadOutline16, { size: 14 }),
-            "Import Local Keys"
+            h(DownloadIcon, { size: 14 }),
+            "Backup / Export"
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () { globalVaultStore.load().then(function () { showToast("Keychain refreshed"); }); },
+              onClick: function () { store.probeAll(); },
+              disabled: isProbingAll,
               style: {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                padding: "6px 10px",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
+                background: isProbingAll ? "var(--dsw-alias-surface-l2)" : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
+                color: "var(--dsw-alias-label-primary)",
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: isProbingAll ? "wait" : "pointer",
                 marginLeft: "auto",
-                borderRadius: "6px",
-                border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
-                background: "transparent",
-                color: "inherit",
                 fontSize: "12px",
                 cursor: "pointer",
               },
             },
-            h(P.IconRefreshOutline14, { size: 13 }),
+            h(RefreshIcon, { size: 13 }),
             "Refresh"
           )
         ),
@@ -819,7 +903,7 @@ window.__ModuleLoader__.load({
               gap: "6px",
             },
           },
-          h(P.IconCheckOutline14, { size: 14 }),
+          h(CheckIcon, { size: 14 }),
           toastMsg
         ) : null,
 
@@ -1025,7 +1109,7 @@ window.__ModuleLoader__.load({
                       opacity: isProbingAny ? 0.6 : 1,
                     },
                   },
-                  h(P.IconInspectOutline12, { size: 12 }),
+                  h(RefreshIcon, { size: 12 }),
                   isProbingAny ? "Probing…" : "Probe Health"
                 ) : null,
                 prov.oauthProviderId ? h(
@@ -1046,7 +1130,7 @@ window.__ModuleLoader__.load({
                       gap: "4px",
                     },
                   },
-                  h(P.IconLinkOutline14, { size: 12 }),
+                  h(LinkIcon, { size: 12 }),
                   isConnected ? "Sign In Another Account" : "Sign In with OAuth"
                 ) : null,
                 h(
@@ -1072,7 +1156,7 @@ window.__ModuleLoader__.load({
                       gap: "4px",
                     },
                   },
-                  h(P.IconPlusOutline16, { size: 11 }),
+                  h(PlusIcon, { size: 11 }),
                   "Add Account / Key"
                 ),
                 h(
@@ -1093,8 +1177,9 @@ window.__ModuleLoader__.load({
                       gap: "4px",
                     },
                   },
-                  h(P.IconTriangleRightFill14, {
+                  h(ChevronRightIcon, {
                     size: 10,
+                    className: "dsh-icon-animated",
                     style: { transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 150ms ease" },
                   }),
                   isExpanded ? "Hide Accounts" : "View Accounts (" + prov.accounts.length + ")"
@@ -1194,7 +1279,7 @@ window.__ModuleLoader__.load({
                             gap: "4px",
                           },
                         },
-                        h(P.IconTrashOutline16, { size: 12 }),
+                        h(TrashIcon, { size: 12 }),
                         "Delete Account"
                       ) : null
                     ),
@@ -1789,7 +1874,7 @@ window.__ModuleLoader__.load({
                         },
                       },
                       p.label,
-                      h(P.IconChevronRightOutline14, { size: 14 })
+                      h(ChevronRightIcon, { size: 14 })
                     );
                   })
                 )
@@ -1835,7 +1920,7 @@ window.__ModuleLoader__.load({
                       },
                     },
                     "Open Verification URL",
-                    h(P.IconRightUpOutline14, { size: 10 })
+                    h(ExternalLinkIcon, { size: 10 })
                   )
                 ),
                 authStatus === "authenticated"
