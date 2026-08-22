@@ -16,43 +16,52 @@ export function resolveProfile(catalog: CompositionCatalog, profileId: string): 
   const profile = catalog.profiles.get(profileId);
   if (!profile) throw new Error(`Unknown Stack profile: ${profileId}`);
 
-  const packIds = new Set(profile.packs);
-  const pluginIds = new Set(profile.plugins ?? []);
+  const selectedPackIds = new Set(profile.packs);
   const packs: PackDefinition[] = [];
+  const selectedPluginIds = new Set(profile.plugins ?? []);
 
-  for (const packId of packIds) {
+  for (const packId of selectedPackIds) {
     const pack = catalog.packs.get(packId);
     if (!pack) throw new Error(`Profile ${profileId} references unknown pack ${packId}`);
     packs.push(pack);
-    for (const pluginId of pack.plugins) pluginIds.add(pluginId);
+    for (const pluginId of pack.plugins) selectedPluginIds.add(pluginId);
   }
 
-  const plugins: PluginDefinition[] = [];
-  for (const pluginId of pluginIds) {
-    const plugin = catalog.plugins.get(pluginId);
-    if (!plugin) throw new Error(`Composition references unknown plugin ${pluginId}`);
-    plugins.push(plugin);
-  }
-
-  validateRequiredDependencies(catalog.plugins, plugins);
+  const plugins = resolvePluginClosure(catalog.plugins, selectedPluginIds);
   return { profile, packs, plugins };
 }
 
-function validateRequiredDependencies(
+function resolvePluginClosure(
   registry: ReadonlyMap<string, PluginDefinition>,
-  plugins: readonly PluginDefinition[],
-): void {
-  const selected = new Set(plugins.map((plugin) => plugin.id));
+  selected: ReadonlySet<string>,
+): PluginDefinition[] {
+  const resolved = new Map<string, PluginDefinition>();
+  const visiting = new Set<string>();
 
-  for (const plugin of plugins) {
+  const visit = (pluginId: string): void => {
+    if (resolved.has(pluginId)) return;
+    if (visiting.has(pluginId)) throw new Error(`Plugin dependency cycle detected at ${pluginId}`);
+
+    const plugin = registry.get(pluginId);
+    if (!plugin) throw new Error(`Composition references unknown plugin ${pluginId}`);
+
+    visiting.add(pluginId);
     for (const dependency of plugin.dependencies ?? []) {
-      if (dependency.kind !== "required") continue;
-      if (!registry.has(dependency.plugin)) {
-        throw new Error(`Plugin ${plugin.id} requires unknown plugin ${dependency.plugin}`);
-      }
-      if (!selected.has(dependency.plugin)) {
-        throw new Error(`Plugin ${plugin.id} requires ${dependency.plugin}, but it is not selected`);
+      if (dependency.kind === 'required') visit(dependency.plugin);
+    }
+    visiting.delete(pluginId);
+    resolved.set(pluginId, plugin);
+  };
+
+  for (const pluginId of selected) visit(pluginId);
+
+  for (const plugin of resolved.values()) {
+    for (const dependency of plugin.dependencies ?? []) {
+      if (dependency.kind === 'optional' && !registry.has(dependency.plugin)) {
+        throw new Error(`Plugin ${plugin.id} declares optional dependency ${dependency.plugin}, but it is unknown`);
       }
     }
   }
+
+  return [...resolved.values()];
 }
