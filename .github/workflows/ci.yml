@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: ['**']
 
 jobs:
   verify:
@@ -30,14 +30,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Typecheck canonical plugins
+      - name: Typecheck Stack workspace
         run: pnpm typecheck
 
-      - name: Build canonical plugins
+      - name: Build Stack workspace
         run: pnpm build
 
-      - name: Verify canonical plugins
+      - name: Verify Stack workspace
         run: pnpm verify
 
-      - name: Test canonical plugins
+      - name: Test Stack workspace
         run: pnpm test
