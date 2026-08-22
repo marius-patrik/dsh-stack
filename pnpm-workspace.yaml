@@ -1,6 +1,6 @@
 packages:
-  - "packages/*"
+  - "packages/**"
 
-# Legacy/plugin-history sources under plugins/ are intentionally excluded from
-# the active workspace while the rewrite is completed. They are migration
-# material only and must not be imported by new code.
+# The canonical workspace includes every real package under packages/.
+# Legacy plugin sources were removed from the repository and must not be
+# imported by canonical code.
