@@ -14,6 +14,7 @@ const errors = []
 const packageNames = new Map()
 const stackIds = new Map()
 const packages = new Map()
+const canonicalDirs = new Set()
 const sourceHashes = new Map()
 
 function fail(message) { errors.push(message) }
@@ -68,8 +69,9 @@ async function main() {
     assert(await exists(stackPath), `${relDir} has no stack.json; every top-level implementation must have exactly one Stack identity`)
     if (!(await exists(stackPath))) continue
 
-    const stack = await readJson(stackPath, `${relative(root, stackPath)}`)
+    const stack = await readJson(stackPath, relative(root, stackPath))
     if (!stack) continue
+    canonicalDirs.add(dir)
     if (typeof stack.id === 'string') {
       const previous = stackIds.get(stack.id)
       if (previous) fail(`duplicate Stack id ${stack.id}: ${previous} and ${relative(root, stackPath)}`)
@@ -88,8 +90,8 @@ async function main() {
     assert(Array.isArray(stack.optionalDependencies ?? []), `${label} optionalDependencies must be an array`)
     if (stack.kind === 'plugin') assert(await exists(join(dir, 'src')), `${label} declares a plugin but has no src/ directory`)
 
-    if (!(await exists(packagePath))) fail(`${relDir} has stack.json but no package.json`)
-    else {
+    assert(await exists(packagePath), `${relDir} has stack.json but no package.json`)
+    if (await exists(packagePath)) {
       const manifest = await readJson(packagePath, relative(root, packagePath))
       if (manifest?.name) {
         const previous = packageNames.get(manifest.name)
@@ -103,9 +105,8 @@ async function main() {
   }
 
   for (const [id, { stack, dir }] of packages) {
-    for (const dependency of [...stack.dependencies, ...stack.optionalDependencies]) {
-      assert(typeof dependency === 'string' && packages.has(dependency), `${id} references missing Stack package ${String(dependency)}`)
-    }
+    const dependencies = [...(stack.dependencies ?? []), ...(stack.optionalDependencies ?? [])]
+    for (const dependency of dependencies) assert(typeof dependency === 'string' && packages.has(dependency), `${id} references missing Stack package ${String(dependency)}`)
     for (const publishedPath of stack.files) {
       if (generatedFileNames.has(publishedPath) || publishedPath === 'lib' || publishedPath === 'dist') continue
       assert(await exists(join(dir, publishedPath)), `${id} publishes missing path ${publishedPath}`)
@@ -115,7 +116,8 @@ async function main() {
   for await (const file of walk(pluginsDir)) {
     const rel = relative(root, file).replaceAll('\\', '/')
     const top = rel.split('/')[1]
-    if (!top || !packages.get([...packages.entries()].find(([, value]) => value.dir === join(pluginsDir, top))?.[0])) continue
+    const topDir = top ? join(pluginsDir, top) : ''
+    if (!canonicalDirs.has(topDir)) continue
     const ext = rel.slice(rel.lastIndexOf('.'))
     if (!codeExts.has(ext)) continue
     const text = await fs.readFile(file, 'utf8')
