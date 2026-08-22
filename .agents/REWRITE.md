@@ -5,7 +5,7 @@ Date: 2026-08-22
 
 ## Purpose
 
-This document replaces the assumption that the current `dsh-stack` implementation is the architectural source of truth. It records the verified baseline, the current product direction, the execution method for a repository-wide rewrite, and the external reference projects that are part of the target feature set.
+This document replaces the assumption that the current `dsh-stack` implementation is the architectural source of truth. It records the verified baseline, the current product direction, the execution method for a repository-wide rewrite, the external reference projects that are part of the target feature set, and the retirement of Andromeda as an active product.
 
 The rewrite is intentionally destructive at the architectural level: existing code is source material, not a compatibility obligation. Useful behavior, tests, fixtures, and prior design decisions are recovered selectively after being reconciled against the actual DeepSeek Harness (`dsh`).
 
@@ -19,7 +19,13 @@ DSH Stack is both:
 The architecture therefore has two layers:
 
 - reusable Stack capabilities and plugins;
-- a canonical Stack product/profile that composes those capabilities into the intended environment.
+- canonical Stack product profiles that compose those capabilities into intended environments.
+
+At minimum there will be:
+
+- `default` / general-purpose Stack profile;
+- `coding` profile;
+- `trading` / research profile.
 
 The finished system should feel like one coherent product rather than a bag of plugins. Web and CLI are interfaces over the same underlying services/capabilities. Low-level behavior must use native DSH primitives when their semantics fit; additional Stack abstractions exist only when they add a real product/domain boundary.
 
@@ -89,6 +95,19 @@ The upstream changes between our pin and current master are not a routine API bu
 
 The rewrite must target a deliberately selected upstream commit after the full compatibility audit rather than blindly updating to `master`.
 
+## Legacy source policy — Andromeda
+
+`marius-patrik/Andromeda` is retired as an active product. Its repository carries an `ARCHIVED.md` declaration identifying it as historical source material. DSH Stack must not depend on Andromeda at runtime, copy its application architecture wholesale, or preserve its old CLI/server structure merely for compatibility.
+
+Instead, the rewrite will:
+
+1. inventory useful Andromeda subsystems and algorithms;
+2. classify each as reusable implementation, reference behavior, obsolete implementation, or unsupported legacy;
+3. port useful behavior into the correct native DSH/Stack capability;
+4. preserve useful tests/fixtures where they express real behavior;
+5. rewrite Bun/Zod/application-specific pieces when the DSH environment requires different primitives;
+6. record the migration mapping so Andromeda can remain archived rather than serving as a second source of truth.
+
 ## External reference projects / directives
 
 These are references for implementation, not authorities that override DSH or the target Stack architecture.
@@ -99,22 +118,22 @@ Use `zhu1090093659/dsh-web-ui` as the primary reference and fork/base for the St
 
 - repository: https://github.com/zhu1090093659/dsh-web-ui
 - relevant branch at audit time: `dev`
-- the project is a large DSH Web UI plugin family with tab/workspace, task board, Git graph, remote, SSH, skins and related UI features.
+- large DSH Web UI plugin family with tab/workspace, task board, Git graph, remote, SSH, skins and related UI features.
 
 Use its implementation as source material for tab/workspace functionality, but reconcile every feature against current upstream DSH client architecture before incorporation. Do not carry forward obsolete shell hacks, stale assumptions, or duplicate Stack implementations.
 
-The intended repository strategy is to maintain a real fork/base lineage for the tab feature work rather than manually recreating the same code in a separate implementation. Our GitHub connector does not expose a fork operation, so the actual fork creation must be performed through GitHub's fork mechanism outside this connector or by an equivalent repository migration step. Until that exists, the upstream repo remains an explicit source/base reference and not a hidden copied implementation.
+The intended repository strategy is a real fork/base lineage for the tab feature work rather than manually recreating the same code in a separate implementation. The GitHub connector available to this session does not expose a repository-fork operation, so the actual fork creation is a separate repository-management step; until then, the upstream repository remains the explicit source/base reference.
 
 ### Sidebar reference
 
-Consider `zhu1090093659/DSH-better-sidebar` as the primary reference for the sidebar/workspace shell:
+Use `zhu1090093659/DSH-better-sidebar` as the primary reference for the sidebar/workspace shell:
 
 - repository: https://github.com/zhu1090093659/DSH-better-sidebar
 - current default branch at audit time: `main`
 
-The project exposes a service-oriented sidebar API with registered tabs/viewers, file explorer/editor/browser/terminal/Git/background-task surfaces, persistent per-session layout, lazy loading and plugin integration. It also explicitly supports mutual exclusion with the dsh-web-ui `aionui-panel` so two competing sidebar implementations do not mount simultaneously. fileciteturn49file0
+It exposes a service-oriented sidebar API with registered tabs/viewers, file explorer/editor/browser/terminal/Git/background-task surfaces, persistent per-session layout, lazy loading and plugin integration. It also explicitly supports mutual exclusion with the dsh-web-ui `aionui-panel`, demonstrating the desired anti-duplication behavior. fileciteturn49file0
 
-That anti-duplication principle is a direct requirement for DSH Stack: **there must be one owner for each workspace/sidebar/tab capability.** We should converge on one implementation and one public service/slot API, not ship multiple competing versions of the same surface.
+For DSH Stack there must be **one canonical owner for each workspace/sidebar/tab capability**. We should converge on one implementation and one public service/slot API, not ship multiple competing versions of the same surface.
 
 ### Trading profile reference
 
@@ -123,9 +142,22 @@ Use `maddogfinance/dsh-trading` as the implementation/reference baseline for the
 - repository: https://github.com/maddogfinance/dsh-trading
 - current default branch at audit time: `main`
 
-Its architecture is particularly useful because it separates market-data seams, providers, model-facing analysis tools, risk guarding, chart UI and an opt-in trading frame rather than patching DSH core. It explicitly treats the trading environment as research-only and structurally omits an execution seam. fileciteturn50file0
+Its architecture separates market-data seams, providers, model-facing analysis tools, risk guarding, chart UI and an opt-in trading frame rather than patching DSH core. It explicitly treats its trading environment as research-only and structurally omits an execution seam. fileciteturn50file0
 
-For Stack, we should reuse that architectural direction where appropriate but derive the final trading profile from our own product/security requirements. The profile should be a real DSH composition, not a pile of trading-specific globals. Any execution-capable future feature must be an explicit, separately authorized capability rather than an accidental consequence of mounting a broker adapter.
+The DSH Stack trading profile will absorb useful `dsh-trading` behavior and architecture, while deriving final product/security policy itself. Profiles share underlying capabilities; the trading profile changes composition/policy, not the fundamental runtime architecture.
+
+### MoneyMaker absorption into trading
+
+`marius-patrik/moneymaker` is also source material for the trading profile:
+
+- repository: https://github.com/marius-patrik/moneymaker
+- current default branch at audit time: `main`
+
+The repository contains useful trading-domain implementation concepts beyond `dsh-trading`, including provider-agnostic strategy interfaces, multi-bar/multi-symbol strategies, deterministic backtesting, multi-window evaluation, parameter grid search with explicit train/test separation, strategy evolution/fork evaluation, risk sizing, multi-account support, execution-provider abstractions, market-data providers, economic release calendars, session logging and background jobs. fileciteturn58file0turn59file0turn60file0
+
+These capabilities should be **absorbed into the DSH Stack trading profile**, not exposed as a second application. The Python/FastAPI/React application shell is not the target architecture. Useful domain algorithms/contracts should be translated into the Stack/DSH capability model, and duplicate concepts already provided by `dsh-trading` or DSH must be merged rather than reimplemented.
+
+The trading profile should preserve the strongest conceptual boundary from both sources: research/backtesting/analysis capabilities are distinct from any real-money execution capability, and any future live execution must be explicit, separately authorized and structurally isolated.
 
 ### Integration requirements: project planning
 
@@ -134,7 +166,7 @@ DSH Stack must provide first-class planning integrations for:
 - GitHub Projects;
 - Trello boards.
 
-These are not merely import/export utilities. They should integrate with the Stack project/task/workspace model so that agents and users can work with external planning systems through the same domain abstractions. Credentials must flow through the Stack/DSH credential and authorization architecture, not through bespoke token storage inside each integration.
+These are not merely import/export utilities. They should integrate with the Stack project/task/workspace model so agents and users can work with external planning systems through the same domain abstractions. Credentials must flow through the Stack/DSH credential and authorization architecture, not through bespoke token storage inside each integration.
 
 The integration design must account for:
 
@@ -150,63 +182,39 @@ The integration design must account for:
 
 Do not create separate implementations of common project/task concepts for GitHub Projects and Trello. Build one Stack planning/domain layer with adapters/providers for each external system.
 
-## Current dsh-stack truth
+## Product profiles
 
-The current repository contains a substantial documentation/implementation mismatch.
+Profiles are intentional product environments assembled from shared Stack capabilities.
 
-### Documented architecture
+### Default / general profile
 
-`.agents/PLAN.md` currently describes a six-domain-pack / 56-atomic-plugin architecture under `plugins/{core,ux,agents,ai,integrations,vcs}` and marks large groups as `[complete]`.
+The full integrated Stack environment: broad capabilities, general agent workspace, projects, planning integrations, repositories, terminals, provider/account management and the complete Web/CLI experience.
 
-`.agents/AGENTS.md` still describes an older flat `plugins/dsh-*` layout and still treats the old workflow as normative.
+### Coding profile
 
-The existing PRD describes a sophisticated harness extension layer, including slot shadowing, profile patches, credential management, session modes, live personas, themes, quotas and sidebar replacement.
+A first-class software-engineering environment built from the same Stack capabilities but optimized and composed specifically for coding work.
 
-### Actual implementation quality
+The coding profile should emphasize:
 
-Representative current packages are substantially thinner than the documentation claims. For example:
+- coding-oriented DSH agent presets and multi-agent workflows;
+- repository/project-centric workspace navigation;
+- filesystem, editor and terminal workflows;
+- Git and forge integrations;
+- LSP, diagnostics, formatting, search and code intelligence;
+- package/build/test runners;
+- issue/project/board planning through the shared planning domain;
+- code review, diff and patch workflows;
+- background jobs and agent teams for implementation/review/testing tasks;
+- strong context visibility around files, repository state, tasks and active work;
+- reliable session/project persistence and reproducible development environments.
 
-- `plugin-manager` exposes a `PluginManifest` registry, but `resolveDAG()` returns insertion order instead of resolving dependency constraints.
-- `vault-credentials` currently exposes an in-memory `Map`-backed account service despite the plan claiming encrypted vault, typed records, OAuth, TOTP, audit and import behavior.
-- `personas` currently exposes an in-memory roster while the plan describes durable persona selection, preset composition, prompt folding, commands and client state.
-- the package check files often assert existence/basic behavior rather than proving full DSH integration.
+The coding profile is not a separate coding application and must not fork core agent/session/tool semantics. It is a focused composition of the same underlying capabilities.
 
-Therefore status labels such as `[complete]` are not accepted as implementation truth without verifying the actual source and integration evidence.
+### Trading / research profile
 
-### Current repository structure
+A research-oriented quantitative/trading environment combining `dsh-trading` and the useful domain machinery from `moneymaker`, including market data, indicators, strategies, backtesting, evaluation/optimization, risk analysis, accounts, session logging, economic calendars and chart/workspace surfaces.
 
-The physical tree is closer to the newer pack/atomic-plugin model than the older documentation in `AGENTS.md`, but the two generations coexist conceptually. This is architectural drift, not a reason to preserve both.
-
-## Target architectural direction
-
-The target system is derived from capabilities, ownership, state semantics and DSH composition rather than from the present package list.
-
-Conceptually:
-
-```text
-DeepSeek Harness / Cordis
-        |
-        +-- DSH-native capabilities
-        |
-        +-- Stack reusable capabilities
-        |      |
-        |      +-- state / configuration
-        |      +-- credentials / authorization
-        |      +-- providers / accounts / models
-        |      +-- agent & preset management
-        |      +-- tools / actions
-        |      +-- projects / repositories / planning
-        |      +-- execution / integrations
-        |      +-- UI / workspace composition
-        |
-        +-- canonical Stack profiles
-               |
-               +-- integrated default environment
-               +-- trading profile
-               +-- other focused product profiles
-```
-
-Package boundaries will be re-derived from this architecture. The existing six packs and 56-package count are not constraints.
+The profile should share the general Stack provider/credential/project/UI foundations. Trading-specific capabilities are added through adapters and profile composition.
 
 ## No-duplicate rule
 
@@ -227,7 +235,7 @@ Before implementing or importing a feature, search the entire Stack and all sele
 - supersede and delete;
 - keep only as historical/reference material.
 
-Do not ship two packages that provide the same tab, sidebar, task board, credential store, project model, or other substantive product surface under different names.
+Do not ship two packages that provide the same tab, sidebar, task board, credential store, project model, trading engine concept, or other substantive product surface under different names.
 
 ## State model
 
@@ -258,7 +266,7 @@ A Stack state capability may exist as a support layer for Stack-owned domain sta
 
 DSH's built-in agent preset is the canonical agent composition primitive.
 
-Stack will build around it rather than create a parallel `StackAgent` abstraction. Agent functionality includes the full desired multi-agent feature set, subject to the native DSH mechanisms and any additional Stack coordination needed:
+Stack will build around it rather than create a parallel `StackAgent` abstraction. Agent functionality includes the full desired multi-agent feature set, subject to native DSH mechanisms and any additional Stack coordination needed:
 
 - many simultaneous agents;
 - per-session preset composition;
@@ -306,7 +314,7 @@ This layer can own richer semantics such as:
 - cost / latency policy;
 - per-agent and per-project policy.
 
-But actual model execution remains behind DSH's LLM seam.
+Actual model execution remains behind DSH's LLM seam.
 
 ## Credentials / authorization target
 
@@ -369,9 +377,16 @@ Code intelligence
 
 Network / services
   - HTTP and provider-specific API adapters
+
+Trading
+  - market data
+  - strategy/backtest
+  - research/evaluation
+  - risk analysis
+  - execution providers only when explicitly enabled and authorized
 ```
 
-A product domain should consume these common capabilities instead of each integration inventing a private execution/auth/filesystem model.
+A product domain should consume common capabilities instead of each integration inventing a private execution/auth/filesystem model.
 
 ## Web / UI model
 
@@ -391,6 +406,7 @@ The desired product surface includes, as applicable:
 - settings;
 - context/details panels;
 - integrated workspace navigation;
+- coding workspace surfaces;
 - trading workspace/profile surfaces.
 
 For tabs/workspace behavior, `zhu1090093659/dsh-web-ui` is the primary reference/base. For sidebar/workspace behavior, `zhu1090093659/DSH-better-sidebar` is the reference. These sources must be reconciled into one canonical Stack implementation with explicit mutual-exclusion/ownership rules where their feature sets overlap.
@@ -402,12 +418,6 @@ UI ownership is determined by actual DSH slots, client package lifecycle, host/c
 Web and CLI are interfaces over the same Stack services/capabilities.
 
 The CLI must not grow a second business-logic implementation simply because a feature has a command. Commands are owners/consumers of domain services and should produce stable machine-readable behavior where appropriate.
-
-## Profiles
-
-Profiles are product compositions, not just collections of package names.
-
-At minimum, the rewrite must provide a canonical general Stack profile and a trading/research profile derived from the `dsh-trading` reference architecture. Profiles should share underlying capabilities and only differ where product policy/composition genuinely differs.
 
 ## Upstream compatibility policy
 
@@ -426,7 +436,7 @@ At minimum, the rewrite must provide a canonical general Stack profile and a tra
 3. Read all normative Stack docs and classify their statements as current, stale, historical or aspirational.
 4. Inventory the DSH primitives used by the Stack.
 5. Compare the pinned DSH against current upstream.
-6. Audit the selected reference projects (`dsh-web-ui`, `DSH-better-sidebar`, `dsh-trading`) for reusable feature implementations and architectural ideas.
+6. Audit the selected reference projects (`dsh-web-ui`, `DSH-better-sidebar`, `dsh-trading`, `moneymaker`) for reusable implementation and overlap.
 7. Recover the intended feature set from PRD, PLAN, BACKLOG, request history and current behavior.
 8. Produce a gap/contradiction/no-duplicate matrix.
 
@@ -440,7 +450,7 @@ At minimum, the rewrite must provide a canonical general Stack profile and a tra
 6. Define security/credential boundaries.
 7. Define UI/client composition and the canonical ownership of each tab/sidebar/workspace feature.
 8. Define Stack planning/project domain and its GitHub Projects/Trello adapters.
-9. Define profile model, including the trading profile.
+9. Define profile model: default, coding, trading/research and future focused profiles.
 10. Derive package boundaries from the resulting dependency graph.
 11. Define test/invariant requirements.
 
@@ -467,23 +477,28 @@ Implement in dependency order, with exact ordering finalized by the Phase 1 depe
 5. sessions and agent-facing state extensions;
 6. tools/actions/commands;
 7. project/repository/planning domain;
-8. execution/integration capabilities.
+8. execution/integration capabilities;
+9. trading research/domain capabilities where shared foundations permit.
 
 ### Phase 4 — integrated product UI
 
 Rebuild the workspace UI around the actual DSH client architecture and the final product information architecture. Use the selected tab and sidebar references as implementation source material, but produce one canonical Stack ownership model and remove duplicate/competing surfaces.
 
-### Phase 5 — integration breadth
+### Phase 5 — profile assembly
 
-Implement and verify the desired execution, source-control, code-intelligence, provider, authentication, planning and environment integrations against the final capability model.
+Assemble and verify the default, coding and trading/research profiles. Profiles should share core capabilities and differ through deliberate composition, presets, tools, policies and workspace configuration.
 
-### Phase 6 — cross-domain workflows
+### Phase 6 — integration breadth
+
+Implement and verify the desired execution, source-control, code-intelligence, provider, authentication, planning, trading and environment integrations against the final capability model.
+
+### Phase 7 — cross-domain workflows
 
 Validate complete user journeys such as:
 
 ```text
-select agent
-  -> preset composition
+select profile
+  -> select agent/preset
   -> select model
   -> resolve provider/account
   -> resolve credential
@@ -496,7 +511,7 @@ select agent
   -> recover identical semantics
 ```
 
-### Phase 7 — hardening
+### Phase 8 — hardening
 
 Audit the complete system for:
 
@@ -515,11 +530,11 @@ Audit the complete system for:
 - stale documentation;
 - weak tests that merely assert object existence.
 
-### Phase 8 — documentation reconstruction
+### Phase 9 — documentation reconstruction
 
 Rewrite the repository documentation around the implemented architecture. Historical session records remain history; they are not normative design documents.
 
-### Phase 9 — release baseline
+### Phase 10 — release baseline
 
 A clean clone must support reproducible install, build, typecheck, tests, profile boot, Web, CLI, persistence, restart/resume and integration verification without hidden manual setup.
 
@@ -545,7 +560,7 @@ A mature feature should, as applicable, have:
 1. Finish the repository-wide implementation inventory.
 2. Build the current Stack feature inventory from PRD/PLAN/BACKLOG/history.
 3. Build the DSH primitive map at the selected upstream baseline.
-4. Audit the three selected reference projects for reusable implementation and overlap.
+4. Audit the selected reference projects for reusable implementation and overlap.
 5. Produce the gap/contradiction/no-duplicate matrix.
 6. Draft the target package/service/event graph.
 7. Present only genuine product/architecture decisions back to the user; execution details remain ours.
