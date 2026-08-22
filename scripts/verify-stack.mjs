@@ -13,7 +13,7 @@ const sourceHashes = new Map()
 function fail(message) { errors.push(message) }
 function assert(condition, message) { if (!condition) fail(message) }
 
-async function walk(dir) {
+async function* walk(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true })
   for (const entry of entries) {
     if (ignoredDirs.has(entry.name)) continue
