@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, integration]
+    branches: [main]
   push:
-    branches: [main, integration]
+    branches: [main]
 
 jobs:
   verify:
@@ -30,14 +30,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Typecheck canonical packages
+      - name: Typecheck canonical plugins
         run: pnpm typecheck
 
-      - name: Build canonical packages
+      - name: Build canonical plugins
         run: pnpm build
 
-      - name: Verify canonical packages
+      - name: Verify canonical plugins
         run: pnpm verify
 
-      - name: Test canonical packages
+      - name: Test canonical plugins
         run: pnpm test
