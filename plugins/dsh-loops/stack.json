@@ -1,0 +1,1 @@
+{"id":"stack.agent.loops","name":"@dsh-stack/agent-loops","version":"0.1.0","kind":"plugin","description":"Goal-based file-defined automation loops.","files":["lib","bin","client.js","package.json","stack.json","cordis.patch.yml"],"dependencies":[],"optionalDependencies":[]}
