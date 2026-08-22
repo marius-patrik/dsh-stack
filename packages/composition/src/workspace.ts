@@ -9,6 +9,11 @@ export interface SidebarSettings {
   readonly showBrandLogo: boolean;
 }
 
+export interface SidebarConversationSettings {
+  /** Controls the large New Conversation action in the sidebar. */
+  readonly showNewConversation: boolean;
+}
+
 export interface SkinDefinition {
   readonly id: string;
   readonly displayName: string;
@@ -41,4 +46,8 @@ export function resolveSidebarLogo(
     collapsed,
     assetId,
   };
+}
+
+export function shouldShowNewConversation(settings: SidebarConversationSettings): boolean {
+  return settings.showNewConversation;
 }
