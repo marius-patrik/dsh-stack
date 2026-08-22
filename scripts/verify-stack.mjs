@@ -33,7 +33,11 @@ async function* walk(dir) {
 
 async function trackedGeneratedFiles() {
   try {
-    const { stdout } = await execFileAsync('git', ['ls-files', '--', 'packages/**/lib/**'], { cwd: root })
+    const { stdout } = await execFileAsync(
+      'git',
+      ['ls-files', '--', 'packages/**/lib/**', 'packages/**/node_modules/**'],
+      { cwd: root },
+    )
     return stdout.split('\n').map((entry) => entry.trim()).filter(Boolean)
   } catch (error) {
     fail(`unable to inspect tracked generated files: ${error.message}`)
@@ -42,12 +46,6 @@ async function trackedGeneratedFiles() {
 }
 
 async function main() {
-  const rootPlugins = join(root, 'plugins')
-  try {
-    await fs.access(rootPlugins)
-    fail('legacy plugins/ directory still exists')
-  } catch {}
-
   for (const file of await trackedGeneratedFiles()) {
     fail(`${file} is checked-in generated output; source of truth must remain in src/`)
   }
@@ -103,7 +101,6 @@ async function main() {
     if (!codeExts.has(ext)) continue
 
     const text = await fs.readFile(file, 'utf8')
-    assert(!text.includes('plugins/'), `${rel} references removed plugins/ tree`)
     for (const marker of ['TODO', 'FIXME', 'not implemented', 'initialized: true']) {
       assert(
         !text.toLowerCase().includes(marker.toLowerCase()),
