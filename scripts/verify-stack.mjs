@@ -12,6 +12,7 @@ const ignoredDirs = new Set(['node_modules', '.git', 'dist', 'coverage', 'lib'])
 const errors = []
 const packageNames = new Map()
 const sourceHashes = new Map()
+let publishableCount = 0
 
 function fail(message) { errors.push(message) }
 function assert(condition, message) { if (!condition) fail(message) }
@@ -46,21 +47,27 @@ async function main() {
 
   for (const manifestPath of manifests) {
     const dir = join(manifestPath, '..')
+    const relManifest = relative(root, manifestPath).replaceAll('\\', '/')
     let manifest
     try { manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8')) }
     catch (error) {
-      fail(`${relative(root, manifestPath)} is not valid JSON: ${error.message}`)
+      fail(`${relManifest} is not valid JSON: ${error.message}`)
       continue
     }
 
-    const relManifest = relative(root, manifestPath)
     assert(typeof manifest.name === 'string' && manifest.name.length > 0, `${relManifest} has no package name`)
     if (typeof manifest.name === 'string') {
       const previous = packageNames.get(manifest.name)
       if (previous) fail(`duplicate package name ${manifest.name}: ${previous} and ${relManifest}`)
       else packageNames.set(manifest.name, relManifest)
-      assert(manifest.name.startsWith('@dsh-stack/'), `${relManifest} package name must use @dsh-stack namespace`)
     }
+
+    const pathParts = relManifest.split('/')
+    const isTopLevelPlugin = pathParts.length === 3 && pathParts[0] === 'plugins'
+    if (!isTopLevelPlugin) continue
+
+    publishableCount += 1
+    assert(manifest.name.startsWith('@dsh-stack/'), `${relManifest} package name must use @dsh-stack namespace`)
     assert(typeof manifest.version === 'string', `${relManifest} has no package version`)
     assert(manifest.type === 'module', `${relManifest} must use ESM`)
     assert(manifest.stack && ['plugin', 'pack'].includes(manifest.stack.kind), `${relManifest} must declare stack.kind`)
@@ -68,11 +75,18 @@ async function main() {
     assert(manifest.private !== true, `${relManifest} must be publishable, not private`)
     assert(manifest.publishConfig?.access === 'public', `${relManifest} must declare public publishConfig.access`)
     assert(Array.isArray(manifest.files) && manifest.files.length > 0, `${relManifest} must explicitly declare published files`)
+    assert(typeof manifest.scripts?.build === 'string', `${relManifest} must provide a build script`)
+    assert(typeof manifest.scripts?.typecheck === 'string', `${relManifest} must provide a typecheck script`)
+    assert(typeof manifest.scripts?.test === 'string', `${relManifest} must provide a test script`)
+    assert(typeof manifest.scripts?.verify === 'string', `${relManifest} must provide a verify script`)
     if (manifest.stack.kind === 'plugin') {
       try { await fs.access(join(dir, 'src')) }
-      catch { fail(`${relative(root, dir)} declares a plugin but has no src/ directory`) }
+      catch { fail(`${relManifest} declares a plugin but has no src/ directory`) }
+      assert(typeof manifest.exports === 'object' || typeof manifest.main === 'string', `${relManifest} plugin must declare exports or main`)
     }
   }
+
+  assert(publishableCount > 0, 'plugins/ contains no publishable top-level plugins or packs')
 
   const catalogPath = join(pluginsDir, 'composition', 'src', 'catalog.ts')
   try {
@@ -101,7 +115,7 @@ async function main() {
     console.error(errors.join('\n'))
     process.exit(1)
   }
-  console.log(`Stack verification passed: ${packageNames.size} packages, ${sourceHashes.size} unique source bodies.`)
+  console.log(`Stack verification passed: ${publishableCount} publishable plugins/packs, ${packageNames.size} total workspace packages, ${sourceHashes.size} unique source bodies.`)
 }
 
 await main()
