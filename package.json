@@ -11,8 +11,10 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "pnpm --filter @dsh-stack/composition typecheck",
-    "verify": "pnpm --filter @dsh-stack/composition verify"
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "verify": "pnpm -r --if-present verify",
+    "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
