@@ -43,8 +43,10 @@ jobs:
         run: pnpm test
 
       - name: Reject legacy imports in canonical source
+        shell: bash
         run: |
-          if grep -R --line-number --exclude-dir=.git --exclude-dir=node_modules -E '(^|["'"'])plugins/(dsh-|core/|agents/|ai/|ux/)' packages; then
+          set -euo pipefail
+          if grep -R --line-number --exclude-dir=.git --exclude-dir=node_modules -E "(plugins/)(dsh-|core/|agents/|ai/|ux/)" packages; then
             echo 'Canonical packages must not import legacy plugin implementations.'
             exit 1
           fi
