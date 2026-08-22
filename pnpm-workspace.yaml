@@ -1,0 +1,6 @@
+packages:
+  - "packages/*"
+
+# Legacy/plugin-history sources under plugins/ are intentionally excluded from
+# the active workspace while the rewrite is completed. They are migration
+# material only and must not be imported by new code.
