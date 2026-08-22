@@ -1,6 +1,6 @@
 {
   "name": "dsh-credentials",
-  "description": "The dsh account manager: an encrypted accounts vault (ctx.accounts) plus file-based secret importers for Claude Code and Cursor, composing with the harness credential seam",
+  "description": "The dsh account manager: an encrypted accounts vault (ctx.accounts) plus file-based secret importers for Claude Code, Cursor, and GitHub, composing with the harness credential seam",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -36,12 +36,12 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-credentials": "^0.1.0"
+    "@deepseek-ai/dsh-credentials": "0.1.1-rc.2"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
     "@types/node": "^22.0.0",
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-credentials": "^0.1.0"
+    "@deepseek-ai/dsh-credentials": "0.1.1-rc.2"
   }
 }
