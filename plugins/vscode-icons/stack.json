@@ -1,0 +1,10 @@
+{
+  "id": "stack.ui.icons.vscode",
+  "name": "@dsh-stack/vscode-icons",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "VS Code icon-theme support for Stack filesystem views.",
+  "files": ["lib", "themes", "package.json", "README.md", "LICENSE"],
+  "dependencies": ["stack.ui.icons"],
+  "optionalDependencies": []
+}
