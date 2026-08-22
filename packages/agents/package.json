@@ -1,24 +1,12 @@
 {
   "name": "@stack/pack-agents",
-  "version": "0.2.0",
+  "version": "0.3.0",
+  "private": true,
   "type": "module",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./lib/index.js",
-      "types": "./lib/index.d.ts"
-    },
-    "./src/*": "./src/*"
-  },
-  "files": [
-    "lib"
-  ],
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "test": "node check-plugin.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "*"
+    "@deepseek-ai/cordis": "^4.0.1"
   }
 }
