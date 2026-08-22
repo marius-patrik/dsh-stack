@@ -63,14 +63,14 @@ async function main() {
     }
 
     const pathParts = relManifest.split('/')
-    const isTopLevelPlugin = pathParts.length === 3 && pathParts[0] === 'plugins'
-    if (!isTopLevelPlugin) continue
+    const isTopLevelPackage = pathParts.length === 3 && pathParts[0] === 'plugins'
+    if (!isTopLevelPackage) continue
 
     publishableCount += 1
     assert(manifest.name.startsWith('@dsh-stack/'), `${relManifest} package name must use @dsh-stack namespace`)
     assert(typeof manifest.version === 'string', `${relManifest} has no package version`)
     assert(manifest.type === 'module', `${relManifest} must use ESM`)
-    assert(manifest.stack && ['plugin', 'pack'].includes(manifest.stack.kind), `${relManifest} must declare stack.kind`)
+    assert(manifest.stack && ['plugin', 'pack', 'library'].includes(manifest.stack.kind), `${relManifest} must declare stack.kind`)
     assert(typeof manifest.stack?.id === 'string' && manifest.stack.id.includes('.'), `${relManifest} stack.id must be namespaced`)
     assert(manifest.private !== true, `${relManifest} must be publishable, not private`)
     assert(manifest.publishConfig?.access === 'public', `${relManifest} must declare public publishConfig.access`)
@@ -86,12 +86,12 @@ async function main() {
     }
   }
 
-  assert(publishableCount > 0, 'plugins/ contains no publishable top-level plugins or packs')
+  assert(publishableCount > 0, 'plugins/ contains no publishable top-level plugins, packs or libraries')
 
   const catalogPath = join(pluginsDir, 'composition', 'src', 'catalog.ts')
   try {
     const catalog = await fs.readFile(catalogPath, 'utf8')
-    for (const match of catalog.matchAll(/id:\s*'([^']+)'/g)) assert(match[1].includes('.'), `catalog id ${match[1]} is not namespaced`)
+    for (const match of catalog.matchAll(/(?:id|plugin):\s*'([^']+)'/g)) assert(match[1].includes('.'), `catalog identifier ${match[1]} is not namespaced`)
   } catch (error) {
     fail(`unable to verify composition catalog: ${error.message}`)
   }
@@ -115,7 +115,7 @@ async function main() {
     console.error(errors.join('\n'))
     process.exit(1)
   }
-  console.log(`Stack verification passed: ${publishableCount} publishable plugins/packs, ${packageNames.size} total workspace packages, ${sourceHashes.size} unique source bodies.`)
+  console.log(`Stack verification passed: ${publishableCount} publishable top-level packages, ${packageNames.size} total workspace packages, ${sourceHashes.size} unique source bodies.`)
 }
 
 await main()
