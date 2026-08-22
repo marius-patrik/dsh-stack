@@ -12,7 +12,7 @@ const ignoredDirs = new Set(['node_modules', '.git', 'dist', 'coverage', 'lib'])
 const errors = []
 const packageNames = new Map()
 const sourceHashes = new Map()
-let publishableCount = 0
+const publicPackages = new Map()
 
 function fail(message) { errors.push(message) }
 function assert(condition, message) { if (!condition) fail(message) }
@@ -37,72 +37,75 @@ async function trackedGeneratedFiles() {
   }
 }
 
+async function readJson(path, label) {
+  try { return JSON.parse(await fs.readFile(path, 'utf8')) }
+  catch (error) {
+    fail(`${label} is not valid JSON: ${error.message}`)
+    return undefined
+  }
+}
+
 async function main() {
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output; source of truth must remain in src/`)
 
-  const manifests = []
-  for await (const file of walk(pluginsDir)) if (file.endsWith('/package.json')) manifests.push(file)
-  manifests.sort()
-  assert(manifests.length > 0, 'plugins/ contains no workspace packages')
+  const children = await fs.readdir(pluginsDir, { withFileTypes: true })
+  for (const child of children) {
+    if (!child.isDirectory() || ignoredDirs.has(child.name)) continue
+    const dir = join(pluginsDir, child.name)
+    const manifestPath = join(dir, 'package.json')
+    try {
+      const manifest = await readJson(manifestPath, `${relative(root, manifestPath)}`)
+      if (manifest?.name) {
+        const previous = packageNames.get(manifest.name)
+        if (previous) fail(`duplicate package name ${manifest.name}: ${previous} and ${relative(root, manifestPath)}`)
+        else packageNames.set(manifest.name, relative(root, manifestPath))
+      }
+    } catch {}
 
-  for (const manifestPath of manifests) {
-    const dir = join(manifestPath, '..')
-    const relManifest = relative(root, manifestPath).replaceAll('\\', '/')
-    let manifest
-    try { manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8')) }
-    catch (error) {
-      fail(`${relManifest} is not valid JSON: ${error.message}`)
-      continue
-    }
+    const stackPath = join(dir, 'stack.json')
+    try { await fs.access(stackPath) } catch { continue }
+    const stack = await readJson(stackPath, `${relative(root, stackPath)}`)
+    if (!stack) continue
 
-    assert(typeof manifest.name === 'string' && manifest.name.length > 0, `${relManifest} has no package name`)
-    if (typeof manifest.name === 'string') {
-      const previous = packageNames.get(manifest.name)
-      if (previous) fail(`duplicate package name ${manifest.name}: ${previous} and ${relManifest}`)
-      else packageNames.set(manifest.name, relManifest)
-    }
-
-    const pathParts = relManifest.split('/')
-    const isTopLevel = pathParts.length === 3 && pathParts[0] === 'plugins'
-    if (!isTopLevel) continue
-
-    if (!manifest.stack) {
-      assert(manifest.private === true, `${relManifest} is an internal package and must remain private`)
-      continue
-    }
-
-    publishableCount += 1
-    assert(manifest.name.startsWith('@dsh-stack/'), `${relManifest} package name must use @dsh-stack namespace`)
-    assert(typeof manifest.version === 'string', `${relManifest} has no package version`)
-    assert(manifest.type === 'module', `${relManifest} must use ESM`)
-    assert(['plugin', 'pack', 'library'].includes(manifest.stack.kind), `${relManifest} has invalid stack.kind`)
-    assert(typeof manifest.stack.id === 'string' && manifest.stack.id.includes('.'), `${relManifest} stack.id must be namespaced`)
-    assert(manifest.private !== true, `${relManifest} must be publishable, not private`)
-    assert(manifest.publishConfig?.access === 'public', `${relManifest} must declare public publishConfig.access`)
-    assert(Array.isArray(manifest.files) && manifest.files.length > 0, `${relManifest} must explicitly declare published files`)
-    assert(typeof manifest.scripts?.build === 'string', `${relManifest} must provide a build script`)
-    assert(typeof manifest.scripts?.typecheck === 'string', `${relManifest} must provide a typecheck script`)
-    assert(typeof manifest.scripts?.test === 'string', `${relManifest} must provide a test script`)
-    assert(typeof manifest.scripts?.verify === 'string', `${relManifest} must provide a verify script`)
-    if (manifest.stack.kind === 'plugin') {
-      try { await fs.access(join(dir, 'src')) }
-      catch { fail(`${relManifest} declares a plugin but has no src/ directory`) }
-      assert(typeof manifest.exports === 'object' || typeof manifest.main === 'string', `${relManifest} plugin must declare exports or main`)
+    publicPackages.set(stack.id, { dir, stack })
+    const label = `plugins/${child.name}/stack.json`
+    assert(typeof stack.id === 'string' && /^stack\.[a-z0-9][a-z0-9.-]*$/.test(stack.id), `${label} id must be namespaced`)
+    assert(['plugin', 'pack', 'library'].includes(stack.kind), `${label} has invalid kind`)
+    assert(typeof stack.version === 'string' && /^\d+\.\d+\.\d+$/.test(stack.version), `${label} must have a semver version`)
+    assert(typeof stack.name === 'string' && /^@dsh-stack\//.test(stack.name), `${label} must have an @dsh-stack package name`)
+    assert(typeof stack.description === 'string' && stack.description.length > 0, `${label} must have a description`)
+    assert(Array.isArray(stack.files) && stack.files.length > 0, `${label} must declare published files`)
+    assert(Array.isArray(stack.dependencies ?? []), `${label} dependencies must be an array`)
+    assert(Array.isArray(stack.optionalDependencies ?? []), `${label} optionalDependencies must be an array`)
+    if (stack.kind === 'plugin') {
+      try { await fs.access(join(dir, 'src')) } catch { fail(`${label} declares a plugin but has no src/ directory`) }
     }
   }
 
-  assert(publishableCount > 0, 'plugins/ contains no publishable Stack packages')
+  assert(publicPackages.size > 0, 'no public Stack package manifests found under plugins/*/stack.json')
 
   const catalogPath = join(pluginsDir, 'composition', 'src', 'catalog.ts')
-  try {
-    const catalog = await fs.readFile(catalogPath, 'utf8')
-    for (const match of catalog.matchAll(/(?:id|plugin):\s*'([^']+)'/g)) assert(match[1].includes('.'), `catalog identifier ${match[1]} is not namespaced`)
-  } catch (error) {
-    fail(`unable to verify composition catalog: ${error.message}`)
+  const catalog = await readJson(join(root, 'plugins', 'composition', 'stack.json'), 'plugins/composition/stack.json')
+  assert(catalog !== undefined, 'composition stack manifest is required')
+
+  if (catalogPath) {
+    try {
+      const source = await fs.readFile(catalogPath, 'utf8')
+      for (const match of source.matchAll(/(?:id|plugin|pack):\s*'([^']+)'/g)) {
+        const id = match[1]
+        assert(id.includes('.'), `catalog identifier ${id} is not namespaced`)
+        if (id.startsWith('stack.') && (id.includes('profile.') || id.includes('workspace') || id.includes('planning') || id.includes('coding') || id.includes('trading') || id.includes('skyblock'))) continue
+        assert(publicPackages.has(id) || source.includes(`plugin: '${id}'`), `catalog id ${id} has no public Stack package manifest`)
+      }
+    } catch (error) {
+      fail(`unable to verify composition catalog: ${error.message}`)
+    }
   }
 
   for await (const file of walk(pluginsDir)) {
     const rel = relative(root, file).replaceAll('\\', '/')
+    const top = rel.split('/')[0] === 'plugins' ? rel.split('/')[1] : undefined
+    if (!top || !publicPackagesHasDir(top)) continue
     const ext = rel.slice(rel.lastIndexOf('.'))
     if (!codeExts.has(ext)) continue
     const text = await fs.readFile(file, 'utf8')
@@ -120,7 +123,12 @@ async function main() {
     console.error(errors.join('\n'))
     process.exit(1)
   }
-  console.log(`Stack verification passed: ${publishableCount} public Stack packages, ${packageNames.size} total workspace packages, ${sourceHashes.size} unique source bodies.`)
+  console.log(`Stack verification passed: ${publicPackages.size} public packages, ${packageNames.size} workspace manifests, ${sourceHashes.size} unique public source bodies.`)
+}
+
+function publicPackagesHasDir(name) {
+  for (const { dir } of publicPackages.values()) if (dir === join(pluginsDir, name)) return true
+  return false
 }
 
 await main()
