@@ -10,8 +10,13 @@ const errors = []
 const packageNames = new Map()
 const sourceHashes = new Map()
 
-function fail(message) { errors.push(message) }
-function assert(condition, message) { if (!condition) fail(message) }
+function fail(message) {
+  errors.push(message)
+}
+
+function assert(condition, message) {
+  if (!condition) fail(message)
+}
 
 async function* walk(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true })
@@ -25,46 +30,79 @@ async function* walk(dir) {
 
 async function main() {
   const rootPlugins = join(root, 'plugins')
-  try { await fs.access(rootPlugins); fail('legacy plugins/ directory still exists') } catch {}
+  try {
+    await fs.access(rootPlugins)
+    fail('legacy plugins/ directory still exists')
+  } catch {}
 
-  const packageDirs = (await fs.readdir(packagesDir, { withFileTypes: true }))
-    .filter(entry => entry.isDirectory())
-    .map(entry => entry.name)
-    .sort()
+  const manifests = []
+  for await (const file of walk(packagesDir)) {
+    if (file.endsWith('/package.json')) manifests.push(file)
+  }
+  manifests.sort()
 
-  for (const name of packageDirs) {
-    const dir = join(packagesDir, name)
-    const manifestPath = join(dir, 'package.json')
+  assert(manifests.length > 0, 'packages/ contains no workspace packages')
+
+  for (const manifestPath of manifests) {
+    const dir = join(manifestPath, '..')
     let manifest
     try {
       manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'))
     } catch (error) {
-      fail(`${relative(root, dir)} has no valid package.json: ${error.message}`)
+      fail(`${relative(root, manifestPath)} is not valid JSON: ${error.message}`)
       continue
     }
 
-    assert(typeof manifest.name === 'string' && manifest.name.length > 0, `${relative(root, manifestPath)} has no package name`)
+    assert(
+      typeof manifest.name === 'string' && manifest.name.length > 0,
+      `${relative(root, manifestPath)} has no package name`,
+    )
     if (typeof manifest.name === 'string') {
       const previous = packageNames.get(manifest.name)
-      if (previous) fail(`duplicate package name ${manifest.name}: ${previous} and ${relative(root, manifestPath)}`)
-      else packageNames.set(manifest.name, relative(root, manifestPath))
+      if (previous) {
+        fail(`duplicate package name ${manifest.name}: ${previous} and ${relative(root, manifestPath)}`)
+      } else {
+        packageNames.set(manifest.name, relative(root, manifestPath))
+      }
     }
-    assert(manifest.private === true || manifest.license || manifest.publishConfig, `${relative(root, manifestPath)} has neither private nor publish metadata`)
+
+    const allowedMetadata = manifest.private === true || manifest.license || manifest.publishConfig
+    assert(
+      Boolean(allowedMetadata),
+      `${relative(root, manifestPath)} has neither private nor publish metadata`,
+    )
+
+    const sourceDir = join(dir, 'src')
+    try {
+      await fs.access(sourceDir)
+    } catch {
+      fail(`${relative(root, dir)} declares a package but has no src/ directory`)
+    }
   }
 
   for await (const file of walk(packagesDir)) {
     const rel = relative(root, file).replaceAll('\\', '/')
     const ext = rel.slice(rel.lastIndexOf('.'))
     if (!codeExts.has(ext)) continue
+
     const text = await fs.readFile(file, 'utf8')
     assert(!text.includes('plugins/'), `${rel} references removed plugins/ tree`)
-    for (const marker of ['TODO', 'FIXME', 'not implemented']) {
-      assert(!text.toLowerCase().includes(marker.toLowerCase()), `${rel} contains unfinished marker ${marker}`)
+    for (const marker of ['TODO', 'FIXME', 'not implemented', 'initialized: true']) {
+      assert(
+        !text.toLowerCase().includes(marker.toLowerCase()),
+        `${rel} contains unfinished or placeholder marker ${marker}`,
+      )
     }
+    assert(!/\bas any\b/.test(text), `${rel} contains an unchecked 'as any' cast`)
+
     if (text.length < 400) continue
     const hash = createHash('sha256').update(text).digest('hex')
     const previous = sourceHashes.get(hash)
-    if (previous && !/\/fixtures\/|\/snapshots\//.test(rel) && !/\/index\.(js|mjs|ts)$/.test(rel)) {
+    if (
+      previous
+      && !/\/fixtures\/|\/snapshots\//.test(rel)
+      && !/\/index\.(js|mjs|ts)$/.test(rel)
+    ) {
       fail(`duplicate source implementation: ${previous} and ${rel}`)
     } else if (!previous) {
       sourceHashes.set(hash, rel)
@@ -81,7 +119,10 @@ async function main() {
     console.error(errors.join('\n'))
     process.exit(1)
   }
-  console.log(`Stack verification passed: ${packageNames.size} packages, ${sourceHashes.size} unique source bodies.`)
+
+  console.log(
+    `Stack verification passed: ${packageNames.size} packages, ${sourceHashes.size} unique source bodies.`,
+  )
 }
 
 await main()
