@@ -1,12 +1,11 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
-
-export const name = 'pack-ai';
-export const inject: string[] = [];
-export const optional: string[] = [];
-
-export const Config = Schema.object({});
-
-export function apply(ctx: Context) {
-  (ctx as any).aiPack = { initialized: true };
+export interface StackPackDescriptor {
+  readonly id: string
+  readonly packageRoots: readonly string[]
 }
+
+export const aiPack: StackPackDescriptor = {
+  id: 'stack.ai',
+  packageRoots: ['protocol-dialects'],
+}
+
+export default aiPack
