@@ -82,6 +82,7 @@ async function main() {
 
   for await (const file of walk(packagesDir)) {
     const rel = relative(root, file).replaceAll('\\', '/')
+    assert(!/(^|\/)lib\//.test(rel), `${rel} is generated build output; source of truth must remain in src/`)
     const ext = rel.slice(rel.lastIndexOf('.'))
     if (!codeExts.has(ext)) continue
 
