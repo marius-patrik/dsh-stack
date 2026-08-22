@@ -15,6 +15,6 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "*"
+    "@stack/icon-engine": "*"
   }
 }
