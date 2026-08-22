@@ -1,11 +1,14 @@
 import { createHash } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import { join, relative } from 'node:path'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 
+const execFileAsync = promisify(execFile)
 const root = process.cwd()
 const packagesDir = join(root, 'packages')
 const codeExts = new Set(['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx'])
-const ignoredDirs = new Set(['node_modules', '.git', 'dist', 'coverage'])
+const ignoredDirs = new Set(['node_modules', '.git', 'dist', 'coverage', 'lib'])
 const errors = []
 const packageNames = new Map()
 const sourceHashes = new Map()
@@ -28,12 +31,26 @@ async function* walk(dir) {
   }
 }
 
+async function trackedGeneratedFiles() {
+  try {
+    const { stdout } = await execFileAsync('git', ['ls-files', '--', 'packages/**/lib/**'], { cwd: root })
+    return stdout.split('\n').map((entry) => entry.trim()).filter(Boolean)
+  } catch (error) {
+    fail(`unable to inspect tracked generated files: ${error.message}`)
+    return []
+  }
+}
+
 async function main() {
   const rootPlugins = join(root, 'plugins')
   try {
     await fs.access(rootPlugins)
     fail('legacy plugins/ directory still exists')
   } catch {}
+
+  for (const file of await trackedGeneratedFiles()) {
+    fail(`${file} is checked-in generated output; source of truth must remain in src/`)
+  }
 
   const manifests = []
   for await (const file of walk(packagesDir)) {
@@ -82,7 +99,6 @@ async function main() {
 
   for await (const file of walk(packagesDir)) {
     const rel = relative(root, file).replaceAll('\\', '/')
-    assert(!/(^|\/)lib\//.test(rel), `${rel} is generated build output; source of truth must remain in src/`)
     const ext = rel.slice(rel.lastIndexOf('.'))
     if (!codeExts.has(ext)) continue
 
