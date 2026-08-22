@@ -26,16 +26,20 @@ export const agentPresetPack: AgentPresetPack = {
   presets: [defaultPreset, codingPreset],
 }
 
+/**
+ * Materialize the pack directly into a DSH agent-preset root.
+ * `root` is expected to be configured as one of the DSH preset discovery roots;
+ * each preset therefore lives at `<root>/<preset-id>/agent.cordis.yml`.
+ */
 export async function materializeAgentPresetPack(
   root: string,
   pack: AgentPresetPack = agentPresetPack,
 ): Promise<string> {
-  const presetRoot = join(root, pack.id)
-  await mkdir(presetRoot, { recursive: true })
+  await mkdir(root, { recursive: true })
   for (const preset of pack.presets) {
-    const dir = join(presetRoot, preset.id)
+    const dir = join(root, preset.id)
     await mkdir(dir, { recursive: true })
     await writeFile(join(dir, 'agent.cordis.yml'), preset.composition, 'utf8')
   }
-  return presetRoot
+  return root
 }
