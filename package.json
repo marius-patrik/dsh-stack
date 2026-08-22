@@ -1,0 +1,20 @@
+{
+  "name": "@marius-patrik/dsh-stack",
+  "version": "0.1.0-rewrite.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "pnpm --filter @dsh-stack/composition typecheck",
+    "verify": "pnpm --filter @dsh-stack/composition verify"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
