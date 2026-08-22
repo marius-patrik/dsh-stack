@@ -1,10 +1,17 @@
 {
-  "name": "@stack/pack-agents",
+  "name": "@dsh-stack/pack-agents",
   "version": "0.3.0",
-  "private": true,
+  "description": "Composable agent actions, commands, personas, tools, loops, skills and translation pack.",
+  "license": "MIT",
   "type": "module",
+  "files": ["actions", "commands", "loops", "personas", "skills", "tools", "translator", "package.json", "README.md", "LICENSE"],
+  "publishConfig": { "access": "public" },
+  "stack": { "kind": "pack", "id": "stack.pack.agents" },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "node ../../scripts/pack.mjs build",
+    "typecheck": "node ../../scripts/pack.mjs typecheck",
+    "test": "node ../../scripts/pack.mjs test",
+    "verify": "node ../../scripts/pack.mjs verify"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1"
