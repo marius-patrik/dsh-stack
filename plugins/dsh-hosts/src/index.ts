@@ -38,15 +38,14 @@ export class HostsService extends Service implements IHostsService {
     const access = this.getAccessConfig()
     this.gateway = new AccessGateway(access)
 
-    // Advertise local mDNS domain (dsh.local)
     void this.domainManager.registerMdns()
 
-    const server = (ctx as any).webServer
+    const server = ctx.get('webServer')
     if (server) {
       server.register({
         kind: 'exact',
         path: '/hosts/api/status',
-        handler: async (_req: any, res: any) => {
+        handler: async (_req, res) => {
           const status = await this.getClusterStatus()
           res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
           res.end(JSON.stringify(status))
@@ -56,7 +55,7 @@ export class HostsService extends Service implements IHostsService {
       server.register({
         kind: 'exact',
         path: '/hosts/api/health',
-        handler: async (_req: any, res: any) => {
+        handler: async (_req, res) => {
           res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
           res.end(JSON.stringify({ ok: true, timestamp: Date.now() }))
         },
@@ -65,7 +64,7 @@ export class HostsService extends Service implements IHostsService {
       server.register({
         kind: 'exact',
         path: '/hosts/bootstrap.sh',
-        handler: async (_req: any, res: any) => {
+        handler: async (_req, res) => {
           const script = this.deployer.generateUnixBootstrap(access.permanentUrl)
           res.writeHead(200, { 'Content-Type': 'text/x-shellscript', 'Access-Control-Allow-Origin': '*' })
           res.end(script)
@@ -75,7 +74,7 @@ export class HostsService extends Service implements IHostsService {
       server.register({
         kind: 'exact',
         path: '/hosts/bootstrap.ps1',
-        handler: async (_req: any, res: any) => {
+        handler: async (_req, res) => {
           const script = this.deployer.generateWindowsBootstrap(access.permanentUrl)
           res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' })
           res.end(script)
@@ -85,7 +84,7 @@ export class HostsService extends Service implements IHostsService {
       server.register({
         kind: 'exact',
         path: '/hosts/api/sync/manifest',
-        handler: async (_req: any, res: any) => {
+        handler: async (_req, res) => {
           const manifest = await this.syncEngine.buildManifest('coordinator')
           res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
           res.end(JSON.stringify(manifest))
@@ -93,17 +92,15 @@ export class HostsService extends Service implements IHostsService {
       })
     }
 
-    // Start network access gateway
-    void this.gateway.start().catch((err: any) => {
-      console.warn(`[dsh-hosts] gateway notice: ${err?.message || err}`)
+    void this.gateway.start().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err)
+      console.warn(`[dsh-hosts] gateway notice: ${message}`)
     })
 
-    ctx.effect(() => {
-      return () => {
-        if (this.gateway) {
-          void this.gateway.stop()
-          this.gateway = null
-        }
+    ctx.effect(() => () => {
+      if (this.gateway) {
+        void this.gateway.stop()
+        this.gateway = null
       }
     }, 'dsh-hosts: gateway lifecycle')
   }
@@ -135,9 +132,7 @@ export class HostsService extends Service implements IHostsService {
 
   async getClusterStatus(): Promise<ClusterStatus> {
     const now = Date.now()
-    if (this.cachedStatus && now - this.lastScan < 10000) {
-      return this.cachedStatus
-    }
+    if (this.cachedStatus && now - this.lastScan < 10000) return this.cachedStatus
     return this.rescanTopology()
   }
 
@@ -152,15 +147,12 @@ export class HostsService extends Service implements IHostsService {
     }
 
     for (const peer of ts.peers) {
-      if (peer.dnsName) {
-        peer.activeUrl = `http://${peer.dnsName}:${access.gatewayPort}`
-      } else if (peer.ips[0]) {
-        peer.activeUrl = `http://${peer.ips[0]}:${access.gatewayPort}`
-      }
+      if (peer.dnsName) peer.activeUrl = `http://${peer.dnsName}:${access.gatewayPort}`
+      else if (peer.ips[0]) peer.activeUrl = `http://${peer.ips[0]}:${access.gatewayPort}`
       nodes.push(peer)
     }
 
-    const onlineNodes = nodes.filter(n => n.online).length
+    const onlineNodes = nodes.filter((n) => n.online).length
     const manifest = await this.syncEngine.buildManifest(ts.self?.id || 'self')
     const trackedFiles = Object.keys(manifest.files).length
 
@@ -170,11 +162,7 @@ export class HostsService extends Service implements IHostsService {
       totalNodes: nodes.length,
       onlineNodes,
       access,
-      syncStatus: {
-        synced: true,
-        lastSync: Date.now(),
-        trackedFiles,
-      },
+      syncStatus: { synced: true, lastSync: Date.now(), trackedFiles },
     }
     this.lastScan = Date.now()
     return this.cachedStatus
@@ -182,10 +170,8 @@ export class HostsService extends Service implements IHostsService {
 
   async deployWorker(nodeId: string): Promise<{ ok: boolean; message: string; command?: string }> {
     const status = await this.getClusterStatus()
-    const node = status.nodes.find(n => n.id === nodeId)
-    if (!node) {
-      return { ok: false, message: `Node with id ${nodeId} not found` }
-    }
+    const node = status.nodes.find((candidate) => candidate.id === nodeId)
+    if (!node) return { ok: false, message: `Node with id ${nodeId} not found` }
 
     const command = this.clusterManager.generateWorkerCommand(node, status.access.permanentUrl)
     return {
