@@ -18,6 +18,9 @@
     "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/schemastery": "*",
+    "@types/node": "^22.15.0",
     "typescript": "^6.0.3"
   }
 }
