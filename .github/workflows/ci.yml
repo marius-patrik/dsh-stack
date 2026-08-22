@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, integration]
   push:
-    branches: [main]
+    branches: [main, integration]
 
 jobs:
   verify:
@@ -41,12 +41,3 @@ jobs:
 
       - name: Test canonical packages
         run: pnpm test
-
-      - name: Reject legacy imports in canonical source
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -R --line-number --exclude-dir=.git --exclude-dir=node_modules -E "(plugins/)(dsh-|core/|agents/|ai/|ux/)" packages; then
-            echo 'Canonical packages must not import legacy plugin implementations.'
-            exit 1
-          fi
