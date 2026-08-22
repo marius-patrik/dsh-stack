@@ -16,6 +16,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "verify": "node verify.mjs"
   },
+  "dependencies": {
+    "@dsh-stack/plugin-kit": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^6.0.3"
   }
