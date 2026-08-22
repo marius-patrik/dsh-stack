@@ -52,3 +52,16 @@ The Stack release always contains the complete package catalog even when only a 
 ## Review standard
 
 Do not declare work complete because code exists. The canonical workspace must pass typecheck, build, package contract verification, duplicate-source verification, package tests, and release packaging. User-visible UI must be wired to actual DSH seams and must not be simulated with placeholder state.
+
+## Tooling and GitHub-operation limitations
+
+The agent environment can inspect public GitHub repositories, branches, pull requests, commits, workflow runs, and repository files, and can create/update branches, commits, files, and pull requests when the available connector exposes the corresponding operation.
+
+Some GitHub administration operations are not exposed by the available connector and therefore cannot be truthfully claimed as completed by an agent. In particular:
+
+- repository branch-protection/ruleset administration is not exposed as a mutation operation here; the agent must record this limitation rather than claiming that `main` is protected;
+- required status-check enforcement, required-PR settings, merge restrictions, and other repository-level rules must be verified in GitHub repository Settings after an authorized maintainer applies them when the connector cannot mutate them;
+- repository visibility/archival and other organization/account-level administration may similarly require the GitHub web UI or an unavailable administrative API operation;
+- the absence of an exposed mutation tool is not evidence that the repository is configured incorrectly; it means the agent cannot safely assert or change that configuration from this environment.
+
+When one of these limitations blocks a requested repository-level policy, document the exact manual/admin action needed here and continue with all code, CI, release, and documentation work that can be performed directly.
