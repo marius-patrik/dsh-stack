@@ -11,9 +11,7 @@ export const plugins: readonly PluginDefinition[] = [
     id: "stack.workspace.tabs",
     version: "0.1.0",
     description: "Canonical workspace tab lifecycle and persistence.",
-    dependencies: [
-      { plugin: "stack.core.composition", kind: "required" },
-    ],
+    dependencies: [{ plugin: "stack.core.composition", kind: "required" }],
     provides: ["workspace.tabs"],
   },
   {
@@ -27,49 +25,53 @@ export const plugins: readonly PluginDefinition[] = [
     provides: ["workspace.sidebar"],
   },
   {
+    id: "stack.ui.icons",
+    version: "0.1.0",
+    description: "Canonical icon resolution and icon-pack registry.",
+    dependencies: [{ plugin: "stack.core.composition", kind: "required" }],
+    provides: ["ui.icons"],
+  },
+  {
+    id: "stack.ui.icons.vscode",
+    version: "0.1.0",
+    description: "VS Code icon-theme format adapter and icon pack provider.",
+    dependencies: [{ plugin: "stack.ui.icons", kind: "required" }],
+    provides: ["ui.icons.vscode"],
+  },
+  {
     id: "stack.ui.skin.deepseek",
     version: "0.1.0",
     description: "DeepSeek branded Stack skin.",
-    dependencies: [
-      { plugin: "stack.workspace.sidebar", kind: "required" },
-    ],
-    provides: ["ui.skin"]
+    dependencies: [{ plugin: "stack.workspace.sidebar", kind: "required" }],
+    provides: ["ui.skin.deepseek"],
   },
   {
     id: "stack.ui.skin.claude",
     version: "0.1.0",
     description: "Claude branded Stack skin.",
-    dependencies: [
-      { plugin: "stack.workspace.sidebar", kind: "required" },
-    ],
-    provides: ["ui.skin"]
+    dependencies: [{ plugin: "stack.workspace.sidebar", kind: "required" }],
+    provides: ["ui.skin.claude"],
   },
   {
     id: "stack.ui.skin.codex",
     version: "0.1.0",
     description: "Codex branded Stack skin.",
-    dependencies: [
-      { plugin: "stack.workspace.sidebar", kind: "required" },
-    ],
-    provides: ["ui.skin"]
+    dependencies: [{ plugin: "stack.workspace.sidebar", kind: "required" }],
+    provides: ["ui.skin.codex"],
   },
   {
     id: "stack.planning.core",
     version: "0.1.0",
     description: "Shared project/task planning domain.",
-    dependencies: [
-      { plugin: "stack.core.composition", kind: "required" },
-    ],
-    provides: ["planning.core"]
+    dependencies: [{ plugin: "stack.core.composition", kind: "required" }],
+    provides: ["planning.core"],
   },
   {
     id: "stack.integration.github",
     version: "0.1.0",
     description: "GitHub integration boundary.",
-    dependencies: [
-      { plugin: "stack.planning.core", kind: "optional" },
-    ],
-    provides: ["integration.github"]
+    dependencies: [{ plugin: "stack.planning.core", kind: "optional" }],
+    provides: ["integration.github"],
   },
   {
     id: "stack.integration.github-projects",
@@ -79,16 +81,14 @@ export const plugins: readonly PluginDefinition[] = [
       { plugin: "stack.planning.core", kind: "required" },
       { plugin: "stack.integration.github", kind: "required" },
     ],
-    provides: ["integration.github-projects"]
+    provides: ["integration.github-projects"],
   },
   {
     id: "stack.integration.trello",
     version: "0.1.0",
     description: "Trello integration.",
-    dependencies: [
-      { plugin: "stack.planning.core", kind: "required" },
-    ],
-    provides: ["integration.trello"]
+    dependencies: [{ plugin: "stack.planning.core", kind: "required" }],
+    provides: ["integration.trello"],
   },
   {
     id: "stack.coding.darkfactory",
@@ -98,58 +98,48 @@ export const plugins: readonly PluginDefinition[] = [
       { plugin: "stack.planning.core", kind: "required" },
       { plugin: "stack.integration.github", kind: "required" },
     ],
-    provides: ["coding.automation", "repository.control-plane"]
+    provides: ["coding.automation", "repository.control-plane"],
   },
   {
     id: "stack.trading.market-data",
     version: "0.1.0",
     description: "Trading market-data capability.",
-    dependencies: [
-      { plugin: "stack.core.composition", kind: "required" },
-    ],
-    provides: ["trading.market-data"]
+    dependencies: [{ plugin: "stack.core.composition", kind: "required" }],
+    provides: ["trading.market-data"],
   },
   {
     id: "stack.trading.research",
     version: "0.1.0",
     description: "Trading research, indicators, strategies and analysis.",
-    dependencies: [
-      { plugin: "stack.trading.market-data", kind: "required" },
-    ],
-    provides: ["trading.research"]
+    dependencies: [{ plugin: "stack.trading.market-data", kind: "required" }],
+    provides: ["trading.research"],
   },
   {
     id: "stack.trading.backtest",
     version: "0.1.0",
     description: "Deterministic backtesting and evaluation.",
-    dependencies: [
-      { plugin: "stack.trading.research", kind: "required" },
-    ],
-    provides: ["trading.backtest"]
+    dependencies: [{ plugin: "stack.trading.research", kind: "required" }],
+    provides: ["trading.backtest"],
   },
   {
     id: "stack.trading.optimizer",
     version: "0.1.0",
     description: "Train/test parameter search and strategy evaluation.",
-    dependencies: [
-      { plugin: "stack.trading.backtest", kind: "required" },
-    ],
-    provides: ["trading.optimizer"]
+    dependencies: [{ plugin: "stack.trading.backtest", kind: "required" }],
+    provides: ["trading.optimizer"],
   },
   {
     id: "stack.skyblock.hypixel",
     version: "0.1.0",
     description: "Hypixel API and SkyBlock data integration.",
-    provides: ["skyblock.hypixel"]
+    provides: ["skyblock.hypixel"],
   },
   {
     id: "stack.skyblock.domain",
     version: "0.1.0",
     description: "SkyBlock deterministic domain model and calculations.",
-    dependencies: [
-      { plugin: "stack.skyblock.hypixel", kind: "required" },
-    ],
-    provides: ["skyblock.domain"]
+    dependencies: [{ plugin: "stack.skyblock.hypixel", kind: "required" }],
+    provides: ["skyblock.domain"],
   },
   {
     id: "stack.skyblock.objectives",
@@ -159,7 +149,7 @@ export const plugins: readonly PluginDefinition[] = [
       { plugin: "stack.skyblock.domain", kind: "required" },
       { plugin: "stack.planning.core", kind: "required" },
     ],
-    provides: ["skyblock.objectives"]
+    provides: ["skyblock.objectives"],
   },
 ];
 
@@ -172,6 +162,8 @@ export const packs: readonly PackDefinition[] = [
       "stack.core.composition",
       "stack.workspace.tabs",
       "stack.workspace.sidebar",
+      "stack.ui.icons",
+      "stack.ui.icons.vscode",
       "stack.ui.skin.deepseek",
       "stack.ui.skin.claude",
       "stack.ui.skin.codex",
@@ -192,9 +184,7 @@ export const packs: readonly PackDefinition[] = [
     id: "stack.coding",
     version: "0.1.0",
     description: "Software engineering and repository control-plane capabilities.",
-    plugins: [
-      "stack.coding.darkfactory",
-    ],
+    plugins: ["stack.coding.darkfactory"],
   },
   {
     id: "stack.trading",
