@@ -8,7 +8,9 @@
     "node": ">=22.19.0"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "plugins/*",
+    "plugins/*/*"
   ],
   "scripts": {
     "typecheck": "pnpm --filter @dsh-stack/composition typecheck",
