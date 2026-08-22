@@ -1,10 +1,10 @@
 {
   "name": "@dsh-stack/pack-agents",
   "version": "0.3.0",
-  "description": "Composable agent actions, commands, personas, tools, loops, skills and translation pack.",
+  "description": "Composable agent capability pack over the canonical Stack agent plugins.",
   "license": "MIT",
   "type": "module",
-  "files": ["actions", "commands", "loops", "personas", "skills", "tools", "translator", "package.json", "README.md", "LICENSE"],
+  "files": ["package.json", "stack.json", "README.md", "LICENSE"],
   "publishConfig": { "access": "public" },
   "stack": { "kind": "pack", "id": "stack.pack.agents" },
   "scripts": {
