@@ -1,12 +1,20 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
-
-export const name = 'pack-integrations';
-export const inject = ['slots', 'webServer'];
-export const optional: string[] = [];
-
-export const Config = Schema.object({});
-
-export function apply(ctx: Context) {
-  (ctx as any).integrationsPack = { initialized: true };
+export interface StackPackDescriptor {
+  readonly id: string
+  readonly packageRoots: readonly string[]
 }
+
+export const integrationsPack: StackPackDescriptor = {
+  id: 'stack.integrations',
+  packageRoots: [
+    'code-formatters',
+    'code-server',
+    'docker-sandbox',
+    'lsp-client',
+    'mesh-hosts',
+    'package-managers',
+    'providers',
+    'tmux-terminal',
+  ],
+}
+
+export default integrationsPack
