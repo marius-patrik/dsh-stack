@@ -63,15 +63,20 @@ async function main() {
     }
 
     const pathParts = relManifest.split('/')
-    const isTopLevelPackage = pathParts.length === 3 && pathParts[0] === 'plugins'
-    if (!isTopLevelPackage) continue
+    const isTopLevel = pathParts.length === 3 && pathParts[0] === 'plugins'
+    if (!isTopLevel) continue
+
+    if (!manifest.stack) {
+      assert(manifest.private === true, `${relManifest} is an internal package and must remain private`)
+      continue
+    }
 
     publishableCount += 1
     assert(manifest.name.startsWith('@dsh-stack/'), `${relManifest} package name must use @dsh-stack namespace`)
     assert(typeof manifest.version === 'string', `${relManifest} has no package version`)
     assert(manifest.type === 'module', `${relManifest} must use ESM`)
-    assert(manifest.stack && ['plugin', 'pack', 'library'].includes(manifest.stack.kind), `${relManifest} must declare stack.kind`)
-    assert(typeof manifest.stack?.id === 'string' && manifest.stack.id.includes('.'), `${relManifest} stack.id must be namespaced`)
+    assert(['plugin', 'pack', 'library'].includes(manifest.stack.kind), `${relManifest} has invalid stack.kind`)
+    assert(typeof manifest.stack.id === 'string' && manifest.stack.id.includes('.'), `${relManifest} stack.id must be namespaced`)
     assert(manifest.private !== true, `${relManifest} must be publishable, not private`)
     assert(manifest.publishConfig?.access === 'public', `${relManifest} must declare public publishConfig.access`)
     assert(Array.isArray(manifest.files) && manifest.files.length > 0, `${relManifest} must explicitly declare published files`)
@@ -86,7 +91,7 @@ async function main() {
     }
   }
 
-  assert(publishableCount > 0, 'plugins/ contains no publishable top-level plugins, packs or libraries')
+  assert(publishableCount > 0, 'plugins/ contains no publishable Stack packages')
 
   const catalogPath = join(pluginsDir, 'composition', 'src', 'catalog.ts')
   try {
@@ -115,7 +120,7 @@ async function main() {
     console.error(errors.join('\n'))
     process.exit(1)
   }
-  console.log(`Stack verification passed: ${publishableCount} publishable top-level packages, ${packageNames.size} total workspace packages, ${sourceHashes.size} unique source bodies.`)
+  console.log(`Stack verification passed: ${publishableCount} public Stack packages, ${packageNames.size} total workspace packages, ${sourceHashes.size} unique source bodies.`)
 }
 
 await main()
