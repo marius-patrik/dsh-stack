@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: Plugin Test Suites & Typecheck
+  verify:
+    name: Canonical Stack workspace
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +20,31 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.19.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11.7.0
 
-      - name: Run Plugin Test Suites
-        run: bash .agents/hooks/pre-push
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Typecheck canonical packages
+        run: pnpm typecheck
+
+      - name: Build canonical packages
+        run: pnpm build
+
+      - name: Verify canonical packages
+        run: pnpm verify
+
+      - name: Test canonical packages
+        run: pnpm test
+
+      - name: Reject legacy imports in canonical source
+        run: |
+          if grep -R --line-number --exclude-dir=.git --exclude-dir=node_modules -E '(^|["'"'])plugins/(dsh-|core/|agents/|ai/|ux/)' packages; then
+            echo 'Canonical packages must not import legacy plugin implementations.'
+            exit 1
+          fi
