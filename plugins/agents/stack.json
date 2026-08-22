@@ -1,0 +1,10 @@
+{
+  "id": "stack.pack.agents",
+  "name": "@dsh-stack/pack-agents",
+  "version": "0.3.0",
+  "kind": "pack",
+  "description": "Composable agent actions, commands, personas, tools, loops, skills and translation pack.",
+  "files": ["actions", "commands", "loops", "personas", "skills", "tools", "translator", "package.json", "README.md", "LICENSE"],
+  "dependencies": [],
+  "optionalDependencies": []
+}
