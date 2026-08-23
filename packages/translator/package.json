@@ -1,5 +1,5 @@
 {
-  "name": "dsh-translator",
+  "name": "translator",
   "description": "dsh plugin: translate between provider session/skill/hook formats and dsh native format",
   "version": "0.1.0",
   "private": true,
