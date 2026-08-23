@@ -1,0 +1,27 @@
+{
+  "name": "@dsh-stack/plugin-kit",
+  "version": "0.1.0",
+  "description": "Reusable Stack plugin metadata, validation and composition support primitives.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": ["lib", "package.json", "README.md", "LICENSE"],
+  "publishConfig": { "access": "public" },
+  "stack": { "kind": "library", "id": "stack.library.plugin-kit" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test",
+    "verify": "node verify.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

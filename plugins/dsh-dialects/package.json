@@ -1,39 +1,5 @@
 {
-  "name": "dsh-dialects",
-  "version": "0.1.0",
-  "description": "Provider wire dialects (openai, claude, gemini, code-assist) for DeepSeek Harness LLM adapters.",
-  "type": "module",
   "private": true,
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "import": "./lib/index.js"
-    },
-    "./*": {
-      "types": "./lib/*.d.ts",
-      "import": "./lib/*.js"
-    }
-  },
-  "files": [
-    "lib"
-  ],
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node test.mjs && node check-plugin.mjs"
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
-    "@deepseek-ai/schemastery": "*"
-  },
-  "dependencies": {
-    "eventsource-parser": "^3.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.0",
-    "@deepseek-ai/dsh-llm": "0.1.1-rc.2"
-  }
+  "type": "module",
+  "main": "src/index.mjs"
 }

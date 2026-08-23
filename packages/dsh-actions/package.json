@@ -1,0 +1,15 @@
+{
+  "name": "@dsh-stack/agent-actions",
+  "version": "0.1.0",
+  "description": "Explicit session actions with durable state, tool policy, routing, and reload mechanisms.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": ["lib", "package.json", "stack.json", "cordis.patch.yml"],
+  "publishConfig": { "access": "public" },
+  "stack": { "kind": "plugin", "id": "stack.agent.actions" },
+  "scripts": { "build": "tsc && cp client.js lib/client.js", "typecheck": "tsc --noEmit", "test": "node check-plugin.mjs", "verify": "node check-plugin.mjs" },
+  "peerDependencies": { "@deepseek-ai/cordis": "^4.0.1" },
+  "devDependencies": { "typescript": "^5.9.0", "@types/node": "^22.0.0", "@deepseek-ai/cordis": "^4.0.1" }
+}

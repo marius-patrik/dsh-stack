@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22.19.0
+          package-manager-cache: false
 
       - name: Format whole repository
         run: npx --yes @biomejs/biome@2.2.0 format --write .

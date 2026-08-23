@@ -1,47 +1,5 @@
-# dsh-tools
+# Plugin composition wrapper
 
-Config-file custom tools for the dsh harness.
+This plugin-tree entry is a composition wrapper. Its implementation lives in the canonical flat `packages/` implementation layer and is imported from there.
 
-The plugin reads the `dsh-tools` settings section — a map of tool name →
-definition — and registers each definition as a model-facing `ctx.tools` entry
-that runs its `command` through `ctx.subprocess` (never shell-interpreted),
-with `{name}` argument placeholders substituted from the call. Custom tools are
-indistinguishable from shipped ones to the model: same schema validation, same
-output contract, same post-execute pipeline.
-
-## Config-file format
-
-The `dsh-tools` section of `settings.yaml`:
-
-```yaml
-dsh-tools:
-  tools:
-    echo-name:
-      description: Echo the name argument
-      parameters:
-        name: { type: string, required: true }
-      command: [node, -e, 'process.stdout.write(process.argv[1])', '{name}']
-```
-
-- `description` — what the model sees this tool doing.
-- `parameters` (optional) — argument schema; each entry is `{ type:
-  string|number|boolean, description?, required? }`.
-- `command` — argv[0] is the executable (absolute or on PATH); `{name}`
-  placeholders substitute the matching argument value.
-
-## Owner CLI
-
-```
-dsh tool list
-dsh tool add <name> <description> <command...>
-dsh tool remove <name>
-```
-
-Changes apply on the next boot.
-
-## Build
-
-```sh
-pnpm build       # tsc -> lib/
-pnpm test        # node check-plugin.mjs (real subprocess round-trips)
-```
+Do not add implementation source here. Changes to behavior belong in the corresponding package under `packages/`.

@@ -9,7 +9,7 @@
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
     "format": "npx --yes @biomejs/biome@2.2.0 format --write .",
-    "format:check": "npx --yes @biomejs/biome@2.2.0 format --check .",
+    "format:check": "npx --yes @biomejs/biome@2.2.0 format --write . && git diff --exit-code",
     "verify:plugin-readmes": "node scripts/verify-plugin-readmes.mjs",
     "verify": "pnpm run verify:plugin-readmes && node scripts/verify-stack.mjs && pnpm -r --if-present verify",
     "test": "pnpm -r --if-present test",
