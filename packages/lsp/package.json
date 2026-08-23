@@ -1,5 +1,5 @@
 {
-  "name": "dsh-lsp",
+  "name": "lsp",
   "description": "LSP server configuration + dsh lsp CLI for the DeepSeek Harness LSP capability seam",
   "version": "0.1.0",
   "private": true,
