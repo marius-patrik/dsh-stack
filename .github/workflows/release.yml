@@ -15,76 +15,67 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: recursive
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
 
-      - name: Determine Next SemVer Version
+      - name: Determine next SemVer version
         id: versioning
         shell: bash
         run: |
           set -euo pipefail
-
           latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
           if [[ -z "$latest_tag" ]]; then
             base_version="v0.1.0"
-            commits=$(git log --format='%H %s' HEAD)
-            echo "No existing SemVer tag found; using initial version $base_version."
+            commits=$(git log --format='%H %s')
           else
             base_version="$latest_tag"
             commits=$(git log "${latest_tag}..HEAD" --format='%H %s')
-            echo "Latest tag: $latest_tag"
           fi
-
           bump="patch"
           if grep -qE '^[a-f0-9]+ (feat|fix)(\([^)]*\))?!:' <<< "$commits"; then
-            if grep -qE '^[a-f0-9]+ feat(\([^)]*\))?!:' <<< "$commits"; then
-              bump="major"
-            fi
+            grep -qE '^[a-f0-9]+ feat(\([^)]*\))?!:' <<< "$commits" && bump="major"
           elif grep -qE '^[a-f0-9]+ feat(\([^)]*\))?:' <<< "$commits"; then
             bump="minor"
           fi
-
           raw_ver="${base_version#v}"
           IFS='.' read -r major minor patch <<< "$raw_ver"
-
           case "$bump" in
-            major)
-              major=$((major + 1))
-              minor=0
-              patch=0
-              ;;
-            minor)
-              minor=$((minor + 1))
-              patch=0
-              ;;
-            patch)
-              patch=$((patch + 1))
-              ;;
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
           esac
-
           next_version="v${major}.${minor}.${patch}"
-          if git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null; then
-            echo "Calculated tag $next_version already exists."
-            exit 1
-          fi
-
-          echo "Next version: $next_version"
+          git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null && exit 1 || true
           echo "tag=$next_version" >> "$GITHUB_OUTPUT"
 
-      - name: Create Git Tag & Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.versioning.outputs.tag }}
-          name: Release ${{ steps.versioning.outputs.tag }}
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+      - name: Build complete release assets
+        run: node scripts/release.mjs assets
+
+      - name: Validate complete catalog assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .release/stack-release.json
+          test -s .release/stack-release.sha256
+          test -s .release/SHA256SUMS
+          test -s .release/dsh-stack-plugins-*.tar.gz
+          test -s .release/dsh-stack-packs-*.tar.gz
+          tar -tzf .release/dsh-stack-plugins-*.tar.gz | grep -q '^plugins/'
+          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/'
+
+      - name: Create GitHub release and upload all assets
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.versioning.outputs.tag }}
+        run: |
+          gh release create "$TAG" .release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Release $TAG" \
+            --generate-notes
