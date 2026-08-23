@@ -5,6 +5,7 @@ import type { SettingsSectionOwnerProps } from '@deepseek-ai/dsh-client-ui-setti
 import type { SidebarFooterActionOwnerProps } from '@deepseek-ai/dsh-client-ui-sidebar/client';
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client';
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client';
+import { CheckIcon, SettingsIcon } from '@dsh-stack/lucide-animated/client';
 import { createProfileRuntime } from '@dsh-stack/profile-runtime';
 import { profileOptions } from '../index.js';
 
@@ -56,7 +57,7 @@ function ProfileSelector({ wide }: SidebarFooterActionOwnerProps) {
             font: 'inherit',
           }}
         >
-          <span aria-hidden="true" style={{ width: 18, textAlign: 'center', opacity: 0.72 }}>◆</span>
+          <SettingsIcon aria-hidden="true" size={18} />
           {wide ? <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeOption.label}</span> : null}
         </button>
       )}
@@ -102,7 +103,7 @@ function ProfileSettings({ close }: SettingsSectionOwnerProps) {
               }}
             >
               <span>{option.label}</span>
-              {selected ? <span aria-hidden="true">✓</span> : null}
+              {selected ? <CheckIcon aria-hidden="true" size={18} /> : null}
             </button>
           );
         })}

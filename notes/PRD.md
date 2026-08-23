@@ -1,51 +1,66 @@
-# DSH Stack Product Requirements
+# Stack PRD
 
 ## Product
 
-DSH Stack is a polished, distributable extension layer for DeepSeek Harness. The repository ships the runtime-facing plugins, reusable support libraries, profile packs, external integrations, skins, UI extensions, credential capabilities, agents, coding/trading/SkyBlock domains, and the distribution/update system as one coherent product.
+DSH Stack is a polished, distributable extension system for DeepSeek Harness. DSH remains the runtime and composition authority; Stack supplies independently versioned plugins, composable packs, reusable support libraries, profiles, integrations, and the release/update system around them.
 
 ## Architecture
 
-The repository has one implementation root: `plugins/`. Every user-visible capability is a plugin. Reusable mechanics are support-library packages. Packs compose plugins; they do not duplicate runtime behavior. Dependencies can be required or optional, and packs can bundle other packs.
+The canonical source tree is `plugins/`. Every feature has one owner. Libraries implement reusable mechanics; plugins expose user-visible behavior or external integrations; packs compose plugins and never impersonate runtime services. The harness submodule is pinned and pristine.
 
-The harness submodule is pristine upstream. Stack integrates through its public extension seams, native agent-preset mechanism, configuration, filesystem/host services, slots, settings sections, and provider contracts.
+Plugin composition supports required dependencies, optional dependencies, bundled dependencies, and plugin packs. External services are isolated into their own plugins. Profiles are compositions, not alternate implementations.
 
 ## Profiles
 
-The shipped profiles are Default, Coding, Trading, and SkyBlock. DarkFactory behavior is incorporated into Coding. SkyAgent behavior is incorporated into SkyBlock. Trading incorporates DSH Trading and MoneyMaker capabilities without preserving either application's shell as a second implementation.
+- **Default** — general DSH experience.
+- **Coding** — development environment, repository workbench, editor/LSP/formatting/tooling, and absorbed DarkFactory functionality.
+- **Trading** — market data/research, deterministic indicators, backtesting/optimization, provider seams, and absorbed MoneyMaker functionality.
+- **SkyBlock** — absorbed SkyAgent functionality and SkyBlock-specific tooling.
 
-## UI
+## UI shell
 
-The sidebar is a native Stack shell using DSH's supported slot system. It provides action buttons above Files, Files instead of Workspaces, muted Host/Container roots, filesystem row menus, profile selection above Settings, optional New Conversation visibility, profile-aware settings, skin-aware branding, and polished responsive behavior.
+The Stack UI uses DSH's native slot/composition seams and does not mutate the DOM. The sidebar is a canonical implementation with action buttons above Files, profile selection above Settings, configurable New Conversation visibility, configurable brand-logo visibility, file/folder rows, three-dot context menus, muted host/container sections, and a coherent collapsed/expanded layout.
 
-The workspace includes unified conversation, terminal, and container tabs; real filesystem browsing; three-dot file actions; file-type icons supplied by a separate VS Code icon plugin; collapsible sections; mobile layouts; and settings navigation/resize behavior.
+The Files view uses DSH filesystem capabilities. Tabs, panes, terminals, conversations, containers, and workspaces share one tab model. File icons are resolved through an icon service; VS Code icon support is its own plugin.
 
-## Settings and skins
+Settings contains a Profiles area, sidebar preferences, skins, credentials, agents/personas, themes, quotas, providers/models, and other feature-owned sections. Settings remains compact and feature-owned sections do not duplicate shell state.
 
-Settings has a dedicated Profiles section and a compact Sidebar section. Sidebar preferences include hiding the large New Conversation action and hiding the DeepSeek logo in both expanded and collapsed states.
+## Skins and branding
 
-Claude, Codex, and DeepSeek skins are independent plugins. Only the active skin owns the brand slots. The sidebar itself is brand-agnostic.
-
-## Credentials
-
-Credential support covers passwords, API keys, OAuth credentials, TOTP/OTP seeds and QR provisioning, recovery codes, passkeys/WebAuthn metadata, SSH material, certificates, cookie/session material, and generic secure notes. Secrets are stored through the DSH credential seam and Stack's encrypted vault layer, never embedded into ordinary configuration.
+DeepSeek, Claude, and Codex skins are separate plugins. Each owns its branding assets and plugs into the single Stack skin host. The sidebar is brand-agnostic. The DeepSeek logo can be hidden independently in collapsed and expanded sidebar states.
 
 ## Agents
 
-Agent composition uses DSH's native agent preset primitive. Stack supplies preset resources, persona catalogs, live persona state, commands, and profile composition without creating a parallel agent runtime.
+Agents use DSH's native agent-preset primitive. Stack supplies actual preset resources and composition, never a synthetic agent manager. Personas are durable session state, independent of session modes, and can be switched during a conversation. Agent/preset UI and commands operate through DSH's native seams.
+
+## Credentials
+
+The credential stack supports API keys, passwords, TOTP seeds and QR provisioning, OAuth grants, passkeys/WebAuthn metadata, recovery codes, SSH keys, certificates, cookie jars, and generic secrets. Secret material is kept behind the credential seam; provider configuration stores references rather than raw secrets. The vault uses authenticated encryption and explicit secret typing.
+
+## Coding
+
+Coding owns repository interaction, editor/LSP/formatting/tooling integrations, code-server and automation features absorbed from DarkFactory, with GitHub/GitHub Projects and Trello exposed as independent integration plugins.
+
+## Trading
+
+Trading owns provider-neutral market data, deterministic research indicators, backtests, optimization and verification. The research/backtest/optimizer chain is deterministic and does not fabricate unsupported metrics.
+
+## SkyBlock
+
+SkyBlock is the profile/domain destination for SkyAgent functionality, keeping the domain logic independent of the coding and trading profiles.
 
 ## Integrations
 
-Each external integration is an independent plugin. GitHub, GitHub Projects, Trello, Git/VCS, provider APIs, terminals, LSP, Docker, themes, and other external systems remain isolated feature packages. No integration owns another integration's implementation.
+Every external service is its own plugin. At minimum the stack supports GitHub, GitHub Projects, Trello, Git/GitLab/Forgejo, provider adapters, container/host integrations, LSP servers, terminal integrations, and other absorbed useful capabilities.
 
-## Distribution
+## Packaging and distribution
 
-Every plugin and pack is independently versioned and published as an npm package using one standard package contract. Stack itself is versioned at the repository root.
+Every plugin and pack is its own publishable package under `plugins/**`, with the same package contract and its own semver. The Stack root package is a release coordinator rather than a substitute for plugin packages.
 
-Every merge into `main` produces a release. The Stack version increments on every release. A plugin or pack version increments only when that package changed, using semantic-version bump rules derived from the change. The release contains every package as an individual artifact, plus a complete machine-readable manifest with exact versions, package names, integrity hashes, dependencies, capabilities, and release metadata.
+Every merge to `main` increments the Stack version. Only modified plugins/packs receive version bumps, based on the semantic change within that package. The release pipeline builds every package, publishes every newly versioned package, generates a complete package catalog with exact versions, dependencies and integrity data, uploads package artifacts and the full manifest to the GitHub release, and updates the updater catalog.
 
-The plugin updater consumes the release manifest, compares installed package versions, resolves dependency constraints, downloads signed release artifacts, verifies integrity, stages updates atomically, and activates updates through the host's supported restart/reload boundary.
+The Stack release always contains the complete plugin/pack catalog. Packs reference exact component versions. The updater plugin compares installed versions against the remote catalog and performs dependency-aware updates.
 
 ## Quality bar
 
-There is one implementation per feature. No compatibility bridges, legacy migration code, duplicate source trees, placeholder runtime services, generated-source copies, or fake UI state are accepted. CI must typecheck, build, verify package contracts, detect duplicate source bodies, run package tests, and build the complete release bundle.
+No duplicate implementations, compatibility bridges, migration shims, legacy detectors, placeholder services, checked-in generated output, unchecked unsafe casts, or unfinished markers. CI is the executable quality gate. UI work is considered complete only when it is connected to actual DSH seams and behaves coherently in the real client.

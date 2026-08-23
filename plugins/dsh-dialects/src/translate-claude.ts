@@ -13,7 +13,6 @@ import { CallId, EMPTY_RESPONSE_CODE, LlmError } from '@deepseek-ai/dsh-llm'
 import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from '@deepseek-ai/dsh-llm'
 import type { SseEvent } from './sse.js'
 
-/** Anthropic wire usage; input and cache fields appear from `message_start`, output cumulatively from `message_delta`. */
 export interface WireUsage {
   input_tokens?: number
   output_tokens?: number
@@ -21,20 +20,17 @@ export interface WireUsage {
   cache_read_input_tokens?: number
 }
 
-/** The `content_block` of a `content_block_start` event. */
 export type WireBlockStart =
   | { type: 'text'; text: string }
   | { type: 'tool_use'; id: string; name: string; input: unknown }
   | { type: 'thinking'; thinking: string }
 
-/** The `delta` of a `content_block_delta` event. */
 export type WireDelta =
   | { type: 'text_delta'; text: string }
   | { type: 'input_json_delta'; partial_json: string }
   | { type: 'thinking_delta'; thinking: string }
   | { type: 'signature_delta'; signature: string }
 
-/** One parsed Anthropic SSE event. */
 export type WireEvent =
   | { type: 'message_start'; message: { id?: string; usage?: WireUsage } }
   | { type: 'content_block_start'; index: number; content_block: WireBlockStart }
@@ -45,21 +41,14 @@ export type WireEvent =
   | { type: 'ping' }
   | { type: 'error'; error: { type?: string; message?: string } }
 
-/** One open block under assembly. */
 interface OpenBlock {
   index: number
   kind: 'text' | 'reasoning' | 'tool-call'
   text: string
-  /** tool-call only */
   callId?: string
   name?: string
 }
 
-/**
- * Map the wire `stop_reason` vocabulary to the harness FinishReason.
- * @param reason - the wire `stop_reason` string.
- * @returns the mapped reason; unrecognized values become `{kind: 'error'}` with the uppercased value as `code`.
- */
 export function mapClaudeFinishReason(reason: string): FinishReason {
   switch (reason) {
     case 'end_turn':
@@ -68,19 +57,10 @@ export function mapClaudeFinishReason(reason: string): FinishReason {
     case 'max_tokens': return { kind: 'max-tokens' }
     case 'tool_use': return { kind: 'tool-calls' }
     default:
-      return {
-        kind: 'error',
-        failure: { message: `model stopped: ${reason}`, code: reason.toUpperCase() },
-      }
+      return { kind: 'error', failure: { message: `model stopped: ${reason}`, code: reason.toUpperCase() } }
   }
 }
 
-/**
- * Map Anthropic wire usage to disjoint harness counts; cache fields are
- * present only when the wire reported them.
- * @param usage - the latest merged wire usage (input from `message_start`, output from `message_delta`).
- * @returns disjoint harness counts.
- */
 export function mapClaudeUsage(usage: WireUsage): TokenUsage {
   return {
     inputTokens: usage.input_tokens ?? 0,
@@ -90,29 +70,14 @@ export function mapClaudeUsage(usage: WireUsage): TokenUsage {
   }
 }
 
-/** Assemble the final ContentBlock for one open block. */
 function closeBlock(block: OpenBlock): ContentBlock {
   switch (block.kind) {
     case 'text': return { type: 'text', text: block.text }
     case 'reasoning': return { type: 'reasoning', text: block.text }
-    case 'tool-call': return {
-      type: 'tool-call',
-      id: CallId(block.callId ?? ''),
-      name: block.name ?? '',
-      arguments: block.text,
-    }
+    case 'tool-call': return { type: 'tool-call', id: CallId(block.callId ?? ''), name: block.name ?? '', arguments: block.text }
   }
 }
 
-/**
- * Consume Anthropic SSE events and yield StreamChunks. Malformed JSON events
- * abort the stream with `MALFORMED_RESPONSE`; a provider `error` event aborts
- * with `PROVIDER_ERROR`.
- * @param events - SSE events from {@link parseSseEvents}.
- * @returns deltas as they arrive; each `block-end` on its `content_block_stop`, and `usage` plus the
- *   terminal `finish` at `message_stop`. A `stop` (or absent) finish with no opened blocks maps to an
- *   `EMPTY_RESPONSE` error finish. `replayState` carries the Anthropic message id when known.
- */
 export async function* translateClaude(events: AsyncIterable<SseEvent>): AsyncGenerator<StreamChunk> {
   const blocks = new Map<number, OpenBlock>()
   const order: OpenBlock[] = []
@@ -159,9 +124,7 @@ export async function* translateClaude(events: AsyncIterable<SseEvent>): AsyncGe
 
       case 'content_block_delta': {
         const block = blocks.get(event.index)
-        if (block === undefined) {
-          throw new LlmError('Anthropic delta before content_block_start', 'MALFORMED_RESPONSE')
-        }
+        if (block === undefined) throw new LlmError('Anthropic delta before content_block_start', 'MALFORMED_RESPONSE')
         const delta = event.delta
         if (delta.type === 'text_delta') {
           block.text += delta.text
@@ -183,9 +146,7 @@ export async function* translateClaude(events: AsyncIterable<SseEvent>): AsyncGe
       }
 
       case 'message_delta':
-        if (event.delta.stop_reason !== undefined) {
-          pendingFinish = mapClaudeFinishReason(event.delta.stop_reason)
-        }
+        if (event.delta.stop_reason !== undefined) pendingFinish = mapClaudeFinishReason(event.delta.stop_reason)
         if (event.usage) pendingUsage = { ...pendingUsage, ...event.usage }
         break
 
@@ -203,11 +164,8 @@ export async function* translateClaude(events: AsyncIterable<SseEvent>): AsyncGe
   yield {
     type: 'finish',
     reason: reason.kind === 'stop' && order.length === 0
-      ? {
-        kind: 'error',
-        failure: { message: 'model returned a completed response with no content', code: EMPTY_RESPONSE_CODE },
-      }
+      ? { kind: 'error', failure: { message: 'model returned a completed response with no content', code: EMPTY_RESPONSE_CODE } }
       : reason,
-    ...messageId !== undefined ? { replayState: { messageId } } : {},
+    ...messageId !== undefined ? { replayState: { response: { messageId } } } : {},
   }
 }

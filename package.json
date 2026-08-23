@@ -1,21 +1,17 @@
 {
   "name": "@marius-patrik/dsh-stack",
-  "version": "0.1.0-rewrite.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.7.0",
-  "engines": {
-    "node": ">=22.19.0"
-  },
-  "workspaces": [
-    "packages/**"
-  ],
+  "engines": { "node": ">=22.19.0" },
   "scripts": {
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
-    "verify:stack": "node scripts/verify-stack.mjs",
-    "verify": "pnpm run verify:stack && pnpm -r --if-present verify",
-    "test": "pnpm -r --if-present test"
+    "verify": "node scripts/verify-stack.mjs && pnpm -r --if-present verify",
+    "test": "pnpm -r --if-present test",
+    "release:manifest": "node scripts/release.mjs manifest",
+    "release:version": "node scripts/release.mjs version"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "*",

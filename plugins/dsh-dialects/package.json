@@ -26,13 +26,14 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-llm": "^0.1.0",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
     "@deepseek-ai/schemastery": "*"
   },
   "dependencies": {
     "eventsource-parser": "^3.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2"
   }
 }

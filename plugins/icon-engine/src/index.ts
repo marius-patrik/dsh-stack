@@ -7,6 +7,7 @@ export const optional: readonly string[] = [];
 export interface IconPack {
   readonly id: string;
   readonly label: string;
+  readonly priority?: number;
   readonly resolve: (key: string) => string | null;
 }
 
@@ -32,12 +33,13 @@ export class IconEngine {
   }
 
   packsList(): readonly IconPack[] {
-    return [...this.packs.values()];
+    return [...this.packs.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   }
 
   resolve(request: IconRequest): string {
+    const packs = this.packsList();
     for (const key of keysFor(request)) {
-      for (const pack of this.packs.values()) {
+      for (const pack of packs) {
         const icon = pack.resolve(key);
         if (icon) return icon;
       }

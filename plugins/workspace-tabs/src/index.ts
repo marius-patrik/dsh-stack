@@ -166,8 +166,5 @@ function clampDockHeight(value: number): number {
 }
 
 function newId(): string {
-  if (typeof globalThis === 'object' && 'crypto' in globalThis && typeof globalThis.crypto.randomUUID === 'function') {
-    return `pane-${globalThis.crypto.randomUUID()}`;
-  }
   return `pane-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }

@@ -1,26 +1,10 @@
 /**
- * `dsh-translator`: translates between provider-native session, skill, and hook
- * file formats and the dsh-stack optimized format.
- *
- * Supported formats:
- * - opencode: messages[] with role/content structure
- * - claude: entries[] with type/text structure
- * - dsh: events[] with type/seq/data structure (native harness format)
- *
- * The translator can convert any supported format to any other, and can batch
- * convert entire session directories.
- *
- * @module dsh-translator
+ * Canonical Stack translator service for supported session/event formats.
  */
-
-import type { Context } from '@deepseek-ai/cordis'
+import { Service, type Context } from '@deepseek-ai/cordis'
 
 export const name = 'dsh-translator'
 export const inject: string[] = []
-
-/* -------------------------------------------------------------------------- */
-/* Format types                                                                 */
-/* -------------------------------------------------------------------------- */
 
 export type Format = 'opencode' | 'claude' | 'dsh'
 
@@ -47,10 +31,6 @@ export interface DshEvent {
   [key: string]: unknown
 }
 
-/* -------------------------------------------------------------------------- */
-/* Format detection                                                             */
-/* -------------------------------------------------------------------------- */
-
 export function detectFormat(data: unknown): Format | null {
   if (data === null || typeof data !== 'object') return null
   const obj = data as Record<string, unknown>
@@ -59,10 +39,6 @@ export function detectFormat(data: unknown): Format | null {
   if ('events' in obj && Array.isArray(obj.events)) return 'dsh'
   return null
 }
-
-/* -------------------------------------------------------------------------- */
-/* Translator registry                                                          */
-/* -------------------------------------------------------------------------- */
 
 export type TranslateFn = (input: unknown) => unknown
 
@@ -75,57 +51,47 @@ export class TranslatorRegistry {
 
   translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     if (sourceFormat === targetFormat) return data
-    const key = `${sourceFormat}->${targetFormat}`
-    const fn = this.converters.get(key)
+    const fn = this.converters.get(`${sourceFormat}->${targetFormat}`)
     if (fn === undefined) throw new Error(`no converter for ${sourceFormat} -> ${targetFormat}`)
     return fn(data)
   }
 
-  supportedConversions(): string[] {
-    return [...this.converters.keys()]
-  }
+  supportedConversions(): readonly string[] { return [...this.converters.keys()] }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Built-in converters                                                          */
-/* -------------------------------------------------------------------------- */
-
 function opencodeToDsh(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('messages' in data) || !Array.isArray(data.messages)) throw new Error('invalid opencode document')
   const input = data as { messages: OpenCodeMessage[] }
-  let seq = 0
   return {
-    events: input.messages.map((msg) => ({
+    events: input.messages.map((msg, seq) => ({
       type: msg.role === 'user' ? 'user/message' : msg.role === 'assistant' ? 'assistant/message' : 'system/message',
-      seq: seq++,
+      seq,
       role: msg.role,
-      content: typeof msg.content === 'string'
-        ? [{ type: 'text', text: msg.content }]
-        : msg.content,
+      content: typeof msg.content === 'string' ? [{ type: 'text', text: msg.content }] : msg.content,
       timestamp: msg.timestamp,
     })),
   }
 }
 
 function dshToOpencode(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('events' in data) || !Array.isArray(data.events)) throw new Error('invalid dsh document')
   const input = data as { events: DshEvent[] }
   return {
-    messages: input.events
-      .filter((e) => e.type.includes('/message'))
-      .map((e) => ({
-        role: e.role ?? (e.type.startsWith('user/') ? 'user' : 'assistant'),
-        content: e.content ?? [],
-        timestamp: e.timestamp,
-      })),
+    messages: input.events.filter((event) => event.type.includes('/message')).map((event) => ({
+      role: event.role === 'system' ? 'system' : event.role === 'user' ? 'user' : 'assistant',
+      content: event.content ?? [],
+      timestamp: event.timestamp,
+    })),
   }
 }
 
 function claudeToDsh(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('entries' in data) || !Array.isArray(data.entries)) throw new Error('invalid claude document')
   const input = data as { entries: ClaudeEntry[] }
-  let seq = 0
   return {
-    events: input.entries.map((entry) => ({
+    events: input.entries.map((entry, seq) => ({
       type: entry.type === 'human' ? 'user/message' : entry.type === 'assistant' ? 'assistant/message' : entry.type,
-      seq: seq++,
+      seq,
       role: entry.type === 'human' ? 'user' : entry.type === 'assistant' ? 'assistant' : undefined,
       content: [{ type: 'text', text: entry.text ?? entry.content ?? '' }],
     })),
@@ -133,46 +99,42 @@ function claudeToDsh(data: unknown): unknown {
 }
 
 function dshToClaude(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('events' in data) || !Array.isArray(data.events)) throw new Error('invalid dsh document')
   const input = data as { events: DshEvent[] }
   return {
-    entries: input.events
-      .filter((e) => e.type.includes('/message'))
-      .map((e) => ({
-        type: e.role === 'user' ? 'human' : 'assistant',
-        text: e.content?.map((c) => c.text ?? '').join('') ?? '',
-      })),
+    entries: input.events.filter((event) => event.type.includes('/message')).map((event) => ({
+      type: event.role === 'user' ? 'human' : 'assistant',
+      text: event.content?.map((chunk) => chunk.text ?? '').join('') ?? '',
+    })),
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Plugin apply                                                                 */
-/* -------------------------------------------------------------------------- */
+export interface Config { defaultFormat?: Format }
 
-export interface Config {
-  /** Default target format for CLI translations. */
-  defaultFormat?: Format
+export class TranslatorService extends Service {
+  static inject: string[] = []
+  readonly registry = new TranslatorRegistry()
+
+  constructor(ctx: Context, _config: Config = {}) {
+    super(ctx, 'translators')
+    this.registry.register('opencode', 'dsh', opencodeToDsh)
+    this.registry.register('dsh', 'opencode', dshToOpencode)
+    this.registry.register('claude', 'dsh', claudeToDsh)
+    this.registry.register('dsh', 'claude', dshToClaude)
+    this.registry.register('opencode', 'claude', (data) => dshToClaude(opencodeToDsh(data)))
+    this.registry.register('claude', 'opencode', (data) => dshToOpencode(claudeToDsh(data)))
+  }
+
+  register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void { this.registry.register(sourceFormat, targetFormat, fn) }
+  translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown { return this.registry.translate(data, sourceFormat, targetFormat) }
+  supportedConversions(): readonly string[] { return this.registry.supportedConversions() }
 }
 
-export function apply(ctx: Context, _config: Config = {}): void {
-  const registry = new TranslatorRegistry()
+declare module '@deepseek-ai/cordis' {
+  interface Context { translators: TranslatorService }
+}
 
-  // Register built-in converters
-  registry.register('opencode', 'dsh', opencodeToDsh)
-  registry.register('dsh', 'opencode', dshToOpencode)
-  registry.register('claude', 'dsh', claudeToDsh)
-  registry.register('dsh', 'claude', dshToClaude)
-
-  // Cross-format via dsh as pivot
-  registry.register('opencode', 'claude', (data) => {
-    const dsh = opencodeToDsh(data)
-    return dshToClaude(dsh)
-  })
-  registry.register('claude', 'opencode', (data) => {
-    const dsh = claudeToDsh(data)
-    return dshToOpencode(dsh)
-  })
-
-  ;(ctx as unknown as { provide(name: string, value: unknown): unknown }).provide('translators', registry)
-
-  ctx.logger.info(`dsh-translator loaded: ${registry.supportedConversions().length} converters registered`)
+export function apply(ctx: Context, config: Config = {}): void {
+  ctx.plugin(TranslatorService, config)
+  ctx.logger.info(`dsh-translator loaded: 6 converters registered`)
 }

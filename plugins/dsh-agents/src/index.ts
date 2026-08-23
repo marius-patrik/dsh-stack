@@ -163,9 +163,6 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
     ;(sctx as unknown as { provide(name: string, value: unknown): unknown }).provide('personaController', controller)
     ;(sctx as unknown as { provide(name: string, value: unknown): unknown }).provide('personaCatalog', catalog)
 
-    // Commit a queued selection at the next accepted in-turn pre-step, before
-    // its request assembly. Waterfall discipline: delegate first, and a
-    // rejected or aborted step keeps the selection pending for a later step.
     const events = sctx as unknown as EventHub
     events.on('agent/pre-step', async (payload, next): Promise<PreStepDecision> => {
       const decision = await next()
@@ -180,9 +177,6 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
       return decision
     })
 
-    // The `persona:policy` section: function text provider folding the
-    // session's persona on every assembly. The child activates only when a
-    // prompt registry is composed (headless assemblies stay unaffected).
     sctx.inject(['systemPrompt'], (pctx) => {
       const systemPrompt = pctx as unknown as {
         systemPrompt: { section(definition: { name: string; order: number; text: (context: SectionContext) => string }): () => void }
@@ -194,18 +188,12 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
       }), 'dsh-agents: persona:policy section')
     })
 
-    // The `persona` projection unit: a pure double-event fold serving the
-    // client { personaId, pending }. `command/run` records the user's logged
-    // /persona selection; `persona/selected` records its commit and clears
-    // the pending flag. Pending is a replay quantity: host restarts, other
-    // tabs, and cold reads recover it from the log alone.
     sctx.inject(['sessionProjections'], (pctx) => {
       const projections = pctx as unknown as { sessionProjections: ProjectionFace }
       const personaSchema = z.object({ personaId: z.string(), pending: z.boolean() })
-      // session-projection calls def.schema.parse(); schemastery schemas are
-      // callables but lack a .parse() method — bridge the gap inline.
-      const projectionSchema = Object.assign((v: unknown) => personaSchema(v), {
-        parse: (v: unknown) => personaSchema(v),
+      type PersonaState = { personaId: string; pending: boolean }
+      const projectionSchema = Object.assign((v: unknown) => personaSchema(v as PersonaState), {
+        parse: (v: unknown) => personaSchema(v as PersonaState),
       })
       pctx.effect(() => projections.sessionProjections.register({
         key: 'persona',
@@ -230,8 +218,6 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
       }), 'dsh-agents: persona projection')
     })
 
-    // The `/persona` command: no-arg reports the persona in force; an arg
-    // switches through the controller (which rejects unknown personas).
     sctx.inject(['commands'], (cctx) => {
       const commands = cctx as unknown as { commands: CommandFace }
       cctx.effect(() => commands.commands.register({
@@ -244,12 +230,8 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
             const current = controller.pendingOf(agent) ?? foldPersona(agent.session.events)
             if (current !== '') return { kind: 'success', text: `Current persona: ${current}` }
             const headerId = agent.session.header?.agentPreset
-            if (headerId !== undefined && catalog.get(headerId) !== undefined) {
-              return { kind: 'success', text: `Current persona: ${headerId}` }
-            }
-            if (fallback !== undefined && catalog.get(fallback) !== undefined) {
-              return { kind: 'success', text: `Current persona: ${fallback}` }
-            }
+            if (headerId !== undefined && catalog.get(headerId) !== undefined) return { kind: 'success', text: `Current persona: ${headerId}` }
+            if (fallback !== undefined && catalog.get(fallback) !== undefined) return { kind: 'success', text: `Current persona: ${fallback}` }
             return { kind: 'success', text: 'No persona selected (deployment default).' }
           }
           try {
@@ -282,8 +264,6 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
           }, WATCH_DEBOUNCE_MS)
         })
         watcher.on('error', (error) => ctx.logger.warn(`dsh-agents: watching ${root} failed: ${error.message}`))
-        // Never hold a process open on the watch alone (the harness outlives
-        // it, and a CLI that loads the plugin must still be able to exit).
         watcher.unref()
         sctx.effect(() => () => {
           if (timer !== undefined) clearTimeout(timer)

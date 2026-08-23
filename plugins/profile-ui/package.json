@@ -33,6 +33,7 @@
     "verify": "node verify.mjs"
   },
   "dependencies": {
+    "@dsh-stack/lucide-animated": "workspace:*",
     "@dsh-stack/profile-runtime": "workspace:*"
   },
   "peerDependencies": {
