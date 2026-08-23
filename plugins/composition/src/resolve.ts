@@ -12,7 +12,10 @@ export interface ResolvedComposition {
   readonly plugins: readonly PluginDefinition[];
 }
 
-export function resolveProfile(catalog: CompositionCatalog, profileId: string): ResolvedComposition {
+export function resolveProfile(
+  catalog: CompositionCatalog,
+  profileId: string,
+): ResolvedComposition {
   const profile = catalog.profiles.get(profileId);
   if (!profile) throw new Error(`Unknown Stack profile: ${profileId}`);
 
@@ -47,7 +50,7 @@ function resolvePluginClosure(
 
     visiting.add(pluginId);
     for (const dependency of plugin.dependencies ?? []) {
-      if (dependency.kind === 'required') visit(dependency.plugin);
+      if (dependency.kind === "required") visit(dependency.plugin);
     }
     visiting.delete(pluginId);
     resolved.set(pluginId, plugin);
@@ -57,8 +60,10 @@ function resolvePluginClosure(
 
   for (const plugin of resolved.values()) {
     for (const dependency of plugin.dependencies ?? []) {
-      if (dependency.kind === 'optional' && !registry.has(dependency.plugin)) {
-        throw new Error(`Plugin ${plugin.id} declares optional dependency ${dependency.plugin}, but it is unknown`);
+      if (dependency.kind === "optional" && !registry.has(dependency.plugin)) {
+        throw new Error(
+          `Plugin ${plugin.id} declares optional dependency ${dependency.plugin}, but it is unknown`,
+        );
       }
     }
   }

@@ -1,46 +1,5 @@
-# dsh-repos
+# Plugin composition wrapper
 
-Repo workflows (status / branch / commit / push / PR) for the dsh harness.
+This plugin-tree entry is a composition wrapper. Its implementation lives in the canonical flat `packages/` implementation layer and is imported from there.
 
-All `git` commands run through `ctx.subprocess` — never shell-interpreted —
-against the working directory the caller names. GitHub pushes and PRs resolve
-the bearer token from the shared vault (`ctx.accounts`), or the
-`GITHUB_OAUTH_TOKEN` / `GH_TOKEN` environment fallback; this plugin never stores
-credentials.
-
-## Model-facing tools
-
-- `repo-status` — current branch, staged/unstaged/untracked files
-- `repo-branch` — list, create, switch, delete branches
-- `repo-commit` — stage (all or specific paths) and commit with a message
-- `repo-push` — push a branch to a remote, authenticated with the vault GitHub
-  token (`--force-with-lease` on request)
-- `repo-pr` — open a pull request for the current branch via the GitHub REST
-  API, authenticated with the vault token
-
-## Owner CLI
-
-`dsh repos` manages the `dsh-repos` settings section and runs the same git
-verbs locally:
-
-```
-dsh repos list
-dsh repos set <remote|defaultBaseBranch> <value>
-dsh repos status [path]
-dsh repos branch [create|switch|delete <name>] [path]
-dsh repos commit <path> <message>
-```
-
-## Settings
-
-The `dsh-repos` section of `settings.yaml`:
-
-- `remote` — default remote name (default `origin`)
-- `defaultBaseBranch` — default PR base branch (default `main`)
-
-## Build
-
-```sh
-pnpm build       # tsc -> lib/
-pnpm test        # node check-plugin.mjs (real git round-trips + local PR API stub)
-```
+Do not add implementation source here. Changes to behavior belong in the corresponding package under `packages/`.

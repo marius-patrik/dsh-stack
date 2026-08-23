@@ -1,0 +1,10 @@
+{
+  "id": "stack.agent.commands",
+  "name": "@dsh-stack/agent-commands",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Canonical agent command registry service.",
+  "files": ["lib", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

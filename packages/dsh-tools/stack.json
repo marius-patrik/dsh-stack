@@ -1,0 +1,10 @@
+{
+  "id": "stack.agent.tools",
+  "name": "@dsh-stack/agent-tools",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Config-file custom tools for the dsh harness.",
+  "files": ["lib", "bin", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

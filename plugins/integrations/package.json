@@ -1,9 +1,36 @@
 {
-  "name": "@stack/pack-integrations",
+  "name": "@dsh-stack/pack-integrations",
   "version": "0.3.0",
-  "private": true,
+  "description": "External integrations, providers, LSP, tooling, host and sandbox composition pack.",
+  "license": "MIT",
   "type": "module",
+  "files": [
+    "code-formatters",
+    "code-server",
+    "docker-sandbox",
+    "lsp-client",
+    "mesh-hosts",
+    "package-managers",
+    "providers",
+    "tmux-terminal",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "pack",
+    "id": "stack.pack.integrations"
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "node ../../scripts/pack.mjs build",
+    "typecheck": "node ../../scripts/pack.mjs typecheck",
+    "test": "node ../../scripts/pack.mjs test",
+    "verify": "node ../../scripts/pack.mjs verify"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
   }
 }

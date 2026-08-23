@@ -1,0 +1,650 @@
+/**
+ * `dsh-providers`: fourteen provider adapters (kimi-code, kimi-sub,
+ * claude-sub, grok-sub, gemini-sub, openai-api, anthropic-api, gemini-api,
+ * grok-api, deepseek-api, mistral-api, groq-api, openrouter-api, zen) wired
+ * onto dsh-dialects wire dialects. The quotas subpackage provides quota
+ * probing, the `/quotas/api/*` web routes, and the `dsh-quotas` settings
+ * section — merged from the standalone dsh-quotas plugin to eliminate data
+ * duplication. Connection facts resolve per request from the optional
+ * `dsh-providers` user-settings section, and credential material resolves
+ * per request through the account seam (`ctx.accounts`) with the harness
+ * credential seam as fallback, so a changed base URL or secret reaches the
+ * very next request without restarting anything.
+ * @module dsh-providers
+ */
+
+import type { Context } from "@deepseek-ai/cordis";
+import { Service } from "@deepseek-ai/cordis";
+import z from "@deepseek-ai/schemastery";
+import { LlmError, resolveRetryPolicy, RetryPolicySchema } from "@deepseek-ai/dsh-llm";
+import type { RetryPolicyConfig } from "@deepseek-ai/dsh-llm";
+import { credentialRef, type CredentialProvider } from "@deepseek-ai/dsh-credentials";
+import {
+  deepEqualJson,
+  installSettingsSection,
+  settingsNamespace,
+} from "@deepseek-ai/dsh-settings";
+import { MAX_TIMER_DELAY_MS } from "@deepseek-ai/dsh-timeout";
+import type { AccountsService } from "dsh-credentials";
+import {
+  getOrCreateAnonymousUserId,
+  type AnonymousUserId,
+} from "@deepseek-ai/dsh-anonymous-user-id";
+import { DialectAdapter, DEFAULT_STREAM_IDLE_TIMEOUT_MS } from "./adapter.js";
+import { ModelCatalog, DEFAULT_CATALOG_TTL_MS } from "./catalog.js";
+import type { ProviderConnection, ProviderGate, ProviderRouteAuthSlot } from "./adapter.js";
+import { PROVIDER_IDS, PROVIDER_ROUTES, providerRoute, type ProviderRoute } from "./providers.js";
+import { applyQuotas, type QuotasConfig } from "./quotas/index.js";
+import type { DialectAuth, DialectId } from "dsh-dialects";
+
+export {
+  DialectAdapter,
+  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
+  httpErrorCode,
+  describeHttpFailure,
+} from "./adapter.js";
+export type { ProviderConnection, ProviderGate, ProviderRouteAuthSlot } from "./adapter.js";
+export {
+  ModelCatalog,
+  DEFAULT_CATALOG_TTL_MS,
+  mergeCatalog,
+  parseCatalogResponse,
+} from "./catalog.js";
+export type { CatalogSource, DiscoveredModel } from "./catalog.js";
+export { PROVIDER_IDS, PROVIDER_ROUTES, providerRoute } from "./providers.js";
+export type {
+  AuthKind,
+  CredentialSlot,
+  ProviderCatalogModel,
+  ProviderKind,
+  ProviderRoute,
+} from "./providers.js";
+
+// Quotas subpackage re-exports (merged from standalone dsh-quotas)
+export {
+  QuotaRegistry,
+  applyQuotas,
+  QUOTAS_PREFIX,
+  mountQuotaWeb,
+  NS as QUOTAS_NS,
+} from "./quotas/index.js";
+export { PROBE_ROUTE_IDS } from "./quotas/index.js";
+export {
+  createConfiguredProviders,
+  probeConfiguredRoute,
+  readConfiguredProfile,
+  modelsEndpoint,
+} from "./quotas/index.js";
+export type {
+  ConfigurableProviderEntry,
+  ConfiguredProbeDeps,
+  ConfiguredRouteProfile,
+  SettingsDescriptorView,
+} from "./quotas/index.js";
+export type { QuotaSnapshot, QuotaProvider, QuotasConfig } from "./quotas/index.js";
+
+/**
+ * Verified OAuth refresh endpoints for the subscription providers. The vault
+ * stores, per provider: the access token (`..._OAUTH_TOKEN`), the refresh
+ * token (`..._REFRESH_TOKEN`, single-use and rotated for claude/kimi/grok,
+ * durable for gemini), and the access expiry as epoch milliseconds
+ * (`..._EXPIRES`). Client ids come from the providers' own CLIs; Gemini's
+ * client id and secret are themselves kept in the vault (GitHub push
+ * protection rejects GCP OAuth material in committed code), resolved through
+ * `clientIdRef` / `clientSecretRef`.
+ */
+type OAuthRefresher = {
+  url: string;
+  clientId?: string;
+  clientIdRef?: string;
+  clientSecret?: string;
+  clientSecretRef?: string;
+  /** Anthropic's endpoint takes a JSON body; the others take form data. */
+  json?: boolean;
+  tokenRef: string;
+  refreshRef: string;
+  expiresRef: string;
+};
+
+const OAUTH_REFRESHERS: Record<string, OAuthRefresher> = {
+  "kimi-sub": {
+    url: "https://auth.kimi.com/api/oauth/token",
+    clientId: "17e5f671-d194-4dfb-9706-5516cb48c098",
+    tokenRef: "KIMI_SUB_OAUTH_TOKEN",
+    refreshRef: "KIMI_SUB_REFRESH_TOKEN",
+    expiresRef: "KIMI_SUB_EXPIRES",
+  },
+  "claude-sub": {
+    url: "https://api.anthropic.com/v1/oauth/token",
+    clientId: "9d1c250a-e61b-44d9-88ed-5944d1962f5e",
+    json: true,
+    tokenRef: "CLAUDE_SUB_OAUTH_TOKEN",
+    refreshRef: "CLAUDE_SUB_REFRESH_TOKEN",
+    expiresRef: "CLAUDE_SUB_EXPIRES",
+  },
+  "grok-sub": {
+    url: "https://auth.x.ai/oauth2/token",
+    clientId: "b1a00492-073a-47ea-816f-4c329264a828",
+    tokenRef: "GROK_SUB_OAUTH_TOKEN",
+    refreshRef: "GROK_SUB_REFRESH_TOKEN",
+    expiresRef: "GROK_SUB_EXPIRES",
+  },
+  "gemini-sub": {
+    url: "https://oauth2.googleapis.com/token",
+    clientIdRef: "GEMINI_SUB_CLIENT_ID",
+    clientSecretRef: "GEMINI_SUB_CLIENT_SECRET",
+    tokenRef: "GEMINI_SUB_OAUTH_TOKEN",
+    refreshRef: "GEMINI_SUB_REFRESH_TOKEN",
+    expiresRef: "GEMINI_SUB_EXPIRES",
+  },
+};
+
+/** How long an OAuth refresh may wait before it counts as a transient failure. */
+const TOKEN_REFRESH_TIMEOUT_MS = 15_000;
+
+type RefreshedToken = { access: string; refresh?: string; expires: number };
+
+async function refreshOAuthToken(
+  spec: OAuthRefresher & { clientId: string },
+  refreshToken: string,
+): Promise<RefreshedToken> {
+  const params: Record<string, string> = {
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+    client_id: spec.clientId,
+    ...(spec.clientSecret !== undefined ? { client_secret: spec.clientSecret } : {}),
+  };
+  const res = await fetch(spec.url, {
+    method: "POST",
+    headers: {
+      "content-type": spec.json === true ? "application/json" : "application/x-www-form-urlencoded",
+    },
+    body: spec.json === true ? JSON.stringify(params) : new URLSearchParams(params),
+    // Bounded so a stalled token endpoint cannot hang every caller waiting on
+    // this refresh — the coalescing map means one hung refresh would otherwise
+    // stall the provider's next request and its quota probe indefinitely.
+    signal: AbortSignal.timeout(TOKEN_REFRESH_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    const err = new Error(
+      `Token refresh failed (HTTP ${res.status}) for ${spec.url}: ${body.slice(0, 200)}`,
+    );
+    // 400/401/403 on a refresh grant means the refresh token itself is dead
+    // (invalid_grant — e.g. a consumed single-use rotating token). Retrying
+    // can never succeed; the user must re-authenticate.
+    if (res.status === 400 || res.status === 401 || res.status === 403)
+      (err as { permanent?: boolean }).permanent = true;
+    throw err;
+  }
+  const data = (await res.json()) as {
+    access_token?: unknown;
+    refresh_token?: unknown;
+    expires_in?: unknown;
+  };
+  if (typeof data.access_token !== "string") {
+    throw new Error(`Token refresh response missing access_token for ${spec.url}`);
+  }
+  const expiresIn =
+    typeof data.expires_in === "number" && data.expires_in > 0 ? data.expires_in : 3600;
+  return {
+    access: data.access_token,
+    refresh: typeof data.refresh_token === "string" ? data.refresh_token : undefined,
+    expires: Date.now() + (expiresIn - 120) * 1000,
+  };
+}
+
+export const name = "dsh-providers";
+export const inject = ["llm", "dialects"];
+
+const NS = settingsNamespace("dsh-providers");
+
+/**
+ * Plugin config, validated by the same-named schemastery schema and doubling
+ * as the `dsh-providers` settings-section shape. Every field is optional:
+ * routes carry advisory defaults, per-provider base URL overrides land here,
+ * the retry policy defaults to the harness normal policy, and the provider
+ * filter defaults to the single-seat subscription-only mode.
+ */
+export interface Config {
+  /** Per-provider endpoint overrides keyed by provider id (e.g. `kimi-code`). */
+  baseURLs?: Record<string, string>;
+  /** Maximum provider idle time while one stream read is outstanding. */
+  streamIdleTimeoutMs?: number;
+  /** Provider-owned model-request retry policy; omission uses normal defaults. */
+  retryPolicy?: RetryPolicyConfig;
+  /**
+   * Provider filter. `subscription-only` hides pay-as-you-go API routes from
+   * the model selector and refuses them at dispatch, so conversation traffic
+   * can only ever run on subscription providers; `all` offers every route.
+   */
+  mode?: "subscription-only" | "all";
+  /**
+   * Discover each route's models from the provider's own listing endpoint
+   * instead of relying on the static table. Defaults to on: a new model
+   * release then reaches the selector without a code change. Set false to pin
+   * the selector to the shipped tables.
+   */
+  liveCatalog?: boolean;
+  /** How long a discovered listing is reused before refetching. */
+  catalogTtlMs?: number;
+  /** Quota probe configuration forwarded to the quotas subpackage. */
+  quotas?: QuotasConfig;
+}
+
+export const Config: z<Config> = z.object({
+  baseURLs: z.dict(z.string()),
+  streamIdleTimeoutMs: z.number().min(Number.MIN_VALUE).max(MAX_TIMER_DELAY_MS),
+  retryPolicy: RetryPolicySchema,
+  mode: z.union(["subscription-only", "all"]),
+  liveCatalog: z.boolean(),
+  catalogTtlMs: z.number().min(Number.MIN_VALUE).max(MAX_TIMER_DELAY_MS),
+  quotas: z.any(),
+});
+
+/** Validated, detached provider facts for the `dsh-providers` section. */
+export interface ResolvedProvidersOptions {
+  baseURLs: Record<string, string>;
+  streamIdleTimeoutMs: number;
+  retryPolicy: ReturnType<typeof resolveRetryPolicy>;
+  mode: NonNullable<Config["mode"]>;
+  liveCatalog: boolean;
+  catalogTtlMs: number;
+}
+
+/** The one explicit resolve step from raw config to validated provider facts. */
+export function resolveProvidersOptions(config: Config): ResolvedProvidersOptions {
+  const streamIdleTimeoutMs = config.streamIdleTimeoutMs ?? DEFAULT_STREAM_IDLE_TIMEOUT_MS;
+  if (
+    !Number.isFinite(streamIdleTimeoutMs) ||
+    streamIdleTimeoutMs <= 0 ||
+    streamIdleTimeoutMs > MAX_TIMER_DELAY_MS
+  ) {
+    throw new Error(
+      `dsh-providers: streamIdleTimeoutMs must be a positive finite number no greater than ${MAX_TIMER_DELAY_MS}`,
+    );
+  }
+  const catalogTtlMs = config.catalogTtlMs ?? DEFAULT_CATALOG_TTL_MS;
+  if (!Number.isFinite(catalogTtlMs) || catalogTtlMs <= 0 || catalogTtlMs > MAX_TIMER_DELAY_MS) {
+    throw new Error(
+      `dsh-providers: catalogTtlMs must be a positive finite number no greater than ${MAX_TIMER_DELAY_MS}`,
+    );
+  }
+  return {
+    baseURLs: config.baseURLs ?? {},
+    streamIdleTimeoutMs,
+    retryPolicy: resolveRetryPolicy(config.retryPolicy, "dsh-providers: retryPolicy"),
+    mode: config.mode ?? "subscription-only",
+    liveCatalog: config.liveCatalog ?? true,
+    catalogTtlMs,
+  };
+}
+
+function toConnection(
+  route: ProviderRoute,
+  resolved: ResolvedProvidersOptions,
+): ProviderConnection {
+  return {
+    displayName: route.displayName,
+    dialectId: route.dialect,
+    baseURL: resolved.baseURLs[route.id] ?? route.baseURL,
+    headers: route.headers,
+    authSlots: route.authSlots,
+    models: route.models,
+    defaultMaxTokens: route.defaultMaxTokens,
+    defaultContextWindow: route.defaultContextWindow,
+    streamIdleTimeoutMs: resolved.streamIdleTimeoutMs,
+    retryPolicy: resolved.retryPolicy,
+    ...(route.catalog === undefined || !resolved.liveCatalog ? {} : { catalog: route.catalog }),
+  };
+}
+
+/**
+ * The provider filter as a service: exposes the same gate the adapter enforces
+ * at catalog, selection, and dispatch, so an agent-scoped remap row (a preset
+ * watching `agent/request`) decides replacement from the identical policy
+ * instead of duplicating mode or credential logic.
+ */
+export class ProviderPolicy extends Service {
+  constructor(
+    ctx: Context,
+    private readonly gateImpl: (provider: string) => Promise<ProviderGate | undefined>,
+  ) {
+    super(ctx, "dshProviders");
+  }
+
+  /**
+   * Why one provider is currently unusable under the filter mode.
+   * @param provider - a dsh provider id.
+   * @returns the gate, or `undefined` when the provider is offered as-is.
+   */
+  gate(provider: string): Promise<ProviderGate | undefined> {
+    return this.gateImpl(provider);
+  }
+}
+
+declare module "@deepseek-ai/cordis" {
+  interface Context {
+    dshProviders: ProviderPolicy;
+  }
+}
+
+export function apply(ctx: Context, config: Config): void {
+  let current: () => Config = () => config;
+  let lastRaw: Config | undefined;
+  let lastGood: ResolvedProvidersOptions | undefined;
+  const resolved = (): ResolvedProvidersOptions => {
+    const raw = current();
+    if (raw === lastRaw && lastGood !== undefined) return lastGood;
+    try {
+      const next = resolveProvidersOptions(raw);
+      lastRaw = raw;
+      lastGood = next;
+      return next;
+    } catch (error) {
+      if (lastGood === undefined) throw error;
+      lastRaw = raw;
+      ctx.logger.error(
+        "dsh-providers: keeping the last good configuration after an invalid settings section",
+      );
+      ctx.logger.error(error);
+      return lastGood;
+    }
+  };
+  resolved();
+
+  const connections = (provider: string): ProviderConnection =>
+    toConnection(providerRoute(provider), resolved());
+
+  const memory = new Map<string, string>();
+
+  const read = async (ref: string): Promise<string | undefined> => {
+    const mem = memory.get(ref);
+    if (mem !== undefined) return mem;
+    const accounts = ctx.get("accounts") as AccountsService | undefined;
+    const credentials = ctx.get("credentials") as CredentialProvider | undefined;
+    if (accounts !== undefined) return (await accounts.resolve(ref))?.value;
+    if (credentials !== undefined) return (await credentials.resolve(credentialRef(ref)))?.value;
+    return undefined;
+  };
+
+  const write = async (ref: string, value: string): Promise<void> => {
+    const accounts = ctx.get("accounts") as AccountsService | undefined;
+    if (accounts !== undefined) {
+      await accounts.set(ref, value);
+      return;
+    }
+    memory.set(ref, value);
+  };
+
+  const refreshInflight = new Map<string, Promise<string | undefined>>();
+  const refreshed = new Map<string, { access: string; expires: number }>();
+
+  /**
+   * Resolve an OAuth access token, refreshing it when the stored refresh token
+   * exists and the access token has expired. The rotated bundle (access,
+   * refresh, expires) is written back through the account seam so the next
+   * request sees fresh material; without a vault, an in-process override keeps
+   * this process on the rotated token. A failed refresh falls back to the
+   * stored access token so the upstream request surfaces the real error.
+   */
+  const readToken = async (
+    provider: string,
+    refresher: OAuthRefresher,
+  ): Promise<string | undefined> => {
+    const value = await read(refresher.tokenRef);
+    if (value === undefined || value.length === 0) return undefined;
+    const fresh = refreshed.get(provider);
+    if (fresh !== undefined && fresh.expires > Date.now()) return fresh.access;
+    const refreshToken = await read(refresher.refreshRef);
+    if (refreshToken === undefined || refreshToken.length === 0) return value;
+    const expiresRaw = await read(refresher.expiresRef);
+    // Accept epoch millis (refresh write-back) and ISO 8601 (login flows).
+    const expires = expiresRaw !== undefined ? Number(expiresRaw) || Date.parse(expiresRaw) : NaN;
+    if (!Number.isNaN(expires) && expires > Date.now()) return value;
+    const clientId =
+      refresher.clientId !== undefined
+        ? refresher.clientId
+        : await read(refresher.clientIdRef ?? "");
+    if (clientId === undefined || clientId.length === 0) return value;
+    const clientSecret =
+      refresher.clientSecret !== undefined
+        ? refresher.clientSecret
+        : refresher.clientSecretRef !== undefined
+          ? await read(refresher.clientSecretRef)
+          : undefined;
+    if (
+      refresher.clientSecretRef !== undefined &&
+      (clientSecret === undefined || clientSecret.length === 0)
+    )
+      return value;
+    const spec: OAuthRefresher & { clientId: string } =
+      refresher.clientSecretRef !== undefined
+        ? { ...refresher, clientId, clientSecret }
+        : { ...refresher, clientId };
+    const inflight = refreshInflight.get(provider);
+    if (inflight !== undefined) return inflight;
+    const attempt = () =>
+      refreshOAuthToken(spec, refreshToken).then(async (token) => {
+        // Write order matters for single-use rotating refresh tokens: persist
+        // the NEW refresh token first. If the process dies after the provider
+        // consumed the old token, the vault must hold the valid rotation, not
+        // a fresh access token paired with a dead refresh token.
+        if (token.refresh !== undefined) await write(refresher.refreshRef, token.refresh);
+        await write(refresher.tokenRef, token.access);
+        await write(refresher.expiresRef, String(token.expires));
+        refreshed.set(provider, { access: token.access, expires: token.expires });
+        return token.access;
+      });
+    const run = attempt().catch((err: unknown) => {
+      if ((err as { permanent?: boolean }).permanent === true) throw err;
+      // one retry for transient failures (network blip, token-endpoint 5xx/429)
+      return new Promise<string>((resolve, reject) =>
+        setTimeout(() => attempt().then(resolve, reject), 1000),
+      );
+    });
+    const guarded = run.catch(async (err: unknown) => {
+      if ((err as { permanent?: boolean }).permanent === true) {
+        // The refresh grant is dead (consumed/rotated away). Drop the stale
+        // in-process entry and surface a missing-credential error instead of
+        // silently returning the expired access token forever.
+        refreshed.delete(provider);
+        return undefined;
+      }
+      return value;
+    });
+    refreshInflight.set(provider, guarded);
+    guarded.finally(() => refreshInflight.delete(provider)).catch(() => {});
+    return guarded;
+  };
+
+  /**
+   * Resolve a credential reference for a quota probe. An OAuth token ref goes
+   * through the refresher so the probe sends the same live token dispatch
+   * would; everything else reads the account seam directly.
+   */
+  const probeToken = async (ref: string): Promise<string | undefined> => {
+    for (const [provider, refresher] of Object.entries(OAUTH_REFRESHERS)) {
+      if (refresher.tokenRef === ref) return readToken(provider, refresher);
+    }
+    return read(ref);
+  };
+
+  /** One credential snapshot per operation: the wire auth plus the slots it could not fill. */
+  const credentialsFor = async (
+    provider: string,
+    connection: ProviderConnection,
+  ): Promise<{ auth: DialectAuth; missing: string[]; stored: boolean }> => {
+    const auth: DialectAuth =
+      connection.headers !== undefined ? { headers: { ...connection.headers } } : {};
+    // Local routes carry no credentials; the wire still wants a bearer shape.
+    if (providerRoute(provider).kind === "local") auth.token = "local";
+    const missing: string[] = [];
+    // Whether this route holds stored credential material at all, which is a
+    // different question from whether that material still works. A provider
+    // nobody ever configured should leave the selector silently; one whose
+    // stored login went stale must say so, or re-authenticating looks
+    // unnecessary.
+    let stored = false;
+    for (const slot of connection.authSlots as readonly ProviderRouteAuthSlot[]) {
+      const refresher = slot.slot === "token" ? OAUTH_REFRESHERS[provider] : undefined;
+      const value =
+        refresher !== undefined ? await readToken(provider, refresher) : await read(slot.ref);
+      if (value !== undefined && value.length > 0) {
+        stored = true;
+        if (slot.slot === "apiKey") auth.apiKey = value;
+        else if (slot.slot === "token") auth.token = value;
+        else if (slot.slot === "header" && slot.headerName !== undefined) {
+          (auth.headers ??= {})[slot.headerName] = value;
+        } else if (slot.cookieName !== undefined) (auth.cookies ??= {})[slot.cookieName] = value;
+      } else {
+        missing.push(slot.ref);
+        // readToken answers undefined both for a route that was never logged
+        // in and for one whose refresh grant was rejected. Only the raw record
+        // separates them.
+        if (refresher !== undefined) {
+          const raw = await read(slot.ref);
+          if (raw !== undefined && raw.length > 0) stored = true;
+        }
+      }
+    }
+    return { auth, missing, stored };
+  };
+
+  const missingCredential = (provider: string, missing: readonly string[]): LlmError =>
+    new LlmError(
+      `dsh-providers: no credential for "${provider}"; store ${missing.join(", ")} through the` +
+        " account manager (dsh-credentials) or the harness credentials service",
+      "MISSING_CREDENTIAL",
+    );
+
+  /** A route that was logged in once and whose stored login no longer resolves. */
+  const staleCredential = (provider: string, missing: readonly string[]): LlmError =>
+    new LlmError(
+      `dsh-providers: the stored credential for "${provider}" is no longer valid` +
+        ` (${missing.join(", ")} could not be resolved or refreshed); sign in again` +
+        " from the account manager",
+      "MISSING_CREDENTIAL",
+    );
+
+  const resolveAuth = async (
+    provider: string,
+    connection: ProviderConnection,
+  ): Promise<DialectAuth> => {
+    const { auth, missing } = await credentialsFor(provider, connection);
+    if (missing.length > 0) throw missingCredential(provider, missing);
+    return auth;
+  };
+
+  /**
+   * The filter gate: whether one provider may be offered under the current
+   * mode. In `subscription-only`, billable pay-as-you-go routes are hidden
+   * from discovery and refused everywhere, and subscription routes must be
+   * logged in (their credential material present); in `all`, nothing is gated
+   * and a missing credential surfaces on the request itself.
+   */
+  const gate = async (
+    provider: string,
+    connection: ProviderConnection,
+  ): Promise<ProviderGate | undefined> => {
+    const route = providerRoute(provider);
+    if (resolved().mode === "subscription-only" && route.kind === "api") {
+      return {
+        visible: false,
+        reason: new LlmError(
+          `dsh-providers: provider "${provider}" is a pay-as-you-go API route and is disabled` +
+            ' in subscription-only mode (single seat); configure mode "all" to allow billed usage',
+          "PROVIDER_DISABLED",
+        ),
+      };
+    }
+    // A route whose credentials do not resolve cannot serve a single request,
+    // so it leaves the selector rather than appearing as a failure row. A
+    // selector is a list of things you can pick; a provider you have no working
+    // login for is not one, and rendering it as an error turns the picker into
+    // a wall of "failed to load" for every route the plugin happens to ship.
+    //
+    // This does not hide the problem, it moves it to the surface built for it:
+    // the quotas panel reports every route's status, including the ones absent
+    // here, and the reason below still reaches logs and dispatch. The message
+    // distinguishes a route that was never configured from one whose stored
+    // login went stale, because only the second is something to act on.
+    const { missing, stored } = await credentialsFor(provider, connection);
+    if (missing.length > 0) {
+      return {
+        visible: false,
+        reason: stored ? staleCredential(provider, missing) : missingCredential(provider, missing),
+      };
+    }
+    return undefined;
+  };
+
+  let userId: AnonymousUserId | undefined;
+  const resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
+
+  // The service gate is a boundary for callers that see arbitrary providers
+  // (the agent-scoped remap row reads every request's provider): a provider
+  // this plugin does not own is offered as-is, never an error, while the
+  // adapter's own gate stays strict for the registered routes it serves.
+  const policy = new ProviderPolicy(ctx, async (provider: string) => {
+    if (!PROVIDER_IDS.includes(provider)) return undefined;
+    return gate(provider, connections(provider));
+  });
+
+  // One cache for the whole plugin: the selector reads many providers at once
+  // and each route's listing is fetched once per TTL, not once per read.
+  const modelCatalog = new ModelCatalog({ ttlMs: resolved().catalogTtlMs });
+
+  const adapter = new DialectAdapter({
+    getDialect: (id: DialectId) => ctx.dialects.get(id),
+    options: connections,
+    resolveAuth,
+    gate,
+    resolveUserId,
+    catalog: modelCatalog,
+  });
+  ctx.llm.registerConfigurableProviders(
+    PROVIDER_ROUTES.map((route) => ({
+      provider: route.id,
+      displayName: route.displayName,
+      settingsNs: NS,
+      settingsPath: [],
+    })),
+  );
+  const registration = ctx.llm.registerAdapter([...PROVIDER_IDS], adapter);
+  let registeredPolicy = resolved().retryPolicy;
+  let registeredCatalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
+  const ensureRegistrationFacts = (): void => {
+    // Base URLs, the live-catalog toggle and the TTL all change what a listing
+    // would return, so drop the discovered entries and let the next read
+    // refetch rather than serving a catalog from the previous configuration.
+    const catalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
+    if (!deepEqualJson(catalogFacts, registeredCatalogFacts)) {
+      modelCatalog.clear();
+      registeredCatalogFacts = catalogFacts;
+    }
+    const policy = resolved().retryPolicy;
+    if (deepEqualJson(policy, registeredPolicy)) return;
+    registration.replace([...PROVIDER_IDS]);
+    registeredPolicy = policy;
+  };
+
+  installSettingsSection(ctx, NS, Config, config, {
+    setSource: (source) => {
+      current = source;
+    },
+    onChange: ensureRegistrationFacts,
+  });
+
+  // Wire the quotas subpackage: registry, settings section, web routes,
+  // built-in probe providers, and staggered 15-minute auto-refresh.
+  //
+  // The probes resolve their credential through the same refreshing path as
+  // dispatch. Reading the stored value instead turned every subscription light
+  // red as soon as its access token aged out — a status light that reports the
+  // token's age rather than whether the credential works is worse than none.
+  applyQuotas(ctx, {
+    providers: config.quotas?.providers,
+    resolveToken: probeToken,
+  });
+}

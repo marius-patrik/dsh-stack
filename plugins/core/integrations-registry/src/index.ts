@@ -1,24 +1,31 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import { Service, type Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'integrations-registry';
-export const inject = ['webServer', 'slots'];
-export const optional = ['icons'];
+export const name = "integrations-registry";
+export const inject = ["webServer", "slots"];
+export const optional = ["icons"];
 
 export interface IntegrationEntry {
   id: string;
   name: string;
-  category: 'sandbox' | 'editor' | 'tool' | 'vcs' | 'runtime' | 'network';
+  category: "sandbox" | "editor" | "tool" | "vcs" | "runtime" | "network";
   installed: boolean;
-  status: 'online' | 'standby' | 'error';
+  status: "online" | "standby" | "error";
   version?: string;
 }
 
-export class IntegrationsRegistryService {
-  private registry = new Map<string, IntegrationEntry>();
+export class IntegrationsRegistryService extends Service {
+  static inject = ["webServer", "slots"];
+  static optional = ["icons"];
+  private readonly registry = new Map<string, IntegrationEntry>();
+
+  constructor(ctx: Context) {
+    super(ctx, "integrations");
+  }
 
   register(entry: IntegrationEntry): void {
-    this.registry.set(entry.id, entry);
+    if (!entry.id.trim()) throw new Error("Integration id must be non-empty");
+    this.registry.set(entry.id, { ...entry });
   }
 
   get(id: string): IntegrationEntry | undefined {
@@ -26,12 +33,12 @@ export class IntegrationsRegistryService {
   }
 
   all(): IntegrationEntry[] {
-    return Array.from(this.registry.values());
+    return Array.from(this.registry.values(), (entry) => ({ ...entry }));
   }
 }
 
 export const Config = Schema.object({});
 
-export function apply(ctx: Context) {
-  (ctx as any).integrations = new IntegrationsRegistryService();
+export function apply(ctx: Context): void {
+  new IntegrationsRegistryService(ctx);
 }

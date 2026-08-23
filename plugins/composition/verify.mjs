@@ -1,5 +1,5 @@
-import assert from 'node:assert/strict';
-import { packs, plugins, profiles, resolveProfile } from './lib/index.js';
+import assert from "node:assert/strict";
+import { packs, plugins, profiles, resolveProfile } from "./lib/index.js";
 
 function assertUnique(values, label) {
   const seen = new Set();
@@ -9,19 +9,34 @@ function assertUnique(values, label) {
   }
 }
 
-assertUnique(plugins.map((plugin) => plugin.id), 'plugin id');
-assertUnique(packs.map((pack) => pack.id), 'pack id');
-assertUnique(profiles.map((profile) => profile.id), 'profile id');
+assertUnique(
+  plugins.map((plugin) => plugin.id),
+  "plugin id",
+);
+assertUnique(
+  packs.map((pack) => pack.id),
+  "pack id",
+);
+assertUnique(
+  profiles.map((profile) => profile.id),
+  "profile id",
+);
 
 const pluginById = new Map(plugins.map((plugin) => [plugin.id, plugin]));
 const packById = new Map(packs.map((pack) => [pack.id, pack]));
 
 for (const plugin of plugins) {
   const dependencies = plugin.dependencies ?? [];
-  assertUnique(dependencies.map((dependency) => `${dependency.plugin}:${dependency.kind}`), `dependency declaration for ${plugin.id}`);
+  assertUnique(
+    dependencies.map((dependency) => `${dependency.plugin}:${dependency.kind}`),
+    `dependency declaration for ${plugin.id}`,
+  );
 
   for (const dependency of dependencies) {
-    assert(pluginById.has(dependency.plugin), `${plugin.id} references unknown plugin ${dependency.plugin}`);
+    assert(
+      pluginById.has(dependency.plugin),
+      `${plugin.id} references unknown plugin ${dependency.plugin}`,
+    );
   }
 
   assertUnique(plugin.provides ?? [], `provided capability for ${plugin.id}`);
@@ -49,4 +64,6 @@ for (const profile of profiles) {
   );
 }
 
-console.log(`Composition verification passed: ${plugins.length} plugins, ${packs.length} packs, ${profiles.length} profiles.`);
+console.log(
+  `Composition verification passed: ${plugins.length} plugins, ${packs.length} packs, ${profiles.length} profiles.`,
+);

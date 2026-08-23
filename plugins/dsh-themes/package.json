@@ -1,53 +1,5 @@
 {
-  "name": "dsh-themes",
-  "description": "VS Code/TextMate theme support for the dsh web UI",
-  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    },
-    "./client": "./lib/client.js",
-    "./package.json": "./package.json",
-    "./src/*": "./src/*"
-  },
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "inject": [
-        "slots",
-        "theme"
-      ],
-      "platform": "web",
-      "immediately": false
-    }
-  },
-  "files": [
-    "lib",
-    "client.js",
-    "cordis.patch.yml"
-  ],
-  "scripts": {
-    "build": "tsc && cp client.js lib/client.js",
-    "typecheck": "tsc --noEmit",
-    "test": "node check-plugin.mjs"
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-settings": "^0.1.0",
-    "@deepseek-ai/schemastery": "^3.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.0",
-    "@types/node": "^22.0.0",
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-settings": "^0.1.0",
-    "@deepseek-ai/schemastery": "^3.0.0"
-  }
+  "main": "src/index.mjs"
 }

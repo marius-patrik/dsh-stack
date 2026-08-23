@@ -1,12 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2023"
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["ES2023"],
+    "types": ["node"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "lib",
@@ -22,7 +18,5 @@
     "declaration": true,
     "sourceMap": false
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

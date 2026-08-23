@@ -8,7 +8,11 @@
     "outDir": "lib",
     "rootDir": "src",
     "noEmitOnError": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@dsh-stack/plugin-kit": ["../plugin-kit/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

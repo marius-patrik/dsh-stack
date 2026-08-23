@@ -1,8 +1,8 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import type { Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'lsp-client';
-export const inject = ['tools', 'integrations', 'webServer'];
+export const name = "lsp-client";
+export const inject = ["tools", "integrations", "webServer"];
 export const optional: string[] = [];
 
 export interface LspPosition {
@@ -57,14 +57,14 @@ export class LspClientService {
   }
 
   getServerForFile(filePath: string): LspServerHandler | undefined {
-    const ext = filePath.includes('.') ? filePath.split('.').pop() || '' : filePath;
+    const ext = filePath.includes(".") ? filePath.split(".").pop() || "" : filePath;
     return this.servers.get(ext);
   }
 
   setDiagnostics(filePath: string, diagnostics: LspDiagnostic[]): void {
     this.diagnosticsCache.set(filePath, diagnostics);
     if ((this.ctx as any).emit) {
-      (this.ctx as any).emit('lsp:diagnostics', { filePath, diagnostics });
+      (this.ctx as any).emit("lsp:diagnostics", { filePath, diagnostics });
     }
   }
 
@@ -74,20 +74,21 @@ export class LspClientService {
 
   private registerLspTools(): void {
     const tools = (this.ctx as any).tools;
-    if (!tools || typeof tools.registerTool !== 'function') return;
+    if (!tools || typeof tools.registerTool !== "function") return;
 
     // 1. lsp_hover
     tools.registerTool({
-      name: 'lsp_hover',
-      description: 'Get hover type information and docstrings for a symbol at a specific file position',
+      name: "lsp_hover",
+      description:
+        "Get hover type information and docstrings for a symbol at a specific file position",
       parameters: {
-        type: 'object',
+        type: "object",
         properties: {
-          path: { type: 'string', description: 'File path' },
-          line: { type: 'number', description: 'Line number (0-indexed)' },
-          character: { type: 'number', description: 'Character column (0-indexed)' }
+          path: { type: "string", description: "File path" },
+          line: { type: "number", description: "Line number (0-indexed)" },
+          character: { type: "number", description: "Character column (0-indexed)" },
         },
-        required: ['path', 'line', 'character']
+        required: ["path", "line", "character"],
       },
       execute: async (params: { path: string; line: number; character: number }) => {
         const s = this.getServerForFile(params.path);
@@ -95,41 +96,44 @@ export class LspClientService {
           return await s.getHover(params.path, { line: params.line, character: params.character });
         }
         return { contents: `No active LSP server for ${params.path}` };
-      }
+      },
     });
 
     // 2. lsp_definition
     tools.registerTool({
-      name: 'lsp_definition',
-      description: 'Find definition target for symbol at cursor',
+      name: "lsp_definition",
+      description: "Find definition target for symbol at cursor",
       parameters: {
-        type: 'object',
+        type: "object",
         properties: {
-          path: { type: 'string', description: 'File path' },
-          line: { type: 'number', description: 'Line number (0-indexed)' },
-          character: { type: 'number', description: 'Character column (0-indexed)' }
+          path: { type: "string", description: "File path" },
+          line: { type: "number", description: "Line number (0-indexed)" },
+          character: { type: "number", description: "Character column (0-indexed)" },
         },
-        required: ['path', 'line', 'character']
+        required: ["path", "line", "character"],
       },
       execute: async (params: { path: string; line: number; character: number }) => {
         const s = this.getServerForFile(params.path);
         if (s && s.getDefinition) {
-          return await s.getDefinition(params.path, { line: params.line, character: params.character });
+          return await s.getDefinition(params.path, {
+            line: params.line,
+            character: params.character,
+          });
         }
         return [];
-      }
+      },
     });
 
     // 3. lsp_diagnostics
     tools.registerTool({
-      name: 'lsp_diagnostics',
-      description: 'Get live lint and compiler diagnostics for a file',
+      name: "lsp_diagnostics",
+      description: "Get live lint and compiler diagnostics for a file",
       parameters: {
-        type: 'object',
+        type: "object",
         properties: {
-          path: { type: 'string', description: 'File path' }
+          path: { type: "string", description: "File path" },
         },
-        required: ['path']
+        required: ["path"],
       },
       execute: async (params: { path: string }) => {
         const s = this.getServerForFile(params.path);
@@ -139,7 +143,7 @@ export class LspClientService {
           return fresh;
         }
         return this.getDiagnostics(params.path);
-      }
+      },
     });
   }
 }

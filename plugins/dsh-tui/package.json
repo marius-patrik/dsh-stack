@@ -1,31 +1,5 @@
 {
-  "name": "dsh-tui",
-  "description": "Standalone terminal TUI client for the DeepSeek Harness — connects over HTTP, no cordis dependency",
-  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "bin": {
-    "dsh-tui": "./bin/dsh-tui.mjs"
-  },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    }
-  },
-  "files": [
-    "lib",
-    "bin"
-  ],
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "build": "tsc",
-    "test": "node check-plugin.mjs"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.0",
-    "@types/node": "^22.0.0"
-  }
+  "main": "src/index.mjs"
 }

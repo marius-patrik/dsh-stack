@@ -1,0 +1,10 @@
+{
+  "id": "stack.ai.dialects",
+  "name": "@dsh-stack/ai-dialects",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Dialect definitions and normalization for Stack AI providers.",
+  "files": ["lib", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

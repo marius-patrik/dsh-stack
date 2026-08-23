@@ -1,8 +1,8 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import { Service, type Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'keybindings';
-export const inject = ['slots'];
+export const name = "keybindings";
+export const inject = ["slots"];
 export const optional: string[] = [];
 
 export interface KeybindingRule {
@@ -12,10 +12,16 @@ export interface KeybindingRule {
   action: () => void;
 }
 
-export class KeybindingsService {
-  private bindings = new Map<string, KeybindingRule>();
+export class KeybindingsService extends Service {
+  static inject = ["slots"];
+  private readonly bindings = new Map<string, KeybindingRule>();
+
+  constructor(ctx: Context) {
+    super(ctx, "keybindings");
+  }
 
   register(rule: KeybindingRule): void {
+    if (!rule.id.trim()) throw new Error("Keybinding id must be non-empty");
     this.bindings.set(rule.id, rule);
   }
 
@@ -26,6 +32,6 @@ export class KeybindingsService {
 
 export const Config = Schema.object({});
 
-export function apply(ctx: Context) {
-  (ctx as any).keybindings = new KeybindingsService();
+export function apply(ctx: Context): void {
+  new KeybindingsService(ctx);
 }

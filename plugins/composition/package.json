@@ -1,7 +1,8 @@
 {
   "name": "@dsh-stack/composition",
   "version": "0.1.0",
-  "private": true,
+  "description": "Stack plugin, pack and profile composition metadata.",
+  "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -11,9 +12,23 @@
       "default": "./lib/index.js"
     }
   },
+  "files": [
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.core.composition"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test",
     "verify": "node verify.mjs"
   },
   "dependencies": {

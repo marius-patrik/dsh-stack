@@ -1,7 +1,7 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import type { Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'protocol-dialects';
+export const name = "protocol-dialects";
 export const inject: string[] = [];
 export const optional: string[] = [];
 

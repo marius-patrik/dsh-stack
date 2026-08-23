@@ -1,6 +1,2 @@
 packages:
   - "packages/**"
-
-# The canonical workspace includes every real package under packages/.
-# Legacy plugin sources were removed from the repository and must not be
-# imported by canonical code.

@@ -1,0 +1,10 @@
+{
+  "id": "stack.agents",
+  "name": "@dsh-stack/agents",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "User-defined agent/persona management for the Stack.",
+  "files": ["lib", "bin", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}
