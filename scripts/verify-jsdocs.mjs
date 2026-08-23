@@ -23,7 +23,9 @@ async function collectFiles(directory) {
 
 /** Return true when a declaration has a JSDoc comment attached to it. */
 function hasJsDoc(sourceFile, node) {
-  return ts.getJSDocCommentsAndTags(node).some((comment) => comment.getFullText(sourceFile).trimStart().startsWith("/**"));
+  return ts
+    .getJSDocCommentsAndTags(node)
+    .some((comment) => comment.getFullText(sourceFile).trimStart().startsWith("/**"));
 }
 
 /** Report every named or declarative function without a JSDoc block. */
@@ -33,7 +35,11 @@ function checkFile(path, source) {
     source,
     ts.ScriptTarget.Latest,
     true,
-    path.endsWith(".tsx") ? ts.ScriptKind.TSX : path.endsWith(".jsx") ? ts.ScriptKind.JSX : ts.ScriptKind.TS,
+    path.endsWith(".tsx")
+      ? ts.ScriptKind.TSX
+      : path.endsWith(".jsx")
+        ? ts.ScriptKind.JSX
+        : ts.ScriptKind.TS,
   );
   const missing = [];
 
@@ -62,7 +68,9 @@ function checkFile(path, source) {
 
     if (declaration !== null && !hasJsDoc(sourceFile, declaration)) {
       const position = sourceFile.getLineAndCharacterOfPosition(declaration.getStart(sourceFile));
-      missing.push(`${relative(root, path)}:${position.line + 1}:${position.character + 1} ${name}`);
+      missing.push(
+        `${relative(root, path)}:${position.line + 1}:${position.character + 1} ${name}`,
+      );
     }
 
     ts.forEachChild(node, visit);
@@ -74,7 +82,9 @@ function checkFile(path, source) {
 
 /** Verify that all declared functions in the implementation have JSDoc. */
 async function main() {
-  const files = (await Promise.all(sourceRoots.map((rootName) => collectFiles(join(root, rootName))))).flat();
+  const files = (
+    await Promise.all(sourceRoots.map((rootName) => collectFiles(join(root, rootName))))
+  ).flat();
   const missing = [];
   for (const path of files.sort()) {
     missing.push(...checkFile(path, await fs.readFile(path, "utf8")));
