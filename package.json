@@ -14,7 +14,7 @@
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
     "format": "biome format --write .",
-    "format:check": "biome format .",
+    "format:check": "biome format --check .",
     "verify:stack": "node scripts/verify-stack.mjs",
     "verify": "pnpm run verify:stack && pnpm -r --if-present verify",
     "test": "pnpm -r --if-present test"
