@@ -42,6 +42,8 @@ jobs:
           git add -A
           git commit -m "style: format repository"
           git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          echo "Formatting changes pushed; the new branch head will run this workflow again."
+          exit 0
 
       - name: Verify formatting
         run: |
