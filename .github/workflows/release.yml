@@ -49,7 +49,7 @@ jobs:
           case "$bump" in
             major) major=$((major + 1)); minor=0; patch=0 ;;
             minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)); ;;
+            patch) patch=$((patch + 1)) ;;
           esac
           next_version="v${major}.${minor}.${patch}"
           git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null && exit 1 || true
