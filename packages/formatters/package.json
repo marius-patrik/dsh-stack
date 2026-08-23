@@ -1,5 +1,5 @@
 {
-  "name": "dsh-formatters",
+  "name": "formatters",
   "description": "Per-extension formatter commands + format tool + auto-format-on-edit for the dsh web UI",
   "version": "0.1.0",
   "private": true,
