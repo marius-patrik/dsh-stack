@@ -1,5 +1,5 @@
 {
-  "name": "dsh-tweaks",
+  "name": "tweaks",
   "description": "User-facing harness tweaks: homeRoot/command settings mirroring, self-hosted share links, session-stats/sessions CLI verbs, plan/build toggle, fork-based undo/redo, config-file slash commands, and a keybinds settings surface",
   "version": "0.2.0",
   "private": true,
