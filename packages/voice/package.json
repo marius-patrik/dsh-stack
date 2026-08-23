@@ -1,5 +1,5 @@
 {
-  "name": "dsh-voice",
+  "name": "voice",
   "description": "Natural, human-sounding voice for the dsh harness: server-proxied neural TTS read-aloud and agent speech tools over OpenAI-compatible endpoints, browser-native or Whisper speech input, and a Voice settings section",
   "version": "0.1.0",
   "license": "MIT",
