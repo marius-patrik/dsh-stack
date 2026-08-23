@@ -1,4 +1,4 @@
-import type { IconPack } from "@dsh-stack/icon-engine";
+import type { IconPack } from "icon-engine";
 
 export const name = "lucide-animated";
 export const version = "0.1.0";
@@ -84,10 +84,12 @@ const fileIcons: Readonly<Record<string, string>> = {
   ".gitmodules": "GitBranchIcon",
 };
 
+/** Normalize a file-extension token for case-insensitive icon lookup. */
 function normalizeExtension(value: string): string {
   return value.startsWith(".") ? value.slice(1).toLowerCase() : value.toLowerCase();
 }
 
+/** Resolve a semantic icon key to the corresponding Lucide icon component name. */
 export function resolveIcon(key: string): string | null {
   const [kind, ...parts] = key.split(":");
   const value = parts.join(":");
@@ -120,6 +122,7 @@ export function resolveIcon(key: string): string | null {
   return null;
 }
 
+/** Create the Lucide Animated icon-pack descriptor. */
 export function createPack(): IconPack {
   return {
     id: "lucide-animated",
@@ -129,6 +132,7 @@ export function createPack(): IconPack {
   };
 }
 
+/** Register the Lucide Animated pack with the host icon-pack registry. */
 export function register(packRegistry: { registerPack(pack: IconPack): void }): void {
   packRegistry.registerPack(createPack());
 }
