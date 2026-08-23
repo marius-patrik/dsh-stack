@@ -1,0 +1,67 @@
+name: Merge enforcement
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  checks: read
+  pull-requests: read
+
+jobs:
+  merge-enforcement:
+    name: Merge enforcement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Fetch current main
+        run: git fetch --no-tags --prune origin main:refs/remotes/origin/main
+
+      - name: Require PR to contain current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git merge-base --is-ancestor origin/main HEAD; then
+            echo 'This pull request is behind main.'
+            echo 'Update/rebase the PR branch onto the current main before merging.'
+            exit 1
+          fi
+
+      - name: Require canonical CI and formatter checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request.head.sha;
+            const required = new Set([
+              'Canonical Stack workspace',
+              'Format repository'
+            ]);
+            const { data } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha,
+              per_page: 100,
+              filter: 'latest'
+            });
+
+            const relevant = data.check_runs.filter(run => required.has(run.name));
+            const missing = [...required].filter(name => !relevant.some(run => run.name === name));
+            if (missing.length) {
+              core.setFailed(`Required checks have not completed: ${missing.join(', ')}`);
+              return;
+            }
+
+            const failed = relevant.filter(run => run.status !== 'completed' || run.conclusion !== 'success');
+            if (failed.length) {
+              core.setFailed(failed.map(run => `${run.name}: ${run.status}/${run.conclusion}`).join('\n'));
+              return;
+            }
+
+            core.info('Canonical CI and formatter checks are green.');
