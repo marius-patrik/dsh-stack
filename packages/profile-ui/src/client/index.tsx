@@ -5,8 +5,8 @@ import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-setti
 import type { SidebarFooterActionOwnerProps } from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import { CheckIcon, SettingsIcon } from "lucide-animated/client";
-import { createProfileRuntime } from "profile-runtime";
+import { CheckIcon, SettingsIcon } from "@dsh-stack/lucide-animated/client";
+import { createProfileRuntime } from "@dsh-stack/profile-runtime";
 import { profileOptions } from "../index.js";
 
 const runtime = createProfileRuntime(profileOptions, {
