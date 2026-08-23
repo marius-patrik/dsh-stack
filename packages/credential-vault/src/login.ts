@@ -728,9 +728,7 @@ export async function submitCliAuthCode(sessionToken: string, code: string): Pro
 }
 
 /** Get the captured token and clean up a CLI login session. */
-export async function completeCliLogin(
-  sessionToken: string,
-): Promise<{
+export async function completeCliLogin(sessionToken: string): Promise<{
   token: string;
   full: { accessToken: string; refreshToken: string; expiresAt: string } | undefined;
   provider: CliLoginProvider;

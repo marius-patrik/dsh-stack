@@ -172,9 +172,7 @@ export class AccountsService extends Service {
    * Each entry carries the account name (null for the default/unscoped record)
    * and the revealed value when the record type supports it.
    */
-  async resolveAll(
-    ref: string,
-  ): Promise<
+  async resolveAll(ref: string): Promise<
     Array<{
       ref: string;
       account: string | null;
