@@ -6,12 +6,13 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
+const packagesDir = join(root, "packages");
 const pluginsDir = join(root, "plugins");
 const command = process.argv[2];
 const bumpArg = process.argv[3] ?? "patch";
 const validBumps = new Set(["major", "minor", "patch"]);
-if (!["manifest", "version"].includes(command)) {
-  console.error("usage: node scripts/release.mjs <manifest|version> [major|minor|patch]");
+if (!["manifest", "version", "assets"].includes(command)) {
+  console.error("usage: node scripts/release.mjs <manifest|version|assets> [major|minor|patch]");
   process.exit(2);
 }
 if (command === "version" && !validBumps.has(bumpArg)) {
@@ -25,8 +26,8 @@ async function readJson(path) {
 async function writeJson(path, value) {
   await fs.writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
-async function exec(args) {
-  const { stdout } = await execFileAsync("git", args, { cwd: root });
+async function exec(command, args) {
+  const { stdout } = await execFileAsync(command, args, { cwd: root });
   return stdout.trim();
 }
 
@@ -40,11 +41,11 @@ function bumpVersion(version, kind) {
 }
 
 async function discoverPackages() {
-  const entries = await fs.readdir(pluginsDir, { withFileTypes: true });
+  const entries = await fs.readdir(packagesDir, { withFileTypes: true });
   const packages = [];
   for (const entry of entries) {
     if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
-    const dir = join(pluginsDir, entry.name);
+    const dir = join(packagesDir, entry.name);
     try {
       const [stack, pkg] = await Promise.all([
         readJson(join(dir, "stack.json")),
@@ -138,18 +139,39 @@ async function manifest() {
   const integrity = createHash("sha256")
     .update(await fs.readFile(output))
     .digest("hex");
-  await fs.writeFile(
-    join(outputDir, "stack-release.sha256"),
-    `${integrity}  stack-release.json\n`,
-    "utf8",
-  );
+  await fs.writeFile(join(outputDir, "stack-release.sha256"), `${integrity}  stack-release.json\n`, "utf8");
   console.log(output);
+}
+
+async function assets() {
+  const rootPackage = await readJson(join(root, "package.json"));
+  const outputDir = join(root, ".release");
+  await fs.rm(outputDir, { recursive: true, force: true });
+  await fs.mkdir(outputDir, { recursive: true });
+  await manifest();
+  const version = rootPackage.version;
+  const archives = [
+    ["plugins", `dsh-stack-plugins-${version}.tar.gz`],
+    ["plugins/packs", `dsh-stack-packs-${version}.tar.gz`],
+  ];
+  for (const [source, archive] of archives) {
+    await exec("tar", ["-czf", join(outputDir, archive), "-C", root, source]);
+  }
+  const files = await fs.readdir(outputDir);
+  const checksums = [];
+  for (const file of files.sort()) {
+    if (file.endsWith(".sha256")) continue;
+    const digest = createHash("sha256").update(await fs.readFile(join(outputDir, file))).digest("hex");
+    checksums.push(`${digest}  ${file}`);
+  }
+  await fs.writeFile(join(outputDir, "SHA256SUMS"), `${checksums.join("\n")}\n`, "utf8");
+  console.log(files.map((file) => join(outputDir, file)).join("\n"));
 }
 
 async function version() {
   const rootPackagePath = join(root, "package.json");
   const rootPackage = await readJson(rootPackagePath);
-  const commitText = await exec(["log", "--format=%s%n%b", "-n", "200"]);
+  const commitText = await exec("git", ["log", "--format=%s%n%b", "-n", "200"]);
   const rootBump = /BREAKING CHANGE|^[^\n]*!:/m.test(commitText)
     ? "major"
     : /^(feat)(\([^)]*\))?:/m.test(commitText)
@@ -160,17 +182,10 @@ async function version() {
 
   const packages = await discoverPackages();
   for (const item of packages) {
-    const dirName = relative(pluginsDir, item.dir);
-    const changed = await exec([
-      "diff",
-      "--name-only",
-      "HEAD^",
-      "HEAD",
-      "--",
-      `plugins/${dirName}`,
-    ]);
+    const dirName = relative(packagesDir, item.dir);
+    const changed = await exec("git", ["diff", "--name-only", "HEAD^", "HEAD", "--", `packages/${dirName}`]);
     if (!changed) continue;
-    const messages = await exec(["log", "--format=%s%n%b", "-n", "50", "--", `plugins/${dirName}`]);
+    const messages = await exec("git", ["log", "--format=%s%n%b", "-n", "50", "--", `packages/${dirName}`]);
     const bump = /BREAKING CHANGE|^[^\n]*!:/m.test(messages)
       ? "major"
       : /^(feat)(\([^)]*\))?:/m.test(messages)
@@ -186,4 +201,5 @@ async function version() {
 }
 
 if (command === "manifest") await manifest();
+else if (command === "assets") await assets();
 else await version();
