@@ -20,17 +20,23 @@ if (command === "version" && !validBumps.has(bumpArg)) {
   process.exit(2);
 }
 
+/** Read and parse a UTF-8 JSON file. */
 async function readJson(path) {
   return JSON.parse(await fs.readFile(path, "utf8"));
 }
+
+/** Serialize a value as consistently formatted UTF-8 JSON. */
 async function writeJson(path, value) {
   await fs.writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
+
+/** Execute a command from the repository root and return trimmed stdout. */
 async function exec(command, args) {
   const { stdout } = await execFileAsync(command, args, { cwd: root });
   return stdout.trim();
 }
 
+/** Calculate the next semantic version for the requested release bump. */
 function bumpVersion(version, kind) {
   const parts = version.split(".").map(Number);
   if (parts.length !== 3 || parts.some((part) => !Number.isInteger(part) || part < 0))
@@ -40,6 +46,7 @@ function bumpVersion(version, kind) {
   return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
 }
 
+/** Discover package implementations from the flat packages directory. */
 async function discoverPackages() {
   const entries = await fs.readdir(packagesDir, { withFileTypes: true });
   const packages = [];
@@ -58,6 +65,7 @@ async function discoverPackages() {
   return packages;
 }
 
+/** Read pack/profile membership from the composition catalog. */
 async function catalogMembership() {
   const source = await fs.readFile(join(pluginsDir, "composition", "src", "catalog.ts"), "utf8");
   const packs = {};
@@ -93,6 +101,7 @@ async function catalogMembership() {
   return { packs, profiles };
 }
 
+/** Build the machine-readable release catalog from package and catalog metadata. */
 async function buildManifest() {
   const rootPackage = await readJson(join(root, "package.json"));
   const packages = await discoverPackages();
@@ -130,6 +139,7 @@ async function buildManifest() {
   };
 }
 
+/** Generate the release catalog and its integrity checksum. */
 async function manifest() {
   const value = await buildManifest();
   const outputDir = join(root, ".release");
@@ -147,6 +157,7 @@ async function manifest() {
   console.log(output);
 }
 
+/** Build self-contained plugin and pack archives with symlink targets dereferenced. */
 async function assets() {
   const rootPackage = await readJson(join(root, "package.json"));
   const outputDir = join(root, ".release");
@@ -159,7 +170,7 @@ async function assets() {
     ["plugins/packs", `dsh-stack-packs-${version}.tar.gz`],
   ];
   for (const [source, archive] of archives) {
-    await exec("tar", ["-czf", join(outputDir, archive), "-C", root, source]);
+    await exec("tar", ["-chzf", join(outputDir, archive), "-C", root, source]);
   }
   const files = await fs.readdir(outputDir);
   const checksums = [];
@@ -174,6 +185,7 @@ async function assets() {
   console.log(files.map((file) => join(outputDir, file)).join("\n"));
 }
 
+/** Apply semantic versioning to the root package and packages changed by the latest commit. */
 async function version() {
   const rootPackagePath = join(root, "package.json");
   const rootPackage = await readJson(rootPackagePath);
