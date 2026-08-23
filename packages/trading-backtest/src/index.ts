@@ -1,6 +1,6 @@
-import type { Candle } from '@dsh-stack/trading-research';
+import type { Candle } from "@dsh-stack/trading-research";
 
-export type PositionSide = 'long' | 'short';
+export type PositionSide = "long" | "short";
 
 export interface Position {
   readonly side: PositionSide;
@@ -50,10 +50,14 @@ export interface BacktestOptions {
   readonly slippageBps?: number;
 }
 
-export function runBacktest(candles: readonly Candle[], strategy: Strategy, options: BacktestOptions = {}): BacktestResult {
-  if (candles.length === 0) throw new Error('Cannot backtest an empty candle series');
+export function runBacktest(
+  candles: readonly Candle[],
+  strategy: Strategy,
+  options: BacktestOptions = {},
+): BacktestResult {
+  if (candles.length === 0) throw new Error("Cannot backtest an empty candle series");
   const initialCapital = options.initialCapital ?? 10_000;
-  if (!(initialCapital > 0)) throw new Error('Initial capital must be positive');
+  if (!(initialCapital > 0)) throw new Error("Initial capital must be positive");
   const commission = options.commissionPerTrade ?? 0;
   const slippage = (options.slippageBps ?? 0) / 10_000;
   let cash = initialCapital;
@@ -62,12 +66,12 @@ export function runBacktest(candles: readonly Candle[], strategy: Strategy, opti
   const trades: Trade[] = [];
   const equityCurve: number[] = [];
 
-  const executionPrice = (price: number, side: 'buy' | 'sell'): number => (
-    side === 'buy' ? price * (1 + slippage) : price * (1 - slippage)
-  );
-  const mark = (price: number): number => position === null
-    ? cash
-    : cash + (position.side === 'long' ? position.quantity * price : -position.quantity * price);
+  const executionPrice = (price: number, side: "buy" | "sell"): number =>
+    side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
+  const mark = (price: number): number =>
+    position === null
+      ? cash
+      : cash + (position.side === "long" ? position.quantity * price : -position.quantity * price);
 
   for (const candle of candles) {
     currentCandle = candle;
@@ -78,25 +82,25 @@ export function runBacktest(candles: readonly Candle[], strategy: Strategy, opti
       cash,
       history: trades,
       buy: (quantity) => {
-        if (!(quantity > 0)) throw new Error('Buy quantity must be positive');
-        if (position?.side === 'short') {
+        if (!(quantity > 0)) throw new Error("Buy quantity must be positive");
+        if (position?.side === "short") {
           close();
-          if (position !== null) throw new Error('Unable to close short before buying');
+          if (position !== null) throw new Error("Unable to close short before buying");
           openLong(quantity);
           return;
         }
-        if (position !== null) throw new Error('A long position is already open');
+        if (position !== null) throw new Error("A long position is already open");
         openLong(quantity);
       },
       sell: (quantity) => {
-        if (!(quantity > 0)) throw new Error('Sell quantity must be positive');
-        if (position?.side === 'long') {
+        if (!(quantity > 0)) throw new Error("Sell quantity must be positive");
+        if (position?.side === "long") {
           close();
-          if (position !== null) throw new Error('Unable to close long before selling');
+          if (position !== null) throw new Error("Unable to close long before selling");
           openShort(quantity);
           return;
         }
-        if (position !== null) throw new Error('A short position is already open');
+        if (position !== null) throw new Error("A short position is already open");
         openShort(quantity);
       },
       close,
@@ -127,25 +131,27 @@ export function runBacktest(candles: readonly Candle[], strategy: Strategy, opti
   };
 
   function openLong(quantity: number): void {
-    const price = executionPrice(currentCandle.close, 'buy');
-    position = { side: 'long', quantity, entryPrice: price, entryTime: currentCandle.time };
+    const price = executionPrice(currentCandle.close, "buy");
+    position = { side: "long", quantity, entryPrice: price, entryTime: currentCandle.time };
     cash -= quantity * price + commission;
   }
 
   function openShort(quantity: number): void {
-    const price = executionPrice(currentCandle.close, 'sell');
-    position = { side: 'short', quantity, entryPrice: price, entryTime: currentCandle.time };
+    const price = executionPrice(currentCandle.close, "sell");
+    position = { side: "short", quantity, entryPrice: price, entryTime: currentCandle.time };
     cash += quantity * price - commission;
   }
 
   function closeAt(price: number, time: number): void {
     if (position === null) return;
-    const exitPrice = position.side === 'long' ? executionPrice(price, 'sell') : executionPrice(price, 'buy');
-    const pnl = position.side === 'long'
-      ? position.quantity * (exitPrice - position.entryPrice) - (commission * 2)
-      : position.quantity * (position.entryPrice - exitPrice) - (commission * 2);
+    const exitPrice =
+      position.side === "long" ? executionPrice(price, "sell") : executionPrice(price, "buy");
+    const pnl =
+      position.side === "long"
+        ? position.quantity * (exitPrice - position.entryPrice) - commission * 2
+        : position.quantity * (position.entryPrice - exitPrice) - commission * 2;
 
-    if (position.side === 'long') cash += position.quantity * exitPrice - commission;
+    if (position.side === "long") cash += position.quantity * exitPrice - commission;
     else cash -= position.quantity * exitPrice + commission;
 
     trades.push({

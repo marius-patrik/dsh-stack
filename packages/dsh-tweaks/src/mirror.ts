@@ -7,43 +7,43 @@
  * @module dsh-tweaks/mirror
  */
 
-import { Document, parseDocument } from 'yaml'
-import { promises as fs } from 'node:fs'
-import { dirname } from 'node:path'
+import { Document, parseDocument } from "yaml";
+import { promises as fs } from "node:fs";
+import { dirname } from "node:path";
 
 /** The normalized, always-map `dsh-tweaks` section written to disk. */
 export interface TweaksSection {
-  homeRoot?: string
-  command?: string
+  homeRoot?: string;
+  command?: string;
 }
 
 /** Reduce a config to the stored section shape (empty or blank fields dropped). */
 export function normalizeSection(value: TweaksSection): Record<string, string> {
-  const homeRoot = value.homeRoot?.trim() ?? ''
-  const command = value.command?.trim() ?? ''
+  const homeRoot = value.homeRoot?.trim() ?? "";
+  const command = value.command?.trim() ?? "";
   return {
-    ...homeRoot.length === 0 ? {} : { homeRoot },
-    ...command.length === 0 ? {} : { command },
-  }
+    ...(homeRoot.length === 0 ? {} : { homeRoot }),
+    ...(command.length === 0 ? {} : { command }),
+  };
 }
 
 /** Deep equality of two section values (undefined === absent). */
 export function sectionsEqual(a: unknown, b: unknown): boolean {
-  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
 /** Read the `dsh-tweaks` top-level section of a settings document. */
 export async function readTweaksSection(path: string): Promise<unknown> {
-  let text: string
+  let text: string;
   try {
-    text = await fs.readFile(path, 'utf8')
+    text = await fs.readFile(path, "utf8");
   } catch {
-    return undefined
+    return undefined;
   }
-  if (text.trim().length === 0) return undefined
-  const root = parseDocument(text).toJS() as Record<string, unknown> | null
-  if (typeof root === 'object' && root !== null) return root['dsh-tweaks']
-  return undefined
+  if (text.trim().length === 0) return undefined;
+  const root = parseDocument(text).toJS() as Record<string, unknown> | null;
+  if (typeof root === "object" && root !== null) return root["dsh-tweaks"];
+  return undefined;
 }
 
 /**
@@ -51,18 +51,21 @@ export async function readTweaksSection(path: string): Promise<unknown> {
  * other section and as much formatting as the yaml round-trip keeps. Creates
  * the document when it does not exist. Returns whether the document changed.
  */
-export async function writeTweaksSection(path: string, section: Record<string, string>): Promise<boolean> {
-  let text: string
+export async function writeTweaksSection(
+  path: string,
+  section: Record<string, string>,
+): Promise<boolean> {
+  let text: string;
   try {
-    text = await fs.readFile(path, 'utf8')
+    text = await fs.readFile(path, "utf8");
   } catch {
-    text = ''
+    text = "";
   }
-  const doc = text.trim().length === 0 ? new Document({}) : parseDocument(text)
-  const current = sectionsEqual(doc.toJS()?.['dsh-tweaks'], section)
-  if (current) return false
-  doc.set('dsh-tweaks', doc.createNode(section))
-  await fs.mkdir(dirname(path), { recursive: true })
-  await fs.writeFile(path, doc.toString(), { mode: 0o600 })
-  return true
+  const doc = text.trim().length === 0 ? new Document({}) : parseDocument(text);
+  const current = sectionsEqual(doc.toJS()?.["dsh-tweaks"], section);
+  if (current) return false;
+  doc.set("dsh-tweaks", doc.createNode(section));
+  await fs.mkdir(dirname(path), { recursive: true });
+  await fs.writeFile(path, doc.toString(), { mode: 0o600 });
+  return true;
 }

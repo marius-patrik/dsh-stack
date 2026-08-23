@@ -15,25 +15,26 @@ export interface ProfileRuntime {
   isBrowserPersisted(): boolean;
 }
 
-const DEFAULT_KEY = 'dsh-stack.profile';
+const DEFAULT_KEY = "dsh-stack.profile";
 
 export function createProfileRuntime(
   options: readonly ProfileOption[],
   runtimeOptions: ProfileRuntimeOptions = {},
 ): ProfileRuntime {
-  if (options.length === 0) throw new Error('At least one Stack profile is required');
+  if (options.length === 0) throw new Error("At least one Stack profile is required");
   const byId = new Set(options.map((option) => option.id));
   const storageKey = runtimeOptions.storageKey ?? DEFAULT_KEY;
   let active = options[0]!.id;
-  const storage = typeof globalThis === 'object' && 'localStorage' in globalThis
-    ? (() => {
-        try {
-          return globalThis.localStorage;
-        } catch {
-          return undefined;
-        }
-      })()
-    : undefined;
+  const storage =
+    typeof globalThis === "object" && "localStorage" in globalThis
+      ? (() => {
+          try {
+            return globalThis.localStorage;
+          } catch {
+            return undefined;
+          }
+        })()
+      : undefined;
 
   if (storage) {
     try {

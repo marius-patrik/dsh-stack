@@ -4,7 +4,15 @@
   "version": "0.3.0",
   "kind": "pack",
   "description": "Presentation, editor, terminal, themes and media composition pack.",
-  "files": ["code-editor", "terminal-client", "theme-studio", "voice-synthesis", "package.json", "README.md", "LICENSE"],
+  "files": [
+    "code-editor",
+    "terminal-client",
+    "theme-studio",
+    "voice-synthesis",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": [],
   "optionalDependencies": []
 }

@@ -1,21 +1,29 @@
-import { readdir } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { readdir } from "node:fs/promises";
+import { join, relative } from "node:path";
 
-const roots = [join(process.cwd(), 'packages'), join(process.cwd(), 'plugins')];
+const roots = [join(process.cwd(), "packages"), join(process.cwd(), "plugins")];
 const missing = [];
 
 async function walk(dir) {
   let entries;
-  try { entries = await readdir(dir, { withFileTypes: true }); } catch { return; }
-  const hasPackage = entries.some((entry) => entry.isFile() && entry.name === 'package.json');
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  const hasPackage = entries.some((entry) => entry.isFile() && entry.name === "package.json");
   if (hasPackage) {
-    const hasReadme = entries.some((entry) => entry.isFile() && /^README(?:\.[^.]*)?$/i.test(entry.name));
+    const hasReadme = entries.some(
+      (entry) => entry.isFile() && /^README(?:\.[^.]*)?$/i.test(entry.name),
+    );
     if (!hasReadme) missing.push(relative(process.cwd(), dir));
     return;
   }
   await Promise.all(
     entries
-      .filter((entry) => entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== 'packs')
+      .filter(
+        (entry) => entry.isDirectory() && entry.name !== "node_modules" && entry.name !== "packs",
+      )
       .map((entry) => walk(join(dir, entry.name))),
   );
 }
@@ -27,4 +35,4 @@ if (missing.length) {
   for (const dir of missing) console.error(`- ${dir}/README.md`);
   process.exit(1);
 }
-console.log('All canonical packages and plugin-tree packages contain a README.');
+console.log("All canonical packages and plugin-tree packages contain a README.");

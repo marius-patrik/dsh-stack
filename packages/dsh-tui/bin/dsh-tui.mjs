@@ -9,9 +9,9 @@
  *   dsh-tui [--url http://127.0.0.1:3080]
  */
 
-import { main } from '../lib/index.js'
+import { main } from "../lib/index.js";
 
 main().catch((err) => {
-  console.error(`fatal: ${err.message}`)
-  process.exit(1)
-})
+  console.error(`fatal: ${err.message}`);
+  process.exit(1);
+});

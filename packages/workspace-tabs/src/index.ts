@@ -1,5 +1,5 @@
-export type WorkspaceTabKind = 'chat' | 'file' | 'repo' | 'diff' | 'terminal' | 'container';
-export type SplitOrientation = 'horizontal' | 'vertical';
+export type WorkspaceTabKind = "chat" | "file" | "repo" | "diff" | "terminal" | "container";
+export type SplitOrientation = "horizontal" | "vertical";
 
 export interface WorkspaceTab {
   readonly id: string;
@@ -30,15 +30,15 @@ export interface WorkspaceTabsOptions {
 }
 
 export type WorkspaceTabsAction =
-  | { type: 'open'; tab: WorkspaceTab; paneId?: string }
-  | { type: 'close'; tabId: string }
-  | { type: 'close-others'; tabId: string }
-  | { type: 'activate'; tabId: string }
-  | { type: 'split'; sourcePaneId: string; orientation: SplitOrientation; tabId?: string }
-  | { type: 'bottom-dock'; open?: boolean }
-  | { type: 'bottom-dock-height'; height: number };
+  | { type: "open"; tab: WorkspaceTab; paneId?: string }
+  | { type: "close"; tabId: string }
+  | { type: "close-others"; tabId: string }
+  | { type: "activate"; tabId: string }
+  | { type: "split"; sourcePaneId: string; orientation: SplitOrientation; tabId?: string }
+  | { type: "bottom-dock"; open?: boolean }
+  | { type: "bottom-dock-height"; height: number };
 
-const DEFAULT_MAIN_PANE = 'pane-main';
+const DEFAULT_MAIN_PANE = "pane-main";
 const DEFAULT_DOCK_HEIGHT = 280;
 
 export function createWorkspaceTabs(options: WorkspaceTabsOptions = {}): WorkspaceTabsState {
@@ -48,7 +48,7 @@ export function createWorkspaceTabs(options: WorkspaceTabsOptions = {}): Workspa
     panes: {
       [mainPaneId]: {
         id: mainPaneId,
-        orientation: 'horizontal',
+        orientation: "horizontal",
         tabs: [],
         activeTabId: null,
       },
@@ -65,19 +65,25 @@ export function reduceWorkspaceTabs(
   options: WorkspaceTabsOptions = {},
 ): WorkspaceTabsState {
   switch (action.type) {
-    case 'open':
+    case "open":
       return openTab(state, action.tab, action.paneId ?? state.mainPaneId);
-    case 'close':
+    case "close":
       return closeTab(state, action.tabId);
-    case 'close-others':
+    case "close-others":
       return closeOtherTabs(state, action.tabId);
-    case 'activate':
+    case "activate":
       return activateTab(state, action.tabId);
-    case 'split':
-      return splitPane(state, action.sourcePaneId, action.orientation, action.tabId, options.idFactory ?? newId);
-    case 'bottom-dock':
+    case "split":
+      return splitPane(
+        state,
+        action.sourcePaneId,
+        action.orientation,
+        action.tabId,
+        options.idFactory ?? newId,
+      );
+    case "bottom-dock":
       return { ...state, bottomDockOpen: action.open ?? !state.bottomDockOpen };
-    case 'bottom-dock-height':
+    case "bottom-dock-height":
       return { ...state, bottomDockHeight: clampDockHeight(action.height) };
   }
 }
@@ -101,7 +107,7 @@ function closeTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState 
     panes[id] = {
       ...pane,
       tabs: next,
-      activeTabId: pane.activeTabId === tabId ? next.at(-1) ?? null : pane.activeTabId,
+      activeTabId: pane.activeTabId === tabId ? (next.at(-1) ?? null) : pane.activeTabId,
     };
   }
   const tabs = { ...state.tabs };
@@ -149,7 +155,10 @@ function splitPane(
     panes[sourcePaneId] = {
       ...source,
       tabs: source.tabs.filter((candidate) => candidate !== tabId),
-      activeTabId: source.activeTabId === tabId ? source.tabs.find((candidate) => candidate !== tabId) ?? null : source.activeTabId,
+      activeTabId:
+        source.activeTabId === tabId
+          ? (source.tabs.find((candidate) => candidate !== tabId) ?? null)
+          : source.activeTabId,
     };
     panes[newId] = { ...newPane, tabs: [tabId], activeTabId: tabId };
   }
@@ -158,7 +167,9 @@ function splitPane(
 }
 
 function clonePanes(panes: Readonly<Record<string, WorkspacePane>>): Record<string, WorkspacePane> {
-  return Object.fromEntries(Object.entries(panes).map(([id, pane]) => [id, { ...pane, tabs: [...pane.tabs] }]));
+  return Object.fromEntries(
+    Object.entries(panes).map(([id, pane]) => [id, { ...pane, tabs: [...pane.tabs] }]),
+  );
 }
 
 function clampDockHeight(value: number): number {

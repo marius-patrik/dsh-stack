@@ -40,7 +40,16 @@ import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { readFile as readFileFromDisk, readdir } from "node:fs/promises";
 import { SecretValue } from "./secret.js";
-import { descriptorOf, createSecretRecord, effectiveExpiryMs, SECRET_TYPES, type SecretMaterial, type SecretRecord, type SecretScope, type SecretType } from "./record.js";
+import {
+  descriptorOf,
+  createSecretRecord,
+  effectiveExpiryMs,
+  SECRET_TYPES,
+  type SecretMaterial,
+  type SecretRecord,
+  type SecretScope,
+  type SecretType,
+} from "./record.js";
 import { EncryptedFileVault, vaultDirectory, type VaultStore } from "./store.js";
 import { KeyFileMasterKey, PassphraseMasterKey, type MasterKeySource } from "./masterkey.js";
 import { createTotpParameters, formatOtpauthUri, generateTotp, parseOtpauthUri } from "./totp.js";
@@ -76,7 +85,8 @@ export function defaultVaultCliIo(): VaultCliIo {
     out: (text) => process.stdout.write(text),
     err: (text) => process.stderr.write(text),
     readStdin: async () => {
-      if (process.stdin.isTTY) throw new Error("secret material must be piped in, not typed at a terminal");
+      if (process.stdin.isTTY)
+        throw new Error("secret material must be piped in, not typed at a terminal");
       const chunks: Buffer[] = [];
       for await (const chunk of process.stdin) chunks.push(Buffer.from(chunk));
       return Buffer.concat(chunks).toString("utf8");
@@ -211,7 +221,10 @@ export interface VaultConfig {
  * by injection and does not depend on the CLI layer, so the precedence is
  * restated here rather than shared.
  */
-export function resolveVaultDirectory(env: Record<string, string | undefined>, home: string): string {
+export function resolveVaultDirectory(
+  env: Record<string, string | undefined>,
+  home: string,
+): string {
   const explicit = env.ANDROMEDA_VAULT_DIR?.trim();
   if (explicit) return path.resolve(explicit);
   const secrets = env.ANDROMEDA_SECRETS?.trim();
@@ -235,7 +248,10 @@ async function readVaultConfig(directory: string): Promise<VaultConfig | null> {
   } catch {
     throw new VaultCliError(`vault configuration is malformed: ${file}`);
   }
-  if (parsed.schemaVersion !== CONFIG_SCHEMA_VERSION || (parsed.masterKey !== "key-file" && parsed.masterKey !== "passphrase")) {
+  if (
+    parsed.schemaVersion !== CONFIG_SCHEMA_VERSION ||
+    (parsed.masterKey !== "key-file" && parsed.masterKey !== "passphrase")
+  ) {
     throw new VaultCliError(`vault configuration is malformed: ${file}`);
   }
   return parsed as VaultConfig;
@@ -250,7 +266,8 @@ async function readVaultConfig(directory: string): Promise<VaultConfig | null> {
 function masterKeyFor(kind: MasterKeyKind, directory: string, io: VaultCliIo): MasterKeySource {
   if (kind === "key-file") return new KeyFileMasterKey({ directory });
   const passphrase = io.env.ANDROMEDA_VAULT_PASSPHRASE?.trim();
-  if (!passphrase) throw new VaultCliError("this vault is passphrase-protected; set ANDROMEDA_VAULT_PASSPHRASE");
+  if (!passphrase)
+    throw new VaultCliError("this vault is passphrase-protected; set ANDROMEDA_VAULT_PASSPHRASE");
   return new PassphraseMasterKey({ directory, passphrase: new SecretValue(passphrase) });
 }
 
@@ -264,7 +281,14 @@ export async function openVault(io: VaultCliIo): Promise<OpenedVault> {
   const directory = resolveVaultDirectory(io.env, io.home);
   const config = await readVaultConfig(directory);
   if (!config) throw new VaultCliError(`no vault at ${directory}; run \`vault init\` first`);
-  return { directory, config, store: new EncryptedFileVault({ directory, masterKey: masterKeyFor(config.masterKey, directory, io) }) };
+  return {
+    directory,
+    config,
+    store: new EncryptedFileVault({
+      directory,
+      masterKey: masterKeyFor(config.masterKey, directory, io),
+    }),
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -288,7 +312,11 @@ export interface MaterialOptions {
  * to hand-write JSON, and a script feeding a full token response should not have
  * to take it apart.
  */
-export function materialFromInput(type: SecretType, raw: string, options: MaterialOptions = {}): SecretMaterial {
+export function materialFromInput(
+  type: SecretType,
+  raw: string,
+  options: MaterialOptions = {},
+): SecretMaterial {
   const text = raw.trim();
   if (!text) throw new VaultCliError("no secret material was supplied on stdin");
   switch (type) {
@@ -296,16 +324,29 @@ export function materialFromInput(type: SecretType, raw: string, options: Materi
       return { type: "api_key", apiKey: new SecretValue(text), header: options.header ?? null };
     case "oauth_token": {
       const document = jsonObject(text);
-      if (!document) return { type: "oauth_token", accessToken: new SecretValue(text), refreshToken: null, refreshTokenExpiresAt: null, scopes: [], subscriptionType: null, tokenEndpoint: null };
-      const accessToken = stringField(document, "accessToken") ?? stringField(document, "access_token");
+      if (!document)
+        return {
+          type: "oauth_token",
+          accessToken: new SecretValue(text),
+          refreshToken: null,
+          refreshTokenExpiresAt: null,
+          scopes: [],
+          subscriptionType: null,
+          tokenEndpoint: null,
+        };
+      const accessToken =
+        stringField(document, "accessToken") ?? stringField(document, "access_token");
       if (!accessToken) throw new VaultCliError("oauth material needs an accessToken field");
-      const refreshToken = stringField(document, "refreshToken") ?? stringField(document, "refresh_token");
+      const refreshToken =
+        stringField(document, "refreshToken") ?? stringField(document, "refresh_token");
       return {
         type: "oauth_token",
         accessToken: new SecretValue(accessToken),
         refreshToken: refreshToken ? new SecretValue(refreshToken) : null,
         refreshTokenExpiresAt: stringField(document, "refreshTokenExpiresAt"),
-        scopes: Array.isArray(document.scopes) ? document.scopes.filter((entry): entry is string => typeof entry === "string") : [],
+        scopes: Array.isArray(document.scopes)
+          ? document.scopes.filter((entry): entry is string => typeof entry === "string")
+          : [],
         subscriptionType: stringField(document, "subscriptionType"),
         tokenEndpoint: stringField(document, "tokenEndpoint"),
       };
@@ -313,7 +354,13 @@ export function materialFromInput(type: SecretType, raw: string, options: Materi
     case "password": {
       const username = options.username?.trim();
       if (!username) throw new VaultCliError("--username is required for a password record");
-      return { type: "password", username, password: new SecretValue(text), origin: options.origin ?? null, loginUrl: options.loginUrl ?? null };
+      return {
+        type: "password",
+        username,
+        password: new SecretValue(text),
+        origin: options.origin ?? null,
+        loginUrl: options.loginUrl ?? null,
+      };
     }
     case "totp_seed":
       return { type: "totp_seed", parameters: totpParametersFromInput(text, options) };
@@ -324,7 +371,9 @@ export function materialFromInput(type: SecretType, raw: string, options: Materi
       const credentialId = stringField(document, "credentialId");
       const relyingPartyId = stringField(document, "relyingPartyId");
       if (!privateKey || !credentialId || !relyingPartyId) {
-        throw new VaultCliError("passkey material needs credentialId, relyingPartyId and privateKey");
+        throw new VaultCliError(
+          "passkey material needs credentialId, relyingPartyId and privateKey",
+        );
       }
       return {
         type: "passkey",
@@ -335,7 +384,9 @@ export function materialFromInput(type: SecretType, raw: string, options: Materi
         coseAlgorithm: typeof document.coseAlgorithm === "number" ? document.coseAlgorithm : -7,
         privateKey: new SecretValue(privateKey),
         signCount: typeof document.signCount === "number" ? document.signCount : 0,
-        transports: Array.isArray(document.transports) ? document.transports.filter((entry): entry is string => typeof entry === "string") : [],
+        transports: Array.isArray(document.transports)
+          ? document.transports.filter((entry): entry is string => typeof entry === "string")
+          : [],
         userVerificationRequired: document.userVerificationRequired === true,
       };
     }
@@ -345,9 +396,16 @@ export function materialFromInput(type: SecretType, raw: string, options: Materi
       return { type: "cookie_jar", origin, jar: new SecretValue(text), sessionExpiresAt: null };
     }
     case "recovery_codes": {
-      const codes = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const codes = text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
       if (codes.length === 0) throw new VaultCliError("no recovery codes were supplied");
-      return { type: "recovery_codes", codes: codes.map((code) => new SecretValue(code)), consumed: 0 };
+      return {
+        type: "recovery_codes",
+        codes: codes.map((code) => new SecretValue(code)),
+        consumed: 0,
+      };
     }
     case "ssh_key":
       return {
@@ -367,14 +425,20 @@ export function materialFromInput(type: SecretType, raw: string, options: Materi
 export function totpParametersFromInput(raw: string, options: MaterialOptions = {}) {
   const text = raw.trim();
   if (text.toLowerCase().startsWith("otpauth://")) return parseOtpauthUri(text);
-  return createTotpParameters({ secret: text, issuer: options.issuer ?? null, account: options.account ?? null });
+  return createTotpParameters({
+    secret: text,
+    issuer: options.issuer ?? null,
+    account: options.account ?? null,
+  });
 }
 
 function jsonObject(text: string): Record<string, unknown> | null {
   if (!text.startsWith("{")) return null;
   try {
     const parsed = JSON.parse(text) as unknown;
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : null;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }
@@ -404,7 +468,9 @@ export function revealField(record: SecretRecord, field: string | null): string 
     case "password":
       return field === "username" ? material.username : material.password.reveal();
     case "totp_seed":
-      return field === "uri" ? formatOtpauthUri(material.parameters) : material.parameters.secret.reveal();
+      return field === "uri"
+        ? formatOtpauthUri(material.parameters)
+        : material.parameters.secret.reveal();
     case "passkey":
       return material.privateKey.reveal();
     case "cookie_jar":
@@ -426,7 +492,9 @@ export function fingerprintsOf(material: SecretMaterial): Fingerprint[] {
     case "oauth_token":
       return [
         fingerprint("accessToken", material.accessToken.reveal()),
-        ...(material.refreshToken ? [fingerprint("refreshToken", material.refreshToken.reveal())] : []),
+        ...(material.refreshToken
+          ? [fingerprint("refreshToken", material.refreshToken.reveal())]
+          : []),
       ];
     case "password":
       return [fingerprint("password", material.password.reveal())];
@@ -514,7 +582,13 @@ export class LocalSource implements CredentialSource {
   readonly #env: Record<string, string | undefined>;
   readonly #keychainTimeoutMs: number;
 
-  constructor(options: { machine?: string; home: string; platform?: SourcePlatform; env: Record<string, string | undefined>; keychainTimeoutMs?: number }) {
+  constructor(options: {
+    machine?: string;
+    home: string;
+    platform?: SourcePlatform;
+    env: Record<string, string | undefined>;
+    keychainTimeoutMs?: number;
+  }) {
     this.machine = options.machine ?? "local";
     this.platform = options.platform ?? (process.platform as SourcePlatform);
     this.home = options.home.replace(/\\/g, "/");
@@ -626,14 +700,21 @@ export class LocalSource implements CredentialSource {
    */
   async keychainSecret(service: string, account: string | null): Promise<string | null> {
     if (this.platform !== "darwin") return null;
-    const args = ["find-generic-password", "-s", service, ...(account ? ["-a", account] : []), "-w"];
+    const args = [
+      "find-generic-password",
+      "-s",
+      service,
+      ...(account ? ["-a", account] : []),
+      "-w",
+    ];
     const value = await this.#security(args, this.#keychainTimeoutMs);
     return value === null ? null : value.trim();
   }
 
   async environment(): Promise<Record<string, string>> {
     const out: Record<string, string> = {};
-    for (const [key, value] of Object.entries(this.#env)) if (typeof value === "string") out[key] = value;
+    for (const [key, value] of Object.entries(this.#env))
+      if (typeof value === "string") out[key] = value;
     return out;
   }
 
@@ -677,7 +758,9 @@ export class SshSource implements CredentialSource {
 
   async readFile(file: string): Promise<string | null> {
     if (this.platform === "win32") {
-      return this.#powershell(`$p = ${psLiteral(file)}\nif (Test-Path -LiteralPath $p) { [Console]::Out.Write([IO.File]::ReadAllText($p)) }`);
+      return this.#powershell(
+        `$p = ${psLiteral(file)}\nif (Test-Path -LiteralPath $p) { [Console]::Out.Write([IO.File]::ReadAllText($p)) }`,
+      );
     }
     return this.#posix(["cat", "--", file]);
   }
@@ -690,7 +773,10 @@ export class SshSource implements CredentialSource {
           )
         : await this.#posix(["ls", "-1A", "--", directory]);
     if (raw === null) return [];
-    return raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    return raw
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
   }
 
   /** No remote keychain is spoken today; Windows credential-manager support would land here. */
@@ -718,13 +804,27 @@ export class SshSource implements CredentialSource {
   }
 
   async #powershell(script: string): Promise<string | null> {
-    const preamble = "$ProgressPreference='SilentlyContinue'; $ErrorActionPreference='SilentlyContinue';\n";
+    const preamble =
+      "$ProgressPreference='SilentlyContinue'; $ErrorActionPreference='SilentlyContinue';\n";
     const encoded = Buffer.from(preamble + script, "utf16le").toString("base64");
-    return runCommand("ssh", ["-o", "BatchMode=yes", this.#host, `powershell -NoProfile -NonInteractive -EncodedCommand ${encoded}`], this.#timeoutMs);
+    return runCommand(
+      "ssh",
+      [
+        "-o",
+        "BatchMode=yes",
+        this.#host,
+        `powershell -NoProfile -NonInteractive -EncodedCommand ${encoded}`,
+      ],
+      this.#timeoutMs,
+    );
   }
 
   async #posix(args: string[]): Promise<string | null> {
-    return runCommand("ssh", ["-o", "BatchMode=yes", this.#host, args.map(shellQuote).join(" ")], this.#timeoutMs);
+    return runCommand(
+      "ssh",
+      ["-o", "BatchMode=yes", this.#host, args.map(shellQuote).join(" ")],
+      this.#timeoutMs,
+    );
   }
 }
 
@@ -752,7 +852,9 @@ export class MemorySource implements CredentialSource {
     this.home = (options.home ?? "/home/fixture").replace(/\/$/, "");
     this.#files = new Map(Object.entries(options.files ?? {}));
     this.#keychain = new Map(Object.entries(options.keychain ?? {}));
-    this.#items = options.keychainItems ?? Object.keys(options.keychain ?? {}).map((service) => ({ service, account: null }));
+    this.#items =
+      options.keychainItems ??
+      Object.keys(options.keychain ?? {}).map((service) => ({ service, account: null }));
     this.#env = options.environment ?? {};
   }
 
@@ -762,7 +864,9 @@ export class MemorySource implements CredentialSource {
 
   async listDirectory(directory: string): Promise<string[]> {
     const prefix = `${directory.replace(/\/$/, "")}/`;
-    return [...this.#files.keys()].filter((file) => file.startsWith(prefix) && !file.slice(prefix.length).includes("/")).map((file) => file.slice(prefix.length));
+    return [...this.#files.keys()]
+      .filter((file) => file.startsWith(prefix) && !file.slice(prefix.length).includes("/"))
+      .map((file) => file.slice(prefix.length));
   }
 
   async keychainItems(): Promise<KeychainItem[]> {
@@ -786,7 +890,11 @@ export class MemorySource implements CredentialSource {
  *
  * Ported from Bun.spawn to node:child_process; behaviour is otherwise identical.
  */
-async function runCommand(command: string, args: string[], timeoutMs: number): Promise<string | null> {
+async function runCommand(
+  command: string,
+  args: string[],
+  timeoutMs: number,
+): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     let child: ReturnType<typeof spawn>;
     try {
@@ -872,7 +980,10 @@ export function decodeKeychainPayload(value: string): string {
  * Collapsing it into an error would make an unattended scan fail on a perfectly
  * healthy Mac.
  */
-type KeychainRead = { state: "released"; value: string } | { state: "withheld" } | { state: "absent" };
+type KeychainRead =
+  | { state: "released"; value: string }
+  | { state: "withheld" }
+  | { state: "absent" };
 
 /**
  * The gate every keychain detector reads through, and the single place that
@@ -902,19 +1013,28 @@ type KeychainRead = { state: "released"; value: string } | { state: "withheld" }
  * process reached the keychain — so a fixture and a real keychain hand a detector
  * the same bytes.
  */
-async function readKeychainItem(source: CredentialSource, context: ScanContext, service: string, account: string | null): Promise<KeychainRead> {
+async function readKeychainItem(
+  source: CredentialSource,
+  context: ScanContext,
+  service: string,
+  account: string | null,
+): Promise<KeychainRead> {
   if (!context.releaseSecrets) {
     // The load-bearing line of this whole change: `keychainSecret` is not called.
     // Presence comes from enumeration, which cannot prompt, so an unattended scan
     // still reports the item truthfully — it just does not demand it.
-    return (await keychainItemPresent(source, service, account)) ? { state: "withheld" } : { state: "absent" };
+    return (await keychainItemPresent(source, service, account))
+      ? { state: "withheld" }
+      : { state: "absent" };
   }
   const raw = await source.keychainSecret(service, account);
   if (raw !== null) return { state: "released", value: decodeKeychainPayload(raw.trim()) };
   // The caller consented to a prompt and the item still did not open: either it
   // is absent, or the owner declined or never answered. Enumeration separates the
   // two without asking a second time.
-  return (await keychainItemPresent(source, service, account)) ? { state: "withheld" } : { state: "absent" };
+  return (await keychainItemPresent(source, service, account))
+    ? { state: "withheld" }
+    : { state: "absent" };
 }
 
 /**
@@ -928,9 +1048,17 @@ async function readKeychainItem(source: CredentialSource, context: ScanContext, 
  * reporting a credential the owner really has as absent is the worse error of the
  * two.
  */
-async function keychainItemPresent(source: CredentialSource, service: string, account: string | null): Promise<boolean> {
+async function keychainItemPresent(
+  source: CredentialSource,
+  service: string,
+  account: string | null,
+): Promise<boolean> {
   const items = await source.keychainItems();
-  return items.some((item) => item.service === service && (account === null || item.account === null || item.account === account));
+  return items.some(
+    (item) =>
+      item.service === service &&
+      (account === null || item.account === null || item.account === account),
+  );
 }
 
 /**
@@ -967,7 +1095,12 @@ function withheldKeychainFinding(spec: {
     account: spec.account,
     expiresAt: null,
     plan: "unknown",
-    origin: origin(spec.source, "keychain", spec.account ? `${spec.service}/${spec.account}` : spec.service, spec.context),
+    origin: origin(
+      spec.source,
+      "keychain",
+      spec.account ? `${spec.service}/${spec.account}` : spec.service,
+      spec.context,
+    ),
     fingerprints: [],
     notes: [KEYCHAIN_WITHHELD_NOTE],
     material: null,
@@ -1067,8 +1200,18 @@ export interface Detector {
   detect(source: CredentialSource, context: ScanContext): Promise<Finding[]>;
 }
 
-function origin(source: CredentialSource, kind: CredentialOrigin["kind"], location: string, context: ScanContext): CredentialOrigin {
-  return { machine: source.machine, kind, location, detectedAt: new Date(context.now()).toISOString() };
+function origin(
+  source: CredentialSource,
+  kind: CredentialOrigin["kind"],
+  location: string,
+  context: ScanContext,
+): CredentialOrigin {
+  return {
+    machine: source.machine,
+    kind,
+    location,
+    detectedAt: new Date(context.now()).toISOString(),
+  };
 }
 
 /** Record ids are `[a-z][a-z0-9-]*`; anything else is folded into that alphabet. */
@@ -1089,7 +1232,9 @@ export function jwtClaims(token: string): Record<string, unknown> | null {
   if (parts.length < 2 || !parts[1]) return null;
   try {
     const parsed = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8")) as unknown;
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : null;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }
@@ -1101,7 +1246,9 @@ function claimString(claims: Record<string, unknown> | null, key: string): strin
 }
 
 function isoFromSeconds(value: unknown): string | null {
-  return typeof value === "number" && Number.isFinite(value) ? new Date(value * 1_000).toISOString() : null;
+  return typeof value === "number" && Number.isFinite(value)
+    ? new Date(value * 1_000).toISOString()
+    : null;
 }
 
 function isoFromMilliseconds(value: unknown): string | null {
@@ -1118,14 +1265,18 @@ function parseJson(raw: string | null): Record<string, unknown> | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as unknown;
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : null;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }
 }
 
 function record(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1155,9 +1306,12 @@ const codexAuthJson: Detector = {
     if (accessToken) {
       const idClaims = jwtClaims(stringField(tokens as Record<string, unknown>, "id_token") ?? "");
       const accessClaims = jwtClaims(accessToken);
-      const auth = record(idClaims?.["https://api.openai.com/auth"]) ?? record(accessClaims?.["https://api.openai.com/auth"]);
+      const auth =
+        record(idClaims?.["https://api.openai.com/auth"]) ??
+        record(accessClaims?.["https://api.openai.com/auth"]);
       const plan = auth ? stringField(auth, "chatgpt_plan_type") : null;
-      const account = claimString(idClaims, "email") ?? (tokens ? stringField(tokens, "account_id") : null);
+      const account =
+        claimString(idClaims, "email") ?? (tokens ? stringField(tokens, "account_id") : null);
       const refreshToken = tokens ? stringField(tokens, "refresh_token") : null;
       const material: SecretMaterial = {
         type: "oauth_token",
@@ -1182,14 +1336,20 @@ const codexAuthJson: Detector = {
         fingerprints: fingerprintsOf(material),
         notes: [
           `codex auth_mode=${stringField(document, "auth_mode") ?? "unknown"}`,
-          ...(stringField(document, "last_refresh") ? [`last refreshed ${stringField(document, "last_refresh")}`] : []),
+          ...(stringField(document, "last_refresh")
+            ? [`last refreshed ${stringField(document, "last_refresh")}`]
+            : []),
         ],
         material,
       });
     }
     const apiKey = stringField(document, "OPENAI_API_KEY");
     if (apiKey) {
-      const material: SecretMaterial = { type: "api_key", apiKey: new SecretValue(apiKey), header: "Authorization" };
+      const material: SecretMaterial = {
+        type: "api_key",
+        apiKey: new SecretValue(apiKey),
+        header: "Authorization",
+      };
       findings.push({
         detector: this.name,
         provider: "openai",
@@ -1230,7 +1390,9 @@ function claudeOauthFinding(
     accessToken: new SecretValue(accessToken),
     refreshToken: refreshToken ? new SecretValue(refreshToken) : null,
     refreshTokenExpiresAt: isoFromMilliseconds(oauth.refreshTokenExpiresAt),
-    scopes: Array.isArray(oauth.scopes) ? oauth.scopes.filter((entry): entry is string => typeof entry === "string") : [],
+    scopes: Array.isArray(oauth.scopes)
+      ? oauth.scopes.filter((entry): entry is string => typeof entry === "string")
+      : [],
     subscriptionType,
     tokenEndpoint: ANTHROPIC_TOKEN_ENDPOINT,
   };
@@ -1247,7 +1409,9 @@ function claudeOauthFinding(
     origin: origin(source, kind, location, context),
     fingerprints: fingerprintsOf(material),
     notes: [
-      ...(material.type === "oauth_token" && material.refreshTokenExpiresAt ? [`refresh token expires ${material.refreshTokenExpiresAt}`] : []),
+      ...(material.type === "oauth_token" && material.refreshTokenExpiresAt
+        ? [`refresh token expires ${material.refreshTokenExpiresAt}`]
+        : []),
       ...(refreshToken ? [] : ["no refresh token: this login cannot self-heal"]),
     ],
     material,
@@ -1304,7 +1468,15 @@ const claudeKeychain: Detector = {
       }
       const document = parseJson(read.value);
       if (!document) continue;
-      const finding = claudeOauthFinding(this.name, source, context, "keychain", service, document, suffix);
+      const finding = claudeOauthFinding(
+        this.name,
+        source,
+        context,
+        "keychain",
+        service,
+        document,
+        suffix,
+      );
       if (finding) findings.push(finding);
     }
     return findings;
@@ -1330,7 +1502,10 @@ const grokAuthJson: Detector = {
         accessToken: new SecretValue(accessToken),
         refreshToken: refreshToken ? new SecretValue(refreshToken) : null,
         refreshTokenExpiresAt: null,
-        scopes: typeof jwtClaims(accessToken)?.scope === "string" ? String(jwtClaims(accessToken)?.scope).split(/\s+/) : [],
+        scopes:
+          typeof jwtClaims(accessToken)?.scope === "string"
+            ? String(jwtClaims(accessToken)?.scope).split(/\s+/)
+            : [],
         subscriptionType: null,
         tokenEndpoint: null,
       };
@@ -1346,7 +1521,10 @@ const grokAuthJson: Detector = {
         plan: "subscription",
         origin: origin(source, "file", file, context),
         fingerprints: fingerprintsOf(material),
-        notes: [`issuer ${key.split("::")[0] ?? "unknown"}`, "token endpoint unknown: refresh needs the xAI OIDC discovery document"],
+        notes: [
+          `issuer ${key.split("::")[0] ?? "unknown"}`,
+          "token endpoint unknown: refresh needs the xAI OIDC discovery document",
+        ],
         material,
       });
     }
@@ -1363,7 +1541,9 @@ const geminiOauthCreds: Detector = {
     const document = parseJson(await source.readFile(file));
     const accessToken = document ? stringField(document, "access_token") : null;
     if (!document || !accessToken) return [];
-    const accounts = parseJson(await source.readFile(joinSource(source.home, ".gemini/google_accounts.json")));
+    const accounts = parseJson(
+      await source.readFile(joinSource(source.home, ".gemini/google_accounts.json")),
+    );
     const refreshToken = stringField(document, "refresh_token");
     const material: SecretMaterial = {
       type: "oauth_token",
@@ -1382,7 +1562,9 @@ const geminiOauthCreds: Detector = {
         suggestedId: slugify("google", "gemini-cli", source.machine),
         label: `Google Gemini CLI login on ${source.machine}`,
         purpose: "google/gemini-cli",
-        account: (accounts ? stringField(accounts, "active") : null) ?? claimString(jwtClaims(stringField(document, "id_token") ?? ""), "email"),
+        account:
+          (accounts ? stringField(accounts, "active") : null) ??
+          claimString(jwtClaims(stringField(document, "id_token") ?? ""), "email"),
         expiresAt: isoFromMilliseconds(document.expiry_date),
         plan: "subscription",
         origin: origin(source, "file", file, context),
@@ -1487,14 +1669,19 @@ const cursorKeychain: Detector = {
     // the record is still importable, just not self-healing. Only the access half
     // decides whether there is a credential here at all.
     const refreshToken = refresh.state === "released" ? refresh.value : null;
-    const config = parseJson(await source.readFile(joinSource(source.home, ".cursor/cli-config.json")));
+    const config = parseJson(
+      await source.readFile(joinSource(source.home, ".cursor/cli-config.json")),
+    );
     const authInfo = config ? record(config.authInfo) : null;
     const material: SecretMaterial = {
       type: "oauth_token",
       accessToken: new SecretValue(accessToken.trim()),
       refreshToken: refreshToken ? new SecretValue(refreshToken.trim()) : null,
       refreshTokenExpiresAt: null,
-      scopes: typeof jwtClaims(accessToken)?.scope === "string" ? String(jwtClaims(accessToken)?.scope).split(/\s+/) : [],
+      scopes:
+        typeof jwtClaims(accessToken)?.scope === "string"
+          ? String(jwtClaims(accessToken)?.scope).split(/\s+/)
+          : [],
       subscriptionType: null,
       tokenEndpoint: null,
     };
@@ -1537,7 +1724,11 @@ const githubHosts: Detector = {
       const hosts = parseGitHubHosts(raw);
       const findings: Finding[] = [];
       for (const host of hosts) {
-        const material: SecretMaterial = { type: "api_key", apiKey: new SecretValue(host.token), header: "Authorization" };
+        const material: SecretMaterial = {
+          type: "api_key",
+          apiKey: new SecretValue(host.token),
+          header: "Authorization",
+        };
         findings.push({
           detector: this.name,
           provider: "github",
@@ -1550,7 +1741,9 @@ const githubHosts: Detector = {
           plan: "unknown",
           origin: origin(source, "file", file, context),
           fingerprints: fingerprintsOf(material),
-          notes: ["gh OAuth tokens do not carry an expiry; they are revoked or rotated by the owner"],
+          notes: [
+            "gh OAuth tokens do not carry an expiry; they are revoked or rotated by the owner",
+          ],
           material,
         });
       }
@@ -1568,7 +1761,9 @@ const githubKeychain: Detector = {
   provider: "github",
   async detect(source, context) {
     if (source.platform !== "darwin") return [];
-    const services = (await source.keychainItems()).map((item) => item.service).filter((service) => /^gh:/.test(service));
+    const services = (await source.keychainItems())
+      .map((item) => item.service)
+      .filter((service) => /^gh:/.test(service));
     const findings: Finding[] = [];
     for (const service of [...new Set(services)].sort()) {
       const read = await readKeychainItem(source, context, service, null);
@@ -1591,7 +1786,11 @@ const githubKeychain: Detector = {
       }
       const token = read.value.trim();
       if (!token) continue;
-      const material: SecretMaterial = { type: "api_key", apiKey: new SecretValue(token), header: "Authorization" };
+      const material: SecretMaterial = {
+        type: "api_key",
+        apiKey: new SecretValue(token),
+        header: "Authorization",
+      };
       findings.push({
         detector: this.name,
         provider: "github",
@@ -1628,13 +1827,16 @@ const agentOsSecrets: Detector = {
       const stem = name.replace(/\.(secret|pem|json)$/, "");
       const suggestedId = slugify("agents", stem, source.machine);
       const document = parseJson(raw);
-      const accessToken = document ? stringField(document, "access_token") ?? stringField(document, "accessToken") : null;
+      const accessToken = document
+        ? (stringField(document, "access_token") ?? stringField(document, "accessToken"))
+        : null;
       if (document && accessToken) {
         // Some tools drop a whole token response in here rather than a bare
         // key. Filing that as an `api_key` would hide an expiry and a refresh
         // token the supervisor could have used, which is the one mistake this
         // whole component exists to stop.
-        const refreshToken = stringField(document, "refresh_token") ?? stringField(document, "refreshToken");
+        const refreshToken =
+          stringField(document, "refresh_token") ?? stringField(document, "refreshToken");
         const provider = stringField(document, "provider") ?? slugify(stem);
         const material: SecretMaterial = {
           type: "oauth_token",
@@ -1653,11 +1855,16 @@ const agentOsSecrets: Detector = {
           label: `${provider} login stored in the Agent OS state root on ${source.machine}`,
           purpose: `${slugify(provider)}/${slugify(stem)}`,
           account: stringField(document, "email") ?? claimString(jwtClaims(accessToken), "email"),
-          expiresAt: isoFromText(document.expires_at) ?? isoFromMilliseconds(document.expires_at) ?? isoFromSeconds(jwtClaims(accessToken)?.exp),
+          expiresAt:
+            isoFromText(document.expires_at) ??
+            isoFromMilliseconds(document.expires_at) ??
+            isoFromSeconds(jwtClaims(accessToken)?.exp),
           plan: "subscription",
           origin: origin(source, "file", file, context),
           fingerprints: fingerprintsOf(material),
-          notes: ["a full token response was stored here; the token endpoint is not recorded in the file"],
+          notes: [
+            "a full token response was stored here; the token endpoint is not recorded in the file",
+          ],
           material,
         });
         continue;
@@ -1696,7 +1903,12 @@ const agentOsSecrets: Detector = {
  * not credentials the owner needs kept alive.
  */
 const CREDENTIAL_ENV = /_(API_KEY|TOKEN)$/;
-const ENV_DENYLIST = new Set(["STARSHIP_SESSION_KEY", "GITHUB_ACTIONS_RUNTIME_TOKEN", "ACTIONS_RUNTIME_TOKEN", "ANDROMEDA_VAULT_PASSPHRASE"]);
+const ENV_DENYLIST = new Set([
+  "STARSHIP_SESSION_KEY",
+  "GITHUB_ACTIONS_RUNTIME_TOKEN",
+  "ACTIONS_RUNTIME_TOKEN",
+  "ANDROMEDA_VAULT_PASSPHRASE",
+]);
 
 const environmentVariables: Detector = {
   name: "environment-variables",
@@ -1704,9 +1916,15 @@ const environmentVariables: Detector = {
   async detect(source, context) {
     const environment = await source.environment();
     const findings: Finding[] = [];
-    for (const [name, value] of Object.entries(environment).sort(([left], [right]) => left.localeCompare(right))) {
+    for (const [name, value] of Object.entries(environment).sort(([left], [right]) =>
+      left.localeCompare(right),
+    )) {
       if (!CREDENTIAL_ENV.test(name) || ENV_DENYLIST.has(name) || !value.trim()) continue;
-      const material: SecretMaterial = { type: "api_key", apiKey: new SecretValue(value.trim()), header: null };
+      const material: SecretMaterial = {
+        type: "api_key",
+        apiKey: new SecretValue(value.trim()),
+        header: null,
+      };
       findings.push({
         detector: this.name,
         provider: providerFromEnvName(name),
@@ -1784,9 +2002,12 @@ function keychainSecretSourceFor(service: string): KeychainSecretSource | null {
 function keychainSecretMaterial(raw: string): SecretMaterial {
   const value = raw.trim();
   const document = parseJson(value);
-  const accessToken = document ? stringField(document, "access_token") ?? stringField(document, "accessToken") : null;
+  const accessToken = document
+    ? (stringField(document, "access_token") ?? stringField(document, "accessToken"))
+    : null;
   if (document && accessToken) {
-    const refreshToken = stringField(document, "refresh_token") ?? stringField(document, "refreshToken");
+    const refreshToken =
+      stringField(document, "refresh_token") ?? stringField(document, "refreshToken");
     return {
       type: "oauth_token",
       accessToken: new SecretValue(accessToken),
@@ -1809,9 +2030,19 @@ function keychainSecretMaterial(raw: string): SecretMaterial {
  * vault does not have it — and the owner's next move is identical either way.
  * What changed is that the first outcome no longer costs a dialog to discover.
  */
-async function openKeychainSecret(source: CredentialSource, context: ScanContext, item: KeychainItem, match: KeychainSecretSource): Promise<Finding> {
+async function openKeychainSecret(
+  source: CredentialSource,
+  context: ScanContext,
+  item: KeychainItem,
+  match: KeychainSecretSource,
+): Promise<Finding> {
   const location = item.account ? `${item.service}/${item.account}` : item.service;
-  const suggestedId = slugify("keychain", match.provider, item.account ?? item.service, source.machine);
+  const suggestedId = slugify(
+    "keychain",
+    match.provider,
+    item.account ?? item.service,
+    source.machine,
+  );
   const read = await readKeychainItem(source, context, item.service, item.account);
   if (read.state !== "released") {
     return withheldKeychainFinding({
@@ -1874,7 +2105,9 @@ const macosKeychainSecrets: Detector = {
       seen.add(dedupe);
       targets.push({ item, match });
     }
-    return Promise.all(targets.map(({ item, match }) => openKeychainSecret(source, context, item, match)));
+    return Promise.all(
+      targets.map(({ item, match }) => openKeychainSecret(source, context, item, match)),
+    );
   },
 };
 
@@ -1890,7 +2123,8 @@ const macosKeychainSecrets: Detector = {
  * keychain detector does by default, via `readKeychainItem`.
  */
 const KEYCHAIN_CREDENTIAL_HINT = /(token|credential|auth|api[-_ ]?key|oauth)/i;
-const KEYCHAIN_IGNORED = /^(com\.apple\.|Chrome Safe Storage|.*Safe Storage$|AirPort|BluetoothGlobal|MobileBluetooth|WiFiAnalytics|iCloud$)/;
+const KEYCHAIN_IGNORED =
+  /^(com\.apple\.|Chrome Safe Storage|.*Safe Storage$|AirPort|BluetoothGlobal|MobileBluetooth|WiFiAnalytics|iCloud$)/;
 
 const macosKeychainInventory: Detector = {
   name: "macos-keychain-inventory",
@@ -1917,7 +2151,12 @@ const macosKeychainInventory: Detector = {
         account: item.account,
         expiresAt: null,
         plan: "unknown",
-        origin: origin(source, "keychain", item.account ? `${service}/${item.account}` : service, context),
+        origin: origin(
+          source,
+          "keychain",
+          item.account ? `${service}/${item.account}` : service,
+          context,
+        ),
         fingerprints: [],
         notes: ["reported only: reading it needs the owner to approve a keychain prompt"],
         material: null,
@@ -1935,7 +2174,8 @@ const macosKeychainInventory: Detector = {
 const PRIVATE_KEY_HEADER = /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----/;
 
 /** Files in `~/.ssh` that are never a private key, so they are not opened as one. */
-const SSH_NON_KEY = /(\.pub$|^config$|^known_hosts|^authorized_keys$|^environment$|\.DS_Store$|\.ps1$|^id_[a-z0-9]+\.pub$)/i;
+const SSH_NON_KEY =
+  /(\.pub$|^config$|^known_hosts|^authorized_keys$|^environment$|\.DS_Store$|\.ps1$|^id_[a-z0-9]+\.pub$)/i;
 
 /**
  * Whether an OpenSSH-format private key is passphrase-protected, read from the
@@ -1958,12 +2198,18 @@ export function sshKeyPassphraseState(pem: string): "none" | "encrypted" | "unkn
       return "unknown";
     }
     const magic = "openssh-key-v1\0";
-    if (bytes.length < magic.length + 4 || bytes.subarray(0, magic.length).toString("latin1") !== magic) return "unknown";
+    if (
+      bytes.length < magic.length + 4 ||
+      bytes.subarray(0, magic.length).toString("latin1") !== magic
+    )
+      return "unknown";
     let offset = magic.length;
     const length = bytes.readUInt32BE(offset);
     offset += 4;
     if (offset + length > bytes.length) return "unknown";
-    return bytes.subarray(offset, offset + length).toString("latin1") === "none" ? "none" : "encrypted";
+    return bytes.subarray(offset, offset + length).toString("latin1") === "none"
+      ? "none"
+      : "encrypted";
   }
   if (/-----BEGIN ENCRYPTED PRIVATE KEY-----/.test(pem)) return "encrypted";
   if (/Proc-Type:\s*4,ENCRYPTED/i.test(pem) || /DEK-Info:/i.test(pem)) return "encrypted";
@@ -2030,7 +2276,9 @@ const sshKeys: Detector = {
           plan: "unknown",
           origin: origin(source, "file", file, context),
           fingerprints: [],
-          notes: [`no ${name}.pub on disk: the record model needs the public half, so this key is reported rather than imported`],
+          notes: [
+            `no ${name}.pub on disk: the record model needs the public half, so this key is reported rather than imported`,
+          ],
           material: null,
         });
         continue;
@@ -2094,8 +2342,11 @@ interface PasswordStoreProbe {
 const PASSWORD_STORES: readonly PasswordStoreProbe[] = [
   {
     provider: "chrome",
-    files: (home) => [joinSource(home, "Library/Application Support/Google/Chrome/Default/Login Data")],
-    unlock: "encrypted under the 'Chrome Safe Storage' key in the login keychain; decrypting needs that key and the Chromium login DB format",
+    files: (home) => [
+      joinSource(home, "Library/Application Support/Google/Chrome/Default/Login Data"),
+    ],
+    unlock:
+      "encrypted under the 'Chrome Safe Storage' key in the login keychain; decrypting needs that key and the Chromium login DB format",
   },
   {
     provider: "bitwarden",
@@ -2114,7 +2365,12 @@ const passwordStores: Detector = {
   provider: "password-store",
   async detect(source, context) {
     const findings: Finding[] = [];
-    const push = (provider: string, location: string, note: string, account: string | null = null) =>
+    const push = (
+      provider: string,
+      location: string,
+      note: string,
+      account: string | null = null,
+    ) =>
       findings.push({
         detector: this.name,
         provider,
@@ -2136,24 +2392,42 @@ const passwordStores: Detector = {
         // A missing file reads back as null locally and as an empty string over
         // the ssh transport; both mean "not here", so presence needs real bytes.
         if (!(await source.readFile(file))) continue;
-        push(store.provider, file, `present but locked: ${store.unlock}. Not extracted (locked store).`);
+        push(
+          store.provider,
+          file,
+          `present but locked: ${store.unlock}. Not extracted (locked store).`,
+        );
         break;
       }
     }
 
     // Firefox names its profiles in a cleartext ini, so the store and the number
     // of logins in it are inventory metadata even though every login is sealed.
-    const ini = await source.readFile(joinSource(source.home, "Library/Application Support/Firefox/profiles.ini"));
+    const ini = await source.readFile(
+      joinSource(source.home, "Library/Application Support/Firefox/profiles.ini"),
+    );
     if (ini) {
       for (const line of ini.split(/\r?\n/)) {
         const match = /^Path=(.+)$/.exec(line.trim());
         if (!match) continue;
-        const logins = await source.readFile(joinSource(source.home, "Library/Application Support/Firefox", match[1]!.trim(), "logins.json"));
+        const logins = await source.readFile(
+          joinSource(
+            source.home,
+            "Library/Application Support/Firefox",
+            match[1]!.trim(),
+            "logins.json",
+          ),
+        );
         if (!logins) continue;
         const count = (logins.match(/"encryptedUsername"/g) ?? []).length;
         push(
           "firefox",
-          joinSource(source.home, "Library/Application Support/Firefox", match[1]!.trim(), "logins.json"),
+          joinSource(
+            source.home,
+            "Library/Application Support/Firefox",
+            match[1]!.trim(),
+            "logins.json",
+          ),
           `present but locked: ${count} saved logins, each NSS-encrypted; decrypting needs the Firefox primary password (if set) via key4.db. Not extracted (locked store).`,
         );
       }
@@ -2203,8 +2477,14 @@ export interface ScanOptions {
  * silent by default — without `releaseSecrets` this will not ask the owner for
  * anything, so it is safe to run from a timer, a supervisor or an agent.
  */
-export async function scanSource(source: CredentialSource, options: ScanOptions = {}): Promise<Finding[]> {
-  const context: ScanContext = { now: options.now ?? (() => Date.now()), releaseSecrets: options.releaseSecrets === true };
+export async function scanSource(
+  source: CredentialSource,
+  options: ScanOptions = {},
+): Promise<Finding[]> {
+  const context: ScanContext = {
+    now: options.now ?? (() => Date.now()),
+    releaseSecrets: options.releaseSecrets === true,
+  };
   const only = new Set(options.only ?? []);
   const findings: Finding[] = [];
   for (const detector of options.detectors ?? DETECTORS) {
@@ -2227,7 +2507,11 @@ function disambiguate(findings: readonly Finding[]): Finding[] {
     const seen = used.get(finding.suggestedId) ?? 0;
     used.set(finding.suggestedId, seen + 1);
     if (seen === 0) return finding;
-    return { ...finding, suggestedId: `${finding.suggestedId}-${seen + 1}`, notes: [...finding.notes, `id disambiguated: another source produced ${finding.suggestedId}`] };
+    return {
+      ...finding,
+      suggestedId: `${finding.suggestedId}-${seen + 1}`,
+      notes: [...finding.notes, `id disambiguated: another source produced ${finding.suggestedId}`],
+    };
   });
 }
 
@@ -2265,18 +2549,32 @@ export function provenanceTags(finding: Finding, importedAt: string): string[] {
   ];
 }
 
-export async function importFindings(vault: VaultStore, findings: readonly Finding[], options: ImportOptions): Promise<ImportOutcome[]> {
+export async function importFindings(
+  vault: VaultStore,
+  findings: readonly Finding[],
+  options: ImportOptions,
+): Promise<ImportOutcome[]> {
   const nowMs = options.now();
   const importedAt = new Date(nowMs).toISOString();
   const outcomes: ImportOutcome[] = [];
   for (const finding of findings) {
     const redacted = redactFinding(finding, nowMs);
     if (!finding.material) {
-      outcomes.push({ kind: "skipped", id: finding.suggestedId, reason: "no readable material", finding: redacted });
+      outcomes.push({
+        kind: "skipped",
+        id: finding.suggestedId,
+        reason: "no readable material",
+        finding: redacted,
+      });
       continue;
     }
     if (options.skipExisting && (await vault.get(finding.suggestedId))) {
-      outcomes.push({ kind: "skipped", id: finding.suggestedId, reason: "a record with this id already exists", finding: redacted });
+      outcomes.push({
+        kind: "skipped",
+        id: finding.suggestedId,
+        reason: "a record with this id already exists",
+        finding: redacted,
+      });
       continue;
     }
     await vault.put(
@@ -2303,13 +2601,23 @@ export async function importFindings(vault: VaultStore, findings: readonly Findi
 function table(rows: readonly (readonly string[])[]): string {
   if (rows.length === 0) return "";
   const widths: number[] = [];
-  for (const row of rows) row.forEach((cell, index) => (widths[index] = Math.max(widths[index] ?? 0, cell.length)));
-  return rows.map((row) => row.map((cell, index) => (index === row.length - 1 ? cell : cell.padEnd(widths[index] ?? 0))).join("  ").trimEnd()).join("\n");
+  for (const row of rows)
+    row.forEach((cell, index) => (widths[index] = Math.max(widths[index] ?? 0, cell.length)));
+  return rows
+    .map((row) =>
+      row
+        .map((cell, index) => (index === row.length - 1 ? cell : cell.padEnd(widths[index] ?? 0)))
+        .join("  ")
+        .trimEnd(),
+    )
+    .join("\n");
 }
 
 export function renderScanReport(findings: readonly Finding[], nowMs: number): string {
   if (findings.length === 0) return "no credentials found\n";
-  const rows: string[][] = [["PROVIDER", "TYPE", "ACCOUNT", "EXPIRY", "PLAN", "SOURCE", "FINGERPRINT", "ID"]];
+  const rows: string[][] = [
+    ["PROVIDER", "TYPE", "ACCOUNT", "EXPIRY", "PLAN", "SOURCE", "FINGERPRINT", "ID"],
+  ];
   for (const finding of findings) {
     const redacted = redactFinding(finding, nowMs);
     rows.push([
@@ -2323,7 +2631,9 @@ export function renderScanReport(findings: readonly Finding[], nowMs: number): s
       finding.suggestedId,
     ]);
   }
-  const notes = findings.flatMap((finding) => finding.notes.map((note) => `  ${finding.suggestedId}: ${note}`));
+  const notes = findings.flatMap((finding) =>
+    finding.notes.map((note) => `  ${finding.suggestedId}: ${note}`),
+  );
   return `${table(rows)}\n${notes.length > 0 ? `\nnotes:\n${notes.join("\n")}\n` : ""}`;
 }
 
@@ -2369,7 +2679,10 @@ async function readMaterialInput(args: ParsedArguments, io: VaultCliIo): Promise
     if (!(await exists(file))) throw new VaultCliError(`no such file: ${file}`);
     return readFileFromDisk(file, "utf8");
   }
-  if (!boolean(args, "stdin")) throw new VaultCliError("secret material must come from --stdin or --file, never from a command-line argument");
+  if (!boolean(args, "stdin"))
+    throw new VaultCliError(
+      "secret material must come from --stdin or --file, never from a command-line argument",
+    );
   return io.readStdin();
 }
 
@@ -2378,20 +2691,27 @@ function scopeFrom(args: ParsedArguments): SecretScope {
 }
 
 function warnEmptyScope(scope: SecretScope, io: VaultCliIo): void {
-  if (scope.agents.length === 0) io.err("warning: no --agent given, so no agent can read this record until it is re-scoped\n");
+  if (scope.agents.length === 0)
+    io.err("warning: no --agent given, so no agent can read this record until it is re-scoped\n");
 }
 
 async function initCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const directory = resolveVaultDirectory(io.env, io.home);
-  if (await readVaultConfig(directory)) throw new VaultCliError(`a vault already exists at ${directory}`);
+  if (await readVaultConfig(directory))
+    throw new VaultCliError(`a vault already exists at ${directory}`);
   const masterKey: MasterKeyKind = boolean(args, "passphrase") ? "passphrase" : "key-file";
-  const config: VaultConfig = { schemaVersion: CONFIG_SCHEMA_VERSION, masterKey, createdAt: new Date(io.now()).toISOString() };
+  const config: VaultConfig = {
+    schemaVersion: CONFIG_SCHEMA_VERSION,
+    masterKey,
+    createdAt: new Date(io.now()).toISOString(),
+  };
   await writePrivateFile(vaultConfigFile(directory), `${JSON.stringify(config, null, 2)}\n`);
   // Forces the key source to mint its material now, so a misconfigured
   // passphrase fails at init rather than at the first write.
   const source = masterKeyFor(masterKey, directory, io);
   await source.key();
-  if (boolean(args, "json")) io.out(`${JSON.stringify({ directory, masterKey, keySource: source.description })}\n`);
+  if (boolean(args, "json"))
+    io.out(`${JSON.stringify({ directory, masterKey, keySource: source.description })}\n`);
   else io.out(`vault initialised at ${directory}\nmaster key: ${source.description}\n`);
   return 0;
 }
@@ -2400,7 +2720,10 @@ async function addCommand(args: ParsedArguments, io: VaultCliIo): Promise<number
   const { store } = await openVault(io);
   const id = required(args, "id");
   const typeName = required(args, "type");
-  if (!isSecretType(typeName)) throw new VaultCliError(`unknown secret type: ${typeName} (expected one of ${SECRET_TYPES.join(", ")})`);
+  if (!isSecretType(typeName))
+    throw new VaultCliError(
+      `unknown secret type: ${typeName} (expected one of ${SECRET_TYPES.join(", ")})`,
+    );
   const raw = await readMaterialInput(args, io);
   const material = materialFromInput(typeName, raw, {
     header: optional(args, "header"),
@@ -2431,14 +2754,19 @@ async function addCommand(args: ParsedArguments, io: VaultCliIo): Promise<number
     now: io.now,
   });
   await store.put(record_);
-  io.out(`added ${record_.id} (${record_.type}) for ${record_.purpose}: ${fingerprintsOf(material).map(formatFingerprint).join(" ")}\n`);
+  io.out(
+    `added ${record_.id} (${record_.type}) for ${record_.purpose}: ${fingerprintsOf(material).map(formatFingerprint).join(" ")}\n`,
+  );
   return 0;
 }
 
 async function importTotpCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store } = await openVault(io);
   const raw = await readMaterialInput(args, io);
-  const parameters = totpParametersFromInput(raw, { issuer: optional(args, "issuer"), account: optional(args, "account") });
+  const parameters = totpParametersFromInput(raw, {
+    issuer: optional(args, "issuer"),
+    account: optional(args, "account"),
+  });
   const scope = scopeFrom(args);
   warnEmptyScope(scope, io);
   const record_ = createSecretRecord({
@@ -2459,7 +2787,10 @@ async function importTotpCommand(args: ParsedArguments, io: VaultCliIo): Promise
   return 0;
 }
 
-async function healthById(store: VaultStore, io: VaultCliIo): Promise<Map<string, CredentialHealth>> {
+async function healthById(
+  store: VaultStore,
+  io: VaultCliIo,
+): Promise<Map<string, CredentialHealth>> {
   const supervisor = new ReauthSupervisor({ vault: store, now: io.now });
   const health = await supervisor.health();
   return new Map(health.map((entry) => [entry.id, entry]));
@@ -2470,7 +2801,9 @@ async function listCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   const descriptors = await store.describe();
   const health = await healthById(store, io);
   if (boolean(args, "json")) {
-    io.out(`${JSON.stringify({ directory, records: descriptors.map((descriptor) => ({ ...descriptor, health: health.get(descriptor.id)?.state ?? "unknown" })) }, null, 2)}\n`);
+    io.out(
+      `${JSON.stringify({ directory, records: descriptors.map((descriptor) => ({ ...descriptor, health: health.get(descriptor.id)?.state ?? "unknown" })) }, null, 2)}\n`,
+    );
     return 0;
   }
   if (descriptors.length === 0) {
@@ -2480,8 +2813,8 @@ async function listCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   const rows: string[][] = [["ID", "TYPE", "ACCOUNT", "LABEL", "PURPOSE", "EXPIRES", "HEALTH"]];
   for (const descriptor of descriptors) {
     const entry = health.get(descriptor.id);
-    const accountTag = descriptor.tags?.find((t: string) => t.startsWith('account:'));
-    const account = accountTag ? accountTag.slice('account:'.length) : '-';
+    const accountTag = descriptor.tags?.find((t: string) => t.startsWith("account:"));
+    const account = accountTag ? accountTag.slice("account:".length) : "-";
     rows.push([
       descriptor.id,
       descriptor.type,
@@ -2505,7 +2838,9 @@ async function getCommand(args: ParsedArguments, io: VaultCliIo): Promise<number
   if (!boolean(args, "reveal")) {
     io.err(
       `refusing to reveal ${id}: pass --reveal to confirm.\n` +
-        (io.isTty ? "stdout is a terminal, so the value would land in your scrollback and possibly your terminal's history.\n" : "") +
+        (io.isTty
+          ? "stdout is a terminal, so the value would land in your scrollback and possibly your terminal's history.\n"
+          : "") +
         `${record_.type} for ${record_.purpose}: ${fingerprintsOf(record_.material).map(formatFingerprint).join(" ")}\n`,
     );
     return 2;
@@ -2525,10 +2860,13 @@ async function totpCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   const { store } = await openVault(io);
   const record_ = await store.get(id);
   if (!record_) throw new VaultCliError(`no such record: ${id}`);
-  if (record_.material.type !== "totp_seed") throw new VaultCliError(`${id} is a ${record_.type}, not a totp_seed`);
+  if (record_.material.type !== "totp_seed")
+    throw new VaultCliError(`${id} is a ${record_.type}, not a totp_seed`);
   const code = generateTotp(record_.material.parameters, io.now());
   if (boolean(args, "json")) {
-    io.out(`${JSON.stringify({ id, code: code.code, validUntil: new Date(code.validUntilMs).toISOString(), remainingSeconds: Math.round(code.remainingMs / 1000) })}\n`);
+    io.out(
+      `${JSON.stringify({ id, code: code.code, validUntil: new Date(code.validUntilMs).toISOString(), remainingSeconds: Math.round(code.remainingMs / 1000) })}\n`,
+    );
     return 0;
   }
   io.out(`${code.code}  (${Math.round(code.remainingMs / 1000)}s remaining)\n`);
@@ -2540,14 +2878,18 @@ async function statusCommand(args: ParsedArguments, io: VaultCliIo): Promise<num
   const supervisor = new ReauthSupervisor({ vault: store, now: io.now });
   const health = await supervisor.health();
   if (boolean(args, "json")) {
-    io.out(`${JSON.stringify({ directory, masterKey: config.masterKey, checkedAt: new Date(io.now()).toISOString(), health }, null, 2)}\n`);
+    io.out(
+      `${JSON.stringify({ directory, masterKey: config.masterKey, checkedAt: new Date(io.now()).toISOString(), health }, null, 2)}\n`,
+    );
     return 0;
   }
   if (health.length === 0) {
     io.out(`no records in ${directory}\n`);
     return 0;
   }
-  const rows: string[][] = [["ID", "PURPOSE", "STATE", "EXPIRES", "NEXT REFRESH", "SELF-HEALING", "STRATEGY"]];
+  const rows: string[][] = [
+    ["ID", "PURPOSE", "STATE", "EXPIRES", "NEXT REFRESH", "SELF-HEALING", "STRATEGY"],
+  ];
   for (const entry of health) {
     rows.push([
       entry.id,
@@ -2559,12 +2901,17 @@ async function statusCommand(args: ParsedArguments, io: VaultCliIo): Promise<num
       entry.strategy,
     ]);
   }
-  const needsOwner = health.filter((entry) => entry.humanPresenceRequired && entry.state !== "healthy" && entry.state !== "no_expiry");
+  const needsOwner = health.filter(
+    (entry) =>
+      entry.humanPresenceRequired && entry.state !== "healthy" && entry.state !== "no_expiry",
+  );
   const summary =
     `\n${health.filter((entry) => entry.selfHealing).length} of ${health.length} can renew themselves; ` +
     `${health.filter((entry) => entry.state === "expired").length} expired; ` +
     `${needsOwner.length} will need you.\n` +
-    (needsOwner.length > 0 ? `${needsOwner.map((entry) => `  ${entry.id}: ${entry.strategy}`).join("\n")}\n` : "");
+    (needsOwner.length > 0
+      ? `${needsOwner.map((entry) => `  ${entry.id}: ${entry.strategy}`).join("\n")}\n`
+      : "");
   io.out(`${table(rows)}\n${summary}`);
   return 0;
 }
@@ -2572,15 +2919,29 @@ async function statusCommand(args: ParsedArguments, io: VaultCliIo): Promise<num
 function sourceFromArguments(args: ParsedArguments, io: VaultCliIo): CredentialSource {
   const host = optional(args, "ssh");
   if (!host) {
-    return new LocalSource({ machine: optional(args, "machine") ?? "local", home: io.home, env: io.env });
+    return new LocalSource({
+      machine: optional(args, "machine") ?? "local",
+      home: io.home,
+      env: io.env,
+    });
   }
   const platformName = optional(args, "remote-platform") ?? "linux";
   if (platformName !== "win32" && platformName !== "linux" && platformName !== "darwin") {
-    throw new VaultCliError(`--remote-platform must be win32, linux or darwin, got ${platformName}`);
+    throw new VaultCliError(
+      `--remote-platform must be win32, linux or darwin, got ${platformName}`,
+    );
   }
   const home = optional(args, "remote-home");
-  if (!home) throw new VaultCliError("--ssh requires --remote-home, the credential owner's home directory on that machine");
-  return new SshSource({ host, home, platform: platformName, machine: optional(args, "machine") ?? host });
+  if (!home)
+    throw new VaultCliError(
+      "--ssh requires --remote-home, the credential owner's home directory on that machine",
+    );
+  return new SshSource({
+    host,
+    home,
+    platform: platformName,
+    machine: optional(args, "machine") ?? host,
+  });
 }
 
 async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
@@ -2591,19 +2952,32 @@ async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   // to something that looks like a terminal.
   const releaseSecrets = boolean(args, "release-secrets");
   if (releaseSecrets) {
-    io.err("--release-secrets: macOS will ask you to approve each keychain item another application owns. Expect one dialog per item.\n");
+    io.err(
+      "--release-secrets: macOS will ask you to approve each keychain item another application owns. Expect one dialog per item.\n",
+    );
   }
-  const findings = await scanSource(source, { only: many(args, "only"), now: io.now, releaseSecrets });
+  const findings = await scanSource(source, {
+    only: many(args, "only"),
+    now: io.now,
+    releaseSecrets,
+  });
   const nowMs = io.now();
   const wantsImport = boolean(args, "import");
 
   if (!wantsImport) {
-    if (boolean(args, "json")) io.out(`${JSON.stringify({ machine: source.machine, scannedAt: new Date(nowMs).toISOString(), findings: findings.map((finding) => redactFinding(finding, nowMs)) }, null, 2)}\n`);
+    if (boolean(args, "json"))
+      io.out(
+        `${JSON.stringify({ machine: source.machine, scannedAt: new Date(nowMs).toISOString(), findings: findings.map((finding) => redactFinding(finding, nowMs)) }, null, 2)}\n`,
+      );
     else io.out(renderScanReport(findings, nowMs));
-    const withheld = findings.filter((finding) => finding.notes.includes(KEYCHAIN_WITHHELD_NOTE)).length;
+    const withheld = findings.filter((finding) =>
+      finding.notes.includes(KEYCHAIN_WITHHELD_NOTE),
+    ).length;
     io.err(
       `report only: pass --import to bring ${findings.filter((finding) => finding.material).length} readable credentials into the vault\n` +
-        (withheld > 0 && !releaseSecrets ? `${withheld} keychain item(s) found but not read; re-run with --release-secrets, with the owner present, to open them\n` : ""),
+        (withheld > 0 && !releaseSecrets
+          ? `${withheld} keychain item(s) found but not read; re-run with --release-secrets, with the owner present, to open them\n`
+          : ""),
     );
     return 0;
   }
@@ -2611,9 +2985,15 @@ async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   const { store } = await openVault(io);
   const scope = scopeFrom(args);
   warnEmptyScope(scope, io);
-  const outcomes = await importFindings(store, findings, { scope, now: io.now, skipExisting: boolean(args, "skip-existing") });
+  const outcomes = await importFindings(store, findings, {
+    scope,
+    now: io.now,
+    skipExisting: boolean(args, "skip-existing"),
+  });
   if (boolean(args, "json")) {
-    io.out(`${JSON.stringify({ machine: source.machine, importedAt: new Date(nowMs).toISOString(), outcomes }, null, 2)}\n`);
+    io.out(
+      `${JSON.stringify({ machine: source.machine, importedAt: new Date(nowMs).toISOString(), outcomes }, null, 2)}\n`,
+    );
     return 0;
   }
   const rows: string[][] = [["RESULT", "ID", "PROVIDER", "TYPE", "ACCOUNT", "EXPIRY", "DETAIL"]];
@@ -2624,8 +3004,12 @@ async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
       outcome.finding.provider,
       outcome.finding.type,
       outcome.finding.account ?? "-",
-      outcome.finding.expiresAt ? `${outcome.finding.expiresAt}${outcome.finding.expired ? " EXPIRED" : ""}` : "-",
-      outcome.kind === "skipped" ? outcome.reason : outcome.finding.fingerprints.map(formatFingerprint).join(" "),
+      outcome.finding.expiresAt
+        ? `${outcome.finding.expiresAt}${outcome.finding.expired ? " EXPIRED" : ""}`
+        : "-",
+      outcome.kind === "skipped"
+        ? outcome.reason
+        : outcome.finding.fingerprints.map(formatFingerprint).join(" "),
     ]);
   }
   io.out(`${table(rows)}\n`);
@@ -2637,7 +3021,10 @@ async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
  * a test can drive every command in-process and so an embedding CLI decides what
  * a failure means.
  */
-export async function vaultCommand(argv: readonly string[], overrides: Partial<VaultCliIo> = {}): Promise<number> {
+export async function vaultCommand(
+  argv: readonly string[],
+  overrides: Partial<VaultCliIo> = {},
+): Promise<number> {
   const io: VaultCliIo = { ...defaultVaultCliIo(), ...overrides };
   const [subcommand = "help", ...rest] = argv;
   const args = parseVaultArguments(rest);
@@ -2679,7 +3066,8 @@ export { descriptorOf, effectiveExpiryMs };
 
 // Standalone entry. The `dsh` launcher also routes the `accounts` verb here
 // (see the plugin bin), so this guard is only for running `node lib/vault/cli.js`.
-const runningEntry = typeof process !== "undefined" && process.argv[1] ? process.argv[1].replace(/\\/g, "/") : "";
+const runningEntry =
+  typeof process !== "undefined" && process.argv[1] ? process.argv[1].replace(/\\/g, "/") : "";
 if (runningEntry.endsWith("/cli.js") || runningEntry.endsWith("/cli.ts")) {
   vaultCommand(process.argv.slice(2)).then((code) => {
     process.exitCode = code;

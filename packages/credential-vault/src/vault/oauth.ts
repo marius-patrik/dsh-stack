@@ -8,92 +8,92 @@
  * @module dsh-credentials/vault/oauth
  */
 
-import { createHash, randomBytes } from 'node:crypto'
-import { createServer } from 'node:http'
-import { URL, URLSearchParams } from 'node:url'
-import { fetchWithoutCrossOriginRedirects } from './redirects.js'
-import type { CredentialStore, ProviderCredential } from './secret.js'
-import { SecretValue } from './secret.js'
-import type { OAuthDeviceAuth, OAuthPkceAuth } from './descriptor.js'
-import { parseOAuthEndpointUrl } from './descriptor.js'
+import { createHash, randomBytes } from "node:crypto";
+import { createServer } from "node:http";
+import { URL, URLSearchParams } from "node:url";
+import { fetchWithoutCrossOriginRedirects } from "./redirects.js";
+import type { CredentialStore, ProviderCredential } from "./secret.js";
+import { SecretValue } from "./secret.js";
+import type { OAuthDeviceAuth, OAuthPkceAuth } from "./descriptor.js";
+import { parseOAuthEndpointUrl } from "./descriptor.js";
 
-const DEVICE_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:device_code'
-const AUTHORIZATION_CODE_GRANT_TYPE = 'authorization_code'
-const REFRESH_TOKEN_GRANT_TYPE = 'refresh_token'
+const DEVICE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
+const AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+const REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
 
-type OAuthAuthConfig = OAuthPkceAuth | OAuthDeviceAuth
+type OAuthAuthConfig = OAuthPkceAuth | OAuthDeviceAuth;
 
 export interface OAuthHttpResponse {
-  status: number
-  body: unknown
+  status: number;
+  body: unknown;
 }
 
 export type OAuthTransport = (request: {
-  url: string
-  method: 'GET' | 'POST'
-  headers: Record<string, string>
-  body?: string
-}) => Promise<OAuthHttpResponse>
+  url: string;
+  method: "GET" | "POST";
+  headers: Record<string, string>;
+  body?: string;
+}) => Promise<OAuthHttpResponse>;
 
-export type OAuthOutcome = 'authenticated' | 'needs_api_key'
+export type OAuthOutcome = "authenticated" | "needs_api_key";
 
 export interface OAuthSuccessResult {
-  outcome: 'authenticated'
-  credential: ProviderCredential & { kind: 'oauth' }
+  outcome: "authenticated";
+  credential: ProviderCredential & { kind: "oauth" };
 }
 
 export interface OAuthNeedsApiKeyResult {
-  outcome: 'needs_api_key'
-  reason: 'access_denied'
+  outcome: "needs_api_key";
+  reason: "access_denied";
 }
 
-export type OAuthLoginResult = OAuthSuccessResult | OAuthNeedsApiKeyResult
+export type OAuthLoginResult = OAuthSuccessResult | OAuthNeedsApiKeyResult;
 
 export interface DeviceVerification {
-  verificationUri: string
-  verificationUriComplete: string | null
-  userCode: string
+  verificationUri: string;
+  verificationUriComplete: string | null;
+  userCode: string;
 }
 
 export interface OAuthPkceFlowOptions {
-  providerId: string
-  auth: OAuthPkceAuth
-  store: CredentialStore
-  transport?: OAuthTransport
-  now?: () => number
-  timeoutMs?: number
-  openBrowser: (url: string) => Promise<void> | void
+  providerId: string;
+  auth: OAuthPkceAuth;
+  store: CredentialStore;
+  transport?: OAuthTransport;
+  now?: () => number;
+  timeoutMs?: number;
+  openBrowser: (url: string) => Promise<void> | void;
 }
 
 export interface OAuthDeviceFlowOptions {
-  providerId: string
-  auth: OAuthDeviceAuth
-  store: CredentialStore
-  transport?: OAuthTransport
-  now?: () => number
-  sleep?: (ms: number) => Promise<void>
-  onVerification: (verification: DeviceVerification) => void
+  providerId: string;
+  auth: OAuthDeviceAuth;
+  store: CredentialStore;
+  transport?: OAuthTransport;
+  now?: () => number;
+  sleep?: (ms: number) => Promise<void>;
+  onVerification: (verification: DeviceVerification) => void;
 }
 
 export interface OAuthTokenRefreshOptions {
-  store: CredentialStore
-  transport?: OAuthTransport
-  now?: () => number
-  sleep?: (ms: number) => Promise<void>
-  random?: () => number
-  refreshSkewMs?: number
-  baseBackoffMs?: number
-  maxBackoffMs?: number
-  maxAttempts?: number
+  store: CredentialStore;
+  transport?: OAuthTransport;
+  now?: () => number;
+  sleep?: (ms: number) => Promise<void>;
+  random?: () => number;
+  refreshSkewMs?: number;
+  baseBackoffMs?: number;
+  maxBackoffMs?: number;
+  maxAttempts?: number;
 }
 
-type RefreshState = 'ready' | 'needs_interactive_login'
+type RefreshState = "ready" | "needs_interactive_login";
 
 interface DiscoveryDocument {
-  issuer: string | undefined
-  authorization_endpoint: string | undefined
-  token_endpoint: string | undefined
-  device_authorization_endpoint: string | undefined
+  issuer: string | undefined;
+  authorization_endpoint: string | undefined;
+  token_endpoint: string | undefined;
+  device_authorization_endpoint: string | undefined;
 }
 
 /**
@@ -110,59 +110,61 @@ export const oauthTransport: OAuthTransport = async ({ url, method, headers, bod
     method,
     headers,
     ...(body ? { body } : {}),
-  })
-  const text = await response.text()
-  let parsed: unknown = null
+  });
+  const text = await response.text();
+  let parsed: unknown = null;
   if (text.length > 0) {
     try {
-      parsed = JSON.parse(text) as unknown
+      parsed = JSON.parse(text) as unknown;
     } catch {
-      parsed = null
+      parsed = null;
     }
   }
-  return { status: response.status, body: parsed }
-}
+  return { status: response.status, body: parsed };
+};
 
 export function createPkceCodeVerifier(random: () => Buffer = () => randomBytes(32)): string {
-  return base64Url(random())
+  return base64Url(random());
 }
 
 export function derivePkceCodeChallengeS256(codeVerifier: string): string {
-  return base64Url(createHash('sha256').update(codeVerifier).digest())
+  return base64Url(createHash("sha256").update(codeVerifier).digest());
 }
 
-export async function runPkceAuthorizationFlow(options: OAuthPkceFlowOptions): Promise<OAuthLoginResult> {
-  const transport = options.transport ?? oauthTransport
-  const now = options.now ?? (() => Date.now())
-  const timeoutMs = options.timeoutMs ?? 120_000
-  const endpoints = await resolveOAuthEndpoints(options.auth, transport)
-  const codeVerifier = createPkceCodeVerifier()
-  const codeChallenge = derivePkceCodeChallengeS256(codeVerifier)
-  const state = base64Url(randomBytes(16))
-  const callbackPath = options.auth.redirectPath ?? '/oauth/callback'
+export async function runPkceAuthorizationFlow(
+  options: OAuthPkceFlowOptions,
+): Promise<OAuthLoginResult> {
+  const transport = options.transport ?? oauthTransport;
+  const now = options.now ?? (() => Date.now());
+  const timeoutMs = options.timeoutMs ?? 120_000;
+  const endpoints = await resolveOAuthEndpoints(options.auth, transport);
+  const codeVerifier = createPkceCodeVerifier();
+  const codeChallenge = derivePkceCodeChallengeS256(codeVerifier);
+  const state = base64Url(randomBytes(16));
+  const callbackPath = options.auth.redirectPath ?? "/oauth/callback";
 
-  const listener = await createLoopbackListener(callbackPath, timeoutMs)
+  const listener = await createLoopbackListener(callbackPath, timeoutMs);
   try {
-    const authorizeUrl = new URL(endpoints.authorizationEndpoint)
-    authorizeUrl.searchParams.set('response_type', 'code')
-    authorizeUrl.searchParams.set('client_id', options.auth.clientId)
-    authorizeUrl.searchParams.set('scope', options.auth.scopes.join(' '))
-    authorizeUrl.searchParams.set('redirect_uri', listener.redirectUri)
-    authorizeUrl.searchParams.set('state', state)
-    authorizeUrl.searchParams.set('code_challenge', codeChallenge)
-    authorizeUrl.searchParams.set('code_challenge_method', 'S256')
-    await options.openBrowser(authorizeUrl.toString())
+    const authorizeUrl = new URL(endpoints.authorizationEndpoint);
+    authorizeUrl.searchParams.set("response_type", "code");
+    authorizeUrl.searchParams.set("client_id", options.auth.clientId);
+    authorizeUrl.searchParams.set("scope", options.auth.scopes.join(" "));
+    authorizeUrl.searchParams.set("redirect_uri", listener.redirectUri);
+    authorizeUrl.searchParams.set("state", state);
+    authorizeUrl.searchParams.set("code_challenge", codeChallenge);
+    authorizeUrl.searchParams.set("code_challenge_method", "S256");
+    await options.openBrowser(authorizeUrl.toString());
 
-    const callback = await listener.waitForCallback()
-    if (callback.state !== state) throw new Error('oauth callback state mismatch')
-    if (callback.error === 'access_denied') {
-      await options.store.delete(options.providerId)
-      return { outcome: 'needs_api_key', reason: 'access_denied' }
+    const callback = await listener.waitForCallback();
+    if (callback.state !== state) throw new Error("oauth callback state mismatch");
+    if (callback.error === "access_denied") {
+      await options.store.delete(options.providerId);
+      return { outcome: "needs_api_key", reason: "access_denied" };
     }
-    if (callback.error) throw new Error(`oauth authorization failed: ${callback.error}`)
-    if (!callback.code) throw new Error('oauth callback did not include an authorization code')
+    if (callback.error) throw new Error(`oauth authorization failed: ${callback.error}`);
+    if (!callback.code) throw new Error("oauth callback did not include an authorization code");
 
-    const clientSecret = await resolveClientSecret(options.store, options.auth)
+    const clientSecret = await resolveClientSecret(options.store, options.auth);
     const tokenResponse = await oauthTokenRequest(transport, endpoints.tokenEndpoint, {
       grant_type: AUTHORIZATION_CODE_GRANT_TYPE,
       code: callback.code,
@@ -170,151 +172,165 @@ export async function runPkceAuthorizationFlow(options: OAuthPkceFlowOptions): P
       redirect_uri: listener.redirectUri,
       code_verifier: codeVerifier,
       ...(clientSecret ? { client_secret: clientSecret.reveal() } : {}),
-    })
-    const credential = tokenToCredential(tokenResponse, now(), options.auth.scopes)
-    await options.store.put(options.providerId, credential)
-    return { outcome: 'authenticated', credential }
+    });
+    const credential = tokenToCredential(tokenResponse, now(), options.auth.scopes);
+    await options.store.put(options.providerId, credential);
+    return { outcome: "authenticated", credential };
   } finally {
-    await listener.close()
+    await listener.close();
   }
 }
 
-export async function runDeviceAuthorizationFlow(options: OAuthDeviceFlowOptions): Promise<OAuthLoginResult> {
-  const transport = options.transport ?? oauthTransport
-  const now = options.now ?? (() => Date.now())
-  const sleep = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)))
-  const endpoint = options.auth.deviceAuthorizationUrl
+export async function runDeviceAuthorizationFlow(
+  options: OAuthDeviceFlowOptions,
+): Promise<OAuthLoginResult> {
+  const transport = options.transport ?? oauthTransport;
+  const now = options.now ?? (() => Date.now());
+  const sleep =
+    options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+  const endpoint = options.auth.deviceAuthorizationUrl;
   const initial = await oauthTokenRequest(transport, endpoint, {
     client_id: options.auth.clientId,
-    scope: options.auth.scopes.join(' '),
-  })
-  const deviceCode = requiredString(initial, 'device_code')
-  const userCode = requiredString(initial, 'user_code')
-  const verificationUri = requiredString(initial, 'verification_uri')
-  const verificationUriComplete = optionalString(initial, 'verification_uri_complete')
-  const expiresIn = optionalFiniteNumber(initial, 'expires_in') ?? 300
-  let intervalMs = (options.auth.pollIntervalSeconds ?? optionalFiniteNumber(initial, 'interval') ?? 5) * 1_000
-  const expiresAt = now() + expiresIn * 1_000
+    scope: options.auth.scopes.join(" "),
+  });
+  const deviceCode = requiredString(initial, "device_code");
+  const userCode = requiredString(initial, "user_code");
+  const verificationUri = requiredString(initial, "verification_uri");
+  const verificationUriComplete = optionalString(initial, "verification_uri_complete");
+  const expiresIn = optionalFiniteNumber(initial, "expires_in") ?? 300;
+  let intervalMs =
+    (options.auth.pollIntervalSeconds ?? optionalFiniteNumber(initial, "interval") ?? 5) * 1_000;
+  const expiresAt = now() + expiresIn * 1_000;
 
-  options.onVerification({ verificationUri, verificationUriComplete, userCode })
+  options.onVerification({ verificationUri, verificationUriComplete, userCode });
   while (now() < expiresAt) {
-    await sleep(intervalMs)
+    await sleep(intervalMs);
     const response = await oauthTokenRequest(transport, options.auth.tokenUrl, {
       grant_type: DEVICE_GRANT_TYPE,
       device_code: deviceCode,
       client_id: options.auth.clientId,
-    })
-    const accessToken = optionalString(response, 'access_token')
+    });
+    const accessToken = optionalString(response, "access_token");
     if (accessToken) {
-      const credential = tokenToCredential(response, now(), options.auth.scopes)
-      await options.store.put(options.providerId, credential)
-      return { outcome: 'authenticated', credential }
+      const credential = tokenToCredential(response, now(), options.auth.scopes);
+      await options.store.put(options.providerId, credential);
+      return { outcome: "authenticated", credential };
     }
-    const error = optionalString(response, 'error')
-    if (error === 'authorization_pending') continue
-    if (error === 'slow_down') {
-      intervalMs += 5_000
-      continue
+    const error = optionalString(response, "error");
+    if (error === "authorization_pending") continue;
+    if (error === "slow_down") {
+      intervalMs += 5_000;
+      continue;
     }
-    if (error === 'access_denied') {
-      await options.store.delete(options.providerId)
-      return { outcome: 'needs_api_key', reason: 'access_denied' }
+    if (error === "access_denied") {
+      await options.store.delete(options.providerId);
+      return { outcome: "needs_api_key", reason: "access_denied" };
     }
-    if (error === 'expired_token') throw new Error('oauth device code expired before authorization')
-    throw new Error(`oauth device flow failed: ${error ?? 'unknown_error'}`)
+    if (error === "expired_token")
+      throw new Error("oauth device code expired before authorization");
+    throw new Error(`oauth device flow failed: ${error ?? "unknown_error"}`);
   }
-  throw new Error('oauth device flow expired before receiving an access token')
+  throw new Error("oauth device flow expired before receiving an access token");
 }
 
 export class OAuthTokenRefresher {
-  readonly #store: CredentialStore
-  readonly #transport: OAuthTransport
-  readonly #now: () => number
-  readonly #sleep: (ms: number) => Promise<void>
-  readonly #random: () => number
-  readonly #refreshSkewMs: number
-  readonly #baseBackoffMs: number
-  readonly #maxBackoffMs: number
-  readonly #maxAttempts: number
-  readonly #inflight = new Map<string, Promise<ProviderCredential & { kind: 'oauth' } | null>>()
-  readonly #state = new Map<string, RefreshState>()
+  readonly #store: CredentialStore;
+  readonly #transport: OAuthTransport;
+  readonly #now: () => number;
+  readonly #sleep: (ms: number) => Promise<void>;
+  readonly #random: () => number;
+  readonly #refreshSkewMs: number;
+  readonly #baseBackoffMs: number;
+  readonly #maxBackoffMs: number;
+  readonly #maxAttempts: number;
+  readonly #inflight = new Map<string, Promise<(ProviderCredential & { kind: "oauth" }) | null>>();
+  readonly #state = new Map<string, RefreshState>();
 
   constructor(options: OAuthTokenRefreshOptions) {
-    this.#store = options.store
-    this.#transport = options.transport ?? oauthTransport
-    this.#now = options.now ?? (() => Date.now())
-    this.#sleep = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)))
-    this.#random = options.random ?? Math.random
-    this.#refreshSkewMs = options.refreshSkewMs ?? 120_000
-    this.#baseBackoffMs = options.baseBackoffMs ?? 500
-    this.#maxBackoffMs = options.maxBackoffMs ?? 30_000
-    this.#maxAttempts = options.maxAttempts ?? 5
+    this.#store = options.store;
+    this.#transport = options.transport ?? oauthTransport;
+    this.#now = options.now ?? (() => Date.now());
+    this.#sleep =
+      options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+    this.#random = options.random ?? Math.random;
+    this.#refreshSkewMs = options.refreshSkewMs ?? 120_000;
+    this.#baseBackoffMs = options.baseBackoffMs ?? 500;
+    this.#maxBackoffMs = options.maxBackoffMs ?? 30_000;
+    this.#maxAttempts = options.maxAttempts ?? 5;
   }
 
   state(providerId: string): RefreshState {
-    return this.#state.get(providerId) ?? 'ready'
+    return this.#state.get(providerId) ?? "ready";
   }
 
   async ensureFreshCredential(
     providerId: string,
     auth: OAuthAuthConfig,
-  ): Promise<(ProviderCredential & { kind: 'oauth' }) | null> {
-    if (this.state(providerId) === 'needs_interactive_login') return null
-    const credential = await this.#store.get(providerId)
-    if (!credential || credential.kind !== 'oauth') return null
-    if (!shouldRefresh(credential, this.#now(), this.#refreshSkewMs)) return credential
-    return this.#singleFlightRefresh(providerId, auth, credential)
+  ): Promise<(ProviderCredential & { kind: "oauth" }) | null> {
+    if (this.state(providerId) === "needs_interactive_login") return null;
+    const credential = await this.#store.get(providerId);
+    if (!credential || credential.kind !== "oauth") return null;
+    if (!shouldRefresh(credential, this.#now(), this.#refreshSkewMs)) return credential;
+    return this.#singleFlightRefresh(providerId, auth, credential);
   }
 
   async #singleFlightRefresh(
     providerId: string,
     auth: OAuthAuthConfig,
-    credential: ProviderCredential & { kind: 'oauth' },
-  ): Promise<(ProviderCredential & { kind: 'oauth' }) | null> {
-    const inFlight = this.#inflight.get(providerId)
-    if (inFlight) return inFlight
+    credential: ProviderCredential & { kind: "oauth" },
+  ): Promise<(ProviderCredential & { kind: "oauth" }) | null> {
+    const inFlight = this.#inflight.get(providerId);
+    if (inFlight) return inFlight;
     const refresh = this.#refresh(providerId, auth, credential).finally(() => {
-      this.#inflight.delete(providerId)
-    })
-    this.#inflight.set(providerId, refresh)
-    return refresh
+      this.#inflight.delete(providerId);
+    });
+    this.#inflight.set(providerId, refresh);
+    return refresh;
   }
 
   async #refresh(
     providerId: string,
     auth: OAuthAuthConfig,
-    credential: ProviderCredential & { kind: 'oauth' },
-  ): Promise<(ProviderCredential & { kind: 'oauth' }) | null> {
+    credential: ProviderCredential & { kind: "oauth" },
+  ): Promise<(ProviderCredential & { kind: "oauth" }) | null> {
     if (!credential.refreshToken) {
-      this.#state.set(providerId, 'needs_interactive_login')
-      return null
+      this.#state.set(providerId, "needs_interactive_login");
+      return null;
     }
-    const tokenEndpoint = resolveTokenEndpoint(auth)
-    const clientSecret = await this.#clientSecret(auth)
+    const tokenEndpoint = resolveTokenEndpoint(auth);
+    const clientSecret = await this.#clientSecret(auth);
     for (let attempt = 0; attempt < this.#maxAttempts; attempt += 1) {
       const body = await oauthTokenRequest(this.#transport, tokenEndpoint, {
         grant_type: REFRESH_TOKEN_GRANT_TYPE,
         refresh_token: credential.refreshToken.reveal(),
         client_id: auth.clientId,
         ...(clientSecret ? { client_secret: clientSecret.reveal() } : {}),
-      })
-      const accessToken = optionalString(body, 'access_token')
+      });
+      const accessToken = optionalString(body, "access_token");
       if (accessToken) {
-        const refreshed = tokenToCredential(body, this.#now(), credential.scopes, credential.refreshToken)
-        await this.#store.put(providerId, refreshed)
-        this.#state.delete(providerId)
-        return refreshed
+        const refreshed = tokenToCredential(
+          body,
+          this.#now(),
+          credential.scopes,
+          credential.refreshToken,
+        );
+        await this.#store.put(providerId, refreshed);
+        this.#state.delete(providerId);
+        return refreshed;
       }
-      const error = optionalString(body, 'error')
-      if (error === 'invalid_grant') {
-        this.#state.set(providerId, 'needs_interactive_login')
-        return null
+      const error = optionalString(body, "error");
+      if (error === "invalid_grant") {
+        this.#state.set(providerId, "needs_interactive_login");
+        return null;
       }
-      if (!isTransientRefreshError(error)) throw new Error(`oauth refresh failed: ${error ?? 'unknown_error'}`)
-      if (attempt + 1 >= this.#maxAttempts) break
-      await this.#sleep(jitteredBackoff(this.#baseBackoffMs, this.#maxBackoffMs, attempt, this.#random))
+      if (!isTransientRefreshError(error))
+        throw new Error(`oauth refresh failed: ${error ?? "unknown_error"}`);
+      if (attempt + 1 >= this.#maxAttempts) break;
+      await this.#sleep(
+        jitteredBackoff(this.#baseBackoffMs, this.#maxBackoffMs, attempt, this.#random),
+      );
     }
-    throw new Error('oauth refresh failed after retries')
+    throw new Error("oauth refresh failed after retries");
   }
 
   /**
@@ -333,7 +349,7 @@ export class OAuthTokenRefresher {
    * declining to do; one vault read per refresh is not a cost worth that.
    */
   async #clientSecret(auth: OAuthAuthConfig): Promise<SecretValue | null> {
-    return resolveClientSecret(this.#store, auth)
+    return resolveClientSecret(this.#store, auth);
   }
 }
 
@@ -345,23 +361,34 @@ export class OAuthTokenRefresher {
  * then goes out with `client_id` alone, and the authorization server's own
  * `invalid_client` is a better error than anything guessed here.
  */
-async function resolveClientSecret(store: CredentialStore, auth: OAuthAuthConfig): Promise<SecretValue | null> {
-  if (auth.method !== 'oauth_pkce' || !auth.clientSecretCredentialId) return null
-  const record = await store.get(auth.clientSecretCredentialId)
-  if (!record) return null
+async function resolveClientSecret(
+  store: CredentialStore,
+  auth: OAuthAuthConfig,
+): Promise<SecretValue | null> {
+  if (auth.method !== "oauth_pkce" || !auth.clientSecretCredentialId) return null;
+  const record = await store.get(auth.clientSecretCredentialId);
+  if (!record) return null;
   // Stored as an api_key record: a static string with no refresh of its own,
   // which is precisely what that variant models.
-  return record.kind === 'api_key' ? record.apiKey : null
+  return record.kind === "api_key" ? record.apiKey : null;
 }
 
-export async function resolveOAuthEndpoints(auth: OAuthPkceAuth, transport: OAuthTransport): Promise<{
-  authorizationEndpoint: string
-  tokenEndpoint: string
-  deviceAuthorizationEndpoint: string | null
+export async function resolveOAuthEndpoints(
+  auth: OAuthPkceAuth,
+  transport: OAuthTransport,
+): Promise<{
+  authorizationEndpoint: string;
+  tokenEndpoint: string;
+  deviceAuthorizationEndpoint: string | null;
 }> {
   const discovered: DiscoveryDocument = auth.discoveryUrl
     ? await fetchDiscovery(auth.discoveryUrl, transport)
-    : { issuer: undefined, authorization_endpoint: undefined, token_endpoint: undefined, device_authorization_endpoint: undefined }
+    : {
+        issuer: undefined,
+        authorization_endpoint: undefined,
+        token_endpoint: undefined,
+        device_authorization_endpoint: undefined,
+      };
   // The issuer check gates *adoption*, and adoption is a question about
   // provenance rather than about the resulting string: a configuration that
   // states the same token endpoint its IdP publishes has not adopted anything,
@@ -375,16 +402,16 @@ export async function resolveOAuthEndpoints(auth: OAuthPkceAuth, transport: OAut
   // `authorizeUrl` and `tokenUrl` mandatory and they take precedence. That is
   // exactly why the guard belongs here now, rather than in the change that
   // eventually relaxes either of them to optional.
-  const adoptsAuthorization = !auth.authorizeUrl && Boolean(discovered.authorization_endpoint)
-  const adoptsToken = !auth.tokenUrl && Boolean(discovered.token_endpoint)
+  const adoptsAuthorization = !auth.authorizeUrl && Boolean(discovered.authorization_endpoint);
+  const adoptsToken = !auth.tokenUrl && Boolean(discovered.token_endpoint);
   if (auth.discoveryUrl && (adoptsAuthorization || adoptsToken)) {
-    assertDiscoveryIssuer(auth.discoveryUrl, discovered.issuer ?? null)
+    assertDiscoveryIssuer(auth.discoveryUrl, discovered.issuer ?? null);
   }
   return {
-    authorizationEndpoint: auth.authorizeUrl || discovered.authorization_endpoint || '',
-    tokenEndpoint: auth.tokenUrl || discovered.token_endpoint || '',
+    authorizationEndpoint: auth.authorizeUrl || discovered.authorization_endpoint || "",
+    tokenEndpoint: auth.tokenUrl || discovered.token_endpoint || "",
     deviceAuthorizationEndpoint: discovered.device_authorization_endpoint ?? null,
-  }
+  };
 }
 
 /**
@@ -402,25 +429,25 @@ export async function resolveOAuthEndpoints(auth: OAuthPkceAuth, transport: OAut
  * used to fill in what the configuration does not state.
  */
 function resolveTokenEndpoint(auth: OAuthAuthConfig): string {
-  return auth.tokenUrl
+  return auth.tokenUrl;
 }
 
 async function fetchDiscovery(url: string, transport: OAuthTransport): Promise<DiscoveryDocument> {
   const response = await transport({
     url,
-    method: 'GET',
-    headers: { accept: 'application/json' },
-  })
+    method: "GET",
+    headers: { accept: "application/json" },
+  });
   if (response.status < 200 || response.status >= 300) {
-    throw new Error(`oauth discovery failed with status ${response.status}`)
+    throw new Error(`oauth discovery failed with status ${response.status}`);
   }
-  const body = asRecord(response.body)
+  const body = asRecord(response.body);
   return {
-    issuer: optionalString(body, 'issuer') ?? undefined,
-    authorization_endpoint: discoveredEndpoint(body, 'authorization_endpoint'),
-    token_endpoint: discoveredEndpoint(body, 'token_endpoint'),
-    device_authorization_endpoint: discoveredEndpoint(body, 'device_authorization_endpoint'),
-  }
+    issuer: optionalString(body, "issuer") ?? undefined,
+    authorization_endpoint: discoveredEndpoint(body, "authorization_endpoint"),
+    token_endpoint: discoveredEndpoint(body, "token_endpoint"),
+    device_authorization_endpoint: discoveredEndpoint(body, "device_authorization_endpoint"),
+  };
 }
 
 /**
@@ -436,10 +463,11 @@ async function fetchDiscovery(url: string, transport: OAuthTransport): Promise<D
  * an unrelated error several frames later.
  */
 function discoveredEndpoint(body: Record<string, unknown>, field: string): string | undefined {
-  const raw = optionalString(body, field)
-  if (raw === null) return undefined
-  if (!parseOAuthEndpointUrl(raw)) throw new Error(`oauth discovery document has an unusable ${field}`)
-  return raw
+  const raw = optionalString(body, field);
+  if (raw === null) return undefined;
+  if (!parseOAuthEndpointUrl(raw))
+    throw new Error(`oauth discovery document has an unusable ${field}`);
+  return raw;
 }
 
 /**
@@ -457,31 +485,31 @@ function discoveredEndpoint(body: Record<string, unknown>, field: string): strin
  * having to know which convention the server chose.
  */
 function assertDiscoveryIssuer(discoveryUrl: string, issuer: string | null): void {
-  const expected = expectedIssuer(discoveryUrl)
+  const expected = expectedIssuer(discoveryUrl);
   if (expected === null) {
     throw new Error(
       `oauth discovery url is not a well-known metadata url, so its issuer cannot be checked: ${discoveryUrl}`,
-    )
+    );
   }
   if (!issuer) {
-    throw new Error('oauth discovery document has no issuer, so its endpoints cannot be adopted')
+    throw new Error("oauth discovery document has no issuer, so its endpoints cannot be adopted");
   }
   if (trimTrailingSlash(issuer) !== trimTrailingSlash(expected)) {
-    throw new Error(`oauth discovery issuer ${issuer} does not match ${discoveryUrl}`)
+    throw new Error(`oauth discovery issuer ${issuer} does not match ${discoveryUrl}`);
   }
 }
 
 function expectedIssuer(discoveryUrl: string): string | null {
-  const url = new URL(discoveryUrl)
-  const segments = url.pathname.split('/').filter((segment) => segment.length > 0)
-  const wellKnown = segments.indexOf('.well-known')
-  if (wellKnown < 0 || wellKnown + 1 >= segments.length) return null
-  const remainder = [...segments.slice(0, wellKnown), ...segments.slice(wellKnown + 2)]
-  return remainder.length === 0 ? url.origin : `${url.origin}/${remainder.join('/')}`
+  const url = new URL(discoveryUrl);
+  const segments = url.pathname.split("/").filter((segment) => segment.length > 0);
+  const wellKnown = segments.indexOf(".well-known");
+  if (wellKnown < 0 || wellKnown + 1 >= segments.length) return null;
+  const remainder = [...segments.slice(0, wellKnown), ...segments.slice(wellKnown + 2)];
+  return remainder.length === 0 ? url.origin : `${url.origin}/${remainder.join("/")}`;
 }
 
 function trimTrailingSlash(value: string): string {
-  return value.endsWith('/') ? value.slice(0, -1) : value
+  return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
 async function oauthTokenRequest(
@@ -489,17 +517,17 @@ async function oauthTokenRequest(
   url: string,
   parameters: Record<string, string>,
 ): Promise<Record<string, unknown>> {
-  const body = new URLSearchParams(parameters)
+  const body = new URLSearchParams(parameters);
   const response = await transport({
     url,
-    method: 'POST',
+    method: "POST",
     headers: {
-      accept: 'application/json',
-      'content-type': 'application/x-www-form-urlencoded',
+      accept: "application/json",
+      "content-type": "application/x-www-form-urlencoded",
     },
     body: body.toString(),
-  })
-  return asRecord(response.body)
+  });
+  return asRecord(response.body);
 }
 
 function tokenToCredential(
@@ -507,132 +535,164 @@ function tokenToCredential(
   nowMs: number,
   scopes: readonly string[],
   existingRefreshToken: SecretValue | null = null,
-): ProviderCredential & { kind: 'oauth' } {
-  const accessToken = requiredString(tokenResponse, 'access_token')
-  const refreshTokenRaw = optionalString(tokenResponse, 'refresh_token')
-  const expiresIn = optionalFiniteNumber(tokenResponse, 'expires_in')
+): ProviderCredential & { kind: "oauth" } {
+  const accessToken = requiredString(tokenResponse, "access_token");
+  const refreshTokenRaw = optionalString(tokenResponse, "refresh_token");
+  const expiresIn = optionalFiniteNumber(tokenResponse, "expires_in");
   const refreshExpiresIn =
-    optionalFiniteNumber(tokenResponse, 'refresh_token_expires_in') ??
-    optionalFiniteNumber(tokenResponse, 'refresh_expires_in')
+    optionalFiniteNumber(tokenResponse, "refresh_token_expires_in") ??
+    optionalFiniteNumber(tokenResponse, "refresh_expires_in");
   return {
-    kind: 'oauth',
+    kind: "oauth",
     accessToken: new SecretValue(accessToken),
     refreshToken: refreshTokenRaw ? new SecretValue(refreshTokenRaw) : existingRefreshToken,
     expiresAt: expiresIn === null ? null : new Date(nowMs + expiresIn * 1_000).toISOString(),
-    refreshTokenExpiresAt: refreshExpiresIn === null ? null : new Date(nowMs + refreshExpiresIn * 1_000).toISOString(),
+    refreshTokenExpiresAt:
+      refreshExpiresIn === null ? null : new Date(nowMs + refreshExpiresIn * 1_000).toISOString(),
     scopes,
-    subscriptionType: optionalString(tokenResponse, 'subscription_type'),
+    subscriptionType: optionalString(tokenResponse, "subscription_type"),
     obtainedAt: new Date(nowMs).toISOString(),
-  }
+  };
 }
 
-function shouldRefresh(credential: ProviderCredential & { kind: 'oauth' }, nowMs: number, skewMs: number): boolean {
-  if (!credential.expiresAt) return false
-  const expiresAt = Date.parse(credential.expiresAt)
-  return Number.isFinite(expiresAt) && nowMs + skewMs >= expiresAt
+function shouldRefresh(
+  credential: ProviderCredential & { kind: "oauth" },
+  nowMs: number,
+  skewMs: number,
+): boolean {
+  if (!credential.expiresAt) return false;
+  const expiresAt = Date.parse(credential.expiresAt);
+  return Number.isFinite(expiresAt) && nowMs + skewMs >= expiresAt;
 }
 
-function jitteredBackoff(baseMs: number, maxMs: number, attempt: number, random: () => number): number {
-  const core = Math.min(maxMs, baseMs * 2 ** attempt)
-  const jitter = core * 0.2 * (random() * 2 - 1)
-  return Math.max(0, Math.round(core + jitter))
+function jitteredBackoff(
+  baseMs: number,
+  maxMs: number,
+  attempt: number,
+  random: () => number,
+): number {
+  const core = Math.min(maxMs, baseMs * 2 ** attempt);
+  const jitter = core * 0.2 * (random() * 2 - 1);
+  return Math.max(0, Math.round(core + jitter));
 }
 
 function isTransientRefreshError(error: string | null): boolean {
-  return error === null || error === 'temporarily_unavailable' || error === 'server_error' || error === 'slow_down'
+  return (
+    error === null ||
+    error === "temporarily_unavailable" ||
+    error === "server_error" ||
+    error === "slow_down"
+  );
 }
 
-async function createLoopbackListener(pathname: string, timeoutMs: number): Promise<{
-  redirectUri: string
-  waitForCallback: () => Promise<{ state: string | null; code: string | null; error: string | null }>
-  close: () => Promise<void>
+async function createLoopbackListener(
+  pathname: string,
+  timeoutMs: number,
+): Promise<{
+  redirectUri: string;
+  waitForCallback: () => Promise<{
+    state: string | null;
+    code: string | null;
+    error: string | null;
+  }>;
+  close: () => Promise<void>;
 }> {
-  let resolved = false
-  let timeout: ReturnType<typeof setTimeout> | null = null
-  let settle: ((value: { state: string | null; code: string | null; error: string | null }) => void) | null = null
-  let fail: ((error: Error) => void) | null = null
-  const callbackPromise = new Promise<{ state: string | null; code: string | null; error: string | null }>((resolve, reject) => {
-    settle = resolve
-    fail = reject
-  })
+  let resolved = false;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  let settle:
+    | ((value: { state: string | null; code: string | null; error: string | null }) => void)
+    | null = null;
+  let fail: ((error: Error) => void) | null = null;
+  const callbackPromise = new Promise<{
+    state: string | null;
+    code: string | null;
+    error: string | null;
+  }>((resolve, reject) => {
+    settle = resolve;
+    fail = reject;
+  });
 
   const server = createServer((request, response) => {
     if (resolved) {
-      response.statusCode = 409
-      response.end('Already handled')
-      return
+      response.statusCode = 409;
+      response.end("Already handled");
+      return;
     }
-    const url = new URL(request.url ?? '/', 'http://127.0.0.1')
+    const url = new URL(request.url ?? "/", "http://127.0.0.1");
     if (url.pathname !== pathname) {
-      response.statusCode = 404
-      response.end('Not Found')
-      return
+      response.statusCode = 404;
+      response.end("Not Found");
+      return;
     }
-    resolved = true
-    response.statusCode = 200
-    response.setHeader('content-type', 'text/plain; charset=utf-8')
-    response.end('Authorization captured. You can close this tab.')
-    if (timeout) clearTimeout(timeout)
+    resolved = true;
+    response.statusCode = 200;
+    response.setHeader("content-type", "text/plain; charset=utf-8");
+    response.end("Authorization captured. You can close this tab.");
+    if (timeout) clearTimeout(timeout);
     settle?.({
-      state: url.searchParams.get('state'),
-      code: url.searchParams.get('code'),
-      error: url.searchParams.get('error'),
-    })
-  })
+      state: url.searchParams.get("state"),
+      code: url.searchParams.get("code"),
+      error: url.searchParams.get("error"),
+    });
+  });
 
   await new Promise<void>((resolve, reject) => {
-    server.once('error', reject)
-    server.listen(0, '127.0.0.1', () => {
-      server.off('error', reject)
-      resolve()
-    })
-  })
-  const address = server.address()
-  if (!address || typeof address === 'string') throw new Error('oauth loopback listener failed to bind')
-  const redirectUri = `http://127.0.0.1:${address.port}${pathname}`
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      server.off("error", reject);
+      resolve();
+    });
+  });
+  const address = server.address();
+  if (!address || typeof address === "string")
+    throw new Error("oauth loopback listener failed to bind");
+  const redirectUri = `http://127.0.0.1:${address.port}${pathname}`;
 
   timeout = setTimeout(() => {
-    if (resolved) return
-    resolved = true
-    fail?.(new Error('oauth loopback callback timed out'))
-  }, timeoutMs)
+    if (resolved) return;
+    resolved = true;
+    fail?.(new Error("oauth loopback callback timed out"));
+  }, timeoutMs);
 
   return {
     redirectUri,
     waitForCallback: () => callbackPromise,
     close: () =>
       new Promise<void>((resolve, reject) => {
-        if (timeout) clearTimeout(timeout)
-        server.close((error) => (error ? reject(error) : resolve()))
+        if (timeout) clearTimeout(timeout);
+        server.close((error) => (error ? reject(error) : resolve()));
       }),
-  }
+  };
 }
 
 function base64Url(bytes: Uint8Array): string {
   return Buffer.from(bytes)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '')
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function requiredString(value: Record<string, unknown>, field: string): string {
-  const raw = value[field]
-  if (typeof raw !== 'string' || raw.length === 0) throw new Error(`oauth response missing ${field}`)
-  return raw
+  const raw = value[field];
+  if (typeof raw !== "string" || raw.length === 0)
+    throw new Error(`oauth response missing ${field}`);
+  return raw;
 }
 
 function optionalString(value: Record<string, unknown>, field: string): string | null {
-  const raw = value[field]
-  return typeof raw === 'string' && raw.length > 0 ? raw : null
+  const raw = value[field];
+  return typeof raw === "string" && raw.length > 0 ? raw : null;
 }
 
 function optionalFiniteNumber(value: Record<string, unknown>, field: string): number | null {
-  const raw = value[field]
-  const parsed = typeof raw === 'string' ? Number(raw) : raw
-  return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : null
+  const raw = value[field];
+  const parsed = typeof raw === "string" ? Number(raw) : raw;
+  return typeof parsed === "number" && Number.isFinite(parsed) ? parsed : null;
 }

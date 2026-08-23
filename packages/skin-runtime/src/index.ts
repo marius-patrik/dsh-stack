@@ -1,16 +1,16 @@
-export type SkinId = 'deepseek' | 'claude' | 'codex';
+export type SkinId = "deepseek" | "claude" | "codex";
 
 export interface SkinOption {
   readonly id: SkinId;
   readonly label: string;
 }
 
-const STORAGE_KEY = 'dsh-stack.ui.skin';
+const STORAGE_KEY = "dsh-stack.ui.skin";
 
 export const defaultSkins: readonly SkinOption[] = [
-  { id: 'deepseek', label: 'DeepSeek' },
-  { id: 'claude', label: 'Claude' },
-  { id: 'codex', label: 'Codex' },
+  { id: "deepseek", label: "DeepSeek" },
+  { id: "claude", label: "Claude" },
+  { id: "codex", label: "Codex" },
 ];
 
 export interface SkinRuntime {
@@ -23,7 +23,7 @@ export function createSkinRuntime(
   options: readonly SkinOption[] = defaultSkins,
   reload: () => void = () => undefined,
 ): SkinRuntime {
-  if (options.length === 0) throw new Error('At least one skin is required');
+  if (options.length === 0) throw new Error("At least one skin is required");
   const allowed = new Set(options.map((skin) => skin.id));
   const listeners = new Set<() => void>();
   let active = readStoredSkin(allowed) ?? options[0]!.id;

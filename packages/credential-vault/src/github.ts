@@ -16,19 +16,19 @@
  * @module dsh-credentials/github
  */
 
-import type { OAuthPkceAuth } from './vault/descriptor.js'
-import { registerProviderRoutes, registerOAuthSupplement } from './vault/provider-descriptor.js'
+import type { OAuthPkceAuth } from "./vault/descriptor.js";
+import { registerProviderRoutes, registerOAuthSupplement } from "./vault/provider-descriptor.js";
 
 /** The GitHub OAuth authorization-server endpoints. */
-export const GITHUB_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
-export const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
-export const GITHUB_API_BASE = 'https://api.github.com'
+export const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
+export const GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
+export const GITHUB_API_BASE = "https://api.github.com";
 
 /** The scopes the GitHub OAuth App is asked for. */
-export const GITHUB_DEFAULT_SCOPES: readonly string[] = ['repo', 'workflow']
+export const GITHUB_DEFAULT_SCOPES: readonly string[] = ["repo", "workflow"];
 
 /** Public (non-secret) client id of the GitHub OAuth App, when configured. */
-export const GITHUB_CLIENT_ID = process.env['GITHUB_OAUTH_CLIENT_ID'] ?? ''
+export const GITHUB_CLIENT_ID = process.env["GITHUB_OAUTH_CLIENT_ID"] ?? "";
 
 /**
  * Build the GitHub PKCE auth from a configured client id. GitHub requires a
@@ -37,15 +37,18 @@ export const GITHUB_CLIENT_ID = process.env['GITHUB_OAUTH_CLIENT_ID'] ?? ''
  * is skipped so the supervisor answers honestly that no refresh protocol is
  * configured.
  */
-export function githubOAuth(clientId: string, scopes: readonly string[] = GITHUB_DEFAULT_SCOPES): OAuthPkceAuth {
+export function githubOAuth(
+  clientId: string,
+  scopes: readonly string[] = GITHUB_DEFAULT_SCOPES,
+): OAuthPkceAuth {
   return {
-    method: 'oauth_pkce',
+    method: "oauth_pkce",
     authorizeUrl: GITHUB_AUTHORIZE_URL,
     tokenUrl: GITHUB_TOKEN_URL,
     clientId,
     scopes: [...scopes],
-    redirect: 'loopback',
-  }
+    redirect: "loopback",
+  };
 }
 
 /**
@@ -53,11 +56,14 @@ export function githubOAuth(clientId: string, scopes: readonly string[] = GITHUB
  * refresh supplement. Idempotent: later calls overwrite the route and
  * supplement exactly like the LLM route registrations do.
  */
-export function registerGithubCredentials(clientId: string = GITHUB_CLIENT_ID, scopes?: readonly string[]): void {
+export function registerGithubCredentials(
+  clientId: string = GITHUB_CLIENT_ID,
+  scopes?: readonly string[],
+): void {
   registerProviderRoutes([
-    { id: 'github', displayName: 'GitHub', authKind: 'oauth', baseURL: GITHUB_API_BASE },
-  ])
+    { id: "github", displayName: "GitHub", authKind: "oauth", baseURL: GITHUB_API_BASE },
+  ]);
   if (clientId.length > 0) {
-    registerOAuthSupplement({ github: githubOAuth(clientId, scopes) })
+    registerOAuthSupplement({ github: githubOAuth(clientId, scopes) });
   }
 }

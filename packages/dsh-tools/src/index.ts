@@ -12,46 +12,55 @@
  * @module dsh-tools
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import type {} from '@deepseek-ai/dsh-subprocess'
-import type {} from '@deepseek-ai/dsh-settings'
-import { defineTool } from '@deepseek-ai/dsh-tools'
-import { installSettingsSection } from '@deepseek-ai/dsh-settings'
-import type { ParameterSchemaSpec, ValueSchemaSpec } from '@deepseek-ai/dsh-tools'
+import type { Context } from "@deepseek-ai/cordis";
+import z from "@deepseek-ai/schemastery";
+import type {} from "@deepseek-ai/dsh-subprocess";
+import type {} from "@deepseek-ai/dsh-settings";
+import { defineTool } from "@deepseek-ai/dsh-tools";
+import { installSettingsSection } from "@deepseek-ai/dsh-settings";
+import type { ParameterSchemaSpec, ValueSchemaSpec } from "@deepseek-ai/dsh-tools";
 import {
-  NS, ToolSettings, ToolsConfig,
-  toolsFor, commandArgv,
+  NS,
+  ToolSettings,
+  ToolsConfig,
+  toolsFor,
+  commandArgv,
   type ToolSettings as ToolSettingsType,
   type ToolsConfig as ToolsConfigType,
   type ToolConfig as ToolConfigType,
   type ToolParameter as ToolParameterType,
-} from './settings.js'
+} from "./settings.js";
 
-export type * from './settings.js'
+export type * from "./settings.js";
 
-export const name = 'dsh-tools'
-export const inject = ['subprocess', 'tools']
+export const name = "dsh-tools";
+export const inject = ["subprocess", "tools"];
 
-export const Config: z<ToolsConfig> = ToolsConfig
+export const Config: z<ToolsConfig> = ToolsConfig;
 
 /** The cwd a custom tool runs in: the caller's cwd (paths resolve via the filesystem seam). */
 function runCwd(): string {
-  return process.cwd()
+  return process.cwd();
 }
 
 /** Map a config-file parameter spec onto the tool-schema `ValueSchemaSpec` shape. */
 function parameterSchema(param: ToolParameterType): ValueSchemaSpec {
-  return { type: param.type, ...param.description !== undefined ? { description: param.description } : {} }
+  return {
+    type: param.type,
+    ...(param.description !== undefined ? { description: param.description } : {}),
+  };
 }
 
 /** The schema a config-file tool's validated arguments are checked against. */
 function parametersSchema(tool: ToolConfigType): ParameterSchemaSpec {
-  const properties: Record<string, ValueSchemaSpec & { required?: true }> = {}
+  const properties: Record<string, ValueSchemaSpec & { required?: true }> = {};
   for (const [name, param] of Object.entries(tool.parameters ?? {})) {
-    properties[name] = { ...parameterSchema(param), ...param.required === true ? { required: true as const } : {} }
+    properties[name] = {
+      ...parameterSchema(param),
+      ...(param.required === true ? { required: true as const } : {}),
+    };
   }
-  return properties
+  return properties;
 }
 
 /**
@@ -64,19 +73,19 @@ async function runToolCommand(ctx: Context, argv: string[], signal?: AbortSignal
     argv,
     cwd: runCwd(),
     stdio: {
-      stdin: { data: '' },
+      stdin: { data: "" },
       stdout: { maxBytes: 1_000_000 },
       stderr: { maxBytes: 1_000_000 },
     },
     graceMs: 30_000,
     signal,
-  })
-  const outcome = await spawn.done
+  });
+  const outcome = await spawn.done;
   return {
-    stdout: spawn.collected.stdout?.readFrom(0).text ?? '',
-    stderr: spawn.collected.stderr?.readFrom(0).text ?? '',
+    stdout: spawn.collected.stdout?.readFrom(0).text ?? "",
+    stderr: spawn.collected.stderr?.readFrom(0).text ?? "",
     exitCode: outcome.exitCode ?? -1,
-  }
+  };
 }
 
 /**
@@ -86,41 +95,54 @@ async function runToolCommand(ctx: Context, argv: string[], signal?: AbortSignal
  * @param config - the plugin's deployment configuration.
  */
 export function apply(ctx: Context, config: ToolsConfigType): void {
-  installSettingsSection(ctx, NS, ToolSettings, { tools: {} }, {
-    setSource: () => {},
-    onChange: () => {},
-  })
+  installSettingsSection(
+    ctx,
+    NS,
+    ToolSettings,
+    { tools: {} },
+    {
+      setSource: () => {},
+      onChange: () => {},
+    },
+  );
 
-  ctx.inject(['settings'], (sctx) => {
-    const settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined
+  ctx.inject(["settings"], (sctx) => {
+    const settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
 
     for (const [name, tool] of Object.entries(toolsFor(settings(), config))) {
-      ctx.tools.register(defineTool({
-        name,
-        description: tool.description,
-        parameters: parametersSchema(tool),
-        output: {
-          schema: {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              stdout: { type: 'string', required: true },
-              stderr: { type: 'string', required: true },
-              exitCode: { type: 'integer', required: true },
+      ctx.tools.register(
+        defineTool({
+          name,
+          description: tool.description,
+          parameters: parametersSchema(tool),
+          output: {
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                stdout: { type: "string", required: true },
+                stderr: { type: "string", required: true },
+                exitCode: { type: "integer", required: true },
+              },
             },
+            render: (_args, value) => [
+              {
+                type: "text",
+                text:
+                  value.exitCode === 0
+                    ? value.stdout.length > 0
+                      ? value.stdout
+                      : `exit ${value.exitCode}`
+                    : `exit ${value.exitCode}\n${value.stderr.length > 0 ? value.stderr : value.stdout}`,
+              },
+            ],
           },
-          render: (_args, value) => [{
-            type: 'text',
-            text: value.exitCode === 0
-              ? (value.stdout.length > 0 ? value.stdout : `exit ${value.exitCode}`)
-              : `exit ${value.exitCode}\n${value.stderr.length > 0 ? value.stderr : value.stdout}`,
-          }],
-        },
-        async execute(args, exec) {
-          const argv = commandArgv(tool, args as Record<string, unknown>)
-          return await runToolCommand(ctx, argv, exec.signal)
-        },
-      }))
+          async execute(args, exec) {
+            const argv = commandArgv(tool, args as Record<string, unknown>);
+            return await runToolCommand(ctx, argv, exec.signal);
+          },
+        }),
+      );
     }
-  })
+  });
 }

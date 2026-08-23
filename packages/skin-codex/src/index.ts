@@ -1,2 +1,2 @@
-export const skinId = 'codex' as const;
-export const skinLabel = 'Codex';
+export const skinId = "codex" as const;
+export const skinLabel = "Codex";

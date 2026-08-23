@@ -7,18 +7,18 @@
  * @module dsh-dialects/sse
  */
 
-import { EventSourceParserStream } from 'eventsource-parser/stream'
-import { LlmError } from '@deepseek-ai/dsh-llm'
+import { EventSourceParserStream } from "eventsource-parser/stream";
+import { LlmError } from "@deepseek-ai/dsh-llm";
 
 /** The terminal payload OpenAI-compatible servers send after the last chunk. */
-export const DONE = '[DONE]'
+export const DONE = "[DONE]";
 
 /** One parsed SSE event. */
 export interface SseEvent {
   /** The event field; empty when the server sent a bare data payload. */
-  event: string
+  event: string;
   /** The data payload. */
-  data: string
+  data: string;
 }
 
 /**
@@ -36,9 +36,9 @@ export async function* parseSseEvents(
 ): AsyncGenerator<SseEvent> {
   const events = stream
     .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new EventSourceParserStream({ onComment }))
+    .pipeThrough(new EventSourceParserStream({ onComment }));
   for await (const event of events) {
-    yield { event: event.event ?? '', data: event.data }
+    yield { event: event.event ?? "", data: event.data };
   }
 }
 
@@ -56,8 +56,8 @@ export async function* parseSseData(
   onComment?: (comment: string) => void,
 ): AsyncGenerator<string> {
   for await (const { data } of parseSseEvents(stream, onComment)) {
-    yield data
-    if (data === DONE) return
+    yield data;
+    if (data === DONE) return;
   }
-  throw new LlmError('SSE stream ended without [DONE]', 'STREAM_CLOSED')
+  throw new LlmError("SSE stream ended without [DONE]", "STREAM_CLOSED");
 }

@@ -1,6 +1,6 @@
-import type { BacktestResult, Strategy } from '@dsh-stack/trading-backtest';
-import { runBacktest } from '@dsh-stack/trading-backtest';
-import type { Candle } from '@dsh-stack/trading-research';
+import type { BacktestResult, Strategy } from "@dsh-stack/trading-backtest";
+import { runBacktest } from "@dsh-stack/trading-backtest";
+import type { Candle } from "@dsh-stack/trading-research";
 
 export type ParameterValue = string | number | boolean;
 export type ParameterGrid = Readonly<Record<string, readonly ParameterValue[]>>;
@@ -25,7 +25,7 @@ export function gridSearch(
   options: OptimizationOptions = {},
   testCandles?: readonly Candle[],
 ): readonly Evaluation[] {
-  if (!(trainSplit > 0 && trainSplit < 1)) throw new Error('trainSplit must be between 0 and 1');
+  if (!(trainSplit > 0 && trainSplit < 1)) throw new Error("trainSplit must be between 0 and 1");
   const splitIndex = Math.floor(candles.length * trainSplit);
   const train = candles.slice(0, splitIndex);
   const test = testCandles ?? candles.slice(splitIndex);
@@ -45,12 +45,17 @@ export function gridSearch(
     const rightScore = objective(right.test ?? right.train);
     return rightScore - leftScore;
   });
-  return options.limit === undefined ? evaluations : evaluations.slice(0, Math.max(0, options.limit));
+  return options.limit === undefined
+    ? evaluations
+    : evaluations.slice(0, Math.max(0, options.limit));
 }
 
 function* combinations(grid: ParameterGrid): Generator<Record<string, ParameterValue>> {
   const entries = Object.entries(grid);
-  function* walk(index: number, current: Record<string, ParameterValue>): Generator<Record<string, ParameterValue>> {
+  function* walk(
+    index: number,
+    current: Record<string, ParameterValue>,
+  ): Generator<Record<string, ParameterValue>> {
     if (index === entries.length) {
       yield { ...current };
       return;

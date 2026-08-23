@@ -12,11 +12,11 @@
  * @module dsh-credentials/web
  */
 
-import { randomBytes } from 'node:crypto'
-import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-host-webserver'
-import type { AccountsService } from './index.js'
+import { randomBytes } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import type { Context } from "@deepseek-ai/cordis";
+import type {} from "@deepseek-ai/dsh-host-webserver";
+import type { AccountsService } from "./index.js";
 import {
   PROVIDER_LOGINS,
   requestDeviceCode,
@@ -27,72 +27,78 @@ import {
   submitCliAuthCode,
   type DeviceFlowProvider,
   type CliLoginProvider,
-} from './login.js'
+} from "./login.js";
 
 /** In-memory map of active device flow poll sessions. Keyed by random poll token. */
-const devicePollState = new Map<string, { provider: DeviceFlowProvider; device: { device_code: string }; createdAt: number }>()
+const devicePollState = new Map<
+  string,
+  { provider: DeviceFlowProvider; device: { device_code: string }; createdAt: number }
+>();
 
 /** The prefix route mounting the page and API. */
-export const VAULT_PREFIX = '/vault'
+export const VAULT_PREFIX = "/vault";
 
 /** Canonical references the UI offers as quick-add affordances. */
 export const KNOWN_REF_NAMES: readonly string[] = [
-  'CLAUDE_SUB_OAUTH_TOKEN',
-  'CLAUDE_API_KEY',
-  'CURSOR_SUB_TOKEN',
-  'CURSOR_EMAIL',
-  'CURSOR_SIGNUP_TYPE',
-  'GROK_SUB_OAUTH_TOKEN',
-  'KIMI_SUB_OAUTH_TOKEN',
-  'KIMI_API_KEY',
-  'OPENAI_API_KEY',
-  'ANTHROPIC_API_KEY',
-  'GEMINI_API_KEY',
-  'XAI_API_KEY',
-  'DEEPSEEK_API_KEY',
-  'MISTRAL_API_KEY',
-  'ANTIGRAVITY_PROJECT',
-  'ZEN_API_KEY',
-  'GROQ_API_KEY',
-  'OPENROUTER_API_KEY',
-  'GITHUB_OAUTH_TOKEN',
-  'GITHUB_USER',
-  'GITHUB_ENTERPRISE_TOKEN',
-  'GITHUB_ENTERPRISE_HOST',
-]
+  "CLAUDE_SUB_OAUTH_TOKEN",
+  "CLAUDE_API_KEY",
+  "CURSOR_SUB_TOKEN",
+  "CURSOR_EMAIL",
+  "CURSOR_SIGNUP_TYPE",
+  "GROK_SUB_OAUTH_TOKEN",
+  "KIMI_SUB_OAUTH_TOKEN",
+  "KIMI_API_KEY",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "GEMINI_API_KEY",
+  "XAI_API_KEY",
+  "DEEPSEEK_API_KEY",
+  "MISTRAL_API_KEY",
+  "ANTIGRAVITY_PROJECT",
+  "ZEN_API_KEY",
+  "GROQ_API_KEY",
+  "OPENROUTER_API_KEY",
+  "GITHUB_OAUTH_TOKEN",
+  "GITHUB_USER",
+  "GITHUB_ENTERPRISE_TOKEN",
+  "GITHUB_ENTERPRISE_HOST",
+];
 
 /** The largest accepted request body (a stored secret). */
-const MAX_BODY_BYTES = 1024 * 1024
+const MAX_BODY_BYTES = 1024 * 1024;
 
 /** A reference is valid when it decodes to a path-safe uppercase name. */
 function isValidRef(ref: string): boolean {
-  return /^[A-Z0-9_][A-Z0-9_.-]*$/.test(ref)
+  return /^[A-Z0-9_][A-Z0-9_.-]*$/.test(ref);
 }
 
 /** JSON helper: one stable error shape with a status and a plain message. */
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
-  const payload = JSON.stringify(body)
-  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
-  res.end(payload)
+  const payload = JSON.stringify(body);
+  res.writeHead(status, {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store",
+  });
+  res.end(payload);
 }
 
 /** Consume a request body, bounded by {@link MAX_BODY_BYTES}. */
 function readBody(req: IncomingMessage, limit = MAX_BODY_BYTES): Promise<string> {
   return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []
-    let total = 0
-    req.on('data', (chunk: Buffer) => {
-      total += chunk.byteLength
+    const chunks: Buffer[] = [];
+    let total = 0;
+    req.on("data", (chunk: Buffer) => {
+      total += chunk.byteLength;
       if (total > limit) {
-        reject(new Error('request body too large'))
-        req.destroy()
-        return
+        reject(new Error("request body too large"));
+        req.destroy();
+        return;
       }
-      chunks.push(chunk)
-    })
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
-    req.on('error', reject)
-  })
+      chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
 }
 
 /**
@@ -101,256 +107,359 @@ function readBody(req: IncomingMessage, limit = MAX_BODY_BYTES): Promise<string>
  * seam resolves it, and the known quick-add set index.
  */
 export interface VaultListRow {
-  ref: string
-  account: string | null
-  kind: string
-  purpose: string | null
-  label: string | null
-  expiresAt: string | null
-  inVault: boolean
-  ambient: boolean
+  ref: string;
+  account: string | null;
+  kind: string;
+  purpose: string | null;
+  label: string | null;
+  expiresAt: string | null;
+  inVault: boolean;
+  ambient: boolean;
 }
 
 /** Build the list rows for the page: vault-held refs first, then quick-adds. */
 export async function listRows(accounts: AccountsService): Promise<VaultListRow[]> {
-  const held = await accounts.accounts()
-  const heldRefs = new Set(held.map((entry) => entry.ref))
-  const rows: VaultListRow[] = []
-  const push = async (ref: string, account: string | null, metadata?: { kind: string; purpose: string; label: string; expiresAt: string | null }): Promise<void> => {
-    const resolved = await accounts.resolve(ref)
+  const held = await accounts.accounts();
+  const heldRefs = new Set(held.map((entry) => entry.ref));
+  const rows: VaultListRow[] = [];
+  const push = async (
+    ref: string,
+    account: string | null,
+    metadata?: { kind: string; purpose: string; label: string; expiresAt: string | null },
+  ): Promise<void> => {
+    const resolved = await accounts.resolve(ref);
     rows.push({
       ref,
       account,
-      kind: metadata?.kind ?? 'api_key',
+      kind: metadata?.kind ?? "api_key",
       purpose: metadata?.purpose ?? null,
       label: metadata?.label ?? null,
       expiresAt: metadata?.expiresAt ?? null,
       inVault: heldRefs.has(ref),
-      ambient: resolved?.origin === 'credentials',
-    })
-  }
-  for (const entry of held) await push(entry.ref, entry.account, entry)
+      ambient: resolved?.origin === "credentials",
+    });
+  };
+  for (const entry of held) await push(entry.ref, entry.account, entry);
   for (const ref of KNOWN_REF_NAMES) {
-    if (heldRefs.has(ref)) continue
-    await push(ref, null)
+    if (heldRefs.has(ref)) continue;
+    await push(ref, null);
   }
-  return rows
+  return rows;
 }
 
 /** The JSON API handler under the `/vault` prefix. */
-export function makeVaultHandler(accounts: AccountsService): (req: IncomingMessage, res: ServerResponse) => Promise<void> {
+export function makeVaultHandler(
+  accounts: AccountsService,
+): (req: IncomingMessage, res: ServerResponse) => Promise<void> {
   return async (req, res) => {
-    const url = new URL(req.url ?? '/', 'http://vault.local')
-    const pathname = url.pathname
+    const url = new URL(req.url ?? "/", "http://vault.local");
+    const pathname = url.pathname;
     try {
       if (pathname === VAULT_PREFIX) {
-        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' })
-        res.end(renderVaultPage())
-        return
+        res.writeHead(200, {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+        });
+        res.end(renderVaultPage());
+        return;
       }
       if (pathname === `${VAULT_PREFIX}/api/accounts`) {
-        if (req.method === 'GET') {
-          sendJson(res, 200, { rows: await listRows(accounts) })
-          return
+        if (req.method === "GET") {
+          sendJson(res, 200, { rows: await listRows(accounts) });
+          return;
         }
-        sendJson(res, 405, { error: 'method not allowed' })
-        return
+        sendJson(res, 405, { error: "method not allowed" });
+        return;
       }
 
       // ---- Login flow endpoints ----
 
-      if (pathname === `${VAULT_PREFIX}/api/login/providers` && req.method === 'GET') {
+      if (pathname === `${VAULT_PREFIX}/api/login/providers` && req.method === "GET") {
         sendJson(res, 200, {
           providers: PROVIDER_LOGINS.map((p) => ({
             id: p.id,
             label: p.label,
             kind: p.kind,
-            description: p.kind === 'manual' ? (p as any).description : p.kind === 'cli' ? 'CLI-based sign in (opens browser)' : undefined,
+            description:
+              p.kind === "manual"
+                ? (p as any).description
+                : p.kind === "cli"
+                  ? "CLI-based sign in (opens browser)"
+                  : undefined,
           })),
-        })
-        return
+        });
+        return;
       }
 
-      if (pathname === `${VAULT_PREFIX}/api/login/device/start` && req.method === 'POST') {
-        const body = await readBody(req)
-        let parsed: { providerId?: string }
-        try { parsed = JSON.parse(body) } catch { sendJson(res, 400, { error: 'request body must be JSON' }); return }
-        const provider = PROVIDER_LOGINS.find((p) => p.id === parsed.providerId && p.kind === 'device') as DeviceFlowProvider | undefined
-        if (!provider) { sendJson(res, 404, { error: `unknown device provider: ${JSON.stringify(parsed.providerId)}` }); return }
+      if (pathname === `${VAULT_PREFIX}/api/login/device/start` && req.method === "POST") {
+        const body = await readBody(req);
+        let parsed: { providerId?: string };
         try {
-          const device = await requestDeviceCode(provider)
+          parsed = JSON.parse(body);
+        } catch {
+          sendJson(res, 400, { error: "request body must be JSON" });
+          return;
+        }
+        const provider = PROVIDER_LOGINS.find(
+          (p) => p.id === parsed.providerId && p.kind === "device",
+        ) as DeviceFlowProvider | undefined;
+        if (!provider) {
+          sendJson(res, 404, {
+            error: `unknown device provider: ${JSON.stringify(parsed.providerId)}`,
+          });
+          return;
+        }
+        try {
+          const device = await requestDeviceCode(provider);
           // Store the device code in a short-lived in-memory map keyed by a random token
-          const pollToken = randomBytes(16).toString('hex')
-          devicePollState.set(pollToken, { provider, device, createdAt: Date.now() })
+          const pollToken = randomBytes(16).toString("hex");
+          devicePollState.set(pollToken, { provider, device, createdAt: Date.now() });
           // Auto-expire after 10 minutes
-          setTimeout(() => { devicePollState.delete(pollToken) }, 10 * 60 * 1000)
+          setTimeout(
+            () => {
+              devicePollState.delete(pollToken);
+            },
+            10 * 60 * 1000,
+          );
           sendJson(res, 200, {
             pollToken,
             verificationUri: device.verification_uri_complete ?? device.verification_uri,
             userCode: device.user_code,
             expiresIn: device.expires_in ?? 300,
-          })
+          });
         } catch (error) {
-          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) })
+          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) });
         }
-        return
+        return;
       }
 
-      if (pathname === `${VAULT_PREFIX}/api/login/device/poll` && req.method === 'POST') {
-        const body = await readBody(req)
-        let parsed: { pollToken?: string }
-        try { parsed = JSON.parse(body) } catch { sendJson(res, 400, { error: 'request body must be JSON' }); return }
-        const state = parsed.pollToken ? devicePollState.get(parsed.pollToken) : undefined
-        if (!state) { sendJson(res, 404, { error: 'invalid or expired poll token' }); return }
+      if (pathname === `${VAULT_PREFIX}/api/login/device/poll` && req.method === "POST") {
+        const body = await readBody(req);
+        let parsed: { pollToken?: string };
         try {
-          const result = await pollDeviceToken(state.provider, state.device.device_code)
-          if (!result) { sendJson(res, 200, { status: 'pending' }); return }
-          // Success — write tokens to vault
-          const now = new Date().toISOString()
-          const expiresAt = result.expires_in ? new Date(Date.now() + result.expires_in * 1000).toISOString() : null
-          const refs = state.provider.vaultRefs
-          if (result.access_token) await accounts.set(refs.accessToken, result.access_token)
-          if (result.refresh_token && refs.refreshToken) await accounts.set(refs.refreshToken, result.refresh_token)
-          // The expiry REF is consumed by dsh-providers as epoch millis; the ISO form stays display-only.
-          if (expiresAt && refs.expires) await accounts.set(refs.expires, String(Date.parse(expiresAt)))
-          devicePollState.delete(parsed.pollToken!)
-          sendJson(res, 200, { status: 'authenticated', expiresAt })
-        } catch (error) {
-          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) })
+          parsed = JSON.parse(body);
+        } catch {
+          sendJson(res, 400, { error: "request body must be JSON" });
+          return;
         }
-        return
+        const state = parsed.pollToken ? devicePollState.get(parsed.pollToken) : undefined;
+        if (!state) {
+          sendJson(res, 404, { error: "invalid or expired poll token" });
+          return;
+        }
+        try {
+          const result = await pollDeviceToken(state.provider, state.device.device_code);
+          if (!result) {
+            sendJson(res, 200, { status: "pending" });
+            return;
+          }
+          // Success — write tokens to vault
+          const now = new Date().toISOString();
+          const expiresAt = result.expires_in
+            ? new Date(Date.now() + result.expires_in * 1000).toISOString()
+            : null;
+          const refs = state.provider.vaultRefs;
+          if (result.access_token) await accounts.set(refs.accessToken, result.access_token);
+          if (result.refresh_token && refs.refreshToken)
+            await accounts.set(refs.refreshToken, result.refresh_token);
+          // The expiry REF is consumed by dsh-providers as epoch millis; the ISO form stays display-only.
+          if (expiresAt && refs.expires)
+            await accounts.set(refs.expires, String(Date.parse(expiresAt)));
+          devicePollState.delete(parsed.pollToken!);
+          sendJson(res, 200, { status: "authenticated", expiresAt });
+        } catch (error) {
+          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) });
+        }
+        return;
       }
 
-      if (pathname === `${VAULT_PREFIX}/api/login/manual` && req.method === 'POST') {
-        const body = await readBody(req)
-        let parsed: { providerId?: string; token?: string }
-        try { parsed = JSON.parse(body) } catch { sendJson(res, 400, { error: 'request body must be JSON' }); return }
-        const found = PROVIDER_LOGINS.find((p) => p.id === parsed.providerId && p.kind === 'manual')
-        if (!found || found.kind !== 'manual') { sendJson(res, 404, { error: `unknown manual provider: ${JSON.stringify(parsed.providerId)}` }); return }
-        if (!parsed.token || parsed.token.trim().length === 0) { sendJson(res, 400, { error: 'token is required' }); return }
-        await accounts.set(found.vaultRef, parsed.token.trim())
-        sendJson(res, 200, { ok: true, ref: found.vaultRef })
-        return
+      if (pathname === `${VAULT_PREFIX}/api/login/manual` && req.method === "POST") {
+        const body = await readBody(req);
+        let parsed: { providerId?: string; token?: string };
+        try {
+          parsed = JSON.parse(body);
+        } catch {
+          sendJson(res, 400, { error: "request body must be JSON" });
+          return;
+        }
+        const found = PROVIDER_LOGINS.find(
+          (p) => p.id === parsed.providerId && p.kind === "manual",
+        );
+        if (!found || found.kind !== "manual") {
+          sendJson(res, 404, {
+            error: `unknown manual provider: ${JSON.stringify(parsed.providerId)}`,
+          });
+          return;
+        }
+        if (!parsed.token || parsed.token.trim().length === 0) {
+          sendJson(res, 400, { error: "token is required" });
+          return;
+        }
+        await accounts.set(found.vaultRef, parsed.token.trim());
+        sendJson(res, 200, { ok: true, ref: found.vaultRef });
+        return;
       }
 
       // ---- CLI login flow endpoints ----
 
-      if (pathname === `${VAULT_PREFIX}/api/login/cli/start` && req.method === 'POST') {
-        const body = await readBody(req)
-        let parsed: { providerId?: string }
-        try { parsed = JSON.parse(body) } catch { sendJson(res, 400, { error: 'request body must be JSON' }); return }
-        const provider = PROVIDER_LOGINS.find((p) => p.id === parsed.providerId && p.kind === 'cli') as CliLoginProvider | undefined
-        if (!provider) { sendJson(res, 404, { error: `unknown CLI provider: ${JSON.stringify(parsed.providerId)}` }); return }
+      if (pathname === `${VAULT_PREFIX}/api/login/cli/start` && req.method === "POST") {
+        const body = await readBody(req);
+        let parsed: { providerId?: string };
         try {
-          const result = await startCliLogin(provider)
+          parsed = JSON.parse(body);
+        } catch {
+          sendJson(res, 400, { error: "request body must be JSON" });
+          return;
+        }
+        const provider = PROVIDER_LOGINS.find(
+          (p) => p.id === parsed.providerId && p.kind === "cli",
+        ) as CliLoginProvider | undefined;
+        if (!provider) {
+          sendJson(res, 404, {
+            error: `unknown CLI provider: ${JSON.stringify(parsed.providerId)}`,
+          });
+          return;
+        }
+        try {
+          const result = await startCliLogin(provider);
           sendJson(res, 200, {
             sessionToken: result.sessionToken,
             message: result.message,
-          })
+          });
         } catch (error) {
-          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) })
+          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) });
         }
-        return
+        return;
       }
 
-      if (pathname === `${VAULT_PREFIX}/api/login/cli/poll` && req.method === 'POST') {
-        const body = await readBody(req)
-        let parsed: { sessionToken?: string }
-        try { parsed = JSON.parse(body) } catch { sendJson(res, 400, { error: 'request body must be JSON' }); return }
-        if (!parsed.sessionToken) { sendJson(res, 400, { error: 'sessionToken is required' }); return }
+      if (pathname === `${VAULT_PREFIX}/api/login/cli/poll` && req.method === "POST") {
+        const body = await readBody(req);
+        let parsed: { sessionToken?: string };
         try {
-          const status = await pollCliLogin(parsed.sessionToken)
-          if (status.status === 'authenticated') {
+          parsed = JSON.parse(body);
+        } catch {
+          sendJson(res, 400, { error: "request body must be JSON" });
+          return;
+        }
+        if (!parsed.sessionToken) {
+          sendJson(res, 400, { error: "sessionToken is required" });
+          return;
+        }
+        try {
+          const status = await pollCliLogin(parsed.sessionToken);
+          if (status.status === "authenticated") {
             // Capture the token and store it
-            const result = await completeCliLogin(parsed.sessionToken)
+            const result = await completeCliLogin(parsed.sessionToken);
             if (result) {
-              const refs = result.provider.vaultRefs
-              const full = result.full
-              await accounts.set(refs.accessToken, full?.accessToken ?? result.token)
-              if (full?.refreshToken && refs.refreshToken) await accounts.set(refs.refreshToken, full.refreshToken)
-              if (full?.expiresAt && refs.expires) await accounts.set(refs.expires, String(Number(full.expiresAt) || Date.parse(full.expiresAt)))
-              sendJson(res, 200, { status: 'authenticated', ref: refs.accessToken, expiresAt: full?.expiresAt ?? null })
+              const refs = result.provider.vaultRefs;
+              const full = result.full;
+              await accounts.set(refs.accessToken, full?.accessToken ?? result.token);
+              if (full?.refreshToken && refs.refreshToken)
+                await accounts.set(refs.refreshToken, full.refreshToken);
+              if (full?.expiresAt && refs.expires)
+                await accounts.set(
+                  refs.expires,
+                  String(Number(full.expiresAt) || Date.parse(full.expiresAt)),
+                );
+              sendJson(res, 200, {
+                status: "authenticated",
+                ref: refs.accessToken,
+                expiresAt: full?.expiresAt ?? null,
+              });
             } else {
-              sendJson(res, 200, { status: 'error', error: 'Failed to capture token' })
+              sendJson(res, 200, { status: "error", error: "Failed to capture token" });
             }
-          } else if (status.status === 'error') {
-            sendJson(res, 200, { status: 'error', error: status.error })
-          } else if (status.status === 'waiting_for_code') {
-            sendJson(res, 200, { status: 'waiting_for_code', authUrl: status.authUrl, browserOpened: status.browserOpened })
+          } else if (status.status === "error") {
+            sendJson(res, 200, { status: "error", error: status.error });
+          } else if (status.status === "waiting_for_code") {
+            sendJson(res, 200, {
+              status: "waiting_for_code",
+              authUrl: status.authUrl,
+              browserOpened: status.browserOpened,
+            });
           } else {
-            sendJson(res, 200, { status: 'pending' })
+            sendJson(res, 200, { status: "pending" });
           }
         } catch (error) {
-          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) })
+          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) });
         }
-        return
+        return;
       }
 
-      if (pathname === `${VAULT_PREFIX}/api/login/cli/submit-code` && req.method === 'POST') {
-        const body = await readBody(req)
-        let parsed: { sessionToken?: string; code?: string }
-        try { parsed = JSON.parse(body) } catch { sendJson(res, 400, { error: 'request body must be JSON' }); return }
-        if (!parsed.sessionToken || !parsed.code) { sendJson(res, 400, { error: 'sessionToken and code are required' }); return }
+      if (pathname === `${VAULT_PREFIX}/api/login/cli/submit-code` && req.method === "POST") {
+        const body = await readBody(req);
+        let parsed: { sessionToken?: string; code?: string };
         try {
-          const ok = await submitCliAuthCode(parsed.sessionToken, parsed.code)
-          sendJson(res, 200, { ok })
-        } catch (error) {
-          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) })
+          parsed = JSON.parse(body);
+        } catch {
+          sendJson(res, 400, { error: "request body must be JSON" });
+          return;
         }
-        return
+        if (!parsed.sessionToken || !parsed.code) {
+          sendJson(res, 400, { error: "sessionToken and code are required" });
+          return;
+        }
+        try {
+          const ok = await submitCliAuthCode(parsed.sessionToken, parsed.code);
+          sendJson(res, 200, { ok });
+        } catch (error) {
+          sendJson(res, 502, { error: error instanceof Error ? error.message : String(error) });
+        }
+        return;
       }
-      const prefix = `${VAULT_PREFIX}/api/accounts/`
+      const prefix = `${VAULT_PREFIX}/api/accounts/`;
       if (pathname.startsWith(prefix)) {
-        const ref = decodeURIComponent(pathname.slice(prefix.length))
+        const ref = decodeURIComponent(pathname.slice(prefix.length));
         if (!isValidRef(ref)) {
-          sendJson(res, 400, { error: `invalid reference: ${JSON.stringify(ref)}` })
-          return
+          sendJson(res, 400, { error: `invalid reference: ${JSON.stringify(ref)}` });
+          return;
         }
         switch (req.method) {
-          case 'GET': {
-            const account = url.searchParams.get('account') ?? undefined
-            const resolved = account !== undefined
-              ? await accounts.resolveFor(ref, account)
-              : await accounts.resolve(ref)
-            sendJson(res, 200, { ref, account: account ?? null, value: resolved?.value ?? null })
-            return
+          case "GET": {
+            const account = url.searchParams.get("account") ?? undefined;
+            const resolved =
+              account !== undefined
+                ? await accounts.resolveFor(ref, account)
+                : await accounts.resolve(ref);
+            sendJson(res, 200, { ref, account: account ?? null, value: resolved?.value ?? null });
+            return;
           }
-          case 'PUT': {
-            const body = await readBody(req)
-            let parsed: unknown
+          case "PUT": {
+            const body = await readBody(req);
+            let parsed: unknown;
             try {
-              parsed = JSON.parse(body)
+              parsed = JSON.parse(body);
             } catch {
-              sendJson(res, 400, { error: 'request body must be JSON' })
-              return
+              sendJson(res, 400, { error: "request body must be JSON" });
+              return;
             }
-            const value = (parsed as { value?: unknown }).value
-            if (typeof value !== 'string' || value.length === 0) {
-              sendJson(res, 400, { error: 'a non-empty string "value" is required' })
-              return
+            const value = (parsed as { value?: unknown }).value;
+            if (typeof value !== "string" || value.length === 0) {
+              sendJson(res, 400, { error: 'a non-empty string "value" is required' });
+              return;
             }
-            const account = url.searchParams.get('account') ?? undefined
-            await accounts.set(ref, value, account)
-            sendJson(res, 200, { ok: true, ref, account: account ?? null })
-            return
+            const account = url.searchParams.get("account") ?? undefined;
+            await accounts.set(ref, value, account);
+            sendJson(res, 200, { ok: true, ref, account: account ?? null });
+            return;
           }
-          case 'DELETE': {
-            const account = url.searchParams.get('account') ?? undefined
-            await accounts.unset(ref, account)
-            sendJson(res, 200, { ok: true, ref, account: account ?? null })
-            return
+          case "DELETE": {
+            const account = url.searchParams.get("account") ?? undefined;
+            await accounts.unset(ref, account);
+            sendJson(res, 200, { ok: true, ref, account: account ?? null });
+            return;
           }
           default:
-            sendJson(res, 405, { error: 'method not allowed' })
+            sendJson(res, 405, { error: "method not allowed" });
         }
-        return
+        return;
       }
-      sendJson(res, 404, { error: 'not found' })
+      sendJson(res, 404, { error: "not found" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      sendJson(res, 500, { error: message })
+      const message = error instanceof Error ? error.message : String(error);
+      sendJson(res, 500, { error: message });
     }
-  }
+  };
 }
 
 /**
@@ -359,13 +468,13 @@ export function makeVaultHandler(accounts: AccountsService): (req: IncomingMessa
  * absent (CLI-only profiles).
  */
 export function mountVaultWeb(ctx: Context, accounts: AccountsService): unknown {
-  return ctx.inject(['webServer'], (httpCtx) => {
+  return ctx.inject(["webServer"], (httpCtx) => {
     return httpCtx.webServer.register({
-      kind: 'prefix',
+      kind: "prefix",
       path: VAULT_PREFIX,
       handler: makeVaultHandler(accounts),
-    })
-  })
+    });
+  });
 }
 
 /** The self-contained vault page: styles use the harness semantic tokens. */
@@ -876,5 +985,5 @@ function renderVaultPage(): string {
       loadProviders().catch((error) => setError(String(error.message || error)));
     </script>
   </body>
-</html>`
+</html>`;
 }

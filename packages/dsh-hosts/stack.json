@@ -1,1 +1,10 @@
-{"id":"stack.hosts","name":"@dsh-stack/hosts","version":"0.1.0","kind":"plugin","description":"Multi-node device and cluster manager.","files":["lib","bin","package.json","stack.json"],"dependencies":[],"optionalDependencies":[]}
+{
+  "id": "stack.hosts",
+  "name": "@dsh-stack/hosts",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Multi-node device and cluster manager.",
+  "files": ["lib", "bin", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

@@ -61,28 +61,28 @@
  * @module dsh-credentials/vault/redirects
  */
 
-const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
 /**
  * Enough for the ordinary `/v1` → `/v1/` → canonical-host chain and far too few
  * to be a useful amplifier. Same-origin throughout, so this bounds work, not
  * exposure.
  */
-const MAX_SAME_ORIGIN_HOPS = 5
+const MAX_SAME_ORIGIN_HOPS = 5;
 
 export class CrossOriginRedirectError extends Error {
-  readonly requestOrigin: string
-  readonly redirectOrigin: string
+  readonly requestOrigin: string;
+  readonly redirectOrigin: string;
 
   constructor(requestOrigin: string, redirectOrigin: string, status: number) {
     super(
       `refusing to follow a ${status} redirect from ${requestOrigin} to ${redirectOrigin}: ` +
-        'the request carries credentials, and neither headers nor a request body are reliably ' +
-        'stripped on a cross-origin hop',
-    )
-    this.name = 'CrossOriginRedirectError'
-    this.requestOrigin = requestOrigin
-    this.redirectOrigin = redirectOrigin
+        "the request carries credentials, and neither headers nor a request body are reliably " +
+        "stripped on a cross-origin hop",
+    );
+    this.name = "CrossOriginRedirectError";
+    this.requestOrigin = requestOrigin;
+    this.redirectOrigin = redirectOrigin;
   }
 }
 
@@ -94,36 +94,41 @@ export class CrossOriginRedirectError extends Error {
  * `redirect` here is ignored, because the whole contract of this function is
  * that it owns that decision.
  */
-export async function fetchWithoutCrossOriginRedirects(input: string | URL, init: RequestInit = {}): Promise<Response> {
-  let target = new URL(String(input))
-  let request: RequestInit = { ...init, redirect: 'manual' }
+export async function fetchWithoutCrossOriginRedirects(
+  input: string | URL,
+  init: RequestInit = {},
+): Promise<Response> {
+  let target = new URL(String(input));
+  let request: RequestInit = { ...init, redirect: "manual" };
 
   for (let hop = 0; ; hop += 1) {
-    const response = await fetch(target, request)
-    if (!REDIRECT_STATUSES.has(response.status)) return response
-    const location = response.headers.get('location')
+    const response = await fetch(target, request);
+    if (!REDIRECT_STATUSES.has(response.status)) return response;
+    const location = response.headers.get("location");
     // A 3xx with no usable `Location` is the provider's problem, not a
     // redirect: hand it back rather than inventing a destination.
-    if (!location) return response
+    if (!location) return response;
 
-    let next: URL
+    let next: URL;
     try {
-      next = new URL(location, target)
+      next = new URL(location, target);
     } catch {
-      return response
+      return response;
     }
     if (next.origin !== target.origin) {
-      await discard(response)
-      throw new CrossOriginRedirectError(target.origin, next.origin, response.status)
+      await discard(response);
+      throw new CrossOriginRedirectError(target.origin, next.origin, response.status);
     }
     if (hop + 1 >= MAX_SAME_ORIGIN_HOPS) {
-      await discard(response)
-      throw new Error(`too many same-origin redirects (${MAX_SAME_ORIGIN_HOPS}) starting at ${input.toString()}`)
+      await discard(response);
+      throw new Error(
+        `too many same-origin redirects (${MAX_SAME_ORIGIN_HOPS}) starting at ${input.toString()}`,
+      );
     }
 
-    await discard(response)
-    request = nextRequest(request, response.status)
-    target = next
+    await discard(response);
+    request = nextRequest(request, response.status);
+    target = next;
   }
 }
 
@@ -143,32 +148,33 @@ export async function fetchWithoutCrossOriginRedirects(input: string | URL, init
  * provider bug.
  */
 function nextRequest(request: RequestInit, status: number): RequestInit {
-  const method = (request.method ?? 'GET').toUpperCase()
-  const rewriteToGet = status === 303 || ((status === 301 || status === 302) && method !== 'GET' && method !== 'HEAD')
+  const method = (request.method ?? "GET").toUpperCase();
+  const rewriteToGet =
+    status === 303 || ((status === 301 || status === 302) && method !== "GET" && method !== "HEAD");
   if (rewriteToGet) {
-    const { body: _dropped, ...rest } = request
-    return { ...rest, method: 'GET' }
+    const { body: _dropped, ...rest } = request;
+    return { ...rest, method: "GET" };
   }
   if (request.body != null && !isReplayableBody(request.body)) {
-    throw new Error(`cannot follow a ${status} redirect: the request body is a one-shot stream`)
+    throw new Error(`cannot follow a ${status} redirect: the request body is a one-shot stream`);
   }
-  return request
+  return request;
 }
 
 function isReplayableBody(body: unknown): boolean {
   return (
-    typeof body === 'string' ||
+    typeof body === "string" ||
     body instanceof URLSearchParams ||
     body instanceof ArrayBuffer ||
     ArrayBuffer.isView(body) ||
     body instanceof Blob
-  )
+  );
 }
 
 /** Release the connection an intermediate response is holding. */
 async function discard(response: Response): Promise<void> {
   try {
-    await response.body?.cancel()
+    await response.body?.cancel();
   } catch {
     // A body already consumed or already errored has nothing left to release.
   }

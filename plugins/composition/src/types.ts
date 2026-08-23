@@ -4,4 +4,4 @@ export type {
   PluginDependency,
   PluginPackDefinition as PackDefinition,
   StackProfileDefinition as ProfileDefinition,
-} from '@dsh-stack/plugin-kit';
+} from "@dsh-stack/plugin-kit";

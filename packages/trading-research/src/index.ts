@@ -13,14 +13,22 @@ export interface RegimeSnapshot {
   readonly adx: number | null;
   readonly diPlus: number | null;
   readonly diMinus: number | null;
-  readonly macd: { readonly line: number | null; readonly signal: number | null; readonly histogram: number | null };
+  readonly macd: {
+    readonly line: number | null;
+    readonly signal: number | null;
+    readonly histogram: number | null;
+  };
   readonly mfi: number | null;
   readonly atr: number | null;
   readonly sma20: number | null;
   readonly sma50: number | null;
   readonly sma200: number | null;
   readonly ema20: number | null;
-  readonly bollinger: { readonly middle: number | null; readonly upper: number | null; readonly lower: number | null };
+  readonly bollinger: {
+    readonly middle: number | null;
+    readonly upper: number | null;
+    readonly lower: number | null;
+  };
 }
 
 export function sma(values: readonly number[], period: number): number | null {
@@ -59,23 +67,27 @@ export function rsi(closes: readonly number[], period = 14): number | null {
   let avgLoss = loss / period;
   for (let i = period + 1; i < closes.length; i++) {
     const change = closes[i]! - closes[i - 1]!;
-    avgGain = ((avgGain * (period - 1)) + Math.max(change, 0)) / period;
-    avgLoss = ((avgLoss * (period - 1)) + Math.max(-change, 0)) / period;
+    avgGain = (avgGain * (period - 1) + Math.max(change, 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + Math.max(-change, 0)) / period;
   }
   if (avgLoss === 0) return 100;
-  return 100 - (100 / (1 + avgGain / avgLoss));
+  return 100 - 100 / (1 + avgGain / avgLoss);
 }
 
 export function atr(candles: readonly Candle[], period = 14): number | null {
   if (period <= 0 || candles.length < period) return null;
   const ranges = trueRanges(candles);
   let value = sma(ranges.slice(0, period), period)!;
-  for (let i = period; i < ranges.length; i++) value = ((value * (period - 1)) + ranges[i]!) / period;
+  for (let i = period; i < ranges.length; i++) value = (value * (period - 1) + ranges[i]!) / period;
   return value;
 }
 
-export function adx(candles: readonly Candle[], period = 14): { adx: number | null; diPlus: number | null; diMinus: number | null } {
-  if (period <= 0 || candles.length < period * 2 + 1) return { adx: null, diPlus: null, diMinus: null };
+export function adx(
+  candles: readonly Candle[],
+  period = 14,
+): { adx: number | null; diPlus: number | null; diMinus: number | null } {
+  if (period <= 0 || candles.length < period * 2 + 1)
+    return { adx: null, diPlus: null, diMinus: null };
   const tr = trueRanges(candles).slice(1);
   const plusDm: number[] = [];
   const minusDm: number[] = [];
@@ -95,18 +107,19 @@ export function adx(candles: readonly Candle[], period = 14): { adx: number | nu
   let lastMinus = 0;
   for (let i = period; i <= tr.length; i++) {
     if (i > period) {
-      trSmooth = trSmooth - (trSmooth / period) + tr[i - 1]!;
-      plusSmooth = plusSmooth - (plusSmooth / period) + plusDm[i - 1]!;
-      minusSmooth = minusSmooth - (minusSmooth / period) + minusDm[i - 1]!;
+      trSmooth = trSmooth - trSmooth / period + tr[i - 1]!;
+      plusSmooth = plusSmooth - plusSmooth / period + plusDm[i - 1]!;
+      minusSmooth = minusSmooth - minusSmooth / period + minusDm[i - 1]!;
     }
-    lastPlus = trSmooth === 0 ? 0 : 100 * plusSmooth / trSmooth;
-    lastMinus = trSmooth === 0 ? 0 : 100 * minusSmooth / trSmooth;
+    lastPlus = trSmooth === 0 ? 0 : (100 * plusSmooth) / trSmooth;
+    lastMinus = trSmooth === 0 ? 0 : (100 * minusSmooth) / trSmooth;
     const sum = lastPlus + lastMinus;
-    dx.push(sum === 0 ? 0 : 100 * Math.abs(lastPlus - lastMinus) / sum);
+    dx.push(sum === 0 ? 0 : (100 * Math.abs(lastPlus - lastMinus)) / sum);
   }
-  if (dx.length < period) return { adx: null, diPlus: lastPlus || null, diMinus: lastMinus || null };
+  if (dx.length < period)
+    return { adx: null, diPlus: lastPlus || null, diMinus: lastMinus || null };
   let adxValue = dx.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
-  for (let i = period; i < dx.length; i++) adxValue = ((adxValue * (period - 1)) + dx[i]!) / period;
+  for (let i = period; i < dx.length; i++) adxValue = (adxValue * (period - 1) + dx[i]!) / period;
   return { adx: adxValue, diPlus: lastPlus, diMinus: lastMinus };
 }
 
@@ -121,14 +134,18 @@ export function mfi(candles: readonly Candle[], period = 14): number | null {
     else if (typical[i]! < typical[i - 1]!) negative += flow;
   }
   if (negative === 0) return positive === 0 ? 50 : 100;
-  return 100 - (100 / (1 + positive / negative));
+  return 100 - 100 / (1 + positive / negative);
 }
 
-export function bollinger(closes: readonly number[], period = 20, deviations = 2): RegimeSnapshot['bollinger'] {
+export function bollinger(
+  closes: readonly number[],
+  period = 20,
+  deviations = 2,
+): RegimeSnapshot["bollinger"] {
   const middle = sma(closes, period);
   if (middle === null) return { middle: null, upper: null, lower: null };
   const window = closes.slice(-period);
-  const variance = window.reduce((sum, value) => sum + ((value - middle) ** 2), 0) / period;
+  const variance = window.reduce((sum, value) => sum + (value - middle) ** 2, 0) / period;
   const standardDeviation = Math.sqrt(variance);
   return {
     middle,
@@ -145,12 +162,17 @@ export function snapshot(candles: readonly Candle[]): RegimeSnapshot {
   const macdSeries = ema26.map((value, index) => (ema12[index + offset] ?? value) - value);
   const macdLine = macdSeries.at(-1) ?? null;
   const macdSignal = ema(macdSeries, 9);
-  const highest = candles.slice(-14).reduce((value, candle) => Math.max(value, candle.high), Number.NEGATIVE_INFINITY);
-  const lowest = candles.slice(-14).reduce((value, candle) => Math.min(value, candle.low), Number.POSITIVE_INFINITY);
+  const highest = candles
+    .slice(-14)
+    .reduce((value, candle) => Math.max(value, candle.high), Number.NEGATIVE_INFINITY);
+  const lowest = candles
+    .slice(-14)
+    .reduce((value, candle) => Math.min(value, candle.low), Number.POSITIVE_INFINITY);
   const last = closes.at(-1);
-  const stochastic = last === undefined || !Number.isFinite(highest) || highest === lowest
-    ? null
-    : ((last - lowest) / (highest - lowest)) * 100;
+  const stochastic =
+    last === undefined || !Number.isFinite(highest) || highest === lowest
+      ? null
+      : ((last - lowest) / (highest - lowest)) * 100;
   const dmi = adx(candles);
   return {
     rsi: rsi(closes),
@@ -177,7 +199,11 @@ function trueRanges(candles: readonly Candle[]): number[] {
   return candles.map((candle, index) => {
     const previous = candles[index - 1];
     return previous
-      ? Math.max(candle.high - candle.low, Math.abs(candle.high - previous.close), Math.abs(candle.low - previous.close))
+      ? Math.max(
+          candle.high - candle.low,
+          Math.abs(candle.high - previous.close),
+          Math.abs(candle.low - previous.close),
+        )
       : candle.high - candle.low;
   });
 }

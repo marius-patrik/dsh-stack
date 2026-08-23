@@ -1,16 +1,20 @@
 (function () {
-  if (typeof globalThis.crypto === 'undefined') globalThis.crypto = {};
-  if (typeof globalThis.crypto.randomUUID !== 'function') {
+  if (typeof globalThis.crypto === "undefined") globalThis.crypto = {};
+  if (typeof globalThis.crypto.randomUUID !== "function") {
     globalThis.crypto.randomUUID = function () {
-      if (typeof globalThis.crypto.getRandomValues === 'function') {
+      if (typeof globalThis.crypto.getRandomValues === "function") {
         try {
-          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function (c) {
-            return (c ^ (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16);
+          return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
+            return (
+              c ^
+              (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+            ).toString(16);
           });
         } catch (e) {}
       }
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0,
+          v = c === "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
       });
     };
@@ -150,7 +154,7 @@ window.__ModuleLoader__.load({
      */
     function KeychainGlyph(props) {
       var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
         "svg",
         {
@@ -167,93 +171,201 @@ window.__ModuleLoader__.load({
           "aria-hidden": "true",
         },
         h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
-        h("path", { d: "m9 12 2 2 4-4" })
+        h("path", { d: "m9 12 2 2 4-4" }),
       );
     }
 
     function PlusIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M5 12h14" }),
-        h("path", { d: "M12 5v14" })
+        h("path", { d: "M12 5v14" }),
       );
     }
 
     function LinkIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }),
-        h("path", { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" })
+        h("path", { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" }),
       );
     }
 
     function EyeIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" }),
-        h("circle", { cx: "12", cy: "12", r: "3" })
+        h("circle", { cx: "12", cy: "12", r: "3" }),
       );
     }
 
     function DownloadIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
         h("polyline", { points: "7 10 12 15 17 10" }),
-        h("line", { x1: "12", x2: "12", y1: "15", y2: "3" })
+        h("line", { x1: "12", x2: "12", y1: "15", y2: "3" }),
       );
     }
 
     function RefreshIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
         h("path", { d: "M21 3v5h-5" }),
         h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
-        h("path", { d: "M8 16H3v5" })
+        h("path", { d: "M8 16H3v5" }),
       );
     }
 
     function CheckIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
-        h("polyline", { points: "20 6 9 17 4 12" })
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
+        h("polyline", { points: "20 6 9 17 4 12" }),
       );
     }
 
     function ChevronRightIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
-        h("polyline", { points: "9 18 15 12 9 6" })
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
+        h("polyline", { points: "9 18 15 12 9 6" }),
       );
     }
 
     function ExternalLinkIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M15 3h6v6" }),
         h("path", { d: "M10 14 21 3" }),
-        h("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" })
+        h("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
       );
     }
 
     function TrashIcon(props) {
       var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + ' ' : '') + 'dsh-icon-animated';
-      return h("svg", { width: size, height: size, className: className, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
+      return h(
+        "svg",
+        {
+          width: size,
+          height: size,
+          className: className,
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          strokeWidth: "2",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
         h("path", { d: "M3 6h18" }),
         h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
         h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
         h("line", { x1: "10", x2: "10", y1: "11", y2: "17" }),
-        h("line", { x1: "14", x2: "14", y1: "11", y2: "17" })
+        h("line", { x1: "14", x2: "14", y1: "11", y2: "17" }),
       );
     }
 
@@ -264,7 +376,9 @@ window.__ModuleLoader__.load({
       var probing = {}; // keyed by probeId
 
       function emit() {
-        listeners.forEach(function (fn) { fn(); });
+        listeners.forEach(function (fn) {
+          fn();
+        });
       }
 
       function load() {
@@ -272,8 +386,20 @@ window.__ModuleLoader__.load({
         emit();
 
         return Promise.all([
-          fetch(VAULT_API + "/accounts").then(function (res) { return res.ok ? res.json() : { rows: [] }; }).catch(function () { return { rows: [] }; }),
-          fetch(QUOTAS_API + "/snapshots").then(function (res) { return res.ok ? res.json() : { snapshots: [] }; }).catch(function () { return { snapshots: [] }; }),
+          fetch(VAULT_API + "/accounts")
+            .then(function (res) {
+              return res.ok ? res.json() : { rows: [] };
+            })
+            .catch(function () {
+              return { rows: [] };
+            }),
+          fetch(QUOTAS_API + "/snapshots")
+            .then(function (res) {
+              return res.ok ? res.json() : { snapshots: [] };
+            })
+            .catch(function () {
+              return { snapshots: [] };
+            }),
         ])
           .then(function (results) {
             var accountsData = results[0];
@@ -293,7 +419,12 @@ window.__ModuleLoader__.load({
             emit();
           })
           .catch(function (err) {
-            state = { rows: state.rows, snapshots: state.snapshots, status: "error", error: String(err && err.message || err) };
+            state = {
+              rows: state.rows,
+              snapshots: state.snapshots,
+              status: "error",
+              error: String((err && err.message) || err),
+            };
             emit();
           });
       }
@@ -303,7 +434,9 @@ window.__ModuleLoader__.load({
         emit();
 
         return fetch(QUOTAS_API + "/refresh/" + encodeURIComponent(probeId), { method: "POST" })
-          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            return res.json();
+          })
           .then(function (data) {
             if (data.snapshot) {
               state.snapshots[data.snapshot.provider] = data.snapshot;
@@ -317,7 +450,9 @@ window.__ModuleLoader__.load({
 
       function probeAll() {
         return fetch(QUOTAS_API + "/refresh", { method: "POST" })
-          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            return res.json();
+          })
           .then(function (data) {
             if (data.snapshots) {
               data.snapshots.forEach(function (s) {
@@ -329,13 +464,17 @@ window.__ModuleLoader__.load({
       }
 
       function reveal(ref, account) {
-        var key = (ref + (account ? ":" + account : ""));
+        var key = ref + (account ? ":" + account : "");
         if (revealed[key]) {
           delete revealed[key];
           emit();
           return Promise.resolve();
         }
-        var url = VAULT_API + "/accounts/" + encodeURIComponent(ref) + (account ? "?account=" + encodeURIComponent(account) : "");
+        var url =
+          VAULT_API +
+          "/accounts/" +
+          encodeURIComponent(ref) +
+          (account ? "?account=" + encodeURIComponent(account) : "");
         return fetch(url)
           .then(function (res) {
             if (!res.ok) throw new Error("Could not reveal secret");
@@ -348,7 +487,11 @@ window.__ModuleLoader__.load({
       }
 
       function setSecret(ref, value, account) {
-        var url = VAULT_API + "/accounts/" + encodeURIComponent(ref) + (account ? "?account=" + encodeURIComponent(account) : "");
+        var url =
+          VAULT_API +
+          "/accounts/" +
+          encodeURIComponent(ref) +
+          (account ? "?account=" + encodeURIComponent(account) : "");
         return fetch(url, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -360,23 +503,32 @@ window.__ModuleLoader__.load({
       }
 
       function unsetSecret(ref, account) {
-        var url = VAULT_API + "/accounts/" + encodeURIComponent(ref) + (account ? "?account=" + encodeURIComponent(account) : "");
-        return fetch(url, { method: "DELETE" })
-          .then(function (res) {
-            if (!res.ok) throw new Error("Failed to remove secret");
-            var key = (ref + (account ? ":" + account : ""));
-            if (revealed[key]) delete revealed[key];
-            return load();
-          });
+        var url =
+          VAULT_API +
+          "/accounts/" +
+          encodeURIComponent(ref) +
+          (account ? "?account=" + encodeURIComponent(account) : "");
+        return fetch(url, { method: "DELETE" }).then(function (res) {
+          if (!res.ok) throw new Error("Failed to remove secret");
+          var key = ref + (account ? ":" + account : "");
+          if (revealed[key]) delete revealed[key];
+          return load();
+        });
       }
 
       function unsetMultiple(items) {
-        return Promise.all(items.map(function (item) {
-          var url = VAULT_API + "/accounts/" + encodeURIComponent(item.ref) + (item.account ? "?account=" + encodeURIComponent(item.account) : "");
-          return fetch(url, { method: "DELETE" });
-        })).then(function () {
+        return Promise.all(
+          items.map(function (item) {
+            var url =
+              VAULT_API +
+              "/accounts/" +
+              encodeURIComponent(item.ref) +
+              (item.account ? "?account=" + encodeURIComponent(item.account) : "");
+            return fetch(url, { method: "DELETE" });
+          }),
+        ).then(function () {
           items.forEach(function (item) {
-            var key = (item.ref + (item.account ? ":" + item.account : ""));
+            var key = item.ref + (item.account ? ":" + item.account : "");
             delete revealed[key];
           });
           return load();
@@ -389,7 +541,9 @@ window.__ModuleLoader__.load({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({}),
         })
-          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            return res.json();
+          })
           .then(function (res) {
             load();
             return res;
@@ -397,12 +551,20 @@ window.__ModuleLoader__.load({
       }
 
       return {
-        getSnapshot: function () { return state; },
-        getRevealed: function () { return revealed; },
-        getProbing: function () { return probing; },
+        getSnapshot: function () {
+          return state;
+        },
+        getRevealed: function () {
+          return revealed;
+        },
+        getProbing: function () {
+          return probing;
+        },
         subscribe: function (fn) {
           listeners.add(fn);
-          return function () { listeners.delete(fn); };
+          return function () {
+            listeners.delete(fn);
+          };
         },
         load: load,
         probeProvider: probeProvider,
@@ -427,20 +589,40 @@ window.__ModuleLoader__.load({
       var resetText = props.resetText;
       var pct = Math.min(100, Math.max(0, Math.round((used / total) * 100)));
 
-      var barColor = pct < 60
-        ? "var(--dsw-alias-state-success-primary, #3fb950)"
-        : pct < 85
-        ? "var(--dsw-alias-state-warn-label, #d29922)"
-        : "var(--dsw-alias-state-danger-primary, #f85149)";
+      var barColor =
+        pct < 60
+          ? "var(--dsw-alias-state-success-primary, #3fb950)"
+          : pct < 85
+            ? "var(--dsw-alias-state-warn-label, #d29922)"
+            : "var(--dsw-alias-state-danger-primary, #f85149)";
 
       return h(
         "div",
-        { style: { display: "flex", flexDirection: "column", gap: "4px", minWidth: "180px", flex: 1 } },
+        {
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+            minWidth: "180px",
+            flex: 1,
+          },
+        },
         h(
           "div",
-          { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
+          {
+            style: {
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: "11px",
+              color: "var(--dsw-alias-label-secondary)",
+            },
+          },
           h("span", { style: { fontWeight: 500 } }, label),
-          h("span", { style: { fontFamily: "monospace", color: "var(--dsw-alias-label-primary)" } }, pct + "% utilized")
+          h(
+            "span",
+            { style: { fontFamily: "monospace", color: "var(--dsw-alias-label-primary)" } },
+            pct + "% utilized",
+          ),
         ),
         h(
           "div",
@@ -460,20 +642,28 @@ window.__ModuleLoader__.load({
               background: barColor,
               transition: "width 300ms ease",
             },
-          })
+          }),
         ),
-        resetText ? h(
-          "div",
-          { style: { fontSize: "10px", color: "var(--dsw-alias-label-tertiary)", textAlign: "right" } },
-          resetText
-        ) : null
+        resetText
+          ? h(
+              "div",
+              {
+                style: {
+                  fontSize: "10px",
+                  color: "var(--dsw-alias-label-tertiary)",
+                  textAlign: "right",
+                },
+              },
+              resetText,
+            )
+          : null,
       );
     }
 
     function KeychainSection() {
       var storeState = React.useSyncExternalStore(
         globalVaultStore.subscribe,
-        globalVaultStore.getSnapshot
+        globalVaultStore.getSnapshot,
       );
       var rows = storeState.rows || [];
       var snapshots = storeState.snapshots || {};
@@ -514,7 +704,9 @@ window.__ModuleLoader__.load({
 
       function showToast(msg) {
         setToastMsg(msg);
-        setTimeout(function () { setToastMsg(null); }, 2500);
+        setTimeout(function () {
+          setToastMsg(null);
+        }, 2500);
       }
 
       React.useEffect(function () {
@@ -540,9 +732,13 @@ window.__ModuleLoader__.load({
       var accountedRefs = new Set();
       var providerTree = PROVIDERS_CONFIG.map(function (p) {
         var providerRows = rows.filter(function (r) {
-          return p.prefixes.some(function (pref) { return (r.ref || "").startsWith(pref); });
+          return p.prefixes.some(function (pref) {
+            return (r.ref || "").startsWith(pref);
+          });
         });
-        providerRows.forEach(function (r) { accountedRefs.add(r.ref); });
+        providerRows.forEach(function (r) {
+          accountedRefs.add(r.ref);
+        });
 
         // Group rows under this provider by account tag
         var accountMap = new Map();
@@ -574,16 +770,32 @@ window.__ModuleLoader__.load({
           });
         }
 
-        var totalVaultKeys = providerRows.filter(function (r) { return r.inVault; }).length;
-        var hasConfig = totalVaultKeys > 0 || providerRows.some(function (r) { return r.ambient; });
-        var hasOauth = providerRows.some(function (r) { return r.kind === "oauth" || r.ref.includes("OAUTH") || r.ref.includes("SUB_TOKEN"); });
+        var totalVaultKeys = providerRows.filter(function (r) {
+          return r.inVault;
+        }).length;
+        var hasConfig =
+          totalVaultKeys > 0 ||
+          providerRows.some(function (r) {
+            return r.ambient;
+          });
+        var hasOauth = providerRows.some(function (r) {
+          return r.kind === "oauth" || r.ref.includes("OAUTH") || r.ref.includes("SUB_TOKEN");
+        });
 
         // Match quota probes
-        var providerSnapshots = p.probeIds.map(function (id) { return snapshots[id]; }).filter(Boolean);
+        var providerSnapshots = p.probeIds
+          .map(function (id) {
+            return snapshots[id];
+          })
+          .filter(Boolean);
         var primarySnapshot = providerSnapshots[0] || null;
 
-        var isHealthy = providerSnapshots.some(function (s) { return s.status === "available"; });
-        var isDegraded = providerSnapshots.some(function (s) { return s.status === "error"; });
+        var isHealthy = providerSnapshots.some(function (s) {
+          return s.status === "available";
+        });
+        var isDegraded = providerSnapshots.some(function (s) {
+          return s.status === "error";
+        });
 
         return {
           id: p.id,
@@ -606,7 +818,9 @@ window.__ModuleLoader__.load({
       });
 
       // Loose/custom keys
-      var looseRows = rows.filter(function (r) { return !accountedRefs.has(r.ref); });
+      var looseRows = rows.filter(function (r) {
+        return !accountedRefs.has(r.ref);
+      });
       if (looseRows.length > 0) {
         var looseAccountMap = new Map();
         looseRows.forEach(function (r) {
@@ -636,8 +850,12 @@ window.__ModuleLoader__.load({
           hasSubscription: false,
           accounts: Array.from(looseAccountMap.values()),
           totalRows: looseRows.length,
-          totalVaultKeys: looseRows.filter(function (r) { return r.inVault; }).length,
-          hasConfig: looseRows.some(function (r) { return r.inVault || r.ambient; }),
+          totalVaultKeys: looseRows.filter(function (r) {
+            return r.inVault;
+          }).length,
+          hasConfig: looseRows.some(function (r) {
+            return r.inVault || r.ambient;
+          }),
           hasOauth: false,
           isHealthy: false,
           isDegraded: false,
@@ -652,9 +870,15 @@ window.__ModuleLoader__.load({
         if (query) {
           var matchName = prov.name.toLowerCase().includes(query);
           var matchAccount = prov.accounts.some(function (acc) {
-            return acc.name.toLowerCase().includes(query) || acc.rows.some(function (r) {
-              return (r.ref || "").toLowerCase().includes(query) || (r.label || "").toLowerCase().includes(query);
-            });
+            return (
+              acc.name.toLowerCase().includes(query) ||
+              acc.rows.some(function (r) {
+                return (
+                  (r.ref || "").toLowerCase().includes(query) ||
+                  (r.label || "").toLowerCase().includes(query)
+                );
+              })
+            );
           });
           if (!matchName && !matchAccount) return false;
         }
@@ -666,10 +890,18 @@ window.__ModuleLoader__.load({
         return true;
       });
 
-      var totalConfigured = providerTree.filter(function (p) { return p.hasConfig; }).length;
-      var totalHealthy = providerTree.filter(function (p) { return p.isHealthy; }).length;
-      var totalOauth = providerTree.filter(function (p) { return p.hasOauth; }).length;
-      var totalUnset = providerTree.filter(function (p) { return !p.hasConfig; }).length;
+      var totalConfigured = providerTree.filter(function (p) {
+        return p.hasConfig;
+      }).length;
+      var totalHealthy = providerTree.filter(function (p) {
+        return p.isHealthy;
+      }).length;
+      var totalOauth = providerTree.filter(function (p) {
+        return p.hasOauth;
+      }).length;
+      var totalUnset = providerTree.filter(function (p) {
+        return !p.hasConfig;
+      }).length;
 
       return h(
         "div",
@@ -692,13 +924,17 @@ window.__ModuleLoader__.load({
             "div",
             { style: { display: "flex", alignItems: "center", gap: "10px" } },
             h(KeychainGlyph, { size: 18, className: "dsh-keychain-headerIcon" }),
-            h("h2", { style: { fontSize: "16px", fontWeight: 500, margin: 0 } }, "Keychain & Accounts")
+            h(
+              "h2",
+              { style: { fontSize: "16px", fontWeight: 500, margin: 0 } },
+              "Keychain & Accounts",
+            ),
           ),
           h(
             "p",
             { style: { fontSize: "13px", color: "var(--dsw-alias-label-tertiary)", margin: 0 } },
-            "Encrypted AES-256-GCM vault with live endpoint health probes, 5-hour & weekly subscription usage sliding windows, and multi-account keys."
-          )
+            "Encrypted AES-256-GCM vault with live endpoint health probes, 5-hour & weekly subscription usage sliding windows, and multi-account keys.",
+          ),
         ),
 
         // Action Toolbar
@@ -717,7 +953,9 @@ window.__ModuleLoader__.load({
             "button",
             {
               type: "button",
-              onClick: function () { setAddModalData({ initialRef: "OPENAI_API_KEY", accountName: "" }); },
+              onClick: function () {
+                setAddModalData({ initialRef: "OPENAI_API_KEY", accountName: "" });
+              },
               style: {
                 display: "inline-flex",
                 alignItems: "center",
@@ -733,13 +971,15 @@ window.__ModuleLoader__.load({
               },
             },
             h(PlusIcon, { size: 14 }),
-            "Add Secret"
+            "Add Secret",
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () { setOauthModalProvider("select"); },
+              onClick: function () {
+                setOauthModalProvider("select");
+              },
               style: {
                 display: "inline-flex",
                 alignItems: "center",
@@ -755,13 +995,15 @@ window.__ModuleLoader__.load({
               },
             },
             h(LinkIcon, { size: 14 }),
-            "Connect OAuth"
+            "Connect OAuth",
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () { setShowInspectModal(true); },
+              onClick: function () {
+                setShowInspectModal(true);
+              },
               style: {
                 display: "inline-flex",
                 alignItems: "center",
@@ -777,13 +1019,15 @@ window.__ModuleLoader__.load({
               },
             },
             h(EyeIcon, { size: 14 }),
-            "Inspect Vault"
+            "Inspect Vault",
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () { setShowBackupModal(true); },
+              onClick: function () {
+                setShowBackupModal(true);
+              },
               style: {
                 display: "inline-flex",
                 alignItems: "center",
@@ -799,13 +1043,15 @@ window.__ModuleLoader__.load({
               },
             },
             h(DownloadIcon, { size: 14 }),
-            "Backup / Export"
+            "Backup / Export",
           ),
           h(
             "button",
             {
               type: "button",
-              onClick: function () { store.probeAll(); },
+              onClick: function () {
+                store.probeAll();
+              },
               disabled: isProbingAll,
               style: {
                 display: "inline-flex",
@@ -814,7 +1060,9 @@ window.__ModuleLoader__.load({
                 padding: "6px 12px",
                 borderRadius: "6px",
                 border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))",
-                background: isProbingAll ? "var(--dsw-alias-surface-l2)" : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
+                background: isProbingAll
+                  ? "var(--dsw-alias-surface-l2)"
+                  : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
                 color: "var(--dsw-alias-label-primary)",
                 fontSize: "12px",
                 fontWeight: 500,
@@ -825,8 +1073,8 @@ window.__ModuleLoader__.load({
               },
             },
             h(RefreshIcon, { size: 13 }),
-            "Refresh"
-          )
+            "Refresh",
+          ),
         ),
 
         // Search & Filter Tabs
@@ -837,7 +1085,9 @@ window.__ModuleLoader__.load({
             type: "text",
             placeholder: "Search providers, health status, accounts, or key references...",
             value: searchQuery,
-            onChange: function (e) { setSearchQuery(e.target.value); },
+            onChange: function (e) {
+              setSearchQuery(e.target.value);
+            },
             style: {
               width: "100%",
               boxSizing: "border-box",
@@ -866,7 +1116,9 @@ window.__ModuleLoader__.load({
                 {
                   key: tab.id,
                   type: "button",
-                  onClick: function () { setFilter(tab.id); },
+                  onClick: function () {
+                    setFilter(tab.id);
+                  },
                   style: {
                     padding: "4px 10px",
                     borderRadius: "20px",
@@ -876,36 +1128,40 @@ window.__ModuleLoader__.load({
                     background: active
                       ? "rgba(99, 102, 241, 0.12)"
                       : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-                    color: active ? "var(--dsw-alias-primary, #6366f1)" : "var(--dsw-alias-label-secondary)",
+                    color: active
+                      ? "var(--dsw-alias-primary, #6366f1)"
+                      : "var(--dsw-alias-label-secondary)",
                     fontSize: "11px",
                     fontWeight: active ? 600 : 400,
                     cursor: "pointer",
                   },
                 },
-                tab.label
+                tab.label,
               );
-            })
-          )
+            }),
+          ),
         ),
 
-        toastMsg ? h(
-          "div",
-          {
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              background: "rgba(63, 185, 80, 0.15)",
-              border: "1px solid rgba(63, 185, 80, 0.3)",
-              color: "#3fb950",
-              fontSize: "12px",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            },
-          },
-          h(CheckIcon, { size: 14 }),
-          toastMsg
-        ) : null,
+        toastMsg
+          ? h(
+              "div",
+              {
+                style: {
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  background: "rgba(63, 185, 80, 0.15)",
+                  border: "1px solid rgba(63, 185, 80, 0.3)",
+                  color: "#3fb950",
+                  fontSize: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                },
+              },
+              h(CheckIcon, { size: 14 }),
+              toastMsg,
+            )
+          : null,
 
         // Provider Cards
         h(
@@ -919,21 +1175,27 @@ window.__ModuleLoader__.load({
             var dotColor = prov.isHealthy
               ? "var(--dsw-alias-state-success-primary, #3fb950)"
               : prov.isDegraded
-              ? "var(--dsw-alias-state-danger-primary, #f85149)"
-              : isConnected
-              ? "var(--dsw-alias-state-warn-label, #d29922)"
-              : "var(--dsw-alias-label-quaternary, #8b949e)";
+                ? "var(--dsw-alias-state-danger-primary, #f85149)"
+                : isConnected
+                  ? "var(--dsw-alias-state-warn-label, #d29922)"
+                  : "var(--dsw-alias-label-quaternary, #8b949e)";
 
-            var activeAccountsCount = prov.accounts.filter(function (a) { return a.inVaultCount > 0 || a.ambientCount > 0; }).length;
-            var isProbingAny = prov.probeIds.some(function (id) { return probing[id]; });
+            var activeAccountsCount = prov.accounts.filter(function (a) {
+              return a.inVaultCount > 0 || a.ambientCount > 0;
+            }).length;
+            var isProbingAny = prov.probeIds.some(function (id) {
+              return probing[id];
+            });
 
             // Calculate usage for 5h and weekly windows
             var limit = (snap && snap.limit) || 100;
-            var remaining = snap && typeof snap.remaining === "number" ? snap.remaining : (isConnected ? 68 : 0);
+            var remaining =
+              snap && typeof snap.remaining === "number" ? snap.remaining : isConnected ? 68 : 0;
             var fiveHourUsed = limit - remaining;
-            var resetStr = snap && snap.resetsAt
-              ? "Resets " + new Date(snap.resetsAt).toLocaleTimeString()
-              : "Resets in ~2h 45m";
+            var resetStr =
+              snap && snap.resetsAt
+                ? "Resets " + new Date(snap.resetsAt).toLocaleTimeString()
+                : "Resets in ~2h 45m";
 
             return h(
               "div",
@@ -966,61 +1228,69 @@ window.__ModuleLoader__.load({
                   },
                 }),
                 h("strong", { style: { fontSize: "14px", fontWeight: 600 } }, prov.name),
-                prov.isHealthy ? h(
-                  "span",
-                  {
-                    style: {
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      padding: "1px 6px",
-                      borderRadius: "4px",
-                      background: "rgba(63, 185, 80, 0.15)",
-                      color: "#3fb950",
-                    },
-                  },
-                  "LIVE HEALTHY"
-                ) : prov.isDegraded ? h(
-                  "span",
-                  {
-                    style: {
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      padding: "1px 6px",
-                      borderRadius: "4px",
-                      background: "rgba(248, 81, 73, 0.15)",
-                      color: "#f85149",
-                    },
-                  },
-                  "DEGRADED / RATE LIMITED"
-                ) : null,
-                prov.hasOauth ? h(
-                  "span",
-                  {
-                    style: {
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      padding: "1px 6px",
-                      borderRadius: "4px",
-                      border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.25))",
-                      color: "var(--dsw-alias-label-secondary)",
-                    },
-                  },
-                  "OAUTH"
-                ) : null,
-                prov.totalVaultKeys > 0 ? h(
-                  "span",
-                  {
-                    style: {
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      padding: "1px 6px",
-                      borderRadius: "4px",
-                      border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.25))",
-                      color: "var(--dsw-alias-label-secondary)",
-                    },
-                  },
-                  prov.totalVaultKeys + " IN VAULT"
-                ) : null,
+                prov.isHealthy
+                  ? h(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          background: "rgba(63, 185, 80, 0.15)",
+                          color: "#3fb950",
+                        },
+                      },
+                      "LIVE HEALTHY",
+                    )
+                  : prov.isDegraded
+                    ? h(
+                        "span",
+                        {
+                          style: {
+                            fontSize: "10px",
+                            fontWeight: 600,
+                            padding: "1px 6px",
+                            borderRadius: "4px",
+                            background: "rgba(248, 81, 73, 0.15)",
+                            color: "#f85149",
+                          },
+                        },
+                        "DEGRADED / RATE LIMITED",
+                      )
+                    : null,
+                prov.hasOauth
+                  ? h(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.25))",
+                          color: "var(--dsw-alias-label-secondary)",
+                        },
+                      },
+                      "OAUTH",
+                    )
+                  : null,
+                prov.totalVaultKeys > 0
+                  ? h(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                          border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.25))",
+                          color: "var(--dsw-alias-label-secondary)",
+                        },
+                      },
+                      prov.totalVaultKeys + " IN VAULT",
+                    )
+                  : null,
                 h(
                   "span",
                   {
@@ -1030,116 +1300,154 @@ window.__ModuleLoader__.load({
                       color: "var(--dsw-alias-label-tertiary)",
                     },
                   },
-                  activeAccountsCount > 0 ? activeAccountsCount + " Account" + (activeAccountsCount > 1 ? "s" : "") + " Active" : "Unconfigured"
-                )
+                  activeAccountsCount > 0
+                    ? activeAccountsCount +
+                        " Account" +
+                        (activeAccountsCount > 1 ? "s" : "") +
+                        " Active"
+                    : "Unconfigured",
+                ),
               ),
 
               // Description & Health Message
               h(
                 "div",
-                { style: { display: "flex", flexDirection: "column", gap: "2px", fontSize: "12px" } },
-                h("span", { style: { color: "var(--dsw-alias-label-secondary)" } }, prov.description),
-                snap ? h(
+                {
+                  style: { display: "flex", flexDirection: "column", gap: "2px", fontSize: "12px" },
+                },
+                h(
                   "span",
-                  {
-                    style: {
-                      fontSize: "11px",
-                      color: snap.status === "available" ? "#3fb950" : snap.status === "error" ? "#f85149" : "var(--dsw-alias-label-tertiary)",
-                      fontWeight: 500,
-                    },
-                  },
-                  "Probe Status: " + (snap.message || snap.status) + (snap.fetchedAt ? " (" + new Date(snap.fetchedAt).toLocaleTimeString() + ")" : "")
-                ) : null
+                  { style: { color: "var(--dsw-alias-label-secondary)" } },
+                  prov.description,
+                ),
+                snap
+                  ? h(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "11px",
+                          color:
+                            snap.status === "available"
+                              ? "#3fb950"
+                              : snap.status === "error"
+                                ? "#f85149"
+                                : "var(--dsw-alias-label-tertiary)",
+                          fontWeight: 500,
+                        },
+                      },
+                      "Probe Status: " +
+                        (snap.message || snap.status) +
+                        (snap.fetchedAt
+                          ? " (" + new Date(snap.fetchedAt).toLocaleTimeString() + ")"
+                          : ""),
+                    )
+                  : null,
               ),
 
               // Subscription Sliding Window Usage Meters (5h and weekly)
-              (isConnected && prov.hasSubscription) ? h(
+              isConnected && prov.hasSubscription
+                ? h(
+                    "div",
+                    {
+                      style: {
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "14px",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        background: "var(--dsw-alias-surface-l2, rgba(0,0,0,0.18))",
+                        border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.15))",
+                      },
+                    },
+                    h(UsageBar, {
+                      label: "5-Hour Sliding Window",
+                      used: fiveHourUsed,
+                      total: limit,
+                      resetText: resetStr,
+                    }),
+                    h(UsageBar, {
+                      label: "Weekly Subscription Allowance",
+                      used: 42,
+                      total: 100,
+                      resetText: "Weekly rolling reset",
+                    }),
+                  )
+                : null,
+
+              // Actions Strip
+              h(
                 "div",
                 {
                   style: {
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: "14px",
-                    padding: "10px 12px",
-                    borderRadius: "8px",
-                    background: "var(--dsw-alias-surface-l2, rgba(0,0,0,0.18))",
-                    border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.15))",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginTop: "2px",
                   },
                 },
-                h(UsageBar, {
-                  label: "5-Hour Sliding Window",
-                  used: fiveHourUsed,
-                  total: limit,
-                  resetText: resetStr,
-                }),
-                h(UsageBar, {
-                  label: "Weekly Subscription Allowance",
-                  used: 42,
-                  total: 100,
-                  resetText: "Weekly rolling reset",
-                })
-              ) : null,
-
-              // Actions Strip
-              h(
-                "div",
-                { style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px", marginTop: "2px" } },
-                prov.probeIds.length > 0 ? h(
-                  "button",
-                  {
-                    type: "button",
-                    disabled: isProbingAny,
-                    onClick: function () {
-                      prov.probeIds.forEach(function (pid) {
-                        globalVaultStore.probeProvider(pid);
-                      });
-                      showToast("Probing " + prov.name + " live endpoint…");
-                    },
-                    style: {
-                      fontSize: "11px",
-                      padding: "4px 10px",
-                      borderRadius: "4px",
-                      border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.3))",
-                      background: "transparent",
-                      color: "inherit",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      opacity: isProbingAny ? 0.6 : 1,
-                    },
-                  },
-                  h(RefreshIcon, { size: 12 }),
-                  isProbingAny ? "Probing…" : "Probe Health"
-                ) : null,
-                prov.oauthProviderId ? h(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: function () { setOauthModalProvider(prov.oauthProviderId); },
-                    style: {
-                      fontSize: "11px",
-                      padding: "4px 10px",
-                      borderRadius: "4px",
-                      border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.3))",
-                      background: "transparent",
-                      color: "inherit",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    },
-                  },
-                  h(LinkIcon, { size: 12 }),
-                  isConnected ? "Sign In Another Account" : "Sign In with OAuth"
-                ) : null,
+                prov.probeIds.length > 0
+                  ? h(
+                      "button",
+                      {
+                        type: "button",
+                        disabled: isProbingAny,
+                        onClick: function () {
+                          prov.probeIds.forEach(function (pid) {
+                            globalVaultStore.probeProvider(pid);
+                          });
+                          showToast("Probing " + prov.name + " live endpoint…");
+                        },
+                        style: {
+                          fontSize: "11px",
+                          padding: "4px 10px",
+                          borderRadius: "4px",
+                          border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.3))",
+                          background: "transparent",
+                          color: "inherit",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          opacity: isProbingAny ? 0.6 : 1,
+                        },
+                      },
+                      h(RefreshIcon, { size: 12 }),
+                      isProbingAny ? "Probing…" : "Probe Health",
+                    )
+                  : null,
+                prov.oauthProviderId
+                  ? h(
+                      "button",
+                      {
+                        type: "button",
+                        onClick: function () {
+                          setOauthModalProvider(prov.oauthProviderId);
+                        },
+                        style: {
+                          fontSize: "11px",
+                          padding: "4px 10px",
+                          borderRadius: "4px",
+                          border: "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.3))",
+                          background: "transparent",
+                          color: "inherit",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        },
+                      },
+                      h(LinkIcon, { size: 12 }),
+                      isConnected ? "Sign In Another Account" : "Sign In with OAuth",
+                    )
+                  : null,
                 h(
                   "button",
                   {
                     type: "button",
                     onClick: function () {
                       setAddModalData({
-                        initialRef: prov.defaultKeys[0] || (prov.prefixes[0] + "API_KEY"),
+                        initialRef: prov.defaultKeys[0] || prov.prefixes[0] + "API_KEY",
                         accountName: "",
                       });
                     },
@@ -1157,13 +1465,15 @@ window.__ModuleLoader__.load({
                     },
                   },
                   h(PlusIcon, { size: 11 }),
-                  "Add Account / Key"
+                  "Add Account / Key",
                 ),
                 h(
                   "button",
                   {
                     type: "button",
-                    onClick: function () { toggleProvider(prov.id); },
+                    onClick: function () {
+                      toggleProvider(prov.id);
+                    },
                     style: {
                       fontSize: "11px",
                       padding: "4px 10px",
@@ -1180,290 +1490,396 @@ window.__ModuleLoader__.load({
                   h(ChevronRightIcon, {
                     size: 10,
                     className: "dsh-icon-animated",
-                    style: { transform: isExpanded ? "rotate(90deg)" : "none", transition: "transform 150ms ease" },
+                    style: {
+                      transform: isExpanded ? "rotate(90deg)" : "none",
+                      transition: "transform 150ms ease",
+                    },
                   }),
-                  isExpanded ? "Hide Accounts" : "View Accounts (" + prov.accounts.length + ")"
-                )
+                  isExpanded ? "Hide Accounts" : "View Accounts (" + prov.accounts.length + ")",
+                ),
               ),
 
               // Multi-Account Expanded View
-              isExpanded ? h(
-                "div",
-                {
-                  style: {
-                    marginTop: "8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                    paddingTop: "10px",
-                    borderTop: "1px dashed var(--dsw-alias-border-l3, rgba(128,128,128,0.2))",
-                  },
-                },
-                prov.accounts.map(function (acc) {
-                  var accInVaultRows = acc.rows.filter(function (r) { return r.inVault; });
-                  var accHasConfig = accInVaultRows.length > 0 || acc.ambientCount > 0;
-
-                  return h(
+              isExpanded
+                ? h(
                     "div",
                     {
-                      key: acc.name,
                       style: {
-                        borderRadius: "8px",
-                        background: "var(--dsw-alias-surface-l2, rgba(0,0,0,0.18))",
-                        border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.15))",
-                        padding: "10px 12px",
+                        marginTop: "8px",
                         display: "flex",
                         flexDirection: "column",
-                        gap: "8px",
+                        gap: "10px",
+                        paddingTop: "10px",
+                        borderTop: "1px dashed var(--dsw-alias-border-l3, rgba(128,128,128,0.2))",
                       },
                     },
-                    // Account Header Row
-                    h(
-                      "div",
-                      { style: { display: "flex", alignItems: "center", gap: "8px" } },
-                      h("span", {
-                        style: {
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          color: "var(--dsw-alias-label-primary)",
-                        },
-                      }, "Account: ", h("code", { style: { fontFamily: "monospace", color: "var(--dsw-alias-primary, #6366f1)" } }, acc.name)),
-                      acc.isDefault ? h(
-                        "span",
-                        {
-                          style: {
-                            fontSize: "10px",
-                            padding: "1px 5px",
-                            borderRadius: "3px",
-                            background: "rgba(128,128,128,0.15)",
-                            color: "var(--dsw-alias-label-secondary)",
-                          },
-                        },
-                        "DEFAULT"
-                      ) : null,
-                      accHasConfig ? h(
-                        "span",
-                        {
-                          style: {
-                            fontSize: "10px",
-                            padding: "1px 5px",
-                            borderRadius: "3px",
-                            background: "rgba(63, 185, 80, 0.15)",
-                            color: "#3fb950",
-                          },
-                        },
-                        accInVaultRows.length + " Keys"
-                      ) : null,
-                      accInVaultRows.length > 0 ? h(
-                        "button",
-                        {
-                          type: "button",
-                          onClick: function () {
-                            setDeleteAccountTarget({
-                              providerName: prov.name,
-                              accountName: acc.name,
-                              items: accInVaultRows.map(function (r) {
-                                return { ref: r.ref, account: acc.isDefault ? undefined : acc.name };
-                              }),
-                            });
-                          },
-                          style: {
-                            marginLeft: "auto",
-                            background: "transparent",
-                            border: "none",
-                            color: "#f85149",
-                            cursor: "pointer",
-                            fontSize: "11px",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          },
-                        },
-                        h(TrashIcon, { size: 12 }),
-                        "Delete Account"
-                      ) : null
-                    ),
+                    prov.accounts.map(function (acc) {
+                      var accInVaultRows = acc.rows.filter(function (r) {
+                        return r.inVault;
+                      });
+                      var accHasConfig = accInVaultRows.length > 0 || acc.ambientCount > 0;
 
-                    // Account Keys List
-                    acc.rows.length === 0
-                      ? h(
+                      return h(
+                        "div",
+                        {
+                          key: acc.name,
+                          style: {
+                            borderRadius: "8px",
+                            background: "var(--dsw-alias-surface-l2, rgba(0,0,0,0.18))",
+                            border: "1px solid var(--dsw-alias-border-l3, rgba(128,128,128,0.15))",
+                            padding: "10px 12px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          },
+                        },
+                        // Account Header Row
+                        h(
                           "div",
-                          { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } },
-                          "No keys stored for this account."
-                        )
-                      : acc.rows.map(function (row) {
-                          var isRowVault = row.inVault;
-                          var isRowAmbient = row.ambient && !row.inVault;
-                          var keyIdentifier = (row.ref + (row.account ? ":" + row.account : ""));
-                          var isRevealed = Boolean(revealed[keyIdentifier]);
-                          var secretVal = revealed[keyIdentifier] || "";
-
-                          return h(
-                            "div",
+                          { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                          h(
+                            "span",
                             {
-                              key: row.ref,
                               style: {
-                                padding: "6px 8px",
-                                borderRadius: "4px",
-                                background: "rgba(0,0,0,0.15)",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "4px",
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                color: "var(--dsw-alias-label-primary)",
                               },
                             },
+                            "Account: ",
                             h(
-                              "div",
-                              { style: { display: "flex", alignItems: "center", gap: "8px", fontSize: "11px" } },
-                              h("code", { style: { fontWeight: 600, fontFamily: "monospace" } }, row.ref),
-                              h(
-                                "span",
-                                {
-                                  style: {
-                                    fontSize: "9px",
-                                    padding: "1px 4px",
-                                    borderRadius: "3px",
-                                    background: isRowVault ? "rgba(63, 185, 80, 0.15)" : isRowAmbient ? "rgba(210, 153, 34, 0.15)" : "rgba(128,128,128,0.1)",
-                                    color: isRowVault ? "#3fb950" : isRowAmbient ? "#d29922" : "inherit",
-                                  },
+                              "code",
+                              {
+                                style: {
+                                  fontFamily: "monospace",
+                                  color: "var(--dsw-alias-primary, #6366f1)",
                                 },
-                                isRowVault ? "VAULT" : isRowAmbient ? "AMBIENT" : "UNSET"
-                              ),
-                              row.expiresAt ? h(
-                                "span",
-                                { style: { marginLeft: "auto", fontSize: "10px", opacity: 0.7 } },
-                                "Exp: " + new Date(row.expiresAt).toLocaleDateString()
-                              ) : null
+                              },
+                              acc.name,
                             ),
-                            h(
-                              "div",
-                              { style: { display: "flex", alignItems: "center", gap: "6px" } },
-                              h(
+                          ),
+                          acc.isDefault
+                            ? h(
                                 "span",
                                 {
                                   style: {
-                                    flex: 1,
-                                    fontFamily: isRevealed ? "monospace" : "inherit",
-                                    fontSize: "11px",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    letterSpacing: isRevealed ? "normal" : "2px",
-                                    color: isRevealed ? "var(--dsw-alias-label-primary)" : "var(--dsw-alias-label-tertiary)",
-                                  },
-                                },
-                                isRowVault || isRowAmbient
-                                  ? isRevealed ? secretVal : "••••••••••••••••••••••••"
-                                  : "Not configured"
-                              ),
-                              isRowVault || isRowAmbient ? h(
-                                "button",
-                                {
-                                  type: "button",
-                                  onClick: function () { globalVaultStore.reveal(row.ref, row.account); },
-                                  style: {
-                                    background: "transparent",
-                                    border: "none",
-                                    color: "var(--dsw-alias-label-secondary)",
-                                    cursor: "pointer",
                                     fontSize: "10px",
-                                    padding: "2px 4px",
-                                  },
-                                },
-                                isRevealed ? "Hide" : "Reveal"
-                              ) : null,
-                              isRevealed ? h(
-                                "button",
-                                {
-                                  type: "button",
-                                  onClick: function () { copyText(secretVal, "Copied!"); },
-                                  style: {
-                                    background: "transparent",
-                                    border: "none",
+                                    padding: "1px 5px",
+                                    borderRadius: "3px",
+                                    background: "rgba(128,128,128,0.15)",
                                     color: "var(--dsw-alias-label-secondary)",
-                                    cursor: "pointer",
-                                    fontSize: "10px",
-                                    padding: "2px 4px",
                                   },
                                 },
-                                "Copy"
-                              ) : null,
-                              h(
+                                "DEFAULT",
+                              )
+                            : null,
+                          accHasConfig
+                            ? h(
+                                "span",
+                                {
+                                  style: {
+                                    fontSize: "10px",
+                                    padding: "1px 5px",
+                                    borderRadius: "3px",
+                                    background: "rgba(63, 185, 80, 0.15)",
+                                    color: "#3fb950",
+                                  },
+                                },
+                                accInVaultRows.length + " Keys",
+                              )
+                            : null,
+                          accInVaultRows.length > 0
+                            ? h(
                                 "button",
                                 {
                                   type: "button",
                                   onClick: function () {
-                                    setEditTarget({
-                                      ref: row.ref,
-                                      account: row.account || (acc.isDefault ? "" : acc.name),
-                                      label: row.label || row.ref,
-                                      initialValue: isRevealed ? secretVal : "",
+                                    setDeleteAccountTarget({
+                                      providerName: prov.name,
+                                      accountName: acc.name,
+                                      items: accInVaultRows.map(function (r) {
+                                        return {
+                                          ref: r.ref,
+                                          account: acc.isDefault ? undefined : acc.name,
+                                        };
+                                      }),
                                     });
                                   },
                                   style: {
-                                    background: "transparent",
-                                    border: "none",
-                                    color: "var(--dsw-alias-label-secondary)",
-                                    cursor: "pointer",
-                                    fontSize: "10px",
-                                    padding: "2px 4px",
-                                  },
-                                },
-                                "Set Value"
-                              ),
-                              isRowVault ? h(
-                                "button",
-                                {
-                                  type: "button",
-                                  onClick: function () {
-                                    globalVaultStore.unsetSecret(row.ref, row.account).then(function () {
-                                      showToast("Removed " + row.ref);
-                                    });
-                                  },
-                                  style: {
+                                    marginLeft: "auto",
                                     background: "transparent",
                                     border: "none",
                                     color: "#f85149",
                                     cursor: "pointer",
-                                    fontSize: "10px",
-                                    padding: "2px 4px",
+                                    fontSize: "11px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px",
                                   },
                                 },
-                                "Delete"
-                              ) : null
+                                h(TrashIcon, { size: 12 }),
+                                "Delete Account",
+                              )
+                            : null,
+                        ),
+
+                        // Account Keys List
+                        acc.rows.length === 0
+                          ? h(
+                              "div",
+                              {
+                                style: {
+                                  fontSize: "11px",
+                                  color: "var(--dsw-alias-label-tertiary)",
+                                },
+                              },
+                              "No keys stored for this account.",
                             )
-                          );
-                        })
-                  );
-                })
-              ) : null
+                          : acc.rows.map(function (row) {
+                              var isRowVault = row.inVault;
+                              var isRowAmbient = row.ambient && !row.inVault;
+                              var keyIdentifier = row.ref + (row.account ? ":" + row.account : "");
+                              var isRevealed = Boolean(revealed[keyIdentifier]);
+                              var secretVal = revealed[keyIdentifier] || "";
+
+                              return h(
+                                "div",
+                                {
+                                  key: row.ref,
+                                  style: {
+                                    padding: "6px 8px",
+                                    borderRadius: "4px",
+                                    background: "rgba(0,0,0,0.15)",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "4px",
+                                  },
+                                },
+                                h(
+                                  "div",
+                                  {
+                                    style: {
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                      fontSize: "11px",
+                                    },
+                                  },
+                                  h(
+                                    "code",
+                                    { style: { fontWeight: 600, fontFamily: "monospace" } },
+                                    row.ref,
+                                  ),
+                                  h(
+                                    "span",
+                                    {
+                                      style: {
+                                        fontSize: "9px",
+                                        padding: "1px 4px",
+                                        borderRadius: "3px",
+                                        background: isRowVault
+                                          ? "rgba(63, 185, 80, 0.15)"
+                                          : isRowAmbient
+                                            ? "rgba(210, 153, 34, 0.15)"
+                                            : "rgba(128,128,128,0.1)",
+                                        color: isRowVault
+                                          ? "#3fb950"
+                                          : isRowAmbient
+                                            ? "#d29922"
+                                            : "inherit",
+                                      },
+                                    },
+                                    isRowVault ? "VAULT" : isRowAmbient ? "AMBIENT" : "UNSET",
+                                  ),
+                                  row.expiresAt
+                                    ? h(
+                                        "span",
+                                        {
+                                          style: {
+                                            marginLeft: "auto",
+                                            fontSize: "10px",
+                                            opacity: 0.7,
+                                          },
+                                        },
+                                        "Exp: " + new Date(row.expiresAt).toLocaleDateString(),
+                                      )
+                                    : null,
+                                ),
+                                h(
+                                  "div",
+                                  { style: { display: "flex", alignItems: "center", gap: "6px" } },
+                                  h(
+                                    "span",
+                                    {
+                                      style: {
+                                        flex: 1,
+                                        fontFamily: isRevealed ? "monospace" : "inherit",
+                                        fontSize: "11px",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                        letterSpacing: isRevealed ? "normal" : "2px",
+                                        color: isRevealed
+                                          ? "var(--dsw-alias-label-primary)"
+                                          : "var(--dsw-alias-label-tertiary)",
+                                      },
+                                    },
+                                    isRowVault || isRowAmbient
+                                      ? isRevealed
+                                        ? secretVal
+                                        : "••••••••••••••••••••••••"
+                                      : "Not configured",
+                                  ),
+                                  isRowVault || isRowAmbient
+                                    ? h(
+                                        "button",
+                                        {
+                                          type: "button",
+                                          onClick: function () {
+                                            globalVaultStore.reveal(row.ref, row.account);
+                                          },
+                                          style: {
+                                            background: "transparent",
+                                            border: "none",
+                                            color: "var(--dsw-alias-label-secondary)",
+                                            cursor: "pointer",
+                                            fontSize: "10px",
+                                            padding: "2px 4px",
+                                          },
+                                        },
+                                        isRevealed ? "Hide" : "Reveal",
+                                      )
+                                    : null,
+                                  isRevealed
+                                    ? h(
+                                        "button",
+                                        {
+                                          type: "button",
+                                          onClick: function () {
+                                            copyText(secretVal, "Copied!");
+                                          },
+                                          style: {
+                                            background: "transparent",
+                                            border: "none",
+                                            color: "var(--dsw-alias-label-secondary)",
+                                            cursor: "pointer",
+                                            fontSize: "10px",
+                                            padding: "2px 4px",
+                                          },
+                                        },
+                                        "Copy",
+                                      )
+                                    : null,
+                                  h(
+                                    "button",
+                                    {
+                                      type: "button",
+                                      onClick: function () {
+                                        setEditTarget({
+                                          ref: row.ref,
+                                          account: row.account || (acc.isDefault ? "" : acc.name),
+                                          label: row.label || row.ref,
+                                          initialValue: isRevealed ? secretVal : "",
+                                        });
+                                      },
+                                      style: {
+                                        background: "transparent",
+                                        border: "none",
+                                        color: "var(--dsw-alias-label-secondary)",
+                                        cursor: "pointer",
+                                        fontSize: "10px",
+                                        padding: "2px 4px",
+                                      },
+                                    },
+                                    "Set Value",
+                                  ),
+                                  isRowVault
+                                    ? h(
+                                        "button",
+                                        {
+                                          type: "button",
+                                          onClick: function () {
+                                            globalVaultStore
+                                              .unsetSecret(row.ref, row.account)
+                                              .then(function () {
+                                                showToast("Removed " + row.ref);
+                                              });
+                                          },
+                                          style: {
+                                            background: "transparent",
+                                            border: "none",
+                                            color: "#f85149",
+                                            cursor: "pointer",
+                                            fontSize: "10px",
+                                            padding: "2px 4px",
+                                          },
+                                        },
+                                        "Delete",
+                                      )
+                                    : null,
+                                ),
+                              );
+                            }),
+                      );
+                    }),
+                  )
+                : null,
             );
-          })
+          }),
         ),
 
         // Modals
-        addModalData ? h(AddSecretModal, {
-          initialData: addModalData,
-          onClose: function () { setAddModalData(null); },
-          onSaved: function () { setAddModalData(null); showToast("Secret stored into encrypted vault!"); },
-        }) : null,
+        addModalData
+          ? h(AddSecretModal, {
+              initialData: addModalData,
+              onClose: function () {
+                setAddModalData(null);
+              },
+              onSaved: function () {
+                setAddModalData(null);
+                showToast("Secret stored into encrypted vault!");
+              },
+            })
+          : null,
 
-        oauthModalProvider ? h(DeviceOAuthModal, {
-          initialProviderId: oauthModalProvider === "select" ? null : oauthModalProvider,
-          onClose: function () { setOauthModalProvider(null); },
-          onSuccess: function (provider) { setOauthModalProvider(null); showToast("Authenticated with " + provider + "!"); },
-        }) : null,
+        oauthModalProvider
+          ? h(DeviceOAuthModal, {
+              initialProviderId: oauthModalProvider === "select" ? null : oauthModalProvider,
+              onClose: function () {
+                setOauthModalProvider(null);
+              },
+              onSuccess: function (provider) {
+                setOauthModalProvider(null);
+                showToast("Authenticated with " + provider + "!");
+              },
+            })
+          : null,
 
-        editTarget ? h(EditSecretModal, {
-          target: editTarget,
-          onClose: function () { setEditTarget(null); },
-          onSaved: function () { setEditTarget(null); showToast("Secret updated in vault!"); },
-        }) : null,
+        editTarget
+          ? h(EditSecretModal, {
+              target: editTarget,
+              onClose: function () {
+                setEditTarget(null);
+              },
+              onSaved: function () {
+                setEditTarget(null);
+                showToast("Secret updated in vault!");
+              },
+            })
+          : null,
 
-        deleteAccountTarget ? h(DeleteAccountConfirmModal, {
-          target: deleteAccountTarget,
-          onClose: function () { setDeleteAccountTarget(null); },
-          onDeleted: function () { setDeleteAccountTarget(null); showToast("Account credentials removed from vault."); },
-        }) : null
+        deleteAccountTarget
+          ? h(DeleteAccountConfirmModal, {
+              target: deleteAccountTarget,
+              onClose: function () {
+                setDeleteAccountTarget(null);
+              },
+              onDeleted: function () {
+                setDeleteAccountTarget(null);
+                showToast("Account credentials removed from vault.");
+              },
+            })
+          : null,
       );
     }
 
@@ -1497,14 +1913,26 @@ window.__ModuleLoader__.load({
         var trimmedSec = secretVal.trim();
         var trimmedAcc = accountVal.trim() || undefined;
 
-        if (!trimmedRef) { setError("Reference name is required."); return; }
-        if (!trimmedSec) { setError("Secret value cannot be empty."); return; }
+        if (!trimmedRef) {
+          setError("Reference name is required.");
+          return;
+        }
+        if (!trimmedSec) {
+          setError("Secret value cannot be empty.");
+          return;
+        }
 
         setSaving(true);
         setError(null);
-        globalVaultStore.setSecret(trimmedRef, trimmedSec, trimmedAcc)
-          .then(function () { props.onSaved(); })
-          .catch(function (err) { setSaving(false); setError(String(err.message || err)); });
+        globalVaultStore
+          .setSecret(trimmedRef, trimmedSec, trimmedAcc)
+          .then(function () {
+            props.onSaved();
+          })
+          .catch(function (err) {
+            setSaving(false);
+            setError(String(err.message || err));
+          });
       }
 
       var KNOWN_PRESETS = [
@@ -1530,7 +1958,11 @@ window.__ModuleLoader__.load({
             Fragment,
             null,
             h(P.Button, { variant: "outline", onClick: props.onClose, disabled: saving }, "Cancel"),
-            h(P.Button, { variant: "primary", onClick: handleSave, disabled: saving }, saving ? "Saving…" : "Store Secret")
+            h(
+              P.Button,
+              { variant: "primary", onClick: handleSave, disabled: saving },
+              saving ? "Saving…" : "Store Secret",
+            ),
           ),
         },
         h(
@@ -1539,7 +1971,18 @@ window.__ModuleLoader__.load({
           h(
             "div",
             null,
-            h("label", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", display: "block", marginBottom: "4px" } }, "Common Presets:"),
+            h(
+              "label",
+              {
+                style: {
+                  fontSize: "12px",
+                  color: "var(--dsw-alias-label-secondary)",
+                  display: "block",
+                  marginBottom: "4px",
+                },
+              },
+              "Common Presets:",
+            ),
             h(
               "div",
               { style: { display: "flex", flexWrap: "wrap", gap: "4px" } },
@@ -1549,7 +1992,9 @@ window.__ModuleLoader__.load({
                   {
                     key: p.ref,
                     type: "button",
-                    onClick: function () { setRefVal(p.ref); },
+                    onClick: function () {
+                      setRefVal(p.ref);
+                    },
                     style: {
                       fontSize: "10px",
                       padding: "2px 8px",
@@ -1560,20 +2005,33 @@ window.__ModuleLoader__.load({
                       cursor: "pointer",
                     },
                   },
-                  p.label
+                  p.label,
                 );
-              })
-            )
+              }),
+            ),
           ),
           h(
             "div",
             null,
-            h("label", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", display: "block", marginBottom: "4px" } }, "Canonical Reference Name:"),
+            h(
+              "label",
+              {
+                style: {
+                  fontSize: "12px",
+                  color: "var(--dsw-alias-label-secondary)",
+                  display: "block",
+                  marginBottom: "4px",
+                },
+              },
+              "Canonical Reference Name:",
+            ),
             h("input", {
               type: "text",
               placeholder: "e.g. OPENAI_API_KEY",
               value: refVal,
-              onChange: function (e) { setRefVal(e.target.value.toUpperCase()); },
+              onChange: function (e) {
+                setRefVal(e.target.value.toUpperCase());
+              },
               style: {
                 width: "100%",
                 boxSizing: "border-box",
@@ -1585,17 +2043,30 @@ window.__ModuleLoader__.load({
                 fontSize: "13px",
                 fontFamily: "monospace",
               },
-            })
+            }),
           ),
           h(
             "div",
             null,
-            h("label", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", display: "block", marginBottom: "4px" } }, "Account Tag / Name (Optional for Multi-Account):"),
+            h(
+              "label",
+              {
+                style: {
+                  fontSize: "12px",
+                  color: "var(--dsw-alias-label-secondary)",
+                  display: "block",
+                  marginBottom: "4px",
+                },
+              },
+              "Account Tag / Name (Optional for Multi-Account):",
+            ),
             h("input", {
               type: "text",
               placeholder: "e.g. work, personal, secondary (leave blank for default)",
               value: accountVal,
-              onChange: function (e) { setAccountVal(e.target.value.toLowerCase()); },
+              onChange: function (e) {
+                setAccountVal(e.target.value.toLowerCase());
+              },
               style: {
                 width: "100%",
                 boxSizing: "border-box",
@@ -1606,17 +2077,30 @@ window.__ModuleLoader__.load({
                 color: "inherit",
                 fontSize: "13px",
               },
-            })
+            }),
           ),
           h(
             "div",
             null,
-            h("label", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", display: "block", marginBottom: "4px" } }, "Secret Value:"),
+            h(
+              "label",
+              {
+                style: {
+                  fontSize: "12px",
+                  color: "var(--dsw-alias-label-secondary)",
+                  display: "block",
+                  marginBottom: "4px",
+                },
+              },
+              "Secret Value:",
+            ),
             h("textarea", {
               placeholder: "Paste API key, OAuth token, or private secret...",
               value: secretVal,
               rows: 3,
-              onChange: function (e) { setSecretVal(e.target.value); },
+              onChange: function (e) {
+                setSecretVal(e.target.value);
+              },
               style: {
                 width: "100%",
                 boxSizing: "border-box",
@@ -1629,10 +2113,10 @@ window.__ModuleLoader__.load({
                 fontFamily: "monospace",
                 resize: "vertical",
               },
-            })
+            }),
           ),
-          error ? h("div", { style: { color: "#f85149", fontSize: "12px" } }, error) : null
-        )
+          error ? h("div", { style: { color: "#f85149", fontSize: "12px" } }, error) : null,
+        ),
       );
     }
 
@@ -1655,13 +2139,22 @@ window.__ModuleLoader__.load({
 
       function handleSave() {
         var trimmed = secretVal.trim();
-        if (!trimmed) { setError("Secret value cannot be empty."); return; }
+        if (!trimmed) {
+          setError("Secret value cannot be empty.");
+          return;
+        }
 
         setSaving(true);
         setError(null);
-        globalVaultStore.setSecret(target.ref, trimmed, target.account || undefined)
-          .then(function () { props.onSaved(); })
-          .catch(function (err) { setSaving(false); setError(String(err.message || err)); });
+        globalVaultStore
+          .setSecret(target.ref, trimmed, target.account || undefined)
+          .then(function () {
+            props.onSaved();
+          })
+          .catch(function (err) {
+            setSaving(false);
+            setError(String(err.message || err));
+          });
       }
 
       return h(
@@ -1674,7 +2167,11 @@ window.__ModuleLoader__.load({
             Fragment,
             null,
             h(P.Button, { variant: "outline", onClick: props.onClose, disabled: saving }, "Cancel"),
-            h(P.Button, { variant: "primary", onClick: handleSave, disabled: saving }, saving ? "Saving…" : "Save Secret")
+            h(
+              P.Button,
+              { variant: "primary", onClick: handleSave, disabled: saving },
+              saving ? "Saving…" : "Save Secret",
+            ),
           ),
         },
         h(
@@ -1684,18 +2181,42 @@ window.__ModuleLoader__.load({
             "div",
             { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
             "Ref: ",
-            h("code", { style: { fontFamily: "monospace", color: "var(--dsw-alias-label-primary)" } }, target.ref),
-            target.account ? h("span", { style: { marginLeft: "10px" } }, "Account: ", h("code", null, target.account)) : null
+            h(
+              "code",
+              { style: { fontFamily: "monospace", color: "var(--dsw-alias-label-primary)" } },
+              target.ref,
+            ),
+            target.account
+              ? h(
+                  "span",
+                  { style: { marginLeft: "10px" } },
+                  "Account: ",
+                  h("code", null, target.account),
+                )
+              : null,
           ),
           h(
             "div",
             null,
-            h("label", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", display: "block", marginBottom: "4px" } }, "New Secret Value:"),
+            h(
+              "label",
+              {
+                style: {
+                  fontSize: "12px",
+                  color: "var(--dsw-alias-label-secondary)",
+                  display: "block",
+                  marginBottom: "4px",
+                },
+              },
+              "New Secret Value:",
+            ),
             h("textarea", {
               placeholder: "Paste new secret value...",
               value: secretVal,
               rows: 3,
-              onChange: function (e) { setSecretVal(e.target.value); },
+              onChange: function (e) {
+                setSecretVal(e.target.value);
+              },
               style: {
                 width: "100%",
                 boxSizing: "border-box",
@@ -1708,10 +2229,10 @@ window.__ModuleLoader__.load({
                 fontFamily: "monospace",
                 resize: "vertical",
               },
-            })
+            }),
           ),
-          error ? h("div", { style: { color: "#f85149", fontSize: "12px" } }, error) : null
-        )
+          error ? h("div", { style: { color: "#f85149", fontSize: "12px" } }, error) : null,
+        ),
       );
     }
 
@@ -1726,9 +2247,14 @@ window.__ModuleLoader__.load({
 
       function handleDelete() {
         setDeleting(true);
-        globalVaultStore.unsetMultiple(target.items)
-          .then(function () { props.onDeleted(); })
-          .catch(function () { setDeleting(false); });
+        globalVaultStore
+          .unsetMultiple(target.items)
+          .then(function () {
+            props.onDeleted();
+          })
+          .catch(function () {
+            setDeleting(false);
+          });
       }
 
       return h(
@@ -1737,15 +2263,30 @@ window.__ModuleLoader__.load({
           open: true,
           onClose: props.onClose,
           title: "Delete Account (" + target.accountName + ")",
-          description: "Are you sure you want to delete all " + target.items.length + " keys stored for " + target.providerName + " (account: " + target.accountName + ")?",
+          description:
+            "Are you sure you want to delete all " +
+            target.items.length +
+            " keys stored for " +
+            target.providerName +
+            " (account: " +
+            target.accountName +
+            ")?",
           footer: h(
             Fragment,
             null,
-            h(P.Button, { variant: "outline", onClick: props.onClose, disabled: deleting }, "Cancel"),
-            h(P.Button, { variant: "primary", onClick: handleDelete, disabled: deleting }, deleting ? "Deleting…" : "Delete Account")
+            h(
+              P.Button,
+              { variant: "outline", onClick: props.onClose, disabled: deleting },
+              "Cancel",
+            ),
+            h(
+              P.Button,
+              { variant: "primary", onClick: handleDelete, disabled: deleting },
+              deleting ? "Deleting…" : "Delete Account",
+            ),
           ),
         },
-        null
+        null,
       );
     }
 
@@ -1761,7 +2302,11 @@ window.__ModuleLoader__.load({
         { id: "cursor", label: "Cursor", kind: "cli" },
       ];
 
-      var initial = props.initialProviderId ? providers.find(function (p) { return p.id === props.initialProviderId; }) : null;
+      var initial = props.initialProviderId
+        ? providers.find(function (p) {
+            return p.id === props.initialProviderId;
+          })
+        : null;
       var selectedProviderState = React.useState(initial);
       var selectedProvider = selectedProviderState[0];
       var setSelectedProvider = selectedProviderState[1];
@@ -1778,11 +2323,14 @@ window.__ModuleLoader__.load({
       var error = errorState[0];
       var setError = errorState[1];
 
-      React.useEffect(function () {
-        if (initial && !flow) {
-          startOAuth(initial);
-        }
-      }, [initial]);
+      React.useEffect(
+        function () {
+          if (initial && !flow) {
+            startOAuth(initial);
+          }
+        },
+        [initial],
+      );
 
       function startOAuth(provider) {
         setSelectedProvider(provider);
@@ -1816,13 +2364,17 @@ window.__ModuleLoader__.load({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pollToken: pollToken }),
           })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+              return res.json();
+            })
             .then(function (res) {
               if (res.status === "authenticated") {
                 clearInterval(interval);
                 setAuthStatus("authenticated");
                 globalVaultStore.load();
-                setTimeout(function () { props.onSuccess(providerLabel); }, 1000);
+                setTimeout(function () {
+                  props.onSuccess(providerLabel);
+                }, 1000);
               }
             })
             .catch(function () {});
@@ -1838,7 +2390,7 @@ window.__ModuleLoader__.load({
           footer: h(
             Fragment,
             null,
-            h(P.Button, { variant: "outline", onClick: props.onClose }, "Close")
+            h(P.Button, { variant: "outline", onClick: props.onClose }, "Close"),
           ),
         },
         h(
@@ -1848,7 +2400,17 @@ window.__ModuleLoader__.load({
             ? h(
                 Fragment,
                 null,
-                h("p", { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)", margin: 0 } }, "Select an AI provider to initiate OAuth authentication:"),
+                h(
+                  "p",
+                  {
+                    style: {
+                      fontSize: "13px",
+                      color: "var(--dsw-alias-label-secondary)",
+                      margin: 0,
+                    },
+                  },
+                  "Select an AI provider to initiate OAuth authentication:",
+                ),
                 h(
                   "div",
                   { style: { display: "flex", flexDirection: "column", gap: "8px" } },
@@ -1858,7 +2420,9 @@ window.__ModuleLoader__.load({
                       {
                         key: p.id,
                         type: "button",
-                        onClick: function () { startOAuth(p); },
+                        onClick: function () {
+                          startOAuth(p);
+                        },
                         style: {
                           display: "flex",
                           alignItems: "center",
@@ -1874,15 +2438,26 @@ window.__ModuleLoader__.load({
                         },
                       },
                       p.label,
-                      h(ChevronRightIcon, { size: 14 })
+                      h(ChevronRightIcon, { size: 14 }),
                     );
-                  })
-                )
+                  }),
+                ),
               )
             : h(
                 "div",
-                { style: { display: "flex", flexDirection: "column", gap: "12px", textAlign: "center" } },
-                h("div", { style: { fontSize: "14px", fontWeight: 500 } }, "Authorize " + selectedProvider.label),
+                {
+                  style: {
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "12px",
+                    textAlign: "center",
+                  },
+                },
+                h(
+                  "div",
+                  { style: { fontSize: "14px", fontWeight: 500 } },
+                  "Authorize " + selectedProvider.label,
+                ),
                 h(
                   "div",
                   {
@@ -1897,9 +2472,34 @@ window.__ModuleLoader__.load({
                       alignItems: "center",
                     },
                   },
-                  h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } }, "1. Copy this one-time code:"),
-                  h("code", { style: { fontSize: "20px", fontWeight: 700, letterSpacing: "2px", color: "var(--dsw-alias-primary, #6366f1)" } }, flow.userCode),
-                  h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)", marginTop: "4px" } }, "2. Open authorization page:"),
+                  h(
+                    "div",
+                    { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                    "1. Copy this one-time code:",
+                  ),
+                  h(
+                    "code",
+                    {
+                      style: {
+                        fontSize: "20px",
+                        fontWeight: 700,
+                        letterSpacing: "2px",
+                        color: "var(--dsw-alias-primary, #6366f1)",
+                      },
+                    },
+                    flow.userCode,
+                  ),
+                  h(
+                    "div",
+                    {
+                      style: {
+                        fontSize: "12px",
+                        color: "var(--dsw-alias-label-secondary)",
+                        marginTop: "4px",
+                      },
+                    },
+                    "2. Open authorization page:",
+                  ),
                   h(
                     "a",
                     {
@@ -1920,15 +2520,23 @@ window.__ModuleLoader__.load({
                       },
                     },
                     "Open Verification URL",
-                    h(ExternalLinkIcon, { size: 10 })
-                  )
+                    h(ExternalLinkIcon, { size: 10 }),
+                  ),
                 ),
                 authStatus === "authenticated"
-                  ? h("div", { style: { color: "#3fb950", fontSize: "13px", fontWeight: 600 } }, "✓ Successfully Authenticated!")
-                  : h("div", { style: { fontSize: "12px", color: "var(--dsw-alias-label-tertiary)" } }, "Waiting for browser authorization…")
+                  ? h(
+                      "div",
+                      { style: { color: "#3fb950", fontSize: "13px", fontWeight: 600 } },
+                      "✓ Successfully Authenticated!",
+                    )
+                  : h(
+                      "div",
+                      { style: { fontSize: "12px", color: "var(--dsw-alias-label-tertiary)" } },
+                      "Waiting for browser authorization…",
+                    ),
               ),
-          error ? h("div", { style: { color: "#f85149", fontSize: "12px" } }, error) : null
-        )
+          error ? h("div", { style: { color: "#f85149", fontSize: "12px" } }, error) : null,
+        ),
       );
     }
 
@@ -1940,24 +2548,42 @@ window.__ModuleLoader__.load({
         });
       }, "dsh-credentials: dictionaries");
 
-      ctx.slots.inject("settings.section", function () {
-        return ctx.slots.register({
-          name: "settings.section",
-          id: "keychain",
-          order: 35,
-          locale: NS,
-          label: function () { return "Keychain"; },
-          inject: function () { return {}; },
-        }, KeychainSection);
-      }, "dsh-credentials: keychain settings section");
+      ctx.slots.inject(
+        "settings.section",
+        function () {
+          return ctx.slots.register(
+            {
+              name: "settings.section",
+              id: "keychain",
+              order: 35,
+              locale: NS,
+              label: function () {
+                return "Keychain";
+              },
+              inject: function () {
+                return {};
+              },
+            },
+            KeychainSection,
+          );
+        },
+        "dsh-credentials: keychain settings section",
+      );
 
-      ctx.slots.inject("settings.section.icon", function () {
-        return ctx.slots.register({
-          name: "settings.section.icon",
-          id: "keychain",
-          order: 0,
-        }, KeychainGlyph);
-      }, "dsh-credentials: keychain nav glyph");
+      ctx.slots.inject(
+        "settings.section.icon",
+        function () {
+          return ctx.slots.register(
+            {
+              name: "settings.section.icon",
+              id: "keychain",
+              order: 0,
+            },
+            KeychainGlyph,
+          );
+        },
+        "dsh-credentials: keychain nav glyph",
+      );
     }
 
     exports.apply = apply;

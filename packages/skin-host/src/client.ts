@@ -1,11 +1,11 @@
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client';
-import type { ComponentType } from 'react';
-import { createSkinRuntime } from '@dsh-stack/skin-runtime';
-import { CodexBrandMark, CodexBrandName } from '@dsh-stack/skin-codex/client';
-import { ClaudeBrandMark, ClaudeBrandName } from '@dsh-stack/skin-claude/client';
-import { DeepSeekBrandMark, DeepSeekBrandName } from '@dsh-stack/skin-deepseek/client';
+import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+import type { ComponentType } from "react";
+import { createSkinRuntime } from "@dsh-stack/skin-runtime";
+import { CodexBrandMark, CodexBrandName } from "@dsh-stack/skin-codex/client";
+import { ClaudeBrandMark, ClaudeBrandName } from "@dsh-stack/skin-claude/client";
+import { DeepSeekBrandMark, DeepSeekBrandName } from "@dsh-stack/skin-deepseek/client";
 
-export const inject = ['slots'];
+export const inject = ["slots"];
 
 const runtime = createSkinRuntime(undefined, () => window.location.reload());
 
@@ -24,15 +24,15 @@ export function apply(ctx: ClientContext): void {
   const active = runtime.getActive();
   const selected = components[active] ?? components.deepseek!;
 
-  ctx.slots.inject('sidebar.brand.mark', function* () {
+  ctx.slots.inject("sidebar.brand.mark", function* () {
     yield ctx.slots.register({ name: `stack-skin:${active}:sidebar-mark` }, selected.mark);
   });
 
-  ctx.slots.inject('sidebar.brand.name', function* () {
+  ctx.slots.inject("sidebar.brand.name", function* () {
     yield ctx.slots.register({ name: `stack-skin:${active}:sidebar-name` }, selected.name);
   });
 
-  ctx.slots.inject('conversation.hero.brand.mark', function* () {
+  ctx.slots.inject("conversation.hero.brand.mark", function* () {
     yield ctx.slots.register({ name: `stack-skin:${active}:hero-mark` }, selected.mark);
   });
 }

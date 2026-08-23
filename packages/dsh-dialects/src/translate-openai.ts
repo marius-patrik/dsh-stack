@@ -9,43 +9,43 @@
  * @module dsh-dialects/translate-openai
  */
 
-import { CallId, EMPTY_RESPONSE_CODE, LlmError } from '@deepseek-ai/dsh-llm'
-import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from '@deepseek-ai/dsh-llm'
-import { DONE } from './sse.js'
+import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";
+import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from "@deepseek-ai/dsh-llm";
+import { DONE } from "./sse.js";
 
 /** One streamed choice; `finish_reason` is non-null only on its terminal chunk. */
 export interface WireChoice {
-  delta?: WireDelta
-  finish_reason?: string | null
+  delta?: WireDelta;
+  finish_reason?: string | null;
 }
 
 /** The incremental content of one streamed choice; any subset of fields may be present per chunk. */
 export interface WireDelta {
-  content?: string | null
-  reasoning_content?: string | null
-  tool_calls?: WireToolCallDelta[]
+  content?: string | null;
+  reasoning_content?: string | null;
+  tool_calls?: WireToolCallDelta[];
 }
 
 /** A streamed fragment of one tool call; fragments sharing an `index` concatenate into one call. */
 export interface WireToolCallDelta {
   /** Disambiguates parallel tool calls; stable across a call's deltas. */
-  index: number
+  index: number;
   /** Present on the first delta of each call only. */
-  id?: string
-  type?: 'function'
+  id?: string;
+  type?: "function";
   function?: {
     /** Present on the first delta of each call only. */
-    name?: string
+    name?: string;
     /** Argument JSON fragment (concatenate across deltas). */
-    arguments?: string
-  }
+    arguments?: string;
+  };
 }
 
 /** One parsed chat.completion.chunk payload. */
 export interface WireChunk {
-  choices?: WireChoice[]
+  choices?: WireChoice[];
   /** Arrives attached to the finish chunk and/or as a trailing usage-only chunk. */
-  usage?: WireUsage | null
+  usage?: WireUsage | null;
 }
 
 /**
@@ -54,21 +54,21 @@ export interface WireChunk {
  * convention of disjoint counts.
  */
 export interface WireUsage {
-  prompt_tokens?: number
-  completion_tokens?: number
-  prompt_cache_hit_tokens?: number
-  prompt_tokens_details?: { cached_tokens?: number }
-  completion_tokens_details?: { reasoning_tokens?: number }
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  prompt_cache_hit_tokens?: number;
+  prompt_tokens_details?: { cached_tokens?: number };
+  completion_tokens_details?: { reasoning_tokens?: number };
 }
 
 /** One open block under assembly. */
 interface OpenBlock {
-  index: number
-  kind: 'text' | 'reasoning' | 'tool-call'
-  text: string
+  index: number;
+  kind: "text" | "reasoning" | "tool-call";
+  text: string;
   /** tool-call only */
-  callId?: string
-  name?: string
+  callId?: string;
+  name?: string;
 }
 
 /**
@@ -78,15 +78,18 @@ interface OpenBlock {
  */
 export function mapFinishReason(reason: string): FinishReason {
   switch (reason) {
-    case 'stop': return { kind: 'stop' }
-    case 'tool_calls':
-    case 'function_call': return { kind: 'tool-calls' }
-    case 'length': return { kind: 'max-tokens' }
+    case "stop":
+      return { kind: "stop" };
+    case "tool_calls":
+    case "function_call":
+      return { kind: "tool-calls" };
+    case "length":
+      return { kind: "max-tokens" };
     default:
       return {
-        kind: 'error',
+        kind: "error",
         failure: { message: `model stopped: ${reason}`, code: reason.toUpperCase() },
-      }
+      };
   }
 }
 
@@ -97,27 +100,30 @@ export function mapFinishReason(reason: string): FinishReason {
  * @returns disjoint harness counts.
  */
 export function mapUsage(usage: WireUsage): TokenUsage {
-  const cacheRead = usage.prompt_tokens_details?.cached_tokens ?? usage.prompt_cache_hit_tokens
-  const reasoning = usage.completion_tokens_details?.reasoning_tokens
+  const cacheRead = usage.prompt_tokens_details?.cached_tokens ?? usage.prompt_cache_hit_tokens;
+  const reasoning = usage.completion_tokens_details?.reasoning_tokens;
   return {
     inputTokens: (usage.prompt_tokens ?? 0) - (cacheRead ?? 0),
     outputTokens: usage.completion_tokens ?? 0,
-    ...cacheRead !== undefined ? { cacheReadTokens: cacheRead } : {},
-    ...reasoning !== undefined ? { reasoningTokens: reasoning } : {},
-  }
+    ...(cacheRead !== undefined ? { cacheReadTokens: cacheRead } : {}),
+    ...(reasoning !== undefined ? { reasoningTokens: reasoning } : {}),
+  };
 }
 
 /** Assemble the final ContentBlock for one open block. */
 function closeBlock(block: OpenBlock): ContentBlock {
   switch (block.kind) {
-    case 'text': return { type: 'text', text: block.text }
-    case 'reasoning': return { type: 'reasoning', text: block.text }
-    case 'tool-call': return {
-      type: 'tool-call',
-      id: CallId(block.callId ?? ''),
-      name: block.name ?? '',
-      arguments: block.text,
-    }
+    case "text":
+      return { type: "text", text: block.text };
+    case "reasoning":
+      return { type: "reasoning", text: block.text };
+    case "tool-call":
+      return {
+        type: "tool-call",
+        id: CallId(block.callId ?? ""),
+        name: block.name ?? "",
+        arguments: block.text,
+      };
   }
 }
 
@@ -129,99 +135,105 @@ function closeBlock(block: OpenBlock): ContentBlock {
  *   sentinel. A `stop` (or absent) finish with no opened blocks is a degenerate provider completion
  *   and maps to an `EMPTY_RESPONSE` error finish instead of a successful empty message.
  */
-export async function* translateOpenAi(payloads: AsyncIterable<string>): AsyncGenerator<StreamChunk> {
-  let nextIndex = 0
-  let textBlock: OpenBlock | undefined
-  let reasoningBlock: OpenBlock | undefined
-  const toolBlocks = new Map<number, OpenBlock>()
-  const order: OpenBlock[] = []
-  let pendingFinish: FinishReason | undefined
-  let pendingUsage: TokenUsage | undefined
+export async function* translateOpenAi(
+  payloads: AsyncIterable<string>,
+): AsyncGenerator<StreamChunk> {
+  let nextIndex = 0;
+  let textBlock: OpenBlock | undefined;
+  let reasoningBlock: OpenBlock | undefined;
+  const toolBlocks = new Map<number, OpenBlock>();
+  const order: OpenBlock[] = [];
+  let pendingFinish: FinishReason | undefined;
+  let pendingUsage: TokenUsage | undefined;
 
-  function open(kind: OpenBlock['kind']): OpenBlock {
-    const block: OpenBlock = { index: nextIndex++, kind, text: '' }
-    order.push(block)
-    return block
+  function open(kind: OpenBlock["kind"]): OpenBlock {
+    const block: OpenBlock = { index: nextIndex++, kind, text: "" };
+    order.push(block);
+    return block;
   }
 
   for await (const payload of payloads) {
     if (payload === DONE) {
       for (const block of order) {
-        yield { type: 'block-end', index: block.index, block: closeBlock(block) }
+        yield { type: "block-end", index: block.index, block: closeBlock(block) };
       }
-      if (pendingUsage) yield { type: 'usage', usage: pendingUsage }
-      const reason = pendingFinish ?? { kind: 'stop' as const }
+      if (pendingUsage) yield { type: "usage", usage: pendingUsage };
+      const reason = pendingFinish ?? { kind: "stop" as const };
       yield {
-        type: 'finish',
-        reason: reason.kind === 'stop' && order.length === 0
-          ? {
-            kind: 'error',
-            failure: { message: 'model returned a completed response with no content', code: EMPTY_RESPONSE_CODE },
-          }
-          : reason,
-      }
-      return
+        type: "finish",
+        reason:
+          reason.kind === "stop" && order.length === 0
+            ? {
+                kind: "error",
+                failure: {
+                  message: "model returned a completed response with no content",
+                  code: EMPTY_RESPONSE_CODE,
+                },
+              }
+            : reason,
+      };
+      return;
     }
 
-    let chunk: WireChunk
+    let chunk: WireChunk;
     try {
-      chunk = JSON.parse(payload) as WireChunk
+      chunk = JSON.parse(payload) as WireChunk;
     } catch {
-      throw new LlmError(`malformed SSE payload: ${payload.slice(0, 120)}`, 'MALFORMED_RESPONSE')
+      throw new LlmError(`malformed SSE payload: ${payload.slice(0, 120)}`, "MALFORMED_RESPONSE");
     }
 
     for (const choice of chunk.choices ?? []) {
-      const delta = choice.delta
+      const delta = choice.delta;
 
-      const reasoning = delta?.reasoning_content
-      if (typeof reasoning === 'string' && reasoning.length > 0) {
+      const reasoning = delta?.reasoning_content;
+      if (typeof reasoning === "string" && reasoning.length > 0) {
         if (!reasoningBlock) {
-          reasoningBlock = open('reasoning')
-          yield { type: 'block-start', index: reasoningBlock.index, blockType: 'reasoning' }
+          reasoningBlock = open("reasoning");
+          yield { type: "block-start", index: reasoningBlock.index, blockType: "reasoning" };
         }
-        reasoningBlock.text += reasoning
-        yield { type: 'reasoning-delta', index: reasoningBlock.index, text: reasoning }
+        reasoningBlock.text += reasoning;
+        yield { type: "reasoning-delta", index: reasoningBlock.index, text: reasoning };
       }
 
-      const content = delta?.content
-      if (typeof content === 'string' && content.length > 0) {
+      const content = delta?.content;
+      if (typeof content === "string" && content.length > 0) {
         if (!textBlock) {
-          textBlock = open('text')
-          yield { type: 'block-start', index: textBlock.index, blockType: 'text' }
+          textBlock = open("text");
+          yield { type: "block-start", index: textBlock.index, blockType: "text" };
         }
-        textBlock.text += content
-        yield { type: 'text-delta', index: textBlock.index, text: content }
+        textBlock.text += content;
+        yield { type: "text-delta", index: textBlock.index, text: content };
       }
 
       for (const call of delta?.tool_calls ?? []) {
-        let block = toolBlocks.get(call.index)
+        let block = toolBlocks.get(call.index);
         if (!block) {
-          block = open('tool-call')
-          toolBlocks.set(call.index, block)
-          yield { type: 'block-start', index: block.index, blockType: 'tool-call' }
+          block = open("tool-call");
+          toolBlocks.set(call.index, block);
+          yield { type: "block-start", index: block.index, blockType: "tool-call" };
         }
-        if (call.id !== undefined) block.callId = call.id
-        if (call.function?.name !== undefined) block.name = call.function.name
-        const fragment = call.function?.arguments ?? ''
-        block.text += fragment
+        if (call.id !== undefined) block.callId = call.id;
+        if (call.function?.name !== undefined) block.name = call.function.name;
+        const fragment = call.function?.arguments ?? "";
+        block.text += fragment;
         yield {
-          type: 'tool-call-delta',
+          type: "tool-call-delta",
           index: block.index,
-          id: CallId(block.callId ?? ''),
-          ...block.name !== undefined ? { name: block.name } : {},
+          id: CallId(block.callId ?? ""),
+          ...(block.name !== undefined ? { name: block.name } : {}),
           argumentsDelta: fragment,
-        }
+        };
       }
 
-      if (typeof choice.finish_reason === 'string') {
-        pendingFinish = mapFinishReason(choice.finish_reason)
+      if (typeof choice.finish_reason === "string") {
+        pendingFinish = mapFinishReason(choice.finish_reason);
       }
     }
 
-    if (chunk.usage) pendingUsage = mapUsage(chunk.usage)
+    if (chunk.usage) pendingUsage = mapUsage(chunk.usage);
   }
 
   // parseSseData guarantees the [DONE] sentinel (or throws); reaching here
   // means the payload source violated that contract.
-  throw new LlmError('SSE payload stream ended without [DONE]', 'STREAM_CLOSED')
+  throw new LlmError("SSE payload stream ended without [DONE]", "STREAM_CLOSED");
 }

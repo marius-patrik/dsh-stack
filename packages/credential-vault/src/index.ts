@@ -25,37 +25,42 @@
  * @module dsh-credentials
  */
 
-import { Service, type Context } from '@deepseek-ai/cordis'
-import { credentialRef, type CredentialProvider } from '@deepseek-ai/dsh-credentials'
-import z from '@deepseek-ai/schemastery'
-import { homedir } from 'node:os'
-import { join, resolve } from 'node:path'
-import { rename } from 'node:fs/promises'
-import { loadOrCreateKey, Vault } from './vault.js'
-import { exists } from './vault/files.js'
-import { EncryptedFileVault, vaultDirectory } from './vault/store.js'
-import type { MasterKeySource } from './vault/masterkey.js'
-import type { SecretRecord } from './vault/record.js'
-import { canonicalRefOf, recordForRef, refTag, revealFromRecord, slugRecordId } from './refs.js'
-import { claudeFileProvider, cursorFileProvider, githubFileProvider } from './file-providers.js'
-import { registerGithubCredentials } from './github.js'
-import { mountVaultWeb } from './web.js'
-import type { FileSecretProvider, ImportResult, ResolvedSecret } from './types.js'
+import { Service, type Context } from "@deepseek-ai/cordis";
+import { credentialRef, type CredentialProvider } from "@deepseek-ai/dsh-credentials";
+import z from "@deepseek-ai/schemastery";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
+import { rename } from "node:fs/promises";
+import { loadOrCreateKey, Vault } from "./vault.js";
+import { exists } from "./vault/files.js";
+import { EncryptedFileVault, vaultDirectory } from "./vault/store.js";
+import type { MasterKeySource } from "./vault/masterkey.js";
+import type { SecretRecord } from "./vault/record.js";
+import { canonicalRefOf, recordForRef, refTag, revealFromRecord, slugRecordId } from "./refs.js";
+import { claudeFileProvider, cursorFileProvider, githubFileProvider } from "./file-providers.js";
+import { registerGithubCredentials } from "./github.js";
+import { mountVaultWeb } from "./web.js";
+import type { FileSecretProvider, ImportResult, ResolvedSecret } from "./types.js";
 
-export { Vault } from './vault.js'
-export { claudeFileProvider, cursorFileProvider, githubFileProvider } from './file-providers.js'
-export { registerGithubCredentials, GITHUB_API_BASE, GITHUB_AUTHORIZE_URL, GITHUB_TOKEN_URL } from './github.js'
-export { VAULT_PREFIX, KNOWN_REF_NAMES, listRows, makeVaultHandler, mountVaultWeb } from './web.js'
-export type { VaultListRow } from './web.js'
-export type { FileSecretProvider, ImportResult, ResolvedSecret } from './types.js'
-export * from './refs.js'
+export { Vault } from "./vault.js";
+export { claudeFileProvider, cursorFileProvider, githubFileProvider } from "./file-providers.js";
+export {
+  registerGithubCredentials,
+  GITHUB_API_BASE,
+  GITHUB_AUTHORIZE_URL,
+  GITHUB_TOKEN_URL,
+} from "./github.js";
+export { VAULT_PREFIX, KNOWN_REF_NAMES, listRows, makeVaultHandler, mountVaultWeb } from "./web.js";
+export type { VaultListRow } from "./web.js";
+export type { FileSecretProvider, ImportResult, ResolvedSecret } from "./types.js";
+export * from "./refs.js";
 
-export const name = 'dsh-credentials'
-export const inject: string[] = []
+export const name = "dsh-credentials";
+export const inject: string[] = [];
 
 /** Resolve the agent home directory: config overrides `$DSH_HOME`, then `~/.agents`. */
 function resolveHome(configHome: string | undefined): string {
-  return resolve(configHome ?? process.env['DSH_HOME'] ?? join(homedir(), '.agents'))
+  return resolve(configHome ?? process.env["DSH_HOME"] ?? join(homedir(), ".agents"));
 }
 
 /**
@@ -64,13 +69,13 @@ function resolveHome(configHome: string | undefined): string {
  */
 export interface Config {
   /** Agent home directory holding `vault/` records (default `$DSH_HOME` or `~/.agents`). */
-  home?: string
+  home?: string;
   /** Vault key file, the Keychain fallback store (default `<home>/accounts.key`). */
-  keyFile?: string
+  keyFile?: string;
   /** Public GitHub OAuth App client id; enables the OAuth refresh supplement. */
-  githubClientId?: string
+  githubClientId?: string;
   /** OAuth scopes for the GitHub App (defaults to `repo`, `workflow`). */
-  githubScopes?: string[]
+  githubScopes?: string[];
 }
 
 export const Config: z<Config> = z.object({
@@ -78,24 +83,24 @@ export const Config: z<Config> = z.object({
   keyFile: z.string(),
   githubClientId: z.string(),
   githubScopes: z.array(z.string()),
-})
+});
 
 /** The legacy v1 key bootstrap as a master-key source: Keychain first, key file second. */
 class KeychainOrKeyFileMasterKey implements MasterKeySource {
-  readonly description = 'macOS Keychain (dsh.accounts) or 0600 key file'
-  #key: Uint8Array | null = null
+  readonly description = "macOS Keychain (dsh.accounts) or 0600 key file";
+  #key: Uint8Array | null = null;
 
   constructor(private readonly keyFile: string) {}
 
   async key(): Promise<Uint8Array> {
-    if (this.#key === null) this.#key = Uint8Array.from(await loadOrCreateKey(this.keyFile))
-    return Uint8Array.from(this.#key)
+    if (this.#key === null) this.#key = Uint8Array.from(await loadOrCreateKey(this.keyFile));
+    return Uint8Array.from(this.#key);
   }
 }
 
 /** The path of the retired legacy document, kept after a successful migration. */
 export function retiredLegacyVaultPath(home: string): string {
-  return `${join(home, 'accounts.vault')}.v1-migrated`
+  return `${join(home, "accounts.vault")}.v1-migrated`;
 }
 
 /**
@@ -103,39 +108,39 @@ export function retiredLegacyVaultPath(home: string): string {
  * makes it available as `ctx.accounts` for the fiber's lifetime.
  */
 export class AccountsService extends Service {
-  private readonly vault: EncryptedFileVault
-  private readonly providers: Map<string, FileSecretProvider> = new Map()
-  private readonly ready: Promise<void>
+  private readonly vault: EncryptedFileVault;
+  private readonly providers: Map<string, FileSecretProvider> = new Map();
+  private readonly ready: Promise<void>;
 
   constructor(
     ctx: Context,
     private readonly options: { home: string; keyFile: string },
   ) {
-    super(ctx, 'accounts')
+    super(ctx, "accounts");
     this.vault = new EncryptedFileVault({
       directory: vaultDirectory(options.home),
       masterKey: new KeychainOrKeyFileMasterKey(options.keyFile),
-    })
-    this.ready = this.migrateLegacyVault(options)
-    this.registerFileProvider(claudeFileProvider)
-    this.registerFileProvider(cursorFileProvider)
-    this.registerFileProvider(githubFileProvider)
+    });
+    this.ready = this.migrateLegacyVault(options);
+    this.registerFileProvider(claudeFileProvider);
+    this.registerFileProvider(cursorFileProvider);
+    this.registerFileProvider(githubFileProvider);
   }
 
   vaultPath(): string {
-    return this.vault.directory
+    return this.vault.directory;
   }
 
   registerFileProvider(provider: FileSecretProvider): void {
-    this.providers.set(provider.id, provider)
+    this.providers.set(provider.id, provider);
   }
 
   getFileProviders(): FileSecretProvider[] {
-    return [...this.providers.values()]
+    return [...this.providers.values()];
   }
 
   async resolve(ref: string): Promise<ResolvedSecret | undefined> {
-    return this.resolveFor(ref, undefined)
+    return this.resolveFor(ref, undefined);
   }
 
   /**
@@ -144,21 +149,22 @@ export class AccountsService extends Service {
    * compatibility with the 1:1 `resolve(ref)` contract.
    */
   async resolveFor(ref: string, account: string | undefined): Promise<ResolvedSecret | undefined> {
-    await this.ready
-    const record = await this.recordForRef(ref, account)
+    await this.ready;
+    const record = await this.recordForRef(ref, account);
     if (record !== null) {
-      const value = revealFromRecord(record)
-      if (value !== null) return { value, origin: 'vault' }
+      const value = revealFromRecord(record);
+      if (value !== null) return { value, origin: "vault" };
     }
     // Only fall through to ambient credentials for the default (unscoped) case
     if (account === undefined) {
-      const credentials = this.ctx.get('credentials') as CredentialProvider | undefined
+      const credentials = this.ctx.get("credentials") as CredentialProvider | undefined;
       if (credentials !== undefined) {
-        const hit = await credentials.resolve(credentialRef(ref))
-        if (hit !== undefined && hit.value.length > 0) return { value: hit.value, origin: 'credentials' }
+        const hit = await credentials.resolve(credentialRef(ref));
+        if (hit !== undefined && hit.value.length > 0)
+          return { value: hit.value, origin: "credentials" };
       }
     }
-    return undefined
+    return undefined;
   }
 
   /**
@@ -166,48 +172,64 @@ export class AccountsService extends Service {
    * Each entry carries the account name (null for the default/unscoped record)
    * and the revealed value when the record type supports it.
    */
-  async resolveAll(ref: string): Promise<Array<{ ref: string; account: string | null; value: string | null; origin: 'vault' | 'credentials' }>> {
-    await this.ready
-    const out: Array<{ ref: string; account: string | null; value: string | null; origin: 'vault' | 'credentials' }> = []
+  async resolveAll(
+    ref: string,
+  ): Promise<
+    Array<{
+      ref: string;
+      account: string | null;
+      value: string | null;
+      origin: "vault" | "credentials";
+    }>
+  > {
+    await this.ready;
+    const out: Array<{
+      ref: string;
+      account: string | null;
+      value: string | null;
+      origin: "vault" | "credentials";
+    }> = [];
     for (const descriptor of await this.vault.describe()) {
-      if (!descriptor.tags.includes(refTag(ref))) continue
-      const account = descriptor.tags.find((tag) => tag.startsWith('account:'))?.slice('account:'.length) ?? null
-      const record = await this.vault.get(descriptor.id)
-      if (record === null) continue
-      const value = revealFromRecord(record)
-      out.push({ ref, account, value, origin: 'vault' })
+      if (!descriptor.tags.includes(refTag(ref))) continue;
+      const account =
+        descriptor.tags.find((tag) => tag.startsWith("account:"))?.slice("account:".length) ?? null;
+      const record = await this.vault.get(descriptor.id);
+      if (record === null) continue;
+      const value = revealFromRecord(record);
+      out.push({ ref, account, value, origin: "vault" });
     }
     // Include ambient credential for the default case if no vault record found for default
-    const hasDefault = out.some((e) => e.account === null)
+    const hasDefault = out.some((e) => e.account === null);
     if (!hasDefault) {
-      const credentials = this.ctx.get('credentials') as CredentialProvider | undefined
+      const credentials = this.ctx.get("credentials") as CredentialProvider | undefined;
       if (credentials !== undefined) {
-        const hit = await credentials.resolve(credentialRef(ref))
+        const hit = await credentials.resolve(credentialRef(ref));
         if (hit !== undefined && hit.value.length > 0) {
-          out.push({ ref, account: null, value: hit.value, origin: 'credentials' })
+          out.push({ ref, account: null, value: hit.value, origin: "credentials" });
         }
       }
     }
-    return out
+    return out;
   }
 
   async set(ref: string, value: string, account?: string): Promise<void> {
-    await this.ready
-    if (value.length === 0) throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`)
-    await this.vault.put(recordForRef(ref, value, account !== undefined ? { account } : {}))
+    await this.ready;
+    if (value.length === 0)
+      throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
+    await this.vault.put(recordForRef(ref, value, account !== undefined ? { account } : {}));
   }
 
   async unset(ref: string, account?: string): Promise<void> {
-    await this.ready
-    const record = await this.recordForRef(ref, account)
-    if (record !== null) await this.vault.delete(record.id)
+    await this.ready;
+    const record = await this.recordForRef(ref, account);
+    if (record !== null) await this.vault.delete(record.id);
   }
 
   async list(): Promise<string[]> {
-    await this.ready
-    const refs = new Set<string>()
-    for (const descriptor of await this.vault.describe()) refs.add(canonicalRefOf(descriptor))
-    return [...refs].sort()
+    await this.ready;
+    const refs = new Set<string>();
+    for (const descriptor of await this.vault.describe()) refs.add(canonicalRefOf(descriptor));
+    return [...refs].sort();
   }
 
   /**
@@ -215,33 +237,57 @@ export class AccountsService extends Service {
    * material stripped. Named accounts arrive on records as `account:` tags,
    * most commonly from a scanned login.
    */
-  async accounts(): Promise<Array<{ ref: string; account: string | null; kind: string; purpose: string; label: string; expiresAt: string | null }>> {
-    await this.ready
-    const out: Array<{ ref: string; account: string | null; kind: string; purpose: string; label: string; expiresAt: string | null }> = []
+  async accounts(): Promise<
+    Array<{
+      ref: string;
+      account: string | null;
+      kind: string;
+      purpose: string;
+      label: string;
+      expiresAt: string | null;
+    }>
+  > {
+    await this.ready;
+    const out: Array<{
+      ref: string;
+      account: string | null;
+      kind: string;
+      purpose: string;
+      label: string;
+      expiresAt: string | null;
+    }> = [];
     for (const descriptor of await this.vault.describe()) {
-      const account = descriptor.tags.find((tag) => tag.startsWith('account:'))?.slice('account:'.length) ?? null
-      out.push({ ref: canonicalRefOf(descriptor), account, kind: descriptor.type, purpose: descriptor.purpose, label: descriptor.label, expiresAt: descriptor.expiresAt })
+      const account =
+        descriptor.tags.find((tag) => tag.startsWith("account:"))?.slice("account:".length) ?? null;
+      out.push({
+        ref: canonicalRefOf(descriptor),
+        account,
+        kind: descriptor.type,
+        purpose: descriptor.purpose,
+        label: descriptor.label,
+        expiresAt: descriptor.expiresAt,
+      });
     }
-    return out
+    return out;
   }
 
   async importFile(path: string): Promise<ImportResult[]> {
-    await this.ready
+    await this.ready;
     for (const provider of this.providers.values()) {
-      if (!(await provider.detect(path))) continue
-      const secrets = await provider.read(path)
-      const results: ImportResult[] = []
+      if (!(await provider.detect(path))) continue;
+      const secrets = await provider.read(path);
+      const results: ImportResult[] = [];
       for (const [ref, value] of Object.entries(secrets)) {
-        if (value.length === 0) continue
-        await this.vault.put(recordForRef(ref, value))
-        results.push({ ref, provider: provider.id, source: path })
+        if (value.length === 0) continue;
+        await this.vault.put(recordForRef(ref, value));
+        results.push({ ref, provider: provider.id, source: path });
       }
       if (results.length === 0) {
-        throw new Error(`dsh-credentials: ${path} holds no known secrets for ${provider.id}`)
+        throw new Error(`dsh-credentials: ${path} holds no known secrets for ${provider.id}`);
       }
-      return results
+      return results;
     }
-    throw new Error(`dsh-credentials: no file provider recognized ${path}`)
+    throw new Error(`dsh-credentials: no file provider recognized ${path}`);
   }
 
   /**
@@ -250,22 +296,22 @@ export class AccountsService extends Service {
    */
   private async recordForRef(ref: string, account?: string): Promise<SecretRecord | null> {
     // Try direct slug lookup first (fast path)
-    const direct = await this.vault.get(slugRecordId(ref, account))
-    if (direct !== null) return direct
+    const direct = await this.vault.get(slugRecordId(ref, account));
+    if (direct !== null) return direct;
     // Fall back to tag scan
     for (const descriptor of await this.vault.describe()) {
-      if (!descriptor.tags.includes(refTag(ref))) continue
+      if (!descriptor.tags.includes(refTag(ref))) continue;
       // If account is specified, filter by account tag
       if (account !== undefined && account.length > 0) {
-        if (!descriptor.tags.includes(`account:${account}`)) continue
+        if (!descriptor.tags.includes(`account:${account}`)) continue;
       } else {
         // Default lookup: skip records that have an account tag (they're scoped)
-        if (descriptor.tags.some((tag) => tag.startsWith('account:'))) continue
+        if (descriptor.tags.some((tag) => tag.startsWith("account:"))) continue;
       }
-      const record = await this.vault.get(descriptor.id)
-      if (record !== null) return record
+      const record = await this.vault.get(descriptor.id);
+      if (record !== null) return record;
     }
-    return null
+    return null;
   }
 
   /**
@@ -275,34 +321,34 @@ export class AccountsService extends Service {
    * a migration hiccup must not take the whole seam down.
    */
   private async migrateLegacyVault(options: { home: string; keyFile: string }): Promise<void> {
-    const legacyFile = join(options.home, 'accounts.vault')
+    const legacyFile = join(options.home, "accounts.vault");
     try {
-      if (!(await exists(legacyFile))) return
-      if ((await this.vault.list()).length > 0) return
-      const legacy = new Vault(legacyFile, options.keyFile)
+      if (!(await exists(legacyFile))) return;
+      if ((await this.vault.list()).length > 0) return;
+      const legacy = new Vault(legacyFile, options.keyFile);
       for (const ref of await legacy.list()) {
-        const value = await legacy.get(ref)
-        if (value === undefined || value.length === 0) continue
-        await this.vault.put(recordForRef(ref, value))
+        const value = await legacy.get(ref);
+        if (value === undefined || value.length === 0) continue;
+        await this.vault.put(recordForRef(ref, value));
       }
-      await rename(legacyFile, retiredLegacyVaultPath(options.home))
+      await rename(legacyFile, retiredLegacyVaultPath(options.home));
     } catch (error) {
-      this.ctx.logger.error('dsh-credentials: legacy vault migration failed')
-      this.ctx.logger.error(error)
+      this.ctx.logger.error("dsh-credentials: legacy vault migration failed");
+      this.ctx.logger.error(error);
     }
   }
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module "@deepseek-ai/cordis" {
   interface Context {
-    accounts: AccountsService
+    accounts: AccountsService;
   }
 }
 
 export function apply(ctx: Context, config: Config): void {
-  const home = resolveHome(config.home)
-  const keyFile = config.keyFile ?? join(home, 'accounts.key')
-  const accounts = new AccountsService(ctx, { home, keyFile })
-  registerGithubCredentials(config.githubClientId, config.githubScopes)
-  mountVaultWeb(ctx, accounts)
+  const home = resolveHome(config.home);
+  const keyFile = config.keyFile ?? join(home, "accounts.key");
+  const accounts = new AccountsService(ctx, { home, keyFile });
+  registerGithubCredentials(config.githubClientId, config.githubScopes);
+  mountVaultWeb(ctx, accounts);
 }

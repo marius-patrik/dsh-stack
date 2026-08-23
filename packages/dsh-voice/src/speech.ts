@@ -8,12 +8,12 @@
  * @module dsh-voice/speech
  */
 
-import { authHeaders, joinUrl, type ResolvedTts } from './providers.js'
+import { authHeaders, joinUrl, type ResolvedTts } from "./providers.js";
 
 /** The slice of the dsh-credentials account service this plugin consumes. */
 export interface AccountsLike {
   /** Resolve a canonical reference, vault first; undefined when absent. */
-  resolve(ref: string): Promise<{ value: string; origin: string } | undefined>
+  resolve(ref: string): Promise<{ value: string; origin: string } | undefined>;
 }
 
 /**
@@ -23,20 +23,23 @@ export interface AccountsLike {
  * @param ref - canonical credential reference, e.g. `OPENAI_API_KEY`.
  * @returns The revealed value, or an empty string when unresolvable.
  */
-export async function resolveCredential(accounts: AccountsLike | undefined, ref: string): Promise<string> {
-  if (ref.length === 0) return ''
+export async function resolveCredential(
+  accounts: AccountsLike | undefined,
+  ref: string,
+): Promise<string> {
+  if (ref.length === 0) return "";
   if (accounts !== undefined) {
-    const hit = await accounts.resolve(ref)
-    if (hit !== undefined && hit.value.length > 0) return hit.value
+    const hit = await accounts.resolve(ref);
+    if (hit !== undefined && hit.value.length > 0) return hit.value;
   }
-  return process.env[ref] ?? ''
+  return process.env[ref] ?? "";
 }
 
 /** Overrides one speech request may apply over the resolved settings. */
 export interface SpeechOverrides {
-  voice?: string
-  speed?: number
-  format?: string
+  voice?: string;
+  speed?: number;
+  format?: string;
 }
 
 /**
@@ -60,40 +63,40 @@ export async function synthesizeSpeech(
     input: text,
     voice: overrides.voice ?? target.voice,
     response_format: overrides.format ?? target.format,
-  }
-  const speed = overrides.speed ?? target.speed
-  if (target.provider.supportsSpeed && speed !== 1) body.speed = speed
-  if (target.instructions.length > 0) body.instructions = target.instructions
+  };
+  const speed = overrides.speed ?? target.speed;
+  if (target.provider.supportsSpeed && speed !== 1) body.speed = speed;
+  if (target.instructions.length > 0) body.instructions = target.instructions;
   const res = await fetch(target.url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...authHeaders(target.provider.auth, apiKey),
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(target.timeoutMs),
-  })
+  });
   if (!res.ok) {
-    const detail = await res.text()
-    throw new Error(`speech upstream ${res.status}: ${detail.slice(0, 500)}`)
+    const detail = await res.text();
+    throw new Error(`speech upstream ${res.status}: ${detail.slice(0, 500)}`);
   }
-  return res
+  return res;
 }
 
 /** The `voice.stt` settings slice the transcription client consumes. */
 export interface SttSettings {
-  apiBase: string
-  path: string
-  credentialRef: string
-  model: string
-  language: string
-  timeoutMs: number
+  apiBase: string;
+  path: string;
+  credentialRef: string;
+  model: string;
+  language: string;
+  timeoutMs: number;
 }
 
 /** One completed transcription. */
 export interface Transcription {
-  text: string
-  language?: string
+  text: string;
+  language?: string;
 }
 
 /**
@@ -114,32 +117,32 @@ export async function transcribeAudio(
   filename: string,
   languageHint: string,
 ): Promise<Transcription> {
-  const apiBase = settings.apiBase.replace(/\/+$/, '')
+  const apiBase = settings.apiBase.replace(/\/+$/, "");
   if (apiBase.length === 0) {
     const err = new Error(
-      'Whisper STT is not configured: set voice.stt.apiBase (e.g. https://api.openai.com/v1, a gateway, or a local whisper.cpp server).',
-    )
-    ;(err as { code?: string }).code = 'NOT_CONFIGURED'
-    throw err
+      "Whisper STT is not configured: set voice.stt.apiBase (e.g. https://api.openai.com/v1, a gateway, or a local whisper.cpp server).",
+    );
+    (err as { code?: string }).code = "NOT_CONFIGURED";
+    throw err;
   }
-  const form = new FormData()
-  form.append('file', new Blob([audio as BlobPart]), filename)
-  form.append('model', settings.model)
-  const language = languageHint || settings.language
-  if (language.length > 0) form.append('language', language)
-  const res = await fetch(joinUrl(apiBase, settings.path || '/audio/transcriptions'), {
-    method: 'POST',
-    headers: authHeaders('bearer', apiKey),
+  const form = new FormData();
+  form.append("file", new Blob([audio as BlobPart]), filename);
+  form.append("model", settings.model);
+  const language = languageHint || settings.language;
+  if (language.length > 0) form.append("language", language);
+  const res = await fetch(joinUrl(apiBase, settings.path || "/audio/transcriptions"), {
+    method: "POST",
+    headers: authHeaders("bearer", apiKey),
     body: form,
     signal: AbortSignal.timeout(settings.timeoutMs),
-  })
+  });
   if (!res.ok) {
-    const detail = await res.text()
-    throw new Error(`transcription upstream ${res.status}: ${detail.slice(0, 500)}`)
+    const detail = await res.text();
+    throw new Error(`transcription upstream ${res.status}: ${detail.slice(0, 500)}`);
   }
-  const data = (await res.json()) as { text?: unknown; language?: unknown }
+  const data = (await res.json()) as { text?: unknown; language?: unknown };
   return {
-    text: typeof data.text === 'string' ? data.text : JSON.stringify(data),
-    ...(typeof data.language === 'string' ? { language: data.language } : {}),
-  }
+    text: typeof data.text === "string" ? data.text : JSON.stringify(data),
+    ...(typeof data.language === "string" ? { language: data.language } : {}),
+  };
 }

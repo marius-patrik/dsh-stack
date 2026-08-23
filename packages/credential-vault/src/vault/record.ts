@@ -38,14 +38,14 @@
  * @module dsh-credentials/vault/record
  */
 
-import { randomUUID } from 'node:crypto'
-import { z } from './zod.js'
-import { SecretValue } from './secret.js'
-import type { TotpParameters } from './totp.js'
-import { decodeTotpParameters, encodeTotpParameters, type TotpParametersPayload } from './totp.js'
+import { randomUUID } from "node:crypto";
+import { z } from "./zod.js";
+import { SecretValue } from "./secret.js";
+import type { TotpParameters } from "./totp.js";
+import { decodeTotpParameters, encodeTotpParameters, type TotpParametersPayload } from "./totp.js";
 
-const SECRET_ID = /^[a-z][a-z0-9-]*$/
-const PURPOSE = /^[a-z][a-z0-9-]*(?:\/[a-z0-9-]+)*$/
+const SECRET_ID = /^[a-z][a-z0-9-]*$/;
+const PURPOSE = /^[a-z][a-z0-9-]*(?:\/[a-z0-9-]+)*$/;
 
 /**
  * Every kind of material the vault holds. Closed on purpose: an agent decides
@@ -53,18 +53,18 @@ const PURPOSE = /^[a-z][a-z0-9-]*(?:\/[a-z0-9-]+)*$/
  * shape would make "can this be renewed automatically?" unanswerable.
  */
 export const SECRET_TYPES = [
-  'api_key',
-  'oauth_token',
-  'password',
-  'totp_seed',
-  'passkey',
-  'cookie_jar',
-  'recovery_codes',
-  'ssh_key',
-  'generic_note',
-] as const
+  "api_key",
+  "oauth_token",
+  "password",
+  "totp_seed",
+  "passkey",
+  "cookie_jar",
+  "recovery_codes",
+  "ssh_key",
+  "generic_note",
+] as const;
 
-export type SecretType = (typeof SECRET_TYPES)[number]
+export type SecretType = (typeof SECRET_TYPES)[number];
 
 /**
  * Who may read a record. Two axes because they fail differently: a workspace
@@ -80,19 +80,19 @@ export type SecretType = (typeof SECRET_TYPES)[number]
 export const SecretScopeSchema = z.strictObject({
   workspace: z.string().min(1),
   agents: z.array(z.string().min(1)).readonly(),
-})
+});
 
-export type SecretScope = z.infer<typeof SecretScopeSchema>
+export type SecretScope = z.infer<typeof SecretScopeSchema>;
 
 /** The caller identity a scope is checked against. */
 export interface AgentIdentity {
-  workspace: string
-  agent: string
+  workspace: string;
+  agent: string;
 }
 
 const IsoDateTime = z.string().refine((value) => Number.isFinite(Date.parse(value)), {
-  message: 'must be an ISO 8601 timestamp',
-})
+  message: "must be an ISO 8601 timestamp",
+});
 
 export const SecretMetadataSchema = z.strictObject({
   /** Stable storage key and filename stem. */
@@ -116,9 +116,9 @@ export const SecretMetadataSchema = z.strictObject({
    * history of a credential is followable across new material under the same id.
    */
   auditRef: z.string().min(1),
-})
+});
 
-export type SecretMetadata = z.infer<typeof SecretMetadataSchema>
+export type SecretMetadata = z.infer<typeof SecretMetadataSchema>;
 
 /**
  * Secret material, one variant per type. Every field that would be damaging in
@@ -128,32 +128,32 @@ export type SecretMetadata = z.infer<typeof SecretMetadataSchema>
  */
 export type SecretMaterial =
   | {
-      type: 'api_key'
-      apiKey: SecretValue
+      type: "api_key";
+      apiKey: SecretValue;
       /** Header the key is sent in, when the record knows. Null defers to the provider descriptor. */
-      header: string | null
+      header: string | null;
     }
   | {
-      type: 'oauth_token'
-      accessToken: SecretValue
-      refreshToken: SecretValue | null
-      refreshTokenExpiresAt: string | null
-      scopes: readonly string[]
-      subscriptionType: string | null
+      type: "oauth_token";
+      accessToken: SecretValue;
+      refreshToken: SecretValue | null;
+      refreshTokenExpiresAt: string | null;
+      scopes: readonly string[];
+      subscriptionType: string | null;
       /** Token endpoint, when the record is self-describing rather than descriptor-backed. */
-      tokenEndpoint: string | null
+      tokenEndpoint: string | null;
     }
   | {
-      type: 'password'
-      username: string
-      password: SecretValue
+      type: "password";
+      username: string;
+      password: SecretValue;
       /** Origin the password belongs to, used to match a cookie jar or passkey. */
-      origin: string | null
-      loginUrl: string | null
+      origin: string | null;
+      loginUrl: string | null;
     }
   | {
-      type: 'totp_seed'
-      parameters: TotpParameters
+      type: "totp_seed";
+      parameters: TotpParameters;
     }
   | {
       /**
@@ -163,20 +163,20 @@ export type SecretMaterial =
        * unattended: a relying party demanding user verification against a
        * platform authenticator wants a gesture no software can produce.
        */
-      type: 'passkey'
+      type: "passkey";
       /** Base64url credential id. Sent in the clear during an assertion. */
-      credentialId: string
-      relyingPartyId: string
+      credentialId: string;
+      relyingPartyId: string;
       /** Base64url user handle. */
-      userHandle: string
-      userName: string
+      userHandle: string;
+      userName: string;
       /** COSE algorithm identifier, for example -7 for ES256. */
-      coseAlgorithm: number
+      coseAlgorithm: number;
       /** PKCS#8 private key. Secret: possession of it is the authenticator. */
-      privateKey: SecretValue
-      signCount: number
-      transports: readonly string[]
-      userVerificationRequired: boolean
+      privateKey: SecretValue;
+      signCount: number;
+      transports: readonly string[];
+      userVerificationRequired: boolean;
     }
   | {
       /**
@@ -184,60 +184,60 @@ export type SecretMaterial =
        * because any cookie in it may be the session bearer, and a partial
        * redaction that guesses wrong leaks the whole session.
        */
-      type: 'cookie_jar'
-      origin: string
-      jar: SecretValue
-      sessionExpiresAt: string | null
+      type: "cookie_jar";
+      origin: string;
+      jar: SecretValue;
+      sessionExpiresAt: string | null;
     }
   | {
-      type: 'recovery_codes'
-      codes: readonly SecretValue[]
+      type: "recovery_codes";
+      codes: readonly SecretValue[];
       /** How many of the codes have been spent, so the supervisor can warn before they run out. */
-      consumed: number
+      consumed: number;
     }
   | {
-      type: 'ssh_key'
-      privateKey: SecretValue
+      type: "ssh_key";
+      privateKey: SecretValue;
       /** Public half, published by design. */
-      publicKey: string
-      passphrase: SecretValue | null
-      fingerprint: string | null
-      comment: string | null
+      publicKey: string;
+      passphrase: SecretValue | null;
+      fingerprint: string | null;
+      comment: string | null;
     }
   | {
-      type: 'generic_note'
-      note: SecretValue
-    }
+      type: "generic_note";
+      note: SecretValue;
+    };
 
 /**
  * A stored record: metadata and material, with the discriminant shared so
  * `record.type === "totp_seed"` narrows `record.material` too.
  */
 export type SecretRecord = {
-  [T in SecretType]: Omit<SecretMetadata, 'type'> & {
-    type: T
-    material: Extract<SecretMaterial, { type: T }>
-  }
-}[SecretType]
+  [T in SecretType]: Omit<SecretMetadata, "type"> & {
+    type: T;
+    material: Extract<SecretMaterial, { type: T }>;
+  };
+}[SecretType];
 
 /** A record with its material stripped: safe to log, return, or serialize. */
-export type SecretDescriptor = SecretMetadata
+export type SecretDescriptor = SecretMetadata;
 
 export interface CreateSecretRecordInput {
-  id: string
-  label: string
-  purpose: string
-  scope: SecretScope
-  material: SecretMaterial
-  expiresAt?: string | null
-  tags?: readonly string[]
-  auditRef?: string
-  now?: () => number
+  id: string;
+  label: string;
+  purpose: string;
+  scope: SecretScope;
+  material: SecretMaterial;
+  expiresAt?: string | null;
+  tags?: readonly string[];
+  auditRef?: string;
+  now?: () => number;
 }
 
 /** Mint a record, validating metadata and stamping both timestamps. */
 export function createSecretRecord(input: CreateSecretRecordInput): SecretRecord {
-  const at = new Date((input.now ?? Date.now)()).toISOString()
+  const at = new Date((input.now ?? Date.now)()).toISOString();
   const metadata = parseSecretMetadata({
     id: input.id,
     type: input.material.type,
@@ -249,8 +249,8 @@ export function createSecretRecord(input: CreateSecretRecordInput): SecretRecord
     expiresAt: input.expiresAt ?? null,
     tags: input.tags ? [...input.tags] : [],
     auditRef: input.auditRef ?? randomUUID(),
-  })
-  return bind(metadata, input.material)
+  });
+  return bind(metadata, input.material);
 }
 
 /** Replace material, advancing `updatedAt` and keeping the audit correlation. */
@@ -260,27 +260,27 @@ export function rotateSecretRecord(
   options: { expiresAt?: string | null; now?: () => number } = {},
 ): SecretRecord {
   if (material.type !== record.type) {
-    throw new Error(`cannot rotate ${record.id} from ${record.type} to ${material.type}`)
+    throw new Error(`cannot rotate ${record.id} from ${record.type} to ${material.type}`);
   }
   const metadata = parseSecretMetadata({
     ...descriptorOf(record),
     updatedAt: new Date((options.now ?? Date.now)()).toISOString(),
     expiresAt: options.expiresAt === undefined ? record.expiresAt : options.expiresAt,
-  })
-  return bind(metadata, material)
+  });
+  return bind(metadata, material);
 }
 
 /** Validate metadata, reporting every failing field path at once. */
 export function parseSecretMetadata(value: unknown): SecretMetadata {
-  const result = SecretMetadataSchema.safeParse(value)
+  const result = SecretMetadataSchema.safeParse(value);
   if (!result.success) {
     throw new Error(
       `invalid secret metadata: ${result.error.issues
-        .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
-        .join('; ')}`,
-    )
+        .map((issue) => `${issue.path.join(".") || "<root>"}: ${issue.message}`)
+        .join("; ")}`,
+    );
   }
-  return result.data
+  return result.data;
 }
 
 /**
@@ -300,7 +300,7 @@ export function descriptorOf(record: SecretRecord): SecretDescriptor {
     expiresAt: record.expiresAt,
     tags: [...record.tags],
     auditRef: record.auditRef,
-  }
+  };
 }
 
 /**
@@ -308,16 +308,16 @@ export function descriptorOf(record: SecretRecord): SecretDescriptor {
  * and an empty agent list denies everyone; there is no implicit allow.
  */
 export function scopeAllows(scope: SecretScope, identity: AgentIdentity): boolean {
-  const workspaceOk = scope.workspace === '*' || scope.workspace === identity.workspace
-  if (!workspaceOk) return false
-  return scope.agents.some((agent) => agent === '*' || agent === identity.agent)
+  const workspaceOk = scope.workspace === "*" || scope.workspace === identity.workspace;
+  if (!workspaceOk) return false;
+  return scope.agents.some((agent) => agent === "*" || agent === identity.agent);
 }
 
 /** True when the record's own expiry has passed. Material-level expiry is separate. */
 export function isExpired(record: SecretRecord, nowMs: number): boolean {
-  if (!record.expiresAt) return false
-  const expiresAt = Date.parse(record.expiresAt)
-  return Number.isFinite(expiresAt) && nowMs >= expiresAt
+  if (!record.expiresAt) return false;
+  const expiresAt = Date.parse(record.expiresAt);
+  return Number.isFinite(expiresAt) && nowMs >= expiresAt;
 }
 
 /**
@@ -325,22 +325,24 @@ export function isExpired(record: SecretRecord, nowMs: number): boolean {
  * expiry and any expiry inside its material. Null means it does not expire.
  */
 export function effectiveExpiryMs(record: SecretRecord): number | null {
-  const candidates: number[] = []
+  const candidates: number[] = [];
   const push = (value: string | null) => {
-    if (!value) return
-    const parsed = Date.parse(value)
-    if (Number.isFinite(parsed)) candidates.push(parsed)
-  }
-  push(record.expiresAt)
-  if (record.material.type === 'cookie_jar') push(record.material.sessionExpiresAt)
-  return candidates.length === 0 ? null : Math.min(...candidates)
+    if (!value) return;
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) candidates.push(parsed);
+  };
+  push(record.expiresAt);
+  if (record.material.type === "cookie_jar") push(record.material.sessionExpiresAt);
+  return candidates.length === 0 ? null : Math.min(...candidates);
 }
 
 function bind(metadata: SecretMetadata, material: SecretMaterial): SecretRecord {
   if (metadata.type !== material.type) {
-    throw new Error(`secret ${metadata.id} declares type ${metadata.type} but carries ${material.type} material`)
+    throw new Error(
+      `secret ${metadata.id} declares type ${metadata.type} but carries ${material.type} material`,
+    );
   }
-  return { ...metadata, material } as SecretRecord
+  return { ...metadata, material } as SecretRecord;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -354,88 +356,95 @@ function bind(metadata: SecretMetadata, material: SecretMaterial): SecretRecord 
  * adjacent to the cipher.
  */
 export type SecretMaterialPayload =
-  | { type: 'api_key'; apiKey: string; header: string | null }
+  | { type: "api_key"; apiKey: string; header: string | null }
   | {
-      type: 'oauth_token'
-      accessToken: string
-      refreshToken: string | null
-      refreshTokenExpiresAt: string | null
-      scopes: string[]
-      subscriptionType: string | null
-      tokenEndpoint: string | null
+      type: "oauth_token";
+      accessToken: string;
+      refreshToken: string | null;
+      refreshTokenExpiresAt: string | null;
+      scopes: string[];
+      subscriptionType: string | null;
+      tokenEndpoint: string | null;
     }
-  | { type: 'password'; username: string; password: string; origin: string | null; loginUrl: string | null }
-  | { type: 'totp_seed'; parameters: TotpParametersPayload }
   | {
-      type: 'passkey'
-      credentialId: string
-      relyingPartyId: string
-      userHandle: string
-      userName: string
-      coseAlgorithm: number
-      privateKey: string
-      signCount: number
-      transports: string[]
-      userVerificationRequired: boolean
+      type: "password";
+      username: string;
+      password: string;
+      origin: string | null;
+      loginUrl: string | null;
     }
-  | { type: 'cookie_jar'; origin: string; jar: string; sessionExpiresAt: string | null }
-  | { type: 'recovery_codes'; codes: string[]; consumed: number }
+  | { type: "totp_seed"; parameters: TotpParametersPayload }
   | {
-      type: 'ssh_key'
-      privateKey: string
-      publicKey: string
-      passphrase: string | null
-      fingerprint: string | null
-      comment: string | null
+      type: "passkey";
+      credentialId: string;
+      relyingPartyId: string;
+      userHandle: string;
+      userName: string;
+      coseAlgorithm: number;
+      privateKey: string;
+      signCount: number;
+      transports: string[];
+      userVerificationRequired: boolean;
     }
-  | { type: 'generic_note'; note: string }
+  | { type: "cookie_jar"; origin: string; jar: string; sessionExpiresAt: string | null }
+  | { type: "recovery_codes"; codes: string[]; consumed: number }
+  | {
+      type: "ssh_key";
+      privateKey: string;
+      publicKey: string;
+      passphrase: string | null;
+      fingerprint: string | null;
+      comment: string | null;
+    }
+  | { type: "generic_note"; note: string };
 
 export interface SecretRecordPayload {
-  metadata: SecretMetadata
-  material: SecretMaterialPayload
+  metadata: SecretMetadata;
+  material: SecretMaterialPayload;
 }
 
 export function encodeSecretRecord(record: SecretRecord): SecretRecordPayload {
-  return { metadata: descriptorOf(record), material: encodeSecretMaterial(record.material) }
+  return { metadata: descriptorOf(record), material: encodeSecretMaterial(record.material) };
 }
 
 export function decodeSecretRecord(value: unknown, id: string): SecretRecord {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error(`stored secret is not an object: ${id}`)
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`stored secret is not an object: ${id}`);
   }
-  const record = value as Record<string, unknown>
-  const metadata = parseSecretMetadata(record.metadata)
-  if (metadata.id !== id) throw new Error(`stored secret ${id} carries a mismatched id: ${metadata.id}`)
-  return bind(metadata, decodeSecretMaterial(record.material, id))
+  const record = value as Record<string, unknown>;
+  const metadata = parseSecretMetadata(record.metadata);
+  if (metadata.id !== id)
+    throw new Error(`stored secret ${id} carries a mismatched id: ${metadata.id}`);
+  return bind(metadata, decodeSecretMaterial(record.material, id));
 }
 
 function encodeSecretMaterial(material: SecretMaterial): SecretMaterialPayload {
   switch (material.type) {
-    case 'api_key':
-      return { type: 'api_key', apiKey: material.apiKey.reveal(), header: material.header }
-    case 'oauth_token':
+    case "api_key":
+      return { type: "api_key", apiKey: material.apiKey.reveal(), header: material.header };
+    case "oauth_token":
       return {
-        type: 'oauth_token',
+        type: "oauth_token",
         accessToken: material.accessToken.reveal(),
         refreshToken: material.refreshToken ? material.refreshToken.reveal() : null,
         refreshTokenExpiresAt: material.refreshTokenExpiresAt,
         scopes: [...material.scopes],
         subscriptionType: material.subscriptionType,
         tokenEndpoint: material.tokenEndpoint,
-      }
-    case 'password':
+      };
+    case "password":
       return {
-        type: 'password',
+        type: "password",
         username: material.username,
         password: material.password.reveal(),
         origin: material.origin,
         loginUrl: material.loginUrl,
-      }
-    case 'totp_seed':
-      return { type: 'totp_seed', parameters: encodeTotpParameters(material.parameters) }
-    case 'passkey':
+      };
+    case "totp_seed":
+      return { type: "totp_seed", parameters: encodeTotpParameters(material.parameters) };
+    case "passkey":
       return {
-        type: 'passkey',
+        type: "passkey",
         credentialId: material.credentialId,
         relyingPartyId: material.relyingPartyId,
         userHandle: material.userHandle,
@@ -445,128 +454,140 @@ function encodeSecretMaterial(material: SecretMaterial): SecretMaterialPayload {
         signCount: material.signCount,
         transports: [...material.transports],
         userVerificationRequired: material.userVerificationRequired,
-      }
-    case 'cookie_jar':
+      };
+    case "cookie_jar":
       return {
-        type: 'cookie_jar',
+        type: "cookie_jar",
         origin: material.origin,
         jar: material.jar.reveal(),
         sessionExpiresAt: material.sessionExpiresAt,
-      }
-    case 'recovery_codes':
-      return { type: 'recovery_codes', codes: material.codes.map((code) => code.reveal()), consumed: material.consumed }
-    case 'ssh_key':
+      };
+    case "recovery_codes":
       return {
-        type: 'ssh_key',
+        type: "recovery_codes",
+        codes: material.codes.map((code) => code.reveal()),
+        consumed: material.consumed,
+      };
+    case "ssh_key":
+      return {
+        type: "ssh_key",
         privateKey: material.privateKey.reveal(),
         publicKey: material.publicKey,
         passphrase: material.passphrase ? material.passphrase.reveal() : null,
         fingerprint: material.fingerprint,
         comment: material.comment,
-      }
-    case 'generic_note':
-      return { type: 'generic_note', note: material.note.reveal() }
+      };
+    case "generic_note":
+      return { type: "generic_note", note: material.note.reveal() };
   }
 }
 
 function decodeSecretMaterial(value: unknown, id: string): SecretMaterial {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error(`stored secret has no material: ${id}`)
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`stored secret has no material: ${id}`);
   }
-  const material = value as Record<string, unknown>
+  const material = value as Record<string, unknown>;
   switch (material.type) {
-    case 'api_key':
+    case "api_key":
       return {
-        type: 'api_key',
-        apiKey: new SecretValue(requireString(material.apiKey, 'apiKey', id)),
-        header: optionalString(material.header, 'header', id),
-      }
-    case 'oauth_token': {
-      const refreshToken = optionalString(material.refreshToken, 'refreshToken', id)
+        type: "api_key",
+        apiKey: new SecretValue(requireString(material.apiKey, "apiKey", id)),
+        header: optionalString(material.header, "header", id),
+      };
+    case "oauth_token": {
+      const refreshToken = optionalString(material.refreshToken, "refreshToken", id);
       return {
-        type: 'oauth_token',
-        accessToken: new SecretValue(requireString(material.accessToken, 'accessToken', id)),
+        type: "oauth_token",
+        accessToken: new SecretValue(requireString(material.accessToken, "accessToken", id)),
         refreshToken: refreshToken === null ? null : new SecretValue(refreshToken),
-        refreshTokenExpiresAt: optionalString(material.refreshTokenExpiresAt, 'refreshTokenExpiresAt', id),
-        scopes: requireStringArray(material.scopes, 'scopes', id),
-        subscriptionType: optionalString(material.subscriptionType, 'subscriptionType', id),
-        tokenEndpoint: optionalString(material.tokenEndpoint, 'tokenEndpoint', id),
-      }
+        refreshTokenExpiresAt: optionalString(
+          material.refreshTokenExpiresAt,
+          "refreshTokenExpiresAt",
+          id,
+        ),
+        scopes: requireStringArray(material.scopes, "scopes", id),
+        subscriptionType: optionalString(material.subscriptionType, "subscriptionType", id),
+        tokenEndpoint: optionalString(material.tokenEndpoint, "tokenEndpoint", id),
+      };
     }
-    case 'password':
+    case "password":
       return {
-        type: 'password',
-        username: requireString(material.username, 'username', id),
-        password: new SecretValue(requireString(material.password, 'password', id)),
-        origin: optionalString(material.origin, 'origin', id),
-        loginUrl: optionalString(material.loginUrl, 'loginUrl', id),
-      }
-    case 'totp_seed':
-      return { type: 'totp_seed', parameters: decodeTotpParameters(material.parameters, id) }
-    case 'passkey': {
-      const privateKey = optionalString(material.privateKey, 'privateKey', id)
-      if (privateKey === null) throw new Error(`stored secret ${id} requires privateKey`)
+        type: "password",
+        username: requireString(material.username, "username", id),
+        password: new SecretValue(requireString(material.password, "password", id)),
+        origin: optionalString(material.origin, "origin", id),
+        loginUrl: optionalString(material.loginUrl, "loginUrl", id),
+      };
+    case "totp_seed":
+      return { type: "totp_seed", parameters: decodeTotpParameters(material.parameters, id) };
+    case "passkey": {
+      const privateKey = optionalString(material.privateKey, "privateKey", id);
+      if (privateKey === null) throw new Error(`stored secret ${id} requires privateKey`);
       return {
-        type: 'passkey',
-        credentialId: requireString(material.credentialId, 'credentialId', id),
-        relyingPartyId: requireString(material.relyingPartyId, 'relyingPartyId', id),
-        userHandle: requireString(material.userHandle, 'userHandle', id),
-        userName: requireString(material.userName, 'userName', id),
-        coseAlgorithm: requireFiniteNumber(material.coseAlgorithm, 'coseAlgorithm', id),
+        type: "passkey",
+        credentialId: requireString(material.credentialId, "credentialId", id),
+        relyingPartyId: requireString(material.relyingPartyId, "relyingPartyId", id),
+        userHandle: requireString(material.userHandle, "userHandle", id),
+        userName: requireString(material.userName, "userName", id),
+        coseAlgorithm: requireFiniteNumber(material.coseAlgorithm, "coseAlgorithm", id),
         privateKey: new SecretValue(privateKey),
-        signCount: requireFiniteNumber(material.signCount, 'signCount', id),
-        transports: requireStringArray(material.transports, 'transports', id),
+        signCount: requireFiniteNumber(material.signCount, "signCount", id),
+        transports: requireStringArray(material.transports, "transports", id),
         userVerificationRequired: material.userVerificationRequired === true,
-      }
+      };
     }
-    case 'cookie_jar':
+    case "cookie_jar":
       return {
-        type: 'cookie_jar',
-        origin: requireString(material.origin, 'origin', id),
-        jar: new SecretValue(requireString(material.jar, 'jar', id)),
-        sessionExpiresAt: optionalString(material.sessionExpiresAt, 'sessionExpiresAt', id),
-      }
-    case 'recovery_codes':
+        type: "cookie_jar",
+        origin: requireString(material.origin, "origin", id),
+        jar: new SecretValue(requireString(material.jar, "jar", id)),
+        sessionExpiresAt: optionalString(material.sessionExpiresAt, "sessionExpiresAt", id),
+      };
+    case "recovery_codes":
       return {
-        type: 'recovery_codes',
-        codes: requireStringArray(material.codes, 'codes', id).map((code) => new SecretValue(code)),
-        consumed: requireFiniteNumber(material.consumed, 'consumed', id),
-      }
-    case 'ssh_key': {
-      const passphrase = optionalString(material.passphrase, 'passphrase', id)
+        type: "recovery_codes",
+        codes: requireStringArray(material.codes, "codes", id).map((code) => new SecretValue(code)),
+        consumed: requireFiniteNumber(material.consumed, "consumed", id),
+      };
+    case "ssh_key": {
+      const passphrase = optionalString(material.passphrase, "passphrase", id);
       return {
-        type: 'ssh_key',
-        privateKey: new SecretValue(requireString(material.privateKey, 'privateKey', id)),
-        publicKey: requireString(material.publicKey, 'publicKey', id),
+        type: "ssh_key",
+        privateKey: new SecretValue(requireString(material.privateKey, "privateKey", id)),
+        publicKey: requireString(material.publicKey, "publicKey", id),
         passphrase: passphrase === null ? null : new SecretValue(passphrase),
-        fingerprint: optionalString(material.fingerprint, 'fingerprint', id),
-        comment: optionalString(material.comment, 'comment', id),
-      }
+        fingerprint: optionalString(material.fingerprint, "fingerprint", id),
+        comment: optionalString(material.comment, "comment", id),
+      };
     }
-    case 'generic_note':
-      return { type: 'generic_note', note: new SecretValue(requireString(material.note, 'note', id)) }
+    case "generic_note":
+      return {
+        type: "generic_note",
+        note: new SecretValue(requireString(material.note, "note", id)),
+      };
     default:
-      throw new Error(`stored secret has an unsupported type: ${id}`)
+      throw new Error(`stored secret has an unsupported type: ${id}`);
   }
 }
 
 function requireString(value: unknown, field: string, id: string): string {
-  if (typeof value !== 'string' || !value) throw new Error(`stored secret ${id} requires ${field}`)
-  return value
+  if (typeof value !== "string" || !value) throw new Error(`stored secret ${id} requires ${field}`);
+  return value;
 }
 
 function optionalString(value: unknown, field: string, id: string): string | null {
-  if (value === null || value === undefined) return null
-  if (typeof value !== 'string') throw new Error(`stored secret ${id} has a malformed ${field}`)
-  return value
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string") throw new Error(`stored secret ${id} has a malformed ${field}`);
+  return value;
 }
 
 function requireStringArray(value: unknown, field: string, id: string): string[] {
-  if (!Array.isArray(value)) throw new Error(`stored secret ${id} has a malformed ${field}`)
-  return value.map((entry) => requireString(entry, field, id))
+  if (!Array.isArray(value)) throw new Error(`stored secret ${id} has a malformed ${field}`);
+  return value.map((entry) => requireString(entry, field, id));
 }
 
 function requireFiniteNumber(value: unknown, field: string, id: string): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`stored secret ${id} has a malformed ${field}`)
-  return value
+  if (typeof value !== "number" || !Number.isFinite(value))
+    throw new Error(`stored secret ${id} has a malformed ${field}`);
+  return value;
 }

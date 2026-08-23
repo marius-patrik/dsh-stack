@@ -6,16 +6,16 @@
  * @module dsh-agents/catalog
  */
 
-import { readFile, readdir } from 'node:fs/promises'
-import { join } from 'node:path'
-import { parsePersona, type Persona } from './persona.js'
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { parsePersona, type Persona } from "./persona.js";
 
 /** The authoring file extensions the catalog indexes. */
-const PERSONA_EXTENSIONS = new Set(['.md', '.json'])
+const PERSONA_EXTENSIONS = new Set([".md", ".json"]);
 
 /** The catalog's authoring directory, as resolved by the caller. */
 export interface PersonaCatalogConfig {
-  root: string
+  root: string;
 }
 
 /**
@@ -24,26 +24,26 @@ export interface PersonaCatalogConfig {
  * pure map read so the prompt section stays synchronous.
  */
 export class PersonaCatalog {
-  private readonly personas = new Map<string, Persona>()
+  private readonly personas = new Map<string, Persona>();
 
   constructor(private readonly config: PersonaCatalogConfig) {}
 
   /** Re-index the authoring root. Never throws; unreadable files are skipped. */
   async load(): Promise<void> {
-    this.personas.clear()
-    let names: string[]
+    this.personas.clear();
+    let names: string[];
     try {
-      names = await readdir(this.config.root)
+      names = await readdir(this.config.root);
     } catch {
-      return
+      return;
     }
     for (const name of names) {
-      const extension = extensionOf(name)
-      if (extension === undefined) continue
-      const source = join(this.config.root, name)
+      const extension = extensionOf(name);
+      if (extension === undefined) continue;
+      const source = join(this.config.root, name);
       try {
-        const persona = parsePersona(source, await readFile(source, 'utf8'))
-        this.personas.set(persona.id, persona)
+        const persona = parsePersona(source, await readFile(source, "utf8"));
+        this.personas.set(persona.id, persona);
       } catch {
         // The sync path reports unparsable files; the catalog just skips them.
       }
@@ -52,24 +52,24 @@ export class PersonaCatalog {
 
   /** The persona with the given id, or `undefined` when not in the index. */
   get(personaId: string): Persona | undefined {
-    return this.personas.get(personaId)
+    return this.personas.get(personaId);
   }
 
   /** Display name for a persona id (falls back to the id). */
   nameOf(personaId: string): string {
-    return this.personas.get(personaId)?.name ?? personaId
+    return this.personas.get(personaId)?.name ?? personaId;
   }
 
   /** The known persona ids, for command validation and completion. */
   ids(): readonly string[] {
-    return [...this.personas.keys()]
+    return [...this.personas.keys()];
   }
 }
 
 /** The normalized extension of a persona file, or undefined for other files. */
 function extensionOf(name: string): string | undefined {
-  const dot = name.lastIndexOf('.')
-  if (dot < 0) return undefined
-  const extension = name.slice(dot).toLowerCase()
-  return PERSONA_EXTENSIONS.has(extension) ? extension : undefined
+  const dot = name.lastIndexOf(".");
+  if (dot < 0) return undefined;
+  const extension = name.slice(dot).toLowerCase();
+  return PERSONA_EXTENSIONS.has(extension) ? extension : undefined;
 }

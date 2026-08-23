@@ -2,7 +2,7 @@
  * Multi-node cluster coordinator and worker deployment generator.
  */
 
-import type { NetworkNode } from './types.js'
+import type { NetworkNode } from "./types.js";
 
 export class ClusterManager {
   /**
@@ -10,27 +10,29 @@ export class ClusterManager {
    * to this coordinator over Tailscale.
    */
   generateWorkerCommand(targetNode: NetworkNode, coordinatorUrl: string): string {
-    const isWin = targetNode.os === 'windows'
+    const isWin = targetNode.os === "windows";
     if (isWin) {
-      return `powershell -Command "irm ${coordinatorUrl}/hosts/bootstrap.ps1 | iex"`
+      return `powershell -Command "irm ${coordinatorUrl}/hosts/bootstrap.ps1 | iex"`;
     }
-    return `curl -fsSL ${coordinatorUrl}/hosts/bootstrap.sh | sh`
+    return `curl -fsSL ${coordinatorUrl}/hosts/bootstrap.sh | sh`;
   }
 
   /**
    * Validate node reachability via HTTP ping.
    */
   async pingNode(node: NetworkNode): Promise<boolean> {
-    if (!node.ips || node.ips.length === 0) return false
-    const targetIp = node.ips[0]
+    if (!node.ips || node.ips.length === 0) return false;
+    const targetIp = node.ips[0];
     try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 2000)
-      const res = await fetch(`http://${targetIp}:3080/hosts/api/health`, { signal: controller.signal })
-      clearTimeout(timeout)
-      return res.ok
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(`http://${targetIp}:3080/hosts/api/health`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      return res.ok;
     } catch {
-      return false
+      return false;
     }
   }
 }

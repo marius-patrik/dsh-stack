@@ -1,6 +1,6 @@
-import type { Context } from '@deepseek-ai/cordis';
+import type { Context } from "@deepseek-ai/cordis";
 
-export const name = 'icon-engine';
+export const name = "icon-engine";
 export const inject: readonly string[] = [];
 export const optional: readonly string[] = [];
 
@@ -44,7 +44,7 @@ export class IconEngine {
         if (icon) return icon;
       }
     }
-    return 'file';
+    return "file";
   }
 }
 
@@ -52,20 +52,22 @@ function keysFor(request: IconRequest): readonly string[] {
   const keys: string[] = [];
   if (request.fileName) keys.push(`file:${request.fileName}`);
   if (request.isRoot && request.folderName) {
-    keys.push(`root:${request.expanded ? 'expanded' : 'collapsed'}:${request.folderName}`);
+    keys.push(`root:${request.expanded ? "expanded" : "collapsed"}:${request.folderName}`);
   }
   if (request.folderName) {
-    keys.push(`folder:${request.expanded ? 'expanded' : 'collapsed'}:${request.folderName}`);
+    keys.push(`folder:${request.expanded ? "expanded" : "collapsed"}:${request.folderName}`);
     keys.push(`folder:${request.folderName}`);
   }
   if (request.languageId) keys.push(`language:${request.languageId}`);
   if (request.extension) {
-    const extension = request.extension.startsWith('.') ? request.extension.slice(1) : request.extension;
+    const extension = request.extension.startsWith(".")
+      ? request.extension.slice(1)
+      : request.extension;
     keys.push(`extension:${extension.toLowerCase()}`);
   }
   return keys;
 }
 
 export function apply(ctx: Context): void {
-  ctx.provide('stack.icons', new IconEngine());
+  ctx.provide("stack.icons", new IconEngine());
 }

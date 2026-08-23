@@ -4,7 +4,15 @@
   "version": "0.3.0",
   "kind": "pack",
   "description": "Core settings, provider, integration registry and keybinding composition pack.",
-  "files": ["integrations-registry", "keybindings", "providers-registry", "settings-dialog", "package.json", "README.md", "LICENSE"],
+  "files": [
+    "integrations-registry",
+    "keybindings",
+    "providers-registry",
+    "settings-dialog",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": [],
   "optionalDependencies": []
 }

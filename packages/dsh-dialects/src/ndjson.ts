@@ -7,7 +7,7 @@
  */
 
 /** The terminal payload some NDJSON-compatible servers send after the last chunk. */
-export const DONE = '[DONE]'
+export const DONE = "[DONE]";
 
 /**
  * Parse an NDJSON byte stream into JSON payload lines, ending on EOF.
@@ -19,33 +19,33 @@ export async function* parseNdjson(
   stream: ReadableStream<BufferSource>,
   onLine?: (line: string) => void,
 ): AsyncGenerator<string> {
-  const reader = stream.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
   try {
     while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      buffer += decoder.decode(value, { stream: true })
-      let newline: number
-      while ((newline = buffer.indexOf('\n')) !== -1) {
-        const line = buffer.slice(0, newline).trim()
-        buffer = buffer.slice(newline + 1)
-        if (line.length === 0) continue
-        const payload = line.startsWith('data:') ? line.slice(5).trimStart() : line
-        if (payload === DONE) return
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let newline: number;
+      while ((newline = buffer.indexOf("\n")) !== -1) {
+        const line = buffer.slice(0, newline).trim();
+        buffer = buffer.slice(newline + 1);
+        if (line.length === 0) continue;
+        const payload = line.startsWith("data:") ? line.slice(5).trimStart() : line;
+        if (payload === DONE) return;
         if (payload.length > 0) {
-          onLine?.(line)
-          yield payload
+          onLine?.(line);
+          yield payload;
         }
       }
     }
-    const tail = buffer.trim()
+    const tail = buffer.trim();
     if (tail.length > 0) {
-      const payload = tail.startsWith('data:') ? tail.slice(5).trimStart() : tail
-      if (payload.length > 0) yield payload
+      const payload = tail.startsWith("data:") ? tail.slice(5).trimStart() : tail;
+      if (payload.length > 0) yield payload;
     }
   } finally {
-    reader.releaseLock()
+    reader.releaseLock();
   }
 }

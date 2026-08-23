@@ -1,1 +1,10 @@
-{"id":"stack.security.credentials","name":"dsh-credentials","version":"0.1.0","kind":"plugin","description":"Encrypted credential vault, account manager, OAuth refresh supervisor, importers and local vault web surface.","files":["lib","client.js","package.json","stack.json"],"dependencies":[],"optionalDependencies":[]}
+{
+  "id": "stack.security.credentials",
+  "name": "dsh-credentials",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Encrypted credential vault, account manager, OAuth refresh supervisor, importers and local vault web surface.",
+  "files": ["lib", "client.js", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

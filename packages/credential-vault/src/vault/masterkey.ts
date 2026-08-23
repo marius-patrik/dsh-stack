@@ -33,16 +33,16 @@
  * @module dsh-credentials/vault/masterkey
  */
 
-import path from 'node:path'
-import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
-import { SecretValue } from './secret.js'
-import { exists, writePrivateFileExclusive } from './files.js'
+import path from "node:path";
+import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { SecretValue } from "./secret.js";
+import { exists, writePrivateFileExclusive } from "./files.js";
 
-const KEY_BYTES = 32
-const KDF_FILE = 'master.kdf'
-const KEY_FILE = 'master.key'
-const KDF_SCHEMA_VERSION = 1
+const KEY_BYTES = 32;
+const KDF_FILE = "master.kdf";
+const KEY_FILE = "master.key";
+const KDF_SCHEMA_VERSION = 1;
 
 /**
  * scrypt cost. N=2^17 with r=8 asks for 128 MiB and measures around a quarter
@@ -50,7 +50,7 @@ const KDF_SCHEMA_VERSION = 1
  * campaign against a decent passphrase is not worth mounting, and short enough
  * that a human unlocking a vault does not notice.
  */
-export const DEFAULT_SCRYPT_PARAMETERS = { N: 1 << 17, r: 8, p: 1 } as const
+export const DEFAULT_SCRYPT_PARAMETERS = { N: 1 << 17, r: 8, p: 1 } as const;
 
 /**
  * Floor below which the memory-hardness claim stops being true. 2^14 with r=8
@@ -58,12 +58,12 @@ export const DEFAULT_SCRYPT_PARAMETERS = { N: 1 << 17, r: 8, p: 1 } as const
  * rejected rather than accepted with a warning, because a work factor that can
  * be quietly lowered is one that will be.
  */
-export const MINIMUM_SCRYPT_N = 1 << 14
+export const MINIMUM_SCRYPT_N = 1 << 14;
 
 export interface ScryptParameters {
-  N: number
-  r: number
-  p: number
+  N: number;
+  r: number;
+  p: number;
 }
 
 /**
@@ -72,35 +72,36 @@ export interface ScryptParameters {
  */
 export interface MasterKeySource {
   /** Where this key comes from, for the health view. Never includes key material. */
-  readonly description: string
-  key(): Promise<Uint8Array>
+  readonly description: string;
+  key(): Promise<Uint8Array>;
 }
 
 /** A key the caller already holds — from a keychain, an unwrap call, or a test. */
 export class StaticMasterKey implements MasterKeySource {
-  readonly description: string
-  readonly #key: Uint8Array
+  readonly description: string;
+  readonly #key: Uint8Array;
 
-  constructor(key: Uint8Array, description = 'static key supplied by the caller') {
-    if (key.byteLength !== KEY_BYTES) throw new Error(`vault master key must be ${KEY_BYTES} bytes`)
-    this.#key = Uint8Array.from(key)
-    this.description = description
+  constructor(key: Uint8Array, description = "static key supplied by the caller") {
+    if (key.byteLength !== KEY_BYTES)
+      throw new Error(`vault master key must be ${KEY_BYTES} bytes`);
+    this.#key = Uint8Array.from(key);
+    this.description = description;
   }
 
   async key(): Promise<Uint8Array> {
-    return Uint8Array.from(this.#key)
+    return Uint8Array.from(this.#key);
   }
 }
 
 export interface PassphraseMasterKeyOptions {
   /** Directory holding the KDF parameter file. Normally the vault directory. */
-  directory: string
+  directory: string;
   /**
    * Resolved lazily so a passphrase can come from a prompt, an agent, or an
    * environment variable without this module knowing which.
    */
-  passphrase: SecretValue | (() => Promise<SecretValue> | SecretValue)
-  scrypt?: Partial<ScryptParameters>
+  passphrase: SecretValue | (() => Promise<SecretValue> | SecretValue);
+  scrypt?: Partial<ScryptParameters>;
 }
 
 /**
@@ -110,55 +111,60 @@ export interface PassphraseMasterKeyOptions {
  * each mint a salt and leave one of them holding an undecryptable vault.
  */
 export class PassphraseMasterKey implements MasterKeySource {
-  readonly description = 'passphrase-derived key (scrypt)'
-  readonly #file: string
-  readonly #passphrase: PassphraseMasterKeyOptions['passphrase']
-  readonly #parameters: ScryptParameters
-  #cached: Uint8Array | null = null
+  readonly description = "passphrase-derived key (scrypt)";
+  readonly #file: string;
+  readonly #passphrase: PassphraseMasterKeyOptions["passphrase"];
+  readonly #parameters: ScryptParameters;
+  #cached: Uint8Array | null = null;
 
   constructor(options: PassphraseMasterKeyOptions) {
-    if (!options.directory.trim()) throw new Error('passphrase master key requires a directory')
-    this.#file = path.join(path.resolve(options.directory), KDF_FILE)
-    this.#passphrase = options.passphrase
-    this.#parameters = validateScryptParameters({ ...DEFAULT_SCRYPT_PARAMETERS, ...options.scrypt })
+    if (!options.directory.trim()) throw new Error("passphrase master key requires a directory");
+    this.#file = path.join(path.resolve(options.directory), KDF_FILE);
+    this.#passphrase = options.passphrase;
+    this.#parameters = validateScryptParameters({
+      ...DEFAULT_SCRYPT_PARAMETERS,
+      ...options.scrypt,
+    });
   }
 
   /** The parameter file this key reads and writes. */
   get parameterFile(): string {
-    return this.#file
+    return this.#file;
   }
 
   async key(): Promise<Uint8Array> {
-    if (this.#cached) return Uint8Array.from(this.#cached)
-    const stored = await this.#loadOrCreateParameters()
-    const passphrase = typeof this.#passphrase === 'function' ? await this.#passphrase() : this.#passphrase
-    const derived = await deriveScryptKey(passphrase, stored.salt, stored.parameters)
-    this.#cached = derived
-    return Uint8Array.from(derived)
+    if (this.#cached) return Uint8Array.from(this.#cached);
+    const stored = await this.#loadOrCreateParameters();
+    const passphrase =
+      typeof this.#passphrase === "function" ? await this.#passphrase() : this.#passphrase;
+    const derived = await deriveScryptKey(passphrase, stored.salt, stored.parameters);
+    this.#cached = derived;
+    return Uint8Array.from(derived);
   }
 
   async #loadOrCreateParameters(): Promise<{ salt: Uint8Array; parameters: ScryptParameters }> {
-    if (await exists(this.#file)) return parseKdfFile(await readFile(this.#file, 'utf8'), this.#file)
-    const salt = randomBytes(16)
+    if (await exists(this.#file))
+      return parseKdfFile(await readFile(this.#file, "utf8"), this.#file);
+    const salt = randomBytes(16);
     const document = {
       schemaVersion: KDF_SCHEMA_VERSION,
-      kdf: 'scrypt',
-      salt: salt.toString('base64'),
+      kdf: "scrypt",
+      salt: salt.toString("base64"),
       N: this.#parameters.N,
       r: this.#parameters.r,
       p: this.#parameters.p,
       keyBytes: KEY_BYTES,
-    }
-    const published = await writePrivateFileExclusive(this.#file, `${JSON.stringify(document)}\n`)
-    if (published) return { salt: Uint8Array.from(salt), parameters: this.#parameters }
-    return parseKdfFile(await readFile(this.#file, 'utf8'), this.#file)
+    };
+    const published = await writePrivateFileExclusive(this.#file, `${JSON.stringify(document)}\n`);
+    if (published) return { salt: Uint8Array.from(salt), parameters: this.#parameters };
+    return parseKdfFile(await readFile(this.#file, "utf8"), this.#file);
   }
 }
 
 export interface KeyFileMasterKeyOptions {
-  directory: string
+  directory: string;
   /** Defaults to `master.key`, matching `EncryptedFileCredentialStore`. */
-  fileName?: string
+  fileName?: string;
 }
 
 /**
@@ -168,35 +174,39 @@ export interface KeyFileMasterKeyOptions {
  * and it is stated rather than implied.
  */
 export class KeyFileMasterKey implements MasterKeySource {
-  readonly description = 'random key file beside the vault'
-  readonly #file: string
-  #cached: Uint8Array | null = null
+  readonly description = "random key file beside the vault";
+  readonly #file: string;
+  #cached: Uint8Array | null = null;
 
   constructor(options: KeyFileMasterKeyOptions) {
-    if (!options.directory.trim()) throw new Error('key file master key requires a directory')
-    this.#file = path.join(path.resolve(options.directory), options.fileName ?? KEY_FILE)
+    if (!options.directory.trim()) throw new Error("key file master key requires a directory");
+    this.#file = path.join(path.resolve(options.directory), options.fileName ?? KEY_FILE);
   }
 
   get keyFile(): string {
-    return this.#file
+    return this.#file;
   }
 
   async key(): Promise<Uint8Array> {
-    if (this.#cached) return Uint8Array.from(this.#cached)
-    this.#cached = await this.#loadOrCreate()
-    return Uint8Array.from(this.#cached)
+    if (this.#cached) return Uint8Array.from(this.#cached);
+    this.#cached = await this.#loadOrCreate();
+    return Uint8Array.from(this.#cached);
   }
 
   async #loadOrCreate(): Promise<Uint8Array> {
     if (await exists(this.#file)) {
-      const key = Buffer.from((await readFile(this.#file, 'utf8')).trim(), 'base64')
-      if (key.byteLength !== KEY_BYTES) throw new Error(`vault key file is malformed: ${this.#file}`)
-      return Uint8Array.from(key)
+      const key = Buffer.from((await readFile(this.#file, "utf8")).trim(), "base64");
+      if (key.byteLength !== KEY_BYTES)
+        throw new Error(`vault key file is malformed: ${this.#file}`);
+      return Uint8Array.from(key);
     }
-    const created = randomBytes(KEY_BYTES)
-    const published = await writePrivateFileExclusive(this.#file, `${created.toString('base64')}\n`)
-    if (published) return Uint8Array.from(created)
-    return this.#loadOrCreate()
+    const created = randomBytes(KEY_BYTES);
+    const published = await writePrivateFileExclusive(
+      this.#file,
+      `${created.toString("base64")}\n`,
+    );
+    if (published) return Uint8Array.from(created);
+    return this.#loadOrCreate();
   }
 }
 
@@ -206,10 +216,10 @@ export async function deriveScryptKey(
   salt: Uint8Array,
   parameters: ScryptParameters = DEFAULT_SCRYPT_PARAMETERS,
 ): Promise<Uint8Array> {
-  const validated = validateScryptParameters(parameters)
+  const validated = validateScryptParameters(parameters);
   // Node's default maxmem is 32 MiB, well under what a memory-hard factor
   // needs; the ceiling is raised in step with N rather than removed.
-  const maxmem = 256 * validated.N * validated.r * validated.p + 1024 * 1024
+  const maxmem = 256 * validated.N * validated.r * validated.p + 1024 * 1024;
   return new Promise<Uint8Array>((resolve, reject) => {
     scryptCallback(
       passphrase.reveal(),
@@ -217,39 +227,46 @@ export async function deriveScryptKey(
       KEY_BYTES,
       { N: validated.N, r: validated.r, p: validated.p, maxmem },
       (error, derived) => (error ? reject(error) : resolve(Uint8Array.from(derived))),
-    )
-  })
+    );
+  });
 }
 
 /** Reject a work factor that would make "memory-hard" untrue. */
 export function validateScryptParameters(parameters: ScryptParameters): ScryptParameters {
-  const { N, r, p } = parameters
+  const { N, r, p } = parameters;
   if (!Number.isInteger(N) || N < MINIMUM_SCRYPT_N || (N & (N - 1)) !== 0) {
-    throw new Error(`scrypt N must be a power of two of at least ${MINIMUM_SCRYPT_N}, got ${N}`)
+    throw new Error(`scrypt N must be a power of two of at least ${MINIMUM_SCRYPT_N}, got ${N}`);
   }
-  if (!Number.isInteger(r) || r < 8) throw new Error(`scrypt r must be at least 8, got ${r}`)
-  if (!Number.isInteger(p) || p < 1) throw new Error(`scrypt p must be at least 1, got ${p}`)
-  return { N, r, p }
+  if (!Number.isInteger(r) || r < 8) throw new Error(`scrypt r must be at least 8, got ${r}`);
+  if (!Number.isInteger(p) || p < 1) throw new Error(`scrypt p must be at least 1, got ${p}`);
+  return { N, r, p };
 }
 
 /** Constant-time key comparison, for tests and for key-rotation checks. */
 export function sameKey(left: Uint8Array, right: Uint8Array): boolean {
-  if (left.byteLength !== right.byteLength) return false
-  return timingSafeEqual(Buffer.from(left), Buffer.from(right))
+  if (left.byteLength !== right.byteLength) return false;
+  return timingSafeEqual(Buffer.from(left), Buffer.from(right));
 }
 
-function parseKdfFile(raw: string, file: string): { salt: Uint8Array; parameters: ScryptParameters } {
-  let parsed: Record<string, unknown>
+function parseKdfFile(
+  raw: string,
+  file: string,
+): { salt: Uint8Array; parameters: ScryptParameters } {
+  let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(raw) as Record<string, unknown>
+    parsed = JSON.parse(raw) as Record<string, unknown>;
   } catch {
-    throw new Error(`vault kdf parameters are malformed: ${file}`)
+    throw new Error(`vault kdf parameters are malformed: ${file}`);
   }
-  if (parsed.schemaVersion !== KDF_SCHEMA_VERSION || parsed.kdf !== 'scrypt' || typeof parsed.salt !== 'string') {
-    throw new Error(`vault kdf parameters are malformed: ${file}`)
+  if (
+    parsed.schemaVersion !== KDF_SCHEMA_VERSION ||
+    parsed.kdf !== "scrypt" ||
+    typeof parsed.salt !== "string"
+  ) {
+    throw new Error(`vault kdf parameters are malformed: ${file}`);
   }
-  const salt = Buffer.from(parsed.salt, 'base64')
-  if (salt.byteLength < 16) throw new Error(`vault kdf salt is too short: ${file}`)
+  const salt = Buffer.from(parsed.salt, "base64");
+  if (salt.byteLength < 16) throw new Error(`vault kdf salt is too short: ${file}`);
   return {
     salt: Uint8Array.from(salt),
     parameters: validateScryptParameters({
@@ -257,5 +274,5 @@ function parseKdfFile(raw: string, file: string): { salt: Uint8Array; parameters
       r: Number(parsed.r),
       p: Number(parsed.p),
     }),
-  }
+  };
 }

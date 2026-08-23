@@ -27,10 +27,10 @@
  * surface this plugin ports) and the record codecs from `./record.js`.
  */
 
-import path from 'node:path'
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
-import { readdir, readFile, rm } from 'node:fs/promises'
-import type { CredentialStore, ProviderCredential } from './secret.js'
+import path from "node:path";
+import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { readdir, readFile, rm } from "node:fs/promises";
+import type { CredentialStore, ProviderCredential } from "./secret.js";
 import {
   createSecretRecord,
   descriptorOf,
@@ -43,17 +43,17 @@ import {
   type SecretRecord,
   type SecretScope,
   type SecretType,
-} from './record.js'
-import { exists, writePrivateFile } from './files.js'
-import type { MasterKeySource } from './masterkey.js'
+} from "./record.js";
+import { exists, writePrivateFile } from "./files.js";
+import type { MasterKeySource } from "./masterkey.js";
 
-const RECORD_ID = /^[a-z][a-z0-9-]*$/
-const RECORD_SUFFIX = '.vault'
-const IV_BYTES = 12
-const ALGORITHM = 'aes-256-gcm'
-const ENVELOPE_SCHEMA_VERSION = 1
+const RECORD_ID = /^[a-z][a-z0-9-]*$/;
+const RECORD_SUFFIX = ".vault";
+const IV_BYTES = 12;
+const ALGORITHM = "aes-256-gcm";
+const ENVELOPE_SCHEMA_VERSION = 1;
 /** Unit separator: cannot occur in a record id or a type name, so `id|type` is unambiguous. */
-const AAD_SEPARATOR = '\u001f'
+const AAD_SEPARATOR = "\u001f";
 
 /**
  * Operations every vault backend provides. Same shape of contract as
@@ -63,14 +63,14 @@ const AAD_SEPARATOR = '\u001f'
  */
 export interface VaultStore {
   /** Null when nothing is stored under this id. */
-  get(id: string): Promise<SecretRecord | null>
-  put(record: SecretRecord): Promise<void>
+  get(id: string): Promise<SecretRecord | null>;
+  put(record: SecretRecord): Promise<void>;
   /** True when a record was removed, false when there was nothing to remove. */
-  delete(id: string): Promise<boolean>
+  delete(id: string): Promise<boolean>;
   /** Stored record ids, sorted. */
-  list(): Promise<string[]>
+  list(): Promise<string[]>;
   /** Metadata for every record, material stripped. */
-  describe(): Promise<SecretDescriptor[]>
+  describe(): Promise<SecretDescriptor[]>;
 }
 
 /**
@@ -79,11 +79,11 @@ export interface VaultStore {
  * general keychain do not collide.
  */
 export function vaultDirectory(secretsDirectory: string): string {
-  return path.join(secretsDirectory, 'vault')
+  return path.join(secretsDirectory, "vault");
 }
 
 export interface EncryptedFileVaultOptions {
-  directory: string
+  directory: string;
   /**
    * Where the 32-byte key comes from. Required — unlike the credential store
    * there is no implicit "mint a key file if none exists", because a vault
@@ -91,118 +91,126 @@ export interface EncryptedFileVaultOptions {
    * protection level. `KeyFileMasterKey` reproduces the old behaviour when that
    * is what the caller wants.
    */
-  masterKey: MasterKeySource
+  masterKey: MasterKeySource;
 }
 
 interface VaultEnvelope {
-  schemaVersion: typeof ENVELOPE_SCHEMA_VERSION
-  algorithm: typeof ALGORITHM
-  id: string
-  type: SecretType
-  iv: string
-  ciphertext: string
-  authTag: string
+  schemaVersion: typeof ENVELOPE_SCHEMA_VERSION;
+  algorithm: typeof ALGORITHM;
+  id: string;
+  type: SecretType;
+  iv: string;
+  ciphertext: string;
+  authTag: string;
 }
 
 /** Local vault backend: one AES-256-GCM encrypted file per record id. */
 export class EncryptedFileVault implements VaultStore {
-  readonly #directory: string
-  readonly #masterKey: MasterKeySource
-  #key: Buffer | null = null
+  readonly #directory: string;
+  readonly #masterKey: MasterKeySource;
+  #key: Buffer | null = null;
 
   constructor(options: EncryptedFileVaultOptions) {
-    if (!options.directory.trim()) throw new Error('vault requires a directory')
-    this.#directory = path.resolve(options.directory)
-    this.#masterKey = options.masterKey
+    if (!options.directory.trim()) throw new Error("vault requires a directory");
+    this.#directory = path.resolve(options.directory);
+    this.#masterKey = options.masterKey;
   }
 
   get directory(): string {
-    return this.#directory
+    return this.#directory;
   }
 
   /** Where the master key comes from, for the health view. Never key material. */
   get keyDescription(): string {
-    return this.#masterKey.description
+    return this.#masterKey.description;
   }
 
   async get(id: string): Promise<SecretRecord | null> {
-    const file = this.#file(id)
-    if (!(await exists(file))) return null
-    const envelope = parseEnvelope(await readFile(file, 'utf8'), file)
-    if (envelope.id !== id) throw new Error(`vault record ${id} carries a mismatched envelope id: ${envelope.id}`)
-    const key = await this.#dataKey()
-    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(envelope.iv, 'base64'))
-    decipher.setAAD(aad(envelope.id, envelope.type))
-    decipher.setAuthTag(Buffer.from(envelope.authTag, 'base64'))
-    let plaintext: string
+    const file = this.#file(id);
+    if (!(await exists(file))) return null;
+    const envelope = parseEnvelope(await readFile(file, "utf8"), file);
+    if (envelope.id !== id)
+      throw new Error(`vault record ${id} carries a mismatched envelope id: ${envelope.id}`);
+    const key = await this.#dataKey();
+    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(envelope.iv, "base64"));
+    decipher.setAAD(aad(envelope.id, envelope.type));
+    decipher.setAuthTag(Buffer.from(envelope.authTag, "base64"));
+    let plaintext: string;
     try {
-      plaintext = decipher.update(envelope.ciphertext, 'base64', 'utf8') + decipher.final('utf8')
+      plaintext = decipher.update(envelope.ciphertext, "base64", "utf8") + decipher.final("utf8");
     } catch {
-      throw new Error(`vault record cannot be decrypted, it may be corrupt or written under a different key: ${id}`)
+      throw new Error(
+        `vault record cannot be decrypted, it may be corrupt or written under a different key: ${id}`,
+      );
     }
-    const record = decodeSecretRecord(JSON.parse(plaintext) as unknown, id)
+    const record = decodeSecretRecord(JSON.parse(plaintext) as unknown, id);
     if (record.type !== envelope.type) {
-      throw new Error(`vault record ${id} declares ${record.type} but its envelope says ${envelope.type}`)
+      throw new Error(
+        `vault record ${id} declares ${record.type} but its envelope says ${envelope.type}`,
+      );
     }
-    return record
+    return record;
   }
 
   async put(record: SecretRecord): Promise<void> {
-    const file = this.#file(record.id)
-    const key = await this.#dataKey()
-    const iv = randomBytes(IV_BYTES)
-    const cipher = createCipheriv(ALGORITHM, key, iv)
-    cipher.setAAD(aad(record.id, record.type))
-    const ciphertext = Buffer.concat([cipher.update(JSON.stringify(encodeSecretRecord(record)), 'utf8'), cipher.final()])
+    const file = this.#file(record.id);
+    const key = await this.#dataKey();
+    const iv = randomBytes(IV_BYTES);
+    const cipher = createCipheriv(ALGORITHM, key, iv);
+    cipher.setAAD(aad(record.id, record.type));
+    const ciphertext = Buffer.concat([
+      cipher.update(JSON.stringify(encodeSecretRecord(record)), "utf8"),
+      cipher.final(),
+    ]);
     const envelope: VaultEnvelope = {
       schemaVersion: ENVELOPE_SCHEMA_VERSION,
       algorithm: ALGORITHM,
       id: record.id,
       type: record.type,
-      iv: iv.toString('base64'),
-      ciphertext: ciphertext.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
-    }
-    await writePrivateFile(file, `${JSON.stringify(envelope)}\n`)
+      iv: iv.toString("base64"),
+      ciphertext: ciphertext.toString("base64"),
+      authTag: cipher.getAuthTag().toString("base64"),
+    };
+    await writePrivateFile(file, `${JSON.stringify(envelope)}\n`);
   }
 
   async delete(id: string): Promise<boolean> {
-    const file = this.#file(id)
-    if (!(await exists(file))) return false
-    await rm(file, { force: true })
-    return true
+    const file = this.#file(id);
+    if (!(await exists(file))) return false;
+    await rm(file, { force: true });
+    return true;
   }
 
   async list(): Promise<string[]> {
-    if (!(await exists(this.#directory))) return []
-    const entries = await readdir(this.#directory, { withFileTypes: true })
+    if (!(await exists(this.#directory))) return [];
+    const entries = await readdir(this.#directory, { withFileTypes: true });
     return entries
       .filter((entry) => entry.isFile() && entry.name.endsWith(RECORD_SUFFIX))
       .map((entry) => entry.name.slice(0, -RECORD_SUFFIX.length))
       .filter((id) => RECORD_ID.test(id))
-      .sort()
+      .sort();
   }
 
   async describe(): Promise<SecretDescriptor[]> {
-    const descriptors: SecretDescriptor[] = []
+    const descriptors: SecretDescriptor[] = [];
     for (const id of await this.list()) {
-      const record = await this.get(id)
-      if (record) descriptors.push(descriptorOf(record))
+      const record = await this.get(id);
+      if (record) descriptors.push(descriptorOf(record));
     }
-    return descriptors
+    return descriptors;
   }
 
   #file(id: string): string {
-    if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`)
-    return path.join(this.#directory, `${id}${RECORD_SUFFIX}`)
+    if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`);
+    return path.join(this.#directory, `${id}${RECORD_SUFFIX}`);
   }
 
   async #dataKey(): Promise<Buffer> {
-    if (this.#key) return this.#key
-    const key = await this.#masterKey.key()
-    if (key.byteLength !== 32) throw new Error('vault master key must be 32 bytes')
-    this.#key = Buffer.from(key)
-    return this.#key
+    if (this.#key) return this.#key;
+    const key = await this.#masterKey.key();
+    if (key.byteLength !== 32) throw new Error("vault master key must be 32 bytes");
+    this.#key = Buffer.from(key);
+    return this.#key;
   }
 }
 
@@ -213,41 +221,46 @@ export class EncryptedFileVault implements VaultStore {
  * ciphertext to a local filesystem at all.
  */
 export class MemoryVault implements VaultStore {
-  readonly #records = new Map<string, SecretRecord>()
+  readonly #records = new Map<string, SecretRecord>();
 
   async get(id: string): Promise<SecretRecord | null> {
-    if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`)
-    return this.#records.get(id) ?? null
+    if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`);
+    return this.#records.get(id) ?? null;
   }
 
   async put(record: SecretRecord): Promise<void> {
-    if (!RECORD_ID.test(record.id)) throw new Error(`invalid vault record id: ${record.id}`)
-    this.#records.set(record.id, record)
+    if (!RECORD_ID.test(record.id)) throw new Error(`invalid vault record id: ${record.id}`);
+    this.#records.set(record.id, record);
   }
 
   async delete(id: string): Promise<boolean> {
-    return this.#records.delete(id)
+    return this.#records.delete(id);
   }
 
   async list(): Promise<string[]> {
-    return [...this.#records.keys()].sort()
+    return [...this.#records.keys()].sort();
   }
 
   async describe(): Promise<SecretDescriptor[]> {
-    return (await this.list()).map((id) => descriptorOf(this.#records.get(id)!))
+    return (await this.list()).map((id) => descriptorOf(this.#records.get(id)!));
   }
 }
 
 export interface VaultCredentialStoreOptions {
-  vault: VaultStore
+  vault: VaultStore;
   /**
    * Metadata for a credential the refresher writes that the vault has not seen.
    * The default scope grants nobody: an auto-created record is storable and
    * refreshable but not readable until someone scopes it deliberately, so a
    * credential never becomes agent-readable as a side effect of a token refresh.
    */
-  defaults?: (id: string) => { label: string; purpose: string; scope: SecretScope; tags?: readonly string[] }
-  now?: () => number
+  defaults?: (id: string) => {
+    label: string;
+    purpose: string;
+    scope: SecretScope;
+    tags?: readonly string[];
+  };
+  now?: () => number;
 }
 
 /**
@@ -260,30 +273,32 @@ export interface VaultCredentialStoreOptions {
  * make the provider harness believe it could refresh things it cannot.
  */
 export class VaultCredentialStore implements CredentialStore {
-  readonly #vault: VaultStore
-  readonly #defaults: NonNullable<VaultCredentialStoreOptions['defaults']>
-  readonly #now: () => number
+  readonly #vault: VaultStore;
+  readonly #defaults: NonNullable<VaultCredentialStoreOptions["defaults"]>;
+  readonly #now: () => number;
 
   constructor(options: VaultCredentialStoreOptions) {
-    this.#vault = options.vault
-    this.#now = options.now ?? (() => Date.now())
-    this.#defaults = options.defaults ?? ((id) => ({ label: id, purpose: id, scope: { workspace: '*', agents: [] } }))
+    this.#vault = options.vault;
+    this.#now = options.now ?? (() => Date.now());
+    this.#defaults =
+      options.defaults ??
+      ((id) => ({ label: id, purpose: id, scope: { workspace: "*", agents: [] } }));
   }
 
   async get(id: string): Promise<ProviderCredential | null> {
-    const record = await this.#vault.get(id)
-    if (!record) return null
-    if (record.type === 'api_key') {
+    const record = await this.#vault.get(id);
+    if (!record) return null;
+    if (record.type === "api_key") {
       return {
-        kind: 'api_key',
+        kind: "api_key",
         apiKey: record.material.apiKey,
         obtainedAt: record.updatedAt,
         expiresAt: record.expiresAt,
-      }
+      };
     }
-    if (record.type === 'oauth_token') {
+    if (record.type === "oauth_token") {
       return {
-        kind: 'oauth',
+        kind: "oauth",
         accessToken: record.material.accessToken,
         refreshToken: record.material.refreshToken,
         expiresAt: record.expiresAt,
@@ -291,19 +306,21 @@ export class VaultCredentialStore implements CredentialStore {
         scopes: record.material.scopes,
         subscriptionType: record.material.subscriptionType,
         obtainedAt: record.updatedAt,
-      }
+      };
     }
-    return null
+    return null;
   }
 
   async put(id: string, credential: ProviderCredential): Promise<void> {
-    const material = credentialToMaterial(credential)
-    const existing = await this.#vault.get(id)
+    const material = credentialToMaterial(credential);
+    const existing = await this.#vault.get(id);
     if (existing) {
-      await this.#vault.put(rotateSecretRecord(existing, material, { expiresAt: credential.expiresAt, now: this.#now }))
-      return
+      await this.#vault.put(
+        rotateSecretRecord(existing, material, { expiresAt: credential.expiresAt, now: this.#now }),
+      );
+      return;
     }
-    const defaults = this.#defaults(id)
+    const defaults = this.#defaults(id);
     await this.#vault.put(
       createSecretRecord({
         id,
@@ -315,65 +332,65 @@ export class VaultCredentialStore implements CredentialStore {
         expiresAt: credential.expiresAt,
         now: this.#now,
       }),
-    )
+    );
   }
 
   async delete(id: string): Promise<boolean> {
-    const record = await this.#vault.get(id)
-    if (!record || !isCredentialType(record.type)) return false
-    return this.#vault.delete(id)
+    const record = await this.#vault.get(id);
+    if (!record || !isCredentialType(record.type)) return false;
+    return this.#vault.delete(id);
   }
 
   async list(): Promise<string[]> {
-    const descriptors = await this.#vault.describe()
+    const descriptors = await this.#vault.describe();
     return descriptors
       .filter((descriptor) => isCredentialType(descriptor.type))
       .map((descriptor) => descriptor.id)
-      .sort()
+      .sort();
   }
 }
 
 function isCredentialType(type: SecretType): boolean {
-  return type === 'api_key' || type === 'oauth_token'
+  return type === "api_key" || type === "oauth_token";
 }
 
 function credentialToMaterial(credential: ProviderCredential): SecretMaterial {
-  if (credential.kind === 'api_key') {
-    return { type: 'api_key', apiKey: credential.apiKey, header: null }
+  if (credential.kind === "api_key") {
+    return { type: "api_key", apiKey: credential.apiKey, header: null };
   }
   return {
-    type: 'oauth_token',
+    type: "oauth_token",
     accessToken: credential.accessToken,
     refreshToken: credential.refreshToken,
     refreshTokenExpiresAt: credential.refreshTokenExpiresAt,
     scopes: credential.scopes,
     subscriptionType: credential.subscriptionType,
     tokenEndpoint: null,
-  }
+  };
 }
 
 function aad(id: string, type: SecretType): Buffer {
-  return Buffer.from(`${id}${AAD_SEPARATOR}${type}`, 'utf8')
+  return Buffer.from(`${id}${AAD_SEPARATOR}${type}`, "utf8");
 }
 
 function parseEnvelope(raw: string, file: string): VaultEnvelope {
-  let parsed: Partial<VaultEnvelope>
+  let parsed: Partial<VaultEnvelope>;
   try {
-    parsed = JSON.parse(raw) as Partial<VaultEnvelope>
+    parsed = JSON.parse(raw) as Partial<VaultEnvelope>;
   } catch {
-    throw new Error(`invalid vault envelope: ${file}`)
+    throw new Error(`invalid vault envelope: ${file}`);
   }
   if (
     parsed.schemaVersion !== ENVELOPE_SCHEMA_VERSION ||
     parsed.algorithm !== ALGORITHM ||
-    typeof parsed.id !== 'string' ||
-    typeof parsed.type !== 'string' ||
+    typeof parsed.id !== "string" ||
+    typeof parsed.type !== "string" ||
     !(SECRET_TYPES as readonly string[]).includes(parsed.type) ||
-    typeof parsed.iv !== 'string' ||
-    typeof parsed.ciphertext !== 'string' ||
-    typeof parsed.authTag !== 'string'
+    typeof parsed.iv !== "string" ||
+    typeof parsed.ciphertext !== "string" ||
+    typeof parsed.authTag !== "string"
   ) {
-    throw new Error(`invalid vault envelope: ${file}`)
+    throw new Error(`invalid vault envelope: ${file}`);
   }
-  return parsed as VaultEnvelope
+  return parsed as VaultEnvelope;
 }

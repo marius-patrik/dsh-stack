@@ -8,10 +8,16 @@
  * @module dsh-agents/controller
  */
 
-import type { HostAgent, HostSession, HostSessionEvent, PersonaSelectedData, PersonaState } from './types.js'
+import type {
+  HostAgent,
+  HostSession,
+  HostSessionEvent,
+  PersonaSelectedData,
+  PersonaState,
+} from "./types.js";
 
 /** The session-log event that records a committed persona switch. */
-export const PERSONA_SELECTED = 'persona/selected'
+export const PERSONA_SELECTED = "persona/selected";
 
 /**
  * Fold the last committed persona from `events[0, end)`. A prefix with no
@@ -21,32 +27,32 @@ export const PERSONA_SELECTED = 'persona/selected'
  * @returns the persona id in force, or `''` when none has been selected.
  */
 export function foldPersona(events: readonly HostSessionEvent[], end = events.length): string {
-  let personaId = ''
-  let index = 0
+  let personaId = "";
+  let index = 0;
   for (const event of events) {
-    if (index >= end) break
-    index++
-    if (event.type !== PERSONA_SELECTED) continue
-    const data = event.data as PersonaSelectedData | undefined
-    if (typeof data?.personaId === 'string' && data.personaId !== '') personaId = data.personaId
+    if (index >= end) break;
+    index++;
+    if (event.type !== PERSONA_SELECTED) continue;
+    const data = event.data as PersonaSelectedData | undefined;
+    if (typeof data?.personaId === "string" && data.personaId !== "") personaId = data.personaId;
   }
-  return personaId
+  return personaId;
 }
 
 /** Whether the log holds an opened turn without its closing `turn/end`. */
 export function hasOpenTurn(events: readonly HostSessionEvent[]): boolean {
-  let open = false
+  let open = false;
   for (const event of events) {
-    if (event.type === 'turn/start') open = true
-    else if (event.type === 'turn/end') open = false
+    if (event.type === "turn/start") open = true;
+    else if (event.type === "turn/end") open = false;
   }
-  return open
+  return open;
 }
 
 /** The controller's catalog hook, so a switch can never select a phantom. */
 export interface PersonaControllerOptions {
   /** Whether the given persona id exists in the runtime catalog. */
-  resolve(personaId: string): boolean
+  resolve(personaId: string): boolean;
 }
 
 /**
@@ -58,20 +64,20 @@ export interface PersonaControllerOptions {
  */
 export class PersonaController {
   /** Latest selection per session awaiting the next accepted in-turn pre-step. */
-  private readonly pendingIntents = new WeakMap<object, string>()
+  private readonly pendingIntents = new WeakMap<object, string>();
 
   constructor(private readonly options: PersonaControllerOptions) {}
 
   /** The committed persona plus any queued selection for the agent's session. */
   get(agent: HostAgent): PersonaState {
-    const pending = this.pendingIntents.get(agent.session)
-    const personaId = foldPersona(agent.session.events)
-    return pending === undefined ? { personaId } : { personaId, pending }
+    const pending = this.pendingIntents.get(agent.session);
+    const personaId = foldPersona(agent.session.events);
+    return pending === undefined ? { personaId } : { personaId, pending };
   }
 
   /** A queued selection for the agent's session, when any. */
   pendingOf(agent: HostAgent): string | undefined {
-    return this.pendingIntents.get(agent.session)
+    return this.pendingIntents.get(agent.session);
   }
 
   /**
@@ -86,23 +92,23 @@ export class PersonaController {
    * was cleared; the logged state already matches), or `noop`.
    * @throws when the persona id is not in the runtime catalog.
    */
-  set(agent: HostAgent, personaId: string): 'committed' | 'queued' | 'cancelled' | 'noop' {
-    if (!this.options.resolve(personaId)) throw new Error(`Unknown persona: ${personaId}`)
-    const session = agent.session
-    const pending = this.pendingIntents.get(session)
-    const target = pending ?? foldPersona(session.events)
-    if (personaId === target) return 'noop'
+  set(agent: HostAgent, personaId: string): "committed" | "queued" | "cancelled" | "noop" {
+    if (!this.options.resolve(personaId)) throw new Error(`Unknown persona: ${personaId}`);
+    const session = agent.session;
+    const pending = this.pendingIntents.get(session);
+    const target = pending ?? foldPersona(session.events);
+    if (personaId === target) return "noop";
     if (hasOpenTurn(session.events)) {
-      this.pendingIntents.set(session, personaId)
-      return foldPersona(session.events) === personaId ? 'cancelled' : 'queued'
+      this.pendingIntents.set(session, personaId);
+      return foldPersona(session.events) === personaId ? "cancelled" : "queued";
     }
     if (personaId === foldPersona(session.events)) {
-      this.pendingIntents.delete(session)
-      return 'cancelled'
+      this.pendingIntents.delete(session);
+      return "cancelled";
     }
-    session.append(PERSONA_SELECTED, { personaId })
-    this.pendingIntents.delete(session)
-    return 'committed'
+    session.append(PERSONA_SELECTED, { personaId });
+    this.pendingIntents.delete(session);
+    return "committed";
   }
 
   /**
@@ -111,13 +117,13 @@ export class PersonaController {
    * retryable at a later accepted in-turn pre-step, not dropped.
    */
   commitPending(session: HostSession): void {
-    const pending = this.pendingIntents.get(session)
-    if (pending === undefined) return
+    const pending = this.pendingIntents.get(session);
+    if (pending === undefined) return;
     if (pending === foldPersona(session.events)) {
-      this.pendingIntents.delete(session)
-      return
+      this.pendingIntents.delete(session);
+      return;
     }
-    session.append(PERSONA_SELECTED, { personaId: pending })
-    this.pendingIntents.delete(session)
+    session.append(PERSONA_SELECTED, { personaId: pending });
+    this.pendingIntents.delete(session);
   }
 }

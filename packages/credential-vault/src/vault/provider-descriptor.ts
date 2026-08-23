@@ -31,16 +31,16 @@
  * @module dsh-credentials/vault/provider-descriptor
  */
 
-import type { OAuthAuthConfig } from './descriptor.js'
-import { parseOAuthEndpointUrl } from './descriptor.js'
+import type { OAuthAuthConfig } from "./descriptor.js";
+import { parseOAuthEndpointUrl } from "./descriptor.js";
 
 /** The minimal route facts the adapter needs. `dsh-providers`' `ProviderRoute` satisfies this. */
 export interface ProviderRouteLike {
-  id: string
-  displayName: string
-  authKind: 'api-key' | 'oauth'
+  id: string;
+  displayName: string;
+  authKind: "api-key" | "oauth";
   /** Default endpoint, `{model}`-substituted on the wire. Contributes to the host allow-list. */
-  baseURL?: string
+  baseURL?: string;
 }
 
 /**
@@ -50,22 +50,22 @@ export interface ProviderRouteLike {
  * `tools.ts`'s `authPlacementFor`.
  */
 export interface ProviderApiKeyAuth {
-  method: 'api_key'
-  header: string
-  prefix: string
+  method: "api_key";
+  header: string;
+  prefix: string;
 }
 
 /** The auth facts the vault reasons about: an api-key placement or an OAuth refresh protocol. */
-export type ProviderAuth = ProviderApiKeyAuth | OAuthAuthConfig
+export type ProviderAuth = ProviderApiKeyAuth | OAuthAuthConfig;
 
 /** What the supervisor and the toolset are allowed to know about a provider. */
 export interface ProviderAuthDescriptor {
-  id: string
-  displayName: string
+  id: string;
+  displayName: string;
   /** The route's default endpoint; its host is allowed for this provider's records. */
-  baseUrl: string
+  baseUrl: string;
   /** Advisory model catalog. `dsh-providers` routes carry static lists, so there is no endpoint URL to add. */
-  modelCatalog: { kind: 'static' } | { kind: 'list_endpoint'; url: string }
+  modelCatalog: { kind: "static" } | { kind: "list_endpoint"; url: string };
   /**
    * The refresh-capable OAuth configuration, the api-key placement, or null.
    * Null exactly when the vault has no protocol to speak for a provider: an
@@ -73,11 +73,11 @@ export interface ProviderAuthDescriptor {
    * cannot drive, and `tools.ts`/`supervisor.ts` answer
    * "expired_without_refresh_path"/"auth_placement_unknown" for those.
    */
-  auth: ProviderAuth | null
+  auth: ProviderAuth | null;
 }
 
-const routes = new Map<string, ProviderRouteLike>()
-let supplement: ReadonlyMap<string, OAuthAuthConfig> = new Map()
+const routes = new Map<string, ProviderRouteLike>();
+let supplement: ReadonlyMap<string, OAuthAuthConfig> = new Map();
 
 /**
  * Record the provider routes this vault can reason about. Idempotent per route
@@ -85,7 +85,7 @@ let supplement: ReadonlyMap<string, OAuthAuthConfig> = new Map()
  * re-register after reloading settings.
  */
 export function registerProviderRoutes(added: readonly ProviderRouteLike[]): void {
-  for (const route of added) routes.set(route.id, route)
+  for (const route of added) routes.set(route.id, route);
 }
 
 /**
@@ -95,33 +95,38 @@ export function registerProviderRoutes(added: readonly ProviderRouteLike[]): voi
  * a refresh token on the wire is rejected at registration, not at first use.
  */
 export function registerOAuthSupplement(entries: Record<string, OAuthAuthConfig>): void {
-  const validated = new Map<string, OAuthAuthConfig>()
+  const validated = new Map<string, OAuthAuthConfig>();
   for (const [id, auth] of Object.entries(entries)) {
-    const tokenUrl = parseOAuthEndpointUrl(auth.tokenUrl)
-    if (!tokenUrl) throw new Error(`provider ${id}: oauth tokenUrl is not an https (or loopback http) url`)
+    const tokenUrl = parseOAuthEndpointUrl(auth.tokenUrl);
+    if (!tokenUrl)
+      throw new Error(`provider ${id}: oauth tokenUrl is not an https (or loopback http) url`);
     const authorizationUrl =
-      auth.method === 'oauth_pkce' ? parseOAuthEndpointUrl(auth.authorizeUrl) : parseOAuthEndpointUrl(auth.deviceAuthorizationUrl)
+      auth.method === "oauth_pkce"
+        ? parseOAuthEndpointUrl(auth.authorizeUrl)
+        : parseOAuthEndpointUrl(auth.deviceAuthorizationUrl);
     if (!authorizationUrl) {
-      throw new Error(`provider ${id}: oauth ${auth.method === 'oauth_pkce' ? 'authorizeUrl' : 'deviceAuthorizationUrl'} is not an https (or loopback http) url`)
+      throw new Error(
+        `provider ${id}: oauth ${auth.method === "oauth_pkce" ? "authorizeUrl" : "deviceAuthorizationUrl"} is not an https (or loopback http) url`,
+      );
     }
-    validated.set(id, auth)
+    validated.set(id, auth);
   }
-  supplement = validated
+  supplement = validated;
 }
 
 /** Look up a provider by id, or null when it is not a known route. */
 export function findProviderDescriptor(id: string): ProviderAuthDescriptor | null {
-  const route = routes.get(id)
-  if (!route) return null
+  const route = routes.get(id);
+  if (!route) return null;
   const auth: ProviderAuth | null =
-    route.authKind === 'api-key'
-      ? { method: 'api_key', header: 'Authorization', prefix: 'Bearer ' }
-      : (supplement.get(route.id) ?? null)
+    route.authKind === "api-key"
+      ? { method: "api_key", header: "Authorization", prefix: "Bearer " }
+      : (supplement.get(route.id) ?? null);
   return {
     id: route.id,
     displayName: route.displayName,
-    baseUrl: route.baseURL ?? '',
-    modelCatalog: { kind: 'static' },
+    baseUrl: route.baseURL ?? "",
+    modelCatalog: { kind: "static" },
     auth,
-  }
+  };
 }

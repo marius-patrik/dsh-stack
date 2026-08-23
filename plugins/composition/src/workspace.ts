@@ -38,8 +38,8 @@ export function resolveSidebarLogo(
 ): SidebarLogoState {
   const surface = skin.sidebarBranding;
   const assetId = collapsed
-    ? surface?.collapsedAssetId ?? skin.logoAssetId
-    : surface?.expandedAssetId ?? skin.logoAssetId;
+    ? (surface?.collapsedAssetId ?? skin.logoAssetId)
+    : (surface?.expandedAssetId ?? skin.logoAssetId);
 
   return {
     showBrandLogo: settings.showBrandLogo,

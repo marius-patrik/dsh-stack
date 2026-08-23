@@ -12,9 +12,19 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "publishConfig": { "access": "public" },
-  "stack": { "kind": "library", "id": "stack.library.plugin-kit" },
+  "files": [
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "library",
+    "id": "stack.library.plugin-kit"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

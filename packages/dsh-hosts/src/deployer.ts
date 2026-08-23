@@ -3,24 +3,24 @@
  * Uses Tailscale SSH / SSH to deploy dsh worker nodes across cluster machines.
  */
 
-import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
-import type { NetworkNode } from './types.js'
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import type { NetworkNode } from "./types.js";
 
-const execFileAsync = promisify(execFile)
+const execFileAsync = promisify(execFile);
 
 export interface DeploymentProgress {
-  nodeId: string
-  stage: 'idle' | 'checking-ssh' | 'provisioning' | 'starting-service' | 'connected' | 'failed'
-  logs: string[]
-  error?: string
+  nodeId: string;
+  stage: "idle" | "checking-ssh" | "provisioning" | "starting-service" | "connected" | "failed";
+  logs: string[];
+  error?: string;
 }
 
 export class RemoteDeployer {
-  private activeDeployments = new Map<string, DeploymentProgress>()
+  private activeDeployments = new Map<string, DeploymentProgress>();
 
   getProgress(nodeId: string): DeploymentProgress | undefined {
-    return this.activeDeployments.get(nodeId)
+    return this.activeDeployments.get(nodeId);
   }
 
   /**
@@ -46,7 +46,7 @@ mkdir -p "$DSH_HOME/profiles/worker"
 
 echo "==> Node configured. Connected to coordinator at $COORDINATOR"
 echo "==> Worker daemon ready."
-`
+`;
   }
 
   /**
@@ -67,7 +67,7 @@ $DshHome = if ($env:DSH_HOME) { $env:DSH_HOME } else { "$env:USERPROFILE\\.agent
 New-Item -ItemType Directory -Force -Path "$DshHome\\profiles\\worker" | Out-Null
 
 Write-Host "==> Windows worker node configured! Coordinator: $Coordinator" -ForegroundColor Green
-`
+`;
   }
 
   /**
@@ -76,29 +76,29 @@ Write-Host "==> Windows worker node configured! Coordinator: $Coordinator" -Fore
   async deployToNode(node: NetworkNode, coordinatorUrl: string): Promise<DeploymentProgress> {
     const progress: DeploymentProgress = {
       nodeId: node.id,
-      stage: 'checking-ssh',
-      logs: [`Initiating deployment to ${node.name} (${node.ips[0] || 'unknown IP'})...`],
-    }
-    this.activeDeployments.set(node.id, progress)
+      stage: "checking-ssh",
+      logs: [`Initiating deployment to ${node.name} (${node.ips[0] || "unknown IP"})...`],
+    };
+    this.activeDeployments.set(node.id, progress);
 
     try {
-      progress.logs.push(`Connecting via Tailscale SSH to ${node.hostname}...`)
-      progress.stage = 'provisioning'
+      progress.logs.push(`Connecting via Tailscale SSH to ${node.hostname}...`);
+      progress.stage = "provisioning";
 
       // Check if tailscale ssh is reachable
-      const target = node.hostname || node.ips[0]
-      if (!target) throw new Error('Target node has no reachable IP or hostname')
+      const target = node.hostname || node.ips[0];
+      if (!target) throw new Error("Target node has no reachable IP or hostname");
 
-      progress.logs.push(`Configuring node role [${node.role}] on ${target}...`)
-      progress.stage = 'starting-service'
-      progress.logs.push(`Worker daemon connected to coordinator ${coordinatorUrl}`)
-      progress.stage = 'connected'
-      return progress
+      progress.logs.push(`Configuring node role [${node.role}] on ${target}...`);
+      progress.stage = "starting-service";
+      progress.logs.push(`Worker daemon connected to coordinator ${coordinatorUrl}`);
+      progress.stage = "connected";
+      return progress;
     } catch (err: any) {
-      progress.stage = 'failed'
-      progress.error = err?.message || String(err)
-      progress.logs.push(`Deployment failed: ${progress.error}`)
-      return progress
+      progress.stage = "failed";
+      progress.error = err?.message || String(err);
+      progress.logs.push(`Deployment failed: ${progress.error}`);
+      return progress;
     }
   }
 }

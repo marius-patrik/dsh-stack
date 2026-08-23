@@ -12,9 +12,19 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "publishConfig": { "access": "public" },
-  "stack": { "kind": "plugin", "id": "stack.core.composition" },
+  "files": [
+    "lib",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.core.composition"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

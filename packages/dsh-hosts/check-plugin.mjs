@@ -1,10 +1,10 @@
-import assert from 'node:assert/strict'
-import * as plugin from './lib/index.js'
+import assert from "node:assert/strict";
+import * as plugin from "./lib/index.js";
 
-assert.equal(plugin.name, 'dsh-hosts')
-assert.equal(typeof plugin.apply, 'function')
-assert.ok(Array.isArray(plugin.inject))
-assert.ok(!('default' in plugin), 'no default export')
+assert.equal(plugin.name, "dsh-hosts");
+assert.equal(typeof plugin.apply, "function");
+assert.ok(Array.isArray(plugin.inject));
+assert.ok(!("default" in plugin), "no default export");
 
-console.log('loader shape ok: dsh-hosts inject=', JSON.stringify(plugin.inject))
-console.log('plugin check passed')
+console.log("loader shape ok: dsh-hosts inject=", JSON.stringify(plugin.inject));
+console.log("plugin check passed");

@@ -13,7 +13,9 @@
     },
     "./src/*": "./src/*"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs"

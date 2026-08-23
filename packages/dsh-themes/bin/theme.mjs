@@ -14,59 +14,70 @@
  *   remove <id>                — delete an installed theme
  */
 
-import { homedir } from 'node:os'
-import { readFile, writeFile } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
-import { extractThemesFromVsix } from '../lib/catalog.js'
-import { listThemes, removeTheme, saveTheme, storeHandle } from '../lib/store.js'
-import { mapTheme, themeId } from '../lib/theme.js'
+import { homedir } from "node:os";
+import { readFile, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { extractThemesFromVsix } from "../lib/catalog.js";
+import { listThemes, removeTheme, saveTheme, storeHandle } from "../lib/store.js";
+import { mapTheme, themeId } from "../lib/theme.js";
 
-const home = resolve(process.env.DSH_HOME ?? join(homedir(), '.agents'))
-const settingsPath = join(home, 'settings.yaml')
+const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
+const settingsPath = join(home, "settings.yaml");
 
 function* readSection(text, section) {
-  let inSection = false
-  for (const line of text.split('\n')) {
-    if (new RegExp(`^${section}\\s*:`).test(line)) { inSection = true; continue }
-    if (inSection && !/^\s/.test(line)) break
-    if (!inSection) continue
-    const match = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/)
+  let inSection = false;
+  for (const line of text.split("\n")) {
+    if (new RegExp(`^${section}\\s*:`).test(line)) {
+      inSection = true;
+      continue;
+    }
+    if (inSection && !/^\s/.test(line)) break;
+    if (!inSection) continue;
+    const match = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
     if (match) {
-      yield [match[1], match[2].trim().replace(/^(['"])(.*)\1$/, '$2')]
+      yield [match[1], match[2].trim().replace(/^(['"])(.*)\1$/, "$2")];
     }
   }
 }
 
 async function readThemesConfig() {
-  let root = 'themes'
-  let catalogUrl = 'https://open-vsx.org'
+  let root = "themes";
+  let catalogUrl = "https://open-vsx.org";
   try {
-    for (const [key, value] of readSection(await readFile(settingsPath, 'utf8'), 'dsh-themes')) {
-      if (key === 'root') root = value
-      if (key === 'catalogUrl') catalogUrl = value
+    for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "dsh-themes")) {
+      if (key === "root") root = value;
+      if (key === "catalogUrl") catalogUrl = value;
     }
-  } catch { /* missing document: defaults */ }
-  return { root, catalogUrl }
+  } catch {
+    /* missing document: defaults */
+  }
+  return { root, catalogUrl };
 }
 
 async function readActive() {
   try {
-    for (const [key, value] of readSection(await readFile(settingsPath, 'utf8'), 'dsh-themes')) {
-      if (key === 'active') return value
+    for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "dsh-themes")) {
+      if (key === "active") return value;
     }
-  } catch { /* no document yet */ }
-  return ''
+  } catch {
+    /* no document yet */
+  }
+  return "";
 }
 
 async function writeActive(id) {
-  let text = ''
-  try { text = await readFile(settingsPath, 'utf8') } catch { /* new file */ }
-  const pattern = /^dsh-themes\s*:\s*[\s\S]*?(?=^\S|$)/gm
-  const section = `dsh-themes:\n  active: ${JSON.stringify(id)}\n`
-  const withoutThemes = text.replace(pattern, '')
-  const rest = withoutThemes.replace(/\n{3,}/g, '\n\n').trim()
-  text = `${rest}${rest.endsWith('\n') ? '' : '\n'}${section}`
-  await writeFile(settingsPath, text, 'utf8')
+  let text = "";
+  try {
+    text = await readFile(settingsPath, "utf8");
+  } catch {
+    /* new file */
+  }
+  const pattern = /^dsh-themes\s*:\s*[\s\S]*?(?=^\S|$)/gm;
+  const section = `dsh-themes:\n  active: ${JSON.stringify(id)}\n`;
+  const withoutThemes = text.replace(pattern, "");
+  const rest = withoutThemes.replace(/\n{3,}/g, "\n\n").trim();
+  text = `${rest}${rest.endsWith("\n") ? "" : "\n"}${section}`;
+  await writeFile(settingsPath, text, "utf8");
 }
 
 function printHelp() {
@@ -78,141 +89,151 @@ function printHelp() {
   install-vsix <path>        install from a local vsix file
   set <id>                   persist the active theme id
   remove <id>                delete an installed theme
-`)
+`);
 }
 
 async function main(argv) {
-  const verb = argv[0]
-  if (verb === undefined || verb === '--help' || verb === '-h') {
-    printHelp()
-    return
+  const verb = argv[0];
+  if (verb === undefined || verb === "--help" || verb === "-h") {
+    printHelp();
+    return;
   }
-  const config = await readThemesConfig()
-  const handle = storeHandle(home, config.root)
+  const config = await readThemesConfig();
+  const handle = storeHandle(home, config.root);
 
-  if (verb === 'list') {
-    const active = await readActive()
-    const themes = await listThemes(handle)
+  if (verb === "list") {
+    const active = await readActive();
+    const themes = await listThemes(handle);
     if (themes.length === 0) {
-      process.stdout.write('no installed themes\n')
-      return
+      process.stdout.write("no installed themes\n");
+      return;
     }
     for (const theme of themes) {
-      const marker = theme.id === active ? ' *' : ''
-      process.stdout.write(`${theme.id.padEnd(24)} ${theme.name.padEnd(28)} ${theme.colorScheme.padEnd(6)}${marker}\n`)
+      const marker = theme.id === active ? " *" : "";
+      process.stdout.write(
+        `${theme.id.padEnd(24)} ${theme.name.padEnd(28)} ${theme.colorScheme.padEnd(6)}${marker}\n`,
+      );
     }
-    return
+    return;
   }
 
-  if (verb === 'search') {
-    const query = argv[1]
+  if (verb === "search") {
+    const query = argv[1];
     if (query === undefined) {
-      process.stderr.write('dsh theme search: missing query\n')
-      process.exitCode = 1
-      return
+      process.stderr.write("dsh theme search: missing query\n");
+      process.exitCode = 1;
+      return;
     }
-    const { searchCatalog } = await import('../lib/catalog.js')
-    const hits = await searchCatalog(config.catalogUrl, query)
+    const { searchCatalog } = await import("../lib/catalog.js");
+    const hits = await searchCatalog(config.catalogUrl, query);
     if (hits.length === 0) {
-      process.stdout.write('no catalog matches\n')
-      return
+      process.stdout.write("no catalog matches\n");
+      return;
     }
     for (const hit of hits) {
-      process.stdout.write(`${hit.namespace}.${hit.name}  v${hit.version}  (${hit.downloadCount} dl)\n`)
-      if (hit.description) process.stdout.write(`  ${hit.description}\n`)
+      process.stdout.write(
+        `${hit.namespace}.${hit.name}  v${hit.version}  (${hit.downloadCount} dl)\n`,
+      );
+      if (hit.description) process.stdout.write(`  ${hit.description}\n`);
     }
-    return
+    return;
   }
 
-  if (verb === 'install' || verb === 'install-vsix') {
-    const query = argv[1]
+  if (verb === "install" || verb === "install-vsix") {
+    const query = argv[1];
     if (query === undefined) {
-      process.stderr.write(`dsh theme ${verb}: missing argument\n`)
-      process.exitCode = 1
-      return
+      process.stderr.write(`dsh theme ${verb}: missing argument\n`);
+      process.exitCode = 1;
+      return;
     }
-    let vsixPath = query
-    if (verb === 'install') {
-      const { searchCatalog } = await import('../lib/catalog.js')
-      const hits = await searchCatalog(config.catalogUrl, query)
-      const hit = hits.find(candidate => candidate.download)
+    let vsixPath = query;
+    if (verb === "install") {
+      const { searchCatalog } = await import("../lib/catalog.js");
+      const hits = await searchCatalog(config.catalogUrl, query);
+      const hit = hits.find((candidate) => candidate.download);
       if (hit === undefined) {
-        process.stderr.write(`dsh theme install: no catalog match for "${query}"\n`)
-        process.exitCode = 1
-        return
+        process.stderr.write(`dsh theme install: no catalog match for "${query}"\n`);
+        process.exitCode = 1;
+        return;
       }
-      process.stdout.write(`installing ${hit.namespace}.${hit.name} from ${hit.download}\n`)
-      const response = await fetch(hit.download)
+      process.stdout.write(`installing ${hit.namespace}.${hit.name} from ${hit.download}\n`);
+      const response = await fetch(hit.download);
       if (!response.ok) {
-        process.stderr.write(`dsh theme install: download failed (HTTP ${response.status})\n`)
-        process.exitCode = 1
-        return
+        process.stderr.write(`dsh theme install: download failed (HTTP ${response.status})\n`);
+        process.exitCode = 1;
+        return;
       }
-      const buffer = Buffer.from(await response.arrayBuffer())
-      const tempPath = join(home, `${hit.namespace}.${hit.name}.vsix`)
-      await writeFile(tempPath, buffer)
-      vsixPath = tempPath
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const tempPath = join(home, `${hit.namespace}.${hit.name}.vsix`);
+      await writeFile(tempPath, buffer);
+      vsixPath = tempPath;
     }
-    const sources = await extractThemesFromVsix(vsixPath, message => process.stderr.write(`${message}\n`))
-    let installed = 0
+    const sources = await extractThemesFromVsix(vsixPath, (message) =>
+      process.stderr.write(`${message}\n`),
+    );
+    let installed = 0;
     for (const source of sources) {
-      const definition = mapTheme(source)
-      await saveTheme(handle, { ...definition, name: source.name })
-      installed += 1
-      process.stdout.write(`installed ${source.name} as ${definition.id}\n`)
+      const definition = mapTheme(source);
+      await saveTheme(handle, { ...definition, name: source.name });
+      installed += 1;
+      process.stdout.write(`installed ${source.name} as ${definition.id}\n`);
     }
-    if (vsixPath !== query) await rmQuiet(vsixPath)
+    if (vsixPath !== query) await rmQuiet(vsixPath);
     if (installed === 0) {
-      process.stderr.write('dsh theme install: no themes found in extension\n')
-      process.exitCode = 1
+      process.stderr.write("dsh theme install: no themes found in extension\n");
+      process.exitCode = 1;
     }
-    return
+    return;
   }
 
-  if (verb === 'set') {
-    const id = argv[1]
+  if (verb === "set") {
+    const id = argv[1];
     if (id === undefined) {
-      process.stderr.write('dsh theme set: missing id\n')
-      process.exitCode = 1
-      return
+      process.stderr.write("dsh theme set: missing id\n");
+      process.exitCode = 1;
+      return;
     }
-    const themes = await listThemes(handle)
-    if (!themes.some(theme => theme.id === id)) {
-      process.stderr.write(`dsh theme set: unknown theme "${id}" (see "dsh theme list")\n`)
-      process.exitCode = 1
-      return
+    const themes = await listThemes(handle);
+    if (!themes.some((theme) => theme.id === id)) {
+      process.stderr.write(`dsh theme set: unknown theme "${id}" (see "dsh theme list")\n`);
+      process.exitCode = 1;
+      return;
     }
-    await writeActive(id)
-    process.stdout.write(`active theme: ${id}\n`)
-    return
+    await writeActive(id);
+    process.stdout.write(`active theme: ${id}\n`);
+    return;
   }
 
-  if (verb === 'remove') {
-    const id = argv[1]
+  if (verb === "remove") {
+    const id = argv[1];
     if (id === undefined) {
-      process.stderr.write('dsh theme remove: missing id\n')
-      process.exitCode = 1
-      return
+      process.stderr.write("dsh theme remove: missing id\n");
+      process.exitCode = 1;
+      return;
     }
-    const removed = await removeTheme(handle, id)
+    const removed = await removeTheme(handle, id);
     if (removed) {
-      const active = await readActive()
-      if (active === id) await writeActive('')
-      process.stdout.write(`removed ${id}\n`)
+      const active = await readActive();
+      if (active === id) await writeActive("");
+      process.stdout.write(`removed ${id}\n`);
     } else {
-      process.stderr.write(`dsh theme remove: no theme "${id}"\n`)
-      process.exitCode = 1
+      process.stderr.write(`dsh theme remove: no theme "${id}"\n`);
+      process.exitCode = 1;
     }
-    return
+    return;
   }
 
-  process.stderr.write(`dsh theme: unknown verb "${verb}"\n`)
-  process.exitCode = 1
+  process.stderr.write(`dsh theme: unknown verb "${verb}"\n`);
+  process.exitCode = 1;
 }
 
 async function rmQuiet(path) {
-  const { rm } = await import('node:fs/promises')
-  try { await rm(path) } catch { /* best effort */ }
+  const { rm } = await import("node:fs/promises");
+  try {
+    await rm(path);
+  } catch {
+    /* best effort */
+  }
 }
 
-await main(process.argv.slice(2))
+await main(process.argv.slice(2));

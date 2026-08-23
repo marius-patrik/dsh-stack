@@ -1,4 +1,4 @@
-import type { ProfileDefinition } from './types.js';
+import type { ProfileDefinition } from "./types.js";
 
 export interface ProfileSelectorState {
   readonly activeProfileId: string;
@@ -6,15 +6,15 @@ export interface ProfileSelectorState {
 }
 
 export interface ProfileSettingsTab {
-  readonly id: 'profiles';
-  readonly title: 'Profiles';
-  readonly description: 'Choose and configure the active Stack profile.';
+  readonly id: "profiles";
+  readonly title: "Profiles";
+  readonly description: "Choose and configure the active Stack profile.";
 }
 
 export const profilesSettingsTab: ProfileSettingsTab = {
-  id: 'profiles',
-  title: 'Profiles',
-  description: 'Choose and configure the active Stack profile.',
+  id: "profiles",
+  title: "Profiles",
+  description: "Choose and configure the active Stack profile.",
 };
 
 export function createProfileSelectorState(

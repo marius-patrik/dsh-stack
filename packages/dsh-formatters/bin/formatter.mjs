@@ -12,61 +12,75 @@
  *   set-auto <on|off>          — toggle auto-format-on-edit
  */
 
-import { homedir } from 'node:os'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
+import { homedir } from "node:os";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 
-const home = resolve(process.env.DSH_HOME ?? join(homedir(), '.agents'))
-const settingsPath = join(home, 'settings.yaml')
+const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
+const settingsPath = join(home, "settings.yaml");
 
 function* readSection(text, section) {
-  let inSection = false
-  for (const line of text.split('\n')) {
-    if (new RegExp(`^${section}\\s*:`).test(line)) { inSection = true; continue }
-    if (inSection && !/^\s/.test(line)) break
-    if (!inSection) continue
-    const match = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/)
+  let inSection = false;
+  for (const line of text.split("\n")) {
+    if (new RegExp(`^${section}\\s*:`).test(line)) {
+      inSection = true;
+      continue;
+    }
+    if (inSection && !/^\s/.test(line)) break;
+    if (!inSection) continue;
+    const match = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
     if (match) {
-      yield [match[1], match[2].trim().replace(/^(['"])(.*)\1$/, '$2')]
+      yield [match[1], match[2].trim().replace(/^(['"])(.*)\1$/, "$2")];
     }
   }
 }
 
 function parseJsonValue(raw) {
-  if (raw === '' || raw === 'null') return null
-  if (raw[0] === '{' || raw[0] === '[') {
-    try { return JSON.parse(raw) } catch { /* fall through */ }
+  if (raw === "" || raw === "null") return null;
+  if (raw[0] === "{" || raw[0] === "[") {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      /* fall through */
+    }
   }
-  if (raw === 'true') return true
-  if (raw === 'false') return false
-  const num = Number(raw)
-  if (raw !== '' && Number.isFinite(num)) return num
-  return raw
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  const num = Number(raw);
+  if (raw !== "" && Number.isFinite(num)) return num;
+  return raw;
 }
 
 async function readSectionData() {
   try {
-    const text = await readFile(settingsPath, 'utf8')
-    const section = {}
-    for (const [key, value] of readSection(text, 'dsh-formatters')) {
-      section[key] = parseJsonValue(value)
+    const text = await readFile(settingsPath, "utf8");
+    const section = {};
+    for (const [key, value] of readSection(text, "dsh-formatters")) {
+      section[key] = parseJsonValue(value);
     }
-    return section
-  } catch { /* no document yet */ }
-  return {}
+    return section;
+  } catch {
+    /* no document yet */
+  }
+  return {};
 }
 
 async function writeSectionData(section) {
-  let text = ''
-  try { text = await readFile(settingsPath, 'utf8') } catch { /* new file */ }
-  const pattern = /^dsh-formatters[^\n]*\n(?:[ \t][^\n]*\n)*/m
-  const block = `dsh-formatters:\n  autoFormatOnEdit: ${section.autoFormatOnEdit ?? true}\n` +
-    `  formatters: ${JSON.stringify(section.formatters ?? {})}\n`
-  const without = text.replace(pattern, '')
-  const rest = without.replace(/\n{3,}/g, '\n\n').trim()
-  const out = `${rest}${rest.endsWith('\n') ? '' : '\n'}${block}`
-  await mkdir(dirname(settingsPath), { recursive: true })
-  await writeFile(settingsPath, out, 'utf8')
+  let text = "";
+  try {
+    text = await readFile(settingsPath, "utf8");
+  } catch {
+    /* new file */
+  }
+  const pattern = /^dsh-formatters[^\n]*\n(?:[ \t][^\n]*\n)*/m;
+  const block =
+    `dsh-formatters:\n  autoFormatOnEdit: ${section.autoFormatOnEdit ?? true}\n` +
+    `  formatters: ${JSON.stringify(section.formatters ?? {})}\n`;
+  const without = text.replace(pattern, "");
+  const rest = without.replace(/\n{3,}/g, "\n\n").trim();
+  const out = `${rest}${rest.endsWith("\n") ? "" : "\n"}${block}`;
+  await mkdir(dirname(settingsPath), { recursive: true });
+  await writeFile(settingsPath, out, "utf8");
 }
 
 function printHelp() {
@@ -77,78 +91,80 @@ verbs:
   add <ext> <command...>      e.g. dsh formatter add .ts npx prettier --write
   remove <ext>
   set-auto <on|off>
-`)
+`);
 }
 
 async function main() {
-  const verb = process.argv[2]
-  const argv = process.argv.slice(3)
+  const verb = process.argv[2];
+  const argv = process.argv.slice(3);
 
-  if (verb === 'list') {
-    const section = await readSectionData()
-    const entries = Object.entries(section.formatters ?? {})
+  if (verb === "list") {
+    const section = await readSectionData();
+    const entries = Object.entries(section.formatters ?? {});
     if (entries.length === 0) {
-      process.stdout.write(`no formatters configured (auto-format-on-edit: ${section.autoFormatOnEdit ?? true})\n`)
-      return
+      process.stdout.write(
+        `no formatters configured (auto-format-on-edit: ${section.autoFormatOnEdit ?? true})\n`,
+      );
+      return;
     }
     for (const [ext, cfg] of entries) {
-      process.stdout.write(`${ext}    ${(cfg.argv ?? []).join(' ')}\n`)
+      process.stdout.write(`${ext}    ${(cfg.argv ?? []).join(" ")}\n`);
     }
-    return
+    return;
   }
 
-  if (verb === 'add') {
-    const ext = argv[0]
-    if (!ext?.startsWith('.') || argv.length < 2) {
-      process.stderr.write('dsh formatter add: expected <ext> <command...>\n')
-      process.exitCode = 1
-      return
+  if (verb === "add") {
+    const ext = argv[0];
+    if (!ext?.startsWith(".") || argv.length < 2) {
+      process.stderr.write("dsh formatter add: expected <ext> <command...>\n");
+      process.exitCode = 1;
+      return;
     }
-    const section = await readSectionData()
-    section.formatters ??= {}
-    section.formatters[ext.toLowerCase()] = { argv: argv.slice(1) }
-    await writeSectionData(section)
-    process.stdout.write(`added formatter ${ext} -> ${argv.slice(1).join(' ')}\n`)
-    return
+    const section = await readSectionData();
+    section.formatters ??= {};
+    section.formatters[ext.toLowerCase()] = { argv: argv.slice(1) };
+    await writeSectionData(section);
+    process.stdout.write(`added formatter ${ext} -> ${argv.slice(1).join(" ")}\n`);
+    return;
   }
 
-  if (verb === 'remove') {
-    const ext = argv[0]
+  if (verb === "remove") {
+    const ext = argv[0];
     if (!ext) {
-      process.stderr.write('dsh formatter remove: missing <ext>\n')
-      process.exitCode = 1
-      return
+      process.stderr.write("dsh formatter remove: missing <ext>\n");
+      process.exitCode = 1;
+      return;
     }
-    const section = await readSectionData()
+    const section = await readSectionData();
     if (section.formatters?.[ext] === undefined) {
-      process.stderr.write(`dsh formatter remove: no formatter "${ext}"\n`)
-      process.exitCode = 1
-      return
+      process.stderr.write(`dsh formatter remove: no formatter "${ext}"\n`);
+      process.exitCode = 1;
+      return;
     }
-    delete section.formatters[ext]
-    await writeSectionData(section)
-    process.stdout.write(`removed formatter ${ext}\n`)
-    return
+    delete section.formatters[ext];
+    await writeSectionData(section);
+    process.stdout.write(`removed formatter ${ext}\n`);
+    return;
   }
 
-  if (verb === 'set-auto') {
-    const value = argv[0]
-    if (value !== 'on' && value !== 'off') {
-      process.stderr.write('dsh formatter set-auto: expected on|off\n')
-      process.exitCode = 1
-      return
+  if (verb === "set-auto") {
+    const value = argv[0];
+    if (value !== "on" && value !== "off") {
+      process.stderr.write("dsh formatter set-auto: expected on|off\n");
+      process.exitCode = 1;
+      return;
     }
-    const section = await readSectionData()
-    section.autoFormatOnEdit = value === 'on'
-    await writeSectionData(section)
-    process.stdout.write(`auto-format-on-edit: ${value}\n`)
-    return
+    const section = await readSectionData();
+    section.autoFormatOnEdit = value === "on";
+    await writeSectionData(section);
+    process.stdout.write(`auto-format-on-edit: ${value}\n`);
+    return;
   }
 
-  printHelp()
+  printHelp();
 }
 
 main().catch((err) => {
-  process.stderr.write(`dsh formatter: ${err.message}\n`)
-  process.exitCode = 1
-})
+  process.stderr.write(`dsh formatter: ${err.message}\n`);
+  process.exitCode = 1;
+});

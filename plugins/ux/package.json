@@ -4,9 +4,22 @@
   "description": "Presentation, editor, terminal, themes and media composition pack.",
   "license": "MIT",
   "type": "module",
-  "files": ["code-editor", "terminal-client", "theme-studio", "voice-synthesis", "package.json", "README.md", "LICENSE"],
-  "publishConfig": { "access": "public" },
-  "stack": { "kind": "pack", "id": "stack.pack.ux" },
+  "files": [
+    "code-editor",
+    "terminal-client",
+    "theme-studio",
+    "voice-synthesis",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "pack",
+    "id": "stack.pack.ux"
+  },
   "scripts": {
     "build": "node ../../scripts/pack.mjs build",
     "typecheck": "node ../../scripts/pack.mjs typecheck",

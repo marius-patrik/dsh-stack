@@ -1,8 +1,8 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import type { Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'forgejo-forge';
-export const inject = ["repos","accounts","tools"];
+export const name = "forgejo-forge";
+export const inject = ["repos", "accounts", "tools"];
 export const optional: string[] = [];
 
 export const Config = Schema.object({});

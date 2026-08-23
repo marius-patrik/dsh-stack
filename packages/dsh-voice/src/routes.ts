@@ -6,32 +6,37 @@
  * @module dsh-voice/routes
  */
 
-import type { IncomingMessage, ServerResponse } from 'node:http'
-import { Readable } from 'node:stream'
-import { TTS_PROVIDERS, resolveTts } from './providers.js'
-import { resolveCredential, synthesizeSpeech, transcribeAudio, type AccountsLike } from './speech.js'
-import type { VoiceConfig } from './config.js'
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { Readable } from "node:stream";
+import { TTS_PROVIDERS, resolveTts } from "./providers.js";
+import {
+  resolveCredential,
+  synthesizeSpeech,
+  transcribeAudio,
+  type AccountsLike,
+} from "./speech.js";
+import type { VoiceConfig } from "./config.js";
 
 /** Read the whole request body. */
 async function readBody(req: IncomingMessage): Promise<Buffer> {
-  const chunks: Buffer[] = []
-  for await (const chunk of req) chunks.push(chunk as Buffer)
-  return Buffer.concat(chunks)
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(chunk as Buffer);
+  return Buffer.concat(chunks);
 }
 
 function sendJson(res: ServerResponse, status: number, payload: unknown): void {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' })
-  res.end(JSON.stringify(payload))
+  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+  res.end(JSON.stringify(payload));
 }
 
 function sendError(res: ServerResponse, err: unknown, notConfiguredStatus = 400): void {
-  const e = err as { code?: string; message?: string }
-  const status = e?.code === 'NOT_CONFIGURED' ? notConfiguredStatus : 502
-  sendJson(res, status, { error: e?.message ?? String(err) })
+  const e = err as { code?: string; message?: string };
+  const status = e?.code === "NOT_CONFIGURED" ? notConfiguredStatus : 502;
+  sendJson(res, status, { error: e?.message ?? String(err) });
 }
 
 /** The config getter the handlers read per request (settings-reload safe). */
-export type ConfigSource = () => VoiceConfig
+export type ConfigSource = () => VoiceConfig;
 
 /**
  * POST /voice/api/tts — synthesize `{text, voice?, speed?, format?}` through
@@ -44,59 +49,65 @@ export type ConfigSource = () => VoiceConfig
 export function makeTtsHandler(current: ConfigSource, accounts: AccountsLike | undefined) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     try {
-      if (req.method !== 'POST') {
-        sendJson(res, 405, { error: 'method not allowed' })
-        return
+      if (req.method !== "POST") {
+        sendJson(res, 405, { error: "method not allowed" });
+        return;
       }
-      const raw = await readBody(req)
-      let payload: { text?: unknown; voice?: unknown; speed?: unknown; format?: unknown }
+      const raw = await readBody(req);
+      let payload: { text?: unknown; voice?: unknown; speed?: unknown; format?: unknown };
       try {
-        payload = JSON.parse(raw.toString('utf8') || '{}') as typeof payload
+        payload = JSON.parse(raw.toString("utf8") || "{}") as typeof payload;
       } catch {
-        sendJson(res, 400, { error: 'invalid JSON body' })
-        return
+        sendJson(res, 400, { error: "invalid JSON body" });
+        return;
       }
-      const text = typeof payload.text === 'string' ? payload.text.trim() : ''
+      const text = typeof payload.text === "string" ? payload.text.trim() : "";
       if (text.length === 0) {
-        sendJson(res, 400, { error: 'empty text' })
-        return
+        sendJson(res, 400, { error: "empty text" });
+        return;
       }
-      const config = current()
+      const config = current();
       if (!config.tts.enabled) {
-        sendJson(res, 403, { error: 'TTS is disabled (voice.tts.enabled)' })
-        return
+        sendJson(res, 403, { error: "TTS is disabled (voice.tts.enabled)" });
+        return;
       }
-      const target = resolveTts(config.tts)
-      const apiKey = await resolveCredential(accounts, target.credentialRef)
-      if (apiKey.length === 0 && target.provider.auth !== 'none') {
+      const target = resolveTts(config.tts);
+      const apiKey = await resolveCredential(accounts, target.credentialRef);
+      if (apiKey.length === 0 && target.provider.auth !== "none") {
         sendJson(res, 400, {
           error: `no credential for ${target.credentialRef}: store it with the accounts CLI (dsh-accounts set ${target.credentialRef}) or export it in the environment`,
-        })
-        return
+        });
+        return;
       }
       const overrides = {
-        ...(typeof payload.voice === 'string' && payload.voice.length > 0 ? { voice: payload.voice } : {}),
-        ...(typeof payload.speed === 'number' && Number.isFinite(payload.speed) ? { speed: payload.speed } : {}),
-        ...(typeof payload.format === 'string' && payload.format.length > 0 ? { format: payload.format } : {}),
-      }
-      const upstream = await synthesizeSpeech(target, apiKey, text, overrides)
+        ...(typeof payload.voice === "string" && payload.voice.length > 0
+          ? { voice: payload.voice }
+          : {}),
+        ...(typeof payload.speed === "number" && Number.isFinite(payload.speed)
+          ? { speed: payload.speed }
+          : {}),
+        ...(typeof payload.format === "string" && payload.format.length > 0
+          ? { format: payload.format }
+          : {}),
+      };
+      const upstream = await synthesizeSpeech(target, apiKey, text, overrides);
       res.writeHead(200, {
-        'Content-Type': upstream.headers.get('Content-Type') ?? 'audio/mpeg',
-        'Cache-Control': 'no-store',
-        ...(upstream.headers.get('Content-Length') !== null
-          ? { 'Content-Length': upstream.headers.get('Content-Length') as string }
-          : { 'Transfer-Encoding': 'chunked' }),
-      })
+        "Content-Type": upstream.headers.get("Content-Type") ?? "audio/mpeg",
+        "Cache-Control": "no-store",
+        ...(upstream.headers.get("Content-Length") !== null
+          ? { "Content-Length": upstream.headers.get("Content-Length") as string }
+          : { "Transfer-Encoding": "chunked" }),
+      });
       if (upstream.body === null) {
-        res.end()
-        return
+        res.end();
+        return;
       }
-      Readable.fromWeb(upstream.body as import('node:stream/web').ReadableStream).pipe(res)
+      Readable.fromWeb(upstream.body as import("node:stream/web").ReadableStream).pipe(res);
     } catch (err) {
-      if (!res.headersSent) sendError(res, err)
-      else res.destroy(err instanceof Error ? err : new Error(String(err)))
+      if (!res.headersSent) sendError(res, err);
+      else res.destroy(err instanceof Error ? err : new Error(String(err)));
     }
-  }
+  };
 }
 
 /**
@@ -110,32 +121,37 @@ export function makeTtsHandler(current: ConfigSource, accounts: AccountsLike | u
 export function makeSttHandler(current: ConfigSource, accounts: AccountsLike | undefined) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     try {
-      if (req.method !== 'POST') {
-        sendJson(res, 405, { error: 'method not allowed' })
-        return
+      if (req.method !== "POST") {
+        sendJson(res, 405, { error: "method not allowed" });
+        return;
       }
-      const audio = await readBody(req)
+      const audio = await readBody(req);
       if (audio.length === 0) {
-        sendJson(res, 400, { error: 'empty audio body' })
-        return
+        sendJson(res, 400, { error: "empty audio body" });
+        return;
       }
-      const config = current()
+      const config = current();
       if (!config.stt.enabled) {
-        sendJson(res, 403, { error: 'STT is disabled (voice.stt.enabled)' })
-        return
+        sendJson(res, 403, { error: "STT is disabled (voice.stt.enabled)" });
+        return;
       }
-      const apiKey = await resolveCredential(accounts, config.stt.credentialRef)
-      const contentType = req.headers['content-type'] ?? 'audio/webm'
-      const ext = contentType.includes('mp4') ? 'm4a'
-        : contentType.includes('mpeg') ? 'mp3'
-          : contentType.includes('ogg') ? 'ogg'
-            : contentType.includes('wav') ? 'wav' : 'webm'
-      const result = await transcribeAudio(config.stt, apiKey, audio, `audio.${ext}`, '')
-      sendJson(res, 200, result)
+      const apiKey = await resolveCredential(accounts, config.stt.credentialRef);
+      const contentType = req.headers["content-type"] ?? "audio/webm";
+      const ext = contentType.includes("mp4")
+        ? "m4a"
+        : contentType.includes("mpeg")
+          ? "mp3"
+          : contentType.includes("ogg")
+            ? "ogg"
+            : contentType.includes("wav")
+              ? "wav"
+              : "webm";
+      const result = await transcribeAudio(config.stt, apiKey, audio, `audio.${ext}`, "");
+      sendJson(res, 200, result);
     } catch (err) {
-      sendError(res, err)
+      sendError(res, err);
     }
-  }
+  };
 }
 
 /**
@@ -148,20 +164,20 @@ export function makeSttHandler(current: ConfigSource, accounts: AccountsLike | u
  */
 export function makeConfigHandler(current: ConfigSource) {
   return (req: IncomingMessage, res: ServerResponse): void => {
-    if (req.method !== 'GET') {
-      sendJson(res, 405, { error: 'method not allowed' })
-      return
+    if (req.method !== "GET") {
+      sendJson(res, 405, { error: "method not allowed" });
+      return;
     }
-    const config = current()
-    let voices: { id: string; label: string }[] = []
-    let models: string[] = []
-    let providerError: string | null = null
+    const config = current();
+    let voices: { id: string; label: string }[] = [];
+    let models: string[] = [];
+    let providerError: string | null = null;
     try {
-      const target = resolveTts(config.tts)
-      voices = target.provider.voices
-      models = target.provider.models
+      const target = resolveTts(config.tts);
+      voices = target.provider.voices;
+      models = target.provider.models;
     } catch (err) {
-      providerError = err instanceof Error ? err.message : String(err)
+      providerError = err instanceof Error ? err.message : String(err);
     }
     sendJson(res, 200, {
       tts: {
@@ -178,6 +194,6 @@ export function makeConfigHandler(current: ConfigSource) {
       providers: TTS_PROVIDERS.map((row) => ({ id: row.id, label: row.label })),
       stt: { enabled: config.stt.enabled, engine: config.stt.engine },
       readAloud: { autoRead: config.readAloud.autoRead },
-    })
-  }
+    });
+  };
 }

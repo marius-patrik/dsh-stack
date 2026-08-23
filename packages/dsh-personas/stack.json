@@ -1,1 +1,10 @@
-{"id":"stack.agent.personas","name":"@dsh-stack/agent-personas","version":"0.1.0","kind":"plugin","description":"Canonical agent persona registry service.","files":["lib","package.json","stack.json"],"dependencies":[],"optionalDependencies":[]}
+{
+  "id": "stack.agent.personas",
+  "name": "@dsh-stack/agent-personas",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Canonical agent persona registry service.",
+  "files": ["lib", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

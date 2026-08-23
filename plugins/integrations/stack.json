@@ -4,7 +4,19 @@
   "version": "0.3.0",
   "kind": "pack",
   "description": "External integrations, providers, LSP, tooling, host and sandbox composition pack.",
-  "files": ["code-formatters", "code-server", "docker-sandbox", "lsp-client", "mesh-hosts", "package-managers", "providers", "tmux-terminal", "package.json", "README.md", "LICENSE"],
+  "files": [
+    "code-formatters",
+    "code-server",
+    "docker-sandbox",
+    "lsp-client",
+    "mesh-hosts",
+    "package-managers",
+    "providers",
+    "tmux-terminal",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": [],
   "optionalDependencies": []
 }

@@ -1,8 +1,8 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import type { Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'mesh-hosts';
-export const inject = ['tools', 'integrations', 'accounts'];
+export const name = "mesh-hosts";
+export const inject = ["tools", "integrations", "accounts"];
 export const optional: string[] = [];
 
 export const Config = Schema.object({});

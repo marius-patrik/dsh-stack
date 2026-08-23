@@ -1,9 +1,9 @@
-import type { Context } from '@deepseek-ai/cordis';
-import Schema from '@deepseek-ai/schemastery';
+import type { Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 
-export const name = 'code-editor';
-export const inject = ['tools', 'webServer', 'slots'];
-export const optional = ['icons'];
+export const name = "code-editor";
+export const inject = ["tools", "webServer", "slots"];
+export const optional = ["icons"];
 
 export interface EditorMarker {
   startLine: number;
@@ -11,7 +11,7 @@ export interface EditorMarker {
   endLine: number;
   endColumn: number;
   message: string;
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
 }
 
 export interface EditorBuffer {
@@ -31,7 +31,7 @@ export class CodeEditorService {
     this.listenToLspEvents();
   }
 
-  openBuffer(path: string, content: string = '', language?: string): EditorBuffer {
+  openBuffer(path: string, content: string = "", language?: string): EditorBuffer {
     const lang = language || this.detectLanguage(path);
     let buf = this.buffers.get(path);
     if (!buf) {
@@ -41,13 +41,13 @@ export class CodeEditorService {
         content,
         originalContent: content,
         dirty: false,
-        markers: []
+        markers: [],
       };
       this.buffers.set(path, buf);
     }
     this.activePath = path;
     if ((this.ctx as any).emit) {
-      (this.ctx as any).emit('editor:buffer-opened', buf);
+      (this.ctx as any).emit("editor:buffer-opened", buf);
     }
     return buf;
   }
@@ -58,7 +58,7 @@ export class CodeEditorService {
       buf.content = newContent;
       buf.dirty = buf.content !== buf.originalContent;
       if ((this.ctx as any).emit) {
-        (this.ctx as any).emit('editor:buffer-changed', { path, dirty: buf.dirty });
+        (this.ctx as any).emit("editor:buffer-changed", { path, dirty: buf.dirty });
       }
     }
   }
@@ -69,7 +69,7 @@ export class CodeEditorService {
     buf.originalContent = buf.content;
     buf.dirty = false;
     if ((this.ctx as any).emit) {
-      (this.ctx as any).emit('editor:buffer-saved', { path, content: buf.content });
+      (this.ctx as any).emit("editor:buffer-saved", { path, content: buf.content });
     }
     return true;
   }
@@ -95,42 +95,42 @@ export class CodeEditorService {
     if (buf) {
       buf.markers = markers;
       if ((this.ctx as any).emit) {
-        (this.ctx as any).emit('editor:markers-updated', { path, markers });
+        (this.ctx as any).emit("editor:markers-updated", { path, markers });
       }
     }
   }
 
   private detectLanguage(filePath: string): string {
-    const ext = filePath.includes('.') ? filePath.split('.').pop()?.toLowerCase() || '' : '';
+    const ext = filePath.includes(".") ? filePath.split(".").pop()?.toLowerCase() || "" : "";
     const map: Record<string, string> = {
-      ts: 'typescript',
-      tsx: 'typescriptreact',
-      js: 'javascript',
-      jsx: 'javascriptreact',
-      py: 'python',
-      rs: 'rust',
-      go: 'go',
-      json: 'json',
-      yaml: 'yaml',
-      yml: 'yaml',
-      md: 'markdown',
-      html: 'html',
-      css: 'css',
-      sh: 'shell'
+      ts: "typescript",
+      tsx: "typescriptreact",
+      js: "javascript",
+      jsx: "javascriptreact",
+      py: "python",
+      rs: "rust",
+      go: "go",
+      json: "json",
+      yaml: "yaml",
+      yml: "yaml",
+      md: "markdown",
+      html: "html",
+      css: "css",
+      sh: "shell",
     };
-    return map[ext] || 'plaintext';
+    return map[ext] || "plaintext";
   }
 
   private listenToLspEvents(): void {
     if ((this.ctx as any).on) {
-      (this.ctx as any).on('lsp:diagnostics', (data: { filePath: string; diagnostics: any[] }) => {
+      (this.ctx as any).on("lsp:diagnostics", (data: { filePath: string; diagnostics: any[] }) => {
         const markers: EditorMarker[] = (data.diagnostics || []).map((d) => ({
           startLine: d.range?.start?.line ?? 1,
           startColumn: d.range?.start?.character ?? 1,
           endLine: d.range?.end?.line ?? 1,
           endColumn: d.range?.end?.character ?? 1,
-          message: d.message || '',
-          severity: d.severity === 1 ? 'error' : d.severity === 2 ? 'warning' : 'info'
+          message: d.message || "",
+          severity: d.severity === 1 ? "error" : d.severity === 2 ? "warning" : "info",
         }));
         this.setMarkers(data.filePath, markers);
       });
@@ -142,7 +142,7 @@ export const Config = Schema.object({
   fontSize: Schema.number().default(13),
   tabSize: Schema.number().default(2),
   minimap: Schema.boolean().default(true),
-  wordWrap: Schema.boolean().default(true)
+  wordWrap: Schema.boolean().default(true),
 });
 
 export function apply(ctx: Context, config: any) {

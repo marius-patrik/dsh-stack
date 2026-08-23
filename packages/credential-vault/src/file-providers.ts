@@ -6,18 +6,18 @@
  * @module dsh-credentials/file-providers
  */
 
-import { DatabaseSync } from 'node:sqlite'
-import { promises as fs } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
-import type { FileSecretProvider } from './types.js'
+import { DatabaseSync } from "node:sqlite";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import type { FileSecretProvider } from "./types.js";
 
 function home(): string {
-  return homedir()
+  return homedir();
 }
 
 function readJson(path: string): Promise<unknown> {
-  return fs.readFile(path, 'utf8').then((text) => JSON.parse(text))
+  return fs.readFile(path, "utf8").then((text) => JSON.parse(text));
 }
 
 /**
@@ -26,43 +26,44 @@ function readJson(path: string): Promise<unknown> {
  * custom-API-key responses. Only string values survive import.
  */
 export const claudeFileProvider: FileSecretProvider = {
-  id: 'claude',
-  displayName: 'Claude Code',
-  description: 'Imports the primary API key and subscription OAuth token from Claude Code\'s credential file.',
-  defaultPaths: [join(home(), '.claude', '.credentials.json')],
+  id: "claude",
+  displayName: "Claude Code",
+  description:
+    "Imports the primary API key and subscription OAuth token from Claude Code's credential file.",
+  defaultPaths: [join(home(), ".claude", ".credentials.json")],
 
   async detect(path: string): Promise<boolean> {
     try {
-      const parsed = await readJson(path)
-      return typeof parsed === 'object' && parsed !== null
+      const parsed = await readJson(path);
+      return typeof parsed === "object" && parsed !== null;
     } catch {
-      return false
+      return false;
     }
   },
 
   async read(path: string): Promise<Record<string, string>> {
-    const parsed = await readJson(path)
-    if (typeof parsed !== 'object' || parsed === null) {
-      throw new Error(`dsh-credentials: ${path} is not a JSON object`)
+    const parsed = await readJson(path);
+    if (typeof parsed !== "object" || parsed === null) {
+      throw new Error(`dsh-credentials: ${path} is not a JSON object`);
     }
-    const object = parsed as Record<string, unknown>
-    const out: Record<string, string> = {}
-    if (typeof object['oauthAccessToken'] === 'string' && object['oauthAccessToken'].length > 0) {
-      out['CLAUDE_SUB_OAUTH_TOKEN'] = object['oauthAccessToken']
+    const object = parsed as Record<string, unknown>;
+    const out: Record<string, string> = {};
+    if (typeof object["oauthAccessToken"] === "string" && object["oauthAccessToken"].length > 0) {
+      out["CLAUDE_SUB_OAUTH_TOKEN"] = object["oauthAccessToken"];
     }
-    if (typeof object['primaryApiKey'] === 'string' && object['primaryApiKey'].length > 0) {
-      out['CLAUDE_API_KEY'] = object['primaryApiKey']
+    if (typeof object["primaryApiKey"] === "string" && object["primaryApiKey"].length > 0) {
+      out["CLAUDE_API_KEY"] = object["primaryApiKey"];
     }
-    return out
+    return out;
   },
-}
+};
 
 /** Keys read out of Cursor's `state.vscdb` item store. */
 const CURSOR_KEYS: ReadonlyArray<readonly [sqliteKey: string, ref: string]> = [
-  ['cursorAuth/accessToken', 'CURSOR_SUB_TOKEN'],
-  ['cursorAuth/cachedEmail', 'CURSOR_EMAIL'],
-  ['cursorAuth/cachedSignUpType', 'CURSOR_SIGNUP_TYPE'],
-]
+  ["cursorAuth/accessToken", "CURSOR_SUB_TOKEN"],
+  ["cursorAuth/cachedEmail", "CURSOR_EMAIL"],
+  ["cursorAuth/cachedSignUpType", "CURSOR_SIGNUP_TYPE"],
+];
 
 /**
  * Cursor's `state.vscdb` (a SQLite item store). The auth token lives in the
@@ -70,45 +71,55 @@ const CURSOR_KEYS: ReadonlyArray<readonly [sqliteKey: string, ref: string]> = [
  * the surrounding identity facts are imported too for diagnostics.
  */
 export const cursorFileProvider: FileSecretProvider = {
-  id: 'cursor',
-  displayName: 'Cursor',
-  description: 'Imports the Cursor subscription token from the editor\'s state.vscdb item store.',
+  id: "cursor",
+  displayName: "Cursor",
+  description: "Imports the Cursor subscription token from the editor's state.vscdb item store.",
   defaultPaths: [
-    join(home(), 'Library', 'Application Support', 'Cursor', 'User', 'state.vscdb'),
-    join(home(), 'Library', 'Application Support', 'Cursor', 'User', 'globalStorage', 'state.vscdb'),
+    join(home(), "Library", "Application Support", "Cursor", "User", "state.vscdb"),
+    join(
+      home(),
+      "Library",
+      "Application Support",
+      "Cursor",
+      "User",
+      "globalStorage",
+      "state.vscdb",
+    ),
   ],
 
   async detect(path: string): Promise<boolean> {
     try {
-      const db = new DatabaseSync(path, { readOnly: true })
+      const db = new DatabaseSync(path, { readOnly: true });
       try {
-        const row = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'ItemTable'").get() as unknown
-        return row !== undefined
+        const row = db
+          .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'ItemTable'")
+          .get() as unknown;
+        return row !== undefined;
       } finally {
-        db.close()
+        db.close();
       }
     } catch {
-      return false
+      return false;
     }
   },
 
   async read(path: string): Promise<Record<string, string>> {
-    const db = new DatabaseSync(path, { readOnly: true })
+    const db = new DatabaseSync(path, { readOnly: true });
     try {
-      const out: Record<string, string> = {}
-      const statement = db.prepare('SELECT value FROM ItemTable WHERE key = ?')
+      const out: Record<string, string> = {};
+      const statement = db.prepare("SELECT value FROM ItemTable WHERE key = ?");
       for (const [sqliteKey, ref] of CURSOR_KEYS) {
-        const row = statement.get(sqliteKey) as { value?: string } | undefined
-        if (row !== undefined && typeof row.value === 'string' && row.value.length > 0) {
-          out[ref] = row.value
+        const row = statement.get(sqliteKey) as { value?: string } | undefined;
+        if (row !== undefined && typeof row.value === "string" && row.value.length > 0) {
+          out[ref] = row.value;
         }
       }
-      return out
+      return out;
     } finally {
-      db.close()
+      db.close();
     }
   },
-}
+};
 
 /**
  * The GitHub CLI's `hosts.yml` as a file provider. Unlike the Claude/Cursor
@@ -122,42 +133,42 @@ export const cursorFileProvider: FileSecretProvider = {
  * which exercises the shared parser via `parseGitHubHosts` in the CLI layer.
  */
 export const githubFileProvider: FileSecretProvider = {
-  id: 'github',
-  displayName: 'GitHub CLI',
-  description: 'Imports the GitHub CLI OAuth token from its hosts.yml credential file.',
-  defaultPaths: [join(home(), '.config', 'gh', 'hosts.yml')],
+  id: "github",
+  displayName: "GitHub CLI",
+  description: "Imports the GitHub CLI OAuth token from its hosts.yml credential file.",
+  defaultPaths: [join(home(), ".config", "gh", "hosts.yml")],
 
   async detect(path: string): Promise<boolean> {
     try {
-      const raw = await fs.readFile(path, 'utf8')
-      return /oauth_token\s*:/.test(raw)
+      const raw = await fs.readFile(path, "utf8");
+      return /oauth_token\s*:/.test(raw);
     } catch {
-      return false
+      return false;
     }
   },
 
   async read(path: string): Promise<Record<string, string>> {
-    const raw = await fs.readFile(path, 'utf8')
-    const out: Record<string, string> = {}
-    const github = parseGitHubHosts(raw).find((entry) => entry.host === 'github.com')
+    const raw = await fs.readFile(path, "utf8");
+    const out: Record<string, string> = {};
+    const github = parseGitHubHosts(raw).find((entry) => entry.host === "github.com");
     if (github && github.token.length > 0) {
-      out['GITHUB_OAUTH_TOKEN'] = github.token
-      if (github.user) out['GITHUB_USER'] = github.user
+      out["GITHUB_OAUTH_TOKEN"] = github.token;
+      if (github.user) out["GITHUB_USER"] = github.user;
     }
-    const enterprise = parseGitHubHosts(raw).filter((entry) => entry.host !== 'github.com')
+    const enterprise = parseGitHubHosts(raw).filter((entry) => entry.host !== "github.com");
     for (const entry of enterprise) {
-      if (entry.token.length > 0) out['GITHUB_ENTERPRISE_TOKEN'] = entry.token
-      if (entry.host.length > 0) out['GITHUB_ENTERPRISE_HOST'] = entry.host
+      if (entry.token.length > 0) out["GITHUB_ENTERPRISE_TOKEN"] = entry.token;
+      if (entry.host.length > 0) out["GITHUB_ENTERPRISE_HOST"] = entry.host;
     }
-    return out
+    return out;
   },
-}
+};
 
 /** A `hosts.yml` entry: the host plus the signed-in account and OAuth token. */
 export interface GitHubHostEntry {
-  host: string
-  user: string | null
-  token: string
+  host: string;
+  user: string | null;
+  token: string;
 }
 
 /**
@@ -166,28 +177,28 @@ export interface GitHubHostEntry {
  * and a scan label the same document the same way.
  */
 export function parseGitHubHosts(raw: string): GitHubHostEntry[] {
-  const entries: GitHubHostEntry[] = []
-  let host: string | null = null
-  let user: string | null = null
-  let token: string | null = null
+  const entries: GitHubHostEntry[] = [];
+  let host: string | null = null;
+  let user: string | null = null;
+  let token: string | null = null;
   const flush = () => {
-    if (host && token) entries.push({ host, user, token })
-    user = null
-    token = null
-  }
+    if (host && token) entries.push({ host, user, token });
+    user = null;
+    token = null;
+  };
   for (const line of raw.split(/\r?\n/)) {
-    if (!line.trim() || line.trim().startsWith('#')) continue
-    const top = /^([^\s#][^:]*):\s*$/.exec(line)
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const top = /^([^\s#][^:]*):\s*$/.exec(line);
     if (top) {
-      flush()
-      host = top[1] ?? null
-      continue
+      flush();
+      host = top[1] ?? null;
+      continue;
     }
-    const userMatch = /^\s+user:\s*(\S+)\s*$/.exec(line)
-    if (userMatch && !user) user = userMatch[1] ?? null
-    const tokenMatch = /oauth_token:\s*([^\s,}]+)/.exec(line)
-    if (tokenMatch && !token) token = tokenMatch[1] ?? null
+    const userMatch = /^\s+user:\s*(\S+)\s*$/.exec(line);
+    if (userMatch && !user) user = userMatch[1] ?? null;
+    const tokenMatch = /oauth_token:\s*([^\s,}]+)/.exec(line);
+    if (tokenMatch && !token) token = tokenMatch[1] ?? null;
   }
-  flush()
-  return entries
+  flush();
+  return entries;
 }

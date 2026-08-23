@@ -7,98 +7,113 @@
  * @module dsh-providers/quotas
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import { installSettingsSection } from '@deepseek-ai/dsh-settings'
-import type { AccountsService } from 'dsh-credentials'
-import { NS, QuotaSettings, type QuotaSettings as QuotaSettingsValue } from './settings.js'
-import { mountQuotaWeb } from './web.js'
-import { createBuiltinProviders, PROBE_ROUTE_IDS } from './providers.js'
-import { PROVIDER_IDS } from '../providers.js'
-import { createConfiguredProviders } from './configured.js'
-import type { ConfigurableProviderEntry, SettingsDescriptorView } from './configured.js'
+import type { Context } from "@deepseek-ai/cordis";
+import { installSettingsSection } from "@deepseek-ai/dsh-settings";
+import type { AccountsService } from "dsh-credentials";
+import { NS, QuotaSettings, type QuotaSettings as QuotaSettingsValue } from "./settings.js";
+import { mountQuotaWeb } from "./web.js";
+import { createBuiltinProviders, PROBE_ROUTE_IDS } from "./providers.js";
+import { PROVIDER_IDS } from "../providers.js";
+import { createConfiguredProviders } from "./configured.js";
+import type { ConfigurableProviderEntry, SettingsDescriptorView } from "./configured.js";
 
-export { NS, QuotaSettings } from './settings.js'
-export type { QuotaProviderConfig, QuotaSettings as QuotaSettingsValue } from './settings.js'
-export { QUOTAS_PREFIX, mountQuotaWeb } from './web.js'
-export { createBuiltinProviders, PROBE_ROUTE_IDS } from './providers.js'
+export { NS, QuotaSettings } from "./settings.js";
+export type { QuotaProviderConfig, QuotaSettings as QuotaSettingsValue } from "./settings.js";
+export { QUOTAS_PREFIX, mountQuotaWeb } from "./web.js";
+export { createBuiltinProviders, PROBE_ROUTE_IDS } from "./providers.js";
 export {
-  createConfiguredProviders, probeConfiguredRoute, readConfiguredProfile, modelsEndpoint,
-} from './configured.js'
+  createConfiguredProviders,
+  probeConfiguredRoute,
+  readConfiguredProfile,
+  modelsEndpoint,
+} from "./configured.js";
 export type {
-  ConfigurableProviderEntry, ConfiguredProbeDeps, ConfiguredRouteProfile, SettingsDescriptorView,
-} from './configured.js'
+  ConfigurableProviderEntry,
+  ConfiguredProbeDeps,
+  ConfiguredRouteProfile,
+  SettingsDescriptorView,
+} from "./configured.js";
 
 export interface QuotaSnapshot {
-  provider: string
-  status: 'available' | 'unknown' | 'error'
-  used?: number
-  limit?: number
-  remaining?: number
-  unit?: 'tokens' | 'requests' | 'credits' | 'currency'
-  window?: string
-  resetsAt?: string
-  fetchedAt: string
-  source: 'endpoint' | 'cli' | 'manual'
-  message?: string
+  provider: string;
+  status: "available" | "unknown" | "error";
+  used?: number;
+  limit?: number;
+  remaining?: number;
+  unit?: "tokens" | "requests" | "credits" | "currency";
+  window?: string;
+  resetsAt?: string;
+  fetchedAt: string;
+  source: "endpoint" | "cli" | "manual";
+  message?: string;
 }
 
 export interface QuotaProvider {
-  readonly id: string
-  read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot>
+  readonly id: string;
+  read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot>;
 }
 
 export class QuotaRegistry {
-  private readonly providers = new Map<string, QuotaProvider>()
-  private readonly snapshots = new Map<string, QuotaSnapshot>()
+  private readonly providers = new Map<string, QuotaProvider>();
+  private readonly snapshots = new Map<string, QuotaSnapshot>();
 
   register(provider: QuotaProvider): () => void {
-    this.providers.set(provider.id, provider)
+    this.providers.set(provider.id, provider);
     return () => {
-      if (this.providers.get(provider.id) === provider) this.providers.delete(provider.id)
-    }
+      if (this.providers.get(provider.id) === provider) this.providers.delete(provider.id);
+    };
   }
 
   snapshot(provider: string): QuotaSnapshot | undefined {
-    return this.snapshots.get(provider)
+    return this.snapshots.get(provider);
   }
 
   all(): readonly QuotaSnapshot[] {
-    return [...this.snapshots.values()]
+    return [...this.snapshots.values()];
   }
 
-  async refresh(provider: string, signal: { readonly aborted: boolean } = { aborted: false }): Promise<QuotaSnapshot> {
-    const source = this.providers.get(provider)
+  async refresh(
+    provider: string,
+    signal: { readonly aborted: boolean } = { aborted: false },
+  ): Promise<QuotaSnapshot> {
+    const source = this.providers.get(provider);
     if (source === undefined) {
       const unknown: QuotaSnapshot = {
-        provider, status: 'unknown', fetchedAt: new Date().toISOString(), source: 'manual',
-        message: 'No verified quota source is configured for this provider.',
-      }
-      this.snapshots.set(provider, unknown)
-      return unknown
+        provider,
+        status: "unknown",
+        fetchedAt: new Date().toISOString(),
+        source: "manual",
+        message: "No verified quota source is configured for this provider.",
+      };
+      this.snapshots.set(provider, unknown);
+      return unknown;
     }
     try {
-      const snapshot = await source.read(signal)
-      this.snapshots.set(provider, snapshot)
-      return snapshot
+      const snapshot = await source.read(signal);
+      this.snapshots.set(provider, snapshot);
+      return snapshot;
     } catch (error) {
       const failed: QuotaSnapshot = {
-        provider, status: 'error', fetchedAt: new Date().toISOString(), source: 'manual',
+        provider,
+        status: "error",
+        fetchedAt: new Date().toISOString(),
+        source: "manual",
         message: error instanceof Error ? error.message : String(error),
-      }
-      this.snapshots.set(provider, failed)
-      return failed
+      };
+      this.snapshots.set(provider, failed);
+      return failed;
     }
   }
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module "@deepseek-ai/cordis" {
   interface Context {
-    quotas: QuotaRegistry
+    quotas: QuotaRegistry;
   }
 }
 
 export interface QuotasConfig {
-  providers?: QuotaSettingsValue['providers']
+  providers?: QuotaSettingsValue["providers"];
   /**
    * Resolve one probe credential. Defaults to reading the account seam as
    * stored, which is wrong for a subscription route: its access token is
@@ -108,7 +123,7 @@ export interface QuotasConfig {
    * does, so the light reflects whether the credential works rather than how
    * long ago it was written.
    */
-  resolveToken?: (ref: string) => Promise<string | undefined>
+  resolveToken?: (ref: string) => Promise<string | undefined>;
 }
 
 /**
@@ -117,12 +132,12 @@ export interface QuotasConfig {
  * fallback. Probes never read vault files directly.
  */
 async function resolveProbeToken(ctx: Context, ref: string): Promise<string | undefined> {
-  const accounts = ctx.get('accounts') as AccountsService | undefined
+  const accounts = ctx.get("accounts") as AccountsService | undefined;
   if (accounts !== undefined) {
-    const resolved = await accounts.resolve(ref)
-    if (resolved?.value !== undefined && resolved.value.length > 0) return resolved.value
+    const resolved = await accounts.resolve(ref);
+    if (resolved?.value !== undefined && resolved.value.length > 0) return resolved.value;
   }
-  return process.env[ref] ?? undefined
+  return process.env[ref] ?? undefined;
 }
 
 /**
@@ -130,19 +145,27 @@ async function resolveProbeToken(ctx: Context, ref: string): Promise<string | un
  * probe providers with their staggered 15-minute auto-refresh.
  */
 export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegistry {
-  const registry = new QuotaRegistry()
-  ctx.provide('quotas', registry)
-  installSettingsSection(ctx, NS, QuotaSettings, { providers: config.providers ?? {} }, {
-    setSource: () => {}, onChange: () => {},
-  })
-  mountQuotaWeb(ctx, registry)
+  const registry = new QuotaRegistry();
+  ctx.provide("quotas", registry);
+  installSettingsSection(
+    ctx,
+    NS,
+    QuotaSettings,
+    { providers: config.providers ?? {} },
+    {
+      setSource: () => {},
+      onChange: () => {},
+    },
+  );
+  mountQuotaWeb(ctx, registry);
 
-  const read = config.resolveToken
-    ?? ((ref: string): Promise<string | undefined> => resolveProbeToken(ctx, ref))
-  const builtinProviders = createBuiltinProviders(read)
-  const disposers: Array<() => void> = []
+  const read =
+    config.resolveToken ??
+    ((ref: string): Promise<string | undefined> => resolveProbeToken(ctx, ref));
+  const builtinProviders = createBuiltinProviders(read);
+  const disposers: Array<() => void> = [];
   for (const provider of builtinProviders) {
-    disposers.push(registry.register(provider))
+    disposers.push(registry.register(provider));
   }
 
   // Providers this plugin does not own — above all the custom
@@ -155,18 +178,23 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   // generic prober, which would read the plugin's own settings section, find no
   // baseURL there, and report "no endpoint configured" about a route whose
   // endpoint is declared in code.
-  const covered = new Set([...PROBE_ROUTE_IDS, ...PROVIDER_IDS])
-  const configuredIds = new Set<string>()
+  const covered = new Set([...PROBE_ROUTE_IDS, ...PROVIDER_IDS]);
+  const configuredIds = new Set<string>();
   const syncConfiguredProviders = (): void => {
-    const llm = ctx.get('llm') as {
-      listConfigurableProviders?: () => readonly ConfigurableProviderEntry[]
-    } | undefined
-    const settingsProvider = ctx.get('settings') as {
-      describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[]
-    } | undefined
-    if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined) return
-    const listConfigurable = llm.listConfigurableProviders.bind(llm)
-    const describe = settingsProvider.describe.bind(settingsProvider)
+    const llm = ctx.get("llm") as
+      | {
+          listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
+        }
+      | undefined;
+    const settingsProvider = ctx.get("settings") as
+      | {
+          describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
+        }
+      | undefined;
+    if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
+      return;
+    const listConfigurable = llm.listConfigurableProviders.bind(llm);
+    const describe = settingsProvider.describe.bind(settingsProvider);
     for (const provider of createConfiguredProviders({
       listConfigurable,
       // Verbatim, not redacted: the probe needs the real credential reference,
@@ -175,47 +203,55 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
       readToken: read,
       covered: (candidate) => covered.has(candidate),
     })) {
-      disposers.push(registry.register(provider))
-      configuredIds.add(provider.id)
+      disposers.push(registry.register(provider));
+      configuredIds.add(provider.id);
     }
-  }
-  syncConfiguredProviders()
+  };
+  syncConfiguredProviders();
 
   /** Every provider the registry should refresh on a cycle. */
   const probeIds = (): string[] => {
-    syncConfiguredProviders()
-    return [...builtinProviders.map(provider => provider.id), ...configuredIds]
-  }
+    syncConfiguredProviders();
+    return [...builtinProviders.map((provider) => provider.id), ...configuredIds];
+  };
 
   // Initial refresh (staggered by 500ms each to avoid thundering herd)
-  const controller = new AbortController()
-  const initial: ReturnType<typeof setTimeout>[] = []
+  const controller = new AbortController();
+  const initial: ReturnType<typeof setTimeout>[] = [];
   for (const [i, id] of probeIds().entries()) {
     const timeout = setTimeout(async () => {
-      if (controller.signal.aborted) return
-      try { await registry.refresh(id, controller.signal) } catch { /* swallow */ }
-    }, i * 500)
-    timeout.unref()
-    initial.push(timeout)
+      if (controller.signal.aborted) return;
+      try {
+        await registry.refresh(id, controller.signal);
+      } catch {
+        /* swallow */
+      }
+    }, i * 500);
+    timeout.unref();
+    initial.push(timeout);
   }
 
   // Periodic auto-refresh (default every 15 minutes)
-  const refreshMinutes = 15
+  const refreshMinutes = 15;
   const timer = setInterval(() => {
     for (const [i, id] of probeIds().entries()) {
       const timeout = setTimeout(async () => {
-        try { await registry.refresh(id) } catch { /* swallow */ }
-      }, i * 500)
-      timeout.unref()
+        try {
+          await registry.refresh(id);
+        } catch {
+          /* swallow */
+        }
+      }, i * 500);
+      timeout.unref();
     }
-  }, refreshMinutes * 60_000)
-  timer.unref()
+  }, refreshMinutes * 60_000);
+  timer.unref();
 
-  ;(ctx.on as (event: string, listener: () => void) => void)('dispose', () => {
-    controller.abort()
-    for (const timeout of initial) clearTimeout(timeout)
-    clearInterval(timer)
-    for (const d of disposers) d()
-  })
-  return registry
+  (ctx.on as (event: string, listener: () => void) => void)("dispose", () => {
+    controller.abort();
+    for (const timeout of initial) clearTimeout(timeout);
+    clearInterval(timer);
+    for (const d of disposers) d();
+  });
+  return registry;
 }

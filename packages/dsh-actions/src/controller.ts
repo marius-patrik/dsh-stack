@@ -12,20 +12,20 @@
  */
 
 /** The session-log event appended when a pending selection commits. */
-export const ACTION_SELECTED = 'action/selected'
+export const ACTION_SELECTED = "action/selected";
 
 /** The pre-rename event, still folded for existing session logs. */
-export const LEGACY_MODE_SELECTED = 'session-mode/selected'
+export const LEGACY_MODE_SELECTED = "session-mode/selected";
 
 /** One session's action state: the committed action plus a queued switch. */
 export interface ActionState {
-  active: string
-  pending?: string
+  active: string;
+  pending?: string;
 }
 
 /** The session-log face the fold reads. */
 interface SessionLogFace {
-  session?: { events?: readonly { type?: string; data?: { action?: unknown; mode?: unknown } }[] }
+  session?: { events?: readonly { type?: string; data?: { action?: unknown; mode?: unknown } }[] };
 }
 
 /**
@@ -39,12 +39,14 @@ export function foldAction(
   events: readonly { type?: string; data?: { action?: unknown; mode?: unknown } }[] | undefined,
   valid: (id: string) => boolean,
 ): string | undefined {
-  const event = events?.findLast((entry) =>
-    (entry.type === ACTION_SELECTED || entry.type === LEGACY_MODE_SELECTED)
-    && typeof (entry.data?.action ?? entry.data?.mode) === 'string'
-    && valid((entry.data?.action ?? entry.data?.mode) as string))
-  const selected = event?.data?.action ?? event?.data?.mode
-  return typeof selected === 'string' && valid(selected) ? selected : undefined
+  const event = events?.findLast(
+    (entry) =>
+      (entry.type === ACTION_SELECTED || entry.type === LEGACY_MODE_SELECTED) &&
+      typeof (entry.data?.action ?? entry.data?.mode) === "string" &&
+      valid((entry.data?.action ?? entry.data?.mode) as string),
+  );
+  const selected = event?.data?.action ?? event?.data?.mode;
+  return typeof selected === "string" && valid(selected) ? selected : undefined;
 }
 
 /**
@@ -53,7 +55,7 @@ export function foldAction(
  * `commit()` settles at the next accepted step.
  */
 export class ActionsController {
-  private readonly states = new WeakMap<object, ActionState>()
+  private readonly states = new WeakMap<object, ActionState>();
 
   constructor(
     private readonly defaultAction: string,
@@ -62,32 +64,32 @@ export class ActionsController {
 
   /** The session's state: cached, else folded from its log, else the default. */
   get(agent: object): ActionState {
-    const state = this.states.get(agent)
-    if (state !== undefined) return { ...state }
-    const restored = foldAction((agent as SessionLogFace).session?.events, this.valid)
+    const state = this.states.get(agent);
+    if (state !== undefined) return { ...state };
+    const restored = foldAction((agent as SessionLogFace).session?.events, this.valid);
     if (restored !== undefined) {
-      this.states.set(agent, { active: restored })
-      return { active: restored }
+      this.states.set(agent, { active: restored });
+      return { active: restored };
     }
-    return { active: this.defaultAction }
+    return { active: this.defaultAction };
   }
 
   /** Queue a switch: applies at the next accepted in-turn pre-step. */
-  set(agent: object, action: string): 'queued' | 'noop' {
-    const current = this.get(agent)
-    if (current.active === action && current.pending === undefined) return 'noop'
-    this.states.set(agent, { active: current.active, pending: action })
-    return 'queued'
+  set(agent: object, action: string): "queued" | "noop" {
+    const current = this.get(agent);
+    if (current.active === action && current.pending === undefined) return "noop";
+    this.states.set(agent, { active: current.active, pending: action });
+    return "queued";
   }
 
   /** Settle a queued switch, returning the action now in force. */
   commit(agent: object): string {
-    const current = this.get(agent)
-    if (current.pending === undefined) return current.active
-    this.states.set(agent, { active: current.pending })
-    return current.pending
+    const current = this.get(agent);
+    if (current.pending === undefined) return current.active;
+    this.states.set(agent, { active: current.pending });
+    return current.pending;
   }
 }
 
 /** @deprecated Compat alias for the pre-rename name; use {@link ActionsController}. */
-export const ModesController = ActionsController
+export const ModesController = ActionsController;

@@ -1,4 +1,4 @@
-export type DependencyKind = 'required' | 'optional';
+export type DependencyKind = "required" | "optional";
 
 export interface PluginDependency {
   readonly plugin: string;
@@ -49,9 +49,18 @@ export function defineProfile<const T extends StackProfileDefinition>(profile: T
 }
 
 export function validateCatalog(catalog: PluginCatalog): void {
-  assertUnique(catalog.plugins.map((plugin) => plugin.id), 'plugin id');
-  assertUnique(catalog.packs.map((pack) => pack.id), 'pack id');
-  assertUnique(catalog.profiles.map((profile) => profile.id), 'profile id');
+  assertUnique(
+    catalog.plugins.map((plugin) => plugin.id),
+    "plugin id",
+  );
+  assertUnique(
+    catalog.packs.map((pack) => pack.id),
+    "pack id",
+  );
+  assertUnique(
+    catalog.profiles.map((profile) => profile.id),
+    "profile id",
+  );
 
   const pluginIds = new Set(catalog.plugins.map((plugin) => plugin.id));
   const packIds = new Set(catalog.packs.map((pack) => pack.id));
@@ -72,7 +81,8 @@ export function validateCatalog(catalog: PluginCatalog): void {
   for (const pack of catalog.packs) {
     assertUnique(pack.plugins, `plugin in pack ${pack.id}`);
     for (const pluginId of pack.plugins) {
-      if (!pluginIds.has(pluginId)) throw new Error(`${pack.id} references unknown plugin ${pluginId}`);
+      if (!pluginIds.has(pluginId))
+        throw new Error(`${pack.id} references unknown plugin ${pluginId}`);
     }
   }
 
@@ -83,7 +93,8 @@ export function validateCatalog(catalog: PluginCatalog): void {
       if (!packIds.has(packId)) throw new Error(`${profile.id} references unknown pack ${packId}`);
     }
     for (const pluginId of profile.plugins ?? []) {
-      if (!pluginIds.has(pluginId)) throw new Error(`${profile.id} references unknown plugin ${pluginId}`);
+      if (!pluginIds.has(pluginId))
+        throw new Error(`${profile.id} references unknown plugin ${pluginId}`);
     }
   }
 }

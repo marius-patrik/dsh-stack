@@ -7,44 +7,50 @@
  * @module dsh-repos/settings
  */
 
-import z from '@deepseek-ai/schemastery'
-import { settingsNamespace } from '@deepseek-ai/dsh-settings'
+import z from "@deepseek-ai/schemastery";
+import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the repo workflow defaults. */
-export const NS = settingsNamespace('dsh-repos')
+export const NS = settingsNamespace("dsh-repos");
 
 /** The user-facing section: remote and branch defaults for the repo tools. */
 export interface RepoSettings {
   /** Default remote name for push and PR tools (default `origin`). */
-  remote: string
+  remote: string;
   /** Default base branch for PRs when the target is not stated (default `main`). */
-  defaultBaseBranch: string
+  defaultBaseBranch: string;
 }
 
 export const RepoSettings: z<RepoSettings> = z.object({
-  remote: z.string().default('origin'),
-  defaultBaseBranch: z.string().default('main'),
-})
+  remote: z.string().default("origin"),
+  defaultBaseBranch: z.string().default("main"),
+});
 
 /** The plugin's deployment configuration: optional entry-level defaults. */
 export interface RepoConfig {
   /** Default remote name, deployment-level (settings win). */
-  remote?: string
+  remote?: string;
   /** Default base branch, deployment-level (settings win). */
-  defaultBaseBranch?: string
+  defaultBaseBranch?: string;
 }
 
 export const RepoConfig: z<RepoConfig> = z.object({
-  remote: z.string().default('origin'),
-  defaultBaseBranch: z.string().default('main'),
-})
+  remote: z.string().default("origin"),
+  defaultBaseBranch: z.string().default("main"),
+});
 
 /** The effective default remote, settings first then deployment entry. */
-export function defaultRemote(settings: RepoSettings | undefined, entry: RepoConfig | undefined): string {
-  return settings?.remote ?? entry?.remote ?? 'origin'
+export function defaultRemote(
+  settings: RepoSettings | undefined,
+  entry: RepoConfig | undefined,
+): string {
+  return settings?.remote ?? entry?.remote ?? "origin";
 }
 
 /** The effective default base branch, settings first then deployment entry. */
-export function defaultBaseBranch(settings: RepoSettings | undefined, entry: RepoConfig | undefined): string {
-  return settings?.defaultBaseBranch ?? entry?.defaultBaseBranch ?? 'main'
+export function defaultBaseBranch(
+  settings: RepoSettings | undefined,
+  entry: RepoConfig | undefined,
+): string {
+  return settings?.defaultBaseBranch ?? entry?.defaultBaseBranch ?? "main";
 }

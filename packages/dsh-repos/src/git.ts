@@ -7,17 +7,17 @@
  * @module dsh-repos/git
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-subprocess'
+import type { Context } from "@deepseek-ai/cordis";
+import type {} from "@deepseek-ai/dsh-subprocess";
 
 /** The outcome of one git command: exit code, stdout, and stderr tails. */
 export interface GitOutcome {
   /** Process exit code; nonzero means the command failed. */
-  code: number
+  code: number;
   /** Trimmed stdout of the command. */
-  stdout: string
+  stdout: string;
   /** Trimmed stderr of the command (what the error message is built from). */
-  stderr: string
+  stderr: string;
 }
 
 /**
@@ -29,37 +29,42 @@ export interface GitOutcome {
  * @param signal - aborts the subprocess.
  * @returns the command's exit code, stdout, and stderr.
  */
-export async function runGit(ctx: Context, cwd: string, args: readonly string[], signal?: AbortSignal): Promise<GitOutcome> {
+export async function runGit(
+  ctx: Context,
+  cwd: string,
+  args: readonly string[],
+  signal?: AbortSignal,
+): Promise<GitOutcome> {
   const spawn = await ctx.subprocess.spawn({
-    argv: ['git', ...args],
+    argv: ["git", ...args],
     cwd,
     stdio: {
-      stdin: { data: '' },
+      stdin: { data: "" },
       stdout: { maxBytes: 256_000 },
       stderr: { maxBytes: 256_000 },
     },
     graceMs: 30_000,
     signal,
-  })
-  const outcome = await spawn.done
-  const stdout = spawn.collected.stdout?.readFrom(0).text ?? ''
-  const stderr = spawn.collected.stderr?.readFrom(0).text ?? ''
+  });
+  const outcome = await spawn.done;
+  const stdout = spawn.collected.stdout?.readFrom(0).text ?? "";
+  const stderr = spawn.collected.stderr?.readFrom(0).text ?? "";
   if (outcome.exitCode !== 0) {
-    throw new GitCommandError(args, outcome.exitCode ?? -1, stderr.trim())
+    throw new GitCommandError(args, outcome.exitCode ?? -1, stderr.trim());
   }
-  return { code: outcome.exitCode ?? 0, stdout: stdout.trim(), stderr: stderr.trim() }
+  return { code: outcome.exitCode ?? 0, stdout: stdout.trim(), stderr: stderr.trim() };
 }
 
 /** A git command that exited nonzero. */
 export class GitCommandError extends Error {
-  readonly command: string[]
-  readonly exitCode: number
+  readonly command: string[];
+  readonly exitCode: number;
 
   constructor(command: readonly string[], exitCode: number, stderr: string) {
-    super(`git ${command.join(' ')} exited ${exitCode}${stderr.length > 0 ? `: ${stderr}` : ''}`)
-    this.name = 'GitCommandError'
-    this.command = [...command]
-    this.exitCode = exitCode
+    super(`git ${command.join(" ")} exited ${exitCode}${stderr.length > 0 ? `: ${stderr}` : ""}`);
+    this.name = "GitCommandError";
+    this.command = [...command];
+    this.exitCode = exitCode;
   }
 }
 
@@ -67,7 +72,11 @@ export class GitCommandError extends Error {
  * The current branch name, or `null` in a detached HEAD state.
  * @returns the branch name, or null when HEAD is detached.
  */
-export async function currentBranch(ctx: Context, cwd: string, signal?: AbortSignal): Promise<string | null> {
-  const { stdout } = await runGit(ctx, cwd, ['branch', '--show-current'], signal)
-  return stdout.length > 0 ? stdout : null
+export async function currentBranch(
+  ctx: Context,
+  cwd: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  const { stdout } = await runGit(ctx, cwd, ["branch", "--show-current"], signal);
+  return stdout.length > 0 ? stdout : null;
 }

@@ -27,20 +27,26 @@
  * @module dsh-credentials/vault/secret
  */
 
-import path from 'node:path'
-import { readdir, readFile, rm } from 'node:fs/promises'
-import { createCipheriv, createDecipheriv, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto'
-import { exists, writePrivateFile, writePrivateFileExclusive } from './files.js'
+import path from "node:path";
+import { readdir, readFile, rm } from "node:fs/promises";
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
+import { exists, writePrivateFile, writePrivateFileExclusive } from "./files.js";
 
-const REDACTED = '[redacted]'
-const CREDENTIAL_ID = /^[a-z][a-z0-9-]*$/
-const CREDENTIAL_SUFFIX = '.cred'
-const KEY_FILE = 'master.key'
-const KEY_BYTES = 32
-const IV_BYTES = 12
-const ALGORITHM = 'aes-256-gcm'
-const ENVELOPE_SCHEMA_VERSION = 1
-const NODE_INSPECT = Symbol.for('nodejs.util.inspect.custom')
+const REDACTED = "[redacted]";
+const CREDENTIAL_ID = /^[a-z][a-z0-9-]*$/;
+const CREDENTIAL_SUFFIX = ".cred";
+const KEY_FILE = "master.key";
+const KEY_BYTES = 32;
+const IV_BYTES = 12;
+const ALGORITHM = "aes-256-gcm";
+const ENVELOPE_SCHEMA_VERSION = 1;
+const NODE_INSPECT = Symbol.for("nodejs.util.inspect.custom");
 
 /**
  * A secret string that does not leak through the accidental paths: string
@@ -50,47 +56,48 @@ const NODE_INSPECT = Symbol.for('nodejs.util.inspect.custom')
  * out, and the only caller of it in this module is the encryption step.
  */
 export class SecretValue {
-  readonly #value: string
+  readonly #value: string;
 
   constructor(value: string) {
-    if (typeof value !== 'string' || value.length === 0) throw new Error('secret value must be a non-empty string')
-    this.#value = value
+    if (typeof value !== "string" || value.length === 0)
+      throw new Error("secret value must be a non-empty string");
+    this.#value = value;
   }
 
   /** Return the plaintext. Every call site is a place a secret can escape. */
   reveal(): string {
-    return this.#value
+    return this.#value;
   }
 
   /** Constant-time comparison, so equality checks do not become an oracle. */
   equals(other: SecretValue): boolean {
-    const left = Buffer.from(this.#value, 'utf8')
-    const right = Buffer.from(other.#value, 'utf8')
-    if (left.byteLength !== right.byteLength) return false
-    return timingSafeEqual(left, right)
+    const left = Buffer.from(this.#value, "utf8");
+    const right = Buffer.from(other.#value, "utf8");
+    if (left.byteLength !== right.byteLength) return false;
+    return timingSafeEqual(left, right);
   }
 
   toString(): string {
-    return REDACTED
+    return REDACTED;
   }
 
   toJSON(): string {
-    return REDACTED
+    return REDACTED;
   }
 
   get [Symbol.toStringTag](): string {
-    return 'SecretValue'
+    return "SecretValue";
   }
 }
 
 Object.defineProperty(SecretValue.prototype, NODE_INSPECT, {
   value: function inspect(): string {
-    return `SecretValue(${REDACTED})`
+    return `SecretValue(${REDACTED})`;
   },
   enumerable: false,
   writable: false,
   configurable: false,
-})
+});
 
 /**
  * Persisted credential material. The `oauth` variant is declared now, and the
@@ -100,22 +107,22 @@ Object.defineProperty(SecretValue.prototype, NODE_INSPECT, {
  */
 export type ProviderCredential =
   | {
-      kind: 'api_key'
-      apiKey: SecretValue
-      obtainedAt: string
-      expiresAt: string | null
+      kind: "api_key";
+      apiKey: SecretValue;
+      obtainedAt: string;
+      expiresAt: string | null;
     }
   | {
-      kind: 'oauth'
-      accessToken: SecretValue
-      refreshToken: SecretValue | null
-      expiresAt: string | null
-      refreshTokenExpiresAt: string | null
-      scopes: readonly string[]
+      kind: "oauth";
+      accessToken: SecretValue;
+      refreshToken: SecretValue | null;
+      expiresAt: string | null;
+      refreshTokenExpiresAt: string | null;
+      scopes: readonly string[];
       /** Plan identity when the token response carries one, as Claude Code's does. */
-      subscriptionType: string | null
-      obtainedAt: string
-    }
+      subscriptionType: string | null;
+      obtainedAt: string;
+    };
 
 /**
  * Operations every credential backend provides. Deliberately small: the local
@@ -128,12 +135,12 @@ export type ProviderCredential =
  */
 export interface CredentialStore {
   /** Null when no credential is stored under this id. */
-  get(id: string): Promise<ProviderCredential | null>
-  put(id: string, credential: ProviderCredential): Promise<void>
+  get(id: string): Promise<ProviderCredential | null>;
+  put(id: string, credential: ProviderCredential): Promise<void>;
   /** True when a credential was removed, false when there was nothing to remove. */
-  delete(id: string): Promise<boolean>
+  delete(id: string): Promise<boolean>;
   /** Stored credential ids, sorted. */
-  list(): Promise<string[]>
+  list(): Promise<string[]>;
 }
 
 /**
@@ -145,144 +152,146 @@ export interface CredentialStore {
  * undisturbed.
  */
 export function providerCredentialDirectory(secretsDirectory: string): string {
-  return path.join(secretsDirectory, 'providers')
+  return path.join(secretsDirectory, "providers");
 }
 
 export interface EncryptedFileCredentialStoreOptions {
   /** Directory for credential files and, by default, the data-encryption key. */
-  directory: string
+  directory: string;
   /**
    * Externally managed 32-byte data-encryption key. Supply this to keep the key
    * out of the state root — from an OS keychain, or later from OpenBao. Omitted,
    * the store creates and reads a 0600 key file inside `directory`.
    */
-  key?: Uint8Array
+  key?: Uint8Array;
 }
 
 interface CredentialEnvelope {
-  schemaVersion: typeof ENVELOPE_SCHEMA_VERSION
-  algorithm: typeof ALGORITHM
-  iv: string
-  ciphertext: string
-  authTag: string
+  schemaVersion: typeof ENVELOPE_SCHEMA_VERSION;
+  algorithm: typeof ALGORITHM;
+  iv: string;
+  ciphertext: string;
+  authTag: string;
 }
 
 type CredentialPayload =
-  | { kind: 'api_key'; apiKey: string; obtainedAt: string; expiresAt: string | null }
+  | { kind: "api_key"; apiKey: string; obtainedAt: string; expiresAt: string | null }
   | {
-      kind: 'oauth'
-      accessToken: string
-      refreshToken: string | null
-      expiresAt: string | null
-      refreshTokenExpiresAt: string | null
-      scopes: string[]
-      subscriptionType: string | null
-      obtainedAt: string
-    }
+      kind: "oauth";
+      accessToken: string;
+      refreshToken: string | null;
+      expiresAt: string | null;
+      refreshTokenExpiresAt: string | null;
+      scopes: string[];
+      subscriptionType: string | null;
+      obtainedAt: string;
+    };
 
 /** Local credential backend: one AES-256-GCM encrypted file per credential id. */
 export class EncryptedFileCredentialStore implements CredentialStore {
-  readonly #directory: string
-  readonly #suppliedKey: Uint8Array | null
-  #key: Buffer | null = null
+  readonly #directory: string;
+  readonly #suppliedKey: Uint8Array | null;
+  #key: Buffer | null = null;
 
   constructor(options: EncryptedFileCredentialStoreOptions) {
-    if (!options.directory.trim()) throw new Error('credential store requires a directory')
+    if (!options.directory.trim()) throw new Error("credential store requires a directory");
     if (options.key && options.key.byteLength !== KEY_BYTES) {
-      throw new Error(`credential store key must be ${KEY_BYTES} bytes`)
+      throw new Error(`credential store key must be ${KEY_BYTES} bytes`);
     }
-    this.#directory = path.resolve(options.directory)
-    this.#suppliedKey = options.key ? Uint8Array.from(options.key) : null
+    this.#directory = path.resolve(options.directory);
+    this.#suppliedKey = options.key ? Uint8Array.from(options.key) : null;
   }
 
   get directory(): string {
-    return this.#directory
+    return this.#directory;
   }
 
   async get(id: string): Promise<ProviderCredential | null> {
-    const file = this.#file(id)
-    if (!(await exists(file))) return null
-    const envelope = parseEnvelope(await readFile(file, 'utf8'), file)
-    const key = await this.#dataKey()
-    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(envelope.iv, 'base64'))
+    const file = this.#file(id);
+    if (!(await exists(file))) return null;
+    const envelope = parseEnvelope(await readFile(file, "utf8"), file);
+    const key = await this.#dataKey();
+    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(envelope.iv, "base64"));
     // The credential id is authenticated, not encrypted: a file moved or
     // renamed under another id fails to decrypt instead of impersonating it.
-    decipher.setAAD(Buffer.from(id, 'utf8'))
-    decipher.setAuthTag(Buffer.from(envelope.authTag, 'base64'))
-    let plaintext: string
+    decipher.setAAD(Buffer.from(id, "utf8"));
+    decipher.setAuthTag(Buffer.from(envelope.authTag, "base64"));
+    let plaintext: string;
     try {
-      plaintext = decipher.update(envelope.ciphertext, 'base64', 'utf8') + decipher.final('utf8')
+      plaintext = decipher.update(envelope.ciphertext, "base64", "utf8") + decipher.final("utf8");
     } catch {
-      throw new Error(`credential cannot be decrypted, it may be corrupt or written under a different key: ${id}`)
+      throw new Error(
+        `credential cannot be decrypted, it may be corrupt or written under a different key: ${id}`,
+      );
     }
-    return decodeCredential(JSON.parse(plaintext) as unknown, id)
+    return decodeCredential(JSON.parse(plaintext) as unknown, id);
   }
 
   async put(id: string, credential: ProviderCredential): Promise<void> {
-    const file = this.#file(id)
-    const key = await this.#dataKey()
-    const iv = randomBytes(IV_BYTES)
-    const cipher = createCipheriv(ALGORITHM, key, iv)
-    cipher.setAAD(Buffer.from(id, 'utf8'))
+    const file = this.#file(id);
+    const key = await this.#dataKey();
+    const iv = randomBytes(IV_BYTES);
+    const cipher = createCipheriv(ALGORITHM, key, iv);
+    cipher.setAAD(Buffer.from(id, "utf8"));
     const ciphertext = Buffer.concat([
-      cipher.update(JSON.stringify(encodeCredential(credential)), 'utf8'),
+      cipher.update(JSON.stringify(encodeCredential(credential)), "utf8"),
       cipher.final(),
-    ])
+    ]);
     const envelope: CredentialEnvelope = {
       schemaVersion: ENVELOPE_SCHEMA_VERSION,
       algorithm: ALGORITHM,
-      iv: iv.toString('base64'),
-      ciphertext: ciphertext.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
-    }
-    await writePrivateFile(file, `${JSON.stringify(envelope)}\n`)
+      iv: iv.toString("base64"),
+      ciphertext: ciphertext.toString("base64"),
+      authTag: cipher.getAuthTag().toString("base64"),
+    };
+    await writePrivateFile(file, `${JSON.stringify(envelope)}\n`);
   }
 
   async delete(id: string): Promise<boolean> {
-    const file = this.#file(id)
-    if (!(await exists(file))) return false
-    await rm(file, { force: true })
-    return true
+    const file = this.#file(id);
+    if (!(await exists(file))) return false;
+    await rm(file, { force: true });
+    return true;
   }
 
   async list(): Promise<string[]> {
-    if (!(await exists(this.#directory))) return []
-    const entries = await readdir(this.#directory, { withFileTypes: true })
+    if (!(await exists(this.#directory))) return [];
+    const entries = await readdir(this.#directory, { withFileTypes: true });
     return entries
       .filter((entry) => entry.isFile() && entry.name.endsWith(CREDENTIAL_SUFFIX))
       .map((entry) => entry.name.slice(0, -CREDENTIAL_SUFFIX.length))
       .filter((id) => CREDENTIAL_ID.test(id))
-      .sort()
+      .sort();
   }
 
   #file(id: string): string {
-    if (!CREDENTIAL_ID.test(id)) throw new Error(`invalid credential id: ${id}`)
-    return path.join(this.#directory, `${id}${CREDENTIAL_SUFFIX}`)
+    if (!CREDENTIAL_ID.test(id)) throw new Error(`invalid credential id: ${id}`);
+    return path.join(this.#directory, `${id}${CREDENTIAL_SUFFIX}`);
   }
 
   async #dataKey(): Promise<Buffer> {
-    if (this.#key) return this.#key
+    if (this.#key) return this.#key;
     if (this.#suppliedKey) {
-      this.#key = Buffer.from(this.#suppliedKey)
-      return this.#key
+      this.#key = Buffer.from(this.#suppliedKey);
+      return this.#key;
     }
-    this.#key = await loadOrCreateKeyFile(path.join(this.#directory, KEY_FILE))
-    return this.#key
+    this.#key = await loadOrCreateKeyFile(path.join(this.#directory, KEY_FILE));
+    return this.#key;
   }
 }
 
 async function loadOrCreateKeyFile(file: string): Promise<Buffer> {
   if (await exists(file)) {
-    const key = Buffer.from((await readFile(file, 'utf8')).trim(), 'base64')
-    if (key.byteLength !== KEY_BYTES) throw new Error(`credential key file is malformed: ${file}`)
-    return key
+    const key = Buffer.from((await readFile(file, "utf8")).trim(), "base64");
+    if (key.byteLength !== KEY_BYTES) throw new Error(`credential key file is malformed: ${file}`);
+    return key;
   }
-  const created = randomBytes(KEY_BYTES)
+  const created = randomBytes(KEY_BYTES);
   // Exclusive creation: two concurrent first writes must not each mint a key
   // and leave one set of credentials undecryptable.
-  const published = await writePrivateFileExclusive(file, `${created.toString('base64')}\n`)
-  if (published) return created
-  return loadOrCreateKeyFile(file)
+  const published = await writePrivateFileExclusive(file, `${created.toString("base64")}\n`);
+  if (published) return created;
+  return loadOrCreateKeyFile(file);
 }
 
 function encodeCredential(credential: ProviderCredential): CredentialPayload {
@@ -290,16 +299,16 @@ function encodeCredential(credential: ProviderCredential): CredentialPayload {
   // SecretValue redacts itself, so the only way plaintext reaches the cipher is
   // a visible reveal() call, and a new secret-bearing field cannot be
   // serialized by accident.
-  if (credential.kind === 'api_key') {
+  if (credential.kind === "api_key") {
     return {
-      kind: 'api_key',
+      kind: "api_key",
       apiKey: credential.apiKey.reveal(),
       obtainedAt: credential.obtainedAt,
       expiresAt: credential.expiresAt,
-    }
+    };
   }
   return {
-    kind: 'oauth',
+    kind: "oauth",
     accessToken: credential.accessToken.reveal(),
     refreshToken: credential.refreshToken ? credential.refreshToken.reveal() : null,
     expiresAt: credential.expiresAt,
@@ -307,59 +316,67 @@ function encodeCredential(credential: ProviderCredential): CredentialPayload {
     scopes: [...credential.scopes],
     subscriptionType: credential.subscriptionType,
     obtainedAt: credential.obtainedAt,
-  }
+  };
 }
 
 function decodeCredential(value: unknown, id: string): ProviderCredential {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error(`stored credential is not an object: ${id}`)
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`stored credential is not an object: ${id}`);
   }
-  const record = value as Record<string, unknown>
-  if (record.kind === 'api_key') {
+  const record = value as Record<string, unknown>;
+  if (record.kind === "api_key") {
     return {
-      kind: 'api_key',
-      apiKey: new SecretValue(requireString(record.apiKey, 'apiKey', id)),
-      obtainedAt: requireString(record.obtainedAt, 'obtainedAt', id),
-      expiresAt: optionalString(record.expiresAt, 'expiresAt', id),
-    }
+      kind: "api_key",
+      apiKey: new SecretValue(requireString(record.apiKey, "apiKey", id)),
+      obtainedAt: requireString(record.obtainedAt, "obtainedAt", id),
+      expiresAt: optionalString(record.expiresAt, "expiresAt", id),
+    };
   }
-  if (record.kind === 'oauth') {
-    const refreshToken = optionalString(record.refreshToken, 'refreshToken', id)
+  if (record.kind === "oauth") {
+    const refreshToken = optionalString(record.refreshToken, "refreshToken", id);
     return {
-      kind: 'oauth',
-      accessToken: new SecretValue(requireString(record.accessToken, 'accessToken', id)),
+      kind: "oauth",
+      accessToken: new SecretValue(requireString(record.accessToken, "accessToken", id)),
       refreshToken: refreshToken === null ? null : new SecretValue(refreshToken),
-      expiresAt: optionalString(record.expiresAt, 'expiresAt', id),
-      refreshTokenExpiresAt: optionalString(record.refreshTokenExpiresAt, 'refreshTokenExpiresAt', id),
-      scopes: Array.isArray(record.scopes) ? record.scopes.map((scope) => requireString(scope, 'scopes', id)) : [],
-      subscriptionType: optionalString(record.subscriptionType, 'subscriptionType', id),
-      obtainedAt: requireString(record.obtainedAt, 'obtainedAt', id),
-    }
+      expiresAt: optionalString(record.expiresAt, "expiresAt", id),
+      refreshTokenExpiresAt: optionalString(
+        record.refreshTokenExpiresAt,
+        "refreshTokenExpiresAt",
+        id,
+      ),
+      scopes: Array.isArray(record.scopes)
+        ? record.scopes.map((scope) => requireString(scope, "scopes", id))
+        : [],
+      subscriptionType: optionalString(record.subscriptionType, "subscriptionType", id),
+      obtainedAt: requireString(record.obtainedAt, "obtainedAt", id),
+    };
   }
-  throw new Error(`stored credential has an unsupported kind: ${id}`)
+  throw new Error(`stored credential has an unsupported kind: ${id}`);
 }
 
 function requireString(value: unknown, field: string, id: string): string {
-  if (typeof value !== 'string' || !value) throw new Error(`stored credential ${id} requires ${field}`)
-  return value
+  if (typeof value !== "string" || !value)
+    throw new Error(`stored credential ${id} requires ${field}`);
+  return value;
 }
 
 function optionalString(value: unknown, field: string, id: string): string | null {
-  if (value === null || value === undefined) return null
-  if (typeof value !== 'string') throw new Error(`stored credential ${id} has a malformed ${field}`)
-  return value
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string")
+    throw new Error(`stored credential ${id} has a malformed ${field}`);
+  return value;
 }
 
 function parseEnvelope(raw: string, file: string): CredentialEnvelope {
-  const parsed = JSON.parse(raw) as Partial<CredentialEnvelope>
+  const parsed = JSON.parse(raw) as Partial<CredentialEnvelope>;
   if (
     parsed.schemaVersion !== ENVELOPE_SCHEMA_VERSION ||
     parsed.algorithm !== ALGORITHM ||
-    typeof parsed.iv !== 'string' ||
-    typeof parsed.ciphertext !== 'string' ||
-    typeof parsed.authTag !== 'string'
+    typeof parsed.iv !== "string" ||
+    typeof parsed.ciphertext !== "string" ||
+    typeof parsed.authTag !== "string"
   ) {
-    throw new Error(`invalid credential envelope: ${file}`)
+    throw new Error(`invalid credential envelope: ${file}`);
   }
-  return parsed as CredentialEnvelope
+  return parsed as CredentialEnvelope;
 }

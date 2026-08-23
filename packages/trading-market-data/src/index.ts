@@ -1,4 +1,4 @@
-import type { Candle } from '@dsh-stack/trading-research';
+import type { Candle } from "@dsh-stack/trading-research";
 
 export interface MarketDataQuery {
   readonly symbol: string;
@@ -17,7 +17,8 @@ export class MarketDataRegistry {
   private readonly providers = new Map<string, MarketDataProvider>();
 
   register(provider: MarketDataProvider): void {
-    if (this.providers.has(provider.id)) throw new Error(`Market-data provider already registered: ${provider.id}`);
+    if (this.providers.has(provider.id))
+      throw new Error(`Market-data provider already registered: ${provider.id}`);
     this.providers.set(provider.id, provider);
   }
 
@@ -34,7 +35,7 @@ export class MemoryMarketDataProvider implements MarketDataProvider {
   readonly id: string;
   private readonly symbols = new Map<string, Candle[]>();
 
-  constructor(id = 'memory') {
+  constructor(id = "memory") {
     this.id = id;
   }
 

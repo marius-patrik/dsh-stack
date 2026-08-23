@@ -9,8 +9,8 @@
  * so a value explicitly stored in the vault always shadows an ambient value.
  */
 export interface ResolvedSecret {
-  value: string
-  origin: 'vault' | 'credentials'
+  value: string;
+  origin: "vault" | "credentials";
 }
 
 /**
@@ -21,24 +21,24 @@ export interface ResolvedSecret {
  */
 export interface FileSecretProvider {
   /** Stable provider id, used to address it in `importFile` disambiguation. */
-  id: string
+  id: string;
   /** Human name shown by configuration surfaces. */
-  displayName: string
+  displayName: string;
   /** Short explanation of where the values come from. */
-  description: string
+  description: string;
   /** Default file paths the provider is willing to read, in preference order. */
-  defaultPaths: string[]
+  defaultPaths: string[];
   /** Whether `path` looks like this provider's file (cheap check, no value reads). */
-  detect(path: string): Promise<boolean>
+  detect(path: string): Promise<boolean>;
   /** Read every known secret from `path`; returns ref → value pairs (empty values dropped). */
-  read(path: string): Promise<Record<string, string>>
+  read(path: string): Promise<Record<string, string>>;
 }
 
 /** One reference stored into the vault by an import. */
 export interface ImportResult {
-  ref: string
-  provider: string
-  source: string
+  ref: string;
+  provider: string;
+  source: string;
 }
 
 /**
@@ -48,21 +48,30 @@ export interface ImportResult {
  */
 export interface AccountsServiceLike {
   /** Resolve a reference, vault first, then the harness credential seam. */
-  resolve(ref: string): Promise<ResolvedSecret | undefined>
+  resolve(ref: string): Promise<ResolvedSecret | undefined>;
   /** Durably store a non-empty value in the vault. */
-  set(ref: string, value: string): Promise<void>
+  set(ref: string, value: string): Promise<void>;
   /** Remove a reference from the vault; an absent reference is a no-op. */
-  unset(ref: string): Promise<void>
+  unset(ref: string): Promise<void>;
   /** All references currently stored in the vault, sorted. */
-  list(): Promise<string[]>
+  list(): Promise<string[]>;
   /** Register a file-based importer. */
-  registerFileProvider(provider: FileSecretProvider): void
+  registerFileProvider(provider: FileSecretProvider): void;
   /** The registered importers. */
-  getFileProviders(): FileSecretProvider[]
+  getFileProviders(): FileSecretProvider[];
   /** Absolute path of the vault document. */
-  vaultPath(): string
+  vaultPath(): string;
   /** Every stored record's canonical reference and its named account, material stripped. */
-  accounts(): Promise<Array<{ ref: string; account: string | null; kind: string; purpose: string; label: string; expiresAt: string | null }>>
+  accounts(): Promise<
+    Array<{
+      ref: string;
+      account: string | null;
+      kind: string;
+      purpose: string;
+      label: string;
+      expiresAt: string | null;
+    }>
+  >;
   /** Import every recognized secret from `path` into the vault. */
-  importFile(path: string): Promise<ImportResult[]>
+  importFile(path: string): Promise<ImportResult[]>;
 }

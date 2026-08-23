@@ -19,39 +19,39 @@
  * @module dsh-providers/catalog
  */
 
-import type { ProbeAuthStyle, ProviderCatalogModel } from './providers.js'
+import type { ProbeAuthStyle, ProviderCatalogModel } from "./providers.js";
 
 /** Where a route's model listing lives, and how the request authenticates. */
 export interface CatalogSource {
   /** The model-listing endpoint. */
-  url: string
+  url: string;
   /** How the credential is sent; defaults to `Authorization: Bearer`. */
-  authStyle?: ProbeAuthStyle
+  authStyle?: ProbeAuthStyle;
 }
 
 /** One model as the provider reported it; unpublished facts stay undefined. */
 export interface DiscoveredModel {
-  id: string
-  name?: string
-  contextWindow?: number
-  maxTokens?: number
+  id: string;
+  name?: string;
+  contextWindow?: number;
+  maxTokens?: number;
 }
 
 /** Default time a discovered listing is reused before refetching. */
-export const DEFAULT_CATALOG_TTL_MS = 3_600_000
+export const DEFAULT_CATALOG_TTL_MS = 3_600_000;
 
 /** How long a model listing may wait before discovery gives up for this TTL. */
-const CATALOG_TIMEOUT_MS = 15_000
+const CATALOG_TIMEOUT_MS = 15_000;
 
 /** How long a failed discovery is remembered, so a broken endpoint is not hammered. */
-const FAILURE_TTL_MS = 60_000
+const FAILURE_TTL_MS = 60_000;
 
 function positiveInteger(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : undefined
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
 function nonEmptyString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.length > 0 ? value : undefined
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 /**
@@ -63,34 +63,37 @@ function nonEmptyString(value: unknown): string | undefined {
  * @returns the discovered model, or undefined when the row carries no usable id.
  */
 export function parseCatalogEntry(entry: unknown): DiscoveredModel | undefined {
-  if (typeof entry !== 'object' || entry === null) return undefined
-  const row = entry as Record<string, unknown>
-  const id = nonEmptyString(row.id)
-  if (id === undefined) return undefined
+  if (typeof entry !== "object" || entry === null) return undefined;
+  const row = entry as Record<string, unknown>;
+  const id = nonEmptyString(row.id);
+  if (id === undefined) return undefined;
 
-  const name = nonEmptyString(row.display_name) ?? nonEmptyString(row.name)
+  const name = nonEmptyString(row.display_name) ?? nonEmptyString(row.name);
   // `top_provider` is OpenRouter's per-upstream capability block.
-  const topProvider = typeof row.top_provider === 'object' && row.top_provider !== null
-    ? row.top_provider as Record<string, unknown>
-    : undefined
-  const contextWindow = positiveInteger(row.context_length)
-    ?? positiveInteger(row.context_window)
-    ?? positiveInteger(row.max_context_length)
+  const topProvider =
+    typeof row.top_provider === "object" && row.top_provider !== null
+      ? (row.top_provider as Record<string, unknown>)
+      : undefined;
+  const contextWindow =
+    positiveInteger(row.context_length) ??
+    positiveInteger(row.context_window) ??
+    positiveInteger(row.max_context_length) ??
     // Anthropic's spelling for the input window.
-    ?? positiveInteger(row.max_input_tokens)
-    ?? positiveInteger(topProvider?.context_length)
-  const maxTokens = positiveInteger(row.max_output_tokens)
-    ?? positiveInteger(row.max_completion_tokens)
+    positiveInteger(row.max_input_tokens) ??
+    positiveInteger(topProvider?.context_length);
+  const maxTokens =
+    positiveInteger(row.max_output_tokens) ??
+    positiveInteger(row.max_completion_tokens) ??
     // Anthropic publishes the output cap as plain `max_tokens`.
-    ?? positiveInteger(row.max_tokens)
-    ?? positiveInteger(topProvider?.max_completion_tokens)
+    positiveInteger(row.max_tokens) ??
+    positiveInteger(topProvider?.max_completion_tokens);
 
   return {
     id,
-    ...name === undefined ? {} : { name },
-    ...contextWindow === undefined ? {} : { contextWindow },
-    ...maxTokens === undefined ? {} : { maxTokens },
-  }
+    ...(name === undefined ? {} : { name }),
+    ...(contextWindow === undefined ? {} : { contextWindow }),
+    ...(maxTokens === undefined ? {} : { maxTokens }),
+  };
 }
 
 /**
@@ -99,13 +102,13 @@ export function parseCatalogEntry(entry: unknown): DiscoveredModel | undefined {
  * @returns the discovered models, or undefined when the body is not a listing.
  */
 export function parseCatalogResponse(payload: unknown): DiscoveredModel[] | undefined {
-  if (typeof payload !== 'object' || payload === null) return undefined
-  const rows = (payload as { data?: unknown }).data ?? (payload as { models?: unknown }).models
-  if (!Array.isArray(rows)) return undefined
+  if (typeof payload !== "object" || payload === null) return undefined;
+  const rows = (payload as { data?: unknown }).data ?? (payload as { models?: unknown }).models;
+  if (!Array.isArray(rows)) return undefined;
   const models = rows
     .map(parseCatalogEntry)
-    .filter((model): model is DiscoveredModel => model !== undefined)
-  return models.length > 0 ? models : undefined
+    .filter((model): model is DiscoveredModel => model !== undefined);
+  return models.length > 0 ? models : undefined;
 }
 
 /**
@@ -125,9 +128,9 @@ export function mergeCatalog(
   fallback: readonly ProviderCatalogModel[],
   defaults: { contextWindow: number; maxTokens: number },
 ): ProviderCatalogModel[] {
-  const staticById = new Map(fallback.map(model => [model.id, model]))
+  const staticById = new Map(fallback.map((model) => [model.id, model]));
   const merged: ProviderCatalogModel[] = discovered.map((model) => {
-    const known = staticById.get(model.id)
+    const known = staticById.get(model.id);
     return {
       id: model.id,
       name: model.name ?? known?.name ?? model.id,
@@ -136,26 +139,26 @@ export function mergeCatalog(
       // Listings do not publish reasoning levels, so the static row is the only
       // source; dropping it here would silently remove the effort changer from
       // every model the moment discovery came online.
-      ...known?.reasoning === undefined ? {} : { reasoning: known.reasoning },
-    }
-  })
-  const discoveredIds = new Set(merged.map(model => model.id))
+      ...(known?.reasoning === undefined ? {} : { reasoning: known.reasoning }),
+    };
+  });
+  const discoveredIds = new Set(merged.map((model) => model.id));
   for (const model of fallback) {
-    if (!discoveredIds.has(model.id)) merged.push(model)
+    if (!discoveredIds.has(model.id)) merged.push(model);
   }
-  return merged
+  return merged;
 }
 
 /** What one route needs to fetch its listing. */
 export interface CatalogRequest {
-  source: CatalogSource
+  source: CatalogSource;
   /** Fixed headers the route sends on every request. */
-  headers?: Record<string, string>
+  headers?: Record<string, string>;
   /** The credential material, already resolved for this route. */
-  token: string
+  token: string;
   /** The route's static table, returned whenever discovery cannot answer. */
-  fallback: readonly ProviderCatalogModel[]
-  defaults: { contextWindow: number; maxTokens: number }
+  fallback: readonly ProviderCatalogModel[];
+  defaults: { contextWindow: number; maxTokens: number };
 }
 
 /**
@@ -165,60 +168,60 @@ export interface CatalogRequest {
  * @returns the URL and init to fetch with.
  */
 export function catalogRequestInit(request: CatalogRequest): { url: string; init: RequestInit } {
-  const headers: Record<string, string> = { ...request.headers, accept: 'application/json' }
-  const authStyle: ProbeAuthStyle = request.source.authStyle ?? 'bearer'
-  let url = request.source.url
-  if (authStyle === 'bearer') {
-    headers['authorization'] = `Bearer ${request.token}`
+  const headers: Record<string, string> = { ...request.headers, accept: "application/json" };
+  const authStyle: ProbeAuthStyle = request.source.authStyle ?? "bearer";
+  let url = request.source.url;
+  if (authStyle === "bearer") {
+    headers["authorization"] = `Bearer ${request.token}`;
     // Same rule as the probes: Anthropic needs a version on every request, so
     // a bearer-authenticated listing 400s without it and discovery silently
     // falls back to the static table.
-    if (isAnthropicHost(url)) headers['anthropic-version'] ??= '2023-06-01'
-  } else if (authStyle === 'x-api-key') {
-    headers['x-api-key'] = request.token
-    headers['anthropic-version'] ??= '2023-06-01'
+    if (isAnthropicHost(url)) headers["anthropic-version"] ??= "2023-06-01";
+  } else if (authStyle === "x-api-key") {
+    headers["x-api-key"] = request.token;
+    headers["anthropic-version"] ??= "2023-06-01";
   } else {
-    const parsed = new URL(url)
-    parsed.searchParams.set('key', request.token)
-    url = parsed.toString()
+    const parsed = new URL(url);
+    parsed.searchParams.set("key", request.token);
+    url = parsed.toString();
   }
   return {
     url,
     // Bounded: a stalled listing must fall back to the static table on a
     // deadline rather than holding the model selector open.
-    init: { method: 'GET', headers, signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS) },
-  }
+    init: { method: "GET", headers, signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS) },
+  };
 }
 
 /** Whether an endpoint is Anthropic's, which requires a version header. */
 function isAnthropicHost(url: string): boolean {
   try {
-    return new URL(url).hostname === 'api.anthropic.com'
+    return new URL(url).hostname === "api.anthropic.com";
   } catch {
-    return false
+    return false;
   }
 }
 
-type CacheEntry = { models: readonly ProviderCatalogModel[]; expiresAt: number }
+type CacheEntry = { models: readonly ProviderCatalogModel[]; expiresAt: number };
 
 /**
  * Per-provider discovered catalogs with a TTL, a negative cache, and in-flight
  * coalescing so a burst of selector reads makes one request.
  */
 export class ModelCatalog {
-  readonly #entries = new Map<string, CacheEntry>()
-  readonly #inflight = new Map<string, Promise<readonly ProviderCatalogModel[]>>()
-  readonly #ttlMs: number
-  readonly #fetch: typeof fetch
+  readonly #entries = new Map<string, CacheEntry>();
+  readonly #inflight = new Map<string, Promise<readonly ProviderCatalogModel[]>>();
+  readonly #ttlMs: number;
+  readonly #fetch: typeof fetch;
 
   constructor(options: { ttlMs?: number; fetch?: typeof fetch } = {}) {
-    this.#ttlMs = options.ttlMs ?? DEFAULT_CATALOG_TTL_MS
-    this.#fetch = options.fetch ?? fetch
+    this.#ttlMs = options.ttlMs ?? DEFAULT_CATALOG_TTL_MS;
+    this.#fetch = options.fetch ?? fetch;
   }
 
   /** Drop every cached listing, so the next read refetches. */
   clear(): void {
-    this.#entries.clear()
+    this.#entries.clear();
   }
 
   /**
@@ -228,38 +231,44 @@ export class ModelCatalog {
    * @param request - how to fetch and what to fall back to.
    * @returns the catalog to advertise.
    */
-  async models(provider: string, request: CatalogRequest): Promise<readonly ProviderCatalogModel[]> {
-    const cached = this.#entries.get(provider)
-    if (cached !== undefined && cached.expiresAt > Date.now()) return cached.models
+  async models(
+    provider: string,
+    request: CatalogRequest,
+  ): Promise<readonly ProviderCatalogModel[]> {
+    const cached = this.#entries.get(provider);
+    if (cached !== undefined && cached.expiresAt > Date.now()) return cached.models;
 
-    const inflight = this.#inflight.get(provider)
-    if (inflight !== undefined) return inflight
+    const inflight = this.#inflight.get(provider);
+    if (inflight !== undefined) return inflight;
 
     const run = this.#discover(request)
       .then((models) => {
-        this.#entries.set(provider, { models, expiresAt: Date.now() + this.#ttlMs })
-        return models
+        this.#entries.set(provider, { models, expiresAt: Date.now() + this.#ttlMs });
+        return models;
       })
       .catch(() => {
         // Discovery is an enhancement: remember the failure briefly so a dead
         // endpoint costs one request per minute, and serve the static table.
-        this.#entries.set(provider, { models: request.fallback, expiresAt: Date.now() + FAILURE_TTL_MS })
-        return request.fallback
+        this.#entries.set(provider, {
+          models: request.fallback,
+          expiresAt: Date.now() + FAILURE_TTL_MS,
+        });
+        return request.fallback;
       })
       .finally(() => {
-        this.#inflight.delete(provider)
-      })
+        this.#inflight.delete(provider);
+      });
 
-    this.#inflight.set(provider, run)
-    return run
+    this.#inflight.set(provider, run);
+    return run;
   }
 
   async #discover(request: CatalogRequest): Promise<readonly ProviderCatalogModel[]> {
-    const { url, init } = catalogRequestInit(request)
-    const response = await this.#fetch(url, init)
-    if (!response.ok) throw new Error(`model listing failed (HTTP ${response.status})`)
-    const discovered = parseCatalogResponse(await response.json())
-    if (discovered === undefined) throw new Error('model listing carried no recognizable rows')
-    return mergeCatalog(discovered, request.fallback, request.defaults)
+    const { url, init } = catalogRequestInit(request);
+    const response = await this.#fetch(url, init);
+    if (!response.ok) throw new Error(`model listing failed (HTTP ${response.status})`);
+    const discovered = parseCatalogResponse(await response.json());
+    if (discovered === undefined) throw new Error("model listing carried no recognizable rows");
+    return mergeCatalog(discovered, request.fallback, request.defaults);
   }
 }

@@ -14,54 +14,88 @@
  * @module dsh-actions/action
  */
 
-import { basename, extname } from 'node:path'
+import { basename, extname } from "node:path";
 
 /** One action's routing hint: the provider/model the session's requests use. */
 export interface ActionRoute {
-  provider: string
-  model: string
+  provider: string;
+  model: string;
 }
 
 /** A parsed action: one entry of the effective action vocabulary. */
 export interface ActionSpec {
   /** Action id (the `/action` argument and the catalog key). */
-  id: string
+  id: string;
   /** Display name; falls back to the id. */
-  name?: string
+  name?: string;
   /** One sentence on what this action is for. */
-  description?: string
+  description?: string;
   /** Tool allowlist; undefined means every tool is available. */
-  tools?: readonly string[]
+  tools?: readonly string[];
   /** Routing hint applied to the session's requests while the action is active. */
-  route?: ActionRoute
+  route?: ActionRoute;
   /** The policy text rendered into the system prompt while the action is active. */
-  policy: string
+  policy: string;
   /** Absolute path of the authoring file; undefined for built-in actions. */
-  source?: string
+  source?: string;
 }
 
 /** The built-in action vocabulary (formerly the session modes). */
-export const ACTIONS = ['tool', 'search', 'action', 'plan', 'agent', 'shell', 'code'] as const
+export const ACTIONS = ["tool", "search", "action", "plan", "agent", "shell", "code"] as const;
 
 /** A built-in action id. */
-export type BuiltInAction = (typeof ACTIONS)[number]
+export type BuiltInAction = (typeof ACTIONS)[number];
 
 /** @deprecated Compat alias for the pre-rename name; use {@link ACTIONS}. */
-export const MODES = ACTIONS
+export const MODES = ACTIONS;
 
 /** The default action a fresh session runs on. */
-export const DEFAULT_ACTION: BuiltInAction = 'agent'
+export const DEFAULT_ACTION: BuiltInAction = "agent";
 
 /** The built-in actions, with their default policy texts. */
 export const BUILT_IN_ACTIONS: readonly ActionSpec[] = [
-  { id: 'tool', description: 'Direct tool use', policy: 'Tool action: answer through direct tool calls with minimal planning; keep steps small and explicit.' },
-  { id: 'search', description: 'Research and lookup', policy: 'Search action: prioritize search and fetch tools; ground answers in sources and cite them.' },
-  { id: 'action', description: 'Eager execution', policy: 'Action action: execute concrete changes eagerly; prefer doing over deliberating, and verify each change.' },
-  { id: 'plan', description: 'Plan before acting', policy: 'Plan action: analyze the request and propose a plan; do not mutate files or run destructive commands until the user approves the plan.' },
-  { id: 'agent', description: 'Full agent (default)', policy: 'Agent action: full autonomous multi-step execution with the complete tool surface.' },
-  { id: 'shell', description: 'Shell-first operation', policy: 'Shell action: operate primarily through the shell; prefer shell pipelines over one-off file edits.' },
-  { id: 'code', description: 'Code reading and editing', policy: 'Code action: focus on reading, writing, and refactoring code; keep edits minimal and typed.' },
-]
+  {
+    id: "tool",
+    description: "Direct tool use",
+    policy:
+      "Tool action: answer through direct tool calls with minimal planning; keep steps small and explicit.",
+  },
+  {
+    id: "search",
+    description: "Research and lookup",
+    policy:
+      "Search action: prioritize search and fetch tools; ground answers in sources and cite them.",
+  },
+  {
+    id: "action",
+    description: "Eager execution",
+    policy:
+      "Action action: execute concrete changes eagerly; prefer doing over deliberating, and verify each change.",
+  },
+  {
+    id: "plan",
+    description: "Plan before acting",
+    policy:
+      "Plan action: analyze the request and propose a plan; do not mutate files or run destructive commands until the user approves the plan.",
+  },
+  {
+    id: "agent",
+    description: "Full agent (default)",
+    policy: "Agent action: full autonomous multi-step execution with the complete tool surface.",
+  },
+  {
+    id: "shell",
+    description: "Shell-first operation",
+    policy:
+      "Shell action: operate primarily through the shell; prefer shell pipelines over one-off file edits.",
+  },
+  {
+    id: "code",
+    description: "Code reading and editing",
+    policy:
+      "Code action: focus on reading, writing, and refactoring code; keep edits minimal and typed.",
+  },
+];
 
 /**
  * Sanitize a file stem into an action id: lowercase, map disallowed
@@ -71,79 +105,89 @@ export const BUILT_IN_ACTIONS: readonly ActionSpec[] = [
 export function sanitizeId(stem: string): string {
   const cleaned = stem
     .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^[^a-z0-9]+/, '')
-  return cleaned === '' ? 'action' : cleaned
+    .replace(/[^a-z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[^a-z0-9]+/, "");
+  return cleaned === "" ? "action" : cleaned;
 }
 
 /** A scalar value from an action file, trimmed and unquoted. */
 function scalar(raw: string | undefined): string | undefined {
-  if (raw === undefined) return undefined
-  const trimmed = raw.trim()
-  if (trimmed === '') return undefined
-  const quoted = trimmed.match(/^(['"])([\s\S]*)\1$/)
-  return quoted !== null ? quoted[2] : trimmed
+  if (raw === undefined) return undefined;
+  const trimmed = raw.trim();
+  if (trimmed === "") return undefined;
+  const quoted = trimmed.match(/^(['"])([\s\S]*)\1$/);
+  return quoted !== null ? quoted[2] : trimmed;
 }
 
 /** Parse the `key: value` lines of a YAML-ish frontmatter block. */
 function frontmatter(text: string): Record<string, string | undefined> {
-  const out: Record<string, string | undefined> = {}
-  for (const line of text.split('\n')) {
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/)
+  const out: Record<string, string | undefined> = {};
+  for (const line of text.split("\n")) {
+    const match = line.match(/^([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
     if (match !== null) {
-      const key = match[1]
-      if (key !== undefined) out[key] = scalar(match[2])
+      const key = match[1];
+      if (key !== undefined) out[key] = scalar(match[2]);
     }
   }
-  return out
+  return out;
 }
 
 /** The `---` frontmatter block of a Markdown action, split from its body. */
-function splitMarkdown(content: string): { fields: Record<string, string | undefined>; body: string } {
-  const fenced = content.match(/^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)/)
-  if (fenced === null || fenced[1] === undefined || fenced[0] === undefined) return { fields: {}, body: content }
-  return { fields: frontmatter(fenced[1]), body: content.slice(fenced[0].length) }
+function splitMarkdown(content: string): {
+  fields: Record<string, string | undefined>;
+  body: string;
+} {
+  const fenced = content.match(/^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)/);
+  if (fenced === null || fenced[1] === undefined || fenced[0] === undefined)
+    return { fields: {}, body: content };
+  return { fields: frontmatter(fenced[1]), body: content.slice(fenced[0].length) };
 }
 
 /** Parse a comma-separated tool allowlist, or undefined when absent/empty. */
 function toolList(raw: string | undefined): readonly string[] | undefined {
-  if (raw === undefined) return undefined
-  const tools = raw.split(',').map((tool) => tool.trim()).filter((tool) => tool !== '')
-  return tools.length === 0 ? undefined : tools
+  if (raw === undefined) return undefined;
+  const tools = raw
+    .split(",")
+    .map((tool) => tool.trim())
+    .filter((tool) => tool !== "");
+  return tools.length === 0 ? undefined : tools;
 }
 
 /** An action's optional metadata, from either frontmatter or JSON. */
 interface ActionFields {
-  name?: string
-  description?: string
-  tools?: readonly string[]
-  route?: ActionRoute
+  name?: string;
+  description?: string;
+  tools?: readonly string[];
+  route?: ActionRoute;
 }
 
 /** A string array from a JSON action's `tools`, or undefined. */
 function jsonTools(raw: unknown, filePath: string): readonly string[] | undefined {
-  if (raw === undefined) return undefined
-  if (!Array.isArray(raw) || raw.some((tool) => typeof tool !== 'string')) {
-    throw new Error(`${filePath}: a JSON action's "tools" must be an array of strings`)
+  if (raw === undefined) return undefined;
+  if (!Array.isArray(raw) || raw.some((tool) => typeof tool !== "string")) {
+    throw new Error(`${filePath}: a JSON action's "tools" must be an array of strings`);
   }
-  const tools = (raw as string[]).map((tool) => tool.trim()).filter((tool) => tool !== '')
-  return tools.length === 0 ? undefined : tools
+  const tools = (raw as string[]).map((tool) => tool.trim()).filter((tool) => tool !== "");
+  return tools.length === 0 ? undefined : tools;
 }
 
 /** A route from a JSON action's `route` or `provider`/`model` pair, or undefined. */
-function jsonRoute(parsed: { provider?: unknown; model?: unknown; route?: unknown }, filePath: string): ActionRoute | undefined {
+function jsonRoute(
+  parsed: { provider?: unknown; model?: unknown; route?: unknown },
+  filePath: string,
+): ActionRoute | undefined {
   if (parsed.route !== undefined) {
-    const route = parsed.route as { provider?: unknown; model?: unknown }
-    if (typeof route?.provider !== 'string' || typeof route?.model !== 'string') {
-      throw new Error(`${filePath}: a JSON action's "route" needs string "provider" and "model"`)
+    const route = parsed.route as { provider?: unknown; model?: unknown };
+    if (typeof route?.provider !== "string" || typeof route?.model !== "string") {
+      throw new Error(`${filePath}: a JSON action's "route" needs string "provider" and "model"`);
     }
-    return { provider: route.provider, model: route.model }
+    return { provider: route.provider, model: route.model };
   }
-  if (typeof parsed.provider === 'string' && typeof parsed.model === 'string') {
-    return { provider: parsed.provider, model: parsed.model }
+  if (typeof parsed.provider === "string" && typeof parsed.model === "string") {
+    return { provider: parsed.provider, model: parsed.model };
   }
-  return undefined
+  return undefined;
 }
 
 /**
@@ -155,41 +199,48 @@ function jsonRoute(parsed: { provider?: unknown; model?: unknown; route?: unknow
  * @throws when the file has no usable policy text.
  */
 export function parseAction(filePath: string, content: string): ActionSpec {
-  const extension = extname(filePath).toLowerCase()
-  const id = sanitizeId(basename(filePath, extension))
-  let fields: ActionFields = {}
-  let policy = ''
+  const extension = extname(filePath).toLowerCase();
+  const id = sanitizeId(basename(filePath, extension));
+  let fields: ActionFields = {};
+  let policy = "";
 
-  if (extension === '.json') {
+  if (extension === ".json") {
     const parsed = JSON.parse(content) as {
-      name?: unknown; description?: unknown; tools?: unknown
-      provider?: unknown; model?: unknown; route?: unknown; policy?: unknown
-    }
-    if (typeof parsed.policy !== 'string') throw new Error(`${filePath}: a JSON action needs a string "policy"`)
-    policy = parsed.policy
+      name?: unknown;
+      description?: unknown;
+      tools?: unknown;
+      provider?: unknown;
+      model?: unknown;
+      route?: unknown;
+      policy?: unknown;
+    };
+    if (typeof parsed.policy !== "string")
+      throw new Error(`${filePath}: a JSON action needs a string "policy"`);
+    policy = parsed.policy;
     fields = {
-      name: typeof parsed.name === 'string' ? parsed.name : undefined,
-      description: typeof parsed.description === 'string' ? parsed.description : undefined,
+      name: typeof parsed.name === "string" ? parsed.name : undefined,
+      description: typeof parsed.description === "string" ? parsed.description : undefined,
       tools: jsonTools(parsed.tools, filePath),
       route: jsonRoute(parsed, filePath),
-    }
-  } else if (extension === '.md') {
-    const { fields: parsed, body } = splitMarkdown(content)
+    };
+  } else if (extension === ".md") {
+    const { fields: parsed, body } = splitMarkdown(content);
     fields = {
       name: parsed.name,
       description: parsed.description,
       tools: toolList(parsed.tools),
-      route: parsed.provider !== undefined && parsed.model !== undefined
-        ? { provider: parsed.provider, model: parsed.model }
-        : undefined,
-    }
-    policy = body
+      route:
+        parsed.provider !== undefined && parsed.model !== undefined
+          ? { provider: parsed.provider, model: parsed.model }
+          : undefined,
+    };
+    policy = body;
   } else {
-    throw new Error(`${filePath}: unsupported action file type "${extension}" (use .md or .json)`)
+    throw new Error(`${filePath}: unsupported action file type "${extension}" (use .md or .json)`);
   }
 
-  const trimmed = policy.trim()
-  if (trimmed === '') throw new Error(`${filePath}: action policy must not be empty`)
+  const trimmed = policy.trim();
+  if (trimmed === "") throw new Error(`${filePath}: action policy must not be empty`);
 
   return {
     id,
@@ -199,5 +250,5 @@ export function parseAction(filePath: string, content: string): ActionSpec {
     ...(fields.route !== undefined ? { route: fields.route } : {}),
     policy: trimmed,
     source: filePath,
-  }
+  };
 }

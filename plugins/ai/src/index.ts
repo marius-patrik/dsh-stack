@@ -1,11 +1,11 @@
 export interface StackPackDescriptor {
-  readonly id: string
-  readonly packageRoots: readonly string[]
+  readonly id: string;
+  readonly packageRoots: readonly string[];
 }
 
 export const aiPack: StackPackDescriptor = {
-  id: 'stack.ai',
-  packageRoots: ['protocol-dialects'],
-}
+  id: "stack.ai",
+  packageRoots: ["protocol-dialects"],
+};
 
-export default aiPack
+export default aiPack;

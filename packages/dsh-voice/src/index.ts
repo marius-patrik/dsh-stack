@@ -22,17 +22,17 @@
  * @module dsh-voice
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-settings'
-import type {} from '@deepseek-ai/dsh-tools'
-import { installSettingsSection } from '@deepseek-ai/dsh-settings'
-import type { IncomingMessage, ServerResponse } from 'node:http'
-import { Config, VOICE_NS, type VoiceConfig } from './config.js'
-import { makeConfigHandler, makeSttHandler, makeTtsHandler } from './routes.js'
-import { registerVoiceTools } from './tools.js'
-import type { AccountsLike } from './speech.js'
+import type { Context } from "@deepseek-ai/cordis";
+import type {} from "@deepseek-ai/dsh-settings";
+import type {} from "@deepseek-ai/dsh-tools";
+import { installSettingsSection } from "@deepseek-ai/dsh-settings";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { Config, VOICE_NS, type VoiceConfig } from "./config.js";
+import { makeConfigHandler, makeSttHandler, makeTtsHandler } from "./routes.js";
+import { registerVoiceTools } from "./tools.js";
+import type { AccountsLike } from "./speech.js";
 
-export { Config, VOICE_NS, type VoiceConfig } from './config.js'
+export { Config, VOICE_NS, type VoiceConfig } from "./config.js";
 export {
   TTS_PROVIDERS,
   authHeaders,
@@ -42,7 +42,7 @@ export {
   type ResolvedTts,
   type TtsProvider,
   type VoiceInfo,
-} from './providers.js'
+} from "./providers.js";
 export {
   resolveCredential,
   synthesizeSpeech,
@@ -50,28 +50,28 @@ export {
   type AccountsLike,
   type SttSettings,
   type Transcription,
-} from './speech.js'
-export { makeConfigHandler, makeSttHandler, makeTtsHandler } from './routes.js'
-export { registerVoiceTools } from './tools.js'
+} from "./speech.js";
+export { makeConfigHandler, makeSttHandler, makeTtsHandler } from "./routes.js";
+export { registerVoiceTools } from "./tools.js";
 
 /** The webServer route shape this plugin registers (host-owned contract). */
 interface WebRouteLike {
-  kind: 'exact' | 'prefix'
-  path: string
-  handler: (req: IncomingMessage, res: ServerResponse) => void | Promise<void>
+  kind: "exact" | "prefix";
+  path: string;
+  handler: (req: IncomingMessage, res: ServerResponse) => void | Promise<void>;
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module "@deepseek-ai/cordis" {
   interface Context {
     /** The dsh host web server route registry. */
-    webServer: { register(route: WebRouteLike): () => void }
+    webServer: { register(route: WebRouteLike): () => void };
     /** The dsh-credentials account vault service. */
-    accounts: AccountsLike
+    accounts: AccountsLike;
   }
 }
 
-export const name = 'dsh-voice'
-export const inject = ['tools', 'settings', 'webServer', 'accounts']
+export const name = "dsh-voice";
+export const inject = ["tools", "settings", "webServer", "accounts"];
 
 /**
  * Wire the plugin: install the `voice` settings section, mount the three
@@ -81,33 +81,47 @@ export const inject = ['tools', 'settings', 'webServer', 'accounts']
  * @param config - the plugin's deployment configuration (settings base layer).
  */
 export function apply(ctx: Context, config: VoiceConfig): void {
-  let current: () => VoiceConfig = () => config
+  let current: () => VoiceConfig = () => config;
   installSettingsSection(ctx, VOICE_NS, Config, config, {
     setSource: (source) => {
-      current = source
+      current = source;
     },
     onChange: () => {},
-  })
+  });
 
-  const accounts: AccountsLike | undefined = ctx.accounts
+  const accounts: AccountsLike | undefined = ctx.accounts;
 
-  ctx.effect(() => ctx.webServer.register({
-    kind: 'exact',
-    path: '/voice/api/tts',
-    handler: makeTtsHandler(() => current(), accounts),
-  }), 'dsh-voice: /voice/api/tts route')
-  ctx.effect(() => ctx.webServer.register({
-    kind: 'exact',
-    path: '/voice/api/stt',
-    handler: makeSttHandler(() => current(), accounts),
-  }), 'dsh-voice: /voice/api/stt route')
-  ctx.effect(() => ctx.webServer.register({
-    kind: 'exact',
-    path: '/voice/api/config',
-    handler: makeConfigHandler(() => current()),
-  }), 'dsh-voice: /voice/api/config route')
+  ctx.effect(
+    () =>
+      ctx.webServer.register({
+        kind: "exact",
+        path: "/voice/api/tts",
+        handler: makeTtsHandler(() => current(), accounts),
+      }),
+    "dsh-voice: /voice/api/tts route",
+  );
+  ctx.effect(
+    () =>
+      ctx.webServer.register({
+        kind: "exact",
+        path: "/voice/api/stt",
+        handler: makeSttHandler(() => current(), accounts),
+      }),
+    "dsh-voice: /voice/api/stt route",
+  );
+  ctx.effect(
+    () =>
+      ctx.webServer.register({
+        kind: "exact",
+        path: "/voice/api/config",
+        handler: makeConfigHandler(() => current()),
+      }),
+    "dsh-voice: /voice/api/config route",
+  );
 
-  registerVoiceTools(ctx.tools, () => current(), accounts)
+  registerVoiceTools(ctx.tools, () => current(), accounts);
 
-  ctx.logger('[dsh-voice]').info('mounted /voice/api/{tts,stt,config} + voice_speak + voice_transcribe')
+  ctx
+    .logger("[dsh-voice]")
+    .info("mounted /voice/api/{tts,stt,config} + voice_speak + voice_transcribe");
 }

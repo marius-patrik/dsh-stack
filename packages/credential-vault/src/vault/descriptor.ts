@@ -32,8 +32,8 @@
 
 /** `127.0.0.0/8`, `::1` and `localhost` — RFC 8252's native-app exception. */
 export function isLoopbackHost(hostname: string): boolean {
-  const host = hostname.toLowerCase()
-  return host === 'localhost' || host === '::1' || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)
+  const host = hostname.toLowerCase();
+  return host === "localhost" || host === "::1" || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host);
 }
 
 /**
@@ -43,27 +43,27 @@ export function isLoopbackHost(hostname: string): boolean {
  * error that names the offending configuration.
  */
 export function parseOAuthEndpointUrl(value: string): URL | null {
-  let url: URL
+  let url: URL;
   try {
-    url = new URL(value)
+    url = new URL(value);
   } catch {
-    return null
+    return null;
   }
-  if (url.protocol === 'https:') return url
-  return url.protocol === 'http:' && isLoopbackHost(url.hostname) ? url : null
+  if (url.protocol === "https:") return url;
+  return url.protocol === "http:" && isLoopbackHost(url.hostname) ? url : null;
 }
 
 /** An https (or loopback-http) OAuth endpoint, already validated. */
-export type OAuthEndpoint = string
+export type OAuthEndpoint = string;
 
 /** A refresh-capable OAuth configuration for one provider. */
 export interface OAuthPkceAuth {
-  method: 'oauth_pkce'
-  authorizeUrl: OAuthEndpoint
-  tokenUrl: OAuthEndpoint
-  revokeUrl?: OAuthEndpoint
+  method: "oauth_pkce";
+  authorizeUrl: OAuthEndpoint;
+  tokenUrl: OAuthEndpoint;
+  revokeUrl?: OAuthEndpoint;
   /** Public, non-secret client identifier: PKCE clients register no secret. */
-  clientId: string
+  clientId: string;
   /**
    * Vault record id holding a client secret the token endpoint additionally
    * demands. A *record id*, never the secret.
@@ -77,23 +77,23 @@ export interface OAuthPkceAuth {
    * Omitted, refresh sends `client_id` alone, which is correct for every other
    * PKCE provider here.
    */
-  clientSecretCredentialId?: string
-  scopes: readonly string[]
+  clientSecretCredentialId?: string;
+  scopes: readonly string[];
   /** `loopback` is the RFC 8252 native-app redirect; `hosted` bounces through a vendor page. */
-  redirect: 'loopback' | 'hosted'
-  redirectPath?: string
+  redirect: "loopback" | "hosted";
+  redirectPath?: string;
   /** RFC 8414 authorization-server metadata document, for bring-your-own-IdP setups. */
-  discoveryUrl?: OAuthEndpoint
+  discoveryUrl?: OAuthEndpoint;
 }
 
 export interface OAuthDeviceAuth {
-  method: 'oauth_device'
-  deviceAuthorizationUrl: OAuthEndpoint
-  tokenUrl: OAuthEndpoint
-  clientId: string
-  scopes: readonly string[]
-  pollIntervalSeconds?: number
+  method: "oauth_device";
+  deviceAuthorizationUrl: OAuthEndpoint;
+  tokenUrl: OAuthEndpoint;
+  clientId: string;
+  scopes: readonly string[];
+  pollIntervalSeconds?: number;
 }
 
 /** The OAuth configurations `OAuthTokenRefresher` and the supervisor accept. */
-export type OAuthAuthConfig = OAuthPkceAuth | OAuthDeviceAuth
+export type OAuthAuthConfig = OAuthPkceAuth | OAuthDeviceAuth;

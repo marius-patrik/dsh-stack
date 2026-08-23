@@ -86,7 +86,15 @@ const GIT_USER_ENV = "ANDROMEDA_VAULT_USER";
 
 const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
 
-const METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
+const METHODS: ReadonlySet<string> = new Set([
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+  "OPTIONS",
+]);
 const BODY_METHODS: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const LOOPBACK: ReadonlySet<string> = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
@@ -116,7 +124,12 @@ const FORBIDDEN_REQUEST_HEADERS: ReadonlySet<string> = new Set([
 /** Response headers that would hand the agent a *new* credential. */
 const STRIPPED_RESPONSE_HEADERS: ReadonlySet<string> = new Set(["set-cookie", "set-cookie2"]);
 
-const FORBIDDEN_QUERY_PARAMETERS: ReadonlySet<string> = new Set(["access_token", "api_key", "apikey", "auth_token"]);
+const FORBIDDEN_QUERY_PARAMETERS: ReadonlySet<string> = new Set([
+  "access_token",
+  "api_key",
+  "apikey",
+  "auth_token",
+]);
 
 /* -------------------------------------------------------------------------- */
 /* Structural proof that nothing returned can carry material                   */
@@ -506,11 +519,14 @@ export type AuthPlacement =
  * credential sent somewhere it was never meant to appear.
  */
 export function authPlacementFor(record: SecretRecord): AuthPlacement | null {
-  const tags = record.tags.filter((tag) => tag.startsWith(AUTH_TAG)).map((tag) => tag.slice(AUTH_TAG.length));
+  const tags = record.tags
+    .filter((tag) => tag.startsWith(AUTH_TAG))
+    .map((tag) => tag.slice(AUTH_TAG.length));
   const prefixTag = tags.find((tag) => tag.startsWith("prefix:"));
   const prefix = prefixTag ? prefixTag.slice("prefix:".length) : null;
   for (const tag of tags) {
-    if (tag === "bearer") return { kind: "header", header: "Authorization", prefix: prefix ?? "Bearer " };
+    if (tag === "bearer")
+      return { kind: "header", header: "Authorization", prefix: prefix ?? "Bearer " };
     if (tag === "basic") return { kind: "basic" };
     if (tag === "cookie") return { kind: "cookie" };
     if (tag.startsWith("header:")) {
@@ -524,21 +540,26 @@ export function authPlacementFor(record: SecretRecord): AuthPlacement | null {
   }
 
   const descriptor = findProviderDescriptor(providerIdForPurpose(record.purpose));
-  const descriptorAuth = descriptor && descriptor.auth?.method === "api_key" ? descriptor.auth : null;
+  const descriptorAuth =
+    descriptor && descriptor.auth?.method === "api_key" ? descriptor.auth : null;
 
   if (record.material.type === "api_key") {
     const header = record.material.header ?? descriptorAuth?.header ?? null;
     if (!header) return null;
     const descriptorPrefix =
-      descriptorAuth && descriptorAuth.header.toLowerCase() === header.toLowerCase() ? descriptorAuth.prefix : null;
+      descriptorAuth && descriptorAuth.header.toLowerCase() === header.toLowerCase()
+        ? descriptorAuth.prefix
+        : null;
     return {
       kind: "header",
       header,
-      prefix: prefix ?? descriptorPrefix ?? (header.toLowerCase() === "authorization" ? "Bearer " : ""),
+      prefix:
+        prefix ?? descriptorPrefix ?? (header.toLowerCase() === "authorization" ? "Bearer " : ""),
     };
   }
   // RFC 6750: an OAuth access token is a bearer token. That is not a guess.
-  if (record.material.type === "oauth_token") return { kind: "header", header: "Authorization", prefix: "Bearer " };
+  if (record.material.type === "oauth_token")
+    return { kind: "header", header: "Authorization", prefix: "Bearer " };
   if (record.material.type === "cookie_jar") return { kind: "cookie" };
   if (record.material.type === "password") return { kind: "basic" };
   return null;
@@ -568,7 +589,11 @@ function redactionTokens(record: SecretRecord): string[] {
       break;
     case "password":
       plain.push(material.password.reveal());
-      plain.push(Buffer.from(`${material.username}:${material.password.reveal()}`, "utf8").toString("base64"));
+      plain.push(
+        Buffer.from(`${material.username}:${material.password.reveal()}`, "utf8").toString(
+          "base64",
+        ),
+      );
       break;
     case "cookie_jar":
       plain.push(material.jar.reveal());
@@ -598,7 +623,9 @@ function redactionTokens(record: SecretRecord): string[] {
     tokens.add(Buffer.from(value, "utf8").toString("base64"));
   }
   // Longest first, so a token that contains another is replaced whole.
-  return [...tokens].filter((token) => token.length >= 4).sort((left, right) => right.length - left.length);
+  return [...tokens]
+    .filter((token) => token.length >= 4)
+    .sort((left, right) => right.length - left.length);
 }
 
 function redact(value: string, tokens: readonly string[]): string {
@@ -702,7 +729,14 @@ export class VaultToolset {
     if (!gate.ok) return gate.denial;
 
     if (!this.#transport) {
-      return this.#deny("authenticated_fetch", purpose, null, null, "capability_unavailable", "no transport is configured for this agent");
+      return this.#deny(
+        "authenticated_fetch",
+        purpose,
+        null,
+        null,
+        "capability_unavailable",
+        "no transport is configured for this agent",
+      );
     }
 
     const found = await this.#credentialFor(purpose, request.credentialId, [
@@ -730,14 +764,37 @@ export class VaultToolset {
     try {
       url = new URL(request.url);
     } catch {
-      return this.#deny("authenticated_fetch", purpose, record, null, "malformed_url", "the request url is not a url");
+      return this.#deny(
+        "authenticated_fetch",
+        purpose,
+        record,
+        null,
+        "malformed_url",
+        "the request url is not a url",
+      );
     }
     if (url.username || url.password) {
-      return this.#deny("authenticated_fetch", purpose, record, url.hostname, "url_credentials", "the request url carries userinfo credentials");
+      return this.#deny(
+        "authenticated_fetch",
+        purpose,
+        record,
+        url.hostname,
+        "url_credentials",
+        "the request url carries userinfo credentials",
+      );
     }
-    const insecure = url.protocol !== "https:" && !(url.protocol === "http:" && LOOPBACK.has(url.hostname.toLowerCase()));
+    const insecure =
+      url.protocol !== "https:" &&
+      !(url.protocol === "http:" && LOOPBACK.has(url.hostname.toLowerCase()));
     if (insecure) {
-      return this.#deny("authenticated_fetch", purpose, record, url.hostname, "insecure_scheme", `credentials are only presented over https, not ${url.protocol.replace(":", "")}`);
+      return this.#deny(
+        "authenticated_fetch",
+        purpose,
+        record,
+        url.hostname,
+        "insecure_scheme",
+        `credentials are only presented over https, not ${url.protocol.replace(":", "")}`,
+      );
     }
 
     const allowed = allowedHostsFor(record);
@@ -765,7 +822,10 @@ export class VaultToolset {
     const headers: Record<string, string> = {};
     for (const [name, value] of Object.entries(request.headers ?? {})) {
       const lower = name.trim().toLowerCase();
-      if (FORBIDDEN_REQUEST_HEADERS.has(lower) || (placement.kind === "header" && lower === placement.header.toLowerCase())) {
+      if (
+        FORBIDDEN_REQUEST_HEADERS.has(lower) ||
+        (placement.kind === "header" && lower === placement.header.toLowerCase())
+      ) {
         return this.#deny(
           "authenticated_fetch",
           purpose,
@@ -776,13 +836,23 @@ export class VaultToolset {
         );
       }
       if (!/^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/.test(name.trim())) {
-        return this.#deny("authenticated_fetch", purpose, record, url.hostname, "invalid_argument", `malformed header name: ${name.trim()}`);
+        return this.#deny(
+          "authenticated_fetch",
+          purpose,
+          record,
+          url.hostname,
+          "invalid_argument",
+          `malformed header name: ${name.trim()}`,
+        );
       }
       headers[name.trim()] = value;
     }
     for (const parameter of url.searchParams.keys()) {
       const lower = parameter.toLowerCase();
-      if (FORBIDDEN_QUERY_PARAMETERS.has(lower) || (placement.kind === "query" && lower === placement.parameter.toLowerCase())) {
+      if (
+        FORBIDDEN_QUERY_PARAMETERS.has(lower) ||
+        (placement.kind === "query" && lower === placement.parameter.toLowerCase())
+      ) {
         return this.#deny(
           "authenticated_fetch",
           purpose,
@@ -796,11 +866,25 @@ export class VaultToolset {
 
     const method = (request.method ?? "GET").trim().toUpperCase();
     if (!METHODS.has(method)) {
-      return this.#deny("authenticated_fetch", purpose, record, url.hostname, "method_not_allowed", `unsupported method: ${method}`);
+      return this.#deny(
+        "authenticated_fetch",
+        purpose,
+        record,
+        url.hostname,
+        "method_not_allowed",
+        `unsupported method: ${method}`,
+      );
     }
     const body = request.body ?? null;
     if (body !== null && !BODY_METHODS.has(method)) {
-      return this.#deny("authenticated_fetch", purpose, record, url.hostname, "body_not_allowed", `${method} does not carry a body`);
+      return this.#deny(
+        "authenticated_fetch",
+        purpose,
+        record,
+        url.hostname,
+        "body_not_allowed",
+        `${method} does not carry a body`,
+      );
     }
 
     applyAuth(placement, record, url, headers);
@@ -827,11 +911,19 @@ export class VaultToolset {
       responseHeaders[name] = redact(value, tokens);
     }
     const location = response.headers
-      ? Object.entries(response.headers).find(([name]) => name.toLowerCase() === "location")?.[1] ?? null
+      ? (Object.entries(response.headers).find(
+          ([name]) => name.toLowerCase() === "location",
+        )?.[1] ?? null)
       : null;
     const redirected = response.status >= 300 && response.status < 400 ? location : null;
 
-    await this.#log("authenticated_fetch", record, url.hostname, `granted: http ${response.status}`, purpose);
+    await this.#log(
+      "authenticated_fetch",
+      record,
+      url.hostname,
+      `granted: http ${response.status}`,
+      purpose,
+    );
     return {
       ok: true,
       status: response.status,
@@ -851,7 +943,10 @@ export class VaultToolset {
    * call: the agent gets something that authenticates once and expires in
    * seconds, instead of a seed that authenticates forever.
    */
-  async currentTotpCode(purpose: string, credentialId?: string): Promise<MaterialFree<VaultToolResult<TotpCodeOk>>> {
+  async currentTotpCode(
+    purpose: string,
+    credentialId?: string,
+  ): Promise<MaterialFree<VaultToolResult<TotpCodeOk>>> {
     const gate = await this.#begin("totp_code", purpose);
     if (!gate.ok) return gate.denial;
 
@@ -859,13 +954,26 @@ export class VaultToolset {
     if (!found.ok) return this.#denyFound("totp_code", purpose, null, found);
     const record = found.record;
     if (record.material.type !== "totp_seed") {
-      return this.#deny("totp_code", purpose, record, null, "wrong_credential_type", `${record.id} is a ${record.type}`);
+      return this.#deny(
+        "totp_code",
+        purpose,
+        record,
+        null,
+        "wrong_credential_type",
+        `${record.id} is a ${record.type}`,
+      );
     }
 
     const nowMs = this.#now();
     const generated = generateTotp(record.material.parameters, nowMs);
     // The code is a bearer credential for its window, so it is not logged either.
-    await this.#log("totp_code", record, null, `granted: valid for ${Math.max(0, generated.remainingMs)}ms`, purpose);
+    await this.#log(
+      "totp_code",
+      record,
+      null,
+      `granted: valid for ${Math.max(0, generated.remainingMs)}ms`,
+      purpose,
+    );
     return {
       ok: true,
       code: generated.code,
@@ -897,7 +1005,14 @@ export class VaultToolset {
     const gate = await this.#begin("authenticated_process", purpose);
     if (!gate.ok) return gate.denial;
     if (!this.#runProcess) {
-      return this.#deny("authenticated_process", purpose, null, null, "capability_unavailable", "no process runner is configured for this agent");
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        null,
+        null,
+        "capability_unavailable",
+        "no process runner is configured for this agent",
+      );
     }
 
     const found = await this.#credentialFor(purpose, request.credentialId, [
@@ -911,7 +1026,14 @@ export class VaultToolset {
 
     const command = request.command.trim();
     if (!command) {
-      return this.#deny("authenticated_process", purpose, record, null, "invalid_argument", "no command given");
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        null,
+        "invalid_argument",
+        "no command given",
+      );
     }
     if (!record.tags.includes(`${EXEC_TAG}${command}`)) {
       return this.#deny(
@@ -926,40 +1048,76 @@ export class VaultToolset {
 
     const credentialEnv = (request.credentialEnv ?? GIT_SECRET_ENV).trim();
     if (!ENV_NAME.test(credentialEnv)) {
-      return this.#deny("authenticated_process", purpose, record, null, "invalid_argument", `malformed environment variable name: ${credentialEnv}`);
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        null,
+        "invalid_argument",
+        `malformed environment variable name: ${credentialEnv}`,
+      );
     }
     const secret = credentialSecret(record);
     if (!secret) {
-      return this.#deny("authenticated_process", purpose, record, null, "wrong_credential_type", `${record.type} material cannot be injected into a process`);
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        null,
+        "wrong_credential_type",
+        `${record.type} material cannot be injected into a process`,
+      );
     }
     for (const name of Object.keys(request.env ?? {})) {
       if (name === credentialEnv) {
-        return this.#deny("authenticated_process", purpose, record, null, "agent_supplied_auth", `an agent may not set ${credentialEnv}; the vault fills it`);
+        return this.#deny(
+          "authenticated_process",
+          purpose,
+          record,
+          null,
+          "agent_supplied_auth",
+          `an agent may not set ${credentialEnv}; the vault fills it`,
+        );
       }
     }
 
-    return this.#spawn("authenticated_process", purpose, record, {
-      command,
-      args: request.args ?? [],
-      cwd: request.cwd ?? null,
-      env: { ...(request.env ?? {}), [credentialEnv]: secret.reveal() },
-    }, null);
+    return this.#spawn(
+      "authenticated_process",
+      purpose,
+      record,
+      {
+        command,
+        args: request.args ?? [],
+        cwd: request.cwd ?? null,
+        env: { ...(request.env ?? {}), [credentialEnv]: secret.reveal() },
+      },
+      null,
+    );
   }
 
   /** Push to an allow-listed https remote with the credential supplied by helper. */
-  async gitPush(purpose: string, request: GitRequest): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
+  async gitPush(
+    purpose: string,
+    request: GitRequest,
+  ): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
     return this.#git(purpose, "push", request);
   }
 
   /** Fetch from an allow-listed https remote with the credential supplied by helper. */
-  async gitFetch(purpose: string, request: GitRequest): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
+  async gitFetch(
+    purpose: string,
+    request: GitRequest,
+  ): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
     return this.#git(purpose, "fetch", request);
   }
 
   /* ---------------------------------------------------------------------- */
 
   /** Sign a payload with a stored key. The signature comes back; the key does not. */
-  async signWith(purpose: string, request: SignRequest): Promise<MaterialFree<VaultToolResult<SignOk>>> {
+  async signWith(
+    purpose: string,
+    request: SignRequest,
+  ): Promise<MaterialFree<VaultToolResult<SignOk>>> {
     const gate = await this.#begin("sign", purpose);
     if (!gate.ok) return gate.denial;
 
@@ -972,7 +1130,14 @@ export class VaultToolset {
     }
     const payload = Buffer.from(request.payload, request.encoding === "base64" ? "base64" : "utf8");
     if (payload.byteLength === 0) {
-      return this.#deny("sign", purpose, record, null, "invalid_argument", "the payload decoded to no bytes");
+      return this.#deny(
+        "sign",
+        purpose,
+        record,
+        null,
+        "invalid_argument",
+        "the payload decoded to no bytes",
+      );
     }
 
     let key: KeyObject;
@@ -982,11 +1147,20 @@ export class VaultToolset {
       const passphrase = record.material.passphrase;
       try {
         key = createPrivateKey(
-          passphrase ? { key: record.material.privateKey.reveal(), passphrase: passphrase.reveal() } : record.material.privateKey.reveal(),
+          passphrase
+            ? { key: record.material.privateKey.reveal(), passphrase: passphrase.reveal() }
+            : record.material.privateKey.reveal(),
         );
       } catch {
         // The thrown message can quote the key body, so it does not travel.
-        return this.#deny("sign", purpose, record, null, "invalid_argument", `the private key in ${record.id} cannot be loaded`);
+        return this.#deny(
+          "sign",
+          purpose,
+          record,
+          null,
+          "invalid_argument",
+          `the private key in ${record.id} cannot be loaded`,
+        );
       }
       published = record.material.publicKey;
       fingerprint = record.material.fingerprint;
@@ -1006,24 +1180,57 @@ export class VaultToolset {
         // Derived from the private half rather than stored beside it, so the
         // two cannot disagree — the same rule `discovery/identity.ts` follows.
         const pem = key.export({ type: "pkcs8", format: "pem" }) as string;
-        published = (createPublicKey(pem).export({ type: "spki", format: "der" }) as Buffer).toString("base64");
+        published = (
+          createPublicKey(pem).export({ type: "spki", format: "der" }) as Buffer
+        ).toString("base64");
       } catch {
-        return this.#deny("sign", purpose, record, null, "invalid_argument", `the private key in ${record.id} cannot be loaded`);
+        return this.#deny(
+          "sign",
+          purpose,
+          record,
+          null,
+          "invalid_argument",
+          `the private key in ${record.id} cannot be loaded`,
+        );
       }
       fingerprint = record.material.credentialId;
     } else {
-      return this.#deny("sign", purpose, record, null, "wrong_credential_type", `${record.id} is a ${record.type}`);
+      return this.#deny(
+        "sign",
+        purpose,
+        record,
+        null,
+        "wrong_credential_type",
+        `${record.id} is a ${record.type}`,
+      );
     }
 
     const algorithm = key.asymmetricKeyType ?? "unknown";
     let signature: Buffer;
     try {
-      signature = cryptoSign(algorithm === "ed25519" || algorithm === "ed448" ? null : "sha256", payload, key);
+      signature = cryptoSign(
+        algorithm === "ed25519" || algorithm === "ed448" ? null : "sha256",
+        payload,
+        key,
+      );
     } catch {
-      return this.#deny("sign", purpose, record, null, "invalid_argument", `${algorithm} signing failed for ${record.id}`);
+      return this.#deny(
+        "sign",
+        purpose,
+        record,
+        null,
+        "invalid_argument",
+        `${algorithm} signing failed for ${record.id}`,
+      );
     }
 
-    await this.#log("sign", record, null, `granted: ${algorithm} over ${payload.byteLength} bytes`, purpose);
+    await this.#log(
+      "sign",
+      record,
+      null,
+      `granted: ${algorithm} over ${payload.byteLength} bytes`,
+      purpose,
+    );
     return {
       ok: true,
       signature: signature.toString("base64url"),
@@ -1037,17 +1244,32 @@ export class VaultToolset {
   /* ---------------------------------------------------------------------- */
 
   /** What the agent is allowed to know about a purpose. Metadata, never material. */
-  async describeCredential(purpose: string): Promise<MaterialFree<VaultToolResult<DescribeCredentialOk>>> {
+  async describeCredential(
+    purpose: string,
+  ): Promise<MaterialFree<VaultToolResult<DescribeCredentialOk>>> {
     const gate = await this.#begin("describe_credential", purpose);
     if (!gate.ok) return gate.denial;
 
     const records = await this.#inScope(purpose);
     if (records.length === 0) {
-      return this.#deny("describe_credential", purpose, null, null, "out_of_scope", `no credential for ${purpose} is available to this agent`);
+      return this.#deny(
+        "describe_credential",
+        purpose,
+        null,
+        null,
+        "out_of_scope",
+        `no credential for ${purpose} is available to this agent`,
+      );
     }
     const credentials: CredentialSummary[] = [];
     for (const record of records) credentials.push(await this.#summarize(record));
-    await this.#log("describe_credential", records[0] ?? null, null, `granted: ${credentials.length} credentials`, purpose);
+    await this.#log(
+      "describe_credential",
+      records[0] ?? null,
+      null,
+      `granted: ${credentials.length} credentials`,
+      purpose,
+    );
     return { ok: true, purpose, credentials };
   }
 
@@ -1063,10 +1285,21 @@ export class VaultToolset {
     const gate = await this.#begin("authenticated_process", purpose);
     if (!gate.ok) return gate.denial;
     if (!this.#runProcess) {
-      return this.#deny("authenticated_process", purpose, null, null, "capability_unavailable", "no process runner is configured for this agent");
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        null,
+        null,
+        "capability_unavailable",
+        "no process runner is configured for this agent",
+      );
     }
 
-    const found = await this.#credentialFor(purpose, request.credentialId, ["api_key", "oauth_token", "password"]);
+    const found = await this.#credentialFor(purpose, request.credentialId, [
+      "api_key",
+      "oauth_token",
+      "password",
+    ]);
     if (!found.ok) return this.#denyFound("authenticated_process", purpose, null, found);
     const record = found.record;
 
@@ -1076,33 +1309,75 @@ export class VaultToolset {
     } catch {
       // A bare remote name resolves inside the repository, where the vault
       // cannot see which host the credential would be handed to.
-      return this.#deny("authenticated_process", purpose, record, null, "malformed_url", "the remote must be an absolute https url so its host can be checked");
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        null,
+        "malformed_url",
+        "the remote must be an absolute https url so its host can be checked",
+      );
     }
     if (remote.protocol !== "https:") {
-      return this.#deny("authenticated_process", purpose, record, remote.hostname, "insecure_scheme", `git credentials are only presented over https, not ${remote.protocol.replace(":", "")}`);
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        remote.hostname,
+        "insecure_scheme",
+        `git credentials are only presented over https, not ${remote.protocol.replace(":", "")}`,
+      );
     }
     if (remote.username || remote.password) {
-      return this.#deny("authenticated_process", purpose, record, remote.hostname, "url_credentials", "the remote url carries userinfo credentials");
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        remote.hostname,
+        "url_credentials",
+        "the remote url carries userinfo credentials",
+      );
     }
     const allowed = allowedHostsFor(record);
     if (allowed.length === 0) {
-      return this.#deny("authenticated_process", purpose, record, remote.hostname, "no_allowed_hosts", `no host is allow-listed for ${purpose}; add a host: tag to the record`);
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        remote.hostname,
+        "no_allowed_hosts",
+        `no host is allow-listed for ${purpose}; add a host: tag to the record`,
+      );
     }
     if (!hostAllowed(allowed, remote.hostname)) {
-      return this.#deny("authenticated_process", purpose, record, remote.hostname, "host_not_allowed", `${remote.hostname} is not an allowed host for ${purpose}`);
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        remote.hostname,
+        "host_not_allowed",
+        `${remote.hostname} is not an allowed host for ${purpose}`,
+      );
     }
 
     const secret = credentialSecret(record);
     if (!secret) {
-      return this.#deny("authenticated_process", purpose, record, remote.hostname, "wrong_credential_type", `${record.type} material cannot authenticate git`);
+      return this.#deny(
+        "authenticated_process",
+        purpose,
+        record,
+        remote.hostname,
+        "wrong_credential_type",
+        `${record.type} material cannot authenticate git`,
+      );
     }
-    const username = record.material.type === "password" ? record.material.username : "x-access-token";
+    const username =
+      record.material.type === "password" ? record.material.username : "x-access-token";
 
     // The helper reads the secret out of the child's environment. It is not on
     // the command line, so it is not in `ps`, not in a shell history, and not in
     // the process table of a machine the agent may also be able to read.
-    const helper =
-      `!f() { test "$1" = get && printf 'username=%s\\npassword=%s\\n' "$${GIT_USER_ENV}" "$${GIT_SECRET_ENV}"; }; f`;
+    const helper = `!f() { test "$1" = get && printf 'username=%s\\npassword=%s\\n' "$${GIT_USER_ENV}" "$${GIT_SECRET_ENV}"; }; f`;
     const args = [
       "-c",
       `credential.helper=${helper}`,
@@ -1137,12 +1412,24 @@ export class VaultToolset {
     operation: VaultToolOperation,
     purpose: string,
     record: SecretRecord,
-    spec: { command: string; args: readonly string[]; cwd: string | null; env: Record<string, string> },
+    spec: {
+      command: string;
+      args: readonly string[];
+      cwd: string | null;
+      env: Record<string, string>;
+    },
     targetHost: string | null,
   ): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
     const runner = this.#runProcess;
     if (!runner) {
-      return this.#deny(operation, purpose, record, targetHost, "capability_unavailable", "no process runner is configured for this agent");
+      return this.#deny(
+        operation,
+        purpose,
+        record,
+        targetHost,
+        "capability_unavailable",
+        "no process runner is configured for this agent",
+      );
     }
     const tokens = redactionTokens(record);
     // PATH is the only inherited variable: without it a command name cannot be
@@ -1164,7 +1451,13 @@ export class VaultToolset {
         redact(error instanceof Error ? error.message : String(error), tokens),
       );
     }
-    await this.#log(operation, record, targetHost, `granted: ${spec.command} exited ${outcome.exitCode}`, purpose);
+    await this.#log(
+      operation,
+      record,
+      targetHost,
+      `granted: ${spec.command} exited ${outcome.exitCode}`,
+      purpose,
+    );
     return {
       ok: true,
       exitCode: outcome.exitCode,
@@ -1224,7 +1517,10 @@ export class VaultToolset {
     purpose: string,
     credentialId: string | undefined,
     preference: readonly SecretType[],
-  ): Promise<{ ok: true; record: SecretRecord } | { ok: false; reason: VaultDenialReason; audit: string; agentDetail: string }> {
+  ): Promise<
+    | { ok: true; record: SecretRecord }
+    | { ok: false; reason: VaultDenialReason; audit: string; agentDetail: string }
+  > {
     const inScope = await this.#inScope(purpose);
     if (credentialId) {
       const exact = inScope.find((record) => record.id === credentialId);
@@ -1235,12 +1531,19 @@ export class VaultToolset {
         return {
           ok: false,
           reason: "out_of_scope",
-          audit: existsAnywhere ? "record exists but is not usable by this agent for this purpose" : "no such record",
+          audit: existsAnywhere
+            ? "record exists but is not usable by this agent for this purpose"
+            : "no such record",
           agentDetail: `no credential for ${purpose} is available to this agent`,
         };
       }
       if (!preference.includes(exact.type)) {
-        return { ok: false, reason: "wrong_credential_type", audit: `wrong type: ${exact.type}`, agentDetail: `${exact.id} is a ${exact.type}` };
+        return {
+          ok: false,
+          reason: "wrong_credential_type",
+          audit: `wrong type: ${exact.type}`,
+          agentDetail: `${exact.id} is a ${exact.type}`,
+        };
       }
       return { ok: true, record: exact };
     }
@@ -1251,7 +1554,10 @@ export class VaultToolset {
     return {
       ok: false,
       reason: "out_of_scope",
-      audit: inScope.length === 0 ? "no record in scope for this purpose" : `in scope but no ${preference.join("/")} credential`,
+      audit:
+        inScope.length === 0
+          ? "no record in scope for this purpose"
+          : `in scope but no ${preference.join("/")} credential`,
       agentDetail: `no credential for ${purpose} is available to this agent`,
     };
   }
@@ -1262,7 +1568,13 @@ export class VaultToolset {
     targetHost: string | null,
     found: { ok: false; reason: VaultDenialReason; audit: string; agentDetail: string },
   ): Promise<VaultToolDenial> {
-    await this.#log(operation, null, targetHost, `denied: ${found.reason} (${found.audit})`, purpose);
+    await this.#log(
+      operation,
+      null,
+      targetHost,
+      `denied: ${found.reason} (${found.audit})`,
+      purpose,
+    );
     this.#usageFor(purpose).denials += 1;
     return { ok: false, denial: found.reason, detail: found.agentDetail };
   }
@@ -1285,7 +1597,9 @@ export class VaultToolset {
     const provider = findProviderDescriptor(providerIdForPurpose(record.purpose));
     let health: CredentialHealthSummary | null = null;
     if (this.#supervisor) {
-      const entry = (await this.#supervisor.health()).find((candidate) => candidate.id === record.id);
+      const entry = (await this.#supervisor.health()).find(
+        (candidate) => candidate.id === record.id,
+      );
       if (entry) {
         health = {
           state: entry.state,
@@ -1338,7 +1652,9 @@ export class VaultToolset {
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
 
-function auditActionFor(operation: VaultToolOperation): "tool_fetch" | "tool_totp" | "tool_process" | "tool_sign" | "tool_describe" {
+function auditActionFor(
+  operation: VaultToolOperation,
+): "tool_fetch" | "tool_totp" | "tool_process" | "tool_sign" | "tool_describe" {
   switch (operation) {
     case "authenticated_fetch":
       return "tool_fetch";
@@ -1391,7 +1707,12 @@ function accountOf(record: SecretRecord): string | null {
  * moves material, and it writes into structures that never come back to the
  * agent: the transport's header map and the transport's URL.
  */
-function applyAuth(placement: AuthPlacement, record: SecretRecord, url: URL, headers: Record<string, string>): void {
+function applyAuth(
+  placement: AuthPlacement,
+  record: SecretRecord,
+  url: URL,
+  headers: Record<string, string>,
+): void {
   const secret = credentialSecret(record);
   if (!secret) return;
   switch (placement.kind) {
@@ -1442,7 +1763,12 @@ export function defaultVaultTransport(): VaultTransport {
     response.headers.forEach((value, name) => {
       headers[name] = value;
     });
-    return { status: response.status, statusText: response.statusText, headers, body: await response.text() };
+    return {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+      body: await response.text(),
+    };
   };
 }
 

@@ -30,30 +30,30 @@
  * @module dsh-credentials/vault/files
  */
 
-import path from 'node:path'
-import { chmod, mkdir, open, rename, rm, stat } from 'node:fs/promises'
-import { randomUUID } from 'node:crypto'
+import path from "node:path";
+import { chmod, mkdir, open, rename, rm, stat } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 
-const WINDOWS_TRANSIENT_RENAME_ERRORS = new Set(['EACCES', 'EBUSY', 'EPERM'])
+const WINDOWS_TRANSIENT_RENAME_ERRORS = new Set(["EACCES", "EBUSY", "EPERM"]);
 
 export async function exists(target: string): Promise<boolean> {
   try {
-    await stat(target)
-    return true
+    await stat(target);
+    return true;
   } catch {
-    return false
+    return false;
   }
 }
 
 export async function ensurePrivateDirectory(directory: string): Promise<void> {
-  await mkdir(directory, { recursive: true, mode: 0o700 })
-  if (process.platform !== 'win32') await chmod(directory, 0o700)
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  if (process.platform !== "win32") await chmod(directory, 0o700);
 }
 
 /** Write 0600, publishing through a rename so a reader never sees a partial file. */
 export async function writePrivateFile(file: string, content: string): Promise<void> {
-  await ensurePrivateDirectory(path.dirname(file))
-  await publishFileAtMode(file, content, 0o600)
+  await ensurePrivateDirectory(path.dirname(file));
+  await publishFileAtMode(file, content, 0o600);
 }
 
 /**
@@ -80,38 +80,41 @@ export async function publishFileAtMode(
   content: string | Uint8Array,
   mode: number,
 ): Promise<void> {
-  const temporary = temporaryName(file)
+  const temporary = temporaryName(file);
   try {
-    await writeExactly(temporary, content, mode)
-    await chmod(temporary, mode)
-    await replaceFile(temporary, file)
+    await writeExactly(temporary, content, mode);
+    await chmod(temporary, mode);
+    await replaceFile(temporary, file);
   } finally {
-    await rm(temporary, { force: true })
+    await rm(temporary, { force: true });
   }
 }
 
 /** As `writePrivateFile`, but returns false when the destination already exists. */
 export async function writePrivateFileExclusive(file: string, content: string): Promise<boolean> {
-  await ensurePrivateDirectory(path.dirname(file))
-  let handle
+  await ensurePrivateDirectory(path.dirname(file));
+  let handle;
   try {
-    handle = await open(file, 'wx', 0o600)
+    handle = await open(file, "wx", 0o600);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'EEXIST') return false
-    throw error
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
+    throw error;
   }
   try {
-    await handle.writeFile(content, 'utf8')
-    await handle.sync()
+    await handle.writeFile(content, "utf8");
+    await handle.sync();
   } finally {
-    await handle.close()
+    await handle.close();
   }
-  if (process.platform !== 'win32') await chmod(file, 0o600)
-  return true
+  if (process.platform !== "win32") await chmod(file, 0o600);
+  return true;
 }
 
 function temporaryName(file: string): string {
-  return path.join(path.dirname(file), `.${path.basename(file)}.${process.pid}.${randomUUID()}.tmp`)
+  return path.join(
+    path.dirname(file),
+    `.${path.basename(file)}.${process.pid}.${randomUUID()}.tmp`,
+  );
 }
 
 /**
@@ -120,18 +123,18 @@ function temporaryName(file: string): string {
  * transient error, so retry briefly there rather than fail a vault write.
  */
 async function replaceFile(temporary: string, file: string): Promise<void> {
-  if (process.platform !== 'win32') {
-    await rename(temporary, file)
-    return
+  if (process.platform !== "win32") {
+    await rename(temporary, file);
+    return;
   }
   for (let attempt = 0; ; attempt += 1) {
     try {
-      await rename(temporary, file)
-      return
+      await rename(temporary, file);
+      return;
     } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code ?? ''
-      if (attempt >= 9 || !WINDOWS_TRANSIENT_RENAME_ERRORS.has(code)) throw error
-      await new Promise((resolve) => setTimeout(resolve, Math.min(160, 10 * 2 ** attempt)))
+      const code = (error as NodeJS.ErrnoException).code ?? "";
+      if (attempt >= 9 || !WINDOWS_TRANSIENT_RENAME_ERRORS.has(code)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, Math.min(160, 10 * 2 ** attempt)));
     }
   }
 }
@@ -145,13 +148,17 @@ async function replaceFile(temporary: string, file: string): Promise<void> {
  * chose. With a pid+UUID temp name an `EEXIST` here means something is wrong,
  * and failing is the right answer.
  */
-async function writeExactly(file: string, content: string | Uint8Array, mode = 0o600): Promise<void> {
-  const handle = await open(file, 'wx', mode)
+async function writeExactly(
+  file: string,
+  content: string | Uint8Array,
+  mode = 0o600,
+): Promise<void> {
+  const handle = await open(file, "wx", mode);
   try {
-    if (typeof content === 'string') await handle.writeFile(content, 'utf8')
-    else await handle.writeFile(content)
-    await handle.sync()
+    if (typeof content === "string") await handle.writeFile(content, "utf8");
+    else await handle.writeFile(content);
+    await handle.sync();
   } finally {
-    await handle.close()
+    await handle.close();
   }
 }

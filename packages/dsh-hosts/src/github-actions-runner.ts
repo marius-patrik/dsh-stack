@@ -1,51 +1,51 @@
 /** GitHub Actions self-hosted runner provisioning for dsh-hosts. */
 
-import { mkdir, writeFile, chmod } from 'node:fs/promises'
-import { join } from 'node:path'
-import { homedir, platform, arch } from 'node:os'
+import { mkdir, writeFile, chmod } from "node:fs/promises";
+import { join } from "node:path";
+import { homedir, platform, arch } from "node:os";
 
 export interface GitHubRunnerConfig {
-  owner: string
-  repository: string
-  registrationToken: string
-  labels?: string[]
-  runnerName?: string
-  runnerDir?: string
+  owner: string;
+  repository: string;
+  registrationToken: string;
+  labels?: string[];
+  runnerName?: string;
+  runnerDir?: string;
 }
 
 export interface GitHubRunnerStatus {
-  installed: boolean
-  running: boolean
-  directory: string
-  runnerName: string
+  installed: boolean;
+  running: boolean;
+  directory: string;
+  runnerName: string;
 }
 
 function defaultDir(): string {
-  return join(process.env.DSH_HOME ?? join(homedir(), '.agents'), 'github-runner')
+  return join(process.env.DSH_HOME ?? join(homedir(), ".agents"), "github-runner");
 }
 
 function runnerArchive(): string {
-  const os = platform() === 'darwin' ? 'osx' : platform()
-  const cpu = arch() === 'arm64' ? 'arm64' : 'x64'
-  return `actions-runner-${os}-${cpu}`
+  const os = platform() === "darwin" ? "osx" : platform();
+  const cpu = arch() === "arm64" ? "arm64" : "x64";
+  return `actions-runner-${os}-${cpu}`;
 }
 
 export class GitHubActionsRunnerManager {
-  readonly config: GitHubRunnerConfig
+  readonly config: GitHubRunnerConfig;
 
   constructor(config: GitHubRunnerConfig) {
     if (!config.owner || !config.repository || !config.registrationToken) {
-      throw new Error('GitHub Actions runner requires owner, repository, and registrationToken')
+      throw new Error("GitHub Actions runner requires owner, repository, and registrationToken");
     }
-    this.config = { ...config, runnerDir: config.runnerDir ?? defaultDir() }
+    this.config = { ...config, runnerDir: config.runnerDir ?? defaultDir() };
   }
 
   get runnerDir(): string {
-    return this.config.runnerDir ?? defaultDir()
+    return this.config.runnerDir ?? defaultDir();
   }
 
   get runnerName(): string {
-    return this.config.runnerName ?? `dsh-${platform()}-${arch()}`
+    return this.config.runnerName ?? `dsh-${platform()}-${arch()}`;
   }
 
   status(): GitHubRunnerStatus {
@@ -54,14 +54,16 @@ export class GitHubActionsRunnerManager {
       running: false,
       directory: this.runnerDir,
       runnerName: this.runnerName,
-    }
+    };
   }
 
   /** Generate an installation script. Token is embedded only in the generated local script. */
   generateUnixInstallScript(): string {
-    const labels = ['self-hosted', 'dsh', platform(), arch(), ...(this.config.labels ?? [])].join(',')
-    const url = `https://github.com/${this.config.owner}/${this.config.repository}`
-    const dir = this.runnerDir
+    const labels = ["self-hosted", "dsh", platform(), arch(), ...(this.config.labels ?? [])].join(
+      ",",
+    );
+    const url = `https://github.com/${this.config.owner}/${this.config.repository}`;
+    const dir = this.runnerDir;
     return `#!/usr/bin/env bash
 set -euo pipefail
 
@@ -98,14 +100,14 @@ if command -v systemctl >/dev/null 2>&1; then
 else
   nohup ./run.sh > runner.log 2>&1 &
 fi
-`
+`;
   }
 
   async writeInstallScript(): Promise<string> {
-    await mkdir(this.runnerDir, { recursive: true })
-    const path = join(this.runnerDir, 'install.sh')
-    await writeFile(path, this.generateUnixInstallScript(), 'utf8')
-    await chmod(path, 0o700)
-    return path
+    await mkdir(this.runnerDir, { recursive: true });
+    const path = join(this.runnerDir, "install.sh");
+    await writeFile(path, this.generateUnixInstallScript(), "utf8");
+    await chmod(path, 0o700);
+    return path;
   }
 }

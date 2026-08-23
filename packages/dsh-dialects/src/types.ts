@@ -7,10 +7,10 @@
  * @module dsh-dialects/types
  */
 
-import type { GenerateOptions, StreamChunk } from '@deepseek-ai/dsh-llm'
+import type { GenerateOptions, StreamChunk } from "@deepseek-ai/dsh-llm";
 
 /** Stable wire protocol identifiers carried by the registry. */
-export type DialectId = 'openai' | 'claude' | 'gemini' | 'code-assist' | 'antigravity'
+export type DialectId = "openai" | "claude" | "gemini" | "code-assist" | "antigravity";
 
 /**
  * Credential material for one wire request. Adapters resolve values from the
@@ -18,13 +18,13 @@ export type DialectId = 'openai' | 'claude' | 'gemini' | 'code-assist' | 'antigr
  */
 export interface DialectAuth {
   /** OAuth bearer token for the request. */
-  token?: string
+  token?: string;
   /** API key for the request. */
-  apiKey?: string
+  apiKey?: string;
   /** Cookie material for browser-backed subscription routes. */
-  cookies?: Record<string, string>
+  cookies?: Record<string, string>;
   /** Extra headers merged into the request (route-specific or override). */
-  headers?: Record<string, string>
+  headers?: Record<string, string>;
 }
 
 /**
@@ -32,19 +32,19 @@ export interface DialectAuth {
  */
 export interface DialectDefaults {
   /** Output cap materialized when the caller omitted `maxTokens`. */
-  maxTokens: number
+  maxTokens: number;
   /** Extra request-body fields merged verbatim (provider-specific toggles). */
-  extra?: Record<string, unknown>
+  extra?: Record<string, unknown>;
 }
 
 /** A fully assembled provider wire request. */
 export interface WireRequest {
-  url: string
-  method: 'POST'
-  headers: Record<string, string>
-  body: string
+  url: string;
+  method: "POST";
+  headers: Record<string, string>;
+  body: string;
   /** Response framing: SSE or NDJSON. */
-  framing: 'sse' | 'ndjson'
+  framing: "sse" | "ndjson";
 }
 
 /**
@@ -53,7 +53,7 @@ export interface WireRequest {
  */
 export interface Dialect {
   /** Stable id used to look the dialect up in the registry. */
-  readonly id: DialectId
+  readonly id: DialectId;
   /**
    * Assemble the wire request for one model call.
    * @param options - the harness request.
@@ -67,7 +67,7 @@ export interface Dialect {
     auth: DialectAuth,
     baseURL: string,
     defaults: DialectDefaults,
-  ): WireRequest
+  ): WireRequest;
   /**
    * Translate a provider response stream into harness chunks.
    * @param body - the 2xx response body stream.
@@ -77,5 +77,5 @@ export interface Dialect {
   parse(
     body: ReadableStream<BufferSource>,
     onActivity?: (line: string) => void,
-  ): AsyncIterable<StreamChunk>
+  ): AsyncIterable<StreamChunk>;
 }

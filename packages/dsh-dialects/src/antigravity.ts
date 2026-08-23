@@ -21,9 +21,9 @@
  * @module dsh-dialects/antigravity
  */
 
-import { LlmError } from '@deepseek-ai/dsh-llm'
-import type { GenerateOptions, StreamChunk, TokenUsage } from '@deepseek-ai/dsh-llm'
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from './types.js'
+import { LlmError } from "@deepseek-ai/dsh-llm";
+import type { GenerateOptions, StreamChunk, TokenUsage } from "@deepseek-ai/dsh-llm";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
 
 /**
  * Header carrying the Cloud AI Companion project this account chats under.
@@ -31,40 +31,38 @@ import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from './types
  * so the project arrives as resolved credential material like any other
  * per-account fact.
  */
-export const ANTIGRAVITY_PROJECT_HEADER = 'x-antigravity-project'
+export const ANTIGRAVITY_PROJECT_HEADER = "x-antigravity-project";
 
 /** One history entry on the wire; the element field is `content`. */
 interface WireHistoryEntry {
-  content: string
+  content: string;
 }
 
 /** The `:streamGenerateChat` request body. */
 interface WireChatRequest {
-  project: string
-  userMessage: string
-  history?: WireHistoryEntry[]
+  project: string;
+  userMessage: string;
+  history?: WireHistoryEntry[];
 }
 
 /** One chunk of the JSON-array response. */
 interface WireChatChunk {
-  markdown?: string
+  markdown?: string;
   usageMetadata?: {
-    candidatesTokenCount?: string | number
-    totalTokenCount?: string | number
-  }
+    candidatesTokenCount?: string | number;
+    totalTokenCount?: string | number;
+  };
 }
 
-function textOf(content: GenerateOptions['messages'][number]['content']): string {
-  if (typeof content === 'string') return content
-  return content
-    .map(part => (part.type === 'text' ? part.text : ''))
-    .join('')
+function textOf(content: GenerateOptions["messages"][number]["content"]): string {
+  if (typeof content === "string") return content;
+  return content.map((part) => (part.type === "text" ? part.text : "")).join("");
 }
 
 function count(value: string | number | undefined): number | undefined {
-  if (value === undefined) return undefined
-  const parsed = typeof value === 'number' ? value : Number(value)
-  return Number.isFinite(parsed) ? parsed : undefined
+  if (value === undefined) return undefined;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 /**
@@ -77,52 +75,54 @@ function count(value: string | number | undefined): number | undefined {
  * @param options - the harness request.
  * @returns the scalar turn and the preceding entries.
  */
-export function splitConversation(
-  options: GenerateOptions,
-): { userMessage: string; history: WireHistoryEntry[] } {
-  const history: WireHistoryEntry[] = []
-  let userMessage = ''
+export function splitConversation(options: GenerateOptions): {
+  userMessage: string;
+  history: WireHistoryEntry[];
+} {
+  const history: WireHistoryEntry[] = [];
+  let userMessage = "";
   if (options.system !== undefined && options.system.length > 0) {
-    history.push({ content: options.system })
+    history.push({ content: options.system });
   }
   for (const [index, message] of options.messages.entries()) {
-    const text = textOf(message.content)
-    if (text.length === 0) continue
-    const isLast = index === options.messages.length - 1
-    if (isLast && message.role === 'user') {
-      userMessage = text
-      continue
+    const text = textOf(message.content);
+    if (text.length === 0) continue;
+    const isLast = index === options.messages.length - 1;
+    if (isLast && message.role === "user") {
+      userMessage = text;
+      continue;
     }
-    history.push({ content: text })
+    history.push({ content: text });
   }
   // Every wire request needs a turn to answer; an empty one is answered with
   // a complaint about the missing request rather than refused, which would be
   // a confusing way to surface a caller bug.
   if (userMessage.length === 0) {
-    throw new LlmError('antigravity dialect requires a trailing user message', 'INVALID_REQUEST')
+    throw new LlmError("antigravity dialect requires a trailing user message", "INVALID_REQUEST");
   }
-  return { userMessage, history }
+  return { userMessage, history };
 }
 
 /** Read the whole body; the response is one JSON array, not a framed stream. */
 async function readAll(body: ReadableStream<BufferSource>): Promise<string> {
-  const decoder = new TextDecoder()
-  const reader = body.getReader()
-  let text = ''
+  const decoder = new TextDecoder();
+  const reader = body.getReader();
+  let text = "";
   try {
     for (;;) {
-      const { done, value } = await reader.read()
-      if (done) break
-      if (value !== undefined) text += decoder.decode(value as AllowSharedBufferSource, { stream: true })
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value !== undefined)
+        text += decoder.decode(value as AllowSharedBufferSource, { stream: true });
     }
   } finally {
-    reader.releaseLock()
+    reader.releaseLock();
   }
-  return text + decoder.decode()
+  return text + decoder.decode();
 }
 
 export const antigravityDialect: Dialect = {
-  id: 'antigravity',
+  id: "antigravity",
 
   serialize(
     options: GenerateOptions,
@@ -131,76 +131,83 @@ export const antigravityDialect: Dialect = {
     _defaults: DialectDefaults,
   ): WireRequest {
     if (auth.token === undefined) {
-      throw new LlmError('no bearer token supplied for an antigravity dialect request', 'AUTH')
+      throw new LlmError("no bearer token supplied for an antigravity dialect request", "AUTH");
     }
-    const project = auth.headers?.[ANTIGRAVITY_PROJECT_HEADER]
+    const project = auth.headers?.[ANTIGRAVITY_PROJECT_HEADER];
     if (project === undefined || project.length === 0) {
       throw new LlmError(
-        'no Cloud AI Companion project for the antigravity route; store ANTIGRAVITY_PROJECT'
-        + ' (from :loadCodeAssist -> cloudaicompanionProject) through the account manager',
-        'MISSING_CREDENTIAL',
-      )
+        "no Cloud AI Companion project for the antigravity route; store ANTIGRAVITY_PROJECT" +
+          " (from :loadCodeAssist -> cloudaicompanionProject) through the account manager",
+        "MISSING_CREDENTIAL",
+      );
     }
-    const { userMessage, history } = splitConversation(options)
+    const { userMessage, history } = splitConversation(options);
     const body: WireChatRequest = {
       project,
       userMessage,
-      ...history.length > 0 ? { history } : {},
-    }
+      ...(history.length > 0 ? { history } : {}),
+    };
     // `modelConfigId` is deliberately omitted: every id the API publishes is
     // refused with ILLEGAL_MODEL_CONFIG, while omitting it serves the account's
     // default chat model on the paid tier. See ANTIGRAVITY.md.
-    const { [ANTIGRAVITY_PROJECT_HEADER]: _project, ...forwarded } = auth.headers ?? {}
+    const { [ANTIGRAVITY_PROJECT_HEADER]: _project, ...forwarded } = auth.headers ?? {};
     return {
-      url: `${baseURL.replace(/\/+$/, '')}:streamGenerateChat`,
-      method: 'POST',
+      url: `${baseURL.replace(/\/+$/, "")}:streamGenerateChat`,
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        accept: 'text/event-stream',
+        "content-type": "application/json",
+        accept: "text/event-stream",
         authorization: `Bearer ${auth.token}`,
-        'x-goog-api-client': 'gl-node',
-        'user-agent': 'Antigravity/2.0.1 (Jetbrains; DARWIN_ARM64)',
+        "x-goog-api-client": "gl-node",
+        "user-agent": "Antigravity/2.0.1 (Jetbrains; DARWIN_ARM64)",
         ...forwarded,
       },
       body: JSON.stringify(body),
-      framing: 'ndjson',
-    }
+      framing: "ndjson",
+    };
   },
 
   async *parse(body: ReadableStream<BufferSource>): AsyncGenerator<StreamChunk> {
-    const raw = await readAll(body)
-    let chunks: WireChatChunk[]
+    const raw = await readAll(body);
+    let chunks: WireChatChunk[];
     try {
-      const parsed: unknown = JSON.parse(raw)
-      chunks = Array.isArray(parsed) ? parsed as WireChatChunk[] : [parsed as WireChatChunk]
+      const parsed: unknown = JSON.parse(raw);
+      chunks = Array.isArray(parsed) ? (parsed as WireChatChunk[]) : [parsed as WireChatChunk];
     } catch {
-      throw new LlmError('antigravity response was not the expected JSON array', 'MALFORMED_RESPONSE')
+      throw new LlmError(
+        "antigravity response was not the expected JSON array",
+        "MALFORMED_RESPONSE",
+      );
     }
 
-    const text = chunks.map(chunk => chunk.markdown ?? '').join('')
-    let usage: TokenUsage | undefined
+    const text = chunks.map((chunk) => chunk.markdown ?? "").join("");
+    let usage: TokenUsage | undefined;
     for (const chunk of chunks) {
-      const output = count(chunk.usageMetadata?.candidatesTokenCount)
-      const total = count(chunk.usageMetadata?.totalTokenCount)
-      if (output === undefined && total === undefined) continue
-      const outputTokens = output ?? 0
+      const output = count(chunk.usageMetadata?.candidatesTokenCount);
+      const total = count(chunk.usageMetadata?.totalTokenCount);
+      if (output === undefined && total === undefined) continue;
+      const outputTokens = output ?? 0;
       usage = {
         inputTokens: total === undefined ? 0 : Math.max(0, total - outputTokens),
         outputTokens,
-      }
+      };
     }
 
     if (text.length > 0) {
-      yield { type: 'block-start', index: 0, blockType: 'text' }
-      yield { type: 'text-delta', index: 0, text }
-      yield { type: 'block-end', index: 0, block: { type: 'text', text } }
+      yield { type: "block-start", index: 0, blockType: "text" };
+      yield { type: "text-delta", index: 0, text };
+      yield { type: "block-end", index: 0, block: { type: "text", text } };
     }
-    if (usage !== undefined) yield { type: 'usage', usage }
+    if (usage !== undefined) yield { type: "usage", usage };
     yield {
-      type: 'finish',
-      reason: text.length > 0
-        ? { kind: 'stop' }
-        : { kind: 'error', failure: { message: 'antigravity returned no content', code: 'EMPTY_RESPONSE' } },
-    }
+      type: "finish",
+      reason:
+        text.length > 0
+          ? { kind: "stop" }
+          : {
+              kind: "error",
+              failure: { message: "antigravity returned no content", code: "EMPTY_RESPONSE" },
+            },
+    };
   },
-}
+};

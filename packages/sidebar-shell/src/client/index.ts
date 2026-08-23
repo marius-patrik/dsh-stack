@@ -1,9 +1,9 @@
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client';
-import type { SidebarRootInjected } from '@deepseek-ai/dsh-client-ui-sidebar/client';
-import type {} from '@deepseek-ai/dsh-client-locale/client';
-import { SidebarRoot } from './SidebarRoot.js';
+import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+import type { SidebarRootInjected } from "@deepseek-ai/dsh-client-ui-sidebar/client";
+import type {} from "@deepseek-ai/dsh-client-locale/client";
+import { SidebarRoot } from "./SidebarRoot.js";
 
-export const inject = ['slots', 'layout', 'workspaces', 'locale'];
+export const inject = ["slots", "layout", "workspaces", "locale"];
 
 export function apply(ctx: ClientContext): void {
   const injectProps = (): SidebarRootInjected => ({
@@ -12,21 +12,22 @@ export function apply(ctx: ClientContext): void {
   });
 
   ctx.effect(
-    () => ctx.slots.register(
-      {
-        name: 'sidebar',
-        locale: 'sidebar',
-        children: {
-          'sidebar.brand.mark': { kind: 'single', scope: 'root' },
-          'sidebar.brand.name': { kind: 'single', scope: 'root' },
-          'sidebar.workspaces': { kind: 'single', scope: 'root' },
-          'sidebar.settings': { kind: 'single', scope: 'root' },
-          'sidebar.footer.action': { kind: 'list', scope: 'root' },
+    () =>
+      ctx.slots.register(
+        {
+          name: "sidebar",
+          locale: "sidebar",
+          children: {
+            "sidebar.brand.mark": { kind: "single", scope: "root" },
+            "sidebar.brand.name": { kind: "single", scope: "root" },
+            "sidebar.workspaces": { kind: "single", scope: "root" },
+            "sidebar.settings": { kind: "single", scope: "root" },
+            "sidebar.footer.action": { kind: "list", scope: "root" },
+          },
+          inject: injectProps,
         },
-        inject: injectProps,
-      },
-      SidebarRoot,
-    ),
-    'stack-sidebar: slot registration',
+        SidebarRoot,
+      ),
+    "stack-sidebar: slot registration",
   );
 }

@@ -19,28 +19,28 @@
  * @module dsh-providers/remap
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
+import type { Context } from "@deepseek-ai/cordis";
+import z from "@deepseek-ai/schemastery";
 // NOTE: no explicit dsh-llm type import — the listener signature is inferred
 // from the dsh-agent event augmentation so a duplicate dsh-llm copy in the
 // resolution graph cannot fork the LlmCallConfig brand.
-import type {} from '@deepseek-ai/dsh-agent'
+import type {} from "@deepseek-ai/dsh-agent";
 
 /** Stable Cordis plugin name. */
-export const name = 'subscription-remap'
+export const name = "subscription-remap";
 
 /** Core services required before the remap can route. */
-export const inject: never[] = []
+export const inject: never[] = [];
 
 /** Plugin config: the single-seat route every disabled provider is steered to. */
 export interface Config {
   /** The subscription default route requests are remapped to. */
   default: {
     /** A provider id known to the harness at request time. */
-    provider: string
+    provider: string;
     /** A model id owned by the provider above. */
-    model: string
-  }
+    model: string;
+  };
 }
 
 export const Config: z<Config> = z.object({
@@ -48,7 +48,7 @@ export const Config: z<Config> = z.object({
     provider: z.string().required(),
     model: z.string().required(),
   }),
-})
+});
 
 /**
  * Mount the remap listener.
@@ -56,16 +56,16 @@ export const Config: z<Config> = z.object({
  * @param config - validated remap config.
  */
 export function apply(ctx: Context, config: Config): void {
-  ctx.on('agent/request', async (_payload, next) => {
-    const resolved = await next()
-    const policy = ctx.get('dshProviders')
-    if (policy === undefined) return resolved
-    const gate = await policy.gate(resolved.provider)
-    if (gate === undefined || gate.visible) return resolved
+  ctx.on("agent/request", async (_payload, next) => {
+    const resolved = await next();
+    const policy = ctx.get("dshProviders");
+    if (policy === undefined) return resolved;
+    const gate = await policy.gate(resolved.provider);
+    if (gate === undefined || gate.visible) return resolved;
     ctx.logger.info(
-      `subscription-remap: ${resolved.provider}/${resolved.model} is disabled (${gate.reason.code}); `
-      + `routing to ${config.default.provider}/${config.default.model}`,
-    )
-    return { ...resolved, provider: config.default.provider, model: config.default.model }
-  })
+      `subscription-remap: ${resolved.provider}/${resolved.model} is disabled (${gate.reason.code}); ` +
+        `routing to ${config.default.provider}/${config.default.model}`,
+    );
+    return { ...resolved, provider: config.default.provider, model: config.default.model };
+  });
 }

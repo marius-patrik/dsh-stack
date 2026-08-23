@@ -12,70 +12,73 @@
  * @module dsh-tools/settings
  */
 
-import z from '@deepseek-ai/schemastery'
-import { settingsNamespace } from '@deepseek-ai/dsh-settings'
+import z from "@deepseek-ai/schemastery";
+import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the custom tool registry. */
-export const NS = settingsNamespace('dsh-tools')
+export const NS = settingsNamespace("dsh-tools");
 
 /** One custom tool parameter: its JSON type and whether the model must supply it. */
 export interface ToolParameter {
   /** JSON Schema primitive type for the argument value. */
-  type: 'string' | 'number' | 'boolean'
+  type: "string" | "number" | "boolean";
   /** Human-readable description of the parameter. */
-  description?: string
+  description?: string;
   /** Whether the parameter is required for a call. */
-  required?: boolean
+  required?: boolean;
 }
 
 export const ToolParameter: z<ToolParameter> = z.object({
-  type: z.union([z.const('string'), z.const('number'), z.const('boolean')]),
+  type: z.union([z.const("string"), z.const("number"), z.const("boolean")]),
   description: z.string(),
   required: z.boolean(),
-})
+});
 
 /** One custom tool definition from the config file. */
 export interface ToolConfig {
   /** What the model sees this tool doing. */
-  description: string
+  description: string;
   /** Optional parameter schema; argument placeholders are `{name}` in `command`. */
-  parameters?: Record<string, ToolParameter>
+  parameters?: Record<string, ToolParameter>;
   /**
    * The command to run: argv[0] is the executable (absolute, or on PATH), the
    * rest are fixed arguments. `{name}` placeholders are substituted with the
    * argument value. Never shell-interpreted.
    */
-  command: string[]
+  command: string[];
 }
 
 export const ToolConfig: z<ToolConfig> = z.object({
   description: z.string(),
   parameters: z.dict(ToolParameter).default({}),
   command: z.array(String).required(),
-})
+});
 
 /** The user-facing section: tool name → definition. */
 export interface ToolSettings {
-  tools: Record<string, ToolConfig>
+  tools: Record<string, ToolConfig>;
 }
 
 export const ToolSettings: z<ToolSettings> = z.object({
   tools: z.dict(ToolConfig).default({}),
-})
+});
 
 /** The plugin's deployment configuration: optional entry-level tool map. */
 export interface ToolsConfig {
   /** Extra custom tools merged under the settings map (settings win). */
-  tools?: Record<string, ToolConfig>
+  tools?: Record<string, ToolConfig>;
 }
 
 export const ToolsConfig: z<ToolsConfig> = z.object({
   tools: z.dict(ToolConfig).default({}),
-})
+});
 
 /** The effective custom-tool map, settings first then deployment entry. */
-export function toolsFor(settings: ToolSettings | undefined, entry: ToolsConfig | undefined): Record<string, ToolConfig> {
-  return { ...(entry?.tools ?? {}), ...(settings?.tools ?? {}) }
+export function toolsFor(
+  settings: ToolSettings | undefined,
+  entry: ToolsConfig | undefined,
+): Record<string, ToolConfig> {
+  return { ...(entry?.tools ?? {}), ...(settings?.tools ?? {}) };
 }
 
 /**
@@ -85,12 +88,12 @@ export function toolsFor(settings: ToolSettings | undefined, entry: ToolsConfig 
  */
 export function substitutePlaceholder(template: string, args: Record<string, unknown>): string {
   return template.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (whole, name: string) => {
-    const value = args[name]
-    if (value === undefined) return ''
-    if (typeof value === 'string') return value
-    if (typeof value === 'boolean') return value ? 'true' : 'false'
-    return String(value)
-  })
+    const value = args[name];
+    if (value === undefined) return "";
+    if (typeof value === "string") return value;
+    if (typeof value === "boolean") return value ? "true" : "false";
+    return String(value);
+  });
 }
 
 /**
@@ -99,5 +102,5 @@ export function substitutePlaceholder(template: string, args: Record<string, unk
  * `['{path}']` command both work.
  */
 export function commandArgv(tool: ToolConfig, args: Record<string, unknown>): string[] {
-  return tool.command.map((entry) => substitutePlaceholder(entry, args))
+  return tool.command.map((entry) => substitutePlaceholder(entry, args));
 }

@@ -11,61 +11,74 @@
  *   remove <name>                 — delete a custom tool
  */
 
-import { homedir } from 'node:os'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
+import { homedir } from "node:os";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 
-const home = resolve(process.env.DSH_HOME ?? join(homedir(), '.agents'))
-const settingsPath = join(home, 'settings.yaml')
-const NS = 'dsh-tools'
+const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
+const settingsPath = join(home, "settings.yaml");
+const NS = "dsh-tools";
 
 function* readSection(text, section) {
-  let inSection = false
-  for (const line of text.split('\n')) {
-    if (new RegExp(`^${section}\\s*:`).test(line)) { inSection = true; continue }
-    if (inSection && !/^\s/.test(line)) break
-    if (!inSection) continue
-    const match = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/)
+  let inSection = false;
+  for (const line of text.split("\n")) {
+    if (new RegExp(`^${section}\\s*:`).test(line)) {
+      inSection = true;
+      continue;
+    }
+    if (inSection && !/^\s/.test(line)) break;
+    if (!inSection) continue;
+    const match = line.match(/^\s+([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
     if (match) {
-      yield [match[1], match[2].trim().replace(/^(['"])(.*)\1$/, '$2')]
+      yield [match[1], match[2].trim().replace(/^(['"])(.*)\1$/, "$2")];
     }
   }
 }
 
 function parseJsonValue(raw) {
-  if (raw === '' || raw === 'null') return null
-  if (raw[0] === '{' || raw[0] === '[') {
-    try { return JSON.parse(raw) } catch { /* fall through */ }
+  if (raw === "" || raw === "null") return null;
+  if (raw[0] === "{" || raw[0] === "[") {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      /* fall through */
+    }
   }
-  if (raw === 'true') return true
-  if (raw === 'false') return false
-  const num = Number(raw)
-  if (raw !== '' && Number.isFinite(num)) return num
-  return raw
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  const num = Number(raw);
+  if (raw !== "" && Number.isFinite(num)) return num;
+  return raw;
 }
 
 async function readSectionData() {
   try {
-    const text = await readFile(settingsPath, 'utf8')
-    const section = {}
+    const text = await readFile(settingsPath, "utf8");
+    const section = {};
     for (const [key, value] of readSection(text, NS)) {
-      section[key] = parseJsonValue(value)
+      section[key] = parseJsonValue(value);
     }
-    return section
-  } catch { /* no document yet */ }
-  return {}
+    return section;
+  } catch {
+    /* no document yet */
+  }
+  return {};
 }
 
 async function writeSectionData(section) {
-  let text = ''
-  try { text = await readFile(settingsPath, 'utf8') } catch { /* new file */ }
-  const pattern = /^dsh-tools[^\n]*\n(?:[ \t][^\n]*\n)*/m
-  const block = `dsh-tools:\n  tools: ${JSON.stringify(section.tools ?? {})}\n`
-  const without = text.replace(pattern, '')
-  const rest = without.replace(/\n{3,}/g, '\n\n').trim()
-  const out = `${rest}${rest.endsWith('\n') ? '' : '\n'}${block}`
-  await mkdir(dirname(settingsPath), { recursive: true })
-  await writeFile(settingsPath, out, 'utf8')
+  let text = "";
+  try {
+    text = await readFile(settingsPath, "utf8");
+  } catch {
+    /* new file */
+  }
+  const pattern = /^dsh-tools[^\n]*\n(?:[ \t][^\n]*\n)*/m;
+  const block = `dsh-tools:\n  tools: ${JSON.stringify(section.tools ?? {})}\n`;
+  const without = text.replace(pattern, "");
+  const rest = without.replace(/\n{3,}/g, "\n\n").trim();
+  const out = `${rest}${rest.endsWith("\n") ? "" : "\n"}${block}`;
+  await mkdir(dirname(settingsPath), { recursive: true });
+  await writeFile(settingsPath, out, "utf8");
 }
 
 function printHelp() {
@@ -75,66 +88,68 @@ verbs:
   list
   add <name> <description> <command...>   e.g. dsh tool add lint-py 'Lint a python file' ruff check
   remove <name>
-`)
+`);
 }
 
 async function main() {
-  const verb = process.argv[2]
-  const argv = process.argv.slice(3)
+  const verb = process.argv[2];
+  const argv = process.argv.slice(3);
 
-  if (verb === 'list') {
-    const section = await readSectionData()
-    const entries = Object.entries(section.tools ?? {})
+  if (verb === "list") {
+    const section = await readSectionData();
+    const entries = Object.entries(section.tools ?? {});
     if (entries.length === 0) {
-      process.stdout.write('no custom tools configured\n')
-      return
+      process.stdout.write("no custom tools configured\n");
+      return;
     }
     for (const [name, cfg] of entries) {
-      process.stdout.write(`${name}\n    ${cfg.description ?? ''}\n    ${(cfg.command ?? []).join(' ')}\n`)
+      process.stdout.write(
+        `${name}\n    ${cfg.description ?? ""}\n    ${(cfg.command ?? []).join(" ")}\n`,
+      );
     }
-    return
+    return;
   }
 
-  if (verb === 'add') {
-    const name = argv[0]
-    const description = argv[1]
-    const command = argv.slice(2)
+  if (verb === "add") {
+    const name = argv[0];
+    const description = argv[1];
+    const command = argv.slice(2);
     if (!name || description === undefined || command.length === 0) {
-      process.stderr.write('dsh tool add: expected <name> <description> <command...>\n')
-      process.exitCode = 1
-      return
+      process.stderr.write("dsh tool add: expected <name> <description> <command...>\n");
+      process.exitCode = 1;
+      return;
     }
-    const section = await readSectionData()
-    section.tools ??= {}
-    section.tools[name] = { description, command }
-    await writeSectionData(section)
-    process.stdout.write(`added tool ${name} -> ${command.join(' ')}\n`)
-    return
+    const section = await readSectionData();
+    section.tools ??= {};
+    section.tools[name] = { description, command };
+    await writeSectionData(section);
+    process.stdout.write(`added tool ${name} -> ${command.join(" ")}\n`);
+    return;
   }
 
-  if (verb === 'remove') {
-    const name = argv[0]
+  if (verb === "remove") {
+    const name = argv[0];
     if (!name) {
-      process.stderr.write('dsh tool remove: missing <name>\n')
-      process.exitCode = 1
-      return
+      process.stderr.write("dsh tool remove: missing <name>\n");
+      process.exitCode = 1;
+      return;
     }
-    const section = await readSectionData()
+    const section = await readSectionData();
     if (section.tools?.[name] === undefined) {
-      process.stderr.write(`dsh tool remove: no tool "${name}"\n`)
-      process.exitCode = 1
-      return
+      process.stderr.write(`dsh tool remove: no tool "${name}"\n`);
+      process.exitCode = 1;
+      return;
     }
-    delete section.tools[name]
-    await writeSectionData(section)
-    process.stdout.write(`removed tool ${name}\n`)
-    return
+    delete section.tools[name];
+    await writeSectionData(section);
+    process.stdout.write(`removed tool ${name}\n`);
+    return;
   }
 
-  printHelp()
+  printHelp();
 }
 
 main().catch((err) => {
-  process.stderr.write(`dsh tool: ${err.message}\n`)
-  process.exitCode = 1
-})
+  process.stderr.write(`dsh tool: ${err.message}\n`);
+  process.exitCode = 1;
+});

@@ -40,19 +40,19 @@
  * re-exported from `./secret.js`, the provider harness surface this plugin owns.
  */
 
-export * from './record.js'
-export * from './masterkey.js'
-export * from './store.js'
-export * from './totp.js'
-export * from './files.js'
-export * from './secret.js'
-export * from './redirects.js'
-export * from './descriptor.js'
-export * from './oauth.js'
-export * from './provider-descriptor.js'
-export * from './supervisor.js'
-export * from './agent.js'
-export * from './tools.js'
+export * from "./record.js";
+export * from "./masterkey.js";
+export * from "./store.js";
+export * from "./totp.js";
+export * from "./files.js";
+export * from "./secret.js";
+export * from "./redirects.js";
+export * from "./descriptor.js";
+export * from "./oauth.js";
+export * from "./provider-descriptor.js";
+export * from "./supervisor.js";
+export * from "./agent.js";
+export * from "./tools.js";
 export {
   defaultVaultCliIo,
   parseVaultArguments,
@@ -85,7 +85,7 @@ export {
   importFindings,
   renderScanReport,
   vaultCommand,
-} from './cli.js'
+} from "./cli.js";
 export type {
   VaultCliIo,
   ParsedArguments,
@@ -107,4 +107,4 @@ export type {
   ScanOptions,
   ImportOptions,
   ImportOutcome,
-} from './cli.js'
+} from "./cli.js";

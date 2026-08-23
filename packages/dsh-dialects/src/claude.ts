@@ -8,98 +8,106 @@
  * @module dsh-dialects/claude
  */
 
-import { contentHasImage, LlmError } from '@deepseek-ai/dsh-llm'
-import type { ContentBlock, GenerateOptions, Message } from '@deepseek-ai/dsh-llm'
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from './types.js'
-import { parseSseEvents } from './sse.js'
-import { translateClaude } from './translate-claude.js'
+import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";
+import type { ContentBlock, GenerateOptions, Message } from "@deepseek-ai/dsh-llm";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
+import { parseSseEvents } from "./sse.js";
+import { translateClaude } from "./translate-claude.js";
 
 /** One Anthropic content part. */
 type WirePart =
-  | { type: 'text'; text: string }
-  | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
-  | { type: 'tool_result'; tool_use_id: string; content: string; is_error?: boolean }
+  | { type: "text"; text: string }
+  | { type: "tool_use"; id: string; name: string; input: Record<string, unknown> }
+  | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean };
 
 /** One request `messages` entry. */
 interface WireMessage {
-  role: 'user' | 'assistant'
-  content: WirePart[]
+  role: "user" | "assistant";
+  content: WirePart[];
 }
 
 /** One entry of the request `tools` array. */
 export interface WireTool {
-  name: string
-  description: string
-  input_schema: Record<string, unknown>
+  name: string;
+  description: string;
+  input_schema: Record<string, unknown>;
 }
 
 /** The request body for `POST {baseURL}/messages`. */
 export interface WireRequestBody {
-  model: string
-  system?: string | readonly WireSystemBlock[]
-  thinking?: { type: 'enabled'; budget_tokens: number }
-  messages: WireMessage[]
-  stream: true
-  max_tokens: number
-  tools?: WireTool[]
-  temperature?: number
-  stop_sequences?: string[]
+  model: string;
+  system?: string | readonly WireSystemBlock[];
+  thinking?: { type: "enabled"; budget_tokens: number };
+  messages: WireMessage[];
+  stream: true;
+  max_tokens: number;
+  tools?: WireTool[];
+  temperature?: number;
+  stop_sequences?: string[];
 }
 
 /** Join the text blocks of a message. */
 function flattenText(blocks: readonly ContentBlock[]): string {
   return blocks
-    .filter(block => block.type === 'text')
-    .map(block => block.text)
-    .join('')
+    .filter((block) => block.type === "text")
+    .map((block) => block.text)
+    .join("");
 }
 
 /** Reject core image content before any text-flattening path can silently erase it. */
 function assertTextOnly(blocks: readonly ContentBlock[]): void {
   if (contentHasImage(blocks)) {
-    throw new LlmError('The claude dialect does not support image content.', 'UNSUPPORTED_CONTENT')
+    throw new LlmError("The claude dialect does not support image content.", "UNSUPPORTED_CONTENT");
   }
 }
 
 /** Parse a raw tool-arguments JSON string into an object. */
 function parseToolInput(argumentsJson: string): Record<string, unknown> {
   try {
-    const value: unknown = JSON.parse(argumentsJson)
-    return typeof value === 'object' && value !== null ? value as Record<string, unknown> : {}
+    const value: unknown = JSON.parse(argumentsJson);
+    return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
   } catch {
-    throw new LlmError('assistant tool-call arguments are not valid JSON', 'MALFORMED_TOOL_ARGUMENTS')
+    throw new LlmError(
+      "assistant tool-call arguments are not valid JSON",
+      "MALFORMED_TOOL_ARGUMENTS",
+    );
   }
 }
 
 function serializeAssistant(message: Message): WireMessage {
-  const parts: WirePart[] = []
+  const parts: WirePart[] = [];
   for (const block of message.content) {
-    if (block.type === 'text') parts.push({ type: 'text', text: block.text })
-    else if (block.type === 'tool-call') {
-      parts.push({ type: 'tool_use', id: block.id, name: block.name, input: parseToolInput(block.arguments) })
+    if (block.type === "text") parts.push({ type: "text", text: block.text });
+    else if (block.type === "tool-call") {
+      parts.push({
+        type: "tool_use",
+        id: block.id,
+        name: block.name,
+        input: parseToolInput(block.arguments),
+      });
     }
   }
-  return { role: 'assistant', content: parts }
+  return { role: "assistant", content: parts };
 }
 
 function serializeUser(message: Message): WireMessage {
-  const parts: WirePart[] = []
+  const parts: WirePart[] = [];
   for (const block of message.content) {
-    if (block.type === 'text') parts.push({ type: 'text', text: block.text })
-    else if (block.type === 'tool-result') {
+    if (block.type === "text") parts.push({ type: "text", text: block.text });
+    else if (block.type === "tool-result") {
       parts.push({
-        type: 'tool_result',
+        type: "tool_result",
         tool_use_id: block.toolCallId,
-        content: flattenText(block.content) || '(no output)',
-        ...block.isError === true ? { is_error: true } : {},
-      })
+        content: flattenText(block.content) || "(no output)",
+        ...(block.isError === true ? { is_error: true } : {}),
+      });
     }
   }
-  return { role: 'user', content: parts }
+  return { role: "user", content: parts };
 }
 
 function stripTrailingSlash(base: string): string {
-  return base.endsWith('/') ? base.slice(0, -1) : base
+  return base.endsWith("/") ? base.slice(0, -1) : base;
 }
 
 /**
@@ -115,11 +123,14 @@ export function serializeSystem(
   auth: DialectAuth,
 ): { system?: string | readonly WireSystemBlock[] } {
   if (auth.token === undefined) {
-    return system === undefined ? {} : { system }
+    return system === undefined ? {} : { system };
   }
-  const blocks: WireSystemBlock[] = [{ type: 'text', text: OAUTH_SUBSCRIPTION_IDENTITY, cache_control: { type: 'ephemeral' } }]
-  if (system !== undefined && system.length > 0) blocks.push({ type: 'text', text: system, cache_control: { type: 'ephemeral' } })
-  return { system: blocks }
+  const blocks: WireSystemBlock[] = [
+    { type: "text", text: OAUTH_SUBSCRIPTION_IDENTITY, cache_control: { type: "ephemeral" } },
+  ];
+  if (system !== undefined && system.length > 0)
+    blocks.push({ type: "text", text: system, cache_control: { type: "ephemeral" } });
+  return { system: blocks };
 }
 
 /**
@@ -130,10 +141,10 @@ export function serializeSystem(
  */
 /** One `system` block, the array form Anthropic accepts alongside a plain string. */
 interface WireSystemBlock {
-  type: 'text'
-  text: string
+  type: "text";
+  text: string;
   /** Anthropic prompt caching: mark this block as a cache breakpoint. */
-  cache_control?: { type: 'ephemeral' }
+  cache_control?: { type: "ephemeral" };
 }
 
 /**
@@ -147,19 +158,19 @@ interface WireSystemBlock {
  * API-key requests need none of this and must not carry it: it would silently
  * prepend an identity the caller never asked for.
  */
-const OAUTH_SUBSCRIPTION_IDENTITY = "You are Claude Code, Anthropic's official CLI for Claude."
+const OAUTH_SUBSCRIPTION_IDENTITY = "You are Claude Code, Anthropic's official CLI for Claude.";
 
 /**
  * Anthropic takes a thinking *budget*, not a named level, so the shared effort
  * vocabulary maps onto token budgets here.
  */
-const THINKING_BUDGETS: Record<string, number> = { low: 4_096, medium: 16_384, high: 32_768 }
+const THINKING_BUDGETS: Record<string, number> = { low: 4_096, medium: 16_384, high: 32_768 };
 
 /** The smallest budget worth enabling extended thinking for. */
-const MINIMUM_THINKING_BUDGET = 1_024
+const MINIMUM_THINKING_BUDGET = 1_024;
 
 /** Headroom left for the answer itself once thinking has taken its share. */
-const ANSWER_HEADROOM = 1_024
+const ANSWER_HEADROOM = 1_024;
 
 /**
  * Resolve the `thinking` block for a request.
@@ -175,73 +186,83 @@ const ANSWER_HEADROOM = 1_024
 export function serializeThinking(
   effort: string | undefined,
   maxTokens: number,
-): { thinking?: { type: 'enabled'; budget_tokens: number } } {
-  if (effort === undefined) return {}
-  const requested = THINKING_BUDGETS[effort]
-  if (requested === undefined) return {}
-  const budget = Math.min(requested, maxTokens - ANSWER_HEADROOM)
-  if (budget < MINIMUM_THINKING_BUDGET) return {}
-  return { thinking: { type: 'enabled', budget_tokens: budget } }
+): { thinking?: { type: "enabled"; budget_tokens: number } } {
+  if (effort === undefined) return {};
+  const requested = THINKING_BUDGETS[effort];
+  if (requested === undefined) return {};
+  const budget = Math.min(requested, maxTokens - ANSWER_HEADROOM);
+  if (budget < MINIMUM_THINKING_BUDGET) return {};
+  return { thinking: { type: "enabled", budget_tokens: budget } };
 }
 
 export const claudeDialect: Dialect = {
-  id: 'claude',
+  id: "claude",
 
-  serialize(options: GenerateOptions, auth: DialectAuth, baseURL: string, defaults: DialectDefaults): WireRequest {
+  serialize(
+    options: GenerateOptions,
+    auth: DialectAuth,
+    baseURL: string,
+    defaults: DialectDefaults,
+  ): WireRequest {
     if (auth.token === undefined && auth.apiKey === undefined) {
-      throw new LlmError('no bearer token or API key supplied for a claude dialect request', 'AUTH')
+      throw new LlmError(
+        "no bearer token or API key supplied for a claude dialect request",
+        "AUTH",
+      );
     }
-    const messages: WireMessage[] = []
+    const messages: WireMessage[] = [];
     for (const message of options.messages) {
-      assertTextOnly(message.content)
-      if (message.role === 'system') continue
-      messages.push(message.role === 'assistant' ? serializeAssistant(message) : serializeUser(message))
+      assertTextOnly(message.content);
+      if (message.role === "system") continue;
+      messages.push(
+        message.role === "assistant" ? serializeAssistant(message) : serializeUser(message),
+      );
     }
 
-    const maxTokens = options.maxTokens ?? defaults.maxTokens
-    const thinking = serializeThinking(options.reasoningEffort, maxTokens)
+    const maxTokens = options.maxTokens ?? defaults.maxTokens;
+    const thinking = serializeThinking(options.reasoningEffort, maxTokens);
     const body: WireRequestBody = {
       model: options.model,
       messages,
       stream: true,
       max_tokens: maxTokens,
       ...serializeSystem(options.system, auth),
-      ...options.tools !== undefined && options.tools.length > 0
+      ...(options.tools !== undefined && options.tools.length > 0
         ? {
-          tools: options.tools.map(tool => ({
-            name: tool.name,
-            description: tool.description,
-            input_schema: tool.parameters,
-          })),
-        }
-        : {},
+            tools: options.tools.map((tool) => ({
+              name: tool.name,
+              description: tool.description,
+              input_schema: tool.parameters,
+            })),
+          }
+        : {}),
       ...thinking,
       // Anthropic pins sampling while extended thinking is on, so a caller's
       // temperature must not be sent alongside it.
-      ...options.temperature !== undefined && thinking.thinking === undefined
+      ...(options.temperature !== undefined && thinking.thinking === undefined
         ? { temperature: options.temperature }
-        : {},
-      ...options.stop !== undefined ? { stop_sequences: options.stop } : {},
-    }
+        : {}),
+      ...(options.stop !== undefined ? { stop_sequences: options.stop } : {}),
+    };
 
     return {
       url: `${stripTrailingSlash(baseURL)}/messages`,
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        accept: 'text/event-stream',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-        ...auth.token !== undefined ? { authorization: `Bearer ${auth.token}` } : {},
-        ...auth.apiKey !== undefined ? { 'x-api-key': auth.apiKey } : {},
+        "content-type": "application/json",
+        accept: "text/event-stream",
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+        ...(auth.token !== undefined ? { authorization: `Bearer ${auth.token}` } : {}),
+        ...(auth.apiKey !== undefined ? { "x-api-key": auth.apiKey } : {}),
         ...auth.headers,
       },
       body: JSON.stringify({ ...body, ...defaults.extra }),
-      framing: 'sse',
-    }
+      framing: "sse",
+    };
   },
 
   parse(body, onActivity) {
-    return translateClaude(parseSseEvents(body, onActivity))
+    return translateClaude(parseSseEvents(body, onActivity));
   },
-}
+};

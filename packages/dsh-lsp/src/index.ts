@@ -12,30 +12,30 @@
  * @module dsh-lsp
  */
 
-import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import { installSettingsSection } from '@deepseek-ai/dsh-settings'
-import Lsp from '@deepseek-ai/dsh-lsp'
-import * as LspStdio from '@deepseek-ai/dsh-lsp-stdio'
-import * as ToolLsp from '@deepseek-ai/dsh-tool-lsp'
-import { NS, LspConfig, LspSettings, type LspSettings as LspSettingsType } from './settings.js'
+import type { Context } from "@deepseek-ai/cordis";
+import z from "@deepseek-ai/schemastery";
+import { installSettingsSection } from "@deepseek-ai/dsh-settings";
+import Lsp from "@deepseek-ai/dsh-lsp";
+import * as LspStdio from "@deepseek-ai/dsh-lsp-stdio";
+import * as ToolLsp from "@deepseek-ai/dsh-tool-lsp";
+import { NS, LspConfig, LspSettings, type LspSettings as LspSettingsType } from "./settings.js";
 
-export type * from './settings.js'
+export type * from "./settings.js";
 
-export const name = 'dsh-lsp'
-export const inject: string[] = []
+export const name = "dsh-lsp";
+export const inject: string[] = [];
 
-export const Config: z<LspConfig> = LspConfig
+export const Config: z<LspConfig> = LspConfig;
 
 /**
  * Merge the plugin's entry server table under the live settings section
  * (settings win). Pure: exported for direct unit verification.
  */
 export function mergeServers(
-  entry: LspConfig['servers'],
+  entry: LspConfig["servers"],
   live: LspSettingsType | undefined,
-): Record<string, LspSettingsType['servers'][string]> {
-  return { ...(entry ?? {}), ...(live?.servers ?? {}) }
+): Record<string, LspSettingsType["servers"][string]> {
+  return { ...(entry ?? {}), ...(live?.servers ?? {}) };
 }
 
 /**
@@ -46,24 +46,37 @@ export function mergeServers(
  * @param config - the plugin's deployment configuration.
  */
 export function apply(ctx: Context, config: LspConfig): void {
-  installSettingsSection(ctx, NS, LspSettings, { servers: {} }, {
-    setSource: () => { /* the mounts read the live section at settings attach */ },
-    onChange: () => {},
-  })
+  installSettingsSection(
+    ctx,
+    NS,
+    LspSettings,
+    { servers: {} },
+    {
+      setSource: () => {
+        /* the mounts read the live section at settings attach */
+      },
+      onChange: () => {},
+    },
+  );
 
-  ctx.inject(['settings'], async (sctx) => {
-    const merged = mergeServers(config.servers ?? {}, sctx.settings.get(NS) as LspSettingsType | undefined)
+  ctx.inject(["settings"], async (sctx) => {
+    const merged = mergeServers(
+      config.servers ?? {},
+      sctx.settings.get(NS) as LspSettingsType | undefined,
+    );
 
-    if (ctx.get('lsp') === undefined) {
-      await ctx.plugin(Lsp)
+    if (ctx.get("lsp") === undefined) {
+      await ctx.plugin(Lsp);
     }
 
     if (Object.keys(merged).length > 0) {
-      await ctx.plugin(LspStdio, { servers: merged })
-      await ctx.plugin(ToolLsp, {})
-      ctx.logger.info(`dsh-lsp: mounted ${Object.keys(merged).length} LSP server(s)`)
+      await ctx.plugin(LspStdio, { servers: merged });
+      await ctx.plugin(ToolLsp, {});
+      ctx.logger.info(`dsh-lsp: mounted ${Object.keys(merged).length} LSP server(s)`);
     } else {
-      ctx.logger.warn('dsh-lsp: no LSP servers configured — run `dsh lsp servers add <id> <command>`')
+      ctx.logger.warn(
+        "dsh-lsp: no LSP servers configured — run `dsh lsp servers add <id> <command>`",
+      );
     }
-  })
+  });
 }

@@ -12,10 +12,10 @@
 /* -------------------------------------------------------------------------- */
 
 export interface ClientRequest {
-  type: 'client-request'
-  rpcId: string
-  method: string
-  payload: Record<string, unknown>
+  type: "client-request";
+  rpcId: string;
+  method: string;
+  payload: Record<string, unknown>;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -23,9 +23,9 @@ export interface ClientRequest {
 /* -------------------------------------------------------------------------- */
 
 export interface ServerResponse {
-  type: 'server-response'
-  rpcId: string
-  result: { ok: boolean; value?: unknown }
+  type: "server-response";
+  rpcId: string;
+  result: { ok: boolean; value?: unknown };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -34,14 +34,14 @@ export interface ServerResponse {
 
 /** Server-initiated request (via SSE or WS downlink). */
 export interface ServerRequest {
-  type: 'server-request'
-  rpcId: string
-  method: string
-  payload: Record<string, unknown>
+  type: "server-request";
+  rpcId: string;
+  method: string;
+  payload: Record<string, unknown>;
 }
 
 /** Union of all possible mux frames. */
-export type MuxFrame = ServerRequest
+export type MuxFrame = ServerRequest;
 
 /* -------------------------------------------------------------------------- */
 /* Domain types                                                                */
@@ -49,35 +49,35 @@ export type MuxFrame = ServerRequest
 
 /** A session descriptor as returned by session.list. */
 export interface SessionDescriptor {
-  id: string
-  title: string
-  workspaceId?: string
-  model?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  title: string;
+  workspaceId?: string;
+  model?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /** A session event as returned by session.history or streamed via SSE. */
 export interface SessionEvent {
-  type: string
-  seq: number
-  role?: string
-  content?: Array<{ type: string; text?: string; [key: string]: unknown }>
-  [key: string]: unknown
+  type: string;
+  seq: number;
+  role?: string;
+  content?: Array<{ type: string; text?: string; [key: string]: unknown }>;
+  [key: string]: unknown;
 }
 
 /** A model descriptor as returned by session.models. */
 export interface ModelDescriptor {
-  id: string
-  name: string
-  provider: string
-  [key: string]: unknown
+  id: string;
+  name: string;
+  provider: string;
+  [key: string]: unknown;
 }
 
 /** A goal descriptor as returned by goal.create. */
 export interface GoalDescriptor {
-  id: string
-  title: string
-  status: 'active' | 'paused' | 'completed'
-  [key: string]: unknown
+  id: string;
+  title: string;
+  status: "active" | "paused" | "completed";
+  [key: string]: unknown;
 }

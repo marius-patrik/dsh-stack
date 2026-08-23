@@ -7,31 +7,31 @@
  * @module dsh-themes/catalog
  */
 
-import { execFile } from 'node:child_process'
-import { mkdtemp, readFile, rm, readdir, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { promisify } from 'node:util'
-import { parseTmThemeXml, parseVsCodeTheme, type ThemeSource } from './theme.js'
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, rm, readdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { promisify } from "node:util";
+import { parseTmThemeXml, parseVsCodeTheme, type ThemeSource } from "./theme.js";
 
-const execFileAsync = promisify(execFile)
+const execFileAsync = promisify(execFile);
 
 /** One Open VSX extension hit (search result). */
 export interface CatalogExtension {
   /** Extension namespace (publisher). */
-  namespace: string
+  namespace: string;
   /** Extension name. */
-  name: string
+  name: string;
   /** Human-readable name. */
-  displayName: string
+  displayName: string;
   /** One-line description. */
-  description: string
+  description: string;
   /** Latest version. */
-  version: string
+  version: string;
   /** Publisher's download count. */
-  downloadCount: number
+  downloadCount: number;
   /** Direct vsix download URL. */
-  download: string
+  download: string;
 }
 
 /** Search a catalog for theme extensions.
@@ -40,17 +40,21 @@ export interface CatalogExtension {
  * @param limit - max results.
  * @returns the matching extensions.
  */
-export async function searchCatalog(baseUrl: string, query: string, limit = 10): Promise<CatalogExtension[]> {
-  const url = new URL('/api/-/search', baseUrl)
-  url.searchParams.set('query', query)
-  url.searchParams.set('category', 'Themes')
-  url.searchParams.set('size', String(limit))
-  const response = await fetch(url)
+export async function searchCatalog(
+  baseUrl: string,
+  query: string,
+  limit = 10,
+): Promise<CatalogExtension[]> {
+  const url = new URL("/api/-/search", baseUrl);
+  url.searchParams.set("query", query);
+  url.searchParams.set("category", "Themes");
+  url.searchParams.set("size", String(limit));
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`dsh-themes: catalog search failed (HTTP ${response.status})`)
+    throw new Error(`dsh-themes: catalog search failed (HTTP ${response.status})`);
   }
-  const body = await response.json() as { extensions?: Array<Record<string, unknown>> }
-  return (body.extensions ?? []).map(parseExtension)
+  const body = (await response.json()) as { extensions?: Array<Record<string, unknown>> };
+  return (body.extensions ?? []).map(parseExtension);
 }
 
 /**
@@ -62,14 +66,20 @@ export async function searchCatalog(baseUrl: string, query: string, limit = 10):
  * @param name - extension name.
  * @returns the extension metadata, including the vsix download URL.
  */
-export async function resolveCatalogExtension(baseUrl: string, namespace: string, name: string): Promise<CatalogExtension> {
-  const url = new URL(`/api/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`, baseUrl)
-  const response = await fetch(url)
+export async function resolveCatalogExtension(
+  baseUrl: string,
+  namespace: string,
+  name: string,
+): Promise<CatalogExtension> {
+  const url = new URL(`/api/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`, baseUrl);
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`dsh-themes: catalog resolve failed for ${namespace}.${name} (HTTP ${response.status})`)
+    throw new Error(
+      `dsh-themes: catalog resolve failed for ${namespace}.${name} (HTTP ${response.status})`,
+    );
   }
-  const body = await response.json() as Record<string, unknown>
-  return parseExtension(body)
+  const body = (await response.json()) as Record<string, unknown>;
+  return parseExtension(body);
 }
 
 /**
@@ -79,37 +89,40 @@ export async function resolveCatalogExtension(baseUrl: string, namespace: string
  * @returns the temporary file path.
  */
 export async function downloadVsix(url: string): Promise<string> {
-  const response = await fetch(url)
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`dsh-themes: vsix download failed (HTTP ${response.status})`)
+    throw new Error(`dsh-themes: vsix download failed (HTTP ${response.status})`);
   }
-  const buffer = Buffer.from(await response.arrayBuffer())
-  const temp = await mkdtemp(join(tmpdir(), 'dsh-themes-vsix-'))
-  const path = join(temp, 'extension.vsix')
-  await writeFile(path, buffer)
-  return path
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const temp = await mkdtemp(join(tmpdir(), "dsh-themes-vsix-"));
+  const path = join(temp, "extension.vsix");
+  await writeFile(path, buffer);
+  return path;
 }
 
 /** Narrow one raw extension record. */
 function parseExtension(raw: Record<string, unknown>): CatalogExtension {
-  const files = raw.files === null || typeof raw.files !== 'object' ? {} : raw.files as Record<string, unknown>
+  const files =
+    raw.files === null || typeof raw.files !== "object"
+      ? {}
+      : (raw.files as Record<string, unknown>);
   return {
-    namespace: stringOf(raw.namespace, 'namespace'),
-    name: stringOf(raw.name, 'name'),
+    namespace: stringOf(raw.namespace, "namespace"),
+    name: stringOf(raw.name, "name"),
     displayName: stringOf(raw.displayName, raw.name as string),
-    description: stringOf(raw.description, ''),
-    version: stringOf(raw.version, ''),
+    description: stringOf(raw.description, ""),
+    version: stringOf(raw.version, ""),
     downloadCount: numberOr(raw.downloadCount, 0),
-    download: stringOf(files.download, ''),
-  }
+    download: stringOf(files.download, ""),
+  };
 }
 
 function stringOf(value: unknown, fallback: string): string {
-  return typeof value === 'string' ? value : fallback
+  return typeof value === "string" ? value : fallback;
 }
 
 function numberOr(value: unknown, fallback: number): number {
-  return typeof value === 'number' ? value : fallback
+  return typeof value === "number" ? value : fallback;
 }
 
 /**
@@ -119,31 +132,36 @@ function numberOr(value: unknown, fallback: number): number {
  * @param warn - reporter for skipped/malformed theme files.
  * @returns the extracted theme sources.
  */
-export async function extractThemesFromVsix(vsixPath: string, warn?: (message: string) => void): Promise<ThemeSource[]> {
-  const temp = await mkdtemp(join(tmpdir(), 'dsh-themes-'))
+export async function extractThemesFromVsix(
+  vsixPath: string,
+  warn?: (message: string) => void,
+): Promise<ThemeSource[]> {
+  const temp = await mkdtemp(join(tmpdir(), "dsh-themes-"));
   try {
-    await execFileAsync('unzip', ['-q', '-o', vsixPath, '-d', temp])
-    const themesDir = join(temp, 'extension', 'themes')
-    let files: string[]
+    await execFileAsync("unzip", ["-q", "-o", vsixPath, "-d", temp]);
+    const themesDir = join(temp, "extension", "themes");
+    let files: string[];
     try {
-      files = await readdir(themesDir)
+      files = await readdir(themesDir);
     } catch {
-      return []
+      return [];
     }
-    const sources: ThemeSource[] = []
+    const sources: ThemeSource[] = [];
     for (const file of files) {
-      if (!file.endsWith('.json') && !file.endsWith('.tmTheme')) continue
+      if (!file.endsWith(".json") && !file.endsWith(".tmTheme")) continue;
       try {
-        const text = await readFile(join(themesDir, file), 'utf8')
-        sources.push(file.endsWith('.tmTheme')
-          ? parseTmThemeXml(text)
-          : parseVsCodeTheme(text, file.replace(/\.json$/, '')))
+        const text = await readFile(join(themesDir, file), "utf8");
+        sources.push(
+          file.endsWith(".tmTheme")
+            ? parseTmThemeXml(text)
+            : parseVsCodeTheme(text, file.replace(/\.json$/, "")),
+        );
       } catch (error) {
-        warn?.(`dsh-themes: skipping theme ${file}: ${String(error)}`)
+        warn?.(`dsh-themes: skipping theme ${file}: ${String(error)}`);
       }
     }
-    return sources
+    return sources;
   } finally {
-    void rm(temp, { recursive: true, force: true })
+    void rm(temp, { recursive: true, force: true });
   }
 }

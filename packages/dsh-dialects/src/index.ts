@@ -7,28 +7,31 @@
  * @module dsh-dialects
  */
 
-import { Context, Service } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
-import { claudeDialect } from './claude.js'
-import { codeAssistDialect } from './code-assist.js'
-import { antigravityDialect } from './antigravity.js'
-export { antigravityDialect, ANTIGRAVITY_PROJECT_HEADER } from './antigravity.js'
-import { geminiDialect } from './gemini.js'
-import { openaiDialect } from './openai.js'
-import type { Dialect, DialectId } from './types.js'
+import { Context, Service } from "@deepseek-ai/cordis";
+import z from "@deepseek-ai/schemastery";
+import { claudeDialect } from "./claude.js";
+import { codeAssistDialect } from "./code-assist.js";
+import { antigravityDialect } from "./antigravity.js";
+export { antigravityDialect, ANTIGRAVITY_PROJECT_HEADER } from "./antigravity.js";
+import { geminiDialect } from "./gemini.js";
+import { openaiDialect } from "./openai.js";
+import type { Dialect, DialectId } from "./types.js";
 
-export type { Dialect, DialectAuth, DialectDefaults, DialectId, WireRequest } from './types.js'
-export { parseSseData, parseSseEvents } from './sse.js'
-export { parseNdjson } from './ndjson.js'
+export type { Dialect, DialectAuth, DialectDefaults, DialectId, WireRequest } from "./types.js";
+export { parseSseData, parseSseEvents } from "./sse.js";
+export { parseNdjson } from "./ndjson.js";
 export {
   translateOpenAi,
   mapFinishReason as mapOpenAiFinishReason,
   mapUsage as mapOpenAiUsage,
-} from './translate-openai.js'
-export { translateClaude, mapClaudeFinishReason, mapClaudeUsage } from './translate-claude.js'
-export { translateGemini, mapGeminiFinishReason } from './translate-gemini.js'
-export { serializeMessages as serializeOpenAiMessages } from './openai.js'
-export { serializeContents as serializeGeminiContents, buildToolNameIndex as buildGeminiToolNameIndex } from './gemini.js'
+} from "./translate-openai.js";
+export { translateClaude, mapClaudeFinishReason, mapClaudeUsage } from "./translate-claude.js";
+export { translateGemini, mapGeminiFinishReason } from "./translate-gemini.js";
+export { serializeMessages as serializeOpenAiMessages } from "./openai.js";
+export {
+  serializeContents as serializeGeminiContents,
+  buildToolNameIndex as buildGeminiToolNameIndex,
+} from "./gemini.js";
 
 /**
  * The `dialects` service: a typed registry of provider wire dialects.
@@ -36,10 +39,10 @@ export { serializeContents as serializeGeminiContents, buildToolNameIndex as bui
  * are HMR-safe through `ctx.effect` disposers.
  */
 export class DialectRegistry extends Service {
-  private readonly dialects = new Map<DialectId, Dialect>()
+  private readonly dialects = new Map<DialectId, Dialect>();
 
   constructor(ctx: Context) {
-    super(ctx, 'dialects')
+    super(ctx, "dialects");
   }
 
   /**
@@ -48,9 +51,9 @@ export class DialectRegistry extends Service {
    */
   register(dialect: Dialect): void {
     if (this.dialects.has(dialect.id)) {
-      throw new Error(`dsh-dialects: duplicate dialect "${dialect.id}"`)
+      throw new Error(`dsh-dialects: duplicate dialect "${dialect.id}"`);
     }
-    this.dialects.set(dialect.id, dialect)
+    this.dialects.set(dialect.id, dialect);
   }
 
   /**
@@ -58,7 +61,7 @@ export class DialectRegistry extends Service {
    * @param id - the dialect id to remove.
    */
   unregister(id: DialectId): void {
-    this.dialects.delete(id)
+    this.dialects.delete(id);
   }
 
   /**
@@ -67,40 +70,46 @@ export class DialectRegistry extends Service {
    * @returns the dialect; throws when unknown.
    */
   get(id: DialectId): Dialect {
-    const dialect = this.dialects.get(id)
+    const dialect = this.dialects.get(id);
     if (dialect === undefined) {
-      throw new Error(`dsh-dialects: unknown dialect "${id}"`)
+      throw new Error(`dsh-dialects: unknown dialect "${id}"`);
     }
-    return dialect
+    return dialect;
   }
 
   /** Every registered dialect, in registration order. */
   list(): readonly Dialect[] {
-    return [...this.dialects.values()]
+    return [...this.dialects.values()];
   }
 }
 
-declare module '@deepseek-ai/cordis' {
+declare module "@deepseek-ai/cordis" {
   interface Context {
-    dialects: DialectRegistry
+    dialects: DialectRegistry;
   }
 }
 
-export const name = 'dsh-dialects'
-export const inject: never[] = []
+export const name = "dsh-dialects";
+export const inject: never[] = [];
 
 /** dsh-dialects configuration; empty — the bundled dialects are built in. */
-export interface Config { }
+export interface Config {}
 
 /** Schemastery configuration for the plugin. */
-export const Config: z<Config> = z.object({})
+export const Config: z<Config> = z.object({});
 
 export function apply(ctx: Context, _config: Config): void {
-  new DialectRegistry(ctx)
-  for (const dialect of [openaiDialect, claudeDialect, geminiDialect, codeAssistDialect, antigravityDialect]) {
+  new DialectRegistry(ctx);
+  for (const dialect of [
+    openaiDialect,
+    claudeDialect,
+    geminiDialect,
+    codeAssistDialect,
+    antigravityDialect,
+  ]) {
     ctx.effect(() => {
-      ctx.dialects.register(dialect)
-      return () => ctx.dialects.unregister(dialect.id)
-    })
+      ctx.dialects.register(dialect);
+      return () => ctx.dialects.unregister(dialect.id);
+    });
   }
 }
