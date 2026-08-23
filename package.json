@@ -16,7 +16,8 @@
     "verify": "pnpm run verify:plugin-readmes && node scripts/verify-stack.mjs && pnpm -r --if-present verify",
     "test": "pnpm -r --if-present test",
     "release:manifest": "node scripts/release.mjs manifest",
-    "release:version": "node scripts/release.mjs version"
+    "release:version": "node scripts/release.mjs version",
+    "release:assets": "node scripts/release.mjs assets"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
