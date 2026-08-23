@@ -1,0 +1,15 @@
+{
+  "name": "@dsh-stack/agent-personas",
+  "version": "0.1.0",
+  "description": "Canonical agent persona registry service.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": ["lib", "package.json", "stack.json"],
+  "publishConfig": { "access": "public" },
+  "stack": { "kind": "plugin", "id": "stack.agent.personas" },
+  "scripts": { "build": "tsc", "typecheck": "tsc --noEmit", "test": "node check-plugin.mjs" },
+  "peerDependencies": { "@deepseek-ai/cordis": "^4.0.1" },
+  "devDependencies": { "typescript": "^6.0.3", "@deepseek-ai/cordis": "^4.0.1" }
+}

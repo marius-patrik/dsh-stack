@@ -1,0 +1,1 @@
+{"id":"stack.agent.actions","name":"@dsh-stack/agent-actions","version":"0.1.0","kind":"plugin","description":"Explicit session actions with durable state, tool policy, routing, and reload mechanisms.","files":["lib","package.json","stack.json","cordis.patch.yml"],"dependencies":[],"optionalDependencies":[]}

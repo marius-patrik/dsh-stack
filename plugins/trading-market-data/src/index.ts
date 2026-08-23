@@ -9,8 +9,8 @@ export interface MarketDataQuery {
 
 export interface MarketDataProvider {
   readonly id: string;
-  readonly listSymbols(): Promise<readonly string[]>;
-  readonly getCandles(query: MarketDataQuery): Promise<readonly Candle[]>;
+  listSymbols(): Promise<readonly string[]>;
+  getCandles(query: MarketDataQuery): Promise<readonly Candle[]>;
 }
 
 export class MarketDataRegistry {

@@ -24,12 +24,15 @@ export function apply(ctx: ClientContext): void {
   const active = runtime.getActive();
   const selected = components[active] ?? components.deepseek!;
 
-  ctx.slots.inject('sidebar.brand.mark', () =>
-    ctx.slots.inject('sidebar.brand.name', () =>
-      ctx.slots.inject('conversation.hero.brand.mark', function* () {
-        yield ctx.slots.register({ name: `stack-skin:${active}:sidebar-mark` }, selected.mark);
-        yield ctx.slots.register({ name: `stack-skin:${active}:sidebar-name` }, selected.name);
-        yield ctx.slots.register({ name: `stack-skin:${active}:hero-mark` }, selected.mark);
-      })))
-  );
+  ctx.slots.inject('sidebar.brand.mark', function* () {
+    yield ctx.slots.register({ name: `stack-skin:${active}:sidebar-mark` }, selected.mark);
+  });
+
+  ctx.slots.inject('sidebar.brand.name', function* () {
+    yield ctx.slots.register({ name: `stack-skin:${active}:sidebar-name` }, selected.name);
+  });
+
+  ctx.slots.inject('conversation.hero.brand.mark', function* () {
+    yield ctx.slots.register({ name: `stack-skin:${active}:hero-mark` }, selected.mark);
+  });
 }

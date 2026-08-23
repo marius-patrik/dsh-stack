@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: ['**']
 
 jobs:
   verify:
@@ -30,23 +30,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Typecheck canonical packages
+      - name: Typecheck Stack workspace
         run: pnpm typecheck
 
-      - name: Build canonical packages
+      - name: Build Stack workspace
         run: pnpm build
 
-      - name: Verify canonical packages
+      - name: Verify Stack workspace
         run: pnpm verify
 
-      - name: Test canonical packages
+      - name: Test Stack workspace
         run: pnpm test
-
-      - name: Reject legacy imports in canonical source
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -R --line-number --exclude-dir=.git --exclude-dir=node_modules -E "(plugins/)(dsh-|core/|agents/|ai/|ux/)" packages; then
-            echo 'Canonical packages must not import legacy plugin implementations.'
-            exit 1
-          fi

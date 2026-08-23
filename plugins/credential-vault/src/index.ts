@@ -1,280 +1,308 @@
-import { createCipheriv, createDecipheriv, createHmac, randomBytes, scryptSync } from 'node:crypto';
+/**
+ * The dsh account manager (`ctx.accounts`): an encrypted vault that owns
+ * provider secret values, layered over the harness credential seam.
+ *
+ * The vault is the Andromeda-parity record store (`EncryptedFileVault`): one
+ * AES-256-GCM envelope per record under `<home>/vault/`, with a 32-byte master
+ * key that comes from the macOS Keychain with the `<home>/accounts.key` file as
+ * fallback — the same bootstrap the legacy document used. Records are addressed
+ * through the seam by their canonical provider reference (a `ref:` tag), since
+ * references like `CLAUDE_SUB_OAUTH_TOKEN` are not valid record ids.
+ *
+ * A legacy `<home>/accounts.vault` document (the v1 flat ref→value store) is
+ * migrated into records on first boot, then retired to
+ * `<home>/accounts.vault.v1-migrated` so nothing is silently destroyed.
+ *
+ * Consumers resolve a reference once per operation, vault first and the
+ * harness credential seam second, so a secret imported or set here reaches the
+ * very next operation without a restart while an ambient value keeps working
+ * as a fallback. `set`/`unset` write the vault only — ambient values are read
+ * through, never promoted.
+ *
+ * File-based importers move existing Claude Code and Cursor credentials into
+ * the vault in one command; the harness owns login and obtaining for the
+ * remaining providers.
+ * @module dsh-credentials
+ */
 
-export const VAULT_VERSION = 1;
-const SALT_BYTES = 16;
-const NONCE_BYTES = 12;
-const KEY_BYTES = 32;
-const AUTH_TAG_BYTES = 16;
-const SCRYPT_N = 32_768;
-const SCRYPT_R = 8;
-const SCRYPT_P = 1;
+import { Service, type Context } from '@deepseek-ai/cordis'
+import { credentialRef, type CredentialProvider } from '@deepseek-ai/dsh-credentials'
+import z from '@deepseek-ai/schemastery'
+import { homedir } from 'node:os'
+import { join, resolve } from 'node:path'
+import { rename } from 'node:fs/promises'
+import { loadOrCreateKey, Vault } from './vault.js'
+import { exists } from './vault/files.js'
+import { EncryptedFileVault, vaultDirectory } from './vault/store.js'
+import type { MasterKeySource } from './vault/masterkey.js'
+import type { SecretRecord } from './vault/record.js'
+import { canonicalRefOf, recordForRef, refTag, revealFromRecord, slugRecordId } from './refs.js'
+import { claudeFileProvider, cursorFileProvider, githubFileProvider } from './file-providers.js'
+import { registerGithubCredentials } from './github.js'
+import { mountVaultWeb } from './web.js'
+import type { FileSecretProvider, ImportResult, ResolvedSecret } from './types.js'
 
-export type CredentialKind =
-  | 'api-key'
-  | 'password'
-  | 'totp'
-  | 'oauth'
-  | 'ssh-key'
-  | 'certificate'
-  | 'recovery-codes'
-  | 'passkey'
-  | 'secret';
+export { Vault } from './vault.js'
+export { claudeFileProvider, cursorFileProvider, githubFileProvider } from './file-providers.js'
+export { registerGithubCredentials, GITHUB_API_BASE, GITHUB_AUTHORIZE_URL, GITHUB_TOKEN_URL } from './github.js'
+export { VAULT_PREFIX, KNOWN_REF_NAMES, listRows, makeVaultHandler, mountVaultWeb } from './web.js'
+export type { VaultListRow } from './web.js'
+export type { FileSecretProvider, ImportResult, ResolvedSecret } from './types.js'
+export * from './refs.js'
 
-export interface ApiKeySecret {
-  readonly kind: 'api-key';
-  readonly value: string;
-  readonly label?: string;
+export const name = 'dsh-credentials'
+export const inject: string[] = []
+
+/** Resolve the agent home directory: config overrides `$DSH_HOME`, then `~/.agents`. */
+function resolveHome(configHome: string | undefined): string {
+  return resolve(configHome ?? process.env['DSH_HOME'] ?? join(homedir(), '.agents'))
 }
 
-export interface PasswordSecret {
-  readonly kind: 'password';
-  readonly username?: string;
-  readonly password: string;
+/**
+ * Plugin config, validated by the same-named schemastery schema. Everything
+ * is optional: the home directory and the vault key file both default.
+ */
+export interface Config {
+  /** Agent home directory holding `vault/` records (default `$DSH_HOME` or `~/.agents`). */
+  home?: string
+  /** Vault key file, the Keychain fallback store (default `<home>/accounts.key`). */
+  keyFile?: string
+  /** Public GitHub OAuth App client id; enables the OAuth refresh supplement. */
+  githubClientId?: string
+  /** OAuth scopes for the GitHub App (defaults to `repo`, `workflow`). */
+  githubScopes?: string[]
 }
 
-export interface TotpSecret {
-  readonly kind: 'totp';
-  readonly secret: string;
-  readonly algorithm?: 'SHA1' | 'SHA256' | 'SHA512';
-  readonly digits?: 6 | 7 | 8;
-  readonly period?: number;
-  readonly issuer?: string;
-  readonly account?: string;
-}
+export const Config: z<Config> = z.object({
+  home: z.string(),
+  keyFile: z.string(),
+  githubClientId: z.string(),
+  githubScopes: z.array(z.string()),
+})
 
-export interface OAuthSecret {
-  readonly kind: 'oauth';
-  readonly accessToken?: string;
-  readonly refreshToken?: string;
-  readonly tokenType?: string;
-  readonly expiresAt?: number;
-  readonly scope?: string;
-}
+/** The legacy v1 key bootstrap as a master-key source: Keychain first, key file second. */
+class KeychainOrKeyFileMasterKey implements MasterKeySource {
+  readonly description = 'macOS Keychain (dsh.accounts) or 0600 key file'
+  #key: Uint8Array | null = null
 
-export interface SshKeySecret {
-  readonly kind: 'ssh-key';
-  readonly privateKey: string;
-  readonly publicKey?: string;
-  readonly passphrase?: string;
-  readonly username?: string;
-  readonly host?: string;
-}
+  constructor(private readonly keyFile: string) {}
 
-export interface CertificateSecret {
-  readonly kind: 'certificate';
-  readonly certificate: string;
-  readonly privateKey?: string;
-  readonly chain?: readonly string[];
-}
-
-export interface RecoveryCodesSecret {
-  readonly kind: 'recovery-codes';
-  readonly codes: readonly string[];
-}
-
-export interface PasskeySecret {
-  readonly kind: 'passkey';
-  readonly credentialId: string;
-  readonly publicKey: string;
-  readonly rpId: string;
-  readonly signCount: number;
-  readonly userHandle?: string;
-  readonly transports?: readonly ('usb' | 'nfc' | 'ble' | 'internal' | 'hybrid')[];
-}
-
-export interface GenericSecret {
-  readonly kind: 'secret';
-  readonly value: string;
-}
-
-export type CredentialSecret =
-  | ApiKeySecret
-  | PasswordSecret
-  | TotpSecret
-  | OAuthSecret
-  | SshKeySecret
-  | CertificateSecret
-  | RecoveryCodesSecret
-  | PasskeySecret
-  | GenericSecret;
-
-export interface VaultEnvelope {
-  readonly version: typeof VAULT_VERSION;
-  readonly salt: string;
-  readonly nonce: string;
-  readonly authTag: string;
-  readonly ciphertext: string;
-}
-
-export class VaultLockedError extends Error {
-  constructor() {
-    super('Credential vault is locked');
-    this.name = 'VaultLockedError';
+  async key(): Promise<Uint8Array> {
+    if (this.#key === null) this.#key = Uint8Array.from(await loadOrCreateKey(this.keyFile))
+    return Uint8Array.from(this.#key)
   }
 }
 
-export function deriveVaultKey(passphrase: string, salt: Buffer): Buffer {
-  if (passphrase.length === 0) throw new Error('Vault passphrase must not be empty');
-  return scryptSync(passphrase, salt, KEY_BYTES, {
-    N: SCRYPT_N,
-    r: SCRYPT_R,
-    p: SCRYPT_P,
-    maxmem: 128 * SCRYPT_N * SCRYPT_R + 1024 * 1024,
-  });
+/** The path of the retired legacy document, kept after a successful migration. */
+export function retiredLegacyVaultPath(home: string): string {
+  return `${join(home, 'accounts.vault')}.v1-migrated`
 }
 
-export function encryptSecret(secret: CredentialSecret, passphrase: string, associatedData?: string): VaultEnvelope {
-  const salt = randomBytes(SALT_BYTES);
-  const key = deriveVaultKey(passphrase, salt);
-  try {
-    return encryptWithKey(secret, key, salt, associatedData);
-  } finally {
-    key.fill(0);
-  }
-}
+/**
+ * The account service. Subclassing {@link Service} with the `accounts` name
+ * makes it available as `ctx.accounts` for the fiber's lifetime.
+ */
+export class AccountsService extends Service {
+  private readonly vault: EncryptedFileVault
+  private readonly providers: Map<string, FileSecretProvider> = new Map()
+  private readonly ready: Promise<void>
 
-export function decryptSecret<T extends CredentialSecret = CredentialSecret>(
-  envelope: VaultEnvelope,
-  passphrase: string,
-  associatedData?: string,
-): T {
-  assertEnvelope(envelope);
-  const salt = Buffer.from(envelope.salt, 'base64url');
-  const key = deriveVaultKey(passphrase, salt);
-  try {
-    return decryptWithKey<T>(envelope, key, associatedData);
-  } finally {
-    key.fill(0);
-  }
-}
-
-export class UnlockedVault {
-  private readonly key: Buffer;
-
-  private constructor(key: Buffer) {
-    this.key = key;
+  constructor(
+    ctx: Context,
+    private readonly options: { home: string; keyFile: string },
+  ) {
+    super(ctx, 'accounts')
+    this.vault = new EncryptedFileVault({
+      directory: vaultDirectory(options.home),
+      masterKey: new KeychainOrKeyFileMasterKey(options.keyFile),
+    })
+    this.ready = this.migrateLegacyVault(options)
+    this.registerFileProvider(claudeFileProvider)
+    this.registerFileProvider(cursorFileProvider)
+    this.registerFileProvider(githubFileProvider)
   }
 
-  static unlock(passphrase: string, salt: Buffer): UnlockedVault {
-    return new UnlockedVault(deriveVaultKey(passphrase, salt));
+  vaultPath(): string {
+    return this.vault.directory
   }
 
-  encrypt(secret: CredentialSecret, associatedData?: string): VaultEnvelope {
-    const salt = randomBytes(SALT_BYTES);
-    return encryptWithKey(secret, this.key, salt, associatedData);
+  registerFileProvider(provider: FileSecretProvider): void {
+    this.providers.set(provider.id, provider)
   }
 
-  decrypt<T extends CredentialSecret = CredentialSecret>(envelope: VaultEnvelope, associatedData?: string): T {
-    assertEnvelope(envelope);
-    return decryptWithKey<T>(envelope, this.key, associatedData);
+  getFileProviders(): FileSecretProvider[] {
+    return [...this.providers.values()]
   }
 
-  lock(): void {
-    this.key.fill(0);
+  async resolve(ref: string): Promise<ResolvedSecret | undefined> {
+    return this.resolveFor(ref, undefined)
   }
-}
 
-function encryptWithKey(secret: CredentialSecret, key: Buffer, salt: Buffer, associatedData?: string): VaultEnvelope {
-  const nonce = randomBytes(NONCE_BYTES);
-  const cipher = createCipheriv('aes-256-gcm', key, nonce);
-  if (associatedData) cipher.setAAD(Buffer.from(associatedData, 'utf8'));
-  const plaintext = Buffer.from(JSON.stringify(secret), 'utf8');
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  return {
-    version: VAULT_VERSION,
-    salt: salt.toString('base64url'),
-    nonce: nonce.toString('base64url'),
-    authTag: authTag.toString('base64url'),
-    ciphertext: ciphertext.toString('base64url'),
-  };
-}
-
-function decryptWithKey<T extends CredentialSecret>(envelope: VaultEnvelope, key: Buffer, associatedData?: string): T {
-  const nonce = Buffer.from(envelope.nonce, 'base64url');
-  const authTag = Buffer.from(envelope.authTag, 'base64url');
-  const ciphertext = Buffer.from(envelope.ciphertext, 'base64url');
-  if (nonce.length !== NONCE_BYTES || authTag.length !== AUTH_TAG_BYTES) throw new Error('Invalid vault envelope');
-
-  const decipher = createDecipheriv('aes-256-gcm', key, nonce);
-  if (associatedData) decipher.setAAD(Buffer.from(associatedData, 'utf8'));
-  decipher.setAuthTag(authTag);
-  const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-  const parsed: unknown = JSON.parse(plaintext.toString('utf8'));
-  assertCredentialSecret(parsed);
-  return parsed as T;
-}
-
-function assertEnvelope(envelope: VaultEnvelope): void {
-  if (!envelope || envelope.version !== VAULT_VERSION) throw new Error(`Unsupported vault envelope version: ${String(envelope?.version)}`);
-  for (const field of ['salt', 'nonce', 'authTag', 'ciphertext'] as const) {
-    if (typeof envelope[field] !== 'string' || envelope[field].length === 0) throw new Error(`Invalid vault envelope field: ${field}`);
+  /**
+   * Resolve a specific account's value for a canonical reference. When account
+   * is undefined, resolves the default (no account tag) — preserving backward
+   * compatibility with the 1:1 `resolve(ref)` contract.
+   */
+  async resolveFor(ref: string, account: string | undefined): Promise<ResolvedSecret | undefined> {
+    await this.ready
+    const record = await this.recordForRef(ref, account)
+    if (record !== null) {
+      const value = revealFromRecord(record)
+      if (value !== null) return { value, origin: 'vault' }
+    }
+    // Only fall through to ambient credentials for the default (unscoped) case
+    if (account === undefined) {
+      const credentials = this.ctx.get('credentials') as CredentialProvider | undefined
+      if (credentials !== undefined) {
+        const hit = await credentials.resolve(credentialRef(ref))
+        if (hit !== undefined && hit.value.length > 0) return { value: hit.value, origin: 'credentials' }
+      }
+    }
+    return undefined
   }
-}
 
-function assertCredentialSecret(value: unknown): asserts value is CredentialSecret {
-  if (!value || typeof value !== 'object' || !('kind' in value)) throw new Error('Invalid credential secret payload');
-  const kind = (value as { kind: unknown }).kind;
-  const supported: readonly CredentialKind[] = ['api-key', 'password', 'totp', 'oauth', 'ssh-key', 'certificate', 'recovery-codes', 'passkey', 'secret'];
-  if (!supported.includes(kind as CredentialKind)) throw new Error(`Unsupported credential kind: ${String(kind)}`);
-}
-
-export function generateRecoveryCodes(count = 10, bytes = 8): string[] {
-  if (count <= 0 || bytes <= 0) throw new Error('Recovery code parameters must be positive');
-  const result = new Set<string>();
-  while (result.size < count) {
-    result.add(randomBytes(bytes).toString('hex').toUpperCase());
+  /**
+   * Return all stored records for a canonical reference across every account.
+   * Each entry carries the account name (null for the default/unscoped record)
+   * and the revealed value when the record type supports it.
+   */
+  async resolveAll(ref: string): Promise<Array<{ ref: string; account: string | null; value: string | null; origin: 'vault' | 'credentials' }>> {
+    await this.ready
+    const out: Array<{ ref: string; account: string | null; value: string | null; origin: 'vault' | 'credentials' }> = []
+    for (const descriptor of await this.vault.describe()) {
+      if (!descriptor.tags.includes(refTag(ref))) continue
+      const account = descriptor.tags.find((tag) => tag.startsWith('account:'))?.slice('account:'.length) ?? null
+      const record = await this.vault.get(descriptor.id)
+      if (record === null) continue
+      const value = revealFromRecord(record)
+      out.push({ ref, account, value, origin: 'vault' })
+    }
+    // Include ambient credential for the default case if no vault record found for default
+    const hasDefault = out.some((e) => e.account === null)
+    if (!hasDefault) {
+      const credentials = this.ctx.get('credentials') as CredentialProvider | undefined
+      if (credentials !== undefined) {
+        const hit = await credentials.resolve(credentialRef(ref))
+        if (hit !== undefined && hit.value.length > 0) {
+          out.push({ ref, account: null, value: hit.value, origin: 'credentials' })
+        }
+      }
+    }
+    return out
   }
-  return [...result];
-}
 
-export function normalizeBase32(secret: string): string {
-  return secret.replace(/\s+/g, '').replace(/=+$/g, '').toUpperCase();
-}
+  async set(ref: string, value: string, account?: string): Promise<void> {
+    await this.ready
+    if (value.length === 0) throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`)
+    await this.vault.put(recordForRef(ref, value, account !== undefined ? { account } : {}))
+  }
 
-export function totpCode(secret: string, timestampMs = Date.now(), options: Pick<TotpSecret, 'algorithm' | 'digits' | 'period'> = {}): string {
-  const normalized = normalizeBase32(secret);
-  const algorithm = options.algorithm ?? 'SHA1';
-  const digits = options.digits ?? 6;
-  const period = options.period ?? 30;
-  const counter = Math.floor(timestampMs / 1000 / period);
-  const key = decodeBase32(normalized);
-  const message = Buffer.alloc(8);
-  message.writeBigUInt64BE(BigInt(counter));
-  const digest = createHmac(algorithm.toLowerCase() as 'sha1' | 'sha256' | 'sha512', key).update(message).digest();
-  const offset = digest[digest.length - 1]! & 0x0f;
-  const code = ((digest[offset]! & 0x7f) << 24)
-    | ((digest[offset + 1]! & 0xff) << 16)
-    | ((digest[offset + 2]! & 0xff) << 8)
-    | (digest[offset + 3]! & 0xff);
-  return String(code % (10 ** digits)).padStart(digits, '0');
-}
+  async unset(ref: string, account?: string): Promise<void> {
+    await this.ready
+    const record = await this.recordForRef(ref, account)
+    if (record !== null) await this.vault.delete(record.id)
+  }
 
-export function otpauthUri(secret: TotpSecret): string {
-  const algorithm = secret.algorithm ?? 'SHA1';
-  const digits = secret.digits ?? 6;
-  const period = secret.period ?? 30;
-  const account = secret.account ?? 'account';
-  const label = secret.issuer ? `${secret.issuer}:${account}` : account;
-  const query = new URLSearchParams({ secret: normalizeBase32(secret.secret), algorithm, digits: String(digits), period: String(period) });
-  if (secret.issuer) query.set('issuer', secret.issuer);
-  return `otpauth://totp/${encodeURIComponent(label)}?${query.toString()}`;
-}
+  async list(): Promise<string[]> {
+    await this.ready
+    const refs = new Set<string>()
+    for (const descriptor of await this.vault.describe()) refs.add(canonicalRefOf(descriptor))
+    return [...refs].sort()
+  }
 
-function decodeBase32(value: string): Buffer {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let bits = 0;
-  let buffer = 0;
-  const output: number[] = [];
-  for (const character of value) {
-    const index = alphabet.indexOf(character);
-    if (index < 0) throw new Error(`Invalid base32 TOTP secret: ${character}`);
-    buffer = (buffer << 5) | index;
-    bits += 5;
-    if (bits >= 8) {
-      bits -= 8;
-      output.push((buffer >> bits) & 0xff);
+  /**
+   * Every stored record's canonical reference and the account it belongs to,
+   * material stripped. Named accounts arrive on records as `account:` tags,
+   * most commonly from a scanned login.
+   */
+  async accounts(): Promise<Array<{ ref: string; account: string | null; kind: string; purpose: string; label: string; expiresAt: string | null }>> {
+    await this.ready
+    const out: Array<{ ref: string; account: string | null; kind: string; purpose: string; label: string; expiresAt: string | null }> = []
+    for (const descriptor of await this.vault.describe()) {
+      const account = descriptor.tags.find((tag) => tag.startsWith('account:'))?.slice('account:'.length) ?? null
+      out.push({ ref: canonicalRefOf(descriptor), account, kind: descriptor.type, purpose: descriptor.purpose, label: descriptor.label, expiresAt: descriptor.expiresAt })
+    }
+    return out
+  }
+
+  async importFile(path: string): Promise<ImportResult[]> {
+    await this.ready
+    for (const provider of this.providers.values()) {
+      if (!(await provider.detect(path))) continue
+      const secrets = await provider.read(path)
+      const results: ImportResult[] = []
+      for (const [ref, value] of Object.entries(secrets)) {
+        if (value.length === 0) continue
+        await this.vault.put(recordForRef(ref, value))
+        results.push({ ref, provider: provider.id, source: path })
+      }
+      if (results.length === 0) {
+        throw new Error(`dsh-credentials: ${path} holds no known secrets for ${provider.id}`)
+      }
+      return results
+    }
+    throw new Error(`dsh-credentials: no file provider recognized ${path}`)
+  }
+
+  /**
+   * The record a canonical reference resolves to in this vault, or null.
+   * When account is provided, only matches records tagged with that account.
+   */
+  private async recordForRef(ref: string, account?: string): Promise<SecretRecord | null> {
+    // Try direct slug lookup first (fast path)
+    const direct = await this.vault.get(slugRecordId(ref, account))
+    if (direct !== null) return direct
+    // Fall back to tag scan
+    for (const descriptor of await this.vault.describe()) {
+      if (!descriptor.tags.includes(refTag(ref))) continue
+      // If account is specified, filter by account tag
+      if (account !== undefined && account.length > 0) {
+        if (!descriptor.tags.includes(`account:${account}`)) continue
+      } else {
+        // Default lookup: skip records that have an account tag (they're scoped)
+        if (descriptor.tags.some((tag) => tag.startsWith('account:'))) continue
+      }
+      const record = await this.vault.get(descriptor.id)
+      if (record !== null) return record
+    }
+    return null
+  }
+
+  /**
+   * One-time v1→v2 migration: when no record exists yet and the legacy
+   * document does, every legacy ref is stored as a tagged record and the
+   * document is retired rather than deleted. Failure is logged, never fatal —
+   * a migration hiccup must not take the whole seam down.
+   */
+  private async migrateLegacyVault(options: { home: string; keyFile: string }): Promise<void> {
+    const legacyFile = join(options.home, 'accounts.vault')
+    try {
+      if (!(await exists(legacyFile))) return
+      if ((await this.vault.list()).length > 0) return
+      const legacy = new Vault(legacyFile, options.keyFile)
+      for (const ref of await legacy.list()) {
+        const value = await legacy.get(ref)
+        if (value === undefined || value.length === 0) continue
+        await this.vault.put(recordForRef(ref, value))
+      }
+      await rename(legacyFile, retiredLegacyVaultPath(options.home))
+    } catch (error) {
+      this.ctx.logger.error('dsh-credentials: legacy vault migration failed')
+      this.ctx.logger.error(error)
     }
   }
-  return Buffer.from(output);
+}
+
+declare module '@deepseek-ai/cordis' {
+  interface Context {
+    accounts: AccountsService
+  }
+}
+
+export function apply(ctx: Context, config: Config): void {
+  const home = resolveHome(config.home)
+  const keyFile = config.keyFile ?? join(home, 'accounts.key')
+  const accounts = new AccountsService(ctx, { home, keyFile })
+  registerGithubCredentials(config.githubClientId, config.githubScopes)
+  mountVaultWeb(ctx, accounts)
 }

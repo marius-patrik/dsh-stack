@@ -14,6 +14,7 @@
  */
 
 import type { Context } from '@deepseek-ai/cordis'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import { settingsNamespace } from '@deepseek-ai/dsh-settings'
@@ -22,10 +23,7 @@ import { join, resolve } from 'node:path'
 import { mapTheme, type ThemeSource } from './theme.js'
 import { mountThemeWeb } from './web.js'
 import { listThemes, resolveStoreDir, saveTheme, storeHandle, type StoredTheme } from './store.js'
-import {
-  DEFAULT_CATALOG_URL, DEFAULT_THEMES_DIR, NS, ThemesConfig, ThemesSettings,
-  type ThemesConfig as ThemesConfigType,
-} from './settings.js'
+import { DEFAULT_CATALOG_URL, DEFAULT_THEMES_DIR, NS, ThemesConfig, ThemesSettings, type ThemesConfig as ThemesConfigType } from './settings.js'
 
 export type * from './theme.js'
 export type * from './store.js'
@@ -39,65 +37,40 @@ export type { ThemeWebDeps } from './web.js'
 
 export const name = 'dsh-themes'
 export const inject: string[] = []
-
 const DEFAULT_HOME_DIR = join('.agents') as string
 
-/** The agent home this run boots under (mirrors dsh-tweaks resolution). */
 export function resolveHome(): string {
   return resolve(process.env['DSH_HOME'] ?? join(homedir(), DEFAULT_HOME_DIR))
 }
 
 export const Config: z<ThemesConfig> = ThemesConfig
-
-/** The route the browser half fetches. */
 export const THEMES_ROUTE = '/themes.json'
 
-/** Install-time options for {@link installThemeSource}. */
 export interface InstallThemeOptions {
-  /** Pinned registry id (defaults to the source name slug). */
   id?: string
-  /** Catalog provenance (`namespace.name`) recorded on the stored theme. */
   extension?: string
 }
 
-/**
- * Install one theme source into the store, mapping it onto the registry
- * vocabulary under a derived (or pinned) id.
- * @param home - the agent home.
- * @param root - configured store root.
- * @param source - the parsed source theme.
- * @param options - pinned id and/or catalog provenance.
- * @returns the stored theme.
- */
 export async function installThemeSource(home: string, root: string, source: ThemeSource, options: InstallThemeOptions = {}): Promise<StoredTheme> {
   const handle = storeHandle(home, root)
   const definition = mapTheme(source, options.id)
-  const stored: StoredTheme = {
-    ...definition,
-    name: source.name,
-    ...options.extension === undefined ? {} : { extension: options.extension },
-  }
+  const stored: StoredTheme = { ...definition, name: source.name, ...options.extension === undefined ? {} : { extension: options.extension } }
   await saveTheme(handle, stored)
   return stored
 }
 
-/** Install the first theme source from a downloaded vsix path. */
 export async function installVsix(home: string, root: string, vsixPath: string): Promise<StoredTheme[]> {
   const { extractThemesFromVsix } = await import('./catalog.js')
   const sources = await extractThemesFromVsix(vsixPath)
   const stored: StoredTheme[] = []
-  for (const source of sources) {
-    stored.push(await installThemeSource(home, root, source))
-  }
+  for (const source of sources) stored.push(await installThemeSource(home, root, source))
   return stored
 }
 
-/** Read the installed themes for the web route. */
 export async function listInstalled(home: string, root: string): Promise<StoredTheme[]> {
   return listThemes(storeHandle(home, root))
 }
 
-/** Resolve the active theme id from the settings document (empty = built-in). */
 function activeThemeId(ctx: Context): string {
   const settings = ctx.get('settings')
   if (settings === undefined) return ''
@@ -108,9 +81,6 @@ function activeThemeId(ctx: Context): string {
 export function apply(ctx: Context, config: ThemesConfigType): void {
   const root = config.root ?? DEFAULT_THEMES_DIR
   const catalogUrl = config.catalogUrl ?? DEFAULT_CATALOG_URL
-
-  // The active-theme choice lives in the settings document; the registration
-  // doubles as the writer the /themes/api/apply route persists through.
   let writer: ((id: string) => Promise<void>) | undefined
   ctx.inject(['settings'], (settingsCtx) => {
     const scope = settingsCtx.settings.register(NS, ThemesSettings, { base: { active: '' } })
@@ -136,15 +106,10 @@ export function apply(ctx: Context, config: ThemesConfigType): void {
       () => webCtx.webServer.register({
         kind: 'exact',
         path: THEMES_ROUTE,
-        handler: async (_req, res) => {
+        handler: async (_req: IncomingMessage, res: ServerResponse) => {
           const home = resolveHome()
           const themes = await listInstalled(home, root)
-          const body = JSON.stringify({
-            active: activeThemeId(webCtx),
-            root,
-            catalogUrl,
-            themes,
-          })
+          const body = JSON.stringify({ active: activeThemeId(webCtx), root, catalogUrl, themes })
           res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
           res.end(body)
         },

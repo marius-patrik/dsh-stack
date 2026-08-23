@@ -1,0 +1,1 @@
+{"id":"stack.agent.translator","name":"@dsh-stack/agent-translator","version":"0.1.0","kind":"plugin","description":"Canonical dialect translation service.","files":["lib","package.json","stack.json"],"dependencies":[],"optionalDependencies":[]}

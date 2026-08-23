@@ -1,0 +1,91 @@
+name: Merge enforcement
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  checks: read
+  pull-requests: read
+
+jobs:
+  merge-enforcement:
+    name: Merge enforcement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Fetch current main
+        run: git fetch --no-tags --force origin +refs/heads/main:refs/remotes/origin/main
+
+      - name: Require PR to contain current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git merge-base --is-ancestor origin/main HEAD; then
+            echo 'This pull request is behind main.'
+            exit 1
+          fi
+
+      - name: Require canonical checks to be green
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const required = new Set(['Canonical Stack workspace', 'Format repository']);
+            const timeoutMs = 15 * 60 * 1000;
+            const intervalMs = 15 * 1000;
+            const deadline = Date.now() + timeoutMs;
+
+            while (true) {
+              const { data } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.payload.pull_request.head.sha,
+                per_page: 100,
+                filter: 'latest'
+              });
+
+              const relevant = data.check_runs.filter(run => required.has(run.name));
+              const missing = [...required].filter(name => !relevant.some(run => run.name === name));
+              if (missing.length) {
+                if (Date.now() >= deadline) {
+                  core.setFailed(`Required checks did not appear before timeout: ${missing.join(', ')}`);
+                  return;
+                }
+                await new Promise(resolve => setTimeout(resolve, intervalMs));
+                continue;
+              }
+
+              const pending = relevant.filter(run => run.status !== 'completed');
+              if (pending.length) {
+                if (Date.now() >= deadline) {
+                  core.setFailed(`Required checks remained pending at timeout: ${pending.map(run => `${run.name}: ${run.status}`).join(', ')}`);
+                  return;
+                }
+                core.info(`Waiting for ${pending.length} canonical check run(s) to complete...`);
+                await new Promise(resolve => setTimeout(resolve, intervalMs));
+                continue;
+              }
+
+              const failures = relevant.filter(run => run.conclusion !== 'success');
+              if (failures.length) {
+                core.setFailed(failures.map(run => `${run.name}: ${run.conclusion}`).join('\n'));
+                return;
+              }
+
+              for (const name of required) {
+                if (!relevant.some(run => run.name === name && run.conclusion === 'success')) {
+                  core.setFailed(`${name}: no successful run found`);
+                  return;
+                }
+              }
+
+              core.info('Canonical CI and formatter checks are green.');
+              return;
+            }

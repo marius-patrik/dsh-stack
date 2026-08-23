@@ -1,0 +1,10 @@
+{
+  "id": "stack.library.plugin-kit",
+  "name": "@dsh-stack/plugin-kit",
+  "version": "0.1.0",
+  "kind": "library",
+  "description": "Reusable Stack plugin metadata, validation and composition support primitives.",
+  "files": ["lib", "package.json", "README.md", "LICENSE"],
+  "dependencies": [],
+  "optionalDependencies": []
+}
