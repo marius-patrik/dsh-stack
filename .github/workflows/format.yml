@@ -30,14 +30,11 @@ jobs:
         with:
           node-version: 22.19.0
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
       - name: Format whole repository
-        run: pnpm format
+        run: pnpm dlx --yes @biomejs/biome@2.2.0 format --write .
 
       - name: Verify formatting
-        run: pnpm format:check
+        run: pnpm dlx --yes @biomejs/biome@2.2.0 format --check .
 
       - name: Commit formatting changes
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
