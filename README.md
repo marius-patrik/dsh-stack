@@ -1,64 +1,52 @@
-# agents
+# DSH Stack
 
-Personal agent stack on top of DeepSeek Harness (`dsh`). Everything is a harness plugin.
+A distributable plugin and pack stack for DeepSeek Harness.
 
-## Layout
+## Structure
 
-- `.agents/` — project docs + workflow hooks (this directory):
-  - `AGENTS.md` — repo conventions for agents (commit cadence, doc-sync rule, plugin scaffold).
-  - `PLAN.md` — authoritative plan: repos, Andromeda mapping, phases, dependency policy.
-  - `PRD.md` — product requirements: settings IA, Keychain, session modes, agents + live personas, themes, quotas, sidebar batch; and the `dsh-tweaks` harness extension layer (Option A).
-  - `BLOCKED.md` — harness-seam ledger: every feature that needs to reach the harness, its anchors, and the decision (`replaced`/`deferred`/`unblocks`). Harness stays pristine.
-  - `CONTEXT.md` — chronological session memory (append-only).
-  - `BACKLOG.md` — opencode-parity delta re-keyed by owning plugin.
-  - `hooks/` — pre-commit, commit-msg, pre-push workflow enforcement.
-- `harness/` — pinned checkout of `deepseek-ai/deepseek-harness` (only git submodule, source of truth, kept pristine).
-- `plugins/` — monorepo plugin packages, directly tracked in this repository:
-  - **`core/`** (`@stack/pack-core`): Foundation, Shell & Abstractions Pack:
-    - `plugin-manager/` (`@stack/plugin-manager`): Universal plugin registry, DAG resolver & optional dependencies.
-    - `providers-registry/` (`@stack/providers-registry`): Provider abstraction, quota probes & model favorites.
-    - `integrations-registry/` (`@stack/integrations-registry`): Integrations health & lifecycle registry.
-    - `vault-credentials/` (`@stack/vault-credentials`): Encrypted secrets vault & OAuth service.
-    - `sidebar-tree/` (`@stack/sidebar-tree`): 5-tier navigation tree with native `.app` icon extraction (`sips`) & strict tri-color palette.
-    - `settings-dialog/` (`@stack/settings-dialog`): Draggable/resizable settings modal & navigation rails.
-    - `keybindings/` (`@stack/keybindings`): Keyboard shortcuts engine & recorder.
-  - **`ux/`** (`@stack/pack-ux`): Presentation, UI & Media Pack:
-    - `tab-manager/` (`@stack/tab-manager`): Universal tab bar, split window docking, bottom drawer panel, right-click tab menus.
-    - `code-editor/` (`@stack/code-editor`): Monaco-powered multi-file tab editor & split diff viewer.
-    - `icon-engine/` (`@stack/icon-engine`): Universal icon resolution pipeline & native app `sips` loader.
-      - `packs/lucide-animated/` (`@stack/icon-pack-lucide`): 1,105 animated SVG icon components.
-    - `theme-studio/` (`@stack/theme-studio`): VS Code/TextMate themes & Open VSX catalog.
-    - `voice-synthesis/` (`@stack/voice-synthesis`): Web Speech API & Whisper neural speech engine.
-    - `terminal-client/` (`@stack/terminal-client`): Standalone TUI client binary.
-  - **`agents/`** (`@stack/pack-agents`): Cognitive Agent Systems Pack:
-    - `personas/` (`@stack/personas`): Agent personas roster & Subagents Dock.
-    - `actions/` (`@stack/actions`): Session action modes & tool execution policies.
-    - `commands/` (`@stack/commands`): Slash commands engine & input autocomplete.
-    - `tools/` (`@stack/tools`): Universal tool registry & MCP connectors (`ctx.tools`).
-    - `loops/` (`@stack/loops`): DarkFactory autonomous goal loops.
-    - `skills/` (`@stack/skills`): Dynamic agent skill loader (`.agents/skills/`).
-    - `translator/` (`@stack/translator`): Cross-provider prompt and session serializer.
-  - **`ai/`** (`@stack/pack-ai`): Wire Protocols & Model Dialects Pack:
-    - `protocol-dialects/` (`@stack/protocol-dialects`): Wire protocol serializers (OpenAI, Claude, Gemini, Kimi, Code Assist).
-  - **`integrations/`** (`@stack/pack-integrations`): Integrations, Sandboxes, Tools & Providers Pack:
-    - `tmux-terminal/` (`@stack/tmux-terminal`): tmux session daemon & 16 CLI harnesses (`claude`, `kimi`, `antigravity`, `codex`, `cursor`, `grok`, `hermes`, `ollama`, `github-cli`, `git-cli`, `sapling-cli`, `code-cli`, `bun-cli`, `pnpm-cli`, `npm-cli`, `nvm-cli`).
-    - `package-managers/` (`@stack/package-managers`): Multi-runtime engine (Bun, pnpm, npm, yarn, Cargo, uv/pip) & Node version switcher.
-    - `code-server/` (`@stack/code-server`): Self-hosted VS Code server manager & iframe proxy.
-    - `providers/` (`@stack/pack-direct-providers`): Direct API providers (`openai-api`, `gemini-studio`, `zen-gateway`, `deepseek-official`).
-    - `docker-sandbox/` (`@stack/docker-sandbox`): Container sandboxes & logs inspector.
-    - `lsp-client/` (`@stack/lsp-client`): Language server protocol client & servers (`typescript`, `python`, `rust`, `golang`, `json-yaml`).
-    - `code-formatters/` (`@stack/code-formatters`): Multi-language source formatters.
-    - `mesh-hosts/` (`@stack/mesh-hosts`): Tailscale mesh discovery.
-  - **`vcs/`** (`@stack/pack-vcs`): Version Control & Forges Pack:
-    - `workbench-core/` (`@stack/workbench-core`): Repository workbench, diff viewer & 100% offline local repos.
-    - `git-driver/` (`@stack/git-driver`): Git driver (requires `git-cli`).
-    - `sapling-driver/` (`@stack/sapling-driver`): Sapling driver (requires `sapling-cli`).
-    - `github-forge/` (`@stack/github-forge`): GitHub forge adapter (requires `github-cli`).
-    - `gitlab-forge/` (`@stack/gitlab-forge`): GitLab forge adapter.
-    - `forgejo-forge/` (`@stack/forgejo-forge`): Forgejo/Gitea self-hosted forge adapter.
+```text
+AGENTS.md
+notes/        product requirements, architecture, plans, decisions
+plugins/      every Stack plugin, support library, and pack
+harness/      pinned pristine DSH runtime
+scripts/      verification and release tooling
+```
 
+`plugins/` is the only application implementation root. Every publishable plugin or pack has its own package, version, dependency graph, tests and verification contract. Support libraries contain reusable mechanics; external integrations are separate plugins; packs compose plugins rather than implementing features a second time.
 
-## State
+## Profiles
 
-- `DSH_HOME` = `~/.agents` by default (configurable via `dsh-tweaks` `homeRoot`).
-- The state folder is never committed.
+| Profile | Purpose |
+| --- | --- |
+| `@dsh-stack/profile-default` | general Stack experience |
+| `@dsh-stack/profile-coding` | coding, repositories, tools, editor/LSP and absorbed DarkFactory capabilities |
+| `@dsh-stack/profile-trading` | research, backtesting, optimization and absorbed MoneyMaker capabilities |
+| `@dsh-stack/profile-skyblock` | SkyBlock capabilities absorbed from SkyAgent |
+
+## UI
+
+The Stack shell uses DSH-native slots. The sidebar provides Files, file-row actions, profile selection, configurable New Conversation/logo visibility, skins, coherent collapsed/expanded behavior, and unified workspace/tab concepts. VS Code icons are an independent plugin. DeepSeek, Claude and Codex skins are independent plugins.
+
+## Credentials and agents
+
+Credentials support typed secrets such as API keys, passwords, TOTP/QR provisioning, OAuth, passkeys, recovery codes, SSH keys, certificates and generic notes. Agents use DSH's native preset primitive; personas are durable session state independent from session modes.
+
+## Distribution
+
+Every plugin and pack is independently versioned and published. Every merge to `main` increments the Stack version. Only packages modified by the merge receive a package semver bump. The release publishes all newly versioned packages and creates a complete release manifest/catalog containing every plugin and pack with exact versions, dependencies and integrity information. The updater plugin consumes that catalog and performs dependency-aware updates.
+
+## Quality gate
+
+Pull requests must pass **Canonical Stack workspace** CI: install, recursive typecheck, build, package-contract verification, duplicate/unfinished-code checks, and tests. No compatibility bridge, migration shim, legacy detector, duplicate implementation, checked-in generated output, or placeholder feature is permitted.
+
+## Development
+
+```bash
+pnpm install
+pnpm typecheck
+pnpm build
+pnpm verify
+pnpm test
+```
+
+The canonical product and implementation decisions live under `notes/`; repository agent instructions live in root `AGENTS.md`.
