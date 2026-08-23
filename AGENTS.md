@@ -9,7 +9,7 @@
 - `plugins/` is the only application/plugin implementation root.
 - Every plugin implementation is a flat direct child of `plugins/`.
 - `plugins/packs/` contains pack aliases/symlinks only; it never contains an independent implementation.
-- `notes/` is the implementation-documentation root.
+- `notes/` is the only implementation-documentation root.
 - `AGENTS.md` is the only agent-context file at repository root.
 - `harness/` is upstream and must not be modified.
 - No `packages/` tree, parallel implementation tree, compatibility bridge, migration shim, legacy runtime path, or duplicate feature owner is allowed.
@@ -32,23 +32,29 @@ The Stack profiles are `@dsh-stack/profile-default`, `@dsh-stack/profile-coding`
 
 The intended separate web UI base is `zhu1090093659/dsh-web-ui`, default branch `dev`. Its tab implementation is the reference/base for the Stack web UI. `zhu1090093659/DSH-better-sidebar` is a separate sidebar reference. Do not copy either project into `dsh-stack` as a second implementation. The final web product belongs behind the separate web-UI boundary; Stack owns plugin/runtime contracts and integration seams.
 
-No fork is claimed as completed until an actual fork exists and is verifiably connected to the Stack integration.
+The current GitHub connector has read access to the intended web UI but not fork/push permission. Therefore no fork is claimed as completed until an actual fork exists and is verifiably connected to the Stack integration. Do not invent a fork name or describe the web UI fork as implemented when it is not in the repository state.
 
 ## CI node architecture
 
 CI automation is intended to run on a real DSH node managed through `dsh-hosts`, not on a bare GitHub runner installation. The node must boot the complete Stack, synchronize repository/node state through `dsh-hosts`, select the `headless` profile, and expose the GitHub Actions runner as one node capability. Node bootstrap must be reproducible and disposable; credentials remain outside the repository in GitHub Actions secrets or the node's secure environment.
 
-## CI and branch policy
-
-- `main` is the only release branch.
-- Every feature branch merges through a pull request into `main`.
-- Required CI must be fully green before merge.
-- A PR must contain the current `main` commit before merge.
-- Same-repository branches are automatically deleted after successful merge; fork branches are never deleted by repository automation.
+The normal CI sequence remains install → typecheck → build → repository verification → tests. A headless review job may additionally execute DSH review/verification workflows on the provisioned node.
 
 ## Documentation
 
-`notes/PRD.md` is the canonical product requirements document. Keep current architectural decisions and implementation policy in `notes/`; do not create a second PRD or agent-context root.
+`notes/PRD.md` is the canonical product requirements document. `notes/PLAN.md`, `notes/CONTEXT.md`, `notes/BACKLOG.md`, `notes/BLOCKED.md`, `notes/REWRITE.md`, `notes/SOURCES.md`, and `notes/decisions/` contain implementation planning/history. Keep current architectural decisions in `notes/` and do not create a second PRD elsewhere.
+
+## Branch and merge policy
+
+- `main` is the only release branch.
+- `ci/closure-verification` is the authoritative branch for the current closure PR.
+- Every feature branch merges through a pull request into `main`.
+- Pull requests must have green **Canonical Stack workspace** CI before merge.
+- There is no shared `integration` branch.
+
+## Release model
+
+The Stack version increments on every merge to `main`. Each changed plugin/pack receives its own semver bump based on the changes within that package; untouched packages retain their versions. A release builds the complete catalog, publishes every new package version, emits a complete manifest with exact versions/dependencies/integrity data, uploads package artifacts and the manifest to the GitHub release, and updates the remote catalog consumed by the updater plugin.
 
 ## Verification standard
 
@@ -56,4 +62,4 @@ Completion requires workspace typecheck, workspace build, package-contract verif
 
 ## GitHub/tooling limitations
 
-The available GitHub connector does not expose repository branch-protection/ruleset mutation or repository fork creation. Do not claim those operations are complete without GitHub evidence. Required manual repository administration remains: protect `main`, require pull requests, require the `Merge enforcement` check, require the branch to be up to date, and block direct pushes.
+The available GitHub connector can inspect and mutate public repository content, branches, commits, pull requests, and workflow runs, but it does not expose repository branch-protection/ruleset mutation or repository fork creation. Do not claim those operations are complete without GitHub evidence. Required manual repository administration remains: protect `main`, require pull requests, require the `Canonical Stack workspace` check, require the branch to be up to date, and block direct pushes.
