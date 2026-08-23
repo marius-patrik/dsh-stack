@@ -23,7 +23,7 @@ jobs:
           BRANCH: ${{ github.event.pull_request.head.ref }}
         run: gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}"
 
-      - name: Delete all merged same-repository PR branches
+      - name: Reconcile merged same-repository branches
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
