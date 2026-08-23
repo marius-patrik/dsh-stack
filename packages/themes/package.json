@@ -1,5 +1,5 @@
 {
-  "name": "dsh-themes",
+  "name": "themes",
   "description": "VS Code/TextMate theme support for the dsh web UI",
   "version": "0.1.0",
   "private": true,
