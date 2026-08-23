@@ -1,4 +1,4 @@
-import type { IconPack } from "icon-engine";
+import type { IconPack } from "@dsh-stack/icon-engine";
 
 export const name = "lucide-animated";
 export const version = "0.1.0";
