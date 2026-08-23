@@ -1,5 +1,5 @@
 {
-  "name": "icon-engine",
+  "name": "@dsh-stack/icon-engine",
   "version": "0.1.0",
   "private": true,
   "type": "module",
