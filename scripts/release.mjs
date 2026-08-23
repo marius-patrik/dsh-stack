@@ -139,7 +139,11 @@ async function manifest() {
   const integrity = createHash("sha256")
     .update(await fs.readFile(output))
     .digest("hex");
-  await fs.writeFile(join(outputDir, "stack-release.sha256"), `${integrity}  stack-release.json\n`, "utf8");
+  await fs.writeFile(
+    join(outputDir, "stack-release.sha256"),
+    `${integrity}  stack-release.json\n`,
+    "utf8",
+  );
   console.log(output);
 }
 
@@ -161,7 +165,9 @@ async function assets() {
   const checksums = [];
   for (const file of files.sort()) {
     if (file.endsWith(".sha256")) continue;
-    const digest = createHash("sha256").update(await fs.readFile(join(outputDir, file))).digest("hex");
+    const digest = createHash("sha256")
+      .update(await fs.readFile(join(outputDir, file)))
+      .digest("hex");
     checksums.push(`${digest}  ${file}`);
   }
   await fs.writeFile(join(outputDir, "SHA256SUMS"), `${checksums.join("\n")}\n`, "utf8");
@@ -183,9 +189,23 @@ async function version() {
   const packages = await discoverPackages();
   for (const item of packages) {
     const dirName = relative(packagesDir, item.dir);
-    const changed = await exec("git", ["diff", "--name-only", "HEAD^", "HEAD", "--", `packages/${dirName}`]);
+    const changed = await exec("git", [
+      "diff",
+      "--name-only",
+      "HEAD^",
+      "HEAD",
+      "--",
+      `packages/${dirName}`,
+    ]);
     if (!changed) continue;
-    const messages = await exec("git", ["log", "--format=%s%n%b", "-n", "50", "--", `packages/${dirName}`]);
+    const messages = await exec("git", [
+      "log",
+      "--format=%s%n%b",
+      "-n",
+      "50",
+      "--",
+      `packages/${dirName}`,
+    ]);
     const bump = /BREAKING CHANGE|^[^\n]*!:/m.test(messages)
       ? "major"
       : /^(feat)(\([^)]*\))?:/m.test(messages)
