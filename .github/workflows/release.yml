@@ -49,7 +49,7 @@ jobs:
           case "$bump" in
             major) major=$((major + 1)); minor=0; patch=0 ;;
             minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)) ;;
+            patch) patch=$((patch + 1)); ;;
           esac
           next_version="v${major}.${minor}.${patch}"
           git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null && exit 1 || true
@@ -68,7 +68,9 @@ jobs:
           test -s .release/dsh-stack-plugins-*.tar.gz
           test -s .release/dsh-stack-packs-*.tar.gz
           tar -tzf .release/dsh-stack-plugins-*.tar.gz | grep -q '^plugins/'
-          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/'
+          tar -tzf .release/dsh-stack-plugins-*.tar.gz | grep -q '^plugins/lucide-animated/package.json$'
+          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/lucide-animated/package.json$'
+          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/lucide-animated/README.md$'
 
       - name: Create GitHub release and upload all assets
         env:
