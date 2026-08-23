@@ -1,5 +1,5 @@
 {
-  "name": "@dsh-stack/lucide-animated",
+  "name": "lucide-animated",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -21,7 +21,7 @@
     "verify": "node verify.mjs"
   },
   "dependencies": {
-    "@dsh-stack/icon-engine": "workspace:*",
+    "icon-engine": "workspace:*",
     "lucide-react": "^0.468.0"
   },
   "peerDependencies": {
