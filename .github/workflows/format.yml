@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   format:
-    name: Format whole repository
+    name: Format repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,12 +29,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.19.0
-          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Format repository
+      - name: Format whole repository
         run: pnpm format
 
       - name: Verify formatting
