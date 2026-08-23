@@ -43,6 +43,7 @@ function checkFile(path, source) {
   );
   const missing = [];
 
+  /** Walk the AST and collect function declarations that lack JSDoc. */
   function visit(node) {
     let declaration = null;
     let name = "<anonymous>";
