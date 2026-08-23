@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "lib": ["ES2023", "DOM"],
+    "paths": {
+      "dsh-dialects": ["../dialects/src/index.ts"],
+      "dsh-credentials": ["../credential-vault/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}
