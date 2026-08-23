@@ -5,8 +5,8 @@ import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-setti
 import type { SidebarFooterActionOwnerProps } from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import { CheckIcon, SettingsIcon } from "@dsh-stack/lucide-animated/client";
-import { createProfileRuntime } from "@dsh-stack/profile-runtime";
+import { CheckIcon, SettingsIcon } from "lucide-animated/client";
+import { createProfileRuntime } from "profile-runtime";
 import { profileOptions } from "../index.js";
 
 const runtime = createProfileRuntime(profileOptions, {
@@ -15,6 +15,7 @@ const runtime = createProfileRuntime(profileOptions, {
 
 export const inject = ["slots"];
 
+/** Render the compact or expanded profile selector in the sidebar footer. */
 function ProfileSelector({ wide }: SidebarFooterActionOwnerProps) {
   const [open, setOpen] = useState(false);
   const active = runtime.getActive();
@@ -69,6 +70,7 @@ function ProfileSelector({ wide }: SidebarFooterActionOwnerProps) {
   );
 }
 
+/** Render the profile selection section inside the settings surface. */
 function ProfileSettings({ close }: SettingsSectionOwnerProps) {
   const [active, setActive] = useState(runtime.getActive());
   return (
@@ -122,6 +124,7 @@ function ProfileSettings({ close }: SettingsSectionOwnerProps) {
   );
 }
 
+/** Mount the profile selector and settings section into the client slot registry. */
 export function apply(ctx: ClientContext): void {
   ctx.slots.inject("sidebar.footer.action", () =>
     ctx.slots.register(
