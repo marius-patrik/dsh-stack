@@ -16,7 +16,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "sourceMap": false
+    "sourceMap": false,
+    "paths": {
+      "dsh-dialects": ["../dialects/src/index.ts"],
+      "dsh-credentials": ["../credential-vault/src/index.ts"]
+    }
   },
   "include": ["src"]
 }
