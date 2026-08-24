@@ -49,7 +49,7 @@ jobs:
           case "$bump" in
             major) major=$((major + 1)); minor=0; patch=0 ;;
             minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)) ;;
+            patch) patch=$((patch + 1)); ;;
           esac
           next_version="v${major}.${minor}.${patch}"
           git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null && exit 1 || true
@@ -58,19 +58,72 @@ jobs:
       - name: Build complete release assets
         run: node scripts/release.mjs assets
 
-      - name: Validate complete catalog assets
+      - name: Validate every plugin and pack ZIP asset
         shell: bash
         run: |
           set -euo pipefail
           test -s .release/stack-release.json
           test -s .release/stack-release.sha256
+          test -s .release/component-assets.json
           test -s .release/SHA256SUMS
-          test -s .release/dsh-stack-plugins-*.tar.gz
-          test -s .release/dsh-stack-packs-*.tar.gz
-          tar -tzf .release/dsh-stack-plugins-*.tar.gz | grep -q '^plugins/'
-          tar -tzf .release/dsh-stack-plugins-*.tar.gz | grep -q '^plugins/lucide-animated/package.json$'
-          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/lucide-animated/package.json$'
-          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/lucide-animated/README.md$'
+          node --input-type=module <<'NODE'
+          import { promises as fs } from 'node:fs';
+          import { join } from 'node:path';
+          const root = process.cwd();
+          const release = join(root, '.release');
+          const inventory = JSON.parse(await fs.readFile(join(release, 'component-assets.json'), 'utf8'));
+          const expectedPlugins = [];
+          const expectedPacks = [];
+          async function walk(base, relative = '') {
+            for (const entry of await fs.readdir(base, { withFileTypes: true })) {
+              if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+              const dir = join(base, entry.name);
+              const rel = relative ? `${relative}/${entry.name}` : entry.name;
+              try {
+                await fs.access(join(dir, 'package.json'));
+                return [{ dir, rel }];
+              } catch {}
+              const nested = await walk(dir, rel);
+              if (nested.length) return nested;
+            }
+            return [];
+          }
+          async function collect(base) {
+            const result = [];
+            async function visit(dir, relative) {
+              for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+                if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+                const child = join(dir, entry.name);
+                const rel = relative ? `${relative}/${entry.name}` : entry.name;
+                try {
+                  await fs.access(join(child, 'package.json'));
+                  result.push(rel);
+                } catch {
+                  await visit(child, rel);
+                }
+              }
+            }
+            await visit(base, '');
+            return result.sort();
+          }
+          const plugins = (await collect(join(root, 'plugins'))).filter((rel) => !rel.startsWith('packs/'));
+          const packs = await collect(join(root, 'plugins', 'packs'));
+          const pluginZips = inventory.plugins.map((name) => name.replace(/^plugin-/, '').replace(/\.zip$/, '')).sort();
+          const packZips = inventory.packs.map((name) => name.replace(/^pack-/, '').replace(/\.zip$/, '')).sort();
+          if (JSON.stringify(pluginZips) !== JSON.stringify(plugins)) {
+            throw new Error(`Plugin ZIP inventory mismatch. Expected ${plugins.length}, generated ${pluginZips.length}.`);
+          }
+          if (JSON.stringify(packZips) !== JSON.stringify(packs)) {
+            throw new Error(`Pack ZIP inventory mismatch. Expected ${packs.length}, generated ${packZips.length}.`);
+          }
+          for (const file of [...inventory.plugins, ...inventory.packs]) {
+            const archive = join(release, file);
+            await fs.access(archive);
+            const stat = await fs.stat(archive);
+            if (!stat.size) throw new Error(`Empty release asset: ${file}`);
+          }
+          console.log(`Validated ${plugins.length} plugin ZIPs and ${packs.length} pack ZIPs.`);
+          NODE
 
       - name: Create GitHub release and upload all assets
         env:
