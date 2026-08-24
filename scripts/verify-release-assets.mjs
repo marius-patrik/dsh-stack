@@ -44,16 +44,28 @@ async function verifyArchive(archive) {
 
 /** Verify that the release contains one valid ZIP for every plugin and pack. */
 async function main() {
-  const inventory = JSON.parse(await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"));
-  const expectedPlugins = (await discoverComponents(pluginsDir)).filter((path) => !path.startsWith("packs/"));
+  const inventory = JSON.parse(
+    await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"),
+  );
+  const expectedPlugins = (await discoverComponents(pluginsDir)).filter(
+    (path) => !path.startsWith("packs/"),
+  );
   const expectedPacks = await discoverComponents(join(pluginsDir, "packs"));
-  const pluginZips = inventory.plugins.map((name) => name.replace(/^plugin-/, "").replace(/\.zip$/, "")).sort();
-  const packZips = inventory.packs.map((name) => name.replace(/^pack-/, "").replace(/\.zip$/, "")).sort();
+  const pluginZips = inventory.plugins
+    .map((name) => name.replace(/^plugin-/, "").replace(/\.zip$/, ""))
+    .sort();
+  const packZips = inventory.packs
+    .map((name) => name.replace(/^pack-/, "").replace(/\.zip$/, ""))
+    .sort();
   if (JSON.stringify(pluginZips) !== JSON.stringify(expectedPlugins)) {
-    throw new Error(`Plugin ZIP inventory mismatch: expected ${expectedPlugins.length}, generated ${pluginZips.length}`);
+    throw new Error(
+      `Plugin ZIP inventory mismatch: expected ${expectedPlugins.length}, generated ${pluginZips.length}`,
+    );
   }
   if (JSON.stringify(packZips) !== JSON.stringify(expectedPacks)) {
-    throw new Error(`Pack ZIP inventory mismatch: expected ${expectedPacks.length}, generated ${packZips.length}`);
+    throw new Error(
+      `Pack ZIP inventory mismatch: expected ${expectedPacks.length}, generated ${packZips.length}`,
+    );
   }
   for (const asset of [...inventory.plugins, ...inventory.packs]) {
     const archive = join(releaseDir, asset);
@@ -61,7 +73,9 @@ async function main() {
     if (!stat.isFile() || stat.size === 0) throw new Error(`Invalid release asset: ${asset}`);
     await verifyArchive(archive);
   }
-  console.log(`Validated ${expectedPlugins.length} plugin ZIPs and ${expectedPacks.length} pack ZIPs.`);
+  console.log(
+    `Validated ${expectedPlugins.length} plugin ZIPs and ${expectedPacks.length} pack ZIPs.`,
+  );
 }
 
 await main();
