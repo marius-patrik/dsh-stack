@@ -26,7 +26,8 @@ function read(): SidebarPreferences {
   }
   cached = {
     showBrandLogo: parsed.showBrandLogo ?? defaultSidebarPreferences.showBrandLogo,
-    showNewConversation: parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
+    showNewConversation:
+      parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
   };
   return cached;
 }
@@ -35,7 +36,8 @@ function read(): SidebarPreferences {
 function write(next: SidebarPreferences): void {
   cached = next;
   try {
-    if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    if (typeof localStorage !== "undefined")
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // The in-memory state remains valid when browser storage is unavailable.
   }
@@ -60,7 +62,11 @@ export const sidebarPreferences = {
       showBrandLogo: patch.showBrandLogo ?? current.showBrandLogo,
       showNewConversation: patch.showNewConversation ?? current.showNewConversation,
     };
-    if (next.showBrandLogo === current.showBrandLogo && next.showNewConversation === current.showNewConversation) return;
+    if (
+      next.showBrandLogo === current.showBrandLogo &&
+      next.showNewConversation === current.showNewConversation
+    )
+      return;
     write(next);
   },
   /** Subscribes to preference changes and returns an unsubscribe function. */
