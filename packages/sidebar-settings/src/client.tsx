@@ -22,7 +22,12 @@ function PreferenceRow({
     <label htmlFor={id}>
       <span>{label}</span>
       <span>{description}</span>
-      <input id={id} type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+      />
     </label>
   );
 }
@@ -35,9 +40,23 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
   return (
     <section aria-label="Sidebar">
       <h2>Sidebar</h2>
-      <PreferenceRow id="sidebar-show-brand-logo" label="Show brand logo" description="Show the active skin's logo." checked={state.showBrandLogo} onChange={(value) => change("showBrandLogo", value)} />
-      <PreferenceRow id="sidebar-show-new-conversation" label="Show New Conversation" description="Show the New Conversation action." checked={state.showNewConversation} onChange={(value) => change("showNewConversation", value)} />
-      <button type="button" onClick={close}>Close</button>
+      <PreferenceRow
+        id="sidebar-show-brand-logo"
+        label="Show brand logo"
+        description="Show the active skin's logo."
+        checked={state.showBrandLogo}
+        onChange={(value) => change("showBrandLogo", value)}
+      />
+      <PreferenceRow
+        id="sidebar-show-new-conversation"
+        label="Show New Conversation"
+        description="Show the New Conversation action."
+        checked={state.showNewConversation}
+        onChange={(value) => change("showNewConversation", value)}
+      />
+      <button type="button" onClick={close}>
+        Close
+      </button>
     </section>
   );
 }
