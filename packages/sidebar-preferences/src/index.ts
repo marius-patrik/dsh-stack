@@ -14,6 +14,7 @@ const STORAGE_KEY = "dsh-stack.sidebar.preferences";
 const listeners = new Set<() => void>();
 let cached: SidebarPreferences | undefined;
 
+/** Reads persisted sidebar preferences, falling back to defaults. */
 function read(): SidebarPreferences {
   if (cached) return cached;
   let parsed: Partial<SidebarPreferences> = {};
@@ -25,17 +26,16 @@ function read(): SidebarPreferences {
   }
   cached = {
     showBrandLogo: parsed.showBrandLogo ?? defaultSidebarPreferences.showBrandLogo,
-    showNewConversation:
-      parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
+    showNewConversation: parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
   };
   return cached;
 }
 
+/** Persists a new preference state and notifies subscribers. */
 function write(next: SidebarPreferences): void {
   cached = next;
   try {
-    if (typeof localStorage !== "undefined")
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // The in-memory state remains valid when browser storage is unavailable.
   }
@@ -43,27 +43,27 @@ function write(next: SidebarPreferences): void {
 }
 
 export const sidebarPreferences = {
+  /** Returns the current sidebar preferences. */
   get(): SidebarPreferences {
     return read();
   },
+  /** Updates one sidebar preference when its value changes. */
   set(key: SidebarPreferenceKey, value: boolean): void {
     const current = read();
     if (current[key] === value) return;
     write({ ...current, [key]: value });
   },
+  /** Merges a partial sidebar preference update into the current state. */
   update(patch: Partial<SidebarPreferences>): void {
     const current = read();
     const next = {
       showBrandLogo: patch.showBrandLogo ?? current.showBrandLogo,
       showNewConversation: patch.showNewConversation ?? current.showNewConversation,
     };
-    if (
-      next.showBrandLogo === current.showBrandLogo &&
-      next.showNewConversation === current.showNewConversation
-    )
-      return;
+    if (next.showBrandLogo === current.showBrandLogo && next.showNewConversation === current.showNewConversation) return;
     write(next);
   },
+  /** Subscribes to preference changes and returns an unsubscribe function. */
   subscribe(listener: () => void): () => void {
     listeners.add(listener);
     return () => listeners.delete(listener);
