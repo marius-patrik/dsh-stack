@@ -217,6 +217,17 @@ async function assets() {
   await fs.mkdir(outputDir, { recursive: true });
   await manifest();
   const archives = await componentArchives(outputDir);
+  const assetInventory = {
+    format: 1,
+    plugins: archives
+      .filter((file) => file.includes("/plugin-") || file.startsWith(join(outputDir, "plugin-")))
+      .map((file) => relative(outputDir, file)),
+    packs: archives
+      .filter((file) => file.includes("/pack-") || file.startsWith(join(outputDir, "pack-")))
+      .map((file) => relative(outputDir, file)),
+    total: archives.length,
+  };
+  await writeJson(join(outputDir, "component-assets.json"), assetInventory);
   const files = await fs.readdir(outputDir);
   const checksums = [];
   for (const file of files.sort()) {
