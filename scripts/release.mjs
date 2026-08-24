@@ -30,9 +30,9 @@ async function writeJson(path, value) {
   await fs.writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-/** Execute a command from the repository root and return trimmed stdout. */
-async function exec(command, args) {
-  const { stdout } = await execFileAsync(command, args, { cwd: root });
+/** Execute a command and return trimmed stdout. */
+async function exec(command, args, options = {}) {
+  const { stdout } = await execFileAsync(command, args, { cwd: root, ...options });
   return stdout.trim();
 }
 
@@ -63,6 +63,25 @@ async function discoverPackages() {
   }
   packages.sort((a, b) => a.stack.id.localeCompare(b.stack.id));
   return packages;
+}
+
+/** Recursively discover plugin or pack directories containing a package manifest. */
+async function discoverComponentDirectories(baseDir, relativePrefix = "") {
+  const entries = await fs.readdir(baseDir, { withFileTypes: true });
+  const components = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+    const dir = join(baseDir, entry.name);
+    const relativePath = relativePrefix ? `${relativePrefix}/${entry.name}` : entry.name;
+    try {
+      const pkg = await readJson(join(dir, "package.json"));
+      components.push({ dir, relativePath, pkg });
+      continue;
+    } catch {}
+    components.push(...(await discoverComponentDirectories(dir, relativePath)));
+  }
+  components.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+  return components;
 }
 
 /** Read pack/profile membership from the composition catalog. */
@@ -157,21 +176,47 @@ async function manifest() {
   console.log(output);
 }
 
-/** Build self-contained plugin and pack archives with symlink targets dereferenced. */
+/** Create a ZIP archive containing one component with symlinks fully dereferenced. */
+async function zipComponent(component, outputDir, kind, stageDir) {
+  const slug = component.relativePath.replaceAll("/", "-");
+  const archive = join(outputDir, `${kind}-${slug}.zip`);
+  const staged = join(stageDir, kind, slug);
+  await fs.mkdir(join(stageDir, kind), { recursive: true });
+  await fs.cp(component.dir, staged, { recursive: true, dereference: true, force: true });
+  await exec("zip", ["-qr", archive, "."], { cwd: staged });
+  return archive;
+}
+
+/** Build individual ZIP assets for every plugin and every pack in the repository. */
+async function componentArchives(outputDir) {
+  const stageDir = join(outputDir, ".stage");
+  await fs.rm(stageDir, { recursive: true, force: true });
+  await fs.mkdir(stageDir, { recursive: true });
+
+  const pluginComponents = await discoverComponentDirectories(pluginsDir);
+  const packComponents = await discoverComponentDirectories(join(pluginsDir, "packs"));
+  const archives = [];
+
+  for (const component of pluginComponents) {
+    if (component.relativePath === "packs" || component.relativePath.startsWith("packs/")) continue;
+    archives.push(await zipComponent(component, outputDir, "plugin", stageDir));
+  }
+  for (const component of packComponents) {
+    archives.push(await zipComponent(component, outputDir, "pack", stageDir));
+  }
+
+  await fs.rm(stageDir, { recursive: true, force: true });
+  return archives;
+}
+
+/** Build individual plugin/pack ZIPs and the release integrity manifest. */
 async function assets() {
   const rootPackage = await readJson(join(root, "package.json"));
   const outputDir = join(root, ".release");
   await fs.rm(outputDir, { recursive: true, force: true });
   await fs.mkdir(outputDir, { recursive: true });
   await manifest();
-  const version = rootPackage.version;
-  const archives = [
-    ["plugins", `dsh-stack-plugins-${version}.tar.gz`],
-    ["plugins/packs", `dsh-stack-packs-${version}.tar.gz`],
-  ];
-  for (const [source, archive] of archives) {
-    await exec("tar", ["-chzf", join(outputDir, archive), "-C", root, source]);
-  }
+  const archives = await componentArchives(outputDir);
   const files = await fs.readdir(outputDir);
   const checksums = [];
   for (const file of files.sort()) {
@@ -182,6 +227,7 @@ async function assets() {
     checksums.push(`${digest}  ${file}`);
   }
   await fs.writeFile(join(outputDir, "SHA256SUMS"), `${checksums.join("\n")}\n`, "utf8");
+  console.log(`Generated ${archives.length} component ZIPs for ${rootPackage.version}`);
   console.log(files.map((file) => join(outputDir, file)).join("\n"));
 }
 
