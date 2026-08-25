@@ -178,15 +178,18 @@ async function verifyPluginTree() {
     const packagePath = join(dir, "package.json");
     if (!(await exists(packagePath))) continue;
     const manifest = await readJson(packagePath, relative(root, packagePath));
+    if (manifest?.stack?.kind === "pack") continue;
     assert(
       manifest?.private === true,
       `${relative(root, packagePath)} must be a private composition wrapper`,
     );
     assert(manifest?.type === "module", `${relative(root, packagePath)} must use ESM`);
+    const wrapperExists = await exists(join(dir, "src", "index.mjs"));
     assert(
-      await exists(join(dir, "src", "index.mjs")),
+      wrapperExists,
       `${relative(root, dir)} must import its canonical package through src/index.mjs`,
     );
+    if (!wrapperExists) continue;
     const source = await fs.readFile(join(dir, "src", "index.mjs"), "utf8");
     assert(
       source.includes("../../../packages/"),

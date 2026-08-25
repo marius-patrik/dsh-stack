@@ -1,0 +1,17 @@
+{
+  "id": "stack.trading.market-data",
+  "name": "@dsh-stack/trading-market-data",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/trading-market-data",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [
+    "stack.trading.research"
+  ],
+  "optionalDependencies": []
+}

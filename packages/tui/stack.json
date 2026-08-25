@@ -1,0 +1,16 @@
+{
+  "id": "stack.ui.tui",
+  "name": "@dsh-stack/tui",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Standalone terminal TUI client for the DeepSeek Harness — connects over HTTP, no cordis dependency",
+  "files": [
+    "lib",
+    "bin",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [],
+  "optionalDependencies": []
+}

@@ -1,10 +1,1 @@
-{
-  "id": "stack.ui.icons.lucide-animated",
-  "name": "@dsh-stack/lucide-animated",
-  "version": "0.1.0",
-  "kind": "plugin",
-  "description": "Canonical animated Lucide icon pack for Stack UI, filesystem and navigation icons.",
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "dependencies": ["stack.ui.icons"],
-  "optionalDependencies": []
-}
+null

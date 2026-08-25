@@ -1,10 +1,1 @@
-{
-  "id": "stack.workspace.formatters",
-  "name": "@dsh-stack/workspace-formatters",
-  "version": "0.1.0",
-  "kind": "plugin",
-  "description": "Workspace formatting and code-format integration.",
-  "files": ["lib", "package.json", "stack.json"],
-  "dependencies": [],
-  "optionalDependencies": []
-}
+null

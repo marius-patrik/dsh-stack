@@ -1,10 +1,1 @@
-{
-  "id": "stack.ui.skin.host",
-  "name": "@dsh-stack/skin-host",
-  "version": "0.1.0",
-  "kind": "plugin",
-  "description": "Single active Stack skin host for DSH brand slots.",
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "dependencies": ["stack.ui.sidebar-shell"],
-  "optionalDependencies": []
-}
+null

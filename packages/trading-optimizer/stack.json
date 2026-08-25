@@ -1,0 +1,18 @@
+{
+  "id": "stack.trading.optimizer",
+  "name": "@dsh-stack/trading-optimizer",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/trading-optimizer",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [
+    "stack.trading.backtest",
+    "stack.trading.research"
+  ],
+  "optionalDependencies": []
+}

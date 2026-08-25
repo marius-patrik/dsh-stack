@@ -1,0 +1,17 @@
+{
+  "id": "stack.ui.themes",
+  "name": "@dsh-stack/themes",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "VS Code/TextMate theme support for the dsh web UI",
+  "files": [
+    "lib",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [],
+  "optionalDependencies": []
+}

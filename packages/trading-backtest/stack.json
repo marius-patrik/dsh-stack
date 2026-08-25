@@ -1,0 +1,17 @@
+{
+  "id": "stack.trading.backtest",
+  "name": "@dsh-stack/trading-backtest",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/trading-backtest",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [
+    "stack.trading.research"
+  ],
+  "optionalDependencies": []
+}

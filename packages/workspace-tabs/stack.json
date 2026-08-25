@@ -1,0 +1,15 @@
+{
+  "id": "stack.workspace.tabs",
+  "name": "@dsh-stack/workspace-tabs",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/workspace-tabs",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [],
+  "optionalDependencies": []
+}

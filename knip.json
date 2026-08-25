@@ -1,0 +1,49 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreUnresolved": ["^\\./lib/index\\.js$"],
+  "ignoreBinaries": ["script", "dns-sd", "sips"],
+  "rules": {
+    "duplicates": "warn"
+  },
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs", "scripts/client-runtime/*.js"],
+      "project": ["scripts/**/*.{mjs,js}"]
+    },
+    "packages/*": {
+      "entry": [
+        "src/index.{ts,tsx,mjs,js}",
+        "src/client.{ts,tsx}",
+        "client.js",
+        "*.mjs",
+        "bin/*.mjs"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
+    },
+    "packages/skin-claude": {
+      "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs"],
+      "ignoreDependencies": ["@types/react"]
+    },
+    "packages/skin-codex": {
+      "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs"],
+      "ignoreDependencies": ["@types/react"]
+    },
+    "packages/vcs/*": {
+      "entry": ["src/index.ts", "check-plugin.mjs"],
+      "project": ["src/**/*.ts"]
+    },
+    "plugins/**": {
+      "entry": ["src/index.{mjs,ts}", "check-plugin.mjs"],
+      "project": ["src/**/*.{ts,mjs}"]
+    }
+  },
+  "ignoreDependencies": [
+    "@biomejs/biome",
+    "@deepseek-ai/cordis",
+    "dialects",
+    "credentials",
+    "@deepseek-ai/dsh-client-ui-slots"
+  ]
+}
