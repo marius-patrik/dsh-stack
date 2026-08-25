@@ -129,7 +129,8 @@ export function apply(ctx: ClientContext): void {
   ctx.slots.inject("sidebar.footer.action", () =>
     ctx.slots.register(
       {
-        name: "stack-profiles-selector",
+        name: "sidebar.footer.action",
+        inject: () => ({ wide: true }),
       },
       ProfileSelector,
     ),
@@ -138,10 +139,11 @@ export function apply(ctx: ClientContext): void {
   ctx.slots.inject("settings.section", () =>
     ctx.slots.register(
       {
-        name: "stack-profiles-section",
+        name: "settings.section",
         id: "profiles",
         order: 40,
         label: "Profiles",
+        inject: () => ({}),
       },
       ProfileSettings,
     ),
