@@ -1,5 +1,5 @@
+import { createElement, type ComponentType } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
-import type { ComponentType } from "react";
 import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import { createSkinRuntime } from "@dsh-stack/skin-runtime";
@@ -26,22 +26,24 @@ const components: Record<string, SkinComponents> = {
 export function apply(ctx: ClientContext): void {
   const active = runtime.getActive();
   const selected = components[active] ?? components.deepseek!;
+  const Mark = (props: { size?: number }) => createElement(selected.mark, props);
+  const Name = () => createElement(selected.name);
 
   ctx.slots.inject("sidebar.brand.mark", function* () {
     yield ctx.slots.register(
       { name: "sidebar.brand.mark", inject: () => ({ size: 24 }) },
-      selected.mark,
+      Mark,
     );
   });
 
   ctx.slots.inject("sidebar.brand.name", function* () {
-    yield ctx.slots.register({ name: "sidebar.brand.name", inject: () => ({}) }, selected.name);
+    yield ctx.slots.register({ name: "sidebar.brand.name", inject: () => ({}) }, Name);
   });
 
   ctx.slots.inject("conversation.hero.brand.mark", function* () {
     yield ctx.slots.register(
       { name: "conversation.hero.brand.mark", inject: () => ({ size: 24 }) },
-      selected.mark,
+      Mark,
     );
   });
 }
