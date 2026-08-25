@@ -74,9 +74,7 @@ export function apply(ctx: Context, config: LspConfig): void {
       await ctx.plugin(ToolLsp, {});
       ctx.logger.info(`lsp: mounted ${Object.keys(merged).length} LSP server(s)`);
     } else {
-      ctx.logger.warn(
-        "lsp: no LSP servers configured — run `dsh lsp servers add <id> <command>`",
-      );
+      ctx.logger.warn("lsp: no LSP servers configured — run `dsh lsp servers add <id> <command>`");
     }
   });
 }

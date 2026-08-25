@@ -24,7 +24,12 @@ export {
 export type { ActionRoute, ActionSpec, BuiltInAction } from "./action.js";
 export { ActionCatalog } from "./catalog.js";
 export type { ActionCatalogConfig } from "./catalog.js";
-export { ACTION_SELECTED, LEGACY_MODE_SELECTED, ActionsController, foldAction } from "./controller.js";
+export {
+  ACTION_SELECTED,
+  LEGACY_MODE_SELECTED,
+  ActionsController,
+  foldAction,
+} from "./controller.js";
 export type { ActionState } from "./controller.js";
 export * from "./reload.js";
 

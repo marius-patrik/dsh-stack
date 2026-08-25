@@ -1134,16 +1134,32 @@ function materialEquals(a, b) {
 const clientPath = join(dirname(fileURLToPath(import.meta.url)), "lib", "client.js");
 assert.ok(existsSync(clientPath), "lib/client.js missing — run `npm run build`");
 const cryptoPolyfill = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), "..", "..", "scripts", "client-runtime", "crypto-polyfill.js"),
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "scripts",
+    "client-runtime",
+    "crypto-polyfill.js",
+  ),
   "utf8",
 );
 const glyphFactory = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), "..", "..", "scripts", "client-runtime", "glyph-factory.js"),
+  join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "scripts",
+    "client-runtime",
+    "glyph-factory.js",
+  ),
   "utf8",
 );
 assert.equal(
   readFileSync(clientPath, "utf8"),
-  cryptoPolyfill + glyphFactory + readFileSync(join(dirname(fileURLToPath(import.meta.url)), "client.js"), "utf8"),
+  cryptoPolyfill +
+    glyphFactory +
+    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "client.js"), "utf8"),
   "lib/client.js must be the shared crypto polyfill + glyph factory + client.js",
 );
 const registered = {};

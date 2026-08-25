@@ -776,20 +776,25 @@ window.__ModuleLoader__.load({
     });
 
     /** LoopsNavIcon implementation. */
-    var LoopsNavIcon = createGlyphComponent(16, "dsh-icon-refresh", false, true, false, function () {
-      return [
-        h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
-        h("path", { d: "M21 3v5h-5" }),
-        h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
-        h("path", { d: "M8 16H3v5" }),
-      ];
-    });
+    var LoopsNavIcon = createGlyphComponent(
+      16,
+      "dsh-icon-refresh",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
+          h("path", { d: "M21 3v5h-5" }),
+          h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
+          h("path", { d: "M8 16H3v5" }),
+        ];
+      },
+    );
 
     /** TriangleRightFill14 implementation. */
     var TriangleRightFill14 = createGlyphComponent(14, "", true, true, false, function () {
-      return [
-        h("polyline", { points: "9 18 15 12 9 6" }),
-      ];
+      return [h("polyline", { points: "9 18 15 12 9 6" })];
     });
 
     /** RobotHeadNavIcon implementation. */
@@ -829,14 +834,21 @@ window.__ModuleLoader__.load({
     });
 
     /** SettingsIcon implementation. */
-    var SettingsIcon = createGlyphComponent(16, "dsh-icon-settings", false, true, false, function () {
-      return [
-        h("path", {
-          d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
-        }),
-        h("circle", { cx: "12", cy: "12", r: "3" }),
-      ];
-    });
+    var SettingsIcon = createGlyphComponent(
+      16,
+      "dsh-icon-settings",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("path", {
+            d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+          }),
+          h("circle", { cx: "12", cy: "12", r: "3" }),
+        ];
+      },
+    );
 
     /** SidebarCollapseIcon implementation. */
     var SidebarCollapseIcon = createGlyphComponent(16, "", false, true, false, function () {
@@ -848,10 +860,7 @@ window.__ModuleLoader__.load({
 
     /** CloseIcon implementation. */
     var CloseIcon = createGlyphComponent(14, "", false, true, false, function () {
-      return [
-        h("path", { d: "M18 6 6 18" }),
-        h("path", { d: "m6 6 12 12" }),
-      ];
+      return [h("path", { d: "M18 6 6 18" }), h("path", { d: "m6 6 12 12" })];
     });
 
     /** CommandsIcon implementation. */

@@ -1007,48 +1007,69 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     ];
 
     /** ProvidersGlyph implementation. */
-    var ProvidersGlyph = createGlyphComponent(16, "dsh-icon-providers", false, true, false, function () {
-      return [
-        h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
-        h("path", {
-          d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
-        }),
-        h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
-        h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" }),
-      ];
-    });
+    var ProvidersGlyph = createGlyphComponent(
+      16,
+      "dsh-icon-providers",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
+          h("path", {
+            d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+          }),
+          h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
+          h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" }),
+        ];
+      },
+    );
 
     /** TerminalsGlyph implementation. */
-    var TerminalsGlyph = createGlyphComponent(16, "dsh-icon-terminal", false, true, false, function () {
-      return [
-        h("polyline", { points: "4 17 10 11 4 5" }),
-        h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
-      ];
-    });
+    var TerminalsGlyph = createGlyphComponent(
+      16,
+      "dsh-icon-terminal",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("polyline", { points: "4 17 10 11 4 5" }),
+          h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
+        ];
+      },
+    );
 
     /** ContainersGlyph implementation. */
-    var ContainersGlyph = createGlyphComponent(16, "dsh-icon-containers", false, true, false, function () {
-      return [
-        h("path", {
-          d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
-        }),
-        h("path", { d: "m7 16.5-4.74-2.85" }),
-        h("path", { d: "m7 16.5 5-3" }),
-        h("path", { d: "M7 16.5v5.17" }),
-        h("path", {
-          d: "M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z",
-        }),
-        h("path", { d: "m17 16.5-5-3" }),
-        h("path", { d: "m17 16.5 4.74-2.85" }),
-        h("path", { d: "M17 16.5v5.17" }),
-        h("path", {
-          d: "M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z",
-        }),
-        h("path", { d: "M12 8 7.26 5.15" }),
-        h("path", { d: "m12 8 4.74-2.85" }),
-        h("path", { d: "M12 13.5V8" }),
-      ];
-    });
+    var ContainersGlyph = createGlyphComponent(
+      16,
+      "dsh-icon-containers",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("path", {
+            d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
+          }),
+          h("path", { d: "m7 16.5-4.74-2.85" }),
+          h("path", { d: "m7 16.5 5-3" }),
+          h("path", { d: "M7 16.5v5.17" }),
+          h("path", {
+            d: "M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z",
+          }),
+          h("path", { d: "m17 16.5-5-3" }),
+          h("path", { d: "m17 16.5 4.74-2.85" }),
+          h("path", { d: "M17 16.5v5.17" }),
+          h("path", {
+            d: "M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z",
+          }),
+          h("path", { d: "M12 8 7.26 5.15" }),
+          h("path", { d: "m12 8 4.74-2.85" }),
+          h("path", { d: "M12 13.5V8" }),
+        ];
+      },
+    );
 
     /** ToolsGlyph implementation. */
     var ToolsGlyph = createGlyphComponent(16, "dsh-icon-tools", false, true, false, function () {
@@ -1070,11 +1091,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     });
 
     /** TriangleRightFill14 implementation. */
-    var TriangleRightFill14 = createGlyphComponent(14, "dsh-icon-chevron", true, true, false, function () {
-      return [
-        h("polyline", { points: "9 18 15 12 9 6" }),
-      ];
-    });
+    var TriangleRightFill14 = createGlyphComponent(
+      14,
+      "dsh-icon-chevron",
+      true,
+      true,
+      false,
+      function () {
+        return [h("polyline", { points: "9 18 15 12 9 6" })];
+      },
+    );
 
     /** PassGlyph implementation. */
     var PassGlyph = createGlyphComponent(16, "dsh-icon-pass", false, true, false, function () {
@@ -1096,20 +1122,25 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
     /** ChatGlyph implementation. */
     var ChatGlyph = createGlyphComponent(16, "dsh-icon-chat", false, true, false, function () {
-      return [
-        h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }),
-      ];
+      return [h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })];
     });
 
     /** RefreshGlyph implementation. */
-    var RefreshGlyph = createGlyphComponent(16, "dsh-icon-refresh", false, true, false, function () {
-      return [
-        h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
-        h("path", { d: "M21 3v5h-5" }),
-        h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
-        h("path", { d: "M8 16H3v5" }),
-      ];
-    });
+    var RefreshGlyph = createGlyphComponent(
+      16,
+      "dsh-icon-refresh",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
+          h("path", { d: "M21 3v5h-5" }),
+          h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
+          h("path", { d: "M8 16H3v5" }),
+        ];
+      },
+    );
 
     /** TrashGlyph implementation. */
     var TrashGlyph = createGlyphComponent(16, "dsh-icon-trash", false, true, false, function () {
@@ -1139,15 +1170,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     });
 
     /** SubagentGlyph implementation. */
-    var SubagentGlyph = createGlyphComponent(12, "dsh-icon-subagent", false, true, false, function () {
-      return [
-        h("circle", { cx: "12", cy: "18", r: "3" }),
-        h("circle", { cx: "6", cy: "6", r: "3" }),
-        h("circle", { cx: "18", cy: "6", r: "3" }),
-        h("path", { d: "M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9" }),
-        h("path", { d: "M12 12v3" }),
-      ];
-    });
+    var SubagentGlyph = createGlyphComponent(
+      12,
+      "dsh-icon-subagent",
+      false,
+      true,
+      false,
+      function () {
+        return [
+          h("circle", { cx: "12", cy: "18", r: "3" }),
+          h("circle", { cx: "6", cy: "6", r: "3" }),
+          h("circle", { cx: "18", cy: "6", r: "3" }),
+          h("path", { d: "M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9" }),
+          h("path", { d: "M12 12v3" }),
+        ];
+      },
+    );
 
     /** CutGlyph implementation. */
     var CutGlyph = createGlyphComponent(13, "dsh-icon-cut", false, false, false, function () {
@@ -1170,20 +1208,24 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
     /** PlusGlyph implementation. */
     var PlusGlyph = createGlyphComponent(14, "dsh-icon-plus", false, false, false, function () {
-      return [
-        h("path", { d: "M5 12h14" }),
-        h("path", { d: "M12 5v14" }),
-      ];
+      return [h("path", { d: "M5 12h14" }), h("path", { d: "M12 5v14" })];
     });
 
     /** EllipsisGlyph implementation. */
-    var EllipsisGlyph = createGlyphComponent(14, "dsh-icon-ellipsis", false, false, false, function () {
-      return [
-        h("circle", { cx: "12", cy: "12", r: "1" }),
-        h("circle", { cx: "19", cy: "12", r: "1" }),
-        h("circle", { cx: "5", cy: "12", r: "1" }),
-      ];
-    });
+    var EllipsisGlyph = createGlyphComponent(
+      14,
+      "dsh-icon-ellipsis",
+      false,
+      false,
+      false,
+      function () {
+        return [
+          h("circle", { cx: "12", cy: "12", r: "1" }),
+          h("circle", { cx: "19", cy: "12", r: "1" }),
+          h("circle", { cx: "5", cy: "12", r: "1" }),
+        ];
+      },
+    );
 
     /** EyeGlyph implementation. */
     var EyeGlyph = createGlyphComponent(14, "dsh-icon-eye", false, false, false, function () {
@@ -1194,12 +1236,19 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     });
 
     /** DockToggleGlyph implementation. */
-    var DockToggleGlyph = createGlyphComponent(14, "dsh-icon-dock", true, false, false, function () {
-      return [
-        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
-        h("path", { d: "M9 3v18" }),
-      ];
-    });
+    var DockToggleGlyph = createGlyphComponent(
+      14,
+      "dsh-icon-dock",
+      true,
+      false,
+      false,
+      function () {
+        return [
+          h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+          h("path", { d: "M9 3v18" }),
+        ];
+      },
+    );
 
     /** PanelBottomGlyph implementation. */
     var PanelBottomGlyph = createGlyphComponent(
@@ -1217,12 +1266,19 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     );
 
     /** PanelRightGlyph implementation. */
-    var PanelRightGlyph = createGlyphComponent(14, "dsh-icon-dock", true, false, false, function () {
-      return [
-        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
-        h("line", { x1: "15", x2: "15", y1: "3", y2: "21" }),
-      ];
-    });
+    var PanelRightGlyph = createGlyphComponent(
+      14,
+      "dsh-icon-dock",
+      true,
+      false,
+      false,
+      function () {
+        return [
+          h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+          h("line", { x1: "15", x2: "15", y1: "3", y2: "21" }),
+        ];
+      },
+    );
 
     /** BranchGlyph implementation. */
     var BranchGlyph = createGlyphComponent(14, "dsh-icon-branch", false, false, false, function () {
@@ -1235,20 +1291,24 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     });
 
     /** FolderOpenGlyph implementation. */
-    var FolderOpenGlyph = createGlyphComponent(14, "dsh-icon-folder", false, false, false, function () {
-      return [
-        h("path", {
-          d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2",
-        }),
-      ];
-    });
+    var FolderOpenGlyph = createGlyphComponent(
+      14,
+      "dsh-icon-folder",
+      false,
+      false,
+      false,
+      function () {
+        return [
+          h("path", {
+            d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2",
+          }),
+        ];
+      },
+    );
 
     /** SearchGlyph implementation. */
     var SearchGlyph = createGlyphComponent(14, "dsh-icon-search", false, false, false, function () {
-      return [
-        h("circle", { cx: "11", cy: "11", r: "8" }),
-        h("path", { d: "m21 21-4.3-4.3" }),
-      ];
+      return [h("circle", { cx: "11", cy: "11", r: "8" }), h("path", { d: "m21 21-4.3-4.3" })];
     });
 
     /** MicGlyph implementation. */
@@ -2740,11 +2800,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               paddingBottom: "16px",
             },
           },
-          h(
-            "h2",
-            { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } },
-            title,
-          ),
+          h("h2", { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } }, title),
           h(
             "div",
             { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
@@ -10088,7 +10144,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Folder: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
             }),
@@ -10098,7 +10156,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       FolderGit2: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
             }),
@@ -10109,7 +10169,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       HardDrive: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
             h("path", {
               d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
@@ -10122,7 +10184,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Server: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { width: "20", height: "8", x: "2", y: "2", rx: "2", ry: "2" }),
             h("rect", { width: "20", height: "8", x: "2", y: "14", rx: "2", ry: "2" }),
             h("line", { x1: "6", x2: "6.01", y1: "6", y2: "6" }),
@@ -10133,7 +10197,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Cpu: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { width: "16", height: "16", x: "4", y: "4", rx: "2" }),
             h("rect", { width: "6", height: "6", x: "9", y: "9", rx: "1" }),
             h("path", { d: "M15 2v2" }),
@@ -10150,7 +10216,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       AppWindow: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { x: "2", y: "4", width: "20", height: "16", rx: "2" }),
             h("path", { d: "M10 4v4" }),
             h("path", { d: "M2 8h20" }),
@@ -10161,7 +10229,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Library: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "m16 6 4 14" }),
             h("path", { d: "M12 6v14" }),
             h("path", { d: "M8 8v12" }),
@@ -10172,7 +10242,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Users: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }),
             h("circle", { cx: "9", cy: "7", r: "4" }),
             h("path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }),
@@ -10183,7 +10255,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Archive: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }),
             h("path", { d: "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" }),
             h("path", { d: "M10 12h4" }),
@@ -10193,7 +10267,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       RotateCcw: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }),
             h("path", { d: "M3 3v5h5" }),
           );
@@ -10202,7 +10278,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Pin: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }),
             h("path", {
               d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z",
@@ -10213,15 +10291,15 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Activity: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
-            h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" }),
-          );
+          return renderLucideSvg(s, c, h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" }));
         },
       },
       ShieldCheck: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
             h("path", { d: "m9 12 2 2 4-4" }),
           );
@@ -10230,7 +10308,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       KeyRound: {
         category: "System & OS",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" }),
             h("circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor" }),
           );
@@ -10241,7 +10321,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Terminal: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("polyline", { points: "4 17 10 11 4 5" }),
             h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
           );
@@ -10250,7 +10332,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       FileCode: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z",
             }),
@@ -10263,7 +10347,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Code: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("polyline", { points: "16 18 22 12 16 6" }),
             h("polyline", { points: "8 6 2 12 8 18" }),
           );
@@ -10272,7 +10358,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       FileText: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z",
             }),
@@ -10286,7 +10374,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Database: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("ellipse", { cx: "12", cy: "5", rx: "9", ry: "3" }),
             h("path", { d: "M3 5V19A9 3 0 0 0 21 19V5" }),
             h("path", { d: "M3 12A9 3 0 0 0 21 12" }),
@@ -10296,7 +10386,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Braces: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1",
             }),
@@ -10309,7 +10401,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Boxes: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
             }),
@@ -10325,7 +10419,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       GitFork: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("circle", { cx: "12", cy: "18", r: "3" }),
             h("circle", { cx: "6", cy: "6", r: "3" }),
             h("circle", { cx: "18", cy: "6", r: "3" }),
@@ -10337,7 +10433,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       GitBranch: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
             h("circle", { cx: "18", cy: "6", r: "3" }),
             h("circle", { cx: "6", cy: "18", r: "3" }),
@@ -10348,7 +10446,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Hammer: {
         category: "Development",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9",
             }),
@@ -10364,7 +10464,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Bot: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M12 8V4H8" }),
             h("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
             h("path", { d: "M2 14h2" }),
@@ -10377,7 +10479,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Brain: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-5.04Z",
             }),
@@ -10390,7 +10494,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Sparkles: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
             }),
@@ -10400,7 +10506,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Calendar: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", ry: "2" }),
             h("line", { x1: "16", x2: "16", y1: "2", y2: "6" }),
             h("line", { x1: "8", x2: "8", y1: "2", y2: "6" }),
@@ -10411,7 +10519,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       PlayCircle: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("circle", { cx: "12", cy: "12", r: "10" }),
             h("polygon", { points: "10 8 16 12 10 16 10 8" }),
           );
@@ -10420,7 +10530,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Network: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { x: "16", y: "16", width: "6", height: "6", rx: "1" }),
             h("rect", { x: "2", y: "16", width: "6", height: "6", rx: "1" }),
             h("rect", { x: "9", y: "2", width: "6", height: "6", rx: "1" }),
@@ -10432,7 +10544,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       CheckSquare: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("polyline", { points: "9 11 12 14 22 4" }),
             h("path", { d: "M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" }),
           );
@@ -10441,7 +10555,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       RefreshCw: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
             h("path", { d: "M21 3v5h-5" }),
             h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
@@ -10452,7 +10568,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Wrench: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", {
               d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
             }),
@@ -10464,7 +10582,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       SlidersHorizontal: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("line", { x1: "21", x2: "14", y1: "4", y2: "4" }),
             h("line", { x1: "10", x2: "3", y1: "4", y2: "4" }),
             h("line", { x1: "21", x2: "12", y1: "12", y2: "12" }),
@@ -10480,7 +10600,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Palette: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
             h("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }),
             h("circle", { cx: "8.5", cy: "7.5", r: ".5", fill: "currentColor" }),
@@ -10494,7 +10616,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       MessageSquare: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }),
           );
         },
@@ -10502,7 +10626,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Image: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2" }),
             h("circle", { cx: "9", cy: "9", r: "2" }),
             h("path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }),
@@ -10512,7 +10638,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Globe: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("circle", { cx: "12", cy: "12", r: "10" }),
             h("line", { x1: "2", x2: "22", y1: "12", y2: "12" }),
             h("path", {
@@ -10524,7 +10652,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Compass: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("circle", { cx: "12", cy: "12", r: "10" }),
             h("polygon", { points: "16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" }),
           );
@@ -10533,7 +10663,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Music: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M9 18V5l12-2v13" }),
             h("circle", { cx: "6", cy: "18", r: "3" }),
             h("circle", { cx: "18", cy: "16", r: "3" }),
@@ -10543,7 +10675,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Trash2: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M3 6h18" }),
             h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
             h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
@@ -10555,7 +10689,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Pencil: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("path", { d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" }),
             h("path", { d: "m15 5 4 4" }),
           );
@@ -10564,7 +10700,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Copy: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2" }),
             h("path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" }),
           );
@@ -10573,7 +10711,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Scissors: {
         category: "UI & Media",
         render: function (s, c) {
-          return renderLucideSvg(s, c,
+          return renderLucideSvg(
+            s,
+            c,
             h("circle", { cx: "6", cy: "6", r: "3" }),
             h("circle", { cx: "6", cy: "18", r: "3" }),
             h("line", { x1: "20", x2: "8.12", y1: "4", y2: "15.88" }),

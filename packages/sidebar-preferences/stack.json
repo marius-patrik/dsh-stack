@@ -4,12 +4,7 @@
   "version": "0.1.0",
   "kind": "plugin",
   "description": "@dsh-stack/sidebar-preferences",
-  "files": [
-    "lib",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
+  "files": ["lib", "README.md", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []
 }

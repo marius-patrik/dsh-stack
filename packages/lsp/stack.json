@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "kind": "plugin",
   "description": "LSP server configuration + dsh lsp CLI for the DeepSeek Harness LSP capability seam",
-  "files": [
-    "lib",
-    "bin",
-    "cordis.patch.yml",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
+  "files": ["lib", "bin", "cordis.patch.yml", "README.md", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []
 }

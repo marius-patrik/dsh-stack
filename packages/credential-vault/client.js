@@ -139,10 +139,7 @@ window.__ModuleLoader__.load({
 
     /** PlusIcon implementation. */
     var PlusIcon = createGlyphComponent(14, "", false, false, false, function () {
-      return [
-        h("path", { d: "M5 12h14" }),
-        h("path", { d: "M12 5v14" }),
-      ];
+      return [h("path", { d: "M5 12h14" }), h("path", { d: "M12 5v14" })];
     });
 
     /** LinkIcon implementation. */
@@ -182,16 +179,12 @@ window.__ModuleLoader__.load({
 
     /** CheckIcon implementation. */
     var CheckIcon = createGlyphComponent(14, "", false, false, false, function () {
-      return [
-        h("polyline", { points: "20 6 9 17 4 12" }),
-      ];
+      return [h("polyline", { points: "20 6 9 17 4 12" })];
     });
 
     /** ChevronRightIcon implementation. */
     var ChevronRightIcon = createGlyphComponent(14, "", false, false, false, function () {
-      return [
-        h("polyline", { points: "9 18 15 12 9 6" }),
-      ];
+      return [h("polyline", { points: "9 18 15 12 9 6" })];
     });
 
     /** ExternalLinkIcon implementation. */

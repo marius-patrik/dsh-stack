@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "kind": "plugin",
   "description": "@dsh-stack/skin-settings",
-  "files": [
-    "lib",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
-  "dependencies": [
-    "stack.ui.skin.runtime"
-  ],
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": ["stack.ui.skin.runtime"],
   "optionalDependencies": []
 }

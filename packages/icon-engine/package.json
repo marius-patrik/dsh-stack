@@ -10,7 +10,10 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },

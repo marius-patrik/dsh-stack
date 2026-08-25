@@ -49,8 +49,7 @@ export function registerVoiceTools(
         },
         outPath: {
           type: "string",
-          description:
-            "Optional absolute output path (default: <cwd>/voice-<timestamp>.<format>).",
+          description: "Optional absolute output path (default: <cwd>/voice-<timestamp>.<format>).",
         },
         voice: {
           type: "string",

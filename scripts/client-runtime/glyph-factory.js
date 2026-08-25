@@ -18,13 +18,21 @@
  * `currentColor` from context.
  */
 function __dshCreateDecoratedGlyphComponent(h) {
-  return function createDecoratedGlyphComponent(defaultSize, classSuffix, baseStyle, mergeStyle, renderChildren) {
+  return function createDecoratedGlyphComponent(
+    defaultSize,
+    classSuffix,
+    baseStyle,
+    mergeStyle,
+    renderChildren,
+  ) {
     return function (props) {
       var size = props && props.size ? props.size : defaultSize;
       var className =
         (props && props.className ? props.className + " " : "") +
         ("dsh-icon-animated" + (classSuffix ? " " + classSuffix : ""));
-      var style = mergeStyle ? Object.assign({}, baseStyle, (props && props.style) || {}) : baseStyle;
+      var style = mergeStyle
+        ? Object.assign({}, baseStyle, (props && props.style) || {})
+        : baseStyle;
       return h.apply(
         null,
         [
@@ -49,7 +57,14 @@ function __dshCreateDecoratedGlyphComponent(h) {
 
 /** __dshCreateGlyphComponent implementation. */
 function __dshCreateGlyphComponent(h) {
-  return function createGlyphComponent(defaultSize, classSuffix, hasStyle, hasAria, hasXmlns, renderChildren) {
+  return function createGlyphComponent(
+    defaultSize,
+    classSuffix,
+    hasStyle,
+    hasAria,
+    hasXmlns,
+    renderChildren,
+  ) {
     return function (props) {
       var size = props && props.size ? props.size : defaultSize;
       var className =
