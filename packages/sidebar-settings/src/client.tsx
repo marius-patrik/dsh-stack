@@ -64,7 +64,7 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
 /** Registers the sidebar settings section with the settings slot registry. */
 export function apply(ctx: ClientContext): void {
   ctx.slots.register(
-    { name: "settings.general.item", id: "sidebar", order: 30, label: "Sidebar" },
+    { name: "settings.section", id: "sidebar", order: 30, label: "Sidebar" },
     SidebarSettings,
   );
 }
