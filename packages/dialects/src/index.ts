@@ -41,8 +41,8 @@ export {
 export class DialectRegistry extends Service {
   private readonly dialects = new Map<DialectId, Dialect>();
 
-    /** Constructs an instance. */
-constructor(ctx: Context) {
+  /** Constructs an instance. */
+  constructor(ctx: Context) {
     super(ctx, "dialects");
   }
 

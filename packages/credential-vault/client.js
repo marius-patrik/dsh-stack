@@ -175,8 +175,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-        /** PlusIcon implementation. */
-function PlusIcon(props) {
+    /** PlusIcon implementation. */
+    function PlusIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -197,8 +197,8 @@ function PlusIcon(props) {
       );
     }
 
-        /** LinkIcon implementation. */
-function LinkIcon(props) {
+    /** LinkIcon implementation. */
+    function LinkIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -219,8 +219,8 @@ function LinkIcon(props) {
       );
     }
 
-        /** EyeIcon implementation. */
-function EyeIcon(props) {
+    /** EyeIcon implementation. */
+    function EyeIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -241,8 +241,8 @@ function EyeIcon(props) {
       );
     }
 
-        /** DownloadIcon implementation. */
-function DownloadIcon(props) {
+    /** DownloadIcon implementation. */
+    function DownloadIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -264,8 +264,8 @@ function DownloadIcon(props) {
       );
     }
 
-        /** RefreshIcon implementation. */
-function RefreshIcon(props) {
+    /** RefreshIcon implementation. */
+    function RefreshIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -288,8 +288,8 @@ function RefreshIcon(props) {
       );
     }
 
-        /** CheckIcon implementation. */
-function CheckIcon(props) {
+    /** CheckIcon implementation. */
+    function CheckIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -309,8 +309,8 @@ function CheckIcon(props) {
       );
     }
 
-        /** ChevronRightIcon implementation. */
-function ChevronRightIcon(props) {
+    /** ChevronRightIcon implementation. */
+    function ChevronRightIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -330,8 +330,8 @@ function ChevronRightIcon(props) {
       );
     }
 
-        /** ExternalLinkIcon implementation. */
-function ExternalLinkIcon(props) {
+    /** ExternalLinkIcon implementation. */
+    function ExternalLinkIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -353,8 +353,8 @@ function ExternalLinkIcon(props) {
       );
     }
 
-        /** TrashIcon implementation. */
-function TrashIcon(props) {
+    /** TrashIcon implementation. */
+    function TrashIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -378,22 +378,22 @@ function TrashIcon(props) {
       );
     }
 
-        /** createVaultStore implementation. */
-function createVaultStore() {
+    /** createVaultStore implementation. */
+    function createVaultStore() {
       var listeners = new Set();
       var state = { rows: [], snapshots: {}, status: "idle", error: null };
       var revealed = {}; // keyed by `ref` or `ref:account`
       var probing = {}; // keyed by probeId
 
-            /** emit implementation. */
-function emit() {
+      /** emit implementation. */
+      function emit() {
         listeners.forEach(function (fn) {
           fn();
         });
       }
 
-            /** load implementation. */
-function load() {
+      /** load implementation. */
+      function load() {
         state = { rows: state.rows, snapshots: state.snapshots, status: "loading", error: null };
         emit();
 
@@ -441,8 +441,8 @@ function load() {
           });
       }
 
-            /** probeProvider implementation. */
-function probeProvider(probeId) {
+      /** probeProvider implementation. */
+      function probeProvider(probeId) {
         probing[probeId] = true;
         emit();
 
@@ -461,8 +461,8 @@ function probeProvider(probeId) {
           });
       }
 
-            /** probeAll implementation. */
-function probeAll() {
+      /** probeAll implementation. */
+      function probeAll() {
         return fetch(QUOTAS_API + "/refresh", { method: "POST" })
           .then(function (res) {
             return res.json();
@@ -477,8 +477,8 @@ function probeAll() {
           });
       }
 
-            /** reveal implementation. */
-function reveal(ref, account) {
+      /** reveal implementation. */
+      function reveal(ref, account) {
         var key = ref + (account ? ":" + account : "");
         if (revealed[key]) {
           delete revealed[key];
@@ -501,8 +501,8 @@ function reveal(ref, account) {
           });
       }
 
-            /** setSecret implementation. */
-function setSecret(ref, value, account) {
+      /** setSecret implementation. */
+      function setSecret(ref, value, account) {
         var url =
           VAULT_API +
           "/accounts/" +
@@ -518,8 +518,8 @@ function setSecret(ref, value, account) {
         });
       }
 
-            /** unsetSecret implementation. */
-function unsetSecret(ref, account) {
+      /** unsetSecret implementation. */
+      function unsetSecret(ref, account) {
         var url =
           VAULT_API +
           "/accounts/" +
@@ -533,8 +533,8 @@ function unsetSecret(ref, account) {
         });
       }
 
-            /** unsetMultiple implementation. */
-function unsetMultiple(items) {
+      /** unsetMultiple implementation. */
+      function unsetMultiple(items) {
         return Promise.all(
           items.map(function (item) {
             var url =
@@ -553,8 +553,8 @@ function unsetMultiple(items) {
         });
       }
 
-            /** importLocal implementation. */
-function importLocal() {
+      /** importLocal implementation. */
+      function importLocal() {
         return fetch(VAULT_API + "/import", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -679,8 +679,8 @@ function importLocal() {
       );
     }
 
-        /** KeychainSection implementation. */
-function KeychainSection() {
+    /** KeychainSection implementation. */
+    function KeychainSection() {
       var storeState = React.useSyncExternalStore(
         globalVaultStore.subscribe,
         globalVaultStore.getSnapshot,
@@ -722,8 +722,8 @@ function KeychainSection() {
       var toastMsg = toastMsgState[0];
       var setToastMsg = toastMsgState[1];
 
-            /** showToast implementation. */
-function showToast(msg) {
+      /** showToast implementation. */
+      function showToast(msg) {
         setToastMsg(msg);
         setTimeout(function () {
           setToastMsg(null);
@@ -734,8 +734,8 @@ function showToast(msg) {
         globalVaultStore.load();
       }, []);
 
-            /** toggleProvider implementation. */
-function toggleProvider(providerId) {
+      /** toggleProvider implementation. */
+      function toggleProvider(providerId) {
         setExpandedProviders(function (prev) {
           var next = Object.assign({}, prev);
           next[providerId] = !next[providerId];
@@ -743,8 +743,8 @@ function toggleProvider(providerId) {
         });
       }
 
-            /** copyText implementation. */
-function copyText(text, label) {
+      /** copyText implementation. */
+      function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
           showToast(label || "Copied to clipboard!");
@@ -1931,8 +1931,8 @@ function copyText(text, label) {
       var saving = savingState[0];
       var setSaving = savingState[1];
 
-            /** handleSave implementation. */
-function handleSave() {
+      /** handleSave implementation. */
+      function handleSave() {
         var trimmedRef = refVal.trim().toUpperCase();
         var trimmedSec = secretVal.trim();
         var trimmedAcc = accountVal.trim() || undefined;
@@ -2161,8 +2161,8 @@ function handleSave() {
       var saving = savingState[0];
       var setSaving = savingState[1];
 
-            /** handleSave implementation. */
-function handleSave() {
+      /** handleSave implementation. */
+      function handleSave() {
         var trimmed = secretVal.trim();
         if (!trimmed) {
           setError("Secret value cannot be empty.");
@@ -2270,8 +2270,8 @@ function handleSave() {
       var deleting = deletingState[0];
       var setDeleting = deletingState[1];
 
-            /** handleDelete implementation. */
-function handleDelete() {
+      /** handleDelete implementation. */
+      function handleDelete() {
         setDeleting(true);
         globalVaultStore
           .unsetMultiple(target.items)
@@ -2358,8 +2358,8 @@ function handleDelete() {
         [initial],
       );
 
-            /** startOAuth implementation. */
-function startOAuth(provider) {
+      /** startOAuth implementation. */
+      function startOAuth(provider) {
         setSelectedProvider(provider);
         setAuthStatus("starting");
         setError(null);
@@ -2384,8 +2384,8 @@ function startOAuth(provider) {
           });
       }
 
-            /** pollTokenLoop implementation. */
-function pollTokenLoop(pollToken, providerLabel) {
+      /** pollTokenLoop implementation. */
+      function pollTokenLoop(pollToken, providerLabel) {
         var interval = setInterval(function () {
           fetch(VAULT_API + "/login/device/poll", {
             method: "POST",
@@ -2568,8 +2568,8 @@ function pollTokenLoop(pollToken, providerLabel) {
       );
     }
 
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register(NS, {
           en: { vault: "Keychain & Accounts" },

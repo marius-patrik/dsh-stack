@@ -18,12 +18,12 @@ const accounts = new AccountsService(ctx, { home, keyFile: join(home, "accounts.
 const llm = {
   configurable: [],
   adapter: undefined,
-    /** registerConfigurableProviders implementation. */
-registerConfigurableProviders(entries) {
+  /** registerConfigurableProviders implementation. */
+  registerConfigurableProviders(entries) {
     this.configurable.push(...entries);
   },
-    /** registerAdapter implementation. */
-registerAdapter(_ids, adapter) {
+  /** registerAdapter implementation. */
+  registerAdapter(_ids, adapter) {
     this.adapter = adapter;
     return { replace: () => {}, dispose: () => {} };
   },
@@ -49,24 +49,24 @@ const modelOverride = modelArg
     })()
   : null;
 const /** firstModel implementation. */
-firstModel = async (id) => {
-  const route = providers.providerRoute(id);
-  try {
-    const models = await llm.adapter.listModels(id);
-    if (models.length > 0) return { model: models[0].id, via: "discovery" };
-    if (route?.models?.[0]?.id)
-      return { model: route.models[0].id, via: "static (discovery empty — gated?)" };
-    return { model: undefined, via: "none" };
-  } catch (e) {
-    if (route?.models?.[0]?.id)
-      return {
-        model: route.models[0].id,
-        via: "static (discovery: " + String(e?.code ?? e?.message ?? e).slice(0, 60) + ")",
-      };
-    console.log("  listModels(" + id + ") error: " + String(e?.message ?? e).slice(0, 150));
-    return { model: undefined, via: "none" };
-  }
-};
+  firstModel = async (id) => {
+    const route = providers.providerRoute(id);
+    try {
+      const models = await llm.adapter.listModels(id);
+      if (models.length > 0) return { model: models[0].id, via: "discovery" };
+      if (route?.models?.[0]?.id)
+        return { model: route.models[0].id, via: "static (discovery empty — gated?)" };
+      return { model: undefined, via: "none" };
+    } catch (e) {
+      if (route?.models?.[0]?.id)
+        return {
+          model: route.models[0].id,
+          via: "static (discovery: " + String(e?.code ?? e?.message ?? e).slice(0, 60) + ")",
+        };
+      console.log("  listModels(" + id + ") error: " + String(e?.message ?? e).slice(0, 150));
+      return { model: undefined, via: "none" };
+    }
+  };
 
 const results = [];
 for (const id of ids) {

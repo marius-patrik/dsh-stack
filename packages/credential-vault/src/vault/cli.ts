@@ -174,8 +174,8 @@ function boolean(args: ParsedArguments, name: string): boolean {
 
 /** A fault the owner can fix by retyping the command. Reported without a stack. */
 export class VaultCliError extends Error {
-    /** Constructs an instance. */
-constructor(message: string) {
+  /** Constructs an instance. */
+  constructor(message: string) {
     super(message);
     this.name = "VaultCliError";
   }
@@ -596,8 +596,8 @@ export class LocalSource implements CredentialSource {
   readonly #env: Record<string, string | undefined>;
   readonly #keychainTimeoutMs: number;
 
-    /** Constructs an instance. */
-constructor(options: {
+  /** Constructs an instance. */
+  constructor(options: {
     machine?: string;
     home: string;
     platform?: SourcePlatform;
@@ -622,8 +622,8 @@ constructor(options: {
     this.#keychainTimeoutMs = options.keychainTimeoutMs ?? 3_000;
   }
 
-    /** readFile implementation. */
-async readFile(file: string): Promise<string | null> {
+  /** readFile implementation. */
+  async readFile(file: string): Promise<string | null> {
     try {
       return await readFileFromDisk(file, "utf8");
     } catch {
@@ -631,8 +631,8 @@ async readFile(file: string): Promise<string | null> {
     }
   }
 
-    /** listDirectory implementation. */
-async listDirectory(directory: string): Promise<string[]> {
+  /** listDirectory implementation. */
+  async listDirectory(directory: string): Promise<string[]> {
     try {
       const entries = await readdir(directory, { withFileTypes: true });
       return entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
@@ -728,16 +728,16 @@ async listDirectory(directory: string): Promise<string[]> {
     return value === null ? null : value.trim();
   }
 
-    /** environment implementation. */
-async environment(): Promise<Record<string, string>> {
+  /** environment implementation. */
+  async environment(): Promise<Record<string, string>> {
     const out: Record<string, string> = {};
     for (const [key, value] of Object.entries(this.#env))
       if (typeof value === "string") out[key] = value;
     return out;
   }
 
-    /** #security implementation. */
-async #security(args: string[], timeoutMs: number): Promise<string | null> {
+  /** #security implementation. */
+  async #security(args: string[], timeoutMs: number): Promise<string | null> {
     return runCommand("security", args, timeoutMs);
   }
 }
@@ -767,8 +767,8 @@ export class SshSource implements CredentialSource {
   readonly #host: string;
   readonly #timeoutMs: number;
 
-    /** Constructs an instance. */
-constructor(options: SshSourceOptions) {
+  /** Constructs an instance. */
+  constructor(options: SshSourceOptions) {
     this.#host = options.host;
     this.machine = options.machine ?? options.host;
     this.platform = options.platform;
@@ -776,8 +776,8 @@ constructor(options: SshSourceOptions) {
     this.#timeoutMs = options.timeoutMs ?? 30_000;
   }
 
-    /** readFile implementation. */
-async readFile(file: string): Promise<string | null> {
+  /** readFile implementation. */
+  async readFile(file: string): Promise<string | null> {
     if (this.platform === "win32") {
       return this.#powershell(
         `$p = ${psLiteral(file)}\nif (Test-Path -LiteralPath $p) { [Console]::Out.Write([IO.File]::ReadAllText($p)) }`,
@@ -786,8 +786,8 @@ async readFile(file: string): Promise<string | null> {
     return this.#posix(["cat", "--", file]);
   }
 
-    /** listDirectory implementation. */
-async listDirectory(directory: string): Promise<string[]> {
+  /** listDirectory implementation. */
+  async listDirectory(directory: string): Promise<string[]> {
     const raw =
       this.platform === "win32"
         ? await this.#powershell(
@@ -806,13 +806,13 @@ async listDirectory(directory: string): Promise<string[]> {
     return [];
   }
 
-    /** keychainSecret implementation. */
-async keychainSecret(): Promise<string | null> {
+  /** keychainSecret implementation. */
+  async keychainSecret(): Promise<string | null> {
     return null;
   }
 
-    /** environment implementation. */
-async environment(): Promise<Record<string, string>> {
+  /** environment implementation. */
+  async environment(): Promise<Record<string, string>> {
     const raw =
       this.platform === "win32"
         ? await this.#powershell(
@@ -827,8 +827,8 @@ async environment(): Promise<Record<string, string>> {
     return out;
   }
 
-    /** #powershell implementation. */
-async #powershell(script: string): Promise<string | null> {
+  /** #powershell implementation. */
+  async #powershell(script: string): Promise<string | null> {
     const preamble =
       "$ProgressPreference='SilentlyContinue'; $ErrorActionPreference='SilentlyContinue';\n";
     const encoded = Buffer.from(preamble + script, "utf16le").toString("base64");
@@ -844,8 +844,8 @@ async #powershell(script: string): Promise<string | null> {
     );
   }
 
-    /** #posix implementation. */
-async #posix(args: string[]): Promise<string | null> {
+  /** #posix implementation. */
+  async #posix(args: string[]): Promise<string | null> {
     return runCommand(
       "ssh",
       ["-o", "BatchMode=yes", this.#host, args.map(shellQuote).join(" ")],
@@ -864,8 +864,8 @@ export class MemorySource implements CredentialSource {
   readonly #items: KeychainItem[];
   readonly #env: Record<string, string>;
 
-    /** Constructs an instance. */
-constructor(options: {
+  /** Constructs an instance. */
+  constructor(options: {
     machine?: string;
     platform?: SourcePlatform;
     home?: string;
@@ -885,31 +885,31 @@ constructor(options: {
     this.#env = options.environment ?? {};
   }
 
-    /** readFile implementation. */
-async readFile(file: string): Promise<string | null> {
+  /** readFile implementation. */
+  async readFile(file: string): Promise<string | null> {
     return this.#files.get(file) ?? null;
   }
 
-    /** listDirectory implementation. */
-async listDirectory(directory: string): Promise<string[]> {
+  /** listDirectory implementation. */
+  async listDirectory(directory: string): Promise<string[]> {
     const prefix = `${directory.replace(/\/$/, "")}/`;
     return [...this.#files.keys()]
       .filter((file) => file.startsWith(prefix) && !file.slice(prefix.length).includes("/"))
       .map((file) => file.slice(prefix.length));
   }
 
-    /** keychainItems implementation. */
-async keychainItems(): Promise<KeychainItem[]> {
+  /** keychainItems implementation. */
+  async keychainItems(): Promise<KeychainItem[]> {
     return [...this.#items];
   }
 
-    /** keychainSecret implementation. */
-async keychainSecret(service: string): Promise<string | null> {
+  /** keychainSecret implementation. */
+  async keychainSecret(service: string): Promise<string | null> {
     return this.#keychain.get(service) ?? null;
   }
 
-    /** environment implementation. */
-async environment(): Promise<Record<string, string>> {
+  /** environment implementation. */
+  async environment(): Promise<Record<string, string>> {
     return { ...this.#env };
   }
 }
@@ -1338,8 +1338,8 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const codexAuthJson: Detector = {
   name: "codex-auth-json",
   provider: "openai",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const file = joinSource(source.home, ".codex/auth.json");
     const document = parseJson(await source.readFile(file));
     if (!document) return [];
@@ -1465,8 +1465,8 @@ function claudeOauthFinding(
 const claudeCredentialsFile: Detector = {
   name: "claude-credentials-file",
   provider: "anthropic",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const file = joinSource(source.home, ".claude/.credentials.json");
     const document = parseJson(await source.readFile(file));
     if (!document) return [];
@@ -1484,8 +1484,8 @@ async detect(source, context) {
 const claudeKeychain: Detector = {
   name: "claude-keychain",
   provider: "anthropic",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const services = (await source.keychainItems())
       .map((item) => item.service)
@@ -1532,8 +1532,8 @@ async detect(source, context) {
 const grokAuthJson: Detector = {
   name: "grok-auth-json",
   provider: "xai",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const file = joinSource(source.home, ".grok/auth.json");
     const document = parseJson(await source.readFile(file));
     if (!document) return [];
@@ -1582,8 +1582,8 @@ async detect(source, context) {
 const geminiOauthCreds: Detector = {
   name: "gemini-oauth-creds",
   provider: "google",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const file = joinSource(source.home, ".gemini/oauth_creds.json");
     const document = parseJson(await source.readFile(file));
     const accessToken = document ? stringField(document, "access_token") : null;
@@ -1630,8 +1630,8 @@ async detect(source, context) {
 const antigravityKeychain: Detector = {
   name: "antigravity-keychain",
   provider: "google",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const read = await readKeychainItem(source, context, "gemini", "antigravity");
     if (read.state === "absent") return [];
@@ -1692,8 +1692,8 @@ async detect(source, context) {
 const cursorKeychain: Detector = {
   name: "cursor-keychain",
   provider: "cursor",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const access = await readKeychainItem(source, context, "cursor-access-token", null);
     if (access.state === "absent") return [];
@@ -1762,8 +1762,8 @@ async detect(source, context) {
 const githubHosts: Detector = {
   name: "github-hosts",
   provider: "github",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const candidates = [
       joinSource(source.home, ".config/gh/hosts.yml"),
       joinSource(source.home, "AppData/Roaming/GitHub CLI/hosts.yml"),
@@ -1809,8 +1809,8 @@ export { parseGitHubHosts } from "../file-providers.js";
 const githubKeychain: Detector = {
   name: "github-keychain",
   provider: "github",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const services = (await source.keychainItems())
       .map((item) => item.service)
@@ -1866,8 +1866,8 @@ async detect(source, context) {
 const agentOsSecrets: Detector = {
   name: "agent-os-secrets",
   provider: "andromeda",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const directory = joinSource(source.home, ".agents/secrets");
     const names = await source.listDirectory(directory);
     const findings: Finding[] = [];
@@ -1965,8 +1965,8 @@ const ENV_DENYLIST = new Set([
 const environmentVariables: Detector = {
   name: "environment-variables",
   provider: "environment",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const environment = await source.environment();
     const findings: Finding[] = [];
     for (const [name, value] of Object.entries(environment).sort(([left], [right]) =>
@@ -2134,8 +2134,8 @@ async function openKeychainSecret(
 const macosKeychainSecrets: Detector = {
   name: "macos-keychain-secrets",
   provider: "keychain",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     if (source.platform !== "darwin") return [];
     // Collect the allowlisted items, then resolve them concurrently.
     //
@@ -2185,8 +2185,8 @@ const KEYCHAIN_IGNORED =
 const macosKeychainInventory: Detector = {
   name: "macos-keychain-inventory",
   provider: "keychain",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const claimed = new Set(["gemini", "cursor-access-token", "cursor-refresh-token"]);
     const findings: Finding[] = [];
@@ -2305,8 +2305,8 @@ function sshPublicKeyComment(publicKey: string): string | null {
 const sshKeys: Detector = {
   name: "ssh-keys",
   provider: "ssh",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const directory = joinSource(source.home, ".ssh");
     const names = await source.listDirectory(directory);
     const findings: Finding[] = [];
@@ -2421,31 +2421,26 @@ const PASSWORD_STORES: readonly PasswordStoreProbe[] = [
 const passwordStores: Detector = {
   name: "password-stores",
   provider: "password-store",
-    /** detect implementation. */
-async detect(source, context) {
+  /** detect implementation. */
+  async detect(source, context) {
     const findings: Finding[] = [];
-    const     /** push implementation. */
-push = (
-      provider: string,
-      location: string,
-      note: string,
-      account: string | null = null,
-    ) =>
-      findings.push({
-        detector: this.name,
-        provider,
-        type: "password",
-        suggestedId: slugify("pwstore", provider, source.machine),
-        label: `${provider} saved-password store on ${source.machine} (present, locked)`,
-        purpose: `password-store/${slugify(provider)}`,
-        account,
-        expiresAt: null,
-        plan: "unknown",
-        origin: origin(source, "file", location, context),
-        fingerprints: [],
-        notes: [note],
-        material: null,
-      });
+    const /** push implementation. */
+      push = (provider: string, location: string, note: string, account: string | null = null) =>
+        findings.push({
+          detector: this.name,
+          provider,
+          type: "password",
+          suggestedId: slugify("pwstore", provider, source.machine),
+          label: `${provider} saved-password store on ${source.machine} (present, locked)`,
+          purpose: `password-store/${slugify(provider)}`,
+          account,
+          expiresAt: null,
+          plan: "unknown",
+          origin: origin(source, "file", location, context),
+          fingerprints: [],
+          notes: [note],
+          material: null,
+        });
 
     for (const store of PASSWORD_STORES) {
       for (const file of store.files(source.home)) {

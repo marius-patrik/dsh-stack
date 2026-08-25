@@ -75,8 +75,8 @@ function buildUrl(base: string): string {
 export const codeAssistDialect: Dialect = {
   id: "code-assist",
 
-    /** serialize implementation. */
-serialize(
+  /** serialize implementation. */
+  serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -137,10 +137,10 @@ serialize(
     };
   },
 
-    /** parse implementation. */
-parse(body, onActivity) {
-        /** unwrap implementation. */
-async function* unwrap(): AsyncIterable<string> {
+  /** parse implementation. */
+  parse(body, onActivity) {
+    /** unwrap implementation. */
+    async function* unwrap(): AsyncIterable<string> {
       for await (const { data } of parseSseEvents(body, onActivity)) {
         let parsed: unknown;
         try {

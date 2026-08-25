@@ -428,8 +428,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 `;
 
     var stylesInjected = false;
-        /** ensureTreeStyles implementation. */
-function ensureTreeStyles() {
+    /** ensureTreeStyles implementation. */
+    function ensureTreeStyles() {
       if (stylesInjected || typeof document === "undefined") return;
       var el = document.createElement("style");
       el.textContent = TREE_STYLES;
@@ -438,28 +438,28 @@ function ensureTreeStyles() {
     }
 
     var modelDecoratorInstalled = false;
-        /** ensureModelPickerDecoration implementation. */
-function ensureModelPickerDecoration() {
+    /** ensureModelPickerDecoration implementation. */
+    function ensureModelPickerDecoration() {
       if (typeof document === "undefined" || typeof MutationObserver === "undefined") return;
       if (modelDecoratorInstalled) return;
       modelDecoratorInstalled = true;
 
-      var       /** getFavoriteModels implementation. */
-getFavoriteModels = function () {
-        try {
-          var raw = window.localStorage.getItem("dsh_favorite_models");
-          return raw ? JSON.parse(raw) : [];
-        } catch (e) {
-          return [];
-        }
-      };
+      var /** getFavoriteModels implementation. */
+        getFavoriteModels = function () {
+          try {
+            var raw = window.localStorage.getItem("dsh_favorite_models");
+            return raw ? JSON.parse(raw) : [];
+          } catch (e) {
+            return [];
+          }
+        };
 
-      var       /** setFavoriteModels implementation. */
-setFavoriteModels = function (favs) {
-        try {
-          window.localStorage.setItem("dsh_favorite_models", JSON.stringify(favs));
-        } catch (e) {}
-      };
+      var /** setFavoriteModels implementation. */
+        setFavoriteModels = function (favs) {
+          try {
+            window.localStorage.setItem("dsh_favorite_models", JSON.stringify(favs));
+          } catch (e) {}
+        };
 
       var STAR_GRAY_SVG =
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
@@ -467,227 +467,231 @@ setFavoriteModels = function (favs) {
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
       var updateTimer = null;
-      var       /** scheduleUpdate implementation. */
-scheduleUpdate = function () {
-        if (updateTimer) clearTimeout(updateTimer);
-        updateTimer = setTimeout(updateModelDecorations, 100);
-      };
+      var /** scheduleUpdate implementation. */
+        scheduleUpdate = function () {
+          if (updateTimer) clearTimeout(updateTimer);
+          updateTimer = setTimeout(updateModelDecorations, 100);
+        };
 
-      var       /** updateModelDecorations implementation. */
-updateModelDecorations = function () {
-        // 1. Remove old inline brand icons if any
-        var oldBrandIcons = document.querySelectorAll(".dsh-prov-brand-icon");
-        oldBrandIcons.forEach(function (icon) {
-          icon.remove();
-        });
-
-        // 2. Decorate model dropdown options with Star/Favorite buttons and build Favorites group at top
-        var modelMenus = document.querySelectorAll(
-          '[role="menu"][id*="menu"], [class*="ModelSelect_menu"]',
-        );
-        modelMenus.forEach(function (menu) {
-          var options = menu.querySelectorAll(
-            'button[role="menuitemradio"], button[class*="option"]',
-          );
-          if (options.length === 0) return;
-
-          var favs = getFavoriteModels();
-          var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
-          var favOptionsMap = {};
-
-          var           /** stopAll implementation. */
-stopAll = function (e) {
-            if (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-            }
-          };
-
-          options.forEach(function (opt) {
-            if (opt.closest(".dsh-favorites-group")) return;
-
-            var modelNameEl = opt.querySelector('[class*="modelName"]') || opt;
-            var modelKey = (opt.getAttribute("title") || modelNameEl.textContent || "").trim();
-            if (!modelKey) return;
-
-            var isFav = favs.indexOf(modelKey) !== -1;
-            if (isFav) {
-              favOptionsMap[modelKey] = opt;
-            }
-
-            var starBtn = opt.querySelector(".dsh-model-star-btn");
-            if (!starBtn) {
-              starBtn = document.createElement("span");
-              starBtn.setAttribute("role", "button");
-              starBtn.setAttribute("tabindex", "0");
-              starBtn.className = "dsh-model-star-btn";
-              starBtn.style.border = "none";
-              starBtn.style.background = "transparent";
-              starBtn.style.padding = "0";
-              starBtn.style.width = "20px";
-              starBtn.style.height = "20px";
-              starBtn.style.cursor = "pointer";
-              starBtn.style.display = "inline-flex";
-              starBtn.style.alignItems = "center";
-              starBtn.style.justifyContent = "center";
-              starBtn.style.flex = "0 0 20px";
-              starBtn.style.flexShrink = "0";
-              starBtn.style.marginLeft = "auto";
-              starBtn.style.zIndex = "10";
-
-              var               /** toggleFav implementation. */
-toggleFav = function (e) {
-                stopAll(e);
-                var currentFavs = getFavoriteModels();
-                var idx = currentFavs.indexOf(modelKey);
-                if (idx === -1) currentFavs.push(modelKey);
-                else currentFavs.splice(idx, 1);
-                setFavoriteModels(currentFavs);
-                scheduleUpdate();
-              };
-
-              starBtn.addEventListener("pointerdown", function (e) {
-                stopAll(e);
-                toggleFav(e);
-              });
-              starBtn.addEventListener("mousedown", function (e) {
-                stopAll(e);
-              });
-              starBtn.addEventListener("pointerup", function (e) {
-                stopAll(e);
-              });
-              starBtn.addEventListener("mouseup", function (e) {
-                stopAll(e);
-              });
-              starBtn.addEventListener("click", function (e) {
-                stopAll(e);
-              });
-
-              var copyEl = opt.querySelector('[class*="optionCopy"]');
-              var checkEl = opt.querySelector('[class*="check"]');
-              if (checkEl) {
-                opt.insertBefore(starBtn, checkEl);
-                if (!checkEl.querySelector("svg") && !checkEl.textContent.trim()) {
-                  checkEl.style.display = "none";
-                } else {
-                  checkEl.style.display = "grid";
-                }
-              } else if (copyEl && copyEl.nextSibling) {
-                opt.insertBefore(starBtn, copyEl.nextSibling);
-              } else {
-                opt.appendChild(starBtn);
-              }
-            } else {
-              var checkElExisting = opt.querySelector('[class*="check"]');
-              if (checkElExisting) {
-                if (!checkElExisting.querySelector("svg") && !checkElExisting.textContent.trim()) {
-                  checkElExisting.style.display = "none";
-                } else {
-                  checkElExisting.style.display = "grid";
-                }
-              }
-            }
-
-            starBtn.title = isFav ? "Remove from Favorites" : "Add to Favorites";
-            starBtn.style.color = isFav ? "#eab308" : "var(--dsw-alias-label-tertiary, #888)";
-            starBtn.innerHTML = isFav ? STAR_GOLD_SVG : STAR_GRAY_SVG;
+      var /** updateModelDecorations implementation. */
+        updateModelDecorations = function () {
+          // 1. Remove old inline brand icons if any
+          var oldBrandIcons = document.querySelectorAll(".dsh-prov-brand-icon");
+          oldBrandIcons.forEach(function (icon) {
+            icon.remove();
           });
 
-          // Build or update Favorites section at top of menu
-          var existingFavGroup = groupsContainer.querySelector(".dsh-favorites-group");
-          var favKeys = Object.keys(favOptionsMap);
+          // 2. Decorate model dropdown options with Star/Favorite buttons and build Favorites group at top
+          var modelMenus = document.querySelectorAll(
+            '[role="menu"][id*="menu"], [class*="ModelSelect_menu"]',
+          );
+          modelMenus.forEach(function (menu) {
+            var options = menu.querySelectorAll(
+              'button[role="menuitemradio"], button[class*="option"]',
+            );
+            if (options.length === 0) return;
 
-          if (favKeys.length === 0) {
-            if (existingFavGroup) existingFavGroup.remove();
-          } else {
-            if (!existingFavGroup) {
-              existingFavGroup = document.createElement("section");
-              existingFavGroup.className = "dsh-favorites-group";
-              existingFavGroup.setAttribute("role", "group");
-              existingFavGroup.style.display = "flex";
-              existingFavGroup.style.flexDirection = "column";
-              existingFavGroup.style.marginBottom = "6px";
-              existingFavGroup.style.paddingBottom = "4px";
-              existingFavGroup.style.borderBottom =
-                "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
+            var favs = getFavoriteModels();
+            var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
+            var favOptionsMap = {};
 
-              var titleDiv = document.createElement("div");
-              titleDiv.className = "dsh-favorites-title";
-              titleDiv.style.padding = "4px 10px 2px";
-              titleDiv.style.fontSize = "10.5px";
-              titleDiv.style.fontWeight = "700";
-              titleDiv.style.color = "#eab308";
-              titleDiv.style.textTransform = "uppercase";
-              titleDiv.style.letterSpacing = "0.5px";
-              titleDiv.style.display = "flex";
-              titleDiv.style.alignItems = "center";
-              titleDiv.style.gap = "4px";
-              titleDiv.innerHTML = "<span>★ Favorites</span>";
-              existingFavGroup.appendChild(titleDiv);
+            var /** stopAll implementation. */
+              stopAll = function (e) {
+                if (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (typeof e.stopImmediatePropagation === "function")
+                    e.stopImmediatePropagation();
+                }
+              };
 
-              groupsContainer.insertBefore(existingFavGroup, groupsContainer.firstChild);
-            }
+            options.forEach(function (opt) {
+              if (opt.closest(".dsh-favorites-group")) return;
 
-            var oldClones = existingFavGroup.querySelectorAll(".dsh-fav-cloned-option");
-            oldClones.forEach(function (c) {
-              c.remove();
-            });
+              var modelNameEl = opt.querySelector('[class*="modelName"]') || opt;
+              var modelKey = (opt.getAttribute("title") || modelNameEl.textContent || "").trim();
+              if (!modelKey) return;
 
-            favKeys.forEach(function (key) {
-              var origOpt = favOptionsMap[key];
-              if (!origOpt) return;
-              var clone = origOpt.cloneNode(true);
-              clone.className = origOpt.className + " dsh-fav-cloned-option";
-              clone.addEventListener("click", function (e) {
-                if (e.target.closest(".dsh-model-star-btn")) return;
-                origOpt.click();
-              });
+              var isFav = favs.indexOf(modelKey) !== -1;
+              if (isFav) {
+                favOptionsMap[modelKey] = opt;
+              }
 
-              var cloneStar = clone.querySelector(".dsh-model-star-btn");
-              if (cloneStar) {
-                var                 /** handleCloneToggle implementation. */
-handleCloneToggle = function (e) {
-                  stopAll(e);
-                  var currentFavs = getFavoriteModels();
-                  var idx = currentFavs.indexOf(key);
-                  if (idx !== -1) {
-                    currentFavs.splice(idx, 1);
+              var starBtn = opt.querySelector(".dsh-model-star-btn");
+              if (!starBtn) {
+                starBtn = document.createElement("span");
+                starBtn.setAttribute("role", "button");
+                starBtn.setAttribute("tabindex", "0");
+                starBtn.className = "dsh-model-star-btn";
+                starBtn.style.border = "none";
+                starBtn.style.background = "transparent";
+                starBtn.style.padding = "0";
+                starBtn.style.width = "20px";
+                starBtn.style.height = "20px";
+                starBtn.style.cursor = "pointer";
+                starBtn.style.display = "inline-flex";
+                starBtn.style.alignItems = "center";
+                starBtn.style.justifyContent = "center";
+                starBtn.style.flex = "0 0 20px";
+                starBtn.style.flexShrink = "0";
+                starBtn.style.marginLeft = "auto";
+                starBtn.style.zIndex = "10";
+
+                var /** toggleFav implementation. */
+                  toggleFav = function (e) {
+                    stopAll(e);
+                    var currentFavs = getFavoriteModels();
+                    var idx = currentFavs.indexOf(modelKey);
+                    if (idx === -1) currentFavs.push(modelKey);
+                    else currentFavs.splice(idx, 1);
                     setFavoriteModels(currentFavs);
                     scheduleUpdate();
-                  }
-                };
-                cloneStar.addEventListener("pointerdown", function (e) {
-                  stopAll(e);
-                  handleCloneToggle(e);
-                });
-                cloneStar.addEventListener("mousedown", function (e) {
-                  stopAll(e);
-                });
-                cloneStar.addEventListener("pointerup", function (e) {
-                  stopAll(e);
-                });
-                cloneStar.addEventListener("mouseup", function (e) {
-                  stopAll(e);
-                });
-                cloneStar.addEventListener("click", function (e) {
-                  stopAll(e);
-                });
-              }
+                  };
 
-              var cloneCheck = clone.querySelector('[class*="check"]');
-              if (cloneCheck) {
-                if (!cloneCheck.querySelector("svg") && !cloneCheck.textContent.trim()) {
-                  cloneCheck.style.display = "none";
+                starBtn.addEventListener("pointerdown", function (e) {
+                  stopAll(e);
+                  toggleFav(e);
+                });
+                starBtn.addEventListener("mousedown", function (e) {
+                  stopAll(e);
+                });
+                starBtn.addEventListener("pointerup", function (e) {
+                  stopAll(e);
+                });
+                starBtn.addEventListener("mouseup", function (e) {
+                  stopAll(e);
+                });
+                starBtn.addEventListener("click", function (e) {
+                  stopAll(e);
+                });
+
+                var copyEl = opt.querySelector('[class*="optionCopy"]');
+                var checkEl = opt.querySelector('[class*="check"]');
+                if (checkEl) {
+                  opt.insertBefore(starBtn, checkEl);
+                  if (!checkEl.querySelector("svg") && !checkEl.textContent.trim()) {
+                    checkEl.style.display = "none";
+                  } else {
+                    checkEl.style.display = "grid";
+                  }
+                } else if (copyEl && copyEl.nextSibling) {
+                  opt.insertBefore(starBtn, copyEl.nextSibling);
                 } else {
-                  cloneCheck.style.display = "grid";
+                  opt.appendChild(starBtn);
+                }
+              } else {
+                var checkElExisting = opt.querySelector('[class*="check"]');
+                if (checkElExisting) {
+                  if (
+                    !checkElExisting.querySelector("svg") &&
+                    !checkElExisting.textContent.trim()
+                  ) {
+                    checkElExisting.style.display = "none";
+                  } else {
+                    checkElExisting.style.display = "grid";
+                  }
                 }
               }
-              existingFavGroup.appendChild(clone);
+
+              starBtn.title = isFav ? "Remove from Favorites" : "Add to Favorites";
+              starBtn.style.color = isFav ? "#eab308" : "var(--dsw-alias-label-tertiary, #888)";
+              starBtn.innerHTML = isFav ? STAR_GOLD_SVG : STAR_GRAY_SVG;
             });
-          }
-        });
-      };
+
+            // Build or update Favorites section at top of menu
+            var existingFavGroup = groupsContainer.querySelector(".dsh-favorites-group");
+            var favKeys = Object.keys(favOptionsMap);
+
+            if (favKeys.length === 0) {
+              if (existingFavGroup) existingFavGroup.remove();
+            } else {
+              if (!existingFavGroup) {
+                existingFavGroup = document.createElement("section");
+                existingFavGroup.className = "dsh-favorites-group";
+                existingFavGroup.setAttribute("role", "group");
+                existingFavGroup.style.display = "flex";
+                existingFavGroup.style.flexDirection = "column";
+                existingFavGroup.style.marginBottom = "6px";
+                existingFavGroup.style.paddingBottom = "4px";
+                existingFavGroup.style.borderBottom =
+                  "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
+
+                var titleDiv = document.createElement("div");
+                titleDiv.className = "dsh-favorites-title";
+                titleDiv.style.padding = "4px 10px 2px";
+                titleDiv.style.fontSize = "10.5px";
+                titleDiv.style.fontWeight = "700";
+                titleDiv.style.color = "#eab308";
+                titleDiv.style.textTransform = "uppercase";
+                titleDiv.style.letterSpacing = "0.5px";
+                titleDiv.style.display = "flex";
+                titleDiv.style.alignItems = "center";
+                titleDiv.style.gap = "4px";
+                titleDiv.innerHTML = "<span>★ Favorites</span>";
+                existingFavGroup.appendChild(titleDiv);
+
+                groupsContainer.insertBefore(existingFavGroup, groupsContainer.firstChild);
+              }
+
+              var oldClones = existingFavGroup.querySelectorAll(".dsh-fav-cloned-option");
+              oldClones.forEach(function (c) {
+                c.remove();
+              });
+
+              favKeys.forEach(function (key) {
+                var origOpt = favOptionsMap[key];
+                if (!origOpt) return;
+                var clone = origOpt.cloneNode(true);
+                clone.className = origOpt.className + " dsh-fav-cloned-option";
+                clone.addEventListener("click", function (e) {
+                  if (e.target.closest(".dsh-model-star-btn")) return;
+                  origOpt.click();
+                });
+
+                var cloneStar = clone.querySelector(".dsh-model-star-btn");
+                if (cloneStar) {
+                  var /** handleCloneToggle implementation. */
+                    handleCloneToggle = function (e) {
+                      stopAll(e);
+                      var currentFavs = getFavoriteModels();
+                      var idx = currentFavs.indexOf(key);
+                      if (idx !== -1) {
+                        currentFavs.splice(idx, 1);
+                        setFavoriteModels(currentFavs);
+                        scheduleUpdate();
+                      }
+                    };
+                  cloneStar.addEventListener("pointerdown", function (e) {
+                    stopAll(e);
+                    handleCloneToggle(e);
+                  });
+                  cloneStar.addEventListener("mousedown", function (e) {
+                    stopAll(e);
+                  });
+                  cloneStar.addEventListener("pointerup", function (e) {
+                    stopAll(e);
+                  });
+                  cloneStar.addEventListener("mouseup", function (e) {
+                    stopAll(e);
+                  });
+                  cloneStar.addEventListener("click", function (e) {
+                    stopAll(e);
+                  });
+                }
+
+                var cloneCheck = clone.querySelector('[class*="check"]');
+                if (cloneCheck) {
+                  if (!cloneCheck.querySelector("svg") && !cloneCheck.textContent.trim()) {
+                    cloneCheck.style.display = "none";
+                  } else {
+                    cloneCheck.style.display = "grid";
+                  }
+                }
+                existingFavGroup.appendChild(clone);
+              });
+            }
+          });
+        };
 
       var observer = new MutationObserver(scheduleUpdate);
       if (document.body) {
@@ -1000,8 +1004,8 @@ handleCloneToggle = function (e) {
       },
     ];
 
-        /** ProvidersGlyph implementation. */
-function ProvidersGlyph(props) {
+    /** ProvidersGlyph implementation. */
+    function ProvidersGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1029,8 +1033,8 @@ function ProvidersGlyph(props) {
       );
     }
 
-        /** TerminalsGlyph implementation. */
-function TerminalsGlyph(props) {
+    /** TerminalsGlyph implementation. */
+    function TerminalsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1054,8 +1058,8 @@ function TerminalsGlyph(props) {
       );
     }
 
-        /** ContainersGlyph implementation. */
-function ContainersGlyph(props) {
+    /** ContainersGlyph implementation. */
+    function ContainersGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1095,8 +1099,8 @@ function ContainersGlyph(props) {
       );
     }
 
-        /** ToolsGlyph implementation. */
-function ToolsGlyph(props) {
+    /** ToolsGlyph implementation. */
+    function ToolsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1121,8 +1125,8 @@ function ToolsGlyph(props) {
       );
     }
 
-        /** LoopsGlyph implementation. */
-function LoopsGlyph(props) {
+    /** LoopsGlyph implementation. */
+    function LoopsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1148,8 +1152,8 @@ function LoopsGlyph(props) {
       );
     }
 
-        /** TriangleRightFill14 implementation. */
-function TriangleRightFill14(props) {
+    /** TriangleRightFill14 implementation. */
+    function TriangleRightFill14(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1174,8 +1178,8 @@ function TriangleRightFill14(props) {
       );
     }
 
-        /** PassGlyph implementation. */
-function PassGlyph(props) {
+    /** PassGlyph implementation. */
+    function PassGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-pass";
@@ -1199,8 +1203,8 @@ function PassGlyph(props) {
       );
     }
 
-        /** DataGlyph implementation. */
-function DataGlyph(props) {
+    /** DataGlyph implementation. */
+    function DataGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-data";
@@ -1224,8 +1228,8 @@ function DataGlyph(props) {
       );
     }
 
-        /** ChatGlyph implementation. */
-function ChatGlyph(props) {
+    /** ChatGlyph implementation. */
+    function ChatGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-chat";
@@ -1247,8 +1251,8 @@ function ChatGlyph(props) {
       );
     }
 
-        /** RefreshGlyph implementation. */
-function RefreshGlyph(props) {
+    /** RefreshGlyph implementation. */
+    function RefreshGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1274,8 +1278,8 @@ function RefreshGlyph(props) {
       );
     }
 
-        /** TrashGlyph implementation. */
-function TrashGlyph(props) {
+    /** TrashGlyph implementation. */
+    function TrashGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1302,8 +1306,8 @@ function TrashGlyph(props) {
       );
     }
 
-        /** EditGlyph implementation. */
-function EditGlyph(props) {
+    /** EditGlyph implementation. */
+    function EditGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-edit";
@@ -1326,8 +1330,8 @@ function EditGlyph(props) {
       );
     }
 
-        /** FileGlyph implementation. */
-function FileGlyph(props) {
+    /** FileGlyph implementation. */
+    function FileGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-file";
@@ -1350,8 +1354,8 @@ function FileGlyph(props) {
       );
     }
 
-        /** SubagentGlyph implementation. */
-function SubagentGlyph(props) {
+    /** SubagentGlyph implementation. */
+    function SubagentGlyph(props) {
       var size = props && props.size ? props.size : 12;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1378,8 +1382,8 @@ function SubagentGlyph(props) {
       );
     }
 
-        /** CutGlyph implementation. */
-function CutGlyph(props) {
+    /** CutGlyph implementation. */
+    function CutGlyph(props) {
       var size = props && props.size ? props.size : 13;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-cut";
@@ -1404,8 +1408,8 @@ function CutGlyph(props) {
       );
     }
 
-        /** CopyGlyph implementation. */
-function CopyGlyph(props) {
+    /** CopyGlyph implementation. */
+    function CopyGlyph(props) {
       var size = props && props.size ? props.size : 13;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-copy";
@@ -1427,8 +1431,8 @@ function CopyGlyph(props) {
       );
     }
 
-        /** PlusGlyph implementation. */
-function PlusGlyph(props) {
+    /** PlusGlyph implementation. */
+    function PlusGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-plus";
@@ -1450,8 +1454,8 @@ function PlusGlyph(props) {
       );
     }
 
-        /** EllipsisGlyph implementation. */
-function EllipsisGlyph(props) {
+    /** EllipsisGlyph implementation. */
+    function EllipsisGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1475,8 +1479,8 @@ function EllipsisGlyph(props) {
       );
     }
 
-        /** EyeGlyph implementation. */
-function EyeGlyph(props) {
+    /** EyeGlyph implementation. */
+    function EyeGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-eye";
@@ -1498,8 +1502,8 @@ function EyeGlyph(props) {
       );
     }
 
-        /** DockToggleGlyph implementation. */
-function DockToggleGlyph(props) {
+    /** DockToggleGlyph implementation. */
+    function DockToggleGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-dock";
@@ -1523,8 +1527,8 @@ function DockToggleGlyph(props) {
       );
     }
 
-        /** PanelBottomGlyph implementation. */
-function PanelBottomGlyph(props) {
+    /** PanelBottomGlyph implementation. */
+    function PanelBottomGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1549,8 +1553,8 @@ function PanelBottomGlyph(props) {
       );
     }
 
-        /** PanelRightGlyph implementation. */
-function PanelRightGlyph(props) {
+    /** PanelRightGlyph implementation. */
+    function PanelRightGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-dock";
@@ -1574,8 +1578,8 @@ function PanelRightGlyph(props) {
       );
     }
 
-        /** BranchGlyph implementation. */
-function BranchGlyph(props) {
+    /** BranchGlyph implementation. */
+    function BranchGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1600,8 +1604,8 @@ function BranchGlyph(props) {
       );
     }
 
-        /** FolderOpenGlyph implementation. */
-function FolderOpenGlyph(props) {
+    /** FolderOpenGlyph implementation. */
+    function FolderOpenGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1625,8 +1629,8 @@ function FolderOpenGlyph(props) {
       );
     }
 
-        /** SearchGlyph implementation. */
-function SearchGlyph(props) {
+    /** SearchGlyph implementation. */
+    function SearchGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1649,8 +1653,8 @@ function SearchGlyph(props) {
       );
     }
 
-        /** MicGlyph implementation. */
-function MicGlyph(props) {
+    /** MicGlyph implementation. */
+    function MicGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-mic";
@@ -1675,8 +1679,8 @@ function MicGlyph(props) {
       );
     }
 
-        /** formatTokenCount implementation. */
-function formatTokenCount(num) {
+    /** formatTokenCount implementation. */
+    function formatTokenCount(num) {
       if (num === undefined || num === null || isNaN(num)) return "0";
       if (num >= 1000000000) return (num / 1000000000).toFixed(1) + "B";
       if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
@@ -1685,8 +1689,8 @@ function formatTokenCount(num) {
     }
 
     // High-speed ANSI to HTML converter
-        /** ansiToHtml implementation. */
-function ansiToHtml(raw) {
+    /** ansiToHtml implementation. */
+    function ansiToHtml(raw) {
       if (!raw) return "";
       var text = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -1772,8 +1776,8 @@ function ansiToHtml(raw) {
       return html;
     }
 
-        /** ProviderBrandIcon implementation. */
-function ProviderBrandIcon(props) {
+    /** ProviderBrandIcon implementation. */
+    function ProviderBrandIcon(props) {
       var id = (props.id || "").toLowerCase();
       var size = props.size || 18;
 
@@ -1812,8 +1816,8 @@ function ProviderBrandIcon(props) {
     }
 
     // 1a. SETTINGS: ACCOUNTS SECTION
-        /** AccountsSection implementation. */
-function AccountsSection() {
+    /** AccountsSection implementation. */
+    function AccountsSection() {
       var state = React.useState({
         accounts: [],
         snapshots: [],
@@ -1892,84 +1896,84 @@ function AccountsSection() {
         [load],
       );
 
-      var       /** handleProbe implementation. */
-handleProbe = function (providerId) {
-        setProbing(function (s) {
-          var n = Object.assign({}, s);
-          n[providerId] = true;
-          return n;
-        });
-        fetch(QUOTAS_API + "/refresh/" + encodeURIComponent(providerId), { method: "POST" })
-          .then(function () {
-            load();
-          })
-          .finally(function () {
-            setProbing(function (s) {
-              var n = Object.assign({}, s);
-              n[providerId] = false;
-              return n;
-            });
-          });
-      };
-
-      var       /** handleProbeAll implementation. */
-handleProbeAll = function () {
-        setProbing(function (s) {
-          return Object.assign({}, s, { all: true });
-        });
-        fetch(QUOTAS_API + "/refresh", { method: "POST" })
-          .then(function () {
-            load();
-          })
-          .finally(function () {
-            setProbing(function (s) {
-              var n = Object.assign({}, s);
-              n.all = false;
-              return n;
-            });
-          });
-      };
-
-      var       /** toggleKeys implementation. */
-toggleKeys = function (provId) {
-        setExpandedKeys(function (s) {
-          var n = Object.assign({}, s);
-          n[provId] = !n[provId];
-          return n;
-        });
-      };
-
-      var       /** toggleReveal implementation. */
-toggleReveal = function (keyId) {
-        if (revealed[keyId]) {
-          setRevealed(function (s) {
+      var /** handleProbe implementation. */
+        handleProbe = function (providerId) {
+          setProbing(function (s) {
             var n = Object.assign({}, s);
-            delete n[keyId];
+            n[providerId] = true;
             return n;
           });
-          return;
-        }
-        var parts = keyId.split("::");
-        var ref = parts[0],
-          account = parts[1];
-        fetch(
-          VAULT_API +
-            "/accounts/" +
-            encodeURIComponent(ref) +
-            "?account=" +
-            encodeURIComponent(account),
-        )
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (res) {
+          fetch(QUOTAS_API + "/refresh/" + encodeURIComponent(providerId), { method: "POST" })
+            .then(function () {
+              load();
+            })
+            .finally(function () {
+              setProbing(function (s) {
+                var n = Object.assign({}, s);
+                n[providerId] = false;
+                return n;
+              });
+            });
+        };
+
+      var /** handleProbeAll implementation. */
+        handleProbeAll = function () {
+          setProbing(function (s) {
+            return Object.assign({}, s, { all: true });
+          });
+          fetch(QUOTAS_API + "/refresh", { method: "POST" })
+            .then(function () {
+              load();
+            })
+            .finally(function () {
+              setProbing(function (s) {
+                var n = Object.assign({}, s);
+                n.all = false;
+                return n;
+              });
+            });
+        };
+
+      var /** toggleKeys implementation. */
+        toggleKeys = function (provId) {
+          setExpandedKeys(function (s) {
+            var n = Object.assign({}, s);
+            n[provId] = !n[provId];
+            return n;
+          });
+        };
+
+      var /** toggleReveal implementation. */
+        toggleReveal = function (keyId) {
+          if (revealed[keyId]) {
             setRevealed(function (s) {
               var n = Object.assign({}, s);
-              n[keyId] = res.value || "(empty)";
+              delete n[keyId];
               return n;
             });
-          });
-      };
+            return;
+          }
+          var parts = keyId.split("::");
+          var ref = parts[0],
+            account = parts[1];
+          fetch(
+            VAULT_API +
+              "/accounts/" +
+              encodeURIComponent(ref) +
+              "?account=" +
+              encodeURIComponent(account),
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              setRevealed(function (s) {
+                var n = Object.assign({}, s);
+                n[keyId] = res.value || "(empty)";
+                return n;
+              });
+            });
+        };
 
       return h(
         "div",
@@ -2624,8 +2628,8 @@ toggleReveal = function (keyId) {
     }
 
     // 1b. SETTINGS: MODELS SECTION
-        /** ModelsSection implementation. */
-function ModelsSection() {
+    /** ModelsSection implementation. */
+    function ModelsSection() {
       var addModelModalState = React.useState(null);
       var addModelModal = addModelModalState[0],
         setAddModelModal = addModelModalState[1];
@@ -2863,8 +2867,8 @@ function ModelsSection() {
     }
 
     // 1c. SETTINGS: APPS SECTION
-        /** AppsSection implementation. */
-function AppsSection() {
+    /** AppsSection implementation. */
+    function AppsSection() {
       var state = React.useState({
         integrationsMeta: null,
         loading: true,
@@ -3106,8 +3110,8 @@ function AppsSection() {
     }
 
     // 2. SETTINGS: TMUX CONFIGURATION
-        /** TmuxSettingsSection implementation. */
-function TmuxSettingsSection() {
+    /** TmuxSettingsSection implementation. */
+    function TmuxSettingsSection() {
       var shellState = React.useState("/bin/zsh");
       var shell = shellState[0],
         setShell = shellState[1];
@@ -3124,13 +3128,13 @@ function TmuxSettingsSection() {
       var saved = savedState[0],
         setSaved = savedState[1];
 
-      var       /** handleSave implementation. */
-handleSave = function () {
-        setSaved(true);
-        setTimeout(function () {
-          setSaved(false);
-        }, 2500);
-      };
+      var /** handleSave implementation. */
+        handleSave = function () {
+          setSaved(true);
+          setTimeout(function () {
+            setSaved(false);
+          }, 2500);
+        };
 
       return h(
         "div",
@@ -3340,8 +3344,8 @@ handleSave = function () {
     }
 
     // 3. SETTINGS: DOCKER CONFIGURATION
-        /** DockerSettingsSection implementation. */
-function DockerSettingsSection() {
+    /** DockerSettingsSection implementation. */
+    function DockerSettingsSection() {
       var imageState = React.useState("node:22-alpine");
       var image = imageState[0],
         setImage = imageState[1];
@@ -3358,13 +3362,13 @@ function DockerSettingsSection() {
       var saved = savedState[0],
         setSaved = savedState[1];
 
-      var       /** handleSave implementation. */
-handleSave = function () {
-        setSaved(true);
-        setTimeout(function () {
-          setSaved(false);
-        }, 2500);
-      };
+      var /** handleSave implementation. */
+        handleSave = function () {
+          setSaved(true);
+          setTimeout(function () {
+            setSaved(false);
+          }, 2500);
+        };
 
       return h(
         "div",
@@ -3590,8 +3594,8 @@ handleSave = function () {
     }
 
     // 4. SETTINGS: TOOLS SECTION
-        /** ToolsSection implementation. */
-function ToolsSection() {
+    /** ToolsSection implementation. */
+    function ToolsSection() {
       var TOOLS_LIST = [
         {
           id: "read_file",
@@ -3770,8 +3774,8 @@ function ToolsSection() {
     }
 
     // 5. SETTINGS: LOOPS SECTION
-        /** LoopsSection implementation. */
-function LoopsSection() {
+    /** LoopsSection implementation. */
+    function LoopsSection() {
       var LOOPS_LIST = [
         {
           id: "darkfactory-orchestrator",
@@ -3944,8 +3948,8 @@ function LoopsSection() {
     }
 
     // 6. DOCKED BOTTOM TERMINAL PANEL WITH TABS
-        /** BottomTerminalPanel implementation. */
-function BottomTerminalPanel(props) {
+    /** BottomTerminalPanel implementation. */
+    function BottomTerminalPanel(props) {
       ensureTreeStyles();
       var onClose = props.onClose;
       var initialSession = props.initialSession || "0";
@@ -4016,26 +4020,29 @@ function BottomTerminalPanel(props) {
       var terminalPreRef = React.useRef(null);
 
       // Drag to resize handler
-      var       /** handleResizeStart implementation. */
-handleResizeStart = function (e) {
-        e.preventDefault();
-        var startY = e.clientY;
-        var startHeight = height;
-        var         /** handleMove implementation. */
-handleMove = function (moveEvent) {
-          var delta = startY - moveEvent.clientY;
-          var newHeight = Math.max(160, Math.min(window.innerHeight * 0.88, startHeight + delta));
-          setHeight(newHeight);
-          setIsMaximized(false);
+      var /** handleResizeStart implementation. */
+        handleResizeStart = function (e) {
+          e.preventDefault();
+          var startY = e.clientY;
+          var startHeight = height;
+          var /** handleMove implementation. */
+            handleMove = function (moveEvent) {
+              var delta = startY - moveEvent.clientY;
+              var newHeight = Math.max(
+                160,
+                Math.min(window.innerHeight * 0.88, startHeight + delta),
+              );
+              setHeight(newHeight);
+              setIsMaximized(false);
+            };
+          var /** handleUp implementation. */
+            handleUp = function () {
+              document.removeEventListener("pointermove", handleMove);
+              document.removeEventListener("pointerup", handleUp);
+            };
+          document.addEventListener("pointermove", handleMove);
+          document.addEventListener("pointerup", handleUp);
         };
-        var         /** handleUp implementation. */
-handleUp = function () {
-          document.removeEventListener("pointermove", handleMove);
-          document.removeEventListener("pointerup", handleUp);
-        };
-        document.addEventListener("pointermove", handleMove);
-        document.addEventListener("pointerup", handleUp);
-      };
 
       var loadSessions = React.useCallback(
         function () {
@@ -4160,25 +4167,25 @@ handleUp = function () {
 
       React.useEffect(
         function () {
-          var           /** onOpenTerm implementation. */
-onOpenTerm = function (e) {
-            var sess = e && e.detail && e.detail.session ? e.detail.session : "0";
-            setActiveView("terminal");
-            setSelectedSession(sess);
-            setSelectedContainer(null);
-            setIsCollapsed(false);
-            loadBuffer(sess);
-            loadWindows(sess);
-          };
-          var           /** onOpenCont implementation. */
-onOpenCont = function (e) {
-            var id = e && e.detail && e.detail.id ? e.detail.id : null;
-            setActiveView("container");
-            setSelectedContainer(id);
-            setSelectedSession(null);
-            setIsCollapsed(false);
-            if (id) loadContainerLogs(id);
-          };
+          var /** onOpenTerm implementation. */
+            onOpenTerm = function (e) {
+              var sess = e && e.detail && e.detail.session ? e.detail.session : "0";
+              setActiveView("terminal");
+              setSelectedSession(sess);
+              setSelectedContainer(null);
+              setIsCollapsed(false);
+              loadBuffer(sess);
+              loadWindows(sess);
+            };
+          var /** onOpenCont implementation. */
+            onOpenCont = function (e) {
+              var id = e && e.detail && e.detail.id ? e.detail.id : null;
+              setActiveView("container");
+              setSelectedContainer(id);
+              setSelectedSession(null);
+              setIsCollapsed(false);
+              if (id) loadContainerLogs(id);
+            };
           window.addEventListener("dsh:open-terminal", onOpenTerm);
           window.addEventListener("dsh:open-container", onOpenCont);
           return function () {
@@ -4219,158 +4226,158 @@ onOpenCont = function (e) {
         [activeView, selectedContainer, loadContainerLogs],
       );
 
-      var       /** handleContainerAction implementation. */
-handleContainerAction = function (cId, action) {
-        fetch(QUOTAS_API + "/docker/containers/action", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: cId, action: action }),
-        }).then(function () {
-          loadContainers();
-        });
-      };
+      var /** handleContainerAction implementation. */
+        handleContainerAction = function (cId, action) {
+          fetch(QUOTAS_API + "/docker/containers/action", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id: cId, action: action }),
+          }).then(function () {
+            loadContainers();
+          });
+        };
 
-      var       /** selectTerminalTab implementation. */
-selectTerminalTab = function (name) {
-        setActiveView("terminal");
-        setSelectedSession(name);
-        setSelectedContainer(null);
-        setIsCollapsed(false);
-      };
+      var /** selectTerminalTab implementation. */
+        selectTerminalTab = function (name) {
+          setActiveView("terminal");
+          setSelectedSession(name);
+          setSelectedContainer(null);
+          setIsCollapsed(false);
+        };
 
-      var       /** selectContainerTab implementation. */
-selectContainerTab = function (c) {
-        setActiveView("container");
-        setSelectedContainer(c.id);
-        setSelectedSession(null);
-        setIsCollapsed(false);
-      };
+      var /** selectContainerTab implementation. */
+        selectContainerTab = function (c) {
+          setActiveView("container");
+          setSelectedContainer(c.id);
+          setSelectedSession(null);
+          setIsCollapsed(false);
+        };
 
       // Send key actions
-      var       /** sendKey implementation. */
-sendKey = function (key) {
-        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: selectedSession, keys: key, isLiteral: false }),
-        }).then(function () {
-          setTimeout(function () {
-            loadBuffer(selectedSession);
-          }, 40);
-        });
-      };
+      var /** sendKey implementation. */
+        sendKey = function (key) {
+          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: selectedSession, keys: key, isLiteral: false }),
+          }).then(function () {
+            setTimeout(function () {
+              loadBuffer(selectedSession);
+            }, 40);
+          });
+        };
 
-      var       /** sendLiteral implementation. */
-sendLiteral = function (text, pressEnter) {
-        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            name: selectedSession,
-            keys: text,
-            isLiteral: true,
-            pressEnter: Boolean(pressEnter),
-          }),
-        }).then(function () {
-          setTimeout(function () {
-            loadBuffer(selectedSession);
-          }, 60);
-        });
-      };
+      var /** sendLiteral implementation. */
+        sendLiteral = function (text, pressEnter) {
+          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              name: selectedSession,
+              keys: text,
+              isLiteral: true,
+              pressEnter: Boolean(pressEnter),
+            }),
+          }).then(function () {
+            setTimeout(function () {
+              loadBuffer(selectedSession);
+            }, 60);
+          });
+        };
 
-      var       /** handleExecuteCommand implementation. */
-handleExecuteCommand = function (e) {
-        if (e) e.preventDefault();
-        if (!cmd.trim()) return;
-        sendLiteral(cmd, true);
-        setCmd("");
-      };
+      var /** handleExecuteCommand implementation. */
+        handleExecuteCommand = function (e) {
+          if (e) e.preventDefault();
+          if (!cmd.trim()) return;
+          sendLiteral(cmd, true);
+          setCmd("");
+        };
 
-      var       /** handleKeyDown implementation. */
-handleKeyDown = function (e) {
-        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      var /** handleKeyDown implementation. */
+        handleKeyDown = function (e) {
+          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
 
-        if (e.key === "Enter") {
-          sendKey("Enter");
-          e.preventDefault();
-        } else if (e.key === "Backspace") {
-          sendKey("BSpace");
-          e.preventDefault();
-        } else if (e.key === "Tab") {
-          sendKey("Tab");
-          e.preventDefault();
-        } else if (e.key === "ArrowUp") {
-          sendKey("Up");
-          e.preventDefault();
-        } else if (e.key === "ArrowDown") {
-          sendKey("Down");
-          e.preventDefault();
-        } else if (e.key === "ArrowLeft") {
-          sendKey("Left");
-          e.preventDefault();
-        } else if (e.key === "ArrowRight") {
-          sendKey("Right");
-          e.preventDefault();
-        } else if (e.key === "Escape") {
-          sendKey("Escape");
-          e.preventDefault();
-        } else if (e.ctrlKey) {
-          if (e.key === "c" || e.key === "C") {
-            sendKey("C-c");
+          if (e.key === "Enter") {
+            sendKey("Enter");
             e.preventDefault();
-          } else if (e.key === "d" || e.key === "D") {
-            sendKey("C-d");
+          } else if (e.key === "Backspace") {
+            sendKey("BSpace");
             e.preventDefault();
-          } else if (e.key === "l" || e.key === "L") {
-            sendKey("C-l");
+          } else if (e.key === "Tab") {
+            sendKey("Tab");
             e.preventDefault();
-          } else if (e.key === "z" || e.key === "Z") {
-            sendKey("C-z");
+          } else if (e.key === "ArrowUp") {
+            sendKey("Up");
+            e.preventDefault();
+          } else if (e.key === "ArrowDown") {
+            sendKey("Down");
+            e.preventDefault();
+          } else if (e.key === "ArrowLeft") {
+            sendKey("Left");
+            e.preventDefault();
+          } else if (e.key === "ArrowRight") {
+            sendKey("Right");
+            e.preventDefault();
+          } else if (e.key === "Escape") {
+            sendKey("Escape");
+            e.preventDefault();
+          } else if (e.ctrlKey) {
+            if (e.key === "c" || e.key === "C") {
+              sendKey("C-c");
+              e.preventDefault();
+            } else if (e.key === "d" || e.key === "D") {
+              sendKey("C-d");
+              e.preventDefault();
+            } else if (e.key === "l" || e.key === "L") {
+              sendKey("C-l");
+              e.preventDefault();
+            } else if (e.key === "z" || e.key === "Z") {
+              sendKey("C-z");
+              e.preventDefault();
+            }
+          } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
+            sendLiteral(e.key, false);
             e.preventDefault();
           }
-        } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
-          sendLiteral(e.key, false);
-          e.preventDefault();
-        }
-      };
+        };
 
-      var       /** handleSelectWindow implementation. */
-handleSelectWindow = function (idx) {
-        fetch(QUOTAS_API + "/tmux/sessions/select-window", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: selectedSession, index: idx }),
-        }).then(function () {
-          loadWindows(selectedSession);
-          loadBuffer(selectedSession);
-        });
-      };
+      var /** handleSelectWindow implementation. */
+        handleSelectWindow = function (idx) {
+          fetch(QUOTAS_API + "/tmux/sessions/select-window", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: selectedSession, index: idx }),
+          }).then(function () {
+            loadWindows(selectedSession);
+            loadBuffer(selectedSession);
+          });
+        };
 
-      var       /** handleNewWindow implementation. */
-handleNewWindow = function () {
-        var winName = prompt("New Window Name:", "sh");
-        if (!winName) return;
-        fetch(QUOTAS_API + "/tmux/sessions/new-window", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: selectedSession, windowName: winName }),
-        }).then(function () {
-          loadWindows(selectedSession);
-          loadBuffer(selectedSession);
-        });
-      };
+      var /** handleNewWindow implementation. */
+        handleNewWindow = function () {
+          var winName = prompt("New Window Name:", "sh");
+          if (!winName) return;
+          fetch(QUOTAS_API + "/tmux/sessions/new-window", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: selectedSession, windowName: winName }),
+          }).then(function () {
+            loadWindows(selectedSession);
+            loadBuffer(selectedSession);
+          });
+        };
 
-      var       /** handleKill implementation. */
-handleKill = function (name) {
-        if (!confirm("Kill tmux session '" + name + "'?")) return;
-        fetch(QUOTAS_API + "/tmux/sessions/kill", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: name }),
-        }).then(function () {
-          loadSessions();
-        });
-      };
+      var /** handleKill implementation. */
+        handleKill = function (name) {
+          if (!confirm("Kill tmux session '" + name + "'?")) return;
+          fetch(QUOTAS_API + "/tmux/sessions/kill", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: name }),
+          }).then(function () {
+            loadSessions();
+          });
+        };
 
       var sidebarRightState = React.useState(260);
       var sidebarRight = sidebarRightState[0],
@@ -4380,30 +4387,30 @@ handleKill = function (name) {
         setDetailsWidth = detailsWidthState[1];
 
       React.useEffect(function () {
-        var         /** updateOffsets implementation. */
-updateOffsets = function () {
-          var centerEl = document.querySelector('[class*="centerCol"]');
-          if (centerEl) {
-            var cRect = centerEl.getBoundingClientRect();
-            if (cRect.width > 0) {
-              setSidebarRight(cRect.left);
-              setDetailsWidth(window.innerWidth - cRect.right);
-              return;
+        var /** updateOffsets implementation. */
+          updateOffsets = function () {
+            var centerEl = document.querySelector('[class*="centerCol"]');
+            if (centerEl) {
+              var cRect = centerEl.getBoundingClientRect();
+              if (cRect.width > 0) {
+                setSidebarRight(cRect.left);
+                setDetailsWidth(window.innerWidth - cRect.right);
+                return;
+              }
             }
-          }
-          var sidebarEl = document.querySelector('[class*="sidebarCol"]');
-          if (sidebarEl) {
-            var sRect = sidebarEl.getBoundingClientRect();
-            if (sRect.right > 0) setSidebarRight(sRect.right);
-          }
-          var detailsEl = document.querySelector('[class*="detailsCol"]');
-          if (detailsEl) {
-            var dRect = detailsEl.getBoundingClientRect();
-            var dWidth = window.innerWidth - dRect.left;
-            if (dWidth >= 0 && dRect.width > 0) setDetailsWidth(dWidth);
-            else setDetailsWidth(0);
-          }
-        };
+            var sidebarEl = document.querySelector('[class*="sidebarCol"]');
+            if (sidebarEl) {
+              var sRect = sidebarEl.getBoundingClientRect();
+              if (sRect.right > 0) setSidebarRight(sRect.right);
+            }
+            var detailsEl = document.querySelector('[class*="detailsCol"]');
+            if (detailsEl) {
+              var dRect = detailsEl.getBoundingClientRect();
+              var dWidth = window.innerWidth - dRect.left;
+              if (dWidth >= 0 && dRect.width > 0) setDetailsWidth(dWidth);
+              else setDetailsWidth(0);
+            }
+          };
 
         updateOffsets();
         var timer = setInterval(updateOffsets, 200);
@@ -5478,8 +5485,8 @@ updateOffsets = function () {
     var FullPageTerminalsWorkspace = BottomTerminalPanel;
 
     // 7. DOCKABLE CONTAINERS WORKSPACE
-        /** FullPageContainersWorkspace implementation. */
-function FullPageContainersWorkspace(props) {
+    /** FullPageContainersWorkspace implementation. */
+    function FullPageContainersWorkspace(props) {
       var onClose = props.onClose;
       var initialContainerId = props.initialContainerId;
       var state = React.useState({ containers: [], loading: true, error: null });
@@ -5501,12 +5508,12 @@ function FullPageContainersWorkspace(props) {
 
       React.useLayoutEffect(function () {
         if (!containerRef.current) return;
-        var         /** checkWidth implementation. */
-checkWidth = function () {
-          if (containerRef.current) {
-            setIsNarrow(containerRef.current.clientWidth < 420);
-          }
-        };
+        var /** checkWidth implementation. */
+          checkWidth = function () {
+            if (containerRef.current) {
+              setIsNarrow(containerRef.current.clientWidth < 420);
+            }
+          };
         checkWidth();
         var obs = new ResizeObserver(checkWidth);
         obs.observe(containerRef.current);
@@ -5569,29 +5576,29 @@ checkWidth = function () {
         [selectedContainer, loadLogs],
       );
 
-      var       /** handleAction implementation. */
-handleAction = function (id, action) {
-        setActionMap(function (s) {
-          var n = Object.assign({}, s);
-          n[id] = action;
-          return n;
-        });
-        fetch(QUOTAS_API + "/docker/containers/action", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: id, action: action }),
-        })
-          .then(function () {
-            loadContainers();
-          })
-          .finally(function () {
-            setActionMap(function (s) {
-              var n = Object.assign({}, s);
-              delete n[id];
-              return n;
-            });
+      var /** handleAction implementation. */
+        handleAction = function (id, action) {
+          setActionMap(function (s) {
+            var n = Object.assign({}, s);
+            n[id] = action;
+            return n;
           });
-      };
+          fetch(QUOTAS_API + "/docker/containers/action", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id: id, action: action }),
+          })
+            .then(function () {
+              loadContainers();
+            })
+            .finally(function () {
+              setActionMap(function (s) {
+                var n = Object.assign({}, s);
+                delete n[id];
+                return n;
+              });
+            });
+        };
 
       return h(
         "div",
@@ -5775,8 +5782,8 @@ handleAction = function (id, action) {
       );
     }
 
-        /** SelectDropdownMenu implementation. */
-function SelectDropdownMenu(props) {
+    /** SelectDropdownMenu implementation. */
+    function SelectDropdownMenu(props) {
       var open = props.open,
         onClose = props.onClose,
         items = props.items,
@@ -5829,15 +5836,18 @@ function SelectDropdownMenu(props) {
       React.useEffect(
         function () {
           if (!open) return;
-          var           /** handlePointerDown implementation. */
-handlePointerDown = function (e) {
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
-              if (anchorRef && anchorRef.current && anchorRef.current.contains(e.target)) return;
-              if (menuRef.current.parentElement && menuRef.current.parentElement.contains(e.target))
-                return;
-              onClose();
-            }
-          };
+          var /** handlePointerDown implementation. */
+            handlePointerDown = function (e) {
+              if (menuRef.current && !menuRef.current.contains(e.target)) {
+                if (anchorRef && anchorRef.current && anchorRef.current.contains(e.target)) return;
+                if (
+                  menuRef.current.parentElement &&
+                  menuRef.current.parentElement.contains(e.target)
+                )
+                  return;
+                onClose();
+              }
+            };
           var timer = setTimeout(function () {
             document.addEventListener("pointerdown", handlePointerDown);
           }, 30);
@@ -5921,8 +5931,8 @@ handlePointerDown = function (e) {
     }
 
     // Interactive Tmux Terminal Component (Unified for Main Area, Bottom Panel, and Right Sidebar)
-        /** InteractiveTmuxTerminal implementation. */
-function InteractiveTmuxTerminal(props) {
+    /** InteractiveTmuxTerminal implementation. */
+    function InteractiveTmuxTerminal(props) {
       var sessionName = props.sessionName || "0";
       var style = props.style || {};
       var bufferState = React.useState("Connecting to " + sessionName + "…");
@@ -5934,143 +5944,145 @@ function InteractiveTmuxTerminal(props) {
       var isFocused = isFocusedState[0],
         setIsFocused = isFocusedState[1];
 
-      var       /** sendKey implementation. */
-sendKey = function (key) {
-        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: sessionName, keys: key, isLiteral: false }),
-        }).then(function () {
-          fetch(
-            QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
-          )
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (res) {
-              if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
-            });
-        });
-      };
-
-      var       /** sendLiteral implementation. */
-sendLiteral = function (text) {
-        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: sessionName, keys: text, isLiteral: true }),
-        }).then(function () {
-          fetch(
-            QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
-          )
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (res) {
-              if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
-            });
-        });
-      };
-
-      var       /** handleKeyDown implementation. */
-handleKeyDown = function (e) {
-        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
-        if (e.key === "Enter") {
-          sendKey("Enter");
-          e.preventDefault();
-        } else if (e.key === "Backspace") {
-          sendKey("BSpace");
-          e.preventDefault();
-        } else if (e.key === "Tab") {
-          sendKey("Tab");
-          e.preventDefault();
-        } else if (e.key === "ArrowUp") {
-          sendKey("Up");
-          e.preventDefault();
-        } else if (e.key === "ArrowDown") {
-          sendKey("Down");
-          e.preventDefault();
-        } else if (e.key === "ArrowLeft") {
-          sendKey("Left");
-          e.preventDefault();
-        } else if (e.key === "ArrowRight") {
-          sendKey("Right");
-          e.preventDefault();
-        } else if (e.key === "Escape") {
-          sendKey("Escape");
-          e.preventDefault();
-        } else if (e.ctrlKey) {
-          if (e.key === "c" || e.key === "C") {
-            sendKey("C-c");
-            e.preventDefault();
-          } else if (e.key === "d" || e.key === "D") {
-            sendKey("C-d");
-            e.preventDefault();
-          } else if (e.key === "l" || e.key === "L") {
-            sendKey("C-l");
-            e.preventDefault();
-          } else if (e.key === "z" || e.key === "Z") {
-            sendKey("C-z");
-            e.preventDefault();
-          }
-        } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
-          sendLiteral(e.key);
-          e.preventDefault();
-        }
-      };
-
-      var       /** handleSessionExited implementation. */
-handleSessionExited = function () {
-        if (props.onClose) {
-          props.onClose();
-        }
-        window.dispatchEvent(
-          new CustomEvent("dsh:close-terminal-tab", {
-            detail: { id: sessionName, session: sessionName },
-          }),
-        );
-      };
-
-      React.useEffect(
-        function () {
-          var consecutiveErrors = 0;
-          var           /** load implementation. */
-load = function () {
+      var /** sendKey implementation. */
+        sendKey = function (key) {
+          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: sessionName, keys: key, isLiteral: false }),
+          }).then(function () {
             fetch(
               QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
             )
               .then(function (r) {
-                if (r.status === 404 || r.status === 410) {
-                  handleSessionExited();
-                  return null;
-                }
                 return r.json();
               })
               .then(function (res) {
-                if (!res) return;
-                if (
-                  res.error &&
-                  (res.error.indexOf("not found") !== -1 ||
-                    res.error.indexOf("failed") !== -1 ||
-                    res.error.indexOf("no server") !== -1 ||
-                    res.error.indexOf("exited") !== -1)
-                ) {
+                if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
+              });
+          });
+        };
+
+      var /** sendLiteral implementation. */
+        sendLiteral = function (text) {
+          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: sessionName, keys: text, isLiteral: true }),
+          }).then(function () {
+            fetch(
+              QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
+            )
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (res) {
+                if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
+              });
+          });
+        };
+
+      var /** handleKeyDown implementation. */
+        handleKeyDown = function (e) {
+          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+          if (e.key === "Enter") {
+            sendKey("Enter");
+            e.preventDefault();
+          } else if (e.key === "Backspace") {
+            sendKey("BSpace");
+            e.preventDefault();
+          } else if (e.key === "Tab") {
+            sendKey("Tab");
+            e.preventDefault();
+          } else if (e.key === "ArrowUp") {
+            sendKey("Up");
+            e.preventDefault();
+          } else if (e.key === "ArrowDown") {
+            sendKey("Down");
+            e.preventDefault();
+          } else if (e.key === "ArrowLeft") {
+            sendKey("Left");
+            e.preventDefault();
+          } else if (e.key === "ArrowRight") {
+            sendKey("Right");
+            e.preventDefault();
+          } else if (e.key === "Escape") {
+            sendKey("Escape");
+            e.preventDefault();
+          } else if (e.ctrlKey) {
+            if (e.key === "c" || e.key === "C") {
+              sendKey("C-c");
+              e.preventDefault();
+            } else if (e.key === "d" || e.key === "D") {
+              sendKey("C-d");
+              e.preventDefault();
+            } else if (e.key === "l" || e.key === "L") {
+              sendKey("C-l");
+              e.preventDefault();
+            } else if (e.key === "z" || e.key === "Z") {
+              sendKey("C-z");
+              e.preventDefault();
+            }
+          } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
+            sendLiteral(e.key);
+            e.preventDefault();
+          }
+        };
+
+      var /** handleSessionExited implementation. */
+        handleSessionExited = function () {
+          if (props.onClose) {
+            props.onClose();
+          }
+          window.dispatchEvent(
+            new CustomEvent("dsh:close-terminal-tab", {
+              detail: { id: sessionName, session: sessionName },
+            }),
+          );
+        };
+
+      React.useEffect(
+        function () {
+          var consecutiveErrors = 0;
+          var /** load implementation. */
+            load = function () {
+              fetch(
+                QUOTAS_API +
+                  "/tmux/sessions/capture?ansi=1&name=" +
+                  encodeURIComponent(sessionName),
+              )
+                .then(function (r) {
+                  if (r.status === 404 || r.status === 410) {
+                    handleSessionExited();
+                    return null;
+                  }
+                  return r.json();
+                })
+                .then(function (res) {
+                  if (!res) return;
+                  if (
+                    res.error &&
+                    (res.error.indexOf("not found") !== -1 ||
+                      res.error.indexOf("failed") !== -1 ||
+                      res.error.indexOf("no server") !== -1 ||
+                      res.error.indexOf("exited") !== -1)
+                  ) {
+                    consecutiveErrors++;
+                    if (consecutiveErrors >= 2) {
+                      handleSessionExited();
+                    }
+                    return;
+                  }
+                  consecutiveErrors = 0;
+                  if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
+                })
+                .catch(function () {
                   consecutiveErrors++;
-                  if (consecutiveErrors >= 2) {
+                  if (consecutiveErrors >= 3) {
                     handleSessionExited();
                   }
-                  return;
-                }
-                consecutiveErrors = 0;
-                if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
-              })
-              .catch(function () {
-                consecutiveErrors++;
-                if (consecutiveErrors >= 3) {
-                  handleSessionExited();
-                }
-              });
-          };
+                });
+            };
           load();
           var timer = setInterval(load, 500);
           return function () {
@@ -6143,8 +6155,8 @@ load = function () {
     }
 
     // Empty Area New Tab Fallback Picker
-        /** EmptyAreaNewTabPicker implementation. */
-function EmptyAreaNewTabPicker(props) {
+    /** EmptyAreaNewTabPicker implementation. */
+    function EmptyAreaNewTabPicker(props) {
       var areaName = props.areaName || "Area";
       return h(
         "div",
@@ -6265,8 +6277,8 @@ function EmptyAreaNewTabPicker(props) {
     }
 
     // Secondary Sidebar Dock Component
-        /** RightSidebarDock implementation. */
-function RightSidebarDock(props) {
+    /** RightSidebarDock implementation. */
+    function RightSidebarDock(props) {
       var isOpenState = React.useState(false);
       var isOpen = isOpenState[0],
         setIsOpen = isOpenState[1];
@@ -6310,48 +6322,48 @@ function RightSidebarDock(props) {
       );
 
       React.useEffect(function () {
-        var         /** onToggle implementation. */
-onToggle = function () {
-          setIsOpen(function (v) {
-            return !v;
-          });
-        };
-        var         /** onMoveToRight implementation. */
-onMoveToRight = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            if (
-              prev.some(function (t) {
-                return t.id === tab.id;
-              })
-            )
-              return prev;
-            return prev.concat([tab]);
-          });
-          setActiveTab(tab.id);
-          setIsOpen(true);
-        };
-        var         /** onMoveToTop implementation. */
-onMoveToTop = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            return prev.filter(function (t) {
-              return t.id !== tab.id;
+        var /** onToggle implementation. */
+          onToggle = function () {
+            setIsOpen(function (v) {
+              return !v;
             });
-          });
-        };
-        var         /** onMoveToBottom implementation. */
-onMoveToBottom = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            return prev.filter(function (t) {
-              return t.id !== tab.id;
+          };
+        var /** onMoveToRight implementation. */
+          onMoveToRight = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
+            setTabs(function (prev) {
+              if (
+                prev.some(function (t) {
+                  return t.id === tab.id;
+                })
+              )
+                return prev;
+              return prev.concat([tab]);
             });
-          });
-        };
+            setActiveTab(tab.id);
+            setIsOpen(true);
+          };
+        var /** onMoveToTop implementation. */
+          onMoveToTop = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
+            setTabs(function (prev) {
+              return prev.filter(function (t) {
+                return t.id !== tab.id;
+              });
+            });
+          };
+        var /** onMoveToBottom implementation. */
+          onMoveToBottom = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
+            setTabs(function (prev) {
+              return prev.filter(function (t) {
+                return t.id !== tab.id;
+              });
+            });
+          };
         window.addEventListener("dsh:toggle-right-sidebar", onToggle);
         window.addEventListener("dsh:toggle-secondary-sidebar", onToggle);
         window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
@@ -6366,30 +6378,30 @@ onMoveToBottom = function (e) {
         };
       }, []);
 
-      var       /** handleResizeStart implementation. */
-handleResizeStart = function (e) {
-        e.preventDefault();
-        setIsResizing(true);
-        var startX = e.clientX;
-        var startW = width;
-        var isSwapped =
-          typeof document !== "undefined" &&
-          document.body.classList.contains("dsh-sidebars-swapped");
-        var         /** onMove implementation. */
-onMove = function (moveEv) {
-          var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;
-          var nextW = Math.max(180, Math.min(600, startW + delta));
-          setWidth(nextW);
+      var /** handleResizeStart implementation. */
+        handleResizeStart = function (e) {
+          e.preventDefault();
+          setIsResizing(true);
+          var startX = e.clientX;
+          var startW = width;
+          var isSwapped =
+            typeof document !== "undefined" &&
+            document.body.classList.contains("dsh-sidebars-swapped");
+          var /** onMove implementation. */
+            onMove = function (moveEv) {
+              var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;
+              var nextW = Math.max(180, Math.min(600, startW + delta));
+              setWidth(nextW);
+            };
+          var /** onUp implementation. */
+            onUp = function () {
+              setIsResizing(false);
+              document.removeEventListener("pointermove", onMove);
+              document.removeEventListener("pointerup", onUp);
+            };
+          document.addEventListener("pointermove", onMove);
+          document.addEventListener("pointerup", onUp);
         };
-        var         /** onUp implementation. */
-onUp = function () {
-          setIsResizing(false);
-          document.removeEventListener("pointermove", onMove);
-          document.removeEventListener("pointerup", onUp);
-        };
-        document.addEventListener("pointermove", onMove);
-        document.addEventListener("pointerup", onUp);
-      };
 
       if (!isOpen || tabs.length === 0) return null;
 
@@ -6665,8 +6677,8 @@ onUp = function () {
       );
     }
 
-        /** getCenterBounds implementation. */
-function getCenterBounds() {
+    /** getCenterBounds implementation. */
+    function getCenterBounds() {
       if (typeof document === "undefined") return { left: 240, right: 0, top: 0 };
       var centerEl = document.querySelector('div[class*="centerCol"], [class*="centerCol"], main');
       if (centerEl && centerEl.getBoundingClientRect) {
@@ -6712,23 +6724,23 @@ function getCenterBounds() {
       };
     }
 
-        /** useCenterBounds implementation. */
-function useCenterBounds() {
+    /** useCenterBounds implementation. */
+    function useCenterBounds() {
       var boundsState = React.useState(getCenterBounds);
       var bounds = boundsState[0],
         setBounds = boundsState[1];
 
       React.useEffect(function () {
-        var         /** update implementation. */
-update = function () {
-          var next = getCenterBounds();
-          setBounds(function (prev) {
-            if (prev.left !== next.left || prev.right !== next.right || prev.top !== next.top) {
-              return next;
-            }
-            return prev;
-          });
-        };
+        var /** update implementation. */
+          update = function () {
+            var next = getCenterBounds();
+            setBounds(function (prev) {
+              if (prev.left !== next.left || prev.right !== next.right || prev.top !== next.top) {
+                return next;
+              }
+              return prev;
+            });
+          };
         window.addEventListener("dsh:right-sidebar-changed", update);
         window.addEventListener("resize", update);
         window.addEventListener("pointermove", update);
@@ -6744,8 +6756,8 @@ update = function () {
       return bounds;
     }
 
-        /** MainViewTerminalOccupant implementation. */
-function MainViewTerminalOccupant(props) {
+    /** MainViewTerminalOccupant implementation. */
+    function MainViewTerminalOccupant(props) {
       var sessionName = props.sessionName || "0";
       var bounds = useCenterBounds();
       var panelHeightState = React.useState(function () {
@@ -6758,12 +6770,12 @@ function MainViewTerminalOccupant(props) {
         setPanelHeight = panelHeightState[1];
 
       React.useEffect(function () {
-        var         /** onGeom implementation. */
-onGeom = function (e) {
-          if (e && e.detail && e.detail.height) {
-            setPanelHeight(e.detail.height);
-          }
-        };
+        var /** onGeom implementation. */
+          onGeom = function (e) {
+            if (e && e.detail && e.detail.height) {
+              setPanelHeight(e.detail.height);
+            }
+          };
         window.addEventListener("dsh:panel-geometry-changed", onGeom);
         return function () {
           window.removeEventListener("dsh:panel-geometry-changed", onGeom);
@@ -6791,8 +6803,8 @@ onGeom = function (e) {
       );
     }
 
-        /** MainViewContainerOccupant implementation. */
-function MainViewContainerOccupant(props) {
+    /** MainViewContainerOccupant implementation. */
+    function MainViewContainerOccupant(props) {
       var bounds = useCenterBounds();
       var panelHeightState = React.useState(function () {
         if (typeof window !== "undefined" && window.__dsh_panel_height__) {
@@ -6804,12 +6816,12 @@ function MainViewContainerOccupant(props) {
         setPanelHeight = panelHeightState[1];
 
       React.useEffect(function () {
-        var         /** onGeom implementation. */
-onGeom = function (e) {
-          if (e && e.detail && e.detail.height) {
-            setPanelHeight(e.detail.height);
-          }
-        };
+        var /** onGeom implementation. */
+          onGeom = function (e) {
+            if (e && e.detail && e.detail.height) {
+              setPanelHeight(e.detail.height);
+            }
+          };
         window.addEventListener("dsh:panel-geometry-changed", onGeom);
         return function () {
           window.removeEventListener("dsh:panel-geometry-changed", onGeom);
@@ -6836,8 +6848,8 @@ onGeom = function (e) {
       );
     }
 
-        /** MainViewFileEditorOccupant implementation. */
-function MainViewFileEditorOccupant(props) {
+    /** MainViewFileEditorOccupant implementation. */
+    function MainViewFileEditorOccupant(props) {
       var filePath = props.filePath || "";
       var fileName = props.fileName || (filePath ? filePath.split("/").pop() : "File");
       var onClose = props.onClose;
@@ -6890,47 +6902,47 @@ function MainViewFileEditorOccupant(props) {
         [filePath],
       );
 
-      var       /** handleSave implementation. */
-handleSave = function () {
-        if (saving) return;
-        setSaving(true);
-        setStatusMsg("Saving…");
-        fetch(QUOTAS_API + "/fs/write", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path: filePath, content: content }),
-        })
-          .then(function (r) {
-            return r.json();
+      var /** handleSave implementation. */
+        handleSave = function () {
+          if (saving) return;
+          setSaving(true);
+          setStatusMsg("Saving…");
+          fetch(QUOTAS_API + "/fs/write", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ path: filePath, content: content }),
           })
-          .then(function (res) {
-            if (res.error) {
-              setStatusMsg("Error: " + res.error);
-            } else {
-              setOriginalContent(content);
-              setStatusMsg("Saved!");
-              setTimeout(function () {
-                setStatusMsg("");
-              }, 2000);
-            }
-          })
-          .catch(function (err) {
-            setStatusMsg("Save failed: " + err.message);
-          })
-          .finally(function () {
-            setSaving(false);
-          });
-      };
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              if (res.error) {
+                setStatusMsg("Error: " + res.error);
+              } else {
+                setOriginalContent(content);
+                setStatusMsg("Saved!");
+                setTimeout(function () {
+                  setStatusMsg("");
+                }, 2000);
+              }
+            })
+            .catch(function (err) {
+              setStatusMsg("Save failed: " + err.message);
+            })
+            .finally(function () {
+              setSaving(false);
+            });
+        };
 
       React.useEffect(
         function () {
-          var           /** onKeyDown implementation. */
-onKeyDown = function (e) {
-            if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
-              e.preventDefault();
-              handleSave();
-            }
-          };
+          var /** onKeyDown implementation. */
+            onKeyDown = function (e) {
+              if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+                e.preventDefault();
+                handleSave();
+              }
+            };
           window.addEventListener("keydown", onKeyDown);
           return function () {
             window.removeEventListener("keydown", onKeyDown);
@@ -7175,8 +7187,8 @@ onKeyDown = function (e) {
       );
     }
 
-        /** MainViewRepoOccupant implementation. */
-function MainViewRepoOccupant(props) {
+    /** MainViewRepoOccupant implementation. */
+    function MainViewRepoOccupant(props) {
       var repoPath = props.repoPath || "";
       var repoName = props.repoName || (repoPath ? repoPath.split("/").pop() : "Repository");
       var onClose = props.onClose;
@@ -7330,129 +7342,129 @@ function MainViewRepoOccupant(props) {
         [activeTab, selectedDiffFile, fetchDiff],
       );
 
-      var       /** handleNavigateSubPath implementation. */
-handleNavigateSubPath = function (newSp) {
-        setSubPath(newSp);
-        fetchOverview(newSp);
-      };
+      var /** handleNavigateSubPath implementation. */
+        handleNavigateSubPath = function (newSp) {
+          setSubPath(newSp);
+          fetchOverview(newSp);
+        };
 
-      var       /** handleCommitAndPush implementation. */
-handleCommitAndPush = function () {
-        if (!commitMsg.trim()) return;
-        setActionStatus("Committing changes…");
-        fetch(QUOTAS_API + "/git/commit", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path: repoPath, message: commitMsg }),
-        })
-          .then(function (r) {
-            return r.json();
+      var /** handleCommitAndPush implementation. */
+        handleCommitAndPush = function () {
+          if (!commitMsg.trim()) return;
+          setActionStatus("Committing changes…");
+          fetch(QUOTAS_API + "/git/commit", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ path: repoPath, message: commitMsg }),
           })
-          .then(function (res) {
-            if (res.error) {
-              setActionStatus("Commit failed: " + res.error);
-            } else {
-              setActionStatus("Pushing to remote…");
-              return fetch(QUOTAS_API + "/git/push", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ path: repoPath }),
-              });
-            }
-          })
-          .then(function (r) {
-            return r ? r.json() : null;
-          })
-          .then(function (res) {
-            if (res && res.error) setActionStatus("Push info: " + res.error);
-            else setActionStatus("Committed & pushed!");
-            setCommitMsg("");
-            fetchRepoData();
-            if (activeTab === "changes") fetchDiff(selectedDiffFile);
-            setTimeout(function () {
-              setActionStatus("");
-            }, 3000);
-          })
-          .catch(function (err) {
-            setActionStatus("Action failed: " + err.message);
-          });
-      };
-
-      var       /** handleDiscardChanges implementation. */
-handleDiscardChanges = function (file) {
-        if (
-          !confirm(
-            file
-              ? "Discard all changes in " + file + "?"
-              : "Discard all unstaged changes and untracked files?",
-          )
-        )
-          return;
-        setActionStatus("Discarding changes…");
-        fetch(QUOTAS_API + "/git/discard", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path: repoPath, file: file }),
-        }).then(function () {
-          fetchRepoData();
-          fetchDiff(null);
-          setSelectedDiffFile(null);
-          setActionStatus("Changes discarded.");
-          setTimeout(function () {
-            setActionStatus("");
-          }, 2500);
-        });
-      };
-
-      var       /** handleStashChanges implementation. */
-handleStashChanges = function () {
-        setActionStatus("Stashing changes…");
-        fetch(QUOTAS_API + "/git/stash", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path: repoPath }),
-        }).then(function () {
-          fetchRepoData();
-          fetchDiff(null);
-          setActionStatus("Changes stashed.");
-          setTimeout(function () {
-            setActionStatus("");
-          }, 2500);
-        });
-      };
-
-      var       /** handleSwitchBranch implementation. */
-handleSwitchBranch = function (bName, createNew) {
-        setActionStatus("Switching branch to " + bName + "…");
-        fetch(QUOTAS_API + "/git/checkout", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path: repoPath, branch: bName, create: Boolean(createNew) }),
-        })
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (res) {
-            if (res.error) {
-              alert("Checkout failed: " + res.error);
-            } else {
-              setBranchPickerOpen(false);
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              if (res.error) {
+                setActionStatus("Commit failed: " + res.error);
+              } else {
+                setActionStatus("Pushing to remote…");
+                return fetch(QUOTAS_API + "/git/push", {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ path: repoPath }),
+                });
+              }
+            })
+            .then(function (r) {
+              return r ? r.json() : null;
+            })
+            .then(function (res) {
+              if (res && res.error) setActionStatus("Push info: " + res.error);
+              else setActionStatus("Committed & pushed!");
+              setCommitMsg("");
               fetchRepoData();
-              setActionStatus("Switched to " + bName);
+              if (activeTab === "changes") fetchDiff(selectedDiffFile);
               setTimeout(function () {
                 setActionStatus("");
-              }, 2500);
-            }
-          });
-      };
+              }, 3000);
+            })
+            .catch(function (err) {
+              setActionStatus("Action failed: " + err.message);
+            });
+        };
 
-      var       /** handleCreateNewBranch implementation. */
-handleCreateNewBranch = function () {
-        var name = prompt("New branch name:");
-        if (name && name.trim()) {
-          handleSwitchBranch(name.trim(), true);
-        }
-      };
+      var /** handleDiscardChanges implementation. */
+        handleDiscardChanges = function (file) {
+          if (
+            !confirm(
+              file
+                ? "Discard all changes in " + file + "?"
+                : "Discard all unstaged changes and untracked files?",
+            )
+          )
+            return;
+          setActionStatus("Discarding changes…");
+          fetch(QUOTAS_API + "/git/discard", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ path: repoPath, file: file }),
+          }).then(function () {
+            fetchRepoData();
+            fetchDiff(null);
+            setSelectedDiffFile(null);
+            setActionStatus("Changes discarded.");
+            setTimeout(function () {
+              setActionStatus("");
+            }, 2500);
+          });
+        };
+
+      var /** handleStashChanges implementation. */
+        handleStashChanges = function () {
+          setActionStatus("Stashing changes…");
+          fetch(QUOTAS_API + "/git/stash", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ path: repoPath }),
+          }).then(function () {
+            fetchRepoData();
+            fetchDiff(null);
+            setActionStatus("Changes stashed.");
+            setTimeout(function () {
+              setActionStatus("");
+            }, 2500);
+          });
+        };
+
+      var /** handleSwitchBranch implementation. */
+        handleSwitchBranch = function (bName, createNew) {
+          setActionStatus("Switching branch to " + bName + "…");
+          fetch(QUOTAS_API + "/git/checkout", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ path: repoPath, branch: bName, create: Boolean(createNew) }),
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              if (res.error) {
+                alert("Checkout failed: " + res.error);
+              } else {
+                setBranchPickerOpen(false);
+                fetchRepoData();
+                setActionStatus("Switched to " + bName);
+                setTimeout(function () {
+                  setActionStatus("");
+                }, 2500);
+              }
+            });
+        };
+
+      var /** handleCreateNewBranch implementation. */
+        handleCreateNewBranch = function () {
+          var name = prompt("New branch name:");
+          if (name && name.trim()) {
+            handleSwitchBranch(name.trim(), true);
+          }
+        };
 
       var curBranch = (overview && overview.branch) || status.branch || "main";
       var remoteUrl = (overview && overview.remoteUrl) || "";
@@ -9262,8 +9274,8 @@ handleCreateNewBranch = function () {
       );
     }
 
-        /** TopConversationTabBar implementation. */
-function TopConversationTabBar(props) {
+    /** TopConversationTabBar implementation. */
+    function TopConversationTabBar(props) {
       var topPlusBtnRef = React.useRef(null);
       var plusOpenState = React.useState(false);
       var plusOpen = plusOpenState[0],
@@ -9312,31 +9324,31 @@ function TopConversationTabBar(props) {
 
       // Sync live chat title from active session or document
       React.useEffect(function () {
-        var         /** updateTitle implementation. */
-updateTitle = function () {
-          var title =
-            typeof window !== "undefined" && window.__dsh_current_session_title__
-              ? window.__dsh_current_session_title__
-              : null;
-          if (!title && typeof document !== "undefined") {
-            var activeSessionRow = document.querySelector(
-              ".dsh-tree-sessionRowActive .dsh-tree-sessionTitle, .dsh-tree-sessionRowActive .dsh-tree-title",
-            );
-            if (activeSessionRow && activeSessionRow.textContent) {
-              title = activeSessionRow.textContent.trim();
+        var /** updateTitle implementation. */
+          updateTitle = function () {
+            var title =
+              typeof window !== "undefined" && window.__dsh_current_session_title__
+                ? window.__dsh_current_session_title__
+                : null;
+            if (!title && typeof document !== "undefined") {
+              var activeSessionRow = document.querySelector(
+                ".dsh-tree-sessionRowActive .dsh-tree-sessionTitle, .dsh-tree-sessionRowActive .dsh-tree-title",
+              );
+              if (activeSessionRow && activeSessionRow.textContent) {
+                title = activeSessionRow.textContent.trim();
+              }
             }
-          }
-          if (title) {
-            setTabs(function (prev) {
-              return prev.map(function (t) {
-                if (t.id === "chat-main" || t.type === "chat") {
-                  if (t.title !== title) return Object.assign({}, t, { title: title });
-                }
-                return t;
+            if (title) {
+              setTabs(function (prev) {
+                return prev.map(function (t) {
+                  if (t.id === "chat-main" || t.type === "chat") {
+                    if (t.title !== title) return Object.assign({}, t, { title: title });
+                  }
+                  return t;
+                });
               });
-            });
-          }
-        };
+            }
+          };
         updateTitle();
         var timer = setInterval(updateTitle, 500);
         return function () {
@@ -9345,179 +9357,184 @@ updateTitle = function () {
       }, []);
 
       React.useEffect(function () {
-        var         /** onTabMovedToTop implementation. */
-onTabMovedToTop = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            if (
-              prev.some(function (t) {
-                return t.id === tab.id;
-              })
-            )
-              return prev;
-            return prev.concat([tab]);
-          });
-          setActiveTab(tab.id);
-        };
-        var         /** onTabMovedToBottom implementation. */
-onTabMovedToBottom = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            var remaining = prev.filter(function (t) {
-              return t.id !== tab.id;
-            });
-            return remaining;
-          });
-          setActiveTab(function (curr) {
-            if (curr === tab.id) return null;
-            return curr;
-          });
-        };
-        var         /** onTabMovedToRight implementation. */
-onTabMovedToRight = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            return prev.filter(function (t) {
-              return t.id !== tab.id;
-            });
-          });
-          setActiveTab(function (curr) {
-            if (curr === tab.id) return null;
-            return curr;
-          });
-        };
-        var         /** onOpenFileTab implementation. */
-onOpenFileTab = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            if (
-              prev.some(function (t) {
-                return t.id === tab.id;
-              })
-            )
-              return prev;
-            return prev.concat([tab]);
-          });
-          setActiveTab(tab.id);
-        };
-        var         /** onOpenRepoTab implementation. */
-onOpenRepoTab = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            if (
-              prev.some(function (t) {
-                return t.id === tab.id;
-              })
-            )
-              return prev;
-            return prev.concat([tab]);
-          });
-          setActiveTab(tab.id);
-        };
-
-        var         /** onOpenTerminal implementation. */
-onOpenTerminal = function (e) {
-          var target = (e && e.detail && e.detail.target) || "bottom";
-          if (target === "top") {
-            var sess = (e && e.detail && e.detail.session) || "0";
-            var termTab = { id: sess, type: "terminal", title: "Terminal: " + sess, session: sess };
+        var /** onTabMovedToTop implementation. */
+          onTabMovedToTop = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
             setTabs(function (prev) {
               if (
                 prev.some(function (t) {
-                  return t.id === termTab.id;
+                  return t.id === tab.id;
                 })
               )
                 return prev;
-              return prev.concat([termTab]);
+              return prev.concat([tab]);
             });
-            setActiveTab(termTab.id);
-          }
-        };
-
-        var         /** onOpenContainer implementation. */
-onOpenContainer = function (e) {
-          var target = (e && e.detail && e.detail.target) || "bottom";
-          if (target === "top") {
-            var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
-            var contTab = {
-              id: cId,
-              type: "container",
-              title:
-                (e && e.detail && e.detail.title) ||
-                (cId === "container-sandboxes"
-                  ? "Docker Sandboxes"
-                  : "Container: " + cId.slice(0, 8)),
-            };
+            setActiveTab(tab.id);
+          };
+        var /** onTabMovedToBottom implementation. */
+          onTabMovedToBottom = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
             setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === contTab.id;
-                })
-              )
-                return prev;
-              return prev.concat([contTab]);
-            });
-            setActiveTab(contTab.id);
-          }
-        };
-
-        var         /** onFocusChat implementation. */
-onFocusChat = function (e) {
-          var tTitle =
-            (e && e.detail && e.detail.title) ||
-            (typeof window !== "undefined" && window.__dsh_current_session_title__) ||
-            "Conversation";
-          var chatTab = { id: "chat-main", type: "chat", title: tTitle };
-          setTabs(function (prev) {
-            var exists = prev.find(function (t) {
-              return t.id === "chat-main" || t.type === "chat";
-            });
-            if (exists) {
-              return prev.map(function (t) {
-                if (t.id === "chat-main" || t.type === "chat") {
-                  return Object.assign({}, t, { title: tTitle });
-                }
-                return t;
-              });
-            }
-            return [chatTab].concat(prev);
-          });
-          setActiveTab("chat-main");
-        };
-
-        var         /** onCloseTerminalTab implementation. */
-onCloseTerminalTab = function (e) {
-          var sess = e && e.detail ? e.detail.session || e.detail.id : null;
-          if (!sess) return;
-          setTabs(function (prev) {
-            var tabToRemove = prev.find(function (t) {
-              return t.type === "terminal" && (t.session === sess || t.id === sess);
-            });
-            if (tabToRemove) {
-              var idx = prev.findIndex(function (t) {
-                return t.id === tabToRemove.id;
-              });
               var remaining = prev.filter(function (t) {
-                return t.id !== tabToRemove.id;
-              });
-              setActiveTab(function (cur) {
-                if (cur === tabToRemove.id) {
-                  return remaining.length > 0
-                    ? remaining[Math.min(idx, remaining.length - 1)].id
-                    : "chat-main";
-                }
-                return cur;
+                return t.id !== tab.id;
               });
               return remaining;
+            });
+            setActiveTab(function (curr) {
+              if (curr === tab.id) return null;
+              return curr;
+            });
+          };
+        var /** onTabMovedToRight implementation. */
+          onTabMovedToRight = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
+            setTabs(function (prev) {
+              return prev.filter(function (t) {
+                return t.id !== tab.id;
+              });
+            });
+            setActiveTab(function (curr) {
+              if (curr === tab.id) return null;
+              return curr;
+            });
+          };
+        var /** onOpenFileTab implementation. */
+          onOpenFileTab = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
+            setTabs(function (prev) {
+              if (
+                prev.some(function (t) {
+                  return t.id === tab.id;
+                })
+              )
+                return prev;
+              return prev.concat([tab]);
+            });
+            setActiveTab(tab.id);
+          };
+        var /** onOpenRepoTab implementation. */
+          onOpenRepoTab = function (e) {
+            var tab = e.detail;
+            if (!tab) return;
+            setTabs(function (prev) {
+              if (
+                prev.some(function (t) {
+                  return t.id === tab.id;
+                })
+              )
+                return prev;
+              return prev.concat([tab]);
+            });
+            setActiveTab(tab.id);
+          };
+
+        var /** onOpenTerminal implementation. */
+          onOpenTerminal = function (e) {
+            var target = (e && e.detail && e.detail.target) || "bottom";
+            if (target === "top") {
+              var sess = (e && e.detail && e.detail.session) || "0";
+              var termTab = {
+                id: sess,
+                type: "terminal",
+                title: "Terminal: " + sess,
+                session: sess,
+              };
+              setTabs(function (prev) {
+                if (
+                  prev.some(function (t) {
+                    return t.id === termTab.id;
+                  })
+                )
+                  return prev;
+                return prev.concat([termTab]);
+              });
+              setActiveTab(termTab.id);
             }
-            return prev;
-          });
-        };
+          };
+
+        var /** onOpenContainer implementation. */
+          onOpenContainer = function (e) {
+            var target = (e && e.detail && e.detail.target) || "bottom";
+            if (target === "top") {
+              var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
+              var contTab = {
+                id: cId,
+                type: "container",
+                title:
+                  (e && e.detail && e.detail.title) ||
+                  (cId === "container-sandboxes"
+                    ? "Docker Sandboxes"
+                    : "Container: " + cId.slice(0, 8)),
+              };
+              setTabs(function (prev) {
+                if (
+                  prev.some(function (t) {
+                    return t.id === contTab.id;
+                  })
+                )
+                  return prev;
+                return prev.concat([contTab]);
+              });
+              setActiveTab(contTab.id);
+            }
+          };
+
+        var /** onFocusChat implementation. */
+          onFocusChat = function (e) {
+            var tTitle =
+              (e && e.detail && e.detail.title) ||
+              (typeof window !== "undefined" && window.__dsh_current_session_title__) ||
+              "Conversation";
+            var chatTab = { id: "chat-main", type: "chat", title: tTitle };
+            setTabs(function (prev) {
+              var exists = prev.find(function (t) {
+                return t.id === "chat-main" || t.type === "chat";
+              });
+              if (exists) {
+                return prev.map(function (t) {
+                  if (t.id === "chat-main" || t.type === "chat") {
+                    return Object.assign({}, t, { title: tTitle });
+                  }
+                  return t;
+                });
+              }
+              return [chatTab].concat(prev);
+            });
+            setActiveTab("chat-main");
+          };
+
+        var /** onCloseTerminalTab implementation. */
+          onCloseTerminalTab = function (e) {
+            var sess = e && e.detail ? e.detail.session || e.detail.id : null;
+            if (!sess) return;
+            setTabs(function (prev) {
+              var tabToRemove = prev.find(function (t) {
+                return t.type === "terminal" && (t.session === sess || t.id === sess);
+              });
+              if (tabToRemove) {
+                var idx = prev.findIndex(function (t) {
+                  return t.id === tabToRemove.id;
+                });
+                var remaining = prev.filter(function (t) {
+                  return t.id !== tabToRemove.id;
+                });
+                setActiveTab(function (cur) {
+                  if (cur === tabToRemove.id) {
+                    return remaining.length > 0
+                      ? remaining[Math.min(idx, remaining.length - 1)].id
+                      : "chat-main";
+                  }
+                  return cur;
+                });
+                return remaining;
+              }
+              return prev;
+            });
+          };
 
         window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
@@ -9541,106 +9558,106 @@ onCloseTerminalTab = function (e) {
         };
       }, []);
 
-      var       /** handleDropOnTop implementation. */
-handleDropOnTop = function (e) {
-        e.preventDefault();
-        try {
-          var raw = e.dataTransfer.getData("text/dsh-tab");
-          if (raw) {
-            var tabData = JSON.parse(raw);
-            window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tabData }));
-          }
-        } catch (err) {}
-      };
-
-      var       /** removeTab implementation. */
-removeTab = function (tabId, e) {
-        if (e) e.stopPropagation();
-        setTabs(function (prev) {
-          var idx = prev.findIndex(function (t) {
-            return t.id === tabId;
-          });
-          var remaining = prev.filter(function (t) {
-            return t.id !== tabId;
-          });
-          if (activeTab === tabId) {
-            if (remaining.length > 0) {
-              var nextIdx = Math.min(idx, remaining.length - 1);
-              setActiveTab(remaining[nextIdx].id);
-            } else {
-              setActiveTab(null);
+      var /** handleDropOnTop implementation. */
+        handleDropOnTop = function (e) {
+          e.preventDefault();
+          try {
+            var raw = e.dataTransfer.getData("text/dsh-tab");
+            if (raw) {
+              var tabData = JSON.parse(raw);
+              window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tabData }));
             }
-          }
-          return remaining;
-        });
-      };
+          } catch (err) {}
+        };
 
-      var       /** checkIsTrajectory implementation. */
-checkIsTrajectory = function () {
-        var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
-        if (activeTabEl) {
-          var txt = (activeTabEl.textContent || "").trim().toLowerCase();
-          return (
-            txt === "trajectory" ||
-            txt.includes("trajectory") ||
-            txt === "轨迹" ||
-            txt.includes("轨迹")
-          );
-        }
-        return Boolean(
-          document.querySelector(
-            '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
-          ),
-        );
-      };
-
-      var       /** handleToggleView implementation. */
-handleToggleView = function () {
-        var onTrajectoryNow = checkIsTrajectory();
-        var targetName = onTrajectoryNow ? "chat" : "trajectory";
-        var allTabs = Array.from(
-          document.querySelectorAll('[role="tab"], [role="tablist"] button'),
-        );
-        var targetBtn = allTabs.find(function (b) {
-          var t = (b.textContent || "").trim().toLowerCase();
-          return (
-            (targetName === "chat" &&
-              (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
-            (targetName === "trajectory" &&
-              (t === "trajectory" ||
-                t.includes("trajectory") ||
-                t === "轨迹" ||
-                t.includes("轨迹")))
-          );
-        });
-        if (targetBtn) {
-          targetBtn.click();
-        } else {
-          var inactiveBtn = allTabs.find(function (b) {
-            return b.getAttribute("aria-selected") !== "true";
+      var /** removeTab implementation. */
+        removeTab = function (tabId, e) {
+          if (e) e.stopPropagation();
+          setTabs(function (prev) {
+            var idx = prev.findIndex(function (t) {
+              return t.id === tabId;
+            });
+            var remaining = prev.filter(function (t) {
+              return t.id !== tabId;
+            });
+            if (activeTab === tabId) {
+              if (remaining.length > 0) {
+                var nextIdx = Math.min(idx, remaining.length - 1);
+                setActiveTab(remaining[nextIdx].id);
+              } else {
+                setActiveTab(null);
+              }
+            }
+            return remaining;
           });
-          if (inactiveBtn) inactiveBtn.click();
-        }
-      };
+        };
 
-      var       /** handleDownloadSessionLog implementation. */
-handleDownloadSessionLog = function () {
-        try {
-          var activeSessId =
-            typeof window !== "undefined" && window.__dsh_current_session_id__
-              ? window.__dsh_current_session_id__
-              : "";
-          var exportUrl = "/api/session.export?id=" + encodeURIComponent(activeSessId || "");
-          var a = document.createElement("a");
-          a.href = exportUrl;
-          a.download = (activeSessId || "session") + ".jsonl";
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function () {
-            if (a.parentNode) a.parentNode.removeChild(a);
-          }, 1000);
-        } catch (e) {}
-      };
+      var /** checkIsTrajectory implementation. */
+        checkIsTrajectory = function () {
+          var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
+          if (activeTabEl) {
+            var txt = (activeTabEl.textContent || "").trim().toLowerCase();
+            return (
+              txt === "trajectory" ||
+              txt.includes("trajectory") ||
+              txt === "轨迹" ||
+              txt.includes("轨迹")
+            );
+          }
+          return Boolean(
+            document.querySelector(
+              '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
+            ),
+          );
+        };
+
+      var /** handleToggleView implementation. */
+        handleToggleView = function () {
+          var onTrajectoryNow = checkIsTrajectory();
+          var targetName = onTrajectoryNow ? "chat" : "trajectory";
+          var allTabs = Array.from(
+            document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+          );
+          var targetBtn = allTabs.find(function (b) {
+            var t = (b.textContent || "").trim().toLowerCase();
+            return (
+              (targetName === "chat" &&
+                (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
+              (targetName === "trajectory" &&
+                (t === "trajectory" ||
+                  t.includes("trajectory") ||
+                  t === "轨迹" ||
+                  t.includes("轨迹")))
+            );
+          });
+          if (targetBtn) {
+            targetBtn.click();
+          } else {
+            var inactiveBtn = allTabs.find(function (b) {
+              return b.getAttribute("aria-selected") !== "true";
+            });
+            if (inactiveBtn) inactiveBtn.click();
+          }
+        };
+
+      var /** handleDownloadSessionLog implementation. */
+        handleDownloadSessionLog = function () {
+          try {
+            var activeSessId =
+              typeof window !== "undefined" && window.__dsh_current_session_id__
+                ? window.__dsh_current_session_id__
+                : "";
+            var exportUrl = "/api/session.export?id=" + encodeURIComponent(activeSessId || "");
+            var a = document.createElement("a");
+            a.href = exportUrl;
+            a.download = (activeSessId || "session") + ".jsonl";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+              if (a.parentNode) a.parentNode.removeChild(a);
+            }, 1000);
+          } catch (e) {}
+        };
 
       var bounds = useCenterBounds();
       var activeTabObj = tabs.find(function (t) {
@@ -10053,8 +10070,8 @@ handleDownloadSessionLog = function () {
       );
     }
 
-        /** RenameTerminalModal implementation. */
-function RenameTerminalModal(props) {
+    /** RenameTerminalModal implementation. */
+    function RenameTerminalModal(props) {
       var oldName = props.oldName,
         onClose = props.onClose,
         onRenamed = props.onRenamed;
@@ -10065,30 +10082,30 @@ function RenameTerminalModal(props) {
       var saving = savingState[0],
         setSaving = savingState[1];
 
-      var       /** handleRename implementation. */
-handleRename = function () {
-        if (!name.trim()) return;
-        setSaving(true);
-        fetch(QUOTAS_API + "/tmux/sessions/rename", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ oldName: oldName, newName: name.trim() }),
-        })
-          .then(function (r) {
-            return r.json();
+      var /** handleRename implementation. */
+        handleRename = function () {
+          if (!name.trim()) return;
+          setSaving(true);
+          fetch(QUOTAS_API + "/tmux/sessions/rename", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ oldName: oldName, newName: name.trim() }),
           })
-          .then(function (res) {
-            if (res.ok) onRenamed();
-            else alert("Failed to rename session: " + (res.error || "Unknown error"));
-          })
-          .catch(function (e) {
-            alert("Error: " + e.message);
-          })
-          .finally(function () {
-            setSaving(false);
-            onClose();
-          });
-      };
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              if (res.ok) onRenamed();
+              else alert("Failed to rename session: " + (res.error || "Unknown error"));
+            })
+            .catch(function (e) {
+              alert("Error: " + e.message);
+            })
+            .finally(function () {
+              setSaving(false);
+              onClose();
+            });
+        };
 
       return h(
         "div",
@@ -10187,8 +10204,8 @@ handleRename = function () {
       );
     }
 
-        /** RepoGlyph implementation. */
-function RepoGlyph(props) {
+    /** RepoGlyph implementation. */
+    function RepoGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10219,8 +10236,8 @@ function RepoGlyph(props) {
       );
     }
 
-        /** WorkspaceGlyph implementation. */
-function WorkspaceGlyph(props) {
+    /** WorkspaceGlyph implementation. */
+    function WorkspaceGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10251,8 +10268,8 @@ function WorkspaceGlyph(props) {
       );
     }
 
-        /** renderAppIcon implementation. */
-function renderAppIcon(appName, size, filePath) {
+    /** renderAppIcon implementation. */
+    function renderAppIcon(appName, size, filePath) {
       var s = size || 15;
       var raw = (appName || "").trim();
       var cleanName = raw.replace(/\.app$/i, "").trim();
@@ -10327,16 +10344,16 @@ function renderAppIcon(appName, size, filePath) {
       return null;
     }
 
-        /** AppGlyph implementation. */
-function AppGlyph(props) {
+    /** AppGlyph implementation. */
+    function AppGlyph(props) {
       return renderAppIcon(
         props && props.appName ? props.appName : "app",
         props && props.size ? props.size : 14,
       );
     }
 
-        /** LibraryGlyph implementation. */
-function LibraryGlyph(props) {
+    /** LibraryGlyph implementation. */
+    function LibraryGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10369,8 +10386,8 @@ function LibraryGlyph(props) {
       );
     }
 
-        /** SystemGlyph implementation. */
-function SystemGlyph(props) {
+    /** SystemGlyph implementation. */
+    function SystemGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10409,8 +10426,8 @@ function SystemGlyph(props) {
       );
     }
 
-        /** UsersGlyph implementation. */
-function UsersGlyph(props) {
+    /** UsersGlyph implementation. */
+    function UsersGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10443,8 +10460,8 @@ function UsersGlyph(props) {
       );
     }
 
-        /** ArchiveBoxGlyph implementation. */
-function ArchiveBoxGlyph(props) {
+    /** ArchiveBoxGlyph implementation. */
+    function ArchiveBoxGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10476,8 +10493,8 @@ function ArchiveBoxGlyph(props) {
       );
     }
 
-        /** RestoreGlyph implementation. */
-function RestoreGlyph(props) {
+    /** RestoreGlyph implementation. */
+    function RestoreGlyph(props) {
       var size = props && props.size ? props.size : 13;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10507,8 +10524,8 @@ function RestoreGlyph(props) {
       );
     }
 
-        /** BlueFolderGlyph implementation. */
-function BlueFolderGlyph(props) {
+    /** BlueFolderGlyph implementation. */
+    function BlueFolderGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10540,8 +10557,8 @@ function BlueFolderGlyph(props) {
       );
     }
 
-        /** FolderPlusGlyph implementation. */
-function FolderPlusGlyph(props) {
+    /** FolderPlusGlyph implementation. */
+    function FolderPlusGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10577,8 +10594,8 @@ function FolderPlusGlyph(props) {
       );
     }
 
-        /** SlidersGlyph implementation. */
-function SlidersGlyph(props) {
+    /** SlidersGlyph implementation. */
+    function SlidersGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10618,8 +10635,8 @@ function SlidersGlyph(props) {
       );
     }
 
-        /** PinGlyph implementation. */
-function PinGlyph(props) {
+    /** PinGlyph implementation. */
+    function PinGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-pin";
@@ -10651,8 +10668,8 @@ function PinGlyph(props) {
       );
     }
 
-        /** ActiveGlyph implementation. */
-function ActiveGlyph(props) {
+    /** ActiveGlyph implementation. */
+    function ActiveGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10682,8 +10699,8 @@ function ActiveGlyph(props) {
       );
     }
 
-        /** HostMachineGlyph implementation. */
-function HostMachineGlyph(props) {
+    /** HostMachineGlyph implementation. */
+    function HostMachineGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10715,8 +10732,8 @@ function HostMachineGlyph(props) {
       );
     }
 
-        /** HardDriveGlyph implementation. */
-function HardDriveGlyph(props) {
+    /** HardDriveGlyph implementation. */
+    function HardDriveGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10749,8 +10766,8 @@ function HardDriveGlyph(props) {
       );
     }
 
-        /** SparklesGlyph implementation. */
-function SparklesGlyph(props) {
+    /** SparklesGlyph implementation. */
+    function SparklesGlyph(props) {
       var size = props.size || 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10778,8 +10795,8 @@ function SparklesGlyph(props) {
       );
     }
 
-        /** AccountsGlyph implementation. */
-function AccountsGlyph(props) {
+    /** AccountsGlyph implementation. */
+    function AccountsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10800,8 +10817,8 @@ function AccountsGlyph(props) {
       );
     }
 
-        /** ModelsGlyph implementation. */
-function ModelsGlyph(props) {
+    /** ModelsGlyph implementation. */
+    function ModelsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10823,8 +10840,8 @@ function ModelsGlyph(props) {
       );
     }
 
-        /** AppsGlyph implementation. */
-function AppsGlyph(props) {
+    /** AppsGlyph implementation. */
+    function AppsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10847,8 +10864,8 @@ function AppsGlyph(props) {
       );
     }
 
-        /** IconsGlyph implementation. */
-function IconsGlyph(props) {
+    /** IconsGlyph implementation. */
+    function IconsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -11899,8 +11916,8 @@ function IconsGlyph(props) {
       },
     };
 
-        /** renderCatalogIcon implementation. */
-function renderCatalogIcon(iconName, size, className) {
+    /** renderCatalogIcon implementation. */
+    function renderCatalogIcon(iconName, size, className) {
       var s = size || 16;
       var c = (className ? className + " " : "") + "dsh-icon-animated";
       if (
@@ -11989,8 +12006,8 @@ function renderCatalogIcon(iconName, size, className) {
       },
     };
 
-        /** loadCustomIconMappings implementation. */
-function loadCustomIconMappings() {
+    /** loadCustomIconMappings implementation. */
+    function loadCustomIconMappings() {
       try {
         if (typeof window !== "undefined" && window.localStorage) {
           var raw = window.localStorage.getItem("dsh_custom_icon_mappings");
@@ -12003,8 +12020,8 @@ function loadCustomIconMappings() {
       return JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
     }
 
-        /** saveCustomIconMappings implementation. */
-function saveCustomIconMappings(mappings) {
+    /** saveCustomIconMappings implementation. */
+    function saveCustomIconMappings(mappings) {
       try {
         if (typeof window !== "undefined" && window.localStorage) {
           window.localStorage.setItem("dsh_custom_icon_mappings", JSON.stringify(mappings));
@@ -12023,8 +12040,8 @@ function saveCustomIconMappings(mappings) {
       };
     }
 
-        /** IconsSection implementation. */
-function IconsSection() {
+    /** IconsSection implementation. */
+    function IconsSection() {
       var mappingsState = React.useState(loadCustomIconMappings);
       var mappings = mappingsState[0],
         setMappings = mappingsState[1];
@@ -12065,44 +12082,44 @@ function IconsSection() {
         return matchCat && matchSearch;
       });
 
-      var       /** handleAddMapping implementation. */
-handleAddMapping = function () {
-        if (!newTarget.trim()) return;
-        var next = JSON.parse(JSON.stringify(mappings));
-        if (!next[activeMappingCategory]) next[activeMappingCategory] = {};
-        next[activeMappingCategory][newTarget.trim()] = newIcon;
-        setMappings(next);
-        saveCustomIconMappings(next);
-        setNewTarget("");
-      };
-
-      var       /** handleRemoveMapping implementation. */
-handleRemoveMapping = function (key) {
-        var next = JSON.parse(JSON.stringify(mappings));
-        if (next[activeMappingCategory] && next[activeMappingCategory][key]) {
-          delete next[activeMappingCategory][key];
+      var /** handleAddMapping implementation. */
+        handleAddMapping = function () {
+          if (!newTarget.trim()) return;
+          var next = JSON.parse(JSON.stringify(mappings));
+          if (!next[activeMappingCategory]) next[activeMappingCategory] = {};
+          next[activeMappingCategory][newTarget.trim()] = newIcon;
           setMappings(next);
           saveCustomIconMappings(next);
-        }
-      };
+          setNewTarget("");
+        };
 
-      var       /** handleResetCategory implementation. */
-handleResetCategory = function () {
-        var next = JSON.parse(JSON.stringify(mappings));
-        next[activeMappingCategory] = Object.assign(
-          {},
-          DEFAULT_ICON_MAPPINGS[activeMappingCategory],
-        );
-        setMappings(next);
-        saveCustomIconMappings(next);
-      };
+      var /** handleRemoveMapping implementation. */
+        handleRemoveMapping = function (key) {
+          var next = JSON.parse(JSON.stringify(mappings));
+          if (next[activeMappingCategory] && next[activeMappingCategory][key]) {
+            delete next[activeMappingCategory][key];
+            setMappings(next);
+            saveCustomIconMappings(next);
+          }
+        };
 
-      var       /** handleResetAll implementation. */
-handleResetAll = function () {
-        var next = JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
-        setMappings(next);
-        saveCustomIconMappings(next);
-      };
+      var /** handleResetCategory implementation. */
+        handleResetCategory = function () {
+          var next = JSON.parse(JSON.stringify(mappings));
+          next[activeMappingCategory] = Object.assign(
+            {},
+            DEFAULT_ICON_MAPPINGS[activeMappingCategory],
+          );
+          setMappings(next);
+          saveCustomIconMappings(next);
+        };
+
+      var /** handleResetAll implementation. */
+        handleResetAll = function () {
+          var next = JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
+          setMappings(next);
+          saveCustomIconMappings(next);
+        };
 
       var currentCategoryMappings = (mappings && mappings[activeMappingCategory]) || {};
       var mappingKeys = Object.keys(currentCategoryMappings);
@@ -12666,8 +12683,8 @@ handleResetAll = function () {
     }
 
     // Helper Modals
-        /** NewSessionModal implementation. */
-function NewSessionModal(props) {
+    /** NewSessionModal implementation. */
+    function NewSessionModal(props) {
       var onClose = props.onClose,
         onCreated = props.onCreated;
       var nameState = React.useState("");
@@ -12677,22 +12694,22 @@ function NewSessionModal(props) {
       var creating = creatingState[0],
         setCreating = creatingState[1];
 
-      var       /** handleCreate implementation. */
-handleCreate = function () {
-        setCreating(true);
-        fetch(QUOTAS_API + "/tmux/sessions/new", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: name }),
-        })
-          .then(function () {
-            onCreated();
-            onClose();
+      var /** handleCreate implementation. */
+        handleCreate = function () {
+          setCreating(true);
+          fetch(QUOTAS_API + "/tmux/sessions/new", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: name }),
           })
-          .finally(function () {
-            setCreating(false);
-          });
-      };
+            .then(function () {
+              onCreated();
+              onClose();
+            })
+            .finally(function () {
+              setCreating(false);
+            });
+        };
 
       return h(
         "div",
@@ -12786,8 +12803,8 @@ handleCreate = function () {
       );
     }
 
-        /** EditValueModal implementation. */
-function EditValueModal(props) {
+    /** EditValueModal implementation. */
+    function EditValueModal(props) {
       var target = props.target,
         onClose = props.onClose,
         onSaved = props.onSaved;
@@ -12798,29 +12815,29 @@ function EditValueModal(props) {
       var saving = savingState[0],
         setSaving = savingState[1];
 
-      var       /** handleSave implementation. */
-handleSave = function () {
-        setSaving(true);
-        fetch(
-          VAULT_API +
-            "/accounts/" +
-            encodeURIComponent(target.ref) +
-            "?account=" +
-            encodeURIComponent(target.account),
-          {
-            method: "PUT",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ value: value }),
-          },
-        )
-          .then(function () {
-            onSaved();
-            onClose();
-          })
-          .finally(function () {
-            setSaving(false);
-          });
-      };
+      var /** handleSave implementation. */
+        handleSave = function () {
+          setSaving(true);
+          fetch(
+            VAULT_API +
+              "/accounts/" +
+              encodeURIComponent(target.ref) +
+              "?account=" +
+              encodeURIComponent(target.account),
+            {
+              method: "PUT",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ value: value }),
+            },
+          )
+            .then(function () {
+              onSaved();
+              onClose();
+            })
+            .finally(function () {
+              setSaving(false);
+            });
+        };
 
       return h(
         "div",
@@ -12921,8 +12938,8 @@ handleSave = function () {
       );
     }
 
-        /** AddKeyModal implementation. */
-function AddKeyModal(props) {
+    /** AddKeyModal implementation. */
+    function AddKeyModal(props) {
       var target = props.target,
         onClose = props.onClose,
         onSaved = props.onSaved;
@@ -12940,29 +12957,29 @@ function AddKeyModal(props) {
       var saving = savingState[0],
         setSaving = savingState[1];
 
-      var       /** handleSave implementation. */
-handleSave = function () {
-        setSaving(true);
-        fetch(
-          VAULT_API +
-            "/accounts/" +
-            encodeURIComponent(ref) +
-            "?account=" +
-            encodeURIComponent(account),
-          {
-            method: "PUT",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ value: value }),
-          },
-        )
-          .then(function () {
-            onSaved();
-            onClose();
-          })
-          .finally(function () {
-            setSaving(false);
-          });
-      };
+      var /** handleSave implementation. */
+        handleSave = function () {
+          setSaving(true);
+          fetch(
+            VAULT_API +
+              "/accounts/" +
+              encodeURIComponent(ref) +
+              "?account=" +
+              encodeURIComponent(account),
+            {
+              method: "PUT",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ value: value }),
+            },
+          )
+            .then(function () {
+              onSaved();
+              onClose();
+            })
+            .finally(function () {
+              setSaving(false);
+            });
+        };
 
       return h(
         "div",
@@ -13085,8 +13102,8 @@ handleSave = function () {
       );
     }
 
-        /** AddModelModal implementation. */
-function AddModelModal(props) {
+    /** AddModelModal implementation. */
+    function AddModelModal(props) {
       var target = props.target,
         onClose = props.onClose,
         onSaved = props.onSaved;
@@ -13101,12 +13118,12 @@ function AddModelModal(props) {
       var context = contextState[0],
         setContext = contextState[1];
 
-      var       /** handleSave implementation. */
-handleSave = function () {
-        prov.models.push({ id: id, name: name || id, context: context, tags: ["Custom"] });
-        onSaved();
-        onClose();
-      };
+      var /** handleSave implementation. */
+        handleSave = function () {
+          prov.models.push({ id: id, name: name || id, context: context, tags: ["Custom"] });
+          onSaved();
+          onClose();
+        };
 
       return h(
         "div",
@@ -13230,8 +13247,8 @@ handleSave = function () {
       );
     }
 
-        /** OAuthFlowModal implementation. */
-function OAuthFlowModal(props) {
+    /** OAuthFlowModal implementation. */
+    function OAuthFlowModal(props) {
       var target = props.target,
         onClose = props.onClose;
       var flowState = React.useState(null);
@@ -13372,8 +13389,8 @@ function OAuthFlowModal(props) {
     }
 
     // 9. UNIFIED FILESYSTEM & WORKSPACES BROWSER
-        /** FileViewerModal implementation. */
-function FileViewerModal(props) {
+    /** FileViewerModal implementation. */
+    function FileViewerModal(props) {
       var file = props.file,
         onClose = props.onClose;
       var loadingState = React.useState(!file.content && !file.error);
@@ -13552,8 +13569,8 @@ function FileViewerModal(props) {
       );
     }
 
-        /** formatTimeAgo implementation. */
-function formatTimeAgo(timestamp) {
+    /** formatTimeAgo implementation. */
+    function formatTimeAgo(timestamp) {
       if (!timestamp) return "";
       var seconds = Math.floor((Date.now() - timestamp) / 1000);
       if (seconds < 60) return "now";
@@ -13565,8 +13582,8 @@ function formatTimeAgo(timestamp) {
       return days + "d";
     }
 
-        /** UnifiedWorkspacesBrowser implementation. */
-function UnifiedWorkspacesBrowser(props) {
+    /** UnifiedWorkspacesBrowser implementation. */
+    function UnifiedWorkspacesBrowser(props) {
       ensureTreeStyles();
       ensureModelPickerDecoration();
       var wide = Boolean(props && props.wide);
@@ -13656,12 +13673,12 @@ function UnifiedWorkspacesBrowser(props) {
         setShowSearch = showSearchState[1];
 
       React.useEffect(function () {
-        var         /** onToggle implementation. */
-onToggle = function (e) {
-          if (e && e.detail && e.detail.enabled !== undefined) {
-            setShowSearch(e.detail.enabled);
-          }
-        };
+        var /** onToggle implementation. */
+          onToggle = function (e) {
+            if (e && e.detail && e.detail.enabled !== undefined) {
+              setShowSearch(e.detail.enabled);
+            }
+          };
         window.addEventListener("dsh:sidebar-search-toggle", onToggle);
         return function () {
           window.removeEventListener("dsh:sidebar-search-toggle", onToggle);
@@ -13708,14 +13725,14 @@ onToggle = function (e) {
         setShowSearchButton = showSearchButtonState[1];
 
       React.useEffect(function () {
-        var         /** onSearchToggle implementation. */
-onSearchToggle = function (e) {
-          var enabled =
-            e && e.detail && e.detail.enabled !== undefined
-              ? e.detail.enabled
-              : localStorage.getItem("dsh_show_sidebar_search") !== "false";
-          setShowSearchButton(enabled);
-        };
+        var /** onSearchToggle implementation. */
+          onSearchToggle = function (e) {
+            var enabled =
+              e && e.detail && e.detail.enabled !== undefined
+                ? e.detail.enabled
+                : localStorage.getItem("dsh_show_sidebar_search") !== "false";
+            setShowSearchButton(enabled);
+          };
         window.addEventListener("dsh:sidebar-search-toggle", onSearchToggle);
         return function () {
           window.removeEventListener("dsh:sidebar-search-toggle", onSearchToggle);
@@ -13746,34 +13763,34 @@ onSearchToggle = function (e) {
         setUngroupedMenuOpen = ungroupedMenuState[1];
 
       React.useEffect(function () {
-        var         /** onTriggerSearch implementation. */
-onTriggerSearch = function () {
-          setSearchExpanded(true);
-          window.dispatchEvent(new CustomEvent("dsh:expand-sidebar"));
-          setTimeout(function () {
-            if (searchInputRef.current) {
-              searchInputRef.current.focus();
-              if (typeof searchInputRef.current.select === "function") {
-                searchInputRef.current.select();
+        var /** onTriggerSearch implementation. */
+          onTriggerSearch = function () {
+            setSearchExpanded(true);
+            window.dispatchEvent(new CustomEvent("dsh:expand-sidebar"));
+            setTimeout(function () {
+              if (searchInputRef.current) {
+                searchInputRef.current.focus();
+                if (typeof searchInputRef.current.select === "function") {
+                  searchInputRef.current.select();
+                }
               }
-            }
-          }, 80);
-        };
+            }, 80);
+          };
         window.addEventListener("dsh:trigger-sidebar-search", onTriggerSearch);
         return function () {
           window.removeEventListener("dsh:trigger-sidebar-search", onTriggerSearch);
         };
       }, []);
 
-      var       /** toggleSubagentExpand implementation. */
-toggleSubagentExpand = function (sessionId) {
-        setExpandedSubagents(function (prev) {
-          var n = Object.assign({}, prev);
-          if (n[sessionId]) delete n[sessionId];
-          else n[sessionId] = true;
-          return n;
-        });
-      };
+      var /** toggleSubagentExpand implementation. */
+        toggleSubagentExpand = function (sessionId) {
+          setExpandedSubagents(function (prev) {
+            var n = Object.assign({}, prev);
+            if (n[sessionId]) delete n[sessionId];
+            else n[sessionId] = true;
+            return n;
+          });
+        };
 
       var fetchDir = React.useCallback(function (dirPath) {
         if (!dirPath) return;
@@ -13850,32 +13867,32 @@ toggleSubagentExpand = function (sessionId) {
             : Object.keys(sessionsById);
       var currentSessionId = sessionList ? sessionList.current : undefined;
 
-      var       /** getParentId implementation. */
-getParentId = function (s) {
-        if (!s) return null;
-        return s.parentId || s.parentSessionId || s.parentSession || s.parent || null;
-      };
+      var /** getParentId implementation. */
+        getParentId = function (s) {
+          if (!s) return null;
+          return s.parentId || s.parentSessionId || s.parentSession || s.parent || null;
+        };
 
-      var       /** isSubagentChild implementation. */
-isSubagentChild = function (s) {
-        var pId = getParentId(s);
-        return Boolean(pId && (sessionsById[pId] || sessionIds.indexOf(pId) !== -1));
-      };
+      var /** isSubagentChild implementation. */
+        isSubagentChild = function (s) {
+          var pId = getParentId(s);
+          return Boolean(pId && (sessionsById[pId] || sessionIds.indexOf(pId) !== -1));
+        };
 
-      var       /** getSubagents implementation. */
-getSubagents = function (parentId) {
-        if (!parentId) return [];
-        return sessionIds
-          .map(function (id) {
-            return sessionsById[id];
-          })
-          .filter(function (s) {
-            return s && getParentId(s) === parentId;
-          })
-          .sort(function (a, b) {
-            return (b.updatedAt || 0) - (a.updatedAt || 0);
-          });
-      };
+      var /** getSubagents implementation. */
+        getSubagents = function (parentId) {
+          if (!parentId) return [];
+          return sessionIds
+            .map(function (id) {
+              return sessionsById[id];
+            })
+            .filter(function (s) {
+              return s && getParentId(s) === parentId;
+            })
+            .sort(function (a, b) {
+              return (b.updatedAt || 0) - (a.updatedAt || 0);
+            });
+        };
 
       var archivedSet = new Set();
       if (workspaceList && workspaceList.archivedSessionIds) {
@@ -13895,14 +13912,14 @@ getSubagents = function (parentId) {
         });
       } catch (e) {}
 
-      var       /** isArchivedSession implementation. */
-isArchivedSession = function (s, sId) {
-        if (!s && !sId) return false;
-        var id = sId || (s && s.id);
-        if (id && archivedSet.has(id)) return true;
-        if (s && (s.isArchived || s.archived || s.status === "archived")) return true;
-        return false;
-      };
+      var /** isArchivedSession implementation. */
+        isArchivedSession = function (s, sId) {
+          if (!s && !sId) return false;
+          var id = sId || (s && s.id);
+          if (id && archivedSet.has(id)) return true;
+          if (s && (s.isArchived || s.archived || s.status === "archived")) return true;
+          return false;
+        };
 
       var pinnedSet = new Set();
       try {
@@ -13912,27 +13929,27 @@ isArchivedSession = function (s, sId) {
         });
       } catch (e) {}
 
-      var       /** isPinnedSession implementation. */
-isPinnedSession = function (s, sId) {
-        if (!s && !sId) return false;
-        var id = sId || (s && s.id);
-        if (id && pinnedSet.has(id)) return true;
-        if (s && (s.isPinned || s.pinned || s.favorite)) return true;
-        return false;
-      };
+      var /** isPinnedSession implementation. */
+        isPinnedSession = function (s, sId) {
+          if (!s && !sId) return false;
+          var id = sId || (s && s.id);
+          if (id && pinnedSet.has(id)) return true;
+          if (s && (s.isPinned || s.pinned || s.favorite)) return true;
+          return false;
+        };
 
-      var       /** togglePinSession implementation. */
-togglePinSession = function (sessionId) {
-        if (pinnedSet.has(sessionId)) {
-          pinnedSet.delete(sessionId);
-        } else {
-          pinnedSet.add(sessionId);
-        }
-        try {
-          localStorage.setItem("dsh_pinned_sessions", JSON.stringify(Array.from(pinnedSet)));
-        } catch (e) {}
-        loadAll();
-      };
+      var /** togglePinSession implementation. */
+        togglePinSession = function (sessionId) {
+          if (pinnedSet.has(sessionId)) {
+            pinnedSet.delete(sessionId);
+          } else {
+            pinnedSet.add(sessionId);
+          }
+          try {
+            localStorage.setItem("dsh_pinned_sessions", JSON.stringify(Array.from(pinnedSet)));
+          } catch (e) {}
+          loadAll();
+        };
 
       var pinnedSessions = sessionIds
         .map(function (sId) {
@@ -14043,147 +14060,149 @@ togglePinSession = function (sessionId) {
       var isArchivedOpen = isArchivedOpenState[0],
         setIsArchivedOpen = isArchivedOpenState[1];
 
-      var       /** handleArchiveChat implementation. */
-handleArchiveChat = function (sessionId) {
-        if (archiveSession) archiveSession(sessionId);
-        archivedSet.add(sessionId);
-        try {
-          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-        } catch (e) {}
-        loadAll();
-      };
-
-      var       /** unarchiveSession implementation. */
-unarchiveSession = function (sessionId) {
-        archivedSet.delete(sessionId);
-        try {
-          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-        } catch (e) {}
-        fetch(QUOTAS_API + "/sessions/unarchive", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: sessionId }),
-        }).catch(function () {});
-        loadAll();
-      };
-
-      var       /** handleOpenChat implementation. */
-handleOpenChat = function (sessionId, sessionTitle) {
-        if (!sessionId) return;
-        if (typeof window !== "undefined") {
-          window.__dsh_current_session_id__ = sessionId;
-          if (sessionTitle) window.__dsh_current_session_title__ = sessionTitle;
-        }
-        if (openSession) {
+      var /** handleArchiveChat implementation. */
+        handleArchiveChat = function (sessionId) {
+          if (archiveSession) archiveSession(sessionId);
+          archivedSet.add(sessionId);
           try {
-            openSession(sessionId);
+            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
           } catch (e) {}
-        }
-        if (typeof window !== "undefined" && window.__dsh_ctx__ && window.__dsh_ctx__.sessions) {
-          try {
-            window.__dsh_ctx__.sessions.open(sessionId);
-          } catch (e) {}
-        }
-        window.dispatchEvent(
-          new CustomEvent("dsh:focus-chat", {
-            detail: { id: sessionId, title: sessionTitle || "Conversation" },
-          }),
-        );
-      };
-
-      var       /** deletePermanentSession implementation. */
-deletePermanentSession = function (sessionId) {
-        archivedSet.delete(sessionId);
-        try {
-          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-        } catch (e) {}
-        fetch(QUOTAS_API + "/sessions/delete", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: sessionId }),
-        }).catch(function () {});
-        loadAll();
-      };
-
-      var       /** handleArchivePongSessions implementation. */
-handleArchivePongSessions = function () {
-        sessionIds.forEach(function (id) {
-          var s = sessionsById[id];
-          var title = (s && (s.displayTitle || s.title || s.name || "")) || "";
-          if (title.trim().toLowerCase() === "pong" || title.trim().toLowerCase() === "ping") {
-            archivedSet.add(id);
-            if (archiveSession) archiveSession(id);
-          }
-        });
-        try {
-          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-        } catch (e) {}
-        fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (res) {
-            alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
-            loadAll();
-          })
-          .catch(function () {
-            loadAll();
-          });
-      };
-
-      var       /** toggleExpand implementation. */
-toggleExpand = function (dirPath) {
-        setExpandedPaths(function (prev) {
-          var n = Object.assign({}, prev);
-          if (n[dirPath]) {
-            delete n[dirPath];
-          } else {
-            n[dirPath] = true;
-            if (!dirCache[dirPath]) {
-              fetchDir(dirPath);
-            }
-          }
-          return n;
-        });
-      };
-
-      var       /** handleNewTerminalInDir implementation. */
-handleNewTerminalInDir = function (dirPath) {
-        var baseName = dirPath.split("/").pop() || "term";
-        var name = prompt(
-          "Terminal session name:",
-          baseName + "-" + Math.floor(Math.random() * 1000),
-        );
-        if (!name) return;
-        fetch(QUOTAS_API + "/tmux/sessions/new", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: name, cwd: dirPath }),
-        }).then(function () {
           loadAll();
-          window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: name } }));
-        });
-      };
+        };
 
-      var       /** handleStartSessionInDir implementation. */
-handleStartSessionInDir = function (dirPath) {
-        var existing = workspaces.find(function (w) {
-          return w.path === dirPath;
-        });
-        if (existing) {
-          if (startSession) startSession(existing.workspaceId);
-        } else if (createWorkspace) {
-          createWorkspace({ path: dirPath })
-            .then(function (newW) {
-              if (startSession) startSession(newW ? newW.workspaceId : undefined);
+      var /** unarchiveSession implementation. */
+        unarchiveSession = function (sessionId) {
+          archivedSet.delete(sessionId);
+          try {
+            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+          } catch (e) {}
+          fetch(QUOTAS_API + "/sessions/unarchive", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id: sessionId }),
+          }).catch(function () {});
+          loadAll();
+        };
+
+      var /** handleOpenChat implementation. */
+        handleOpenChat = function (sessionId, sessionTitle) {
+          if (!sessionId) return;
+          if (typeof window !== "undefined") {
+            window.__dsh_current_session_id__ = sessionId;
+            if (sessionTitle) window.__dsh_current_session_title__ = sessionTitle;
+          }
+          if (openSession) {
+            try {
+              openSession(sessionId);
+            } catch (e) {}
+          }
+          if (typeof window !== "undefined" && window.__dsh_ctx__ && window.__dsh_ctx__.sessions) {
+            try {
+              window.__dsh_ctx__.sessions.open(sessionId);
+            } catch (e) {}
+          }
+          window.dispatchEvent(
+            new CustomEvent("dsh:focus-chat", {
+              detail: { id: sessionId, title: sessionTitle || "Conversation" },
+            }),
+          );
+        };
+
+      var /** deletePermanentSession implementation. */
+        deletePermanentSession = function (sessionId) {
+          archivedSet.delete(sessionId);
+          try {
+            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+          } catch (e) {}
+          fetch(QUOTAS_API + "/sessions/delete", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id: sessionId }),
+          }).catch(function () {});
+          loadAll();
+        };
+
+      var /** handleArchivePongSessions implementation. */
+        handleArchivePongSessions = function () {
+          sessionIds.forEach(function (id) {
+            var s = sessionsById[id];
+            var title = (s && (s.displayTitle || s.title || s.name || "")) || "";
+            if (title.trim().toLowerCase() === "pong" || title.trim().toLowerCase() === "ping") {
+              archivedSet.add(id);
+              if (archiveSession) archiveSession(id);
+            }
+          });
+          try {
+            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+          } catch (e) {}
+          fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
+              loadAll();
             })
             .catch(function () {
-              if (startSession) startSession();
+              loadAll();
             });
-        } else if (startSession) {
-          startSession();
-        }
-      };
+        };
+
+      var /** toggleExpand implementation. */
+        toggleExpand = function (dirPath) {
+          setExpandedPaths(function (prev) {
+            var n = Object.assign({}, prev);
+            if (n[dirPath]) {
+              delete n[dirPath];
+            } else {
+              n[dirPath] = true;
+              if (!dirCache[dirPath]) {
+                fetchDir(dirPath);
+              }
+            }
+            return n;
+          });
+        };
+
+      var /** handleNewTerminalInDir implementation. */
+        handleNewTerminalInDir = function (dirPath) {
+          var baseName = dirPath.split("/").pop() || "term";
+          var name = prompt(
+            "Terminal session name:",
+            baseName + "-" + Math.floor(Math.random() * 1000),
+          );
+          if (!name) return;
+          fetch(QUOTAS_API + "/tmux/sessions/new", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ name: name, cwd: dirPath }),
+          }).then(function () {
+            loadAll();
+            window.dispatchEvent(
+              new CustomEvent("dsh:open-terminal", { detail: { session: name } }),
+            );
+          });
+        };
+
+      var /** handleStartSessionInDir implementation. */
+        handleStartSessionInDir = function (dirPath) {
+          var existing = workspaces.find(function (w) {
+            return w.path === dirPath;
+          });
+          if (existing) {
+            if (startSession) startSession(existing.workspaceId);
+          } else if (createWorkspace) {
+            createWorkspace({ path: dirPath })
+              .then(function (newW) {
+                if (startSession) startSession(newW ? newW.workspaceId : undefined);
+              })
+              .catch(function () {
+                if (startSession) startSession();
+              });
+          } else if (startSession) {
+            startSession();
+          }
+        };
 
       if (!wide) {
         var isRailPlusOpen = Boolean(plusMenu === "rail" || (plusMenu && plusMenu.key === "rail"));
@@ -14196,23 +14215,23 @@ handleStartSessionInDir = function (dirPath) {
         var totalLive = liveSessions.length + liveContainers.length;
         var railPlusBtnRef = React.useRef(null);
 
-        var         /** handleExpand implementation. */
-handleExpand = function (e) {
-          if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-          if (typeof expandSidebar === "function") {
-            expandSidebar();
-          } else if (props && typeof props.expandSidebar === "function") {
-            props.expandSidebar();
-          } else {
-            var toggleBtn = document.querySelector(
-              'button[class*="toggle"], button[aria-label*="sidebar"], button[aria-label*="Sidebar"]',
-            );
-            if (toggleBtn) toggleBtn.click();
-          }
-        };
+        var /** handleExpand implementation. */
+          handleExpand = function (e) {
+            if (e) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+            if (typeof expandSidebar === "function") {
+              expandSidebar();
+            } else if (props && typeof props.expandSidebar === "function") {
+              props.expandSidebar();
+            } else {
+              var toggleBtn = document.querySelector(
+                'button[class*="toggle"], button[aria-label*="sidebar"], button[aria-label*="Sidebar"]',
+              );
+              if (toggleBtn) toggleBtn.click();
+            }
+          };
 
         return h(
           "div",
@@ -14436,144 +14455,419 @@ handleExpand = function (e) {
       });
       var totalLive = liveSessions.length + liveContainers.length;
 
-      var       /** renderUnifiedPlusButton implementation. */
-renderUnifiedPlusButton = function (targetDir, anchorKey) {
-        var isMenuOpen = Boolean(
-          plusMenu && (plusMenu === anchorKey || plusMenu.key === anchorKey),
-        );
-        var path = targetDir || currentRoot || "/Users/user/Projects";
+      var /** renderUnifiedPlusButton implementation. */
+        renderUnifiedPlusButton = function (targetDir, anchorKey) {
+          var isMenuOpen = Boolean(
+            plusMenu && (plusMenu === anchorKey || plusMenu.key === anchorKey),
+          );
+          var path = targetDir || currentRoot || "/Users/user/Projects";
 
-        return h(
-          "div",
-          { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-          h(
-            "button",
-            {
-              type: "button",
-              className: "dsh-tree-actionBtn",
-              title: "New Item (+)",
-              "aria-label": "New Item",
-              onClick: function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var rect = e.currentTarget.getBoundingClientRect();
-                var posX = Math.max(10, Math.min(window.innerWidth - 200, rect.right - 190));
-                var posY = rect.bottom + 4;
-                setPlusMenu(isMenuOpen ? null : { key: anchorKey, pos: { x: posX, y: posY } });
-              },
-            },
-            h(PlusGlyph, { size: 13 }),
-          ),
-          isMenuOpen
-            ? h(SelectDropdownMenu, {
-                open: true,
-                position: plusMenu && plusMenu.pos ? plusMenu.pos : null,
-                onClose: function () {
-                  setPlusMenu(null);
+          return h(
+            "div",
+            { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+            h(
+              "button",
+              {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "New Item (+)",
+                "aria-label": "New Item",
+                onClick: function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  var rect = e.currentTarget.getBoundingClientRect();
+                  var posX = Math.max(10, Math.min(window.innerWidth - 200, rect.right - 190));
+                  var posY = rect.bottom + 4;
+                  setPlusMenu(isMenuOpen ? null : { key: anchorKey, pos: { x: posX, y: posY } });
                 },
-                items: [
-                  { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
-                  {
-                    id: "terminal",
-                    label: "Terminal Session",
-                    icon: h(TerminalsGlyph, { size: 13 }),
+              },
+              h(PlusGlyph, { size: 13 }),
+            ),
+            isMenuOpen
+              ? h(SelectDropdownMenu, {
+                  open: true,
+                  position: plusMenu && plusMenu.pos ? plusMenu.pos : null,
+                  onClose: function () {
+                    setPlusMenu(null);
                   },
-                  {
-                    id: "container",
-                    label: "Sandbox Container",
-                    icon: h(ContainersGlyph, { size: 13 }),
-                  },
-                  {
-                    id: "new-folder",
-                    label: "New Directory…",
-                    icon: h(FolderPlusGlyph, { size: 13 }),
-                  },
-                  {
-                    id: "open-workspace",
-                    label: "Open Folder as Workspace…",
-                    icon: h(BlueFolderGlyph, { size: 13 }),
-                  },
-                  {
-                    id: "archive-empty",
-                    label: "Archive Empty Chats",
-                    icon: h(TrashGlyph, { size: 13 }),
-                    danger: true,
-                  },
-                ],
-                onSelect: function (actionId) {
-                  setPlusMenu(null);
-                  if (actionId === "chat") {
-                    handleStartSessionInDir(path);
-                  } else if (actionId === "terminal") {
-                    handleNewTerminalInDir(path);
-                  } else if (actionId === "container") {
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:open-container", { detail: { cwd: path } }),
-                    );
-                  } else if (actionId === "new-folder") {
-                    var dirName = prompt("New directory name in " + path + ":");
-                    if (dirName && dirName.trim()) {
-                      fetch(QUOTAS_API + "/fs/mkdir", {
-                        method: "POST",
-                        headers: { "content-type": "application/json" },
-                        body: JSON.stringify({ path: path + "/" + dirName.trim() }),
-                      }).then(function () {
-                        loadAll();
-                      });
-                    }
-                  } else if (actionId === "open-workspace") {
-                    var defaultPath = path || "/Users/user/Projects";
-                    var p = prompt("Enter directory path for new Workspace:", defaultPath);
-                    if (p && p.trim()) {
-                      var cleanP = p.trim();
-                      if (createWorkspace) {
-                        createWorkspace({ path: cleanP }).then(function (w) {
-                          if (startSession) startSession(w ? w.workspaceId : undefined);
+                  items: [
+                    { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+                    {
+                      id: "terminal",
+                      label: "Terminal Session",
+                      icon: h(TerminalsGlyph, { size: 13 }),
+                    },
+                    {
+                      id: "container",
+                      label: "Sandbox Container",
+                      icon: h(ContainersGlyph, { size: 13 }),
+                    },
+                    {
+                      id: "new-folder",
+                      label: "New Directory…",
+                      icon: h(FolderPlusGlyph, { size: 13 }),
+                    },
+                    {
+                      id: "open-workspace",
+                      label: "Open Folder as Workspace…",
+                      icon: h(BlueFolderGlyph, { size: 13 }),
+                    },
+                    {
+                      id: "archive-empty",
+                      label: "Archive Empty Chats",
+                      icon: h(TrashGlyph, { size: 13 }),
+                      danger: true,
+                    },
+                  ],
+                  onSelect: function (actionId) {
+                    setPlusMenu(null);
+                    if (actionId === "chat") {
+                      handleStartSessionInDir(path);
+                    } else if (actionId === "terminal") {
+                      handleNewTerminalInDir(path);
+                    } else if (actionId === "container") {
+                      window.dispatchEvent(
+                        new CustomEvent("dsh:open-container", { detail: { cwd: path } }),
+                      );
+                    } else if (actionId === "new-folder") {
+                      var dirName = prompt("New directory name in " + path + ":");
+                      if (dirName && dirName.trim()) {
+                        fetch(QUOTAS_API + "/fs/mkdir", {
+                          method: "POST",
+                          headers: { "content-type": "application/json" },
+                          body: JSON.stringify({ path: path + "/" + dirName.trim() }),
+                        }).then(function () {
                           loadAll();
                         });
-                      } else {
-                        handleStartSessionInDir(cleanP);
                       }
+                    } else if (actionId === "open-workspace") {
+                      var defaultPath = path || "/Users/user/Projects";
+                      var p = prompt("Enter directory path for new Workspace:", defaultPath);
+                      if (p && p.trim()) {
+                        var cleanP = p.trim();
+                        if (createWorkspace) {
+                          createWorkspace({ path: cleanP }).then(function (w) {
+                            if (startSession) startSession(w ? w.workspaceId : undefined);
+                            loadAll();
+                          });
+                        } else {
+                          handleStartSessionInDir(cleanP);
+                        }
+                      }
+                    } else if (actionId === "archive-empty") {
+                      handleArchivePongSessions();
                     }
-                  } else if (actionId === "archive-empty") {
-                    handleArchivePongSessions();
-                  }
-                },
-              })
-            : null,
-        );
-      };
+                  },
+                })
+              : null,
+          );
+        };
 
-      var       /** renderChatRow implementation. */
-renderChatRow = function (chat, padLeft) {
-        var isChatActive = chat.id === currentSessionId;
-        var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "chat::" + chat.id);
-        var subagents = getSubagents(chat.id);
-        var hasSubagents = subagents.length > 0;
-        var isSubExp = Boolean(expandedSubagents[chat.id]);
+      var /** renderChatRow implementation. */
+        renderChatRow = function (chat, padLeft) {
+          var isChatActive = chat.id === currentSessionId;
+          var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "chat::" + chat.id);
+          var subagents = getSubagents(chat.id);
+          var hasSubagents = subagents.length > 0;
+          var isSubExp = Boolean(expandedSubagents[chat.id]);
 
-        return h(
-          "div",
-          {
-            key: "chat-wrapper::" + chat.id,
-            style: { display: "flex", flexDirection: "column", width: "100%" },
-          },
-          h(
+          return h(
             "div",
             {
-              key: "chat::" + chat.id,
-              className:
-                "dsh-tree-sessionRow" +
-                (hasSubagents ? " dsh-has-children" : "") +
-                (isChatActive ? " dsh-tree-sessionRowActive" : ""),
+              key: "chat-wrapper::" + chat.id,
+              style: { display: "flex", flexDirection: "column", width: "100%" },
+            },
+            h(
+              "div",
+              {
+                key: "chat::" + chat.id,
+                className:
+                  "dsh-tree-sessionRow" +
+                  (hasSubagents ? " dsh-has-children" : "") +
+                  (isChatActive ? " dsh-tree-sessionRowActive" : ""),
+                role: "treeitem",
+                "data-session-id": chat.id,
+                "aria-expanded": hasSubagents ? isSubExp : undefined,
+                style: {
+                  paddingLeft: padLeft + "px",
+                  height: "30px",
+                  color: isChatActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
+                  fontWeight: isChatActive ? 600 : 400,
+                  cursor: "pointer",
+                  position: "relative",
+                },
+                onClick: function () {
+                  handleOpenChat(chat.id, chat.title);
+                },
+                onContextMenu: function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setEllipsisOpen({ id: "chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
+                },
+              },
+              (function () {
+                var isPinned = isPinnedSession(chat, chat.id);
+                if (isPinned) {
+                  return h(
+                    "span",
+                    {
+                      className: "dsh-tree-slot dsh-tree-icon",
+                      style: { color: "var(--dsw-alias-primary, #6366f1)" },
+                    },
+                    h(PinGlyph, { size: 13 }),
+                  );
+                }
+                return h(
+                  "span",
+                  { className: "dsh-tree-slot dsh-tree-icon" },
+                  h(ChatGlyph, { size: 14 }),
+                );
+              })(),
+              hasSubagents
+                ? h(
+                    "span",
+                    {
+                      className: "dsh-tree-slot dsh-tree-chevron",
+                      title: isSubExp ? "Collapse subagents" : "Expand subagents",
+                      onClick: function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleSubagentExpand(chat.id);
+                      },
+                    },
+                    h(TriangleRightFill14, {
+                      className: "dsh-tree-arrow" + (isSubExp ? " dsh-tree-arrowOpen" : ""),
+                      size: 11,
+                    }),
+                  )
+                : null,
+              h(
+                "span",
+                {
+                  className: "dsh-tree-title",
+                  title: chat.title || "Chat Session",
+                },
+                chat.title || "Untitled Chat",
+              ),
+              hasSubagents
+                ? h(
+                    "span",
+                    {
+                      style: {
+                        padding: "1px 5px",
+                        borderRadius: "8px",
+                        fontSize: "9.5px",
+                        background: "rgba(99, 102, 241, 0.15)",
+                        color: "var(--dsw-alias-primary, #6366f1)",
+                        fontWeight: 700,
+                        marginLeft: "4px",
+                        cursor: "pointer",
+                      },
+                      title: subagents.length + " subagents (click to toggle)",
+                      onClick: function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleSubagentExpand(chat.id);
+                      },
+                    },
+                    subagents.length,
+                  )
+                : null,
+              h(
+                "span",
+                {
+                  style: {
+                    fontSize: "10.5px",
+                    color: "var(--dsw-alias-label-tertiary)",
+                    marginLeft: "auto",
+                    marginRight: "4px",
+                    flexShrink: 0,
+                  },
+                },
+                formatTimeAgo(chat.updatedAt),
+              ),
+              h(
+                "span",
+                { className: "dsh-tree-actions" },
+                h(
+                  "button",
+                  {
+                    type: "button",
+                    className: "dsh-tree-actionBtn",
+                    title: "Chat Actions (…)",
+                    onClick: function (e) {
+                      e.stopPropagation();
+                      setEllipsisOpen(isMenuOpen ? null : { id: "chat::" + chat.id });
+                    },
+                  },
+                  h(EllipsisGlyph, { size: 13 }),
+                ),
+                h(SelectDropdownMenu, {
+                  open: isMenuOpen,
+                  position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
+                  onClose: function () {
+                    setEllipsisOpen(null);
+                  },
+                  items: [
+                    {
+                      id: isPinnedSession(chat, chat.id) ? "unpin" : "pin",
+                      label: isPinnedSession(chat, chat.id) ? "Unpin Chat" : "Pin Chat",
+                      icon: h(PinGlyph, { size: 13 }),
+                    },
+                    { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
+                    { id: "fork", label: "Fork Chat", icon: h(BranchGlyph, { size: 13 }) },
+                    {
+                      id: "archive",
+                      label: "Archive Chat",
+                      icon: h(TrashGlyph, { size: 13 }),
+                      danger: true,
+                    },
+                  ],
+                  onSelect: function (actionId) {
+                    if (actionId === "pin" || actionId === "unpin") {
+                      togglePinSession(chat.id);
+                    } else if (actionId === "rename") {
+                      var newTitle = prompt("Rename chat:", chat.title || "");
+                      if (newTitle && renameSession) renameSession(chat.id, newTitle);
+                    } else if (actionId === "fork") {
+                      if (forkSession) forkSession(chat.id);
+                    } else if (actionId === "archive") {
+                      handleArchiveChat(chat.id);
+                    }
+                  },
+                }),
+              ),
+            ),
+            hasSubagents && isSubExp
+              ? h(
+                  "div",
+                  { style: { display: "flex", flexDirection: "column", width: "100%" } },
+                  subagents.map(function (sub) {
+                    var isSubActive = sub.id === currentSessionId;
+                    var isSubMenuOpen = Boolean(
+                      ellipsisOpen && ellipsisOpen.id === "chat::" + sub.id,
+                    );
+                    return h(
+                      "div",
+                      {
+                        key: "sub::" + sub.id,
+                        className:
+                          "dsh-tree-sessionRow dsh-tree-subagentRow" +
+                          (isSubActive ? " dsh-tree-sessionRowActive" : ""),
+                        role: "treeitem",
+                        "data-session-id": sub.id,
+                        style: {
+                          paddingLeft: padLeft + 16 + "px",
+                          height: "28px",
+                          color: isSubActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
+                          cursor: "pointer",
+                        },
+                        onClick: function () {
+                          handleOpenChat(sub.id, sub.title);
+                        },
+                        onContextMenu: function (e) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setEllipsisOpen({
+                            id: "chat::" + sub.id,
+                            pos: { x: e.clientX, y: e.clientY },
+                          });
+                        },
+                      },
+                      h(
+                        "span",
+                        { className: "dsh-tree-slot dsh-tree-icon" },
+                        h(SubagentGlyph, { size: 12 }),
+                      ),
+                      h(
+                        "span",
+                        {
+                          className: "dsh-tree-title",
+                          style: { fontSize: "11.5px" },
+                          title: sub.title || "Subagent Session",
+                        },
+                        sub.title || "Subagent",
+                      ),
+                      h(
+                        "span",
+                        {
+                          style: {
+                            fontSize: "10px",
+                            color: "var(--dsw-alias-label-tertiary)",
+                            marginLeft: "auto",
+                            marginRight: "4px",
+                            flexShrink: 0,
+                          },
+                        },
+                        formatTimeAgo(sub.updatedAt),
+                      ),
+                      h(
+                        "span",
+                        { className: "dsh-tree-actions" },
+                        h(
+                          "button",
+                          {
+                            type: "button",
+                            className: "dsh-tree-actionBtn",
+                            title: "Subagent Actions",
+                            onClick: function (e) {
+                              e.stopPropagation();
+                              setEllipsisOpen(isSubMenuOpen ? null : { id: "chat::" + sub.id });
+                            },
+                          },
+                          h(EllipsisGlyph, { size: 12 }),
+                        ),
+                        h(SelectDropdownMenu, {
+                          open: isSubMenuOpen,
+                          position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
+                          onClose: function () {
+                            setEllipsisOpen(null);
+                          },
+                          items: [
+                            {
+                              id: "rename",
+                              label: "Rename Subagent",
+                              icon: h(EditGlyph, { size: 13 }),
+                            },
+                            {
+                              id: "archive",
+                              label: "Archive Subagent",
+                              icon: h(TrashGlyph, { size: 13 }),
+                              danger: true,
+                            },
+                          ],
+                          onSelect: function (actionId) {
+                            if (actionId === "rename") {
+                              var newTitle = prompt("Rename subagent:", sub.title || "");
+                              if (newTitle && renameSession) renameSession(sub.id, newTitle);
+                            } else if (actionId === "archive") {
+                              handleArchiveChat(sub.id);
+                            }
+                          },
+                        }),
+                      ),
+                    );
+                  }),
+                )
+              : null,
+          );
+        };
+
+      var /** renderArchivedChatRow implementation. */
+        renderArchivedChatRow = function (chat, padLeft) {
+          var isChatActive = chat.id === currentSessionId;
+          var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "archived-chat::" + chat.id);
+          return h(
+            "div",
+            {
+              key: "archived-chat::" + chat.id,
+              className: "dsh-tree-sessionRow" + (isChatActive ? " dsh-tree-sessionRowActive" : ""),
               role: "treeitem",
               "data-session-id": chat.id,
-              "aria-expanded": hasSubagents ? isSubExp : undefined,
               style: {
                 paddingLeft: padLeft + "px",
-                height: "30px",
-                color: isChatActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
-                fontWeight: isChatActive ? 600 : 400,
+                height: "28px",
+                opacity: 0.75,
                 cursor: "pointer",
                 position: "relative",
               },
@@ -14583,82 +14877,33 @@ renderChatRow = function (chat, padLeft) {
               onContextMenu: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                setEllipsisOpen({ id: "chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
+                setEllipsisOpen({
+                  id: "archived-chat::" + chat.id,
+                  pos: { x: e.clientX, y: e.clientY },
+                });
               },
             },
-            (function () {
-              var isPinned = isPinnedSession(chat, chat.id);
-              if (isPinned) {
-                return h(
-                  "span",
-                  {
-                    className: "dsh-tree-slot dsh-tree-icon",
-                    style: { color: "var(--dsw-alias-primary, #6366f1)" },
-                  },
-                  h(PinGlyph, { size: 13 }),
-                );
-              }
-              return h(
-                "span",
-                { className: "dsh-tree-slot dsh-tree-icon" },
-                h(ChatGlyph, { size: 14 }),
-              );
-            })(),
-            hasSubagents
-              ? h(
-                  "span",
-                  {
-                    className: "dsh-tree-slot dsh-tree-chevron",
-                    title: isSubExp ? "Collapse subagents" : "Expand subagents",
-                    onClick: function (e) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleSubagentExpand(chat.id);
-                    },
-                  },
-                  h(TriangleRightFill14, {
-                    className: "dsh-tree-arrow" + (isSubExp ? " dsh-tree-arrowOpen" : ""),
-                    size: 11,
-                  }),
-                )
-              : null,
+            h(
+              "span",
+              {
+                className: "dsh-tree-slot dsh-tree-icon",
+                style: { color: "var(--dsw-alias-label-tertiary)" },
+              },
+              h(ChatGlyph, { size: 14 }),
+            ),
             h(
               "span",
               {
                 className: "dsh-tree-title",
-                title: chat.title || "Chat Session",
+                title: chat.title || "Archived Chat",
               },
               chat.title || "Untitled Chat",
             ),
-            hasSubagents
-              ? h(
-                  "span",
-                  {
-                    style: {
-                      padding: "1px 5px",
-                      borderRadius: "8px",
-                      fontSize: "9.5px",
-                      background: "rgba(99, 102, 241, 0.15)",
-                      color: "var(--dsw-alias-primary, #6366f1)",
-                      fontWeight: 700,
-                      marginLeft: "4px",
-                      cursor: "pointer",
-                    },
-                    title: subagents.length + " subagents (click to toggle)",
-                    onClick: function (e) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleSubagentExpand(chat.id);
-                    },
-                  },
-                  subagents.length,
-                )
-              : null,
             h(
               "span",
               {
                 style: {
-                  fontSize: "10.5px",
+                  fontSize: "10px",
                   color: "var(--dsw-alias-label-tertiary)",
                   marginLeft: "auto",
                   marginRight: "4px",
@@ -14675,10 +14920,23 @@ renderChatRow = function (chat, padLeft) {
                 {
                   type: "button",
                   className: "dsh-tree-actionBtn",
-                  title: "Chat Actions (…)",
+                  title: "Restore / Unarchive",
                   onClick: function (e) {
                     e.stopPropagation();
-                    setEllipsisOpen(isMenuOpen ? null : { id: "chat::" + chat.id });
+                    unarchiveSession(chat.id);
+                  },
+                },
+                h(RestoreGlyph, { size: 13 }),
+              ),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "dsh-tree-actionBtn",
+                  title: "Archived Actions (…)",
+                  onClick: function (e) {
+                    e.stopPropagation();
+                    setEllipsisOpen(isMenuOpen ? null : { id: "archived-chat::" + chat.id });
                   },
                 },
                 h(EllipsisGlyph, { size: 13 }),
@@ -14691,527 +14949,298 @@ renderChatRow = function (chat, padLeft) {
                 },
                 items: [
                   {
-                    id: isPinnedSession(chat, chat.id) ? "unpin" : "pin",
-                    label: isPinnedSession(chat, chat.id) ? "Unpin Chat" : "Pin Chat",
-                    icon: h(PinGlyph, { size: 13 }),
+                    id: "restore",
+                    label: "Restore to Active",
+                    icon: h(RestoreGlyph, { size: 13 }),
                   },
                   { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
-                  { id: "fork", label: "Fork Chat", icon: h(BranchGlyph, { size: 13 }) },
                   {
-                    id: "archive",
-                    label: "Archive Chat",
+                    id: "delete",
+                    label: "Delete Permanently",
                     icon: h(TrashGlyph, { size: 13 }),
                     danger: true,
                   },
                 ],
                 onSelect: function (actionId) {
-                  if (actionId === "pin" || actionId === "unpin") {
-                    togglePinSession(chat.id);
+                  if (actionId === "restore") {
+                    unarchiveSession(chat.id);
                   } else if (actionId === "rename") {
                     var newTitle = prompt("Rename chat:", chat.title || "");
                     if (newTitle && renameSession) renameSession(chat.id, newTitle);
-                  } else if (actionId === "fork") {
-                    if (forkSession) forkSession(chat.id);
-                  } else if (actionId === "archive") {
-                    handleArchiveChat(chat.id);
+                  } else if (actionId === "delete") {
+                    if (confirm("Permanently delete this archived session?")) {
+                      deletePermanentSession(chat.id);
+                    }
                   }
                 },
               }),
             ),
-          ),
-          hasSubagents && isSubExp
-            ? h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", width: "100%" } },
-                subagents.map(function (sub) {
-                  var isSubActive = sub.id === currentSessionId;
-                  var isSubMenuOpen = Boolean(
-                    ellipsisOpen && ellipsisOpen.id === "chat::" + sub.id,
-                  );
-                  return h(
-                    "div",
-                    {
-                      key: "sub::" + sub.id,
-                      className:
-                        "dsh-tree-sessionRow dsh-tree-subagentRow" +
-                        (isSubActive ? " dsh-tree-sessionRowActive" : ""),
-                      role: "treeitem",
-                      "data-session-id": sub.id,
-                      style: {
-                        paddingLeft: padLeft + 16 + "px",
-                        height: "28px",
-                        color: isSubActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
-                        cursor: "pointer",
-                      },
-                      onClick: function () {
-                        handleOpenChat(sub.id, sub.title);
-                      },
-                      onContextMenu: function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setEllipsisOpen({
-                          id: "chat::" + sub.id,
-                          pos: { x: e.clientX, y: e.clientY },
-                        });
-                      },
-                    },
-                    h(
-                      "span",
-                      { className: "dsh-tree-slot dsh-tree-icon" },
-                      h(SubagentGlyph, { size: 12 }),
-                    ),
-                    h(
-                      "span",
-                      {
-                        className: "dsh-tree-title",
-                        style: { fontSize: "11.5px" },
-                        title: sub.title || "Subagent Session",
-                      },
-                      sub.title || "Subagent",
-                    ),
-                    h(
-                      "span",
-                      {
-                        style: {
-                          fontSize: "10px",
-                          color: "var(--dsw-alias-label-tertiary)",
-                          marginLeft: "auto",
-                          marginRight: "4px",
-                          flexShrink: 0,
-                        },
-                      },
-                      formatTimeAgo(sub.updatedAt),
-                    ),
-                    h(
-                      "span",
-                      { className: "dsh-tree-actions" },
-                      h(
-                        "button",
-                        {
-                          type: "button",
-                          className: "dsh-tree-actionBtn",
-                          title: "Subagent Actions",
-                          onClick: function (e) {
-                            e.stopPropagation();
-                            setEllipsisOpen(isSubMenuOpen ? null : { id: "chat::" + sub.id });
-                          },
-                        },
-                        h(EllipsisGlyph, { size: 12 }),
-                      ),
-                      h(SelectDropdownMenu, {
-                        open: isSubMenuOpen,
-                        position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
-                        onClose: function () {
-                          setEllipsisOpen(null);
-                        },
-                        items: [
-                          {
-                            id: "rename",
-                            label: "Rename Subagent",
-                            icon: h(EditGlyph, { size: 13 }),
-                          },
-                          {
-                            id: "archive",
-                            label: "Archive Subagent",
-                            icon: h(TrashGlyph, { size: 13 }),
-                            danger: true,
-                          },
-                        ],
-                        onSelect: function (actionId) {
-                          if (actionId === "rename") {
-                            var newTitle = prompt("Rename subagent:", sub.title || "");
-                            if (newTitle && renameSession) renameSession(sub.id, newTitle);
-                          } else if (actionId === "archive") {
-                            handleArchiveChat(sub.id);
-                          }
-                        },
-                      }),
-                    ),
-                  );
-                }),
-              )
-            : null,
-        );
-      };
-
-      var       /** renderArchivedChatRow implementation. */
-renderArchivedChatRow = function (chat, padLeft) {
-        var isChatActive = chat.id === currentSessionId;
-        var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "archived-chat::" + chat.id);
-        return h(
-          "div",
-          {
-            key: "archived-chat::" + chat.id,
-            className: "dsh-tree-sessionRow" + (isChatActive ? " dsh-tree-sessionRowActive" : ""),
-            role: "treeitem",
-            "data-session-id": chat.id,
-            style: {
-              paddingLeft: padLeft + "px",
-              height: "28px",
-              opacity: 0.75,
-              cursor: "pointer",
-              position: "relative",
-            },
-            onClick: function () {
-              handleOpenChat(chat.id, chat.title);
-            },
-            onContextMenu: function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              setEllipsisOpen({
-                id: "archived-chat::" + chat.id,
-                pos: { x: e.clientX, y: e.clientY },
-              });
-            },
-          },
-          h(
-            "span",
-            {
-              className: "dsh-tree-slot dsh-tree-icon",
-              style: { color: "var(--dsw-alias-label-tertiary)" },
-            },
-            h(ChatGlyph, { size: 14 }),
-          ),
-          h(
-            "span",
-            {
-              className: "dsh-tree-title",
-              title: chat.title || "Archived Chat",
-            },
-            chat.title || "Untitled Chat",
-          ),
-          h(
-            "span",
-            {
-              style: {
-                fontSize: "10px",
-                color: "var(--dsw-alias-label-tertiary)",
-                marginLeft: "auto",
-                marginRight: "4px",
-                flexShrink: 0,
-              },
-            },
-            formatTimeAgo(chat.updatedAt),
-          ),
-          h(
-            "span",
-            { className: "dsh-tree-actions" },
-            h(
-              "button",
-              {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "Restore / Unarchive",
-                onClick: function (e) {
-                  e.stopPropagation();
-                  unarchiveSession(chat.id);
-                },
-              },
-              h(RestoreGlyph, { size: 13 }),
-            ),
-            h(
-              "button",
-              {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "Archived Actions (…)",
-                onClick: function (e) {
-                  e.stopPropagation();
-                  setEllipsisOpen(isMenuOpen ? null : { id: "archived-chat::" + chat.id });
-                },
-              },
-              h(EllipsisGlyph, { size: 13 }),
-            ),
-            h(SelectDropdownMenu, {
-              open: isMenuOpen,
-              position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
-              onClose: function () {
-                setEllipsisOpen(null);
-              },
-              items: [
-                { id: "restore", label: "Restore to Active", icon: h(RestoreGlyph, { size: 13 }) },
-                { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
-                {
-                  id: "delete",
-                  label: "Delete Permanently",
-                  icon: h(TrashGlyph, { size: 13 }),
-                  danger: true,
-                },
-              ],
-              onSelect: function (actionId) {
-                if (actionId === "restore") {
-                  unarchiveSession(chat.id);
-                } else if (actionId === "rename") {
-                  var newTitle = prompt("Rename chat:", chat.title || "");
-                  if (newTitle && renameSession) renameSession(chat.id, newTitle);
-                } else if (actionId === "delete") {
-                  if (confirm("Permanently delete this archived session?")) {
-                    deletePermanentSession(chat.id);
-                  }
-                }
-              },
-            }),
-          ),
-        );
-      };
-
-      var       /** renderDirEntries implementation. */
-renderDirEntries = function (dirPath, depth) {
-        var entries = dirCache[dirPath];
-        var itemLeftPad = 8 + depth * 16;
-
-        if (loadingPaths[dirPath]) {
-          return h(
-            "div",
-            {
-              key: "loading-" + dirPath,
-              style: {
-                padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
-                fontSize: "11px",
-                color: "var(--dsw-alias-label-tertiary)",
-              },
-            },
-            "Loading…",
           );
-        }
-        if (!entries || entries.length === 0) {
-          return h(
-            "div",
-            {
-              key: "empty-" + dirPath,
-              style: {
-                padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
-                fontSize: "11px",
-                color: "var(--dsw-alias-label-tertiary)",
+        };
+
+      var /** renderDirEntries implementation. */
+        renderDirEntries = function (dirPath, depth) {
+          var entries = dirCache[dirPath];
+          var itemLeftPad = 8 + depth * 16;
+
+          if (loadingPaths[dirPath]) {
+            return h(
+              "div",
+              {
+                key: "loading-" + dirPath,
+                style: {
+                  padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
+                  fontSize: "11px",
+                  color: "var(--dsw-alias-label-tertiary)",
+                },
               },
-            },
-            "(empty)",
-          );
-        }
-
-        var visibleEntries = entries.filter(function (entry) {
-          if (!searchQuery || !searchQuery.trim()) return true;
-          var q = searchQuery.trim().toLowerCase();
-          return (entry.name || "").toLowerCase().indexOf(q) !== -1;
-        });
-
-        if (visibleEntries.length === 0 && searchQuery && searchQuery.trim()) {
-          return null;
-        }
-
-        return visibleEntries.map(function (entry) {
-          var isDir = Boolean(entry.isDirectory);
-          var isExp = Boolean(expandedPaths[entry.path]);
-          var isPlusOpen = plusMenu === entry.path;
-
-          if (isDir) {
-            var chatsInDir = folderSessions[entry.path] || [];
-            var isFolderEllipsisOpen = Boolean(
-              ellipsisOpen && ellipsisOpen.id === "folder::" + entry.path,
+              "Loading…",
             );
-            var isAppBundle = Boolean(
-              entry.name &&
-                (entry.name.endsWith(".app") ||
-                  entry.name.endsWith(".dmg") ||
-                  entry.name.endsWith(".pkg")),
+          }
+          if (!entries || entries.length === 0) {
+            return h(
+              "div",
+              {
+                key: "empty-" + dirPath,
+                style: {
+                  padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
+                  fontSize: "11px",
+                  color: "var(--dsw-alias-label-tertiary)",
+                },
+              },
+              "(empty)",
             );
-            var isApplications = entry.name === "Applications";
-            var isLibrary = entry.name === "Library";
-            var isSystem = entry.name === "System" || entry.name.toLowerCase() === "system";
-            var isUsers = entry.name === "Users" || entry.name.toLowerCase() === "users";
-            var isVendorOrInternal = Boolean(
-              isApplications ||
-                isLibrary ||
-                isSystem ||
-                isUsers ||
-                entry.name === "node_modules" ||
-                entry.name === ".git" ||
-                entry.name === "dist" ||
-                entry.name === "lib" ||
-                entry.name === ".turbo",
-            );
-            var isWorkspace =
-              !isVendorOrInternal &&
-              Boolean(
-                workspaces &&
-                  workspaces.some(function (w) {
-                    var wPath = w.path || w.cwd;
-                    if (!wPath) return false;
-                    if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
-                    var ePath = entry.path;
-                    if (ePath && ePath.length > 1 && ePath.endsWith("/"))
-                      ePath = ePath.slice(0, -1);
-                    return wPath === ePath && ePath !== "/Users/user";
-                  }),
+          }
+
+          var visibleEntries = entries.filter(function (entry) {
+            if (!searchQuery || !searchQuery.trim()) return true;
+            var q = searchQuery.trim().toLowerCase();
+            return (entry.name || "").toLowerCase().indexOf(q) !== -1;
+          });
+
+          if (visibleEntries.length === 0 && searchQuery && searchQuery.trim()) {
+            return null;
+          }
+
+          return visibleEntries.map(function (entry) {
+            var isDir = Boolean(entry.isDirectory);
+            var isExp = Boolean(expandedPaths[entry.path]);
+            var isPlusOpen = plusMenu === entry.path;
+
+            if (isDir) {
+              var chatsInDir = folderSessions[entry.path] || [];
+              var isFolderEllipsisOpen = Boolean(
+                ellipsisOpen && ellipsisOpen.id === "folder::" + entry.path,
               );
-            var isRepo =
-              !isVendorOrInternal &&
-              Boolean(entry.isRepo || entry.name === "dsh-stack" || isWorkspace);
+              var isAppBundle = Boolean(
+                entry.name &&
+                  (entry.name.endsWith(".app") ||
+                    entry.name.endsWith(".dmg") ||
+                    entry.name.endsWith(".pkg")),
+              );
+              var isApplications = entry.name === "Applications";
+              var isLibrary = entry.name === "Library";
+              var isSystem = entry.name === "System" || entry.name.toLowerCase() === "system";
+              var isUsers = entry.name === "Users" || entry.name.toLowerCase() === "users";
+              var isVendorOrInternal = Boolean(
+                isApplications ||
+                  isLibrary ||
+                  isSystem ||
+                  isUsers ||
+                  entry.name === "node_modules" ||
+                  entry.name === ".git" ||
+                  entry.name === "dist" ||
+                  entry.name === "lib" ||
+                  entry.name === ".turbo",
+              );
+              var isWorkspace =
+                !isVendorOrInternal &&
+                Boolean(
+                  workspaces &&
+                    workspaces.some(function (w) {
+                      var wPath = w.path || w.cwd;
+                      if (!wPath) return false;
+                      if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
+                      var ePath = entry.path;
+                      if (ePath && ePath.length > 1 && ePath.endsWith("/"))
+                        ePath = ePath.slice(0, -1);
+                      return wPath === ePath && ePath !== "/Users/user";
+                    }),
+                );
+              var isRepo =
+                !isVendorOrInternal &&
+                Boolean(entry.isRepo || entry.name === "dsh-stack" || isWorkspace);
 
+              return h(
+                "div",
+                {
+                  key: entry.path,
+                  style: { display: "flex", flexDirection: "column", width: "100%" },
+                },
+                h(
+                  "div",
+                  {
+                    className: "dsh-tree-projectRow",
+                    role: "treeitem",
+                    style: {
+                      position: "relative",
+                      paddingLeft: itemLeftPad + "px",
+                      height: "28px",
+                    },
+                    "aria-expanded": isExp,
+                    onClick: function () {
+                      toggleExpand(entry.path);
+                    },
+                    onDoubleClick: isRepo
+                      ? function (e) {
+                          e.stopPropagation();
+                          window.dispatchEvent(
+                            new CustomEvent("dsh:open-repo-tab", {
+                              detail: {
+                                id: "repo::" + entry.path,
+                                type: "repo",
+                                title: entry.name,
+                                path: entry.path,
+                              },
+                            }),
+                          );
+                        }
+                      : undefined,
+                    onContextMenu: function (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setEllipsisOpen({
+                        id: "folder::" + entry.path,
+                        pos: { x: e.clientX, y: e.clientY },
+                      });
+                    },
+                  },
+                  h(
+                    "span",
+                    { className: "dsh-tree-slot dsh-tree-icon" },
+                    isAppBundle
+                      ? renderAppIcon(entry.name, 16, entry.path)
+                      : isApplications
+                        ? h(AppGlyph, { size: 15 })
+                        : isLibrary
+                          ? h(LibraryGlyph, { size: 15 })
+                          : isSystem
+                            ? h(SystemGlyph, { size: 15 })
+                            : isUsers
+                              ? h(UsersGlyph, { size: 15 })
+                              : isRepo
+                                ? h(RepoGlyph, { size: 15 })
+                                : isWorkspace
+                                  ? h(WorkspaceGlyph, { size: 15 })
+                                  : isExp
+                                    ? h(FolderOpenGlyph, { size: 15 })
+                                    : h(FolderOpenGlyph, { size: 15 }),
+                  ),
+                  h(
+                    "span",
+                    { className: "dsh-tree-slot dsh-tree-chevron" },
+                    h(TriangleRightFill14, {
+                      className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""),
+                      size: 11,
+                    }),
+                  ),
+                  h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
+                  chatsInDir.length > 0
+                    ? h(
+                        "span",
+                        {
+                          style: {
+                            padding: "1px 5px",
+                            borderRadius: "8px",
+                            fontSize: "9.5px",
+                            background: "rgba(99, 102, 241, 0.15)",
+                            color: "var(--dsw-alias-primary, #6366f1)",
+                            fontWeight: 700,
+                            marginLeft: "4px",
+                          },
+                        },
+                        chatsInDir.length,
+                      )
+                    : null,
+                  h(
+                    "span",
+                    { className: "dsh-tree-actions" },
+                    renderUnifiedPlusButton(entry.path, "folder-plus::" + entry.path),
+                  ),
+                ),
+                isExp
+                  ? h(
+                      "div",
+                      { style: { display: "flex", flexDirection: "column", width: "100%" } },
+                      // Render chat sessions under this folder (aligned at depth + 1)
+                      chatsInDir.map(function (c) {
+                        return renderChatRow(c, 8 + (depth + 1) * 16);
+                      }),
+                      // Render subdirectories and files (aligned at depth + 1)
+                      renderDirEntries(entry.path, depth + 1),
+                    )
+                  : null,
+              );
+            }
+
+            // File Row (aligned at itemLeftPad)
+            var isAppFile =
+              entry.name.endsWith(".app") ||
+              entry.name.endsWith(".exe") ||
+              entry.name.endsWith(".dmg") ||
+              entry.name.endsWith(".pkg");
             return h(
               "div",
               {
                 key: entry.path,
-                style: { display: "flex", flexDirection: "column", width: "100%" },
+                className: "dsh-tree-sessionRow",
+                role: "treeitem",
+                style: { paddingLeft: itemLeftPad + "px", height: "28px" },
+                onClick: function () {
+                  window.dispatchEvent(
+                    new CustomEvent("dsh:open-file-tab", {
+                      detail: {
+                        id: "file::" + entry.path,
+                        type: "file",
+                        title: entry.name,
+                        path: entry.path,
+                      },
+                    }),
+                  );
+                },
               },
               h(
-                "div",
+                "span",
                 {
-                  className: "dsh-tree-projectRow",
-                  role: "treeitem",
-                  style: { position: "relative", paddingLeft: itemLeftPad + "px", height: "28px" },
-                  "aria-expanded": isExp,
-                  onClick: function () {
-                    toggleExpand(entry.path);
-                  },
-                  onDoubleClick: isRepo
-                    ? function (e) {
-                        e.stopPropagation();
-                        window.dispatchEvent(
-                          new CustomEvent("dsh:open-repo-tab", {
-                            detail: {
-                              id: "repo::" + entry.path,
-                              type: "repo",
-                              title: entry.name,
-                              path: entry.path,
-                            },
-                          }),
-                        );
-                      }
-                    : undefined,
-                  onContextMenu: function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setEllipsisOpen({
-                      id: "folder::" + entry.path,
-                      pos: { x: e.clientX, y: e.clientY },
-                    });
+                  className: "dsh-tree-slot",
+                  style: {
+                    width: "16px",
+                    color: isAppFile
+                      ? "var(--dsw-alias-primary)"
+                      : "var(--dsw-alias-label-tertiary)",
                   },
                 },
-                h(
-                  "span",
-                  { className: "dsh-tree-slot dsh-tree-icon" },
-                  isAppBundle
-                    ? renderAppIcon(entry.name, 16, entry.path)
-                    : isApplications
-                      ? h(AppGlyph, { size: 15 })
-                      : isLibrary
-                        ? h(LibraryGlyph, { size: 15 })
-                        : isSystem
-                          ? h(SystemGlyph, { size: 15 })
-                          : isUsers
-                            ? h(UsersGlyph, { size: 15 })
-                            : isRepo
-                              ? h(RepoGlyph, { size: 15 })
-                              : isWorkspace
-                                ? h(WorkspaceGlyph, { size: 15 })
-                                : isExp
-                                  ? h(FolderOpenGlyph, { size: 15 })
-                                  : h(FolderOpenGlyph, { size: 15 }),
-                ),
-                h(
-                  "span",
-                  { className: "dsh-tree-slot dsh-tree-chevron" },
-                  h(TriangleRightFill14, {
-                    className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""),
-                    size: 11,
-                  }),
-                ),
-                h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
-                chatsInDir.length > 0
-                  ? h(
-                      "span",
-                      {
-                        style: {
-                          padding: "1px 5px",
-                          borderRadius: "8px",
-                          fontSize: "9.5px",
-                          background: "rgba(99, 102, 241, 0.15)",
-                          color: "var(--dsw-alias-primary, #6366f1)",
-                          fontWeight: 700,
-                          marginLeft: "4px",
-                        },
-                      },
-                      chatsInDir.length,
-                    )
-                  : null,
-                h(
-                  "span",
-                  { className: "dsh-tree-actions" },
-                  renderUnifiedPlusButton(entry.path, "folder-plus::" + entry.path),
-                ),
+                isAppFile ? renderAppIcon(entry.name, 15, entry.path) : h(FileGlyph, { size: 13 }),
               ),
-              isExp
-                ? h(
-                    "div",
-                    { style: { display: "flex", flexDirection: "column", width: "100%" } },
-                    // Render chat sessions under this folder (aligned at depth + 1)
-                    chatsInDir.map(function (c) {
-                      return renderChatRow(c, 8 + (depth + 1) * 16);
-                    }),
-                    // Render subdirectories and files (aligned at depth + 1)
-                    renderDirEntries(entry.path, depth + 1),
-                  )
-                : null,
-            );
-          }
-
-          // File Row (aligned at itemLeftPad)
-          var isAppFile =
-            entry.name.endsWith(".app") ||
-            entry.name.endsWith(".exe") ||
-            entry.name.endsWith(".dmg") ||
-            entry.name.endsWith(".pkg");
-          return h(
-            "div",
-            {
-              key: entry.path,
-              className: "dsh-tree-sessionRow",
-              role: "treeitem",
-              style: { paddingLeft: itemLeftPad + "px", height: "28px" },
-              onClick: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-file-tab", {
-                    detail: {
-                      id: "file::" + entry.path,
-                      type: "file",
-                      title: entry.name,
-                      path: entry.path,
-                    },
-                  }),
-                );
-              },
-            },
-            h(
-              "span",
-              {
-                className: "dsh-tree-slot",
-                style: {
-                  width: "16px",
-                  color: isAppFile ? "var(--dsw-alias-primary)" : "var(--dsw-alias-label-tertiary)",
+              h(
+                "span",
+                {
+                  className: "dsh-tree-sessionTitle",
+                  style: { fontSize: "12px", marginLeft: "4px" },
+                  title: entry.path,
                 },
-              },
-              isAppFile ? renderAppIcon(entry.name, 15, entry.path) : h(FileGlyph, { size: 13 }),
-            ),
-            h(
-              "span",
-              {
-                className: "dsh-tree-sessionTitle",
-                style: { fontSize: "12px", marginLeft: "4px" },
-                title: entry.path,
-              },
-              entry.name,
-            ),
-          );
-        });
-      };
+                entry.name,
+              ),
+            );
+          });
+        };
 
-      var       /** filterBySearch implementation. */
-filterBySearch = function (chat) {
-        if (!searchQuery || !searchQuery.trim()) return true;
-        var q = searchQuery.trim().toLowerCase();
-        return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
-      };
+      var /** filterBySearch implementation. */
+        filterBySearch = function (chat) {
+          if (!searchQuery || !searchQuery.trim()) return true;
+          var q = searchQuery.trim().toLowerCase();
+          return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
+        };
 
       var filteredPinnedSessions = pinnedSessions.filter(filterBySearch);
       var filteredActiveChatSessions = activeChatSessions.filter(filterBySearch);
@@ -15954,8 +15983,8 @@ filterBySearch = function (chat) {
       );
     }
 
-        /** GlobalTerminalAndContainerManager implementation. */
-function GlobalTerminalAndContainerManager() {
+    /** GlobalTerminalAndContainerManager implementation. */
+    function GlobalTerminalAndContainerManager() {
       var isBottomOpenState = React.useState(false);
       var isBottomOpen = isBottomOpenState[0],
         setBottomOpen = isBottomOpenState[1];
@@ -15964,32 +15993,32 @@ function GlobalTerminalAndContainerManager() {
         setPanel = panelState[1];
 
       React.useEffect(function () {
-        var         /** onToggleBottom implementation. */
-onToggleBottom = function () {
-          setBottomOpen(function (v) {
-            return !v;
-          });
-        };
-        var         /** onMoveToBottom implementation. */
-onMoveToBottom = function (e) {
-          var tab = e.detail;
-          if (tab) {
-            setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
+        var /** onToggleBottom implementation. */
+          onToggleBottom = function () {
+            setBottomOpen(function (v) {
+              return !v;
+            });
+          };
+        var /** onMoveToBottom implementation. */
+          onMoveToBottom = function (e) {
+            var tab = e.detail;
+            if (tab) {
+              setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
+              setBottomOpen(true);
+            }
+          };
+        var /** onOpenTerm implementation. */
+          onOpenTerm = function (e) {
+            var sess = (e && e.detail && e.detail.session) || "0";
+            setPanel({ type: "terminal", session: sess, id: sess });
             setBottomOpen(true);
-          }
-        };
-        var         /** onOpenTerm implementation. */
-onOpenTerm = function (e) {
-          var sess = (e && e.detail && e.detail.session) || "0";
-          setPanel({ type: "terminal", session: sess, id: sess });
-          setBottomOpen(true);
-        };
-        var         /** onOpenCont implementation. */
-onOpenCont = function (e) {
-          var id = (e && e.detail && e.detail.id) || null;
-          setPanel({ type: "container", session: null, id: id });
-          setBottomOpen(true);
-        };
+          };
+        var /** onOpenCont implementation. */
+          onOpenCont = function (e) {
+            var id = (e && e.detail && e.detail.id) || null;
+            setPanel({ type: "container", session: null, id: id });
+            setBottomOpen(true);
+          };
 
         window.addEventListener("dsh:toggle-bottom-panel", onToggleBottom);
         window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
@@ -15997,48 +16026,48 @@ onOpenCont = function (e) {
         window.addEventListener("dsh:open-container", onOpenCont);
 
         // Global Keyboard Shortcuts
-        var         /** onGlobalKeyDown implementation. */
-onGlobalKeyDown = function (e) {
-          var isMac =
-            typeof navigator !== "undefined" &&
-            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
-          var cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
-          var altOrOpt = e.altKey;
+        var /** onGlobalKeyDown implementation. */
+          onGlobalKeyDown = function (e) {
+            var isMac =
+              typeof navigator !== "undefined" &&
+              /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
+            var cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+            var altOrOpt = e.altKey;
 
-          // 1. Cmd+J / Ctrl+J -> Toggle Bottom Panel
-          if (
-            cmdOrCtrl &&
-            !altOrOpt &&
-            !e.shiftKey &&
-            (e.key === "j" || e.key === "J" || e.code === "KeyJ")
-          ) {
-            e.preventDefault();
-            e.stopPropagation();
-            onToggleBottom();
-            return;
-          }
+            // 1. Cmd+J / Ctrl+J -> Toggle Bottom Panel
+            if (
+              cmdOrCtrl &&
+              !altOrOpt &&
+              !e.shiftKey &&
+              (e.key === "j" || e.key === "J" || e.code === "KeyJ")
+            ) {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleBottom();
+              return;
+            }
 
-          // 2. Cmd+Opt+B / Ctrl+Alt+B -> Toggle Secondary Sidebar
-          if (
-            cmdOrCtrl &&
-            altOrOpt &&
-            !e.shiftKey &&
-            (e.key === "b" || e.key === "B" || e.code === "KeyB")
-          ) {
-            e.preventDefault();
-            e.stopPropagation();
-            window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
-            return;
-          }
+            // 2. Cmd+Opt+B / Ctrl+Alt+B -> Toggle Secondary Sidebar
+            if (
+              cmdOrCtrl &&
+              altOrOpt &&
+              !e.shiftKey &&
+              (e.key === "b" || e.key === "B" || e.code === "KeyB")
+            ) {
+              e.preventDefault();
+              e.stopPropagation();
+              window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
+              return;
+            }
 
-          // 3. Cmd+Shift+P / Ctrl+Shift+P -> Trigger Sidebar Search
-          if (cmdOrCtrl && e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
-            e.preventDefault();
-            e.stopPropagation();
-            window.dispatchEvent(new CustomEvent("dsh:trigger-sidebar-search"));
-            return;
-          }
-        };
+            // 3. Cmd+Shift+P / Ctrl+Shift+P -> Trigger Sidebar Search
+            if (cmdOrCtrl && e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
+              e.preventDefault();
+              e.stopPropagation();
+              window.dispatchEvent(new CustomEvent("dsh:trigger-sidebar-search"));
+              return;
+            }
+          };
 
         window.addEventListener("keydown", onGlobalKeyDown, { capture: true });
 
@@ -16073,46 +16102,46 @@ onGlobalKeyDown = function (e) {
       window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
     }
 
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       if (typeof window !== "undefined") {
         window.__dsh_ctx__ = ctx;
         window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
       }
       ensureModelPickerDecoration();
       // Injected helper methods for dynamic workspaces and sessions
-      var       /** browserInjected implementation. */
-browserInjected = function () {
-        return {
-          startSession: function (workspaceId) {
-            ctx.workspaces && ctx.workspaces.startSession(workspaceId);
-          },
-          open: function (sessionId) {
-            ctx.sessions && ctx.sessions.open(sessionId);
-          },
-          createWorkspace: function (input) {
-            return ctx.workspaces && ctx.workspaces.create
-              ? ctx.workspaces.create(input)
-              : Promise.resolve();
-          },
-          renameSession: function (sessionId, title) {
-            var session = ctx.sessions && ctx.sessions.binding(sessionId)?.session;
-            return session ? session.rename(title) : Promise.resolve();
-          },
-          archiveSession: function (sessionId) {
-            return ctx.workspaces ? ctx.workspaces.archiveSession(sessionId) : Promise.resolve();
-          },
-          forkSession: function (sessionId) {
-            if (ctx.sessions && ctx.sessions.fork) {
-              ctx.sessions
-                .fork({ sessionId: sessionId, increaseTitle: true })
-                .then(function (childId) {
-                  ctx.sessions.open(childId);
-                });
-            }
-          },
+      var /** browserInjected implementation. */
+        browserInjected = function () {
+          return {
+            startSession: function (workspaceId) {
+              ctx.workspaces && ctx.workspaces.startSession(workspaceId);
+            },
+            open: function (sessionId) {
+              ctx.sessions && ctx.sessions.open(sessionId);
+            },
+            createWorkspace: function (input) {
+              return ctx.workspaces && ctx.workspaces.create
+                ? ctx.workspaces.create(input)
+                : Promise.resolve();
+            },
+            renameSession: function (sessionId, title) {
+              var session = ctx.sessions && ctx.sessions.binding(sessionId)?.session;
+              return session ? session.rename(title) : Promise.resolve();
+            },
+            archiveSession: function (sessionId) {
+              return ctx.workspaces ? ctx.workspaces.archiveSession(sessionId) : Promise.resolve();
+            },
+            forkSession: function (sessionId) {
+              if (ctx.sessions && ctx.sessions.fork) {
+                ctx.sessions
+                  .fork({ sessionId: sessionId, increaseTitle: true })
+                  .then(function (childId) {
+                    ctx.sessions.open(childId);
+                  });
+              }
+            },
+          };
         };
-      };
 
       // 0. Dynamic Filesystem & Workspaces Browser
       ctx.slots.inject(

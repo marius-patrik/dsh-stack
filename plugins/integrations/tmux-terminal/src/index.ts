@@ -18,13 +18,13 @@ export interface TmuxSession {
 export class TmuxService {
   private sessions = new Map<string, TmuxSession>();
 
-    /** Constructs an instance. */
-constructor(private ctx: Context) {
+  /** Constructs an instance. */
+  constructor(private ctx: Context) {
     this.registerTmuxTools();
   }
 
-    /** createSession implementation. */
-createSession(name: string, command: string = "zsh", cwd: string = process.cwd()): TmuxSession {
+  /** createSession implementation. */
+  createSession(name: string, command: string = "zsh", cwd: string = process.cwd()): TmuxSession {
     const id = "tmux-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
     const session: TmuxSession = {
       id,
@@ -42,8 +42,8 @@ createSession(name: string, command: string = "zsh", cwd: string = process.cwd()
     return session;
   }
 
-    /** sendInput implementation. */
-sendInput(id: string, input: string): boolean {
+  /** sendInput implementation. */
+  sendInput(id: string, input: string): boolean {
     const s = this.sessions.get(id);
     if (!s || !s.running) return false;
     s.history.push(input);
@@ -53,20 +53,20 @@ sendInput(id: string, input: string): boolean {
     return true;
   }
 
-    /** captureOutput implementation. */
-captureOutput(id: string, linesCount: number = 50): string {
+  /** captureOutput implementation. */
+  captureOutput(id: string, linesCount: number = 50): string {
     const s = this.sessions.get(id);
     if (!s) return "";
     return s.history.slice(-linesCount).join("\n");
   }
 
-    /** listSessions implementation. */
-listSessions(): TmuxSession[] {
+  /** listSessions implementation. */
+  listSessions(): TmuxSession[] {
     return Array.from(this.sessions.values());
   }
 
-    /** killSession implementation. */
-killSession(id: string): boolean {
+  /** killSession implementation. */
+  killSession(id: string): boolean {
     const s = this.sessions.get(id);
     if (!s) return false;
     s.running = false;
@@ -77,8 +77,8 @@ killSession(id: string): boolean {
     return true;
   }
 
-    /** registerTmuxTools implementation. */
-private registerTmuxTools(): void {
+  /** registerTmuxTools implementation. */
+  private registerTmuxTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 

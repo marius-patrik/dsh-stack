@@ -11,8 +11,7 @@ import { translateOpenAi } from "./lib/translate-openai.js";
 import { translateClaude } from "./lib/translate-claude.js";
 import { translateGemini } from "./lib/translate-gemini.js";
 
-const /** id implementation. */
-id = () => crypto.randomUUID();
+const /** id implementation. */ id = () => crypto.randomUUID();
 
 /** userMessage implementation. */
 function userMessage(text) {
@@ -36,9 +35,9 @@ async function collect(gen) {
 }
 
 const /** ok implementation. */
-ok = (name) => {
-  console.log("ok -", name);
-};
+  ok = (name) => {
+    console.log("ok -", name);
+  };
 
 // ---- openai: serialize shape ----
 const req = openaiDialect.serialize(
@@ -270,8 +269,8 @@ assert.equal(creq.framing, "sse");
     { markdown: "king", usageMetadata: { candidatesTokenCount: "2", totalTokenCount: "10" } },
   ]);
   const stream = new ReadableStream({
-        /** start implementation. */
-start(c) {
+    /** start implementation. */
+    start(c) {
       c.enqueue(new TextEncoder().encode(wire));
       c.close();
     },
@@ -291,8 +290,8 @@ start(c) {
 
   // An empty answer is an error finish, not a silent success.
   const empty = new ReadableStream({
-        /** start implementation. */
-start(c) {
+    /** start implementation. */
+    start(c) {
       c.enqueue(new TextEncoder().encode("[]"));
       c.close();
     },

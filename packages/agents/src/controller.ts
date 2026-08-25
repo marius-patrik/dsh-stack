@@ -66,8 +66,8 @@ export class PersonaController {
   /** Latest selection per session awaiting the next accepted in-turn pre-step. */
   private readonly pendingIntents = new WeakMap<object, string>();
 
-    /** Constructs an instance. */
-constructor(private readonly options: PersonaControllerOptions) {}
+  /** Constructs an instance. */
+  constructor(private readonly options: PersonaControllerOptions) {}
 
   /** The committed persona plus any queued selection for the agent's session. */
   get(agent: HostAgent): PersonaState {

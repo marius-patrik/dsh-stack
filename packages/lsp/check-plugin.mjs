@@ -49,8 +49,8 @@ const ctx = new Context();
 const sections = new Map([[NS, { servers: {} }]]);
 ctx.provide("settings", {
   get: (ns) => sections.get(ns),
-    /** register implementation. */
-register(_ns, _schema, opts) {
+  /** register implementation. */
+  register(_ns, _schema, opts) {
     sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };
   },
@@ -82,8 +82,8 @@ const sections2 = new Map([
 ]);
 ctx2.provide("settings", {
   get: (ns) => sections2.get(ns),
-    /** register implementation. */
-register(_ns, _schema, opts) {
+  /** register implementation. */
+  register(_ns, _schema, opts) {
     if (!sections2.has(_ns)) sections2.set(_ns, opts.base);
     return { get: (ns) => sections2.get(ns), watch: () => undefined };
   },

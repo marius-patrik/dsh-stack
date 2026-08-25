@@ -250,8 +250,8 @@ export class OAuthTokenRefresher {
   readonly #inflight = new Map<string, Promise<(ProviderCredential & { kind: "oauth" }) | null>>();
   readonly #state = new Map<string, RefreshState>();
 
-    /** Constructs an instance. */
-constructor(options: OAuthTokenRefreshOptions) {
+  /** Constructs an instance. */
+  constructor(options: OAuthTokenRefreshOptions) {
     this.#store = options.store;
     this.#transport = options.transport ?? oauthTransport;
     this.#now = options.now ?? (() => Date.now());
@@ -264,13 +264,13 @@ constructor(options: OAuthTokenRefreshOptions) {
     this.#maxAttempts = options.maxAttempts ?? 5;
   }
 
-    /** state implementation. */
-state(providerId: string): RefreshState {
+  /** state implementation. */
+  state(providerId: string): RefreshState {
     return this.#state.get(providerId) ?? "ready";
   }
 
-    /** ensureFreshCredential implementation. */
-async ensureFreshCredential(
+  /** ensureFreshCredential implementation. */
+  async ensureFreshCredential(
     providerId: string,
     auth: OAuthAuthConfig,
   ): Promise<(ProviderCredential & { kind: "oauth" }) | null> {
@@ -281,8 +281,8 @@ async ensureFreshCredential(
     return this.#singleFlightRefresh(providerId, auth, credential);
   }
 
-    /** #singleFlightRefresh implementation. */
-async #singleFlightRefresh(
+  /** #singleFlightRefresh implementation. */
+  async #singleFlightRefresh(
     providerId: string,
     auth: OAuthAuthConfig,
     credential: ProviderCredential & { kind: "oauth" },
@@ -296,8 +296,8 @@ async #singleFlightRefresh(
     return refresh;
   }
 
-    /** #refresh implementation. */
-async #refresh(
+  /** #refresh implementation. */
+  async #refresh(
     providerId: string,
     auth: OAuthAuthConfig,
     credential: ProviderCredential & { kind: "oauth" },

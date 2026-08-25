@@ -707,8 +707,8 @@ window.__ModuleLoader__.load({
     var h = React.createElement;
     var Fragment = React.Fragment;
 
-        /** KeychainNavIcon implementation. */
-function KeychainNavIcon(props) {
+    /** KeychainNavIcon implementation. */
+    function KeychainNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -730,8 +730,8 @@ function KeychainNavIcon(props) {
       );
     }
 
-        /** ProvidersNavIcon implementation. */
-function ProvidersNavIcon(props) {
+    /** ProvidersNavIcon implementation. */
+    function ProvidersNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -757,8 +757,8 @@ function ProvidersNavIcon(props) {
       );
     }
 
-        /** GeneralNavIcon implementation. */
-function GeneralNavIcon(props) {
+    /** GeneralNavIcon implementation. */
+    function GeneralNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -787,8 +787,8 @@ function GeneralNavIcon(props) {
       );
     }
 
-        /** TerminalsNavIcon implementation. */
-function TerminalsNavIcon(props) {
+    /** TerminalsNavIcon implementation. */
+    function TerminalsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -810,8 +810,8 @@ function TerminalsNavIcon(props) {
       );
     }
 
-        /** ContainersNavIcon implementation. */
-function ContainersNavIcon(props) {
+    /** ContainersNavIcon implementation. */
+    function ContainersNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -849,8 +849,8 @@ function ContainersNavIcon(props) {
       );
     }
 
-        /** PlugNavIcon implementation. */
-function PlugNavIcon(props) {
+    /** PlugNavIcon implementation. */
+    function PlugNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -874,8 +874,8 @@ function PlugNavIcon(props) {
       );
     }
 
-        /** ToolsNavIcon implementation. */
-function ToolsNavIcon(props) {
+    /** ToolsNavIcon implementation. */
+    function ToolsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -898,8 +898,8 @@ function ToolsNavIcon(props) {
       );
     }
 
-        /** LoopsNavIcon implementation. */
-function LoopsNavIcon(props) {
+    /** LoopsNavIcon implementation. */
+    function LoopsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -925,8 +925,8 @@ function LoopsNavIcon(props) {
       );
     }
 
-        /** TriangleRightFill14 implementation. */
-function TriangleRightFill14(props) {
+    /** TriangleRightFill14 implementation. */
+    function TriangleRightFill14(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       var style = props && props.style ? props.style : undefined;
@@ -949,8 +949,8 @@ function TriangleRightFill14(props) {
       );
     }
 
-        /** RobotHeadNavIcon implementation. */
-function RobotHeadNavIcon(props) {
+    /** RobotHeadNavIcon implementation. */
+    function RobotHeadNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -976,8 +976,8 @@ function RobotHeadNavIcon(props) {
       );
     }
 
-        /** KeyboardNavIcon implementation. */
-function KeyboardNavIcon(props) {
+    /** KeyboardNavIcon implementation. */
+    function KeyboardNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1006,8 +1006,8 @@ function KeyboardNavIcon(props) {
       );
     }
 
-        /** DataGlyph implementation. */
-function DataGlyph(props) {
+    /** DataGlyph implementation. */
+    function DataGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1030,8 +1030,8 @@ function DataGlyph(props) {
       );
     }
 
-        /** SettingsIcon implementation. */
-function SettingsIcon(props) {
+    /** SettingsIcon implementation. */
+    function SettingsIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1057,8 +1057,8 @@ function SettingsIcon(props) {
       );
     }
 
-        /** SidebarCollapseIcon implementation. */
-function SidebarCollapseIcon(props) {
+    /** SidebarCollapseIcon implementation. */
+    function SidebarCollapseIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1080,8 +1080,8 @@ function SidebarCollapseIcon(props) {
       );
     }
 
-        /** CloseIcon implementation. */
-function CloseIcon(props) {
+    /** CloseIcon implementation. */
+    function CloseIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1103,8 +1103,8 @@ function CloseIcon(props) {
       );
     }
 
-        /** CommandsIcon implementation. */
-function CommandsIcon(props) {
+    /** CommandsIcon implementation. */
+    function CommandsIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1127,8 +1127,8 @@ function CommandsIcon(props) {
       );
     }
 
-        /** PaletteIcon implementation. */
-function PaletteIcon(props) {
+    /** PaletteIcon implementation. */
+    function PaletteIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1155,8 +1155,8 @@ function PaletteIcon(props) {
       );
     }
 
-        /** AgentPresetIcon implementation. */
-function AgentPresetIcon(props) {
+    /** AgentPresetIcon implementation. */
+    function AgentPresetIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1182,8 +1182,8 @@ function AgentPresetIcon(props) {
       );
     }
 
-        /** EllipsisIcon implementation. */
-function EllipsisIcon(props) {
+    /** EllipsisIcon implementation. */
+    function EllipsisIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1206,8 +1206,8 @@ function EllipsisIcon(props) {
       );
     }
 
-        /** DownloadIcon implementation. */
-function DownloadIcon(props) {
+    /** DownloadIcon implementation. */
+    function DownloadIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1230,8 +1230,8 @@ function DownloadIcon(props) {
       );
     }
 
-        /** BranchIcon implementation. */
-function BranchIcon(props) {
+    /** BranchIcon implementation. */
+    function BranchIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1255,8 +1255,8 @@ function BranchIcon(props) {
       );
     }
 
-        /** navIcon implementation. */
-function navIcon(id) {
+    /** navIcon implementation. */
+    function navIcon(id) {
       if (id === "general") return h(GeneralNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "integrations" || id === "providers")
         return h(ProvidersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
@@ -1287,8 +1287,8 @@ function navIcon(id) {
 
     // Glyph seat: a registrant's glyph wins; an id with no glyph falls back to
     // the static map so every nav cell keeps a mark.
-        /** navGlyph implementation. */
-function navGlyph(renderSlot, row) {
+    /** navGlyph implementation. */
+    function navGlyph(renderSlot, row) {
       try {
         if (typeof renderSlot === "function") {
           var content = renderSlot("settings.section.icon", {}, { only: row.id });
@@ -1298,8 +1298,8 @@ function navGlyph(renderSlot, row) {
       return navIcon(row.id);
     }
 
-        /** NotepadPencilGlyph implementation. */
-function NotepadPencilGlyph(props) {
+    /** NotepadPencilGlyph implementation. */
+    function NotepadPencilGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1324,8 +1324,8 @@ function NotepadPencilGlyph(props) {
       );
     }
 
-        /** ChatGlyph implementation. */
-function ChatGlyph(props) {
+    /** ChatGlyph implementation. */
+    function ChatGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1345,8 +1345,8 @@ function ChatGlyph(props) {
       );
     }
 
-        /** TerminalsGlyph implementation. */
-function TerminalsGlyph(props) {
+    /** TerminalsGlyph implementation. */
+    function TerminalsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1367,8 +1367,8 @@ function TerminalsGlyph(props) {
       );
     }
 
-        /** ContainersGlyph implementation. */
-function ContainersGlyph(props) {
+    /** ContainersGlyph implementation. */
+    function ContainersGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1391,8 +1391,8 @@ function ContainersGlyph(props) {
     }
 
     var SettingsPanelErrorBoundary = (function (_super) {
-            /** SettingsPanelErrorBoundary implementation. */
-function SettingsPanelErrorBoundary(props) {
+      /** SettingsPanelErrorBoundary implementation. */
+      function SettingsPanelErrorBoundary(props) {
         if (_super && typeof _super === "function") {
           try {
             _super.call(this, props);
@@ -1511,8 +1511,8 @@ function SettingsPanelErrorBoundary(props) {
       return SettingsPanelErrorBoundary;
     })(React ? React.Component : undefined);
 
-        /** SelectDropdownMenu implementation. */
-function SelectDropdownMenu(props) {
+    /** SelectDropdownMenu implementation. */
+    function SelectDropdownMenu(props) {
       var open = props.open,
         onClose = props.onClose,
         items = props.items,
@@ -1522,12 +1522,12 @@ function SelectDropdownMenu(props) {
       React.useEffect(
         function () {
           if (!open) return;
-          var           /** handlePointerDown implementation. */
-handlePointerDown = function (e) {
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
-              onClose();
-            }
-          };
+          var /** handlePointerDown implementation. */
+            handlePointerDown = function (e) {
+              if (menuRef.current && !menuRef.current.contains(e.target)) {
+                onClose();
+              }
+            };
           document.addEventListener("pointerdown", handlePointerDown);
           return function () {
             document.removeEventListener("pointerdown", handlePointerDown);
@@ -1607,8 +1607,8 @@ handlePointerDown = function (e) {
       );
     }
 
-        /** NewSessionButton implementation. */
-function NewSessionButton(props) {
+    /** NewSessionButton implementation. */
+    function NewSessionButton(props) {
       var wide = props.wide,
         startSession = props.startSession,
         t = props.t;
@@ -1616,16 +1616,18 @@ function NewSessionButton(props) {
       var menuOpen = menuState[0],
         setMenuOpen = menuState[1];
 
-      var       /** handleSelect implementation. */
-handleSelect = function (id) {
-        if (id === "chat") {
-          startSession();
-        } else if (id === "terminal") {
-          window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }));
-        } else if (id === "container") {
-          window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
-        }
-      };
+      var /** handleSelect implementation. */
+        handleSelect = function (id) {
+          if (id === "chat") {
+            startSession();
+          } else if (id === "terminal") {
+            window.dispatchEvent(
+              new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
+            );
+          } else if (id === "container") {
+            window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+          }
+        };
 
       return h(
         "div",
@@ -1689,8 +1691,8 @@ handleSelect = function (id) {
       );
     }
 
-        /** TweaksSidebarRoot implementation. */
-function TweaksSidebarRoot(props) {
+    /** TweaksSidebarRoot implementation. */
+    function TweaksSidebarRoot(props) {
       var collapsed = props.collapsed,
         width = props.width,
         startSession = props.startSession;
@@ -1753,34 +1755,34 @@ function TweaksSidebarRoot(props) {
       var pointerInside = pointerState[0],
         setPointerInside = pointerState[1];
       var lingerTimer = React.useRef(undefined);
-      var       /** armLinger implementation. */
-armLinger = function () {
-        if (lingerTimer.current !== undefined) return;
-        lingerTimer.current = window.setTimeout(function () {
+      var /** armLinger implementation. */
+        armLinger = function () {
+          if (lingerTimer.current !== undefined) return;
+          lingerTimer.current = window.setTimeout(function () {
+            lingerTimer.current = undefined;
+            setPointerInside(false);
+          }, SCROLLBAR_LINGER_MS);
+        };
+      var /** cancelLinger implementation. */
+        cancelLinger = function () {
+          window.clearTimeout(lingerTimer.current);
           lingerTimer.current = undefined;
-          setPointerInside(false);
-        }, SCROLLBAR_LINGER_MS);
-      };
-      var       /** cancelLinger implementation. */
-cancelLinger = function () {
-        window.clearTimeout(lingerTimer.current);
-        lingerTimer.current = undefined;
-      };
+        };
       React.useEffect(
         function () {
           if (!pointerInside) return;
-          var           /** onMove implementation. */
-onMove = function (event) {
-            var rect = column.current && column.current.getBoundingClientRect();
-            if (rect === undefined) return;
-            var inside =
-              event.clientX >= rect.left &&
-              event.clientX < rect.right &&
-              event.clientY >= rect.top &&
-              event.clientY < rect.bottom;
-            if (inside) cancelLinger();
-            else armLinger();
-          };
+          var /** onMove implementation. */
+            onMove = function (event) {
+              var rect = column.current && column.current.getBoundingClientRect();
+              if (rect === undefined) return;
+              var inside =
+                event.clientX >= rect.left &&
+                event.clientX < rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY < rect.bottom;
+              if (inside) cancelLinger();
+              else armLinger();
+            };
           document.addEventListener("pointermove", onMove);
           return function () {
             document.removeEventListener("pointermove", onMove);
@@ -1792,54 +1794,54 @@ onMove = function (event) {
 
       React.useEffect(
         function () {
-          var           /** onKeyDown implementation. */
-onKeyDown = function (e) {
-            var target = e.target;
-            var isEditable =
-              target &&
-              (target.tagName === "INPUT" ||
-                target.tagName === "TEXTAREA" ||
-                target.isContentEditable);
+          var /** onKeyDown implementation. */
+            onKeyDown = function (e) {
+              var target = e.target;
+              var isEditable =
+                target &&
+                (target.tagName === "INPUT" ||
+                  target.tagName === "TEXTAREA" ||
+                  target.isContentEditable);
 
-            var customKeybind = null;
-            try {
-              var raw = localStorage.getItem("dsh_keybind_toggle_sidebar");
-              if (raw) customKeybind = JSON.parse(raw);
-            } catch (err) {}
+              var customKeybind = null;
+              try {
+                var raw = localStorage.getItem("dsh_keybind_toggle_sidebar");
+                if (raw) customKeybind = JSON.parse(raw);
+              } catch (err) {}
 
-            var matched = false;
-            if (customKeybind) {
-              var ctrlMatch = customKeybind.ctrl
-                ? e.ctrlKey || e.metaKey
-                : !e.ctrlKey && !e.metaKey;
-              var altMatch = customKeybind.alt ? e.altKey : !e.altKey;
-              var shiftMatch = customKeybind.shift ? e.shiftKey : !e.shiftKey;
-              var keyMatch =
-                customKeybind.key && customKeybind.key.toLowerCase() === e.key.toLowerCase();
-              if (ctrlMatch && altMatch && shiftMatch && keyMatch) matched = true;
-            } else {
-              // Default Ctrl+B / Cmd+B
-              if (
-                (e.ctrlKey || e.metaKey) &&
-                !e.altKey &&
-                !e.shiftKey &&
-                (e.key === "b" || e.key === "B")
-              ) {
-                matched = true;
+              var matched = false;
+              if (customKeybind) {
+                var ctrlMatch = customKeybind.ctrl
+                  ? e.ctrlKey || e.metaKey
+                  : !e.ctrlKey && !e.metaKey;
+                var altMatch = customKeybind.alt ? e.altKey : !e.altKey;
+                var shiftMatch = customKeybind.shift ? e.shiftKey : !e.shiftKey;
+                var keyMatch =
+                  customKeybind.key && customKeybind.key.toLowerCase() === e.key.toLowerCase();
+                if (ctrlMatch && altMatch && shiftMatch && keyMatch) matched = true;
+              } else {
+                // Default Ctrl+B / Cmd+B
+                if (
+                  (e.ctrlKey || e.metaKey) &&
+                  !e.altKey &&
+                  !e.shiftKey &&
+                  (e.key === "b" || e.key === "B")
+                ) {
+                  matched = true;
+                }
               }
-            }
 
-            if (matched) {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleSidebar();
-            }
-          };
+              if (matched) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSidebar();
+              }
+            };
 
-          var           /** onExpandSidebar implementation. */
-onExpandSidebar = function () {
-            if (collapsed) toggleSidebar();
-          };
+          var /** onExpandSidebar implementation. */
+            onExpandSidebar = function () {
+              if (collapsed) toggleSidebar();
+            };
 
           window.addEventListener("keydown", onKeyDown, { capture: true });
           window.addEventListener("dsh:expand-sidebar", onExpandSidebar);
@@ -1989,8 +1991,8 @@ onExpandSidebar = function () {
       );
     }
 
-        /** TriggerContent implementation. */
-function TriggerContent(props) {
+    /** TriggerContent implementation. */
+    function TriggerContent(props) {
       var wide = Boolean(props && props.wide);
       var t = props && props.t;
       var label = typeof t === "function" ? t("trigger") : "Settings";
@@ -2026,20 +2028,20 @@ function TriggerContent(props) {
       );
     }
 
-        /** HeaderContent implementation. */
-function HeaderContent(props) {
+    /** HeaderContent implementation. */
+    function HeaderContent(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("title") : "Settings");
     }
 
-        /** CloseLabel implementation. */
-function CloseLabel(props) {
+    /** CloseLabel implementation. */
+    function CloseLabel(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("close") : "Close");
     }
 
-        /** GeneralSection implementation. */
-function GeneralSection(props) {
+    /** GeneralSection implementation. */
+    function GeneralSection(props) {
       var noticeState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return false;
         return window.localStorage.getItem("dsh_suppress_welcome_notice") === "false";
@@ -2111,42 +2113,42 @@ function GeneralSection(props) {
       var autoScroll = autoScrollState[0],
         setAutoScroll = autoScrollState[1];
 
-      var       /** handleToggleNotice implementation. */
-handleToggleNotice = function (e) {
-        var checked = e.target.checked;
-        setNoticeEnabled(checked);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_suppress_welcome_notice", checked ? "false" : "true");
-        }
-      };
-
-      var       /** handleToggleSearch implementation. */
-handleToggleSearch = function (e) {
-        var checked = e.target.checked;
-        setSearchEnabled(checked);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_show_sidebar_search", checked ? "true" : "false");
-          window.dispatchEvent(
-            new CustomEvent("dsh:sidebar-search-toggle", { detail: { enabled: checked } }),
-          );
-        }
-      };
-
-      var       /** handleToggleSwapSidebars implementation. */
-handleToggleSwapSidebars = function (e) {
-        var checked = e.target.checked;
-        setSwapSidebars(checked);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
-          window.dispatchEvent(
-            new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
-          );
-          if (document.body) {
-            if (checked) document.body.classList.add("dsh-sidebars-swapped");
-            else document.body.classList.remove("dsh-sidebars-swapped");
+      var /** handleToggleNotice implementation. */
+        handleToggleNotice = function (e) {
+          var checked = e.target.checked;
+          setNoticeEnabled(checked);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_suppress_welcome_notice", checked ? "false" : "true");
           }
-        }
-      };
+        };
+
+      var /** handleToggleSearch implementation. */
+        handleToggleSearch = function (e) {
+          var checked = e.target.checked;
+          setSearchEnabled(checked);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_show_sidebar_search", checked ? "true" : "false");
+            window.dispatchEvent(
+              new CustomEvent("dsh:sidebar-search-toggle", { detail: { enabled: checked } }),
+            );
+          }
+        };
+
+      var /** handleToggleSwapSidebars implementation. */
+        handleToggleSwapSidebars = function (e) {
+          var checked = e.target.checked;
+          setSwapSidebars(checked);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
+            window.dispatchEvent(
+              new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
+            );
+            if (document.body) {
+              if (checked) document.body.classList.add("dsh-sidebars-swapped");
+              else document.body.classList.remove("dsh-sidebars-swapped");
+            }
+          }
+        };
 
       var hideSendState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return false;
@@ -2155,18 +2157,18 @@ handleToggleSwapSidebars = function (e) {
       var hideSendButton = hideSendState[0],
         setHideSendButton = hideSendState[1];
 
-      var       /** handleToggleHideSend implementation. */
-handleToggleHideSend = function (e) {
-        var checked = e.target.checked;
-        setHideSendButton(checked);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_hide_send_button", checked ? "true" : "false");
-          if (document.body) {
-            if (checked) document.body.classList.add("dsh-hide-inactive-send");
-            else document.body.classList.remove("dsh-hide-inactive-send");
+      var /** handleToggleHideSend implementation. */
+        handleToggleHideSend = function (e) {
+          var checked = e.target.checked;
+          setHideSendButton(checked);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_hide_send_button", checked ? "true" : "false");
+            if (document.body) {
+              if (checked) document.body.classList.add("dsh-hide-inactive-send");
+              else document.body.classList.remove("dsh-hide-inactive-send");
+            }
           }
-        }
-      };
+        };
 
       var composerLayoutState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return "unified";
@@ -2175,26 +2177,26 @@ handleToggleHideSend = function (e) {
       var composerLayout = composerLayoutState[0],
         setComposerLayout = composerLayoutState[1];
 
-      var       /** handleSelectComposerLayout implementation. */
-handleSelectComposerLayout = function (e) {
-        var val = e.target.value;
-        setComposerLayout(val);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_composer_toolbar_layout", val);
-          window.dispatchEvent(
-            new CustomEvent("dsh:composer-layout-changed", { detail: { layout: val } }),
-          );
-          if (document.body) {
-            if (val === "split") {
-              document.body.classList.add("dsh-composer-split");
-              document.body.classList.remove("dsh-composer-unified");
-            } else {
-              document.body.classList.add("dsh-composer-unified");
-              document.body.classList.remove("dsh-composer-split");
+      var /** handleSelectComposerLayout implementation. */
+        handleSelectComposerLayout = function (e) {
+          var val = e.target.value;
+          setComposerLayout(val);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_composer_toolbar_layout", val);
+            window.dispatchEvent(
+              new CustomEvent("dsh:composer-layout-changed", { detail: { layout: val } }),
+            );
+            if (document.body) {
+              if (val === "split") {
+                document.body.classList.add("dsh-composer-split");
+                document.body.classList.remove("dsh-composer-unified");
+              } else {
+                document.body.classList.add("dsh-composer-unified");
+                document.body.classList.remove("dsh-composer-split");
+              }
             }
           }
-        }
-      };
+        };
 
       return h(
         "div",
@@ -2738,8 +2740,8 @@ handleSelectComposerLayout = function (e) {
       );
     }
 
-        /** ThemeSettingsSection implementation. */
-function ThemeSettingsSection() {
+    /** ThemeSettingsSection implementation. */
+    function ThemeSettingsSection() {
       var THEME_PRESETS = [
         {
           id: "dark",
@@ -2889,144 +2891,144 @@ function ThemeSettingsSection() {
       var newThemeName = newThemeNameState[0],
         setNewThemeName = newThemeNameState[1];
 
-      var       /** applyPaletteToDOM implementation. */
-applyPaletteToDOM = function (palette, themeType) {
-        if (typeof document === "undefined") return;
-        var styleEl = document.getElementById("dsh-custom-theme-vars");
-        if (!styleEl) {
-          styleEl = document.createElement("style");
-          styleEl.id = "dsh-custom-theme-vars";
-          document.head.appendChild(styleEl);
-        }
+      var /** applyPaletteToDOM implementation. */
+        applyPaletteToDOM = function (palette, themeType) {
+          if (typeof document === "undefined") return;
+          var styleEl = document.getElementById("dsh-custom-theme-vars");
+          if (!styleEl) {
+            styleEl = document.createElement("style");
+            styleEl.id = "dsh-custom-theme-vars";
+            document.head.appendChild(styleEl);
+          }
 
-        var css =
-          ":root, [data-theme], body {\n" +
-          "  --dsw-alias-primary: " +
-          palette.primary +
-          " !important;\n" +
-          "  --dsw-alias-brand-primary: " +
-          palette.primary +
-          " !important;\n" +
-          "  --dsw-alias-bg-base: " +
-          palette.bgBase +
-          " !important;\n" +
-          "  --dsw-alias-bg-layer-1: " +
-          palette.surfaceL1 +
-          " !important;\n" +
-          "  --dsw-alias-surface-l1: " +
-          palette.surfaceL1 +
-          " !important;\n" +
-          "  --dsw-alias-bg-layer-2: " +
-          palette.surfaceL2 +
-          " !important;\n" +
-          "  --dsw-alias-surface-l2: " +
-          palette.surfaceL2 +
-          " !important;\n" +
-          "  --dsw-alias-bg-overlay: " +
-          palette.surfaceL2 +
-          " !important;\n" +
-          "  --dsw-alias-border-l1: " +
-          palette.borderL1 +
-          " !important;\n" +
-          "  --dsw-alias-border-l2: " +
-          palette.borderL1 +
-          " !important;\n" +
-          "  --dsw-alias-label-primary: " +
-          palette.textPrimary +
-          " !important;\n" +
-          "  --dsw-alias-label-secondary: " +
-          palette.textSecondary +
-          " !important;\n" +
-          "  --dsw-specific-sidebar-fill: " +
-          palette.sidebar +
-          " !important;\n" +
-          "}\n";
+          var css =
+            ":root, [data-theme], body {\n" +
+            "  --dsw-alias-primary: " +
+            palette.primary +
+            " !important;\n" +
+            "  --dsw-alias-brand-primary: " +
+            palette.primary +
+            " !important;\n" +
+            "  --dsw-alias-bg-base: " +
+            palette.bgBase +
+            " !important;\n" +
+            "  --dsw-alias-bg-layer-1: " +
+            palette.surfaceL1 +
+            " !important;\n" +
+            "  --dsw-alias-surface-l1: " +
+            palette.surfaceL1 +
+            " !important;\n" +
+            "  --dsw-alias-bg-layer-2: " +
+            palette.surfaceL2 +
+            " !important;\n" +
+            "  --dsw-alias-surface-l2: " +
+            palette.surfaceL2 +
+            " !important;\n" +
+            "  --dsw-alias-bg-overlay: " +
+            palette.surfaceL2 +
+            " !important;\n" +
+            "  --dsw-alias-border-l1: " +
+            palette.borderL1 +
+            " !important;\n" +
+            "  --dsw-alias-border-l2: " +
+            palette.borderL1 +
+            " !important;\n" +
+            "  --dsw-alias-label-primary: " +
+            palette.textPrimary +
+            " !important;\n" +
+            "  --dsw-alias-label-secondary: " +
+            palette.textSecondary +
+            " !important;\n" +
+            "  --dsw-specific-sidebar-fill: " +
+            palette.sidebar +
+            " !important;\n" +
+            "}\n";
 
-        styleEl.textContent = css;
-        if (themeType === "oled") {
-          document.documentElement.setAttribute("data-theme", "oled");
-        } else if (themeType === "light") {
-          document.documentElement.setAttribute("data-theme", "light");
-        } else {
-          document.documentElement.removeAttribute("data-theme");
-        }
-      };
-
-      var       /** selectPreset implementation. */
-selectPreset = function (preset) {
-        setActiveTheme(preset.id);
-        setCustomPalette(Object.assign({}, preset.colors));
-        applyPaletteToDOM(preset.colors, preset.type);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_active_theme", preset.id);
-          window.localStorage.setItem("dsh_custom_palette", JSON.stringify(preset.colors));
-        }
-      };
-
-      var       /** updateColor implementation. */
-updateColor = function (key, value) {
-        var updated = Object.assign({}, customPalette);
-        updated[key] = value;
-        setCustomPalette(updated);
-        setActiveTheme("custom");
-        applyPaletteToDOM(updated, "custom");
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_active_theme", "custom");
-          window.localStorage.setItem("dsh_custom_palette", JSON.stringify(updated));
-        }
-      };
-
-      var       /** handleSaveCustomTheme implementation. */
-handleSaveCustomTheme = function () {
-        var name = (newThemeName || "").trim();
-        if (!name) {
-          name = "Custom Theme " + (customThemes.length + 1);
-        }
-        var newTheme = {
-          id: "custom-" + Date.now(),
-          name: name,
-          type: "custom",
-          colors: Object.assign({}, customPalette),
+          styleEl.textContent = css;
+          if (themeType === "oled") {
+            document.documentElement.setAttribute("data-theme", "oled");
+          } else if (themeType === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
         };
-        var nextList = customThemes.concat([newTheme]);
-        setCustomThemes(nextList);
-        setNewThemeName("");
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
-        }
-      };
 
-      var       /** handleDeleteCustomTheme implementation. */
-handleDeleteCustomTheme = function (themeId, e) {
-        if (e) e.stopPropagation();
-        var nextList = customThemes.filter(function (t) {
-          return t.id !== themeId;
-        });
-        setCustomThemes(nextList);
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
-        }
-      };
-
-      var       /** handleExportThemes implementation. */
-handleExportThemes = function () {
-        var data = {
-          activeTheme: activeTheme,
-          customPalette: customPalette,
-          customThemes: customThemes,
+      var /** selectPreset implementation. */
+        selectPreset = function (preset) {
+          setActiveTheme(preset.id);
+          setCustomPalette(Object.assign({}, preset.colors));
+          applyPaletteToDOM(preset.colors, preset.type);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_active_theme", preset.id);
+            window.localStorage.setItem("dsh_custom_palette", JSON.stringify(preset.colors));
+          }
         };
-        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = "dsh-themes.json";
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function () {
-          if (a.parentNode) a.parentNode.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 1000);
-      };
+
+      var /** updateColor implementation. */
+        updateColor = function (key, value) {
+          var updated = Object.assign({}, customPalette);
+          updated[key] = value;
+          setCustomPalette(updated);
+          setActiveTheme("custom");
+          applyPaletteToDOM(updated, "custom");
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_active_theme", "custom");
+            window.localStorage.setItem("dsh_custom_palette", JSON.stringify(updated));
+          }
+        };
+
+      var /** handleSaveCustomTheme implementation. */
+        handleSaveCustomTheme = function () {
+          var name = (newThemeName || "").trim();
+          if (!name) {
+            name = "Custom Theme " + (customThemes.length + 1);
+          }
+          var newTheme = {
+            id: "custom-" + Date.now(),
+            name: name,
+            type: "custom",
+            colors: Object.assign({}, customPalette),
+          };
+          var nextList = customThemes.concat([newTheme]);
+          setCustomThemes(nextList);
+          setNewThemeName("");
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
+          }
+        };
+
+      var /** handleDeleteCustomTheme implementation. */
+        handleDeleteCustomTheme = function (themeId, e) {
+          if (e) e.stopPropagation();
+          var nextList = customThemes.filter(function (t) {
+            return t.id !== themeId;
+          });
+          setCustomThemes(nextList);
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
+          }
+        };
+
+      var /** handleExportThemes implementation. */
+        handleExportThemes = function () {
+          var data = {
+            activeTheme: activeTheme,
+            customPalette: customPalette,
+            customThemes: customThemes,
+          };
+          var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "dsh-themes.json";
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () {
+            if (a.parentNode) a.parentNode.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 1000);
+        };
 
       var COLOR_FIELDS = [
         { key: "primary", label: "Primary Accent (Blurple)" },
@@ -3503,8 +3505,8 @@ handleExportThemes = function () {
       );
     }
 
-        /** CustomizationSettingsSection implementation. */
-function CustomizationSettingsSection() {
+    /** CustomizationSettingsSection implementation. */
+    function CustomizationSettingsSection() {
       var subtabState = React.useState("skills");
       var subtab = subtabState[0],
         setSubtab = subtabState[1];
@@ -3667,19 +3669,19 @@ function CustomizationSettingsSection() {
         },
       ];
 
-      var       /** handleRunHookTest implementation. */
-handleRunHookTest = function (hookId) {
-        setHookRunning(hookId);
-        setHookOutput("Running validation for " + hookId + "...\n");
-        setTimeout(function () {
-          setHookRunning(null);
-          setHookOutput(
-            "✓ Hook check passed for " +
-              hookId +
-              ":\n- All 80 package check-plugin suites verified: OK\n- Doc files synced: OK\n- No dirty submodule trees: OK\n- Superproject coherence: 100% PASS",
-          );
-        }, 800);
-      };
+      var /** handleRunHookTest implementation. */
+        handleRunHookTest = function (hookId) {
+          setHookRunning(hookId);
+          setHookOutput("Running validation for " + hookId + "...\n");
+          setTimeout(function () {
+            setHookRunning(null);
+            setHookOutput(
+              "✓ Hook check passed for " +
+                hookId +
+                ":\n- All 80 package check-plugin suites verified: OK\n- Doc files synced: OK\n- No dirty submodule trees: OK\n- Superproject coherence: 100% PASS",
+            );
+          }, 800);
+        };
 
       var filteredSkills = skillsList.filter(function (s) {
         if (!skillSearch) return true;
@@ -4052,8 +4054,8 @@ handleRunHookTest = function (hookId) {
       );
     }
 
-        /** PluginsSettingsSection implementation. */
-function PluginsSettingsSection() {
+    /** PluginsSettingsSection implementation. */
+    function PluginsSettingsSection() {
       var pluginList = [
         {
           id: "dsh-actions",
@@ -4157,13 +4159,13 @@ function PluginsSettingsSection() {
       var reloadingId = reloadingState[0],
         setReloadingId = reloadingState[1];
 
-      var       /** handleReloadPlugin implementation. */
-handleReloadPlugin = function (pId) {
-        setReloadingId(pId);
-        setTimeout(function () {
-          setReloadingId(null);
-        }, 600);
-      };
+      var /** handleReloadPlugin implementation. */
+        handleReloadPlugin = function (pId) {
+          setReloadingId(pId);
+          setTimeout(function () {
+            setReloadingId(null);
+          }, 600);
+        };
 
       return h(
         "div",
@@ -4325,8 +4327,8 @@ handleReloadPlugin = function (pId) {
       );
     }
 
-        /** createObservable implementation. */
-function createObservable(initial) {
+    /** createObservable implementation. */
+    function createObservable(initial) {
       var snapshot = initial;
       var listeners = new Set();
       return {
@@ -4350,8 +4352,8 @@ function createObservable(initial) {
       };
     }
 
-        /** messageOf implementation. */
-function messageOf(error) {
+    /** messageOf implementation. */
+    function messageOf(error) {
       return error instanceof Error ? error.message : String(error);
     }
 
@@ -4359,8 +4361,8 @@ function messageOf(error) {
     // snapshot-store engine (dsh-client-runtime/client) is not a platform seed
     // word, so the state rides a hand-rolled observable bound through the
     // framework-made bindSnapshotSelector.
-        /** SettingsDocumentStore implementation. */
-function SettingsDocumentStore(api) {
+    /** SettingsDocumentStore implementation. */
+    function SettingsDocumentStore(api) {
       this.api = api;
       this.observable = createObservable({ status: "idle", opening: false, error: null });
       this.generation = 0;
@@ -4428,14 +4430,14 @@ function SettingsDocumentStore(api) {
         });
     };
 
-        /** refreshDocumentIfLoaded implementation. */
-function refreshDocumentIfLoaded(controller) {
+    /** refreshDocumentIfLoaded implementation. */
+    function refreshDocumentIfLoaded(controller) {
       if (controller === undefined || controller.observable.getSnapshot().status === "idle") return;
       controller.load();
     }
 
-        /** SettingsDocumentAction implementation. */
-function SettingsDocumentAction(props) {
+    /** SettingsDocumentAction implementation. */
+    function SettingsDocumentAction(props) {
       var controller = props.controller,
         useSnapshot = props.useSnapshot,
         t = props.t;
@@ -4470,8 +4472,8 @@ function SettingsDocumentAction(props) {
       );
     }
 
-        /** KeybindsSettingsSection implementation. */
-function KeybindsSettingsSection() {
+    /** KeybindsSettingsSection implementation. */
+    function KeybindsSettingsSection() {
       var isMac =
         typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
       var defaultSidebarKey = isMac ? "⌘B" : "Ctrl+B";
@@ -4541,15 +4543,15 @@ function KeybindsSettingsSection() {
         [isRecording, handleRecordKey],
       );
 
-      var       /** handleReset implementation. */
-handleReset = function () {
-        try {
-          localStorage.removeItem("dsh_keybind_toggle_sidebar");
-          localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
-        } catch (e) {}
-        setSidebarKeyLabel(defaultSidebarKey);
-        setIsRecording(false);
-      };
+      var /** handleReset implementation. */
+        handleReset = function () {
+          try {
+            localStorage.removeItem("dsh_keybind_toggle_sidebar");
+            localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
+          } catch (e) {}
+          setSidebarKeyLabel(defaultSidebarKey);
+          setIsRecording(false);
+        };
 
       var shortcuts = [
         {
@@ -4721,8 +4723,8 @@ handleReset = function () {
       );
     }
 
-        /** SettingsPanel implementation. */
-function SettingsPanel(props) {
+    /** SettingsPanel implementation. */
+    function SettingsPanel(props) {
       var rows = props.rows,
         renderSlot = props.renderSlot,
         activeId = props.activeId;
@@ -4743,10 +4745,10 @@ function SettingsPanel(props) {
 
       React.useEffect(
         function () {
-          var           /** onKeyDown implementation. */
-onKeyDown = function (e) {
-            if (e.key === "Escape") onClose();
-          };
+          var /** onKeyDown implementation. */
+            onKeyDown = function (e) {
+              if (e.key === "Escape") onClose();
+            };
           document.addEventListener("keydown", onKeyDown);
           return function () {
             document.removeEventListener("keydown", onKeyDown);
@@ -4860,124 +4862,124 @@ onKeyDown = function (e) {
         setDialogPos = dialogPosState[1];
 
       // Drag modal window handler
-      var       /** handleHeaderPointerDown implementation. */
-handleHeaderPointerDown = function (e) {
-        if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
-          return;
-        e.preventDefault();
-        var startX = e.clientX - dialogPos.x;
-        var startY = e.clientY - dialogPos.y;
+      var /** handleHeaderPointerDown implementation. */
+        handleHeaderPointerDown = function (e) {
+          if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
+            return;
+          e.preventDefault();
+          var startX = e.clientX - dialogPos.x;
+          var startY = e.clientY - dialogPos.y;
 
-        var         /** onMove implementation. */
-onMove = function (moveEv) {
-          setDialogPos({
-            x: moveEv.clientX - startX,
-            y: moveEv.clientY - startY,
-          });
+          var /** onMove implementation. */
+            onMove = function (moveEv) {
+              setDialogPos({
+                x: moveEv.clientX - startX,
+                y: moveEv.clientY - startY,
+              });
+            };
+          var /** onUp implementation. */
+            onUp = function () {
+              document.removeEventListener("pointermove", onMove);
+              document.removeEventListener("pointerup", onUp);
+            };
+          document.addEventListener("pointermove", onMove);
+          document.addEventListener("pointerup", onUp);
         };
-        var         /** onUp implementation. */
-onUp = function () {
-          document.removeEventListener("pointermove", onMove);
-          document.removeEventListener("pointerup", onUp);
-        };
-        document.addEventListener("pointermove", onMove);
-        document.addEventListener("pointerup", onUp);
-      };
 
       // Resize settings window handler (direction: 'se', 'e', 's')
-      var       /** handleWindowResizePointerDown implementation. */
-handleWindowResizePointerDown = function (e, direction) {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsWindowResizing(true);
-        var startX = e.clientX;
-        var startY = e.clientY;
-        var startW = windowSize.w;
-        var startH = windowSize.h;
+      var /** handleWindowResizePointerDown implementation. */
+        handleWindowResizePointerDown = function (e, direction) {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsWindowResizing(true);
+          var startX = e.clientX;
+          var startY = e.clientY;
+          var startW = windowSize.w;
+          var startH = windowSize.h;
 
-        var         /** onMove implementation. */
-onMove = function (moveEv) {
-          var deltaX = moveEv.clientX - startX;
-          var deltaY = moveEv.clientY - startY;
-          var nextW = startW;
-          var nextH = startH;
+          var /** onMove implementation. */
+            onMove = function (moveEv) {
+              var deltaX = moveEv.clientX - startX;
+              var deltaY = moveEv.clientY - startY;
+              var nextW = startW;
+              var nextH = startH;
 
-          if (direction.indexOf("e") !== -1) {
-            nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
-          }
-          if (direction.indexOf("s") !== -1) {
-            nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
-          }
+              if (direction.indexOf("e") !== -1) {
+                nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
+              }
+              if (direction.indexOf("s") !== -1) {
+                nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
+              }
 
-          setWindowSize({ w: nextW, h: nextH });
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_settings_window_width", String(nextW));
-            window.localStorage.setItem("dsh_settings_window_height", String(nextH));
-          }
+              setWindowSize({ w: nextW, h: nextH });
+              if (typeof window !== "undefined" && window.localStorage) {
+                window.localStorage.setItem("dsh_settings_window_width", String(nextW));
+                window.localStorage.setItem("dsh_settings_window_height", String(nextH));
+              }
+            };
+
+          var /** onUp implementation. */
+            onUp = function () {
+              setIsWindowResizing(false);
+              document.removeEventListener("pointermove", onMove);
+              document.removeEventListener("pointerup", onUp);
+            };
+          document.addEventListener("pointermove", onMove);
+          document.addEventListener("pointerup", onUp);
         };
-
-        var         /** onUp implementation. */
-onUp = function () {
-          setIsWindowResizing(false);
-          document.removeEventListener("pointermove", onMove);
-          document.removeEventListener("pointerup", onUp);
-        };
-        document.addEventListener("pointermove", onMove);
-        document.addEventListener("pointerup", onUp);
-      };
 
       // Resize nav width handler
-      var       /** handleResizePointerDown implementation. */
-handleResizePointerDown = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsResizing(true);
-        var startX = e.clientX;
-        var startW = isNavCollapsed ? 56 : navWidth;
+      var /** handleResizePointerDown implementation. */
+        handleResizePointerDown = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsResizing(true);
+          var startX = e.clientX;
+          var startW = isNavCollapsed ? 56 : navWidth;
 
-        var         /** onMove implementation. */
-onMove = function (moveEv) {
-          var delta = moveEv.clientX - startX;
-          var nextW = Math.max(130, Math.min(380, startW + delta));
-          setNavWidth(nextW);
-          if (isNavCollapsed && nextW > 90) {
-            setIsNavCollapsed(false);
+          var /** onMove implementation. */
+            onMove = function (moveEv) {
+              var delta = moveEv.clientX - startX;
+              var nextW = Math.max(130, Math.min(380, startW + delta));
+              setNavWidth(nextW);
+              if (isNavCollapsed && nextW > 90) {
+                setIsNavCollapsed(false);
+                if (typeof window !== "undefined" && window.localStorage) {
+                  window.localStorage.setItem("dsh_settings_nav_collapsed", "false");
+                }
+              }
+              if (typeof window !== "undefined" && window.localStorage) {
+                window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
+              }
+            };
+          var /** onUp implementation. */
+            onUp = function () {
+              setIsResizing(false);
+              document.removeEventListener("pointermove", onMove);
+              document.removeEventListener("pointerup", onUp);
+            };
+          document.addEventListener("pointermove", onMove);
+          document.addEventListener("pointerup", onUp);
+        };
+
+      var /** toggleNavCollapse implementation. */
+        toggleNavCollapse = function (e) {
+          e.stopPropagation();
+          setIsNavCollapsed(function (prev) {
+            var next = !prev;
             if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_settings_nav_collapsed", "false");
+              window.localStorage.setItem("dsh_settings_nav_collapsed", next ? "true" : "false");
             }
-          }
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
-          }
+            return next;
+          });
         };
-        var         /** onUp implementation. */
-onUp = function () {
-          setIsResizing(false);
-          document.removeEventListener("pointermove", onMove);
-          document.removeEventListener("pointerup", onUp);
-        };
-        document.addEventListener("pointermove", onMove);
-        document.addEventListener("pointerup", onUp);
-      };
-
-      var       /** toggleNavCollapse implementation. */
-toggleNavCollapse = function (e) {
-        e.stopPropagation();
-        setIsNavCollapsed(function (prev) {
-          var next = !prev;
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_settings_nav_collapsed", next ? "true" : "false");
-          }
-          return next;
-        });
-      };
 
       var collapsedGroupsState = React.useState({});
       var collapsedGroups = collapsedGroupsState[0],
         setCollapsedGroups = collapsedGroupsState[1];
 
-            /** toggleGroup implementation. */
-function toggleGroup(groupName) {
+      /** toggleGroup implementation. */
+      function toggleGroup(groupName) {
         setCollapsedGroups(function (s) {
           var n = Object.assign({}, s);
           n[groupName] = !n[groupName];
@@ -4985,8 +4987,8 @@ function toggleGroup(groupName) {
         });
       }
 
-            /** renderNavRow implementation. */
-function renderNavRow(row) {
+      /** renderNavRow implementation. */
+      function renderNavRow(row) {
         return h(
           "button",
           {
@@ -5004,8 +5006,8 @@ function renderNavRow(row) {
         );
       }
 
-            /** renderGroupHeader implementation. */
-function renderGroupHeader(label, count) {
+      /** renderGroupHeader implementation. */
+      function renderGroupHeader(label, count) {
         if (isNavCollapsed) return null;
         var isCollapsed = Boolean(collapsedGroups[label]);
         return h(
@@ -5263,8 +5265,8 @@ function renderGroupHeader(label, count) {
       );
     }
 
-        /** TweaksSettingsRoot implementation. */
-function TweaksSettingsRoot(props) {
+    /** TweaksSettingsRoot implementation. */
+    function TweaksSettingsRoot(props) {
       var wide = Boolean(props && props.wide);
       var useSections = props && props.useSections;
       var useOnboardingSteps = props && props.useOnboardingSteps;
@@ -5293,12 +5295,12 @@ function TweaksSettingsRoot(props) {
       }, []);
 
       React.useEffect(function () {
-        var         /** onOpenSettings implementation. */
-onOpenSettings = function (e) {
-          var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
-          if (sec) setActiveId(sec);
-          setOpen(true);
-        };
+        var /** onOpenSettings implementation. */
+          onOpenSettings = function (e) {
+            var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
+            if (sec) setActiveId(sec);
+            setOpen(true);
+          };
         window.addEventListener("dsh:open-settings", onOpenSettings);
         return function () {
           window.removeEventListener("dsh:open-settings", onOpenSettings);
@@ -5509,8 +5511,8 @@ onOpenSettings = function (e) {
     // Ledger -> nav-row / coordinator projections as observable sources (uSES
     // contract: getSnapshot returns the cached rows until the ledger or the
     // locale revision moves). Ported from ui-settings-general's apply.
-        /** makeShellInjected implementation. */
-function makeShellInjected(ctx) {
+    /** makeShellInjected implementation. */
+    function makeShellInjected(ctx) {
       var rowsVersion = -1;
       var rowsRevision = -1;
       var rows = [];
@@ -5586,8 +5588,8 @@ function makeShellInjected(ctx) {
       };
     }
 
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register("sidebar", { zh: SIDEBAR_ZH, en: SIDEBAR_EN });
       }, "dsh-tweaks: sidebar dictionaries");
@@ -5614,19 +5616,19 @@ function apply(ctx) {
         });
       }, "dsh-tweaks: metadata invalidations");
 
-      var       /** startSession implementation. */
-startSession = function (workspaceId) {
-        ctx.workspaces.startSession(workspaceId);
-      };
-      var       /** sidebarInjected implementation. */
-sidebarInjected = function () {
-        return {
-          startSession: startSession,
-          toggleSidebar: function () {
-            ctx.layout.toggleSidebar();
-          },
+      var /** startSession implementation. */
+        startSession = function (workspaceId) {
+          ctx.workspaces.startSession(workspaceId);
         };
-      };
+      var /** sidebarInjected implementation. */
+        sidebarInjected = function () {
+          return {
+            startSession: startSession,
+            toggleSidebar: function () {
+              ctx.layout.toggleSidebar();
+            },
+          };
+        };
       ctx.slots.inject(
         "sidebar",
         function () {
@@ -5846,36 +5848,36 @@ sidebarInjected = function () {
       // (the harness checkout is kept pristine), so dsh-tweaks owns the three
       // mark seats — models, plugins, agent-presets — under the shared
       // settings.section.icon seat keyed by section id.
-            /** GeneralGlyph implementation. */
-function GeneralGlyph() {
+      /** GeneralGlyph implementation. */
+      function GeneralGlyph() {
         return navIcon("general");
       }
-            /** ThemesGlyph implementation. */
-function ThemesGlyph() {
+      /** ThemesGlyph implementation. */
+      function ThemesGlyph() {
         return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-            /** CustomizationGlyph implementation. */
-function CustomizationGlyph() {
+      /** CustomizationGlyph implementation. */
+      function CustomizationGlyph() {
         return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-            /** ModelsGlyph implementation. */
-function ModelsGlyph() {
+      /** ModelsGlyph implementation. */
+      function ModelsGlyph() {
         return navIcon("models");
       }
-            /** PluginsGlyph implementation. */
-function PluginsGlyph() {
+      /** PluginsGlyph implementation. */
+      function PluginsGlyph() {
         return navIcon("plugins");
       }
-            /** AgentPresetsGlyph implementation. */
-function AgentPresetsGlyph() {
+      /** AgentPresetsGlyph implementation. */
+      function AgentPresetsGlyph() {
         return navIcon("agent-presets");
       }
-            /** KeybindsGlyph implementation. */
-function KeybindsGlyph() {
+      /** KeybindsGlyph implementation. */
+      function KeybindsGlyph() {
         return navIcon("keybinds");
       }
-            /** harnessGlyph implementation. */
-function harnessGlyph(id, component) {
+      /** harnessGlyph implementation. */
+      function harnessGlyph(id, component) {
         return function () {
           return ctx.slots.register(
             {
@@ -5925,8 +5927,8 @@ function harnessGlyph(id, component) {
       );
 
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
-            /** SessionHeaderUtilities implementation. */
-function SessionHeaderUtilities(props) {
+      /** SessionHeaderUtilities implementation. */
+      function SessionHeaderUtilities(props) {
         var sessionId = props.sessionId;
         var menuState = React.useState(false);
         var menuOpen = menuState[0],
@@ -5938,30 +5940,30 @@ function SessionHeaderUtilities(props) {
         var isTrajectory = trajState[0],
           setIsTrajectory = trajState[1];
 
-        var         /** checkIsTrajectory implementation. */
-checkIsTrajectory = function () {
-          var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
-          if (activeTab) {
-            var txt = (activeTab.textContent || "").trim().toLowerCase();
-            return (
-              txt === "trajectory" ||
-              txt.includes("trajectory") ||
-              txt === "轨迹" ||
-              txt.includes("轨迹")
+        var /** checkIsTrajectory implementation. */
+          checkIsTrajectory = function () {
+            var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
+            if (activeTab) {
+              var txt = (activeTab.textContent || "").trim().toLowerCase();
+              return (
+                txt === "trajectory" ||
+                txt.includes("trajectory") ||
+                txt === "轨迹" ||
+                txt.includes("轨迹")
+              );
+            }
+            return Boolean(
+              document.querySelector(
+                '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
+              ),
             );
-          }
-          return Boolean(
-            document.querySelector(
-              '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
-            ),
-          );
-        };
+          };
 
         React.useEffect(function () {
-          var           /** update implementation. */
-update = function () {
-            setIsTrajectory(checkIsTrajectory());
-          };
+          var /** update implementation. */
+            update = function () {
+              setIsTrajectory(checkIsTrajectory());
+            };
           update();
           var timer = setInterval(update, 400);
           return function () {
@@ -5969,61 +5971,61 @@ update = function () {
           };
         }, []);
 
-        var         /** handleToggleView implementation. */
-handleToggleView = function () {
-          setMenuOpen(false);
-          var onTrajectoryNow = checkIsTrajectory();
-          var targetName = onTrajectoryNow ? "chat" : "trajectory";
+        var /** handleToggleView implementation. */
+          handleToggleView = function () {
+            setMenuOpen(false);
+            var onTrajectoryNow = checkIsTrajectory();
+            var targetName = onTrajectoryNow ? "chat" : "trajectory";
 
-          var allTabs = Array.from(
-            document.querySelectorAll('[role="tab"], [role="tablist"] button'),
-          );
-          var targetBtn = allTabs.find(function (b) {
-            var t = (b.textContent || "").trim().toLowerCase();
-            return (
-              (targetName === "chat" &&
-                (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
-              (targetName === "trajectory" &&
-                (t === "trajectory" ||
-                  t.includes("trajectory") ||
-                  t === "轨迹" ||
-                  t.includes("轨迹")))
+            var allTabs = Array.from(
+              document.querySelectorAll('[role="tab"], [role="tablist"] button'),
             );
-          });
-
-          if (targetBtn) {
-            targetBtn.click();
-          } else {
-            var inactiveBtn = allTabs.find(function (b) {
-              return b.getAttribute("aria-selected") !== "true";
+            var targetBtn = allTabs.find(function (b) {
+              var t = (b.textContent || "").trim().toLowerCase();
+              return (
+                (targetName === "chat" &&
+                  (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
+                (targetName === "trajectory" &&
+                  (t === "trajectory" ||
+                    t.includes("trajectory") ||
+                    t === "轨迹" ||
+                    t.includes("轨迹")))
+              );
             });
-            if (inactiveBtn) inactiveBtn.click();
-          }
 
-          setTimeout(function () {
-            setIsTrajectory(checkIsTrajectory());
-          }, 80);
-        };
+            if (targetBtn) {
+              targetBtn.click();
+            } else {
+              var inactiveBtn = allTabs.find(function (b) {
+                return b.getAttribute("aria-selected") !== "true";
+              });
+              if (inactiveBtn) inactiveBtn.click();
+            }
 
-        var         /** handleDownloadLog implementation. */
-handleDownloadLog = function () {
-          setMenuOpen(false);
-          setBusy(true);
-          try {
-            var exportUrl = "/api/session.export?id=" + encodeURIComponent(sessionId || "");
-            var a = document.createElement("a");
-            a.href = exportUrl;
-            a.download = (sessionId || "session") + ".jsonl";
-            document.body.appendChild(a);
-            a.click();
             setTimeout(function () {
-              if (a.parentNode) a.parentNode.removeChild(a);
+              setIsTrajectory(checkIsTrajectory());
+            }, 80);
+          };
+
+        var /** handleDownloadLog implementation. */
+          handleDownloadLog = function () {
+            setMenuOpen(false);
+            setBusy(true);
+            try {
+              var exportUrl = "/api/session.export?id=" + encodeURIComponent(sessionId || "");
+              var a = document.createElement("a");
+              a.href = exportUrl;
+              a.download = (sessionId || "session") + ".jsonl";
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(function () {
+                if (a.parentNode) a.parentNode.removeChild(a);
+                setBusy(false);
+              }, 1000);
+            } catch (e) {
               setBusy(false);
-            }, 1000);
-          } catch (e) {
-            setBusy(false);
-          }
-        };
+            }
+          };
 
         var items = [
           {
@@ -6106,8 +6108,8 @@ handleDownloadLog = function () {
       );
 
       // 2. Subagents Dock above input bar
-            /** SubagentsDock implementation. */
-function SubagentsDock(props) {
+      /** SubagentsDock implementation. */
+      function SubagentsDock(props) {
         var sessionId = props.sessionId;
         var useSessions = props.useSessions;
         var openChild = props.openChild;
@@ -6174,19 +6176,19 @@ function SubagentsDock(props) {
         if (completedCount > 0) progressParts.push(completedCount + " completed");
         var progressStr = progressParts.join(" · ") || childList.length + " subagents";
 
-        var         /** getRoleBadgeStyle implementation. */
-getRoleBadgeStyle = function (role) {
-          if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
-            return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
-          } else if (role.indexOf("exec") !== -1) {
-            return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
-          } else if (role.indexOf("research") !== -1) {
+        var /** getRoleBadgeStyle implementation. */
+          getRoleBadgeStyle = function (role) {
+            if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
+              return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
+            } else if (role.indexOf("exec") !== -1) {
+              return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
+            } else if (role.indexOf("research") !== -1) {
+              return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
+            } else if (role.indexOf("orch") !== -1) {
+              return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
+            }
             return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
-          } else if (role.indexOf("orch") !== -1) {
-            return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
-          }
-          return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
-        };
+          };
 
         return h(
           "section",
@@ -6463,311 +6465,313 @@ getRoleBadgeStyle = function (role) {
         menuContainer.style.display = "none";
         document.body.appendChild(menuContainer);
 
-        var         /** closeMenu implementation. */
-closeMenu = function () {
-          menuContainer.style.display = "none";
-          menuContainer.innerHTML = "";
-        };
-
-        var         /** onKeyDown implementation. */
-onKeyDown = function (e) {
-          if (e.key === "Escape") closeMenu();
-        };
-        var         /** onContextMenu implementation. */
-onContextMenu = function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          var icons = {
-            chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-            terminal:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
-            container:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
-            cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
-            copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
-            paste:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
-            rename:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-            close:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
-            appearance:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
-            settings:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
-            reload:
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+        var /** closeMenu implementation. */
+          closeMenu = function () {
+            menuContainer.style.display = "none";
+            menuContainer.innerHTML = "";
           };
 
-          var x = e.clientX;
-          var y = e.clientY;
-          var selectedText = window.getSelection ? window.getSelection().toString() : "";
-          var targetEl = e.target;
-          var isEditable =
-            targetEl &&
-            (targetEl.tagName === "INPUT" ||
-              targetEl.tagName === "TEXTAREA" ||
-              targetEl.isContentEditable);
-          var sessionEl = targetEl
-            ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]')
-            : null;
-          var workspaceEl = targetEl
-            ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]')
-            : null;
-          var targetSessionId = sessionEl
-            ? sessionEl.getAttribute("data-session-id") || sessionEl.getAttribute("data-id")
-            : null;
-          var targetWorkspaceId = workspaceEl
-            ? workspaceEl.getAttribute("data-workspace-id") || workspaceEl.getAttribute("data-id")
-            : null;
+        var /** onKeyDown implementation. */
+          onKeyDown = function (e) {
+            if (e.key === "Escape") closeMenu();
+          };
+        var /** onContextMenu implementation. */
+          onContextMenu = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-          var items = [];
+            var icons = {
+              chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+              terminal:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+              container:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+              cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+              copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+              paste:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
+              rename:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+              close:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+              appearance:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
+              settings:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+              reload:
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+            };
 
-          // 1. Contextual Items (Rename / Close / Delete)
-          if (sessionEl) {
-            items.push({
-              id: "rename-session",
-              label: "Rename Conversation",
-              icon: icons.rename,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:rename-session", { detail: { id: targetSessionId } }),
-                );
-              },
-            });
-            items.push({
-              id: "close-session",
-              label: "Close / Archive Session",
-              icon: icons.close,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:close-session", { detail: { id: targetSessionId } }),
-                );
-              },
-            });
-            items.push({ type: "divider" });
-          } else if (workspaceEl) {
-            items.push({
-              id: "rename-workspace",
-              label: "Rename Workspace",
-              icon: icons.rename,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:rename-workspace", { detail: { id: targetWorkspaceId } }),
-                );
-              },
-            });
-            items.push({
-              id: "close-workspace",
-              label: "Close Workspace",
-              icon: icons.close,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:delete-workspace", { detail: { id: targetWorkspaceId } }),
-                );
-              },
-            });
-            items.push({ type: "divider" });
-          }
+            var x = e.clientX;
+            var y = e.clientY;
+            var selectedText = window.getSelection ? window.getSelection().toString() : "";
+            var targetEl = e.target;
+            var isEditable =
+              targetEl &&
+              (targetEl.tagName === "INPUT" ||
+                targetEl.tagName === "TEXTAREA" ||
+                targetEl.isContentEditable);
+            var sessionEl = targetEl
+              ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]')
+              : null;
+            var workspaceEl = targetEl
+              ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]')
+              : null;
+            var targetSessionId = sessionEl
+              ? sessionEl.getAttribute("data-session-id") || sessionEl.getAttribute("data-id")
+              : null;
+            var targetWorkspaceId = workspaceEl
+              ? workspaceEl.getAttribute("data-workspace-id") || workspaceEl.getAttribute("data-id")
+              : null;
 
-          // 2. Clipboard actions
-          if (selectedText) {
-            if (isEditable) {
+            var items = [];
+
+            // 1. Contextual Items (Rename / Close / Delete)
+            if (sessionEl) {
               items.push({
-                id: "cut",
-                label: "Cut",
-                icon: icons.cut,
+                id: "rename-session",
+                label: "Rename Conversation",
+                icon: icons.rename,
                 action: function () {
-                  navigator.clipboard.writeText(selectedText).then(function () {
-                    try {
-                      document.execCommand("delete");
-                    } catch (err) {}
-                  });
+                  window.dispatchEvent(
+                    new CustomEvent("dsh:rename-session", { detail: { id: targetSessionId } }),
+                  );
+                },
+              });
+              items.push({
+                id: "close-session",
+                label: "Close / Archive Session",
+                icon: icons.close,
+                action: function () {
+                  window.dispatchEvent(
+                    new CustomEvent("dsh:close-session", { detail: { id: targetSessionId } }),
+                  );
+                },
+              });
+              items.push({ type: "divider" });
+            } else if (workspaceEl) {
+              items.push({
+                id: "rename-workspace",
+                label: "Rename Workspace",
+                icon: icons.rename,
+                action: function () {
+                  window.dispatchEvent(
+                    new CustomEvent("dsh:rename-workspace", { detail: { id: targetWorkspaceId } }),
+                  );
+                },
+              });
+              items.push({
+                id: "close-workspace",
+                label: "Close Workspace",
+                icon: icons.close,
+                action: function () {
+                  window.dispatchEvent(
+                    new CustomEvent("dsh:delete-workspace", { detail: { id: targetWorkspaceId } }),
+                  );
+                },
+              });
+              items.push({ type: "divider" });
+            }
+
+            // 2. Clipboard actions
+            if (selectedText) {
+              if (isEditable) {
+                items.push({
+                  id: "cut",
+                  label: "Cut",
+                  icon: icons.cut,
+                  action: function () {
+                    navigator.clipboard.writeText(selectedText).then(function () {
+                      try {
+                        document.execCommand("delete");
+                      } catch (err) {}
+                    });
+                  },
+                });
+              }
+              items.push({
+                id: "copy",
+                label:
+                  'Copy ("' +
+                  (selectedText.length > 20 ? selectedText.slice(0, 18) + "…" : selectedText) +
+                  '")',
+                icon: icons.copy,
+                action: function () {
+                  navigator.clipboard.writeText(selectedText);
                 },
               });
             }
+
             items.push({
-              id: "copy",
-              label:
-                'Copy ("' +
-                (selectedText.length > 20 ? selectedText.slice(0, 18) + "…" : selectedText) +
-                '")',
-              icon: icons.copy,
+              id: "paste",
+              label: "Paste",
+              icon: icons.paste,
               action: function () {
-                navigator.clipboard.writeText(selectedText);
+                navigator.clipboard.readText().then(function (text) {
+                  if (!text) return;
+                  try {
+                    if (
+                      document.activeElement &&
+                      (document.activeElement.tagName === "INPUT" ||
+                        document.activeElement.tagName === "TEXTAREA" ||
+                        document.activeElement.isContentEditable)
+                    ) {
+                      document.execCommand("insertText", false, text);
+                    } else {
+                      var activeInput = document.querySelector("textarea, input:focus");
+                      if (activeInput) {
+                        activeInput.value = (activeInput.value || "") + text;
+                        activeInput.dispatchEvent(new Event("input", { bubbles: true }));
+                      }
+                    }
+                  } catch (err) {}
+                });
               },
             });
-          }
 
-          items.push({
-            id: "paste",
-            label: "Paste",
-            icon: icons.paste,
-            action: function () {
-              navigator.clipboard.readText().then(function (text) {
-                if (!text) return;
-                try {
-                  if (
-                    document.activeElement &&
-                    (document.activeElement.tagName === "INPUT" ||
-                      document.activeElement.tagName === "TEXTAREA" ||
-                      document.activeElement.isContentEditable)
-                  ) {
-                    document.execCommand("insertText", false, text);
-                  } else {
-                    var activeInput = document.querySelector("textarea, input:focus");
-                    if (activeInput) {
-                      activeInput.value = (activeInput.value || "") + text;
-                      activeInput.dispatchEvent(new Event("input", { bubbles: true }));
-                    }
-                  }
-                } catch (err) {}
-              });
-            },
-          });
+            items.push({ type: "divider" });
 
-          items.push({ type: "divider" });
+            // 3. Main actions
+            items.push({
+              id: "chat",
+              label: "New Conversation",
+              icon: icons.chat,
+              action: function () {
+                startSession();
+              },
+            });
+            items.push({
+              id: "terminal",
+              label: "New Terminal",
+              icon: icons.terminal,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
+                );
+              },
+            });
+            items.push({
+              id: "container",
+              label: "New Container",
+              icon: icons.container,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:open-container", { detail: { id: null } }),
+                );
+              },
+            });
+            items.push({ type: "divider" });
 
-          // 3. Main actions
-          items.push({
-            id: "chat",
-            label: "New Conversation",
-            icon: icons.chat,
-            action: function () {
-              startSession();
-            },
-          });
-          items.push({
-            id: "terminal",
-            label: "New Terminal",
-            icon: icons.terminal,
-            action: function () {
-              window.dispatchEvent(
-                new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
-              );
-            },
-          });
-          items.push({
-            id: "container",
-            label: "New Container",
-            icon: icons.container,
-            action: function () {
-              window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
-            },
-          });
-          items.push({ type: "divider" });
+            items.push({
+              id: "appearance",
+              label: "Appearance & Themes",
+              icon: icons.appearance,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
+                );
+              },
+            });
+            items.push({
+              id: "settings",
+              label: "Settings & Preferences",
+              icon: icons.settings,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:open-settings", { detail: { section: "general" } }),
+                );
+              },
+            });
+            items.push({ type: "divider" });
+            items.push({
+              id: "reload",
+              label: "Reload Window",
+              icon: icons.reload,
+              action: function () {
+                window.location.reload();
+              },
+            });
 
-          items.push({
-            id: "appearance",
-            label: "Appearance & Themes",
-            icon: icons.appearance,
-            action: function () {
-              window.dispatchEvent(
-                new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
-              );
-            },
-          });
-          items.push({
-            id: "settings",
-            label: "Settings & Preferences",
-            icon: icons.settings,
-            action: function () {
-              window.dispatchEvent(
-                new CustomEvent("dsh:open-settings", { detail: { section: "general" } }),
-              );
-            },
-          });
-          items.push({ type: "divider" });
-          items.push({
-            id: "reload",
-            label: "Reload Window",
-            icon: icons.reload,
-            action: function () {
-              window.location.reload();
-            },
-          });
+            menuContainer.innerHTML = "";
+            var menuEl = document.createElement("div");
+            menuEl.style.minWidth = "220px";
+            menuEl.style.background = "var(--dsw-alias-surface-l0, #181825)";
+            menuEl.style.border = "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))";
+            menuEl.style.borderRadius = "10px";
+            menuEl.style.boxShadow = "0 12px 36px rgba(0,0,0,0.6)";
+            menuEl.style.padding = "5px";
+            menuEl.style.display = "flex";
+            menuEl.style.flexDirection = "column";
+            menuEl.style.gap = "2px";
+            menuEl.style.fontFamily = "inherit";
 
-          menuContainer.innerHTML = "";
-          var menuEl = document.createElement("div");
-          menuEl.style.minWidth = "220px";
-          menuEl.style.background = "var(--dsw-alias-surface-l0, #181825)";
-          menuEl.style.border = "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))";
-          menuEl.style.borderRadius = "10px";
-          menuEl.style.boxShadow = "0 12px 36px rgba(0,0,0,0.6)";
-          menuEl.style.padding = "5px";
-          menuEl.style.display = "flex";
-          menuEl.style.flexDirection = "column";
-          menuEl.style.gap = "2px";
-          menuEl.style.fontFamily = "inherit";
-
-          items.forEach(function (item) {
-            if (item.type === "divider") {
-              var div = document.createElement("div");
-              div.style.height = "1px";
-              div.style.background = "var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
-              div.style.margin = "4px 0";
-              menuEl.appendChild(div);
-              return;
-            }
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.style.display = "flex";
-            btn.style.alignItems = "center";
-            btn.style.gap = "10px";
-            btn.style.width = "100%";
-            btn.style.padding = "8px 12px";
-            btn.style.borderRadius = "6px";
-            btn.style.border = "none";
-            btn.style.background = "transparent";
-            btn.style.color = "var(--dsw-alias-label-primary, #fff)";
-            btn.style.fontSize = "13px";
-            btn.style.textAlign = "left";
-            btn.style.cursor = "pointer";
-            btn.style.fontFamily = "inherit";
-
-            btn.onmouseenter = function () {
-              btn.style.background =
-                "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
-            };
-            btn.onmouseleave = function () {
+            items.forEach(function (item) {
+              if (item.type === "divider") {
+                var div = document.createElement("div");
+                div.style.height = "1px";
+                div.style.background = "var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
+                div.style.margin = "4px 0";
+                menuEl.appendChild(div);
+                return;
+              }
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.style.display = "flex";
+              btn.style.alignItems = "center";
+              btn.style.gap = "10px";
+              btn.style.width = "100%";
+              btn.style.padding = "8px 12px";
+              btn.style.borderRadius = "6px";
+              btn.style.border = "none";
               btn.style.background = "transparent";
-            };
-            btn.onclick = function (ev) {
-              ev.stopPropagation();
-              closeMenu();
-              item.action();
-            };
+              btn.style.color = "var(--dsw-alias-label-primary, #fff)";
+              btn.style.fontSize = "13px";
+              btn.style.textAlign = "left";
+              btn.style.cursor = "pointer";
+              btn.style.fontFamily = "inherit";
 
-            var iconSpan = document.createElement("span");
-            iconSpan.style.width = "16px";
-            iconSpan.style.height = "16px";
-            iconSpan.style.display = "inline-flex";
-            iconSpan.style.alignItems = "center";
-            iconSpan.style.justifyContent = "center";
-            iconSpan.style.color = "var(--dsw-alias-label-secondary, #a8a8a8)";
-            iconSpan.innerHTML = item.icon;
+              btn.onmouseenter = function () {
+                btn.style.background =
+                  "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
+              };
+              btn.onmouseleave = function () {
+                btn.style.background = "transparent";
+              };
+              btn.onclick = function (ev) {
+                ev.stopPropagation();
+                closeMenu();
+                item.action();
+              };
 
-            var textSpan = document.createElement("span");
-            textSpan.style.flex = "1";
-            textSpan.textContent = item.label;
+              var iconSpan = document.createElement("span");
+              iconSpan.style.width = "16px";
+              iconSpan.style.height = "16px";
+              iconSpan.style.display = "inline-flex";
+              iconSpan.style.alignItems = "center";
+              iconSpan.style.justifyContent = "center";
+              iconSpan.style.color = "var(--dsw-alias-label-secondary, #a8a8a8)";
+              iconSpan.innerHTML = item.icon;
 
-            btn.appendChild(iconSpan);
-            btn.appendChild(textSpan);
-            menuEl.appendChild(btn);
-          });
+              var textSpan = document.createElement("span");
+              textSpan.style.flex = "1";
+              textSpan.textContent = item.label;
 
-          menuContainer.appendChild(menuEl);
-          menuContainer.style.display = "block";
+              btn.appendChild(iconSpan);
+              btn.appendChild(textSpan);
+              menuEl.appendChild(btn);
+            });
 
-          var menuWidth = 220;
-          var menuHeight = 240;
-          var finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
-          var finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
+            menuContainer.appendChild(menuEl);
+            menuContainer.style.display = "block";
 
-          menuContainer.style.left = Math.max(8, finalX) + "px";
-          menuContainer.style.top = Math.max(8, finalY) + "px";
-        };
+            var menuWidth = 220;
+            var menuHeight = 240;
+            var finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+            var finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
+
+            menuContainer.style.left = Math.max(8, finalX) + "px";
+            menuContainer.style.top = Math.max(8, finalY) + "px";
+          };
 
         document.addEventListener("click", closeMenu);
         document.addEventListener("scroll", closeMenu, true);
@@ -6867,8 +6871,8 @@ onContextMenu = function (e) {
       })();
 
       // Universal Lucide Animated Icons DOM Decorator
-            /** ensureUniversalLucideIcons implementation. */
-function ensureUniversalLucideIcons() {
+      /** ensureUniversalLucideIcons implementation. */
+      function ensureUniversalLucideIcons() {
         if (typeof document === "undefined" || !document.body) return;
         var svgs = document.querySelectorAll("svg");
         for (var i = 0; i < svgs.length; i++) {

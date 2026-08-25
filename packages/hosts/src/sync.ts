@@ -24,8 +24,8 @@ export interface ClusterSyncManifest {
 export class ClusterSyncEngine {
   private homeDir: string;
 
-    /** Constructs an instance. */
-constructor(homeDir?: string) {
+  /** Constructs an instance. */
+  constructor(homeDir?: string) {
     this.homeDir = homeDir || process.env.DSH_HOME || join(homedir(), ".agents");
   }
 
@@ -48,8 +48,8 @@ constructor(homeDir?: string) {
     };
   }
 
-    /** scanDirRecursive implementation. */
-private async scanDirRecursive(
+  /** scanDirRecursive implementation. */
+  private async scanDirRecursive(
     currentDir: string,
     relativePrefix: string,
     result: Record<string, FileManifestEntry>,

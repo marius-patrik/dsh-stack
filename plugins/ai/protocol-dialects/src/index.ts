@@ -14,13 +14,13 @@ export interface DialectSerializer {
 export class DialectsService {
   private serializers = new Map<string, DialectSerializer>();
 
-    /** register implementation. */
-register(name: string, serializer: DialectSerializer): void {
+  /** register implementation. */
+  register(name: string, serializer: DialectSerializer): void {
     this.serializers.set(name, serializer);
   }
 
-    /** get implementation. */
-get(name: string) {
+  /** get implementation. */
+  get(name: string) {
     return this.serializers.get(name);
   }
 }

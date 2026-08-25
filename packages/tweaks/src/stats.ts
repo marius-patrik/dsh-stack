@@ -143,9 +143,8 @@ export function formatTable(rows: SessionStatsRow[]): string {
     String(row.decodeTokens),
   ]);
   const widths = header.map((h, i) => Math.max(h.length, ...body.map((r) => (r[i] ?? "").length)));
-  const   /** line implementation. */
-line = (cells: string[]): string =>
-    cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
+  const /** line implementation. */
+    line = (cells: string[]): string => cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
   return [line(header), body.map(line).join("\n")].join("\n");
 }
 

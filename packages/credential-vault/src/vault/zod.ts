@@ -98,20 +98,20 @@ _z.extend("refine", (data, schema, options) => {
 /* -------------------------------------------------------------------------- */
 
 Object.assign(_z.prototype, {
-    /** nullable implementation. */
-nullable(this: Schema): Schema {
+  /** nullable implementation. */
+  nullable(this: Schema): Schema {
     return _z.union([this, _z.const(null)]) as Schema;
   },
-    /** readonly implementation. */
-readonly(this: Schema): Schema {
+  /** readonly implementation. */
+  readonly(this: Schema): Schema {
     return this;
   },
-    /** regex implementation. */
-regex(this: Schema, regexp: RegExp): Schema {
+  /** regex implementation. */
+  regex(this: Schema, regexp: RegExp): Schema {
     return this.pattern(regexp) as Schema;
   },
-    /** refine implementation. */
-refine(this: Schema, check: (value: unknown) => boolean, options?: { message?: string }): Schema {
+  /** refine implementation. */
+  refine(this: Schema, check: (value: unknown) => boolean, options?: { message?: string }): Schema {
     return _z({
       type: "refine",
       inner: this,
@@ -119,8 +119,8 @@ refine(this: Schema, check: (value: unknown) => boolean, options?: { message?: s
       message: options?.message ?? "value is invalid",
     } as unknown as Partial<Schema>) as Schema;
   },
-    /** safeParse implementation. */
-safeParse(this: Schema, value: unknown): SafeParseResult<unknown> {
+  /** safeParse implementation. */
+  safeParse(this: Schema, value: unknown): SafeParseResult<unknown> {
     const issues = collectIssues(this, value, []);
     if (issues.length > 0) return { success: false, error: { issues } };
     try {

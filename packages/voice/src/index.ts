@@ -81,8 +81,7 @@ export const inject = ["tools", "settings", "webServer", "accounts"];
  * @param config - the plugin's deployment configuration (settings base layer).
  */
 export function apply(ctx: Context, config: VoiceConfig): void {
-  let   /** current implementation. */
-current: () => VoiceConfig = () => config;
+  let /** current implementation. */ current: () => VoiceConfig = () => config;
   installSettingsSection(ctx, VOICE_NS, Config, config, {
     setSource: (source) => {
       current = source;

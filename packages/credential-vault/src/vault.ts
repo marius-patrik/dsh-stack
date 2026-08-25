@@ -134,14 +134,14 @@ function decrypt(key: Buffer, entry: StoredEntry): string {
  * is written by one process at a time in practice).
  */
 export class Vault {
-    /** Constructs an instance. */
-constructor(
+  /** Constructs an instance. */
+  constructor(
     readonly filePath: string,
     readonly keyFile: string,
   ) {}
 
-    /** load implementation. */
-private async load(): Promise<StoredVault> {
+  /** load implementation. */
+  private async load(): Promise<StoredVault> {
     try {
       const parsed: unknown = JSON.parse(await fs.readFile(this.filePath, "utf8"));
       if (
@@ -158,8 +158,8 @@ private async load(): Promise<StoredVault> {
     return emptyVault();
   }
 
-    /** save implementation. */
-private async save(stored: StoredVault): Promise<void> {
+  /** save implementation. */
+  private async save(stored: StoredVault): Promise<void> {
     const serialized = JSON.stringify(stored);
     await fs.mkdir(dirname(this.filePath), { recursive: true });
     const temp = `${this.filePath}.tmp`;
@@ -167,8 +167,8 @@ private async save(stored: StoredVault): Promise<void> {
     await fs.rename(temp, this.filePath);
   }
 
-    /** get implementation. */
-async get(ref: string): Promise<string | undefined> {
+  /** get implementation. */
+  async get(ref: string): Promise<string | undefined> {
     const entry = (await this.load()).entries[ref];
     if (entry === undefined) return undefined;
     const key = await loadOrCreateKey(this.keyFile);
@@ -181,8 +181,8 @@ async get(ref: string): Promise<string | undefined> {
     }
   }
 
-    /** set implementation. */
-async set(ref: string, value: string): Promise<void> {
+  /** set implementation. */
+  async set(ref: string, value: string): Promise<void> {
     if (value.length === 0)
       throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
     const key = await loadOrCreateKey(this.keyFile);
@@ -191,16 +191,16 @@ async set(ref: string, value: string): Promise<void> {
     await this.save(stored);
   }
 
-    /** unset implementation. */
-async unset(ref: string): Promise<void> {
+  /** unset implementation. */
+  async unset(ref: string): Promise<void> {
     const stored = await this.load();
     if (!(ref in stored.entries)) return;
     delete stored.entries[ref];
     await this.save(stored);
   }
 
-    /** list implementation. */
-async list(): Promise<string[]> {
+  /** list implementation. */
+  async list(): Promise<string[]> {
     return Object.keys((await this.load()).entries).sort();
   }
 }

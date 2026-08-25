@@ -9,14 +9,14 @@ const dir = "/Users/user/.agents/vault",
   SEP = String.fromCharCode(31);
 const key = Buffer.from(readFileSync(`${dir}/master.key`, "utf8").trim(), "base64");
 const /** read implementation. */
-read = (id) => {
-  const e = JSON.parse(readFileSync(`${dir}/${id}.vault`, "utf8"));
-  const d = createDecipheriv("aes-256-gcm", key, Buffer.from(e.iv, "base64"));
-  d.setAAD(Buffer.from(`${e.id}${SEP}${e.type}`, "utf8"));
-  d.setAuthTag(Buffer.from(e.authTag, "base64"));
-  const r = JSON.parse(d.update(e.ciphertext, "base64", "utf8") + d.final("utf8"));
-  return r.material.accessToken ?? r.material.apiKey;
-};
+  read = (id) => {
+    const e = JSON.parse(readFileSync(`${dir}/${id}.vault`, "utf8"));
+    const d = createDecipheriv("aes-256-gcm", key, Buffer.from(e.iv, "base64"));
+    d.setAAD(Buffer.from(`${e.id}${SEP}${e.type}`, "utf8"));
+    d.setAuthTag(Buffer.from(e.authTag, "base64"));
+    const r = JSON.parse(d.update(e.ciphertext, "base64", "utf8") + d.final("utf8"));
+    return r.material.accessToken ?? r.material.apiKey;
+  };
 const ctx = new Context();
 dialects.apply(ctx, {});
 const route = PROVIDER_ROUTES.find((r) => r.id === "zen");

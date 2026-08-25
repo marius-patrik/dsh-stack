@@ -50,8 +50,8 @@ export class DshClient {
   private muxListener: ((frame: MuxFrame) => void) | null = null;
   private muxConnected = false;
 
-    /** Constructs an instance. */
-constructor(config: DshClientConfig) {
+  /** Constructs an instance. */
+  constructor(config: DshClientConfig) {
     // Strip trailing slash
     this.baseUrl = config.baseUrl.replace(/\/+$/, "");
     this.timeoutMs = config.timeoutMs ?? 30_000;

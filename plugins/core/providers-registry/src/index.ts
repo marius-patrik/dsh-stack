@@ -18,24 +18,24 @@ export class ProvidersRegistryService extends Service {
   static optional = ["icons"];
   private readonly routes = new Map<string, ProviderRoute>();
 
-    /** Constructs an instance. */
-constructor(ctx: Context) {
+  /** Constructs an instance. */
+  constructor(ctx: Context) {
     super(ctx, "providers");
   }
 
-    /** registerRoute implementation. */
-registerRoute(route: ProviderRoute): void {
+  /** registerRoute implementation. */
+  registerRoute(route: ProviderRoute): void {
     if (!route.id.trim()) throw new Error("Provider route id must be non-empty");
     this.routes.set(route.id, { ...route, models: [...route.models] });
   }
 
-    /** getRoute implementation. */
-getRoute(id: string): ProviderRoute | undefined {
+  /** getRoute implementation. */
+  getRoute(id: string): ProviderRoute | undefined {
     return this.routes.get(id);
   }
 
-    /** listRoutes implementation. */
-listRoutes(): ProviderRoute[] {
+  /** listRoutes implementation. */
+  listRoutes(): ProviderRoute[] {
     return Array.from(this.routes.values(), (route) => ({ ...route, models: [...route.models] }));
   }
 }
@@ -47,15 +47,15 @@ export interface QuotaMeter {
 }
 
 export class QuotasService extends Service {
-    /** Constructs an instance. */
-constructor(ctx: Context) {
+  /** Constructs an instance. */
+  constructor(ctx: Context) {
     super(ctx, "quotas");
   }
 
   private readonly meters = new Map<string, QuotaMeter>();
 
-    /** setQuota implementation. */
-setQuota(provider: string, used: number, limit: number): void {
+  /** setQuota implementation. */
+  setQuota(provider: string, used: number, limit: number): void {
     if (!provider.trim()) throw new Error("Quota provider id must be non-empty");
     if (!Number.isFinite(used) || !Number.isFinite(limit) || limit < 0 || used < 0) {
       throw new Error("Quota values must be finite non-negative numbers");
@@ -63,8 +63,8 @@ setQuota(provider: string, used: number, limit: number): void {
     this.meters.set(provider, { used, limit, remaining: Math.max(0, limit - used) });
   }
 
-    /** getQuota implementation. */
-getQuota(provider: string): QuotaMeter | undefined {
+  /** getQuota implementation. */
+  getQuota(provider: string): QuotaMeter | undefined {
     const meter = this.meters.get(provider);
     return meter ? { ...meter } : undefined;
   }

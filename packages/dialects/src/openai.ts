@@ -142,8 +142,8 @@ function stripTrailingSlash(base: string): string {
 export const openaiDialect: Dialect = {
   id: "openai",
 
-    /** serialize implementation. */
-serialize(
+  /** serialize implementation. */
+  serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -201,8 +201,8 @@ serialize(
     };
   },
 
-    /** parse implementation. */
-parse(body, onActivity) {
+  /** parse implementation. */
+  parse(body, onActivity) {
     return translateOpenAi(parseSseData(body, onActivity));
   },
 };

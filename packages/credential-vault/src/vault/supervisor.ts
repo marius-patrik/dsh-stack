@@ -450,8 +450,8 @@ export class ReauthSupervisor {
   readonly #emitted = new Map<string, TerminalReason>();
   readonly #events: ReauthRequired[] = [];
 
-    /** Constructs an instance. */
-constructor(options: ReauthSupervisorOptions) {
+  /** Constructs an instance. */
+  constructor(options: ReauthSupervisorOptions) {
     this.#vault = options.vault;
     this.#now = options.now ?? (() => Date.now());
     this.#refreshSkewMs = options.refreshSkewMs ?? 120_000;
@@ -610,8 +610,8 @@ constructor(options: ReauthSupervisorOptions) {
     this.#emitted.delete(id);
   }
 
-    /** #refreshOAuth implementation. */
-async #refreshOAuth(
+  /** #refreshOAuth implementation. */
+  async #refreshOAuth(
     record: OAuthTokenRecord,
     options: { force?: boolean } = {},
   ): Promise<EnsureFreshOutcome> {
@@ -669,15 +669,15 @@ async #refreshOAuth(
     return { kind: "refreshed", record: stored ?? record };
   }
 
-    /** #isDue implementation. */
-#isDue(record: SecretRecord): boolean {
+  /** #isDue implementation. */
+  #isDue(record: SecretRecord): boolean {
     const expiresAt = effectiveExpiryMs(record);
     if (expiresAt === null) return false;
     return this.#now() + this.#refreshSkewMs >= expiresAt;
   }
 
-    /** #healthOf implementation. */
-#healthOf(record: SecretRecord, all: readonly SecretRecord[], nowMs: number): CredentialHealth {
+  /** #healthOf implementation. */
+  #healthOf(record: SecretRecord, all: readonly SecretRecord[], nowMs: number): CredentialHealth {
     const descriptor = descriptorOf(record);
     const expiryMs = effectiveExpiryMs(record);
     const failure = this.#failures.get(record.id);
@@ -725,8 +725,8 @@ async #refreshOAuth(
     };
   }
 
-    /** #raise implementation. */
-async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequired> {
+  /** #raise implementation. */
+  async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequired> {
     const all: SecretRecord[] = [];
     for (const id of await this.#vault.list()) {
       const peer = await this.#vault.get(id);
@@ -762,8 +762,8 @@ async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequir
     return event;
   }
 
-    /** #recordRecoverable implementation. */
-#recordRecoverable(id: string, reason: string): number {
+  /** #recordRecoverable implementation. */
+  #recordRecoverable(id: string, reason: string): number {
     const previous = this.#failures.get(id);
     const attempts = (previous?.terminalReason ? 0 : (previous?.attempts ?? 0)) + 1;
     this.#failures.set(id, {
@@ -775,8 +775,8 @@ async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequir
     return attempts;
   }
 
-    /** #backoff implementation. */
-#backoff(attempt: number): number {
+  /** #backoff implementation. */
+  #backoff(attempt: number): number {
     const core = Math.min(this.#maxBackoffMs, this.#baseBackoffMs * 2 ** Math.max(0, attempt));
     const jitter = core * 0.2 * (this.#random() * 2 - 1);
     return Math.max(0, Math.round(core + jitter));

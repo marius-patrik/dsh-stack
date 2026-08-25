@@ -59,12 +59,12 @@ const llm = {
   configurable: [],
   adapter: undefined,
   registeredProviders: undefined,
-    /** registerConfigurableProviders implementation. */
-registerConfigurableProviders(entries) {
+  /** registerConfigurableProviders implementation. */
+  registerConfigurableProviders(entries) {
     this.configurable.push(...entries);
   },
-    /** registerAdapter implementation. */
-registerAdapter(registered, adapter) {
+  /** registerAdapter implementation. */
+  registerAdapter(registered, adapter) {
     this.adapter = adapter;
     this.registeredProviders = [...registered];
     return { replace: () => {}, dispose: () => {} };
@@ -72,15 +72,15 @@ registerAdapter(registered, adapter) {
 };
 ctx.provide("llm", llm);
 const settings = {
-    /** register implementation. */
-register(_ns, _schema, opts) {
+  /** register implementation. */
+  register(_ns, _schema, opts) {
     return { get: () => opts.base, watch: () => undefined };
   },
 };
 ctx.provide("settings", settings);
 const credentialsMin = {
-    /** resolve implementation. */
-async resolve(ref) {
+  /** resolve implementation. */
+  async resolve(ref) {
     if (ref === "CLAUDE_SUB_OAUTH_TOKEN") return { value: "test-oauth-token", source: "test" };
     if (ref === "OPENAI_API_KEY") return { value: "test-openai-key", source: "test" };
     return undefined;
@@ -164,12 +164,12 @@ const llmAll = {
   configurable: [],
   adapter: undefined,
   registeredProviders: undefined,
-    /** registerConfigurableProviders implementation. */
-registerConfigurableProviders(entries) {
+  /** registerConfigurableProviders implementation. */
+  registerConfigurableProviders(entries) {
     this.configurable.push(...entries);
   },
-    /** registerAdapter implementation. */
-registerAdapter(registered, adapter) {
+  /** registerAdapter implementation. */
+  registerAdapter(registered, adapter) {
     this.adapter = adapter;
     this.registeredProviders = [...registered];
     return { replace: () => {}, dispose: () => {} };
@@ -178,8 +178,8 @@ registerAdapter(registered, adapter) {
 ctxAll.provide("llm", llmAll);
 ctxAll.provide("settings", settings);
 const credentialsFull = {
-    /** resolve implementation. */
-async resolve(ref) {
+  /** resolve implementation. */
+  async resolve(ref) {
     if (ref === "CLAUDE_SUB_OAUTH_TOKEN") return { value: "test-oauth-token", source: "test" };
     if (ref === "GROK_SUB_OAUTH_TOKEN") return { value: "test-grok-token", source: "test" };
     if (ref === "GEMINI_SUB_OAUTH_TOKEN") return { value: "test-gemini-token", source: "test" };
@@ -232,8 +232,8 @@ globalThis.fetch = async (url, init) => {
   capturedAuth = init.headers["authorization"];
   return new Response(
     new ReadableStream({
-            /** start implementation. */
-start(controller) {
+      /** start implementation. */
+      start(controller) {
         controller.enqueue(new TextEncoder().encode(sseBody));
         controller.close();
       },
@@ -281,8 +281,8 @@ globalThis.fetch = async (url, init) => {
   capturedAuth = init.headers["authorization"];
   return new Response(
     new ReadableStream({
-            /** start implementation. */
-start(controller) {
+      /** start implementation. */
+      start(controller) {
         controller.enqueue(new TextEncoder().encode(openaiBody));
         controller.close();
       },
@@ -328,8 +328,8 @@ globalThis.fetch = async (url, init) => {
   capturedAuth = init.headers["authorization"];
   return new Response(
     new ReadableStream({
-            /** start implementation. */
-start(controller) {
+      /** start implementation. */
+      start(controller) {
         controller.enqueue(new TextEncoder().encode(openaiBody));
         controller.close();
       },
@@ -339,8 +339,8 @@ start(controller) {
 };
 // Provide ZEN_API_KEY for the stream test — update the existing resolver
 const zenCreds = {
-    /** resolve implementation. */
-async resolve(ref) {
+  /** resolve implementation. */
+  async resolve(ref) {
     if (ref === "CLAUDE_SUB_OAUTH_TOKEN") return { value: "test-oauth-token", source: "test" };
     if (ref === "GROK_SUB_OAUTH_TOKEN") return { value: "test-grok-token", source: "test" };
     if (ref === "GEMINI_SUB_OAUTH_TOKEN") return { value: "test-gemini-token", source: "test" };
@@ -389,8 +389,8 @@ globalThis.fetch = async (url, init) => {
   capturedInit = init;
   return new Response(
     new ReadableStream({
-            /** start implementation. */
-start(controller) {
+      /** start implementation. */
+      start(controller) {
         controller.enqueue(new TextEncoder().encode(openaiBody));
         controller.close();
       },
@@ -430,8 +430,8 @@ globalThis.fetch = async (url, init) => {
   capturedInit = init;
   return new Response(
     new ReadableStream({
-            /** start implementation. */
-start(controller) {
+      /** start implementation. */
+      start(controller) {
         controller.enqueue(new TextEncoder().encode(assistBody));
         controller.close();
       },
@@ -520,10 +520,10 @@ console.log("403 quota classification ok");
   const llmBare = {
     configurable: [],
     adapter: undefined,
-        /** registerConfigurableProviders implementation. */
-registerConfigurableProviders() {},
-        /** registerAdapter implementation. */
-registerAdapter(registered, adapter) {
+    /** registerConfigurableProviders implementation. */
+    registerConfigurableProviders() {},
+    /** registerAdapter implementation. */
+    registerAdapter(registered, adapter) {
       this.adapter = adapter;
       return { replace: () => {}, dispose: () => {} };
     },
@@ -532,8 +532,8 @@ registerAdapter(registered, adapter) {
   ctxBare.provide("settings", settings);
   // Nothing is configured: every route is uncredentialed.
   ctxBare.provide("credentials", {
-        /** resolve implementation. */
-async resolve() {
+    /** resolve implementation. */
+    async resolve() {
       return undefined;
     },
   });
@@ -563,10 +563,10 @@ async resolve() {
   const llmStale = {
     configurable: [],
     adapter: undefined,
-        /** registerConfigurableProviders implementation. */
-registerConfigurableProviders() {},
-        /** registerAdapter implementation. */
-registerAdapter(registered, adapter) {
+    /** registerConfigurableProviders implementation. */
+    registerConfigurableProviders() {},
+    /** registerAdapter implementation. */
+    registerAdapter(registered, adapter) {
       this.adapter = adapter;
       return { replace: () => {}, dispose: () => {} };
     },
@@ -577,17 +577,17 @@ registerAdapter(registered, adapter) {
   // refresh token the provider has already consumed, and an expiry in the past
   // so a refresh is attempted.
   ctxStale.provide("accounts", {
-        /** resolve implementation. */
-async resolve(ref) {
+    /** resolve implementation. */
+    async resolve(ref) {
       if (ref === "CLAUDE_SUB_OAUTH_TOKEN") return { value: "stored-but-expired", source: "test" };
       if (ref === "CLAUDE_SUB_REFRESH_TOKEN") return { value: "consumed-refresh", source: "test" };
       if (ref === "CLAUDE_SUB_EXPIRES") return { value: "1", source: "test" };
       return undefined;
     },
-        /** set implementation. */
-async set() {},
-        /** accounts implementation. */
-async accounts() {
+    /** set implementation. */
+    async set() {},
+    /** accounts implementation. */
+    async accounts() {
       return [];
     },
   });

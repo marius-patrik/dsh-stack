@@ -21,28 +21,28 @@ export interface RepoDetails {
 export class ReposWorkbenchService {
   private repos = new Map<string, RepoDetails>();
 
-    /** Constructs an instance. */
-constructor(private ctx: Context) {
+  /** Constructs an instance. */
+  constructor(private ctx: Context) {
     this.registerVcsTools();
   }
 
-    /** registerRepo implementation. */
-registerRepo(details: RepoDetails): void {
+  /** registerRepo implementation. */
+  registerRepo(details: RepoDetails): void {
     this.repos.set(details.path, details);
   }
 
-    /** getRepo implementation. */
-getRepo(targetPath: string): RepoDetails | undefined {
+  /** getRepo implementation. */
+  getRepo(targetPath: string): RepoDetails | undefined {
     return this.repos.get(targetPath);
   }
 
-    /** listRepos implementation. */
-listRepos(): RepoDetails[] {
+  /** listRepos implementation. */
+  listRepos(): RepoDetails[] {
     return Array.from(this.repos.values());
   }
 
-    /** getOverview implementation. */
-getOverview(repoPath: string) {
+  /** getOverview implementation. */
+  getOverview(repoPath: string) {
     let branch = "main";
     let isLocalOnly = true;
     let remoteUrl: string | undefined;
@@ -85,8 +85,8 @@ getOverview(repoPath: string) {
     };
   }
 
-    /** registerVcsTools implementation. */
-private registerVcsTools(): void {
+  /** registerVcsTools implementation. */
+  private registerVcsTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 

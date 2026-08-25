@@ -714,28 +714,28 @@ rmSync(legacyHome, { recursive: true, force: true });
   });
   await vault.put(oauth);
   const calls = [];
-  const   /** transport implementation. */
-transport = async (request) => {
-    calls.push(request.url);
-    return {
-      status: 200,
-      body: {
-        access_token: "fresh-access",
-        refresh_token: "fresh-refresh",
-        expires_in: 3600,
-        token_type: "Bearer",
-      },
+  const /** transport implementation. */
+    transport = async (request) => {
+      calls.push(request.url);
+      return {
+        status: 200,
+        body: {
+          access_token: "fresh-access",
+          refresh_token: "fresh-refresh",
+          expires_in: 3600,
+          token_type: "Bearer",
+        },
+      };
     };
-  };
-  const   /** authFor implementation. */
-authFor = async () => ({
-    method: "oauth_pkce",
-    authorizeUrl: "https://auth.example/authorize",
-    tokenUrl: "https://token.example/token",
-    clientId: "client-1",
-    scopes: ["openid"],
-    redirect: "loopback",
-  });
+  const /** authFor implementation. */
+    authFor = async () => ({
+      method: "oauth_pkce",
+      authorizeUrl: "https://auth.example/authorize",
+      tokenUrl: "https://token.example/token",
+      clientId: "client-1",
+      scopes: ["openid"],
+      redirect: "loopback",
+    });
   const supervisor = new ReauthSupervisor({
     vault,
     now: () => now,
@@ -1065,8 +1065,7 @@ function firstSecret(material) {
 /** materialEquals implementation. */
 function materialEquals(a, b) {
   if (a.type !== b.type) return false;
-  const   /** reveal implementation. */
-reveal = (value) => value?.reveal?.();
+  const /** reveal implementation. */ reveal = (value) => value?.reveal?.();
   switch (a.type) {
     case "api_key":
       return reveal(a.apiKey) === reveal(b.apiKey) && a.header === b.header;
@@ -1160,20 +1159,22 @@ assert.deepEqual(clientExports.inject, ["slots", "locale"]);
 const registrants = new Map();
 const registrations = [];
 const clientCtx = {
-    /** effect implementation. */
-effect(fn) {
+  /** effect implementation. */
+  effect(fn) {
     fn();
   },
-  locale: {   /** register implementation. */
-/** register implementation. */
-register() {} },
+  locale: {
+    /** register implementation. */
+    /** register implementation. */
+    register() {},
+  },
   slots: {
-        /** inject implementation. */
-inject(name, fn) {
+    /** inject implementation. */
+    inject(name, fn) {
       registrants.set(name, fn);
     },
-        /** register implementation. */
-register(spec) {
+    /** register implementation. */
+    register(spec) {
       registrations.push(spec);
       return spec;
     },

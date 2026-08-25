@@ -43,37 +43,37 @@ const base = {
 const ctx = new Context();
 const registered = [];
 const settings = {
-    /** register implementation. */
-register(_ns, _schema, opts) {
+  /** register implementation. */
+  register(_ns, _schema, opts) {
     return { get: () => opts.base, watch: () => undefined };
   },
 };
 ctx.provide("settings", settings);
 ctx.provide("commands", {
-    /** register implementation. */
-register(def) {
+  /** register implementation. */
+  register(def) {
     registered.push({ name: def.name, description: def.description });
     return () => undefined;
   },
 });
 ctx.provide("webServer", {
-    /** register implementation. */
-register(route) {
+  /** register implementation. */
+  register(route) {
     assert.equal(route.kind, "prefix");
     assert.equal(route.path, "/share");
     return () => undefined;
   },
 });
 ctx.provide("planMode", {
-    /** set implementation. */
-set(_agent, active) {
+  /** set implementation. */
+  set(_agent, active) {
     assert.equal(active, false);
     return "committed";
   },
 });
 ctx.provide("sessions", {
-    /** create implementation. */
-create() {
+  /** create implementation. */
+  create() {
     return {};
   },
 });
@@ -178,22 +178,22 @@ assert.deepEqual(ids, ["abc"]);
 rmSync(join(home, "share.token"), { force: true });
 const handler = share.makeShareHandler(home, "/share", true);
 const /** respond implementation. */
-respond = async (url) => {
-  const res = {
-    _status: 0,
-    _body: "",
-        /** writeHead implementation. */
-writeHead(s) {
-      this._status = s;
-    },
-        /** end implementation. */
-end(b) {
-      this._body = b;
-    },
+  respond = async (url) => {
+    const res = {
+      _status: 0,
+      _body: "",
+      /** writeHead implementation. */
+      writeHead(s) {
+        this._status = s;
+      },
+      /** end implementation. */
+      end(b) {
+        this._body = b;
+      },
+    };
+    await handler({ url }, res);
+    return res;
   };
-  await handler({ url }, res);
-  return res;
-};
 const plain = await respond(`/share/abc`);
 assert.equal(plain._status, 200);
 assert.ok(!plain._body.includes("#live"));
@@ -206,12 +206,12 @@ const roHandler = share.makeShareHandler(home, "/share", false);
 const roRes = {
   _status: 0,
   _body: "",
-    /** writeHead implementation. */
-writeHead(s) {
+  /** writeHead implementation. */
+  writeHead(s) {
     this._status = s;
   },
-    /** end implementation. */
-end(b) {
+  /** end implementation. */
+  end(b) {
     this._body = b;
   },
 };
@@ -289,8 +289,8 @@ const forkSeed = [
 const agent = { session: { events: forkSeed } };
 const forks = [];
 const sessionsStub = {
-    /** create implementation. */
-create(_id, opts) {
+  /** create implementation. */
+  create(_id, opts) {
     forks.push(opts);
     return {};
   },
@@ -337,8 +337,7 @@ const stubModules = {
     bindSnapshotSelector: (observable) => (selector) => selector(observable.getSnapshot()),
   },
 };
-const /** stubRequire implementation. */
-stubRequire = (name) => stubModules[name];
+const /** stubRequire implementation. */ stubRequire = (name) => stubModules[name];
 const clientModule = clientSpec.factory(stubRequire);
 assert.equal(typeof clientModule.apply, "function", "client bundle apply must be a function");
 assert.deepEqual(clientModule.inject, [
@@ -356,33 +355,33 @@ const localeEntries = new Map();
 let localeRevision = 0;
 const allRecords = [];
 const slotsStub = {
-    /** register implementation. */
-register(entry, component) {
+  /** register implementation. */
+  register(entry, component) {
     records.set(entry.name, { entry, component });
     allRecords.push({ entry, component });
     return () => {
       records.delete(entry.name);
     };
   },
-    /** inject implementation. */
-inject(name, fn) {
+  /** inject implementation. */
+  inject(name, fn) {
     const dispose = fn();
     return () => {
       if (dispose) dispose();
     };
   },
-    /** entries implementation. */
-entries(name) {
+  /** entries implementation. */
+  entries(name) {
     const list = [];
     for (const rec of allRecords) if (rec.entry.name === name) list.push(rec);
     return list.map((rec) => ({ options: rec.entry }));
   },
-    /** getVersion implementation. */
-getVersion() {
+  /** getVersion implementation. */
+  getVersion() {
     return 1;
   },
-    /** subscribe implementation. */
-subscribe() {
+  /** subscribe implementation. */
+  subscribe() {
     return () => {};
   },
 };
@@ -396,52 +395,56 @@ const connectionStub = {
   },
 };
 const ctxStub = {
-    /** effect implementation. */
-effect(fn) {
+  /** effect implementation. */
+  effect(fn) {
     fn();
     return () => {};
   },
-    /** on implementation. */
-on() {
+  /** on implementation. */
+  on() {
     return () => {};
   },
-    /** get implementation. */
-get(name) {
+  /** get implementation. */
+  get(name) {
     if (name === "connection") return connectionStub;
     throw new Error("unexpected get: " + name);
   },
   locale: {
-        /** register implementation. */
-register(ns, dicts) {
+    /** register implementation. */
+    register(ns, dicts) {
       localeEntries.set(ns, dicts);
     },
-        /** bind implementation. */
-bind(ns) {
+    /** bind implementation. */
+    bind(ns) {
       const dicts = localeEntries.get(ns);
       return (key) => (dicts && dicts.zh[key] !== undefined ? dicts.zh[key] : key);
     },
-        /** getSnapshot implementation. */
-getSnapshot() {
+    /** getSnapshot implementation. */
+    getSnapshot() {
       return { revision: localeRevision };
     },
-        /** subscribe implementation. */
-subscribe() {
+    /** subscribe implementation. */
+    subscribe() {
       return () => {};
     },
   },
-  layout: {   /** toggleSidebar implementation. */
-/** toggleSidebar implementation. */
-toggleSidebar() {} },
-  workspaces: {   /** startSession implementation. */
-/** startSession implementation. */
-startSession() {} },
+  layout: {
+    /** toggleSidebar implementation. */
+    /** toggleSidebar implementation. */
+    toggleSidebar() {},
+  },
+  workspaces: {
+    /** startSession implementation. */
+    /** startSession implementation. */
+    startSession() {},
+  },
   slots: slotsStub,
 };
 clientModule.apply(ctxStub);
 
 const /** assertRegistered implementation. */
-assertRegistered = (name, reason) =>
-  assert.ok(records.has(name), `${reason}: ${name} not registered`);
+  assertRegistered = (name, reason) =>
+    assert.ok(records.has(name), `${reason}: ${name} not registered`);
 assertRegistered("sidebar", "Phase A");
 assertRegistered("sidebar.newSession", "Phase A");
 assertRegistered("sidebar.settings", "Phase A");

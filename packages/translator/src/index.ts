@@ -46,21 +46,21 @@ export type TranslateFn = (input: unknown) => unknown;
 export class TranslatorRegistry {
   private readonly converters = new Map<string, TranslateFn>();
 
-    /** register implementation. */
-register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
+  /** register implementation. */
+  register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
     this.converters.set(`${sourceFormat}->${targetFormat}`, fn);
   }
 
-    /** translate implementation. */
-translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
+  /** translate implementation. */
+  translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     if (sourceFormat === targetFormat) return data;
     const fn = this.converters.get(`${sourceFormat}->${targetFormat}`);
     if (fn === undefined) throw new Error(`no converter for ${sourceFormat} -> ${targetFormat}`);
     return fn(data);
   }
 
-    /** supportedConversions implementation. */
-supportedConversions(): readonly string[] {
+  /** supportedConversions implementation. */
+  supportedConversions(): readonly string[] {
     return [...this.converters.keys()];
   }
 }
@@ -146,8 +146,8 @@ export class TranslatorService extends Service {
   static inject: string[] = [];
   readonly registry = new TranslatorRegistry();
 
-    /** Constructs an instance. */
-constructor(ctx: Context, _config: Config = {}) {
+  /** Constructs an instance. */
+  constructor(ctx: Context, _config: Config = {}) {
     super(ctx, "translators");
     this.registry.register("opencode", "dsh", opencodeToDsh);
     this.registry.register("dsh", "opencode", dshToOpencode);
@@ -157,16 +157,16 @@ constructor(ctx: Context, _config: Config = {}) {
     this.registry.register("claude", "opencode", (data) => dshToOpencode(claudeToDsh(data)));
   }
 
-    /** register implementation. */
-register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
+  /** register implementation. */
+  register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
     this.registry.register(sourceFormat, targetFormat, fn);
   }
-    /** translate implementation. */
-translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
+  /** translate implementation. */
+  translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     return this.registry.translate(data, sourceFormat, targetFormat);
   }
-    /** supportedConversions implementation. */
-supportedConversions(): readonly string[] {
+  /** supportedConversions implementation. */
+  supportedConversions(): readonly string[] {
     return this.registry.supportedConversions();
   }
 }

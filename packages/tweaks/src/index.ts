@@ -140,12 +140,11 @@ function installSection<T>(
 /** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
   const currentHome = resolveHome();
-  let   /** current implementation. */
-current: () => Config = () => config;
-  const   /** mirror implementation. */
-mirror = (): void => {
-    void mirrorTweaks(currentHome, current, ctx.logger);
-  };
+  let /** current implementation. */ current: () => Config = () => config;
+  const /** mirror implementation. */
+    mirror = (): void => {
+      void mirrorTweaks(currentHome, current, ctx.logger);
+    };
   // The launcher reads settings.yaml before this process exists, so the first
   // mirror must run even when no settings provider is mounted: it bootstrap
   // the document for the next launch.

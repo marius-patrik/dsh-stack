@@ -9,20 +9,20 @@ export class SkillLoaderService extends Service {
   static inject = ["tools"];
   private loadedSkills = new Set<string>();
 
-    /** Constructs an instance. */
-constructor(ctx: Context) {
+  /** Constructs an instance. */
+  constructor(ctx: Context) {
     super(ctx, "skills");
   }
 
-    /** loadSkill implementation. */
-loadSkill(skillName: string): boolean {
+  /** loadSkill implementation. */
+  loadSkill(skillName: string): boolean {
     if (!skillName.trim()) return false;
     this.loadedSkills.add(skillName);
     return true;
   }
 
-    /** hasSkill implementation. */
-hasSkill(skillName: string): boolean {
+  /** hasSkill implementation. */
+  hasSkill(skillName: string): boolean {
     return this.loadedSkills.has(skillName);
   }
 }

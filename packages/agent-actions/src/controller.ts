@@ -57,8 +57,8 @@ export function foldAction(
 export class ActionsController {
   private readonly states = new WeakMap<object, ActionState>();
 
-    /** Constructs an instance. */
-constructor(
+  /** Constructs an instance. */
+  constructor(
     private readonly defaultAction: string,
     private readonly valid: (id: string) => boolean,
   ) {}

@@ -69,8 +69,8 @@ export function apply(ctx: Context, config: FormatterConfigType): void {
   );
 
   ctx.inject(["settings"], (sctx) => {
-    const     /** settings implementation. */
-settings = () => sctx.settings.get(NS) as FormatterSettingsType | undefined;
+    const /** settings implementation. */
+      settings = () => sctx.settings.get(NS) as FormatterSettingsType | undefined;
 
     ctx.tools.register(
       defineTool({
@@ -104,8 +104,8 @@ settings = () => sctx.settings.get(NS) as FormatterSettingsType | undefined;
             },
           ],
         },
-                /** execute implementation. */
-async execute(args, exec) {
+        /** execute implementation. */
+        async execute(args, exec) {
           const command = commandFor(settings(), config, args.path);
           if (!command)
             throw new Error(

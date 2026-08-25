@@ -67,14 +67,15 @@ export function runBacktest(
   const trades: Trade[] = [];
   const equityCurve: number[] = [];
 
-  const   /** executionPrice implementation. */
-executionPrice = (price: number, side: "buy" | "sell"): number =>
-    side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
-  const   /** mark implementation. */
-mark = (price: number): number =>
-    position === null
-      ? cash
-      : cash + (position.side === "long" ? position.quantity * price : -position.quantity * price);
+  const /** executionPrice implementation. */
+    executionPrice = (price: number, side: "buy" | "sell"): number =>
+      side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
+  const /** mark implementation. */
+    mark = (price: number): number =>
+      position === null
+        ? cash
+        : cash +
+          (position.side === "long" ? position.quantity * price : -position.quantity * price);
 
   for (const candle of candles) {
     currentCandle = candle;
@@ -133,22 +134,22 @@ mark = (price: number): number =>
     trades,
   };
 
-    /** openLong implementation. */
-function openLong(quantity: number): void {
+  /** openLong implementation. */
+  function openLong(quantity: number): void {
     const price = executionPrice(currentCandle.close, "buy");
     position = { side: "long", quantity, entryPrice: price, entryTime: currentCandle.time };
     cash -= quantity * price + commission;
   }
 
-    /** openShort implementation. */
-function openShort(quantity: number): void {
+  /** openShort implementation. */
+  function openShort(quantity: number): void {
     const price = executionPrice(currentCandle.close, "sell");
     position = { side: "short", quantity, entryPrice: price, entryTime: currentCandle.time };
     cash += quantity * price - commission;
   }
 
-    /** closeAt implementation. */
-function closeAt(price: number, time: number): void {
+  /** closeAt implementation. */
+  function closeAt(price: number, time: number): void {
     if (position === null) return;
     const exitPrice =
       position.side === "long" ? executionPrice(price, "sell") : executionPrice(price, "buy");
@@ -172,8 +173,8 @@ function closeAt(price: number, time: number): void {
     position = null;
   }
 
-    /** close implementation. */
-function close(): void {
+  /** close implementation. */
+  function close(): void {
     closeAt(currentCandle.close, currentCandle.time);
   }
 }

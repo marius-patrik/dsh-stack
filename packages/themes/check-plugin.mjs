@@ -165,8 +165,8 @@ const registered = [];
 const sections = new Map([[NS, { active: "" }]]);
 ctx.provide("settings", {
   get: (ns) => sections.get(ns),
-    /** register implementation. */
-register(_ns, _schema, opts) {
+  /** register implementation. */
+  register(_ns, _schema, opts) {
     sections.set(_ns, opts.base);
     return {
       get: (ns) => sections.get(ns),
@@ -175,8 +175,8 @@ register(_ns, _schema, opts) {
   },
 });
 ctx.provide("webServer", {
-    /** register implementation. */
-register(route) {
+  /** register implementation. */
+  register(route) {
     registered.push(route);
     return () => undefined;
   },
@@ -194,12 +194,12 @@ sections.set(NS, { active: "monokai-pro" });
 const res = {
   _status: 0,
   _body: "",
-    /** writeHead implementation. */
-writeHead(s) {
+  /** writeHead implementation. */
+  writeHead(s) {
     this._status = s;
   },
-    /** end implementation. */
-end(b) {
+  /** end implementation. */
+  end(b) {
     this._body = b;
   },
 };
@@ -236,30 +236,30 @@ assert.deepEqual(clientExports.inject, ["slots", "theme"]);
 const clientRegistrants = new Map();
 globalThis.fetch = async () => ({ ok: true, json: async () => ({ active: "", themes: [] }) });
 const clientCtx = {
-    /** effect implementation. */
-effect(fn) {
+  /** effect implementation. */
+  effect(fn) {
     fn();
   },
-    /** on implementation. */
-on() {
+  /** on implementation. */
+  on() {
     return () => undefined;
   },
   theme: {
     getTheme: () => ({ active: { id: "light" }, themes: [] }),
-        /** setTheme implementation. */
-setTheme() {},
-        /** register implementation. */
-register() {
+    /** setTheme implementation. */
+    setTheme() {},
+    /** register implementation. */
+    register() {
       return () => undefined;
     },
   },
   slots: {
-        /** inject implementation. */
-inject(name, fn) {
+    /** inject implementation. */
+    inject(name, fn) {
       clientRegistrants.set(name, fn);
     },
-        /** register implementation. */
-register(spec) {
+    /** register implementation. */
+    register(spec) {
       return spec;
     },
   },

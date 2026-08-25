@@ -29,8 +29,8 @@ export interface ActionCatalogConfig {
 export class ActionCatalog {
   private readonly fileActions = new Map<string, ActionSpec>();
 
-    /** Constructs an instance. */
-constructor(private readonly config: ActionCatalogConfig) {}
+  /** Constructs an instance. */
+  constructor(private readonly config: ActionCatalogConfig) {}
 
   /** Re-index the authoring root. Never throws; unreadable files are skipped. */
   async load(): Promise<void> {

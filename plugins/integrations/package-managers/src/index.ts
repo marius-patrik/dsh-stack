@@ -17,13 +17,13 @@ export interface DetectedRuntime {
 export class PackageManagersService {
   private customRunners = new Map<string, (script: string, cwd: string) => Promise<string>>();
 
-    /** Constructs an instance. */
-constructor(private ctx: Context) {
+  /** Constructs an instance. */
+  constructor(private ctx: Context) {
     this.registerPackageTools();
   }
 
-    /** detect implementation. */
-detect(projectPath: string): DetectedRuntime[] {
+  /** detect implementation. */
+  detect(projectPath: string): DetectedRuntime[] {
     const results: DetectedRuntime[] = [];
 
     const checks: Array<{ lock: string; type: DetectedRuntime["type"]; cmd: string }> = [
@@ -67,8 +67,8 @@ detect(projectPath: string): DetectedRuntime[] {
     return results;
   }
 
-    /** registerPackageTools implementation. */
-private registerPackageTools(): void {
+  /** registerPackageTools implementation. */
+  private registerPackageTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 

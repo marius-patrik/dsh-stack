@@ -17,8 +17,8 @@ window.__ModuleLoader__.load({
      * slot ledger.
      */
     var MODES_ROUTE = "/actions";
-        /** SessionModesGlyph implementation. */
-function SessionModesGlyph(props) {
+    /** SessionModesGlyph implementation. */
+    function SessionModesGlyph(props) {
       var React = require("react");
       var size = (props && props.size) || 16;
       return React.createElement(
@@ -45,8 +45,8 @@ function SessionModesGlyph(props) {
         React.createElement("line", { x1: "16", x2: "16", y1: "18", y2: "22" }),
       );
     }
-        /** SessionModesSection implementation. */
-function SessionModesSection(props) {
+    /** SessionModesSection implementation. */
+    function SessionModesSection(props) {
       var React = require("react");
       var h = React.createElement;
       var useState = React.useState,
@@ -173,8 +173,8 @@ function SessionModesSection(props) {
         ),
       );
     }
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       ctx.slots.inject(
         "settings.section",
         () =>

@@ -22,8 +22,8 @@ window.__ModuleLoader__.load({
      * the section + glyph re-register through the slot ledger.
      */
     var THEMES_ROUTE = "/themes.json";
-        /** createThemeObservable implementation. */
-function createThemeObservable(ctx) {
+    /** createThemeObservable implementation. */
+    function createThemeObservable(ctx) {
       var listeners = new Set();
       var snapshot = ctx.theme.getTheme();
       var off = ctx.on("theme/change", function (next) {
@@ -45,8 +45,8 @@ function createThemeObservable(ctx) {
         dispose: off,
       };
     }
-        /** applyBorderStyle implementation. */
-function applyBorderStyle(style) {
+    /** applyBorderStyle implementation. */
+    function applyBorderStyle(style) {
       if (typeof document === "undefined") return;
       var id = "dsh-border-style-override";
       var el = document.getElementById(id);
@@ -87,8 +87,8 @@ function applyBorderStyle(style) {
       }
     }
 
-        /** applyOledStyles implementation. */
-function applyOledStyles(isOled) {
+    /** applyOledStyles implementation. */
+    function applyOledStyles(isOled) {
       if (typeof document === "undefined") return;
       var id = "dsh-oled-style-override";
       var el = document.getElementById(id);
@@ -159,8 +159,8 @@ function applyOledStyles(isOled) {
       }
     }
 
-        /** ThemesGlyph implementation. */
-function ThemesGlyph(props) {
+    /** ThemesGlyph implementation. */
+    function ThemesGlyph(props) {
       var React = require("react");
       var size = (props && props.size) || 16;
       return React.createElement(
@@ -186,8 +186,8 @@ function ThemesGlyph(props) {
       );
     }
 
-        /** ThemesSection implementation. */
-function ThemesSection(props) {
+    /** ThemesSection implementation. */
+    function ThemesSection(props) {
       var React = require("react");
       var h = React.createElement;
       var useThemeSnapshot = props.useThemeSnapshot,
@@ -220,116 +220,118 @@ function ThemesSection(props) {
       var showHeroBanner = heroBannerState[0],
         setShowHeroBanner = heroBannerState[1];
 
-      var       /** setBorderChoice implementation. */
-setBorderChoice = function (style) {
-        setBorderStyle(style);
-        try {
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_border_style", style);
-          }
-        } catch (e) {}
-        applyBorderStyle(style);
-        if (typeof window !== "undefined")
-          window.dispatchEvent(new CustomEvent("dsh:settings-change"));
-      };
+      var /** setBorderChoice implementation. */
+        setBorderChoice = function (style) {
+          setBorderStyle(style);
+          try {
+            if (typeof window !== "undefined" && window.localStorage) {
+              window.localStorage.setItem("dsh_border_style", style);
+            }
+          } catch (e) {}
+          applyBorderStyle(style);
+          if (typeof window !== "undefined")
+            window.dispatchEvent(new CustomEvent("dsh:settings-change"));
+        };
 
-      var       /** toggleHeroBanner implementation. */
-toggleHeroBanner = function () {
-        var next = !showHeroBanner;
-        setShowHeroBanner(next);
-        try {
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_show_hero_banner", next ? "true" : "false");
+      var /** toggleHeroBanner implementation. */
+        toggleHeroBanner = function () {
+          var next = !showHeroBanner;
+          setShowHeroBanner(next);
+          try {
+            if (typeof window !== "undefined" && window.localStorage) {
+              window.localStorage.setItem("dsh_show_hero_banner", next ? "true" : "false");
+            }
+          } catch (e) {}
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("dsh:settings-change"));
+            window.dispatchEvent(new Event("storage"));
           }
-        } catch (e) {}
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("dsh:settings-change"));
-          window.dispatchEvent(new Event("storage"));
-        }
-      };
+        };
 
       var groups = {};
       for (var i = 0; i < themes.length; i++) {
         var theme = themes[i];
         (groups[theme.colorScheme] = groups[theme.colorScheme] || []).push(theme);
       }
-      var       /** themeButton implementation. */
-themeButton = function (theme) {
-        var isActive = theme.id === active;
-        return h(
-          "button",
-          {
-            key: theme.id,
-            type: "button",
-            onClick: function () {
-              applyTheme(theme.id);
-              applyOledStyles(theme.id === "oled");
-            },
-            "aria-pressed": isActive,
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              border: isActive
-                ? "1px solid var(--dsw-alias-border-accent)"
-                : "1px solid var(--dsw-alias-border-l2)",
-              borderRadius: "10px",
-              padding: "12px 14px",
-              background: isActive ? "var(--dsw-specific-sidebar-nav-item-active)" : "transparent",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              fontSize: "14px",
-              color: "var(--dsw-alias-label-primary)",
-              textAlign: "left",
-            },
-          },
-          h("span", {
-            style: {
-              width: "12px",
-              height: "12px",
-              borderRadius: "3px",
-              flex: "none",
-              background: theme.colorScheme === "dark" ? "#1f2430" : "#ffffff",
-              border: "1px solid var(--dsw-alias-border-l2)",
-            },
-          }),
-          h("span", null, theme.id),
-          isActive
-            ? h("strong", { style: { marginLeft: "auto", fontSize: "12px" } }, "Active")
-            : null,
-        );
-      };
-      var       /** schemeGroup implementation. */
-schemeGroup = function (scheme) {
-        var list = groups[scheme];
-        if (!list || list.length === 0) return null;
-        return h(
-          "div",
-          { key: scheme, style: { display: "grid", gap: "8px" } },
-          h(
-            "div",
+      var /** themeButton implementation. */
+        themeButton = function (theme) {
+          var isActive = theme.id === active;
+          return h(
+            "button",
             {
+              key: theme.id,
+              type: "button",
+              onClick: function () {
+                applyTheme(theme.id);
+                applyOledStyles(theme.id === "oled");
+              },
+              "aria-pressed": isActive,
               style: {
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "var(--dsw-alias-label-secondary)",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                border: isActive
+                  ? "1px solid var(--dsw-alias-border-accent)"
+                  : "1px solid var(--dsw-alias-border-l2)",
+                borderRadius: "10px",
+                padding: "12px 14px",
+                background: isActive
+                  ? "var(--dsw-specific-sidebar-nav-item-active)"
+                  : "transparent",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontSize: "14px",
+                color: "var(--dsw-alias-label-primary)",
+                textAlign: "left",
               },
             },
-            scheme === "light" ? "Light Palettes" : "Dark Palettes",
-          ),
-          h(
-            "div",
-            {
+            h("span", {
               style: {
-                display: "grid",
-                gap: "8px",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                width: "12px",
+                height: "12px",
+                borderRadius: "3px",
+                flex: "none",
+                background: theme.colorScheme === "dark" ? "#1f2430" : "#ffffff",
+                border: "1px solid var(--dsw-alias-border-l2)",
               },
-            },
-            list.map(themeButton),
-          ),
-        );
-      };
+            }),
+            h("span", null, theme.id),
+            isActive
+              ? h("strong", { style: { marginLeft: "auto", fontSize: "12px" } }, "Active")
+              : null,
+          );
+        };
+      var /** schemeGroup implementation. */
+        schemeGroup = function (scheme) {
+          var list = groups[scheme];
+          if (!list || list.length === 0) return null;
+          return h(
+            "div",
+            { key: scheme, style: { display: "grid", gap: "8px" } },
+            h(
+              "div",
+              {
+                style: {
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  color: "var(--dsw-alias-label-secondary)",
+                },
+              },
+              scheme === "light" ? "Light Palettes" : "Dark Palettes",
+            ),
+            h(
+              "div",
+              {
+                style: {
+                  display: "grid",
+                  gap: "8px",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                },
+              },
+              list.map(themeButton),
+            ),
+          );
+        };
       var currentScheme = snapshot && snapshot.active ? snapshot.active.colorScheme : "dark";
 
       var isOledActive = snapshot && snapshot.active ? snapshot.active.id === "oled" : false;
@@ -627,26 +629,26 @@ schemeGroup = function (scheme) {
       },
     };
 
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       var themeObservable;
-      var       /** getSavedTheme implementation. */
-getSavedTheme = function () {
-        try {
-          if (typeof window !== "undefined" && window.localStorage) {
-            return window.localStorage.getItem("dsh_active_theme");
-          }
-        } catch (e) {}
-        return null;
-      };
-      var       /** saveActiveTheme implementation. */
-saveActiveTheme = function (id) {
-        try {
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_active_theme", id);
-          }
-        } catch (e) {}
-      };
+      var /** getSavedTheme implementation. */
+        getSavedTheme = function () {
+          try {
+            if (typeof window !== "undefined" && window.localStorage) {
+              return window.localStorage.getItem("dsh_active_theme");
+            }
+          } catch (e) {}
+          return null;
+        };
+      var /** saveActiveTheme implementation. */
+        saveActiveTheme = function (id) {
+          try {
+            if (typeof window !== "undefined" && window.localStorage) {
+              window.localStorage.setItem("dsh_active_theme", id);
+            }
+          } catch (e) {}
+        };
 
       // Initialize border styles and OLED styles on boot
       try {

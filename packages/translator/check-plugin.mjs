@@ -6,12 +6,12 @@ import { readFileSync } from "node:fs";
 
 let ok = true;
 const /** assert implementation. */
-assert = (cond, msg) => {
-  if (!cond) {
-    ok = false;
-    console.error(`FAIL: ${msg}`);
-  }
-};
+  assert = (cond, msg) => {
+    if (!cond) {
+      ok = false;
+      console.error(`FAIL: ${msg}`);
+    }
+  };
 
 const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
 assert(pkg.name === "dsh-translator", `name should be dsh-translator, got ${pkg.name}`);

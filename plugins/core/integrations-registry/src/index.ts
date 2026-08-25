@@ -19,24 +19,24 @@ export class IntegrationsRegistryService extends Service {
   static optional = ["icons"];
   private readonly registry = new Map<string, IntegrationEntry>();
 
-    /** Constructs an instance. */
-constructor(ctx: Context) {
+  /** Constructs an instance. */
+  constructor(ctx: Context) {
     super(ctx, "integrations");
   }
 
-    /** register implementation. */
-register(entry: IntegrationEntry): void {
+  /** register implementation. */
+  register(entry: IntegrationEntry): void {
     if (!entry.id.trim()) throw new Error("Integration id must be non-empty");
     this.registry.set(entry.id, { ...entry });
   }
 
-    /** get implementation. */
-get(id: string): IntegrationEntry | undefined {
+  /** get implementation. */
+  get(id: string): IntegrationEntry | undefined {
     return this.registry.get(id);
   }
 
-    /** all implementation. */
-all(): IntegrationEntry[] {
+  /** all implementation. */
+  all(): IntegrationEntry[] {
     return Array.from(this.registry.values(), (entry) => ({ ...entry }));
   }
 }

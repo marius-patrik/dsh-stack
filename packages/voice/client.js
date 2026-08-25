@@ -23,8 +23,8 @@ window.__ModuleLoader__.load({
 
     // ── host config (non-secret slice) ─────────────────────────────────────
     var hostConfig = { value: null, pending: null };
-        /** fetchHostConfig implementation. */
-function fetchHostConfig(force) {
+    /** fetchHostConfig implementation. */
+    function fetchHostConfig(force) {
       if (hostConfig.value !== null && !force) return Promise.resolve(hostConfig.value);
       if (hostConfig.pending !== null && !force) return hostConfig.pending;
       hostConfig.pending = fetch("/voice/api/config")
@@ -45,8 +45,8 @@ function fetchHostConfig(force) {
 
     // ── streaming TTS player (stop-on-new) ─────────────────────────────────
     var player = { audio: null, token: 0 };
-        /** stopPlayback implementation. */
-function stopPlayback() {
+    /** stopPlayback implementation. */
+    function stopPlayback() {
       player.token += 1;
       if (player.audio !== null) {
         try {
@@ -143,8 +143,8 @@ function stopPlayback() {
     // ──────────────────────────────────────────────────────────────────────
     // Mic button — browser SpeechRecognition (interim) or Whisper fallback
     // ──────────────────────────────────────────────────────────────────────
-        /** MicButton implementation. */
-function MicButton(props) {
+    /** MicButton implementation. */
+    function MicButton(props) {
       var useInput = props.useInput,
         inputActions = props.inputActions;
       var stateTuple = useState("idle"); // idle | listening | recording | transcribing | error
@@ -168,18 +168,18 @@ function MicButton(props) {
       var inputRef = useRef(null);
       inputRef.current = input;
 
-            /** setStateBoth implementation. */
-function setStateBoth(s) {
+      /** setStateBoth implementation. */
+      function setStateBoth(s) {
         stateRef.current = s;
         setState(s);
       }
-            /** setDraft implementation. */
-function setDraft(text) {
+      /** setDraft implementation. */
+      function setDraft(text) {
         if (!inputActions) return;
         inputActions.setDraft(text);
       }
-            /** pushTranscript implementation. */
-function pushTranscript(finalText, interimText) {
+      /** pushTranscript implementation. */
+      function pushTranscript(finalText, interimText) {
         var base = baseRef.current;
         var sep = base && !/[\s\u3000]$/.test(base) && (finalText || interimText) ? " " : "";
         setDraft(
@@ -211,8 +211,8 @@ function pushTranscript(finalText, interimText) {
         };
       }, []);
 
-            /** startBrowserRecognition implementation. */
-function startBrowserRecognition(SpeechRecognitionCtor) {
+      /** startBrowserRecognition implementation. */
+      function startBrowserRecognition(SpeechRecognitionCtor) {
         var rec;
         try {
           rec = new SpeechRecognitionCtor();
@@ -257,8 +257,8 @@ function startBrowserRecognition(SpeechRecognitionCtor) {
         }
       }
 
-            /** startWhisperRecording implementation. */
-function startWhisperRecording() {
+      /** startWhisperRecording implementation. */
+      function startWhisperRecording() {
         navigator.mediaDevices
           .getUserMedia({ audio: true })
           .then(function (stream) {
@@ -323,8 +323,8 @@ function startWhisperRecording() {
           });
       }
 
-            /** start implementation. */
-function start() {
+      /** start implementation. */
+      function start() {
         setError("");
         fetchHostConfig()
           .then(function (cfg) {
@@ -347,8 +347,8 @@ function start() {
           });
       }
 
-            /** onClick implementation. */
-function onClick() {
+      /** onClick implementation. */
+      function onClick() {
         var s = stateRef.current;
         if (s === "listening") {
           var rec = recRef.current;
@@ -393,8 +393,8 @@ function onClick() {
     // Speaker button — neural read-aloud for one assistant message
     // ──────────────────────────────────────────────────────────────────────
     var lastAutoPlayed = { id: null };
-        /** SpeakerButton implementation. */
-function SpeakerButton(props) {
+    /** SpeakerButton implementation. */
+    function SpeakerButton(props) {
       var messageId = props.messageId,
         useSession = props.useSession;
       var speakTuple = useState("idle"); // idle | loading | speaking
@@ -429,8 +429,8 @@ function SpeakerButton(props) {
         [session, messageId],
       );
 
-            /** speak implementation. */
-function speak() {
+      /** speak implementation. */
+      function speak() {
         if (stateRef.current === "speaking" || stateRef.current === "loading") {
           stopPlayback();
           setState("idle");
@@ -511,13 +511,13 @@ function speak() {
     // ──────────────────────────────────────────────────────────────────────
     // Voice settings section
     // ──────────────────────────────────────────────────────────────────────
-        /** VoiceGlyph implementation. */
-function VoiceGlyph() {
+    /** VoiceGlyph implementation. */
+    function VoiceGlyph() {
       return SPEAKER_SVG;
     }
 
-        /** row implementation. */
-function row(label, control, hint) {
+    /** row implementation. */
+    function row(label, control, hint) {
       return h(
         "div",
         { style: { display: "grid", gap: "4px" } },
@@ -541,8 +541,8 @@ function row(label, control, hint) {
       color: "var(--dsw-alias-label-primary)",
     };
 
-        /** TextField implementation. */
-function TextField(props) {
+    /** TextField implementation. */
+    function TextField(props) {
       var local = useState(props.value);
       var value = local[0],
         setValue = local[1];
@@ -551,8 +551,8 @@ function TextField(props) {
         lastProp.current = props.value;
         if (value !== props.value) setValue(props.value);
       }
-            /** commit implementation. */
-function commit() {
+      /** commit implementation. */
+      function commit() {
         if (value !== props.value) props.onCommit(value);
       }
       return h("input", {
@@ -569,8 +569,8 @@ function commit() {
       });
     }
 
-        /** VoiceSection implementation. */
-function VoiceSection(props) {
+    /** VoiceSection implementation. */
+    function VoiceSection(props) {
       var settings = props.settings; // { describe, mutate } injected from apply
       var viewTuple = useState({ status: "loading", view: null, error: null });
       var view = viewTuple[0],
@@ -582,8 +582,8 @@ function VoiceSection(props) {
       var preview = prevTuple[0],
         setPreview = prevTuple[1];
 
-            /** load implementation. */
-function load() {
+      /** load implementation. */
+      function load() {
         setView({ status: "loading", view: null, error: null });
         settings
           .describe({})
@@ -605,8 +605,8 @@ function load() {
       }
       useEffect(load, []);
 
-            /** mutate implementation. */
-function mutate(ops) {
+      /** mutate implementation. */
+      function mutate(ops) {
         var current = view.view;
         if (!current) return;
         settings
@@ -624,8 +624,8 @@ function mutate(ops) {
             setView(Object.assign({}, view, { error: String((err && err.message) || err) }));
           });
       }
-            /** set implementation. */
-function set(path) {
+      /** set implementation. */
+      function set(path) {
         return function (value) {
           mutate([{ op: "set", path: path, value: value }]);
         };
@@ -664,8 +664,8 @@ function set(path) {
               { id: "custom", label: "OpenAI-compatible endpoint" },
             ];
 
-            /** selectField implementation. */
-function selectField(label, value, options, onChange) {
+      /** selectField implementation. */
+      function selectField(label, value, options, onChange) {
         return row(
           label,
           h(
@@ -684,8 +684,8 @@ function selectField(label, value, options, onChange) {
         );
       }
 
-            /** previewVoice implementation. */
-function previewVoice() {
+      /** previewVoice implementation. */
+      function previewVoice() {
         if (preview === "loading" || preview === "playing") {
           stopPlayback();
           setPreview("idle");
@@ -871,8 +871,8 @@ function previewVoice() {
     // ──────────────────────────────────────────────────────────────────────
     // Plugin body
     // ──────────────────────────────────────────────────────────────────────
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       var styleEl = document.getElementById("dsh-voice-style");
       if (!styleEl) {
         styleEl = document.createElement("style");

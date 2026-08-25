@@ -57,26 +57,26 @@ export class QuotaRegistry {
   private readonly providers = new Map<string, QuotaProvider>();
   private readonly snapshots = new Map<string, QuotaSnapshot>();
 
-    /** register implementation. */
-register(provider: QuotaProvider): () => void {
+  /** register implementation. */
+  register(provider: QuotaProvider): () => void {
     this.providers.set(provider.id, provider);
     return () => {
       if (this.providers.get(provider.id) === provider) this.providers.delete(provider.id);
     };
   }
 
-    /** snapshot implementation. */
-snapshot(provider: string): QuotaSnapshot | undefined {
+  /** snapshot implementation. */
+  snapshot(provider: string): QuotaSnapshot | undefined {
     return this.snapshots.get(provider);
   }
 
-    /** all implementation. */
-all(): readonly QuotaSnapshot[] {
+  /** all implementation. */
+  all(): readonly QuotaSnapshot[] {
     return [...this.snapshots.values()];
   }
 
-    /** refresh implementation. */
-async refresh(
+  /** refresh implementation. */
+  async refresh(
     provider: string,
     signal: { readonly aborted: boolean } = { aborted: false },
   ): Promise<QuotaSnapshot> {
@@ -184,34 +184,34 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   // endpoint is declared in code.
   const covered = new Set([...PROBE_ROUTE_IDS, ...PROVIDER_IDS]);
   const configuredIds = new Set<string>();
-  const   /** syncConfiguredProviders implementation. */
-syncConfiguredProviders = (): void => {
-    const llm = ctx.get("llm") as
-      | {
-          listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
-        }
-      | undefined;
-    const settingsProvider = ctx.get("settings") as
-      | {
-          describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
-        }
-      | undefined;
-    if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
-      return;
-    const listConfigurable = llm.listConfigurableProviders.bind(llm);
-    const describe = settingsProvider.describe.bind(settingsProvider);
-    for (const provider of createConfiguredProviders({
-      listConfigurable,
-      // Verbatim, not redacted: the probe needs the real credential reference,
-      // and this read never leaves the process.
-      describeSettings: () => describe(),
-      readToken: read,
-      covered: (candidate) => covered.has(candidate),
-    })) {
-      disposers.push(registry.register(provider));
-      configuredIds.add(provider.id);
-    }
-  };
+  const /** syncConfiguredProviders implementation. */
+    syncConfiguredProviders = (): void => {
+      const llm = ctx.get("llm") as
+        | {
+            listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
+          }
+        | undefined;
+      const settingsProvider = ctx.get("settings") as
+        | {
+            describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
+          }
+        | undefined;
+      if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
+        return;
+      const listConfigurable = llm.listConfigurableProviders.bind(llm);
+      const describe = settingsProvider.describe.bind(settingsProvider);
+      for (const provider of createConfiguredProviders({
+        listConfigurable,
+        // Verbatim, not redacted: the probe needs the real credential reference,
+        // and this read never leaves the process.
+        describeSettings: () => describe(),
+        readToken: read,
+        covered: (candidate) => covered.has(candidate),
+      })) {
+        disposers.push(registry.register(provider));
+        configuredIds.add(provider.id);
+      }
+    };
   syncConfiguredProviders();
 
   /** Every provider the registry should refresh on a cycle. */

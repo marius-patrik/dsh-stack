@@ -47,8 +47,8 @@ window.__ModuleLoader__.load({
         React.createElement("path", { d: "M9 13v2" }),
       );
     }
-        /** AgentsSection implementation. */
-function AgentsSection(props) {
+    /** AgentsSection implementation. */
+    function AgentsSection(props) {
       var React = require("react");
       var h = React.createElement;
       var useState = React.useState,
@@ -96,59 +96,59 @@ function AgentsSection(props) {
         );
       }
       var presets = payload.presets || [];
-      var       /** presetRow implementation. */
-presetRow = function (preset) {
-        var label = preset.name || preset.id;
-        return h(
-          "div",
-          {
-            key: preset.id,
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              borderRadius: "10px",
-              padding: "12px 14px",
-            },
-          },
-          h(
+      var /** presetRow implementation. */
+        presetRow = function (preset) {
+          var label = preset.name || preset.id;
+          return h(
             "div",
-            { style: { display: "grid", gap: "2px", minWidth: "0" } },
+            {
+              key: preset.id,
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                border: "1px solid var(--dsw-alias-border-l2)",
+                borderRadius: "10px",
+                padding: "12px 14px",
+              },
+            },
             h(
               "div",
-              { style: { display: "flex", alignItems: "center", gap: "8px" } },
-              h("span", { style: { fontWeight: 600, fontSize: "14px" } }, label),
-              preset.isDefault
+              { style: { display: "grid", gap: "2px", minWidth: "0" } },
+              h(
+                "div",
+                { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                h("span", { style: { fontWeight: 600, fontSize: "14px" } }, label),
+                preset.isDefault
+                  ? h(
+                      "span",
+                      { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                      "default",
+                    )
+                  : null,
+                h(
+                  "span",
+                  { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                  preset.trust,
+                ),
+              ),
+              preset.description
                 ? h(
-                    "span",
-                    { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                    "default",
+                    "div",
+                    { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
+                    preset.description,
                   )
                 : null,
-              h(
-                "span",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                preset.trust,
-              ),
+              preset.broken
+                ? h(
+                    "div",
+                    { style: { fontSize: "13px", color: "var(--dsw-alias-state-error-primary)" } },
+                    preset.broken,
+                  )
+                : null,
             ),
-            preset.description
-              ? h(
-                  "div",
-                  { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
-                  preset.description,
-                )
-              : null,
-            preset.broken
-              ? h(
-                  "div",
-                  { style: { fontSize: "13px", color: "var(--dsw-alias-state-error-primary)" } },
-                  preset.broken,
-                )
-              : null,
-          ),
-        );
-      };
+          );
+        };
       return h(
         "div",
         { style: { display: "grid", gap: "20px", maxWidth: "760px" } },
@@ -238,32 +238,32 @@ presetRow = function (preset) {
         ],
       );
     }
-        /** apply implementation. */
-function apply(ctx) {
+    /** apply implementation. */
+    function apply(ctx) {
       var roster = { value: null, pending: null };
-      var       /** ensureRoster implementation. */
-ensureRoster = function () {
-        if (roster.value !== null) return Promise.resolve(roster.value);
-        if (roster.pending !== null) return roster.pending;
-        roster.pending = ctx.connection.api.agentPresets.list({}).then(function (response) {
-          var presets = response.result.ok ? response.result.value.presets : [];
-          var entries = presets.map(function (preset) {
-            return { id: preset.id, label: preset.name || preset.id, detail: preset.description };
+      var /** ensureRoster implementation. */
+        ensureRoster = function () {
+          if (roster.value !== null) return Promise.resolve(roster.value);
+          if (roster.pending !== null) return roster.pending;
+          roster.pending = ctx.connection.api.agentPresets.list({}).then(function (response) {
+            var presets = response.result.ok ? response.result.value.presets : [];
+            var entries = presets.map(function (preset) {
+              return { id: preset.id, label: preset.name || preset.id, detail: preset.description };
+            });
+            roster.value = entries;
+            return entries;
           });
-          roster.value = entries;
-          return entries;
-        });
-        return roster.pending;
-      };
-      var       /** nameFor implementation. */
-nameFor = function (personaId) {
-        var entries = roster.value;
-        if (entries === null) return personaId;
-        for (var i = 0; i < entries.length; i++) {
-          if (entries[i].id === personaId) return entries[i].label;
-        }
-        return personaId;
-      };
+          return roster.pending;
+        };
+      var /** nameFor implementation. */
+        nameFor = function (personaId) {
+          var entries = roster.value;
+          if (entries === null) return personaId;
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].id === personaId) return entries[i].label;
+          }
+          return personaId;
+        };
 
       ctx.slots.inject(
         "settings.section",

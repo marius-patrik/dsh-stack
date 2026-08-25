@@ -222,8 +222,8 @@ export function createConfiguredProviders(deps: ConfiguredProbeDeps): QuotaProvi
     if (readConfiguredProfile(entry, descriptors)?.baseURL === undefined) continue;
     providers.push({
       id: entry.provider,
-            /** read implementation. */
-async read(signal): Promise<QuotaSnapshot> {
+      /** read implementation. */
+      async read(signal): Promise<QuotaSnapshot> {
         if (signal.aborted) {
           return snapshot(entry.provider, {
             status: "unknown",

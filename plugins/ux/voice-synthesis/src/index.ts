@@ -6,8 +6,8 @@ export const inject = ["webServer", "slots"];
 export const optional = ["llm"];
 
 export class VoiceSynthesisService {
-    /** speak implementation. */
-speak(text: string): boolean {
+  /** speak implementation. */
+  speak(text: string): boolean {
     return true;
   }
 }

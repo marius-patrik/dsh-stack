@@ -201,8 +201,8 @@ export function serializeThinking(
 export const claudeDialect: Dialect = {
   id: "claude",
 
-    /** serialize implementation. */
-serialize(
+  /** serialize implementation. */
+  serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -266,8 +266,8 @@ serialize(
     };
   },
 
-    /** parse implementation. */
-parse(body, onActivity) {
+  /** parse implementation. */
+  parse(body, onActivity) {
     return translateClaude(parseSseEvents(body, onActivity));
   },
 };

@@ -21,28 +21,28 @@ const listeners = new Map();
 const commands = [];
 const routes = [];
 const ctx = {
-    /** provide implementation. */
-provide(name, value) {
+  /** provide implementation. */
+  provide(name, value) {
     this[name] = value;
   },
-    /** on implementation. */
-on(name, listener) {
+  /** on implementation. */
+  on(name, listener) {
     listeners.set(name, listener);
   },
-    /** inject implementation. */
-inject(services, callback) {
+  /** inject implementation. */
+  inject(services, callback) {
     callback(this);
   },
   webServer: {
-        /** register implementation. */
-register(definition) {
+    /** register implementation. */
+    register(definition) {
       routes.push(definition);
       return () => undefined;
     },
   },
   commands: {
-        /** register implementation. */
-register(definition) {
+    /** register implementation. */
+    register(definition) {
       commands.push(definition);
       return () => undefined;
     },
@@ -68,8 +68,8 @@ const preStep = listeners.get("agent/pre-step");
 assert.equal(typeof preStep, "function");
 let appended;
 agent.session = {
-    /** append implementation. */
-append(type, data) {
+  /** append implementation. */
+  append(type, data) {
     appended = { type, data };
   },
 };
@@ -115,13 +115,13 @@ assert.equal(routes[2].path, "/actions/api/reload");
 const res = {
   _status: 0,
   _body: "",
-    /** writeHead implementation. */
-writeHead(s, h) {
+  /** writeHead implementation. */
+  writeHead(s, h) {
     this._status = s;
     this._headers = h;
   },
-    /** end implementation. */
-end(b) {
+  /** end implementation. */
+  end(b) {
     this._body = b;
   },
 };
@@ -158,17 +158,17 @@ const clientExports = loader.spec.factory((spec) => {
 assert.deepEqual(clientExports.inject, ["slots"]);
 const clientRegistrants = new Map();
 const clientCtx = {
-    /** effect implementation. */
-effect(fn) {
+  /** effect implementation. */
+  effect(fn) {
     fn();
   },
   slots: {
-        /** inject implementation. */
-inject(name, fn) {
+    /** inject implementation. */
+    inject(name, fn) {
       clientRegistrants.set(name, fn);
     },
-        /** register implementation. */
-register(spec) {
+    /** register implementation. */
+    register(spec) {
       return spec;
     },
   },

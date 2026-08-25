@@ -43,21 +43,22 @@ function resolvePluginClosure(
   const resolved = new Map<string, PluginDefinition>();
   const visiting = new Set<string>();
 
-  const   /** visit implementation. */
-visit = (pluginId: string): void => {
-    if (resolved.has(pluginId)) return;
-    if (visiting.has(pluginId)) throw new Error(`Plugin dependency cycle detected at ${pluginId}`);
+  const /** visit implementation. */
+    visit = (pluginId: string): void => {
+      if (resolved.has(pluginId)) return;
+      if (visiting.has(pluginId))
+        throw new Error(`Plugin dependency cycle detected at ${pluginId}`);
 
-    const plugin = registry.get(pluginId);
-    if (!plugin) throw new Error(`Composition references unknown plugin ${pluginId}`);
+      const plugin = registry.get(pluginId);
+      if (!plugin) throw new Error(`Composition references unknown plugin ${pluginId}`);
 
-    visiting.add(pluginId);
-    for (const dependency of plugin.dependencies ?? []) {
-      if (dependency.kind === "required") visit(dependency.plugin);
-    }
-    visiting.delete(pluginId);
-    resolved.set(pluginId, plugin);
-  };
+      visiting.add(pluginId);
+      for (const dependency of plugin.dependencies ?? []) {
+        if (dependency.kind === "required") visit(dependency.plugin);
+      }
+      visiting.delete(pluginId);
+      resolved.set(pluginId, plugin);
+    };
 
   for (const pluginId of selected) visit(pluginId);
 

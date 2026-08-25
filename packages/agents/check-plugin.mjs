@@ -209,17 +209,17 @@ await ctrlCatalog.load();
 const controller = new PersonaController({ resolve: (id) => ctrlCatalog.get(id) !== undefined });
 
 const /** makeSession implementation. */
-makeSession = (header = {}) => {
-  const events = [];
-  return {
-    events,
-    header,
-        /** append implementation. */
-append(type, data) {
-      events.push({ type, data });
-    },
+  makeSession = (header = {}) => {
+    const events = [];
+    return {
+      events,
+      header,
+      /** append implementation. */
+      append(type, data) {
+        events.push({ type, data });
+      },
+    };
   };
-};
 
 // foldPersona
 assert.equal(foldPersona([]), "");
@@ -293,9 +293,16 @@ assert.equal(
 const s6 = makeSession();
 assert.equal(
   plugin.personaPolicyText(
-    { agent: { session: { events: [], header: { agentPreset: "reviewer" },     /** append implementation. */
-/** append implementation. */
-append() {} } } },
+    {
+      agent: {
+        session: {
+          events: [],
+          header: { agentPreset: "reviewer" } /** append implementation. */,
+          /** append implementation. */
+          append() {},
+        },
+      },
+    },
     controller,
     ctrlCatalog,
     undefined,
@@ -306,9 +313,16 @@ append() {} } } },
 const s7 = makeSession();
 assert.equal(
   plugin.personaPolicyText(
-    { agent: { session: { events: [], header: { agentPreset: "unknown" },     /** append implementation. */
-/** append implementation. */
-append() {} } } },
+    {
+      agent: {
+        session: {
+          events: [],
+          header: { agentPreset: "unknown" } /** append implementation. */,
+          /** append implementation. */
+          append() {},
+        },
+      },
+    },
     controller,
     ctrlCatalog,
     undefined,
@@ -336,8 +350,8 @@ let capturedCommand = null;
 const actx = new Context();
 actx.provide("settings", {
   get: (ns) => sections.get(ns),
-    /** register implementation. */
-register(_ns, _schema, opts) {
+  /** register implementation. */
+  register(_ns, _schema, opts) {
     if (!sections.has(_ns)) sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };
   },
@@ -382,9 +396,12 @@ assert.equal(capturedSection.name, "persona:policy");
 assert.equal(capturedSection.order, 45);
 assert.equal(typeof capturedSection.text, "function");
 assert.equal(capturedSection.text({}), "", "no agent → empty");
-const bootAgentSession = { events: [], header: { agentPreset: "boot" }, /** append implementation. */
-/** append implementation. */
-append() {} };
+const bootAgentSession = {
+  events: [],
+  header: { agentPreset: "boot" } /** append implementation. */,
+  /** append implementation. */
+  append() {},
+};
 assert.equal(
   capturedSection.text({ agent: { session: bootAgentSession } }),
   "Boot persona.",
@@ -510,33 +527,33 @@ assert.deepEqual(
 );
 const clientRegistrants = new Map();
 const clientCtx = {
-    /** effect implementation. */
-effect(fn) {
+  /** effect implementation. */
+  effect(fn) {
     fn();
   },
   slots: {
-        /** inject implementation. */
-inject(name, fn) {
+    /** inject implementation. */
+    inject(name, fn) {
       clientRegistrants.set(name, fn);
     },
-        /** register implementation. */
-register(spec) {
+    /** register implementation. */
+    register(spec) {
       return spec;
     },
   },
-    /** inject implementation. */
-inject(services, cb) {
+  /** inject implementation. */
+  inject(services, cb) {
     const scope = {
-            /** effect implementation. */
-effect(fn) {
+      /** effect implementation. */
+      effect(fn) {
         fn();
       },
-            /** get implementation. */
-get(name) {
+      /** get implementation. */
+      get(name) {
         if (name === "commandUi")
           return {
-                        /** register implementation. */
-register(spec) {
+            /** register implementation. */
+            register(spec) {
               commandUiRegistrants.push(spec);
               return () => {};
             },
@@ -544,12 +561,12 @@ register(spec) {
         return undefined;
       },
       sessions: {
-                /** get implementation. */
-get() {
+        /** get implementation. */
+        get() {
           return {
             projections: {
-                            /** get implementation. */
-get() {
+              /** get implementation. */
+              get() {
                 return currentProjection;
               },
             },
@@ -562,8 +579,8 @@ get() {
   connection: {
     api: {
       agentPresets: {
-                /** list implementation. */
-list() {
+        /** list implementation. */
+        list() {
           return Promise.resolve({ result: { ok: true, value: { presets: stubRoster } } });
         },
       },
@@ -571,8 +588,8 @@ list() {
   },
   remote: {
     commands: {
-            /** execute implementation. */
-execute(sessionId, line) {
+      /** execute implementation. */
+      execute(sessionId, line) {
         executedCommands.push({ sessionId, line });
         return Promise.resolve({ ok: true });
       },

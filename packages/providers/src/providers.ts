@@ -151,17 +151,16 @@ const EFFORTS: ProviderReasoning = {
 };
 
 const /** TOKEN implementation. */
-TOKEN = (ref: string): CredentialSlot => ({ slot: "token", ref });
+  TOKEN = (ref: string): CredentialSlot => ({ slot: "token", ref });
 const /** API_KEY implementation. */
-API_KEY = (ref: string): CredentialSlot => ({ slot: "apiKey", ref });
+  API_KEY = (ref: string): CredentialSlot => ({ slot: "apiKey", ref });
 const /** HEADER implementation. */
-HEADER = (headerName: string, ref: string): CredentialSlot => ({
-  slot: "header",
-  headerName,
-  ref,
-});
-const /** HEADERS implementation. */
-HEADERS = (headers: Record<string, string>) => headers;
+  HEADER = (headerName: string, ref: string): CredentialSlot => ({
+    slot: "header",
+    headerName,
+    ref,
+  });
+const /** HEADERS implementation. */ HEADERS = (headers: Record<string, string>) => headers;
 
 // Per-model windows, cross-checked against GET https://api.kimi.com/coding/v1/models
 // (2026-08-18): K3 carries the 1M window, every other coding model 256k. The

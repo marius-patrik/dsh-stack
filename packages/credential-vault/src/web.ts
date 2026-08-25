@@ -122,24 +122,24 @@ export async function listRows(accounts: AccountsService): Promise<VaultListRow[
   const held = await accounts.accounts();
   const heldRefs = new Set(held.map((entry) => entry.ref));
   const rows: VaultListRow[] = [];
-  const   /** push implementation. */
-push = async (
-    ref: string,
-    account: string | null,
-    metadata?: { kind: string; purpose: string; label: string; expiresAt: string | null },
-  ): Promise<void> => {
-    const resolved = await accounts.resolve(ref);
-    rows.push({
-      ref,
-      account,
-      kind: metadata?.kind ?? "api_key",
-      purpose: metadata?.purpose ?? null,
-      label: metadata?.label ?? null,
-      expiresAt: metadata?.expiresAt ?? null,
-      inVault: heldRefs.has(ref),
-      ambient: resolved?.origin === "credentials",
-    });
-  };
+  const /** push implementation. */
+    push = async (
+      ref: string,
+      account: string | null,
+      metadata?: { kind: string; purpose: string; label: string; expiresAt: string | null },
+    ): Promise<void> => {
+      const resolved = await accounts.resolve(ref);
+      rows.push({
+        ref,
+        account,
+        kind: metadata?.kind ?? "api_key",
+        purpose: metadata?.purpose ?? null,
+        label: metadata?.label ?? null,
+        expiresAt: metadata?.expiresAt ?? null,
+        inVault: heldRefs.has(ref),
+        ambient: resolved?.origin === "credentials",
+      });
+    };
   for (const entry of held) await push(entry.ref, entry.account, entry);
   for (const ref of KNOWN_REF_NAMES) {
     if (heldRefs.has(ref)) continue;

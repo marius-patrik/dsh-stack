@@ -54,8 +54,8 @@ export function gridSearch(
 /** combinations implementation. */
 function* combinations(grid: ParameterGrid): Generator<Record<string, ParameterValue>> {
   const entries = Object.entries(grid);
-    /** walk implementation. */
-function* walk(
+  /** walk implementation. */
+  function* walk(
     index: number,
     current: Record<string, ParameterValue>,
   ): Generator<Record<string, ParameterValue>> {

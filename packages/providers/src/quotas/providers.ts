@@ -215,8 +215,8 @@ export function createBuiltinProviders(read: ProbeTokenReader): QuotaProvider[] 
     const tokenRef = probeTokenRef(route);
     return {
       id: route.id,
-            /** read implementation. */
-async read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot> {
+      /** read implementation. */
+      async read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot> {
         if (signal.aborted) {
           return {
             provider: route.id,

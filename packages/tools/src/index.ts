@@ -107,8 +107,8 @@ export function apply(ctx: Context, config: ToolsConfigType): void {
   );
 
   ctx.inject(["settings"], (sctx) => {
-    const     /** settings implementation. */
-settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
+    const /** settings implementation. */
+      settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
 
     for (const [name, tool] of Object.entries(toolsFor(settings(), config))) {
       ctx.tools.register(
@@ -138,8 +138,8 @@ settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
               },
             ],
           },
-                    /** execute implementation. */
-async execute(args, exec) {
+          /** execute implementation. */
+          async execute(args, exec) {
             const argv = commandArgv(tool, args as Record<string, unknown>);
             return await runToolCommand(ctx, argv, exec.signal);
           },

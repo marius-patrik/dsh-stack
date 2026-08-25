@@ -35,26 +35,26 @@ function runnerArchive(): string {
 export class GitHubActionsRunnerManager {
   readonly config: GitHubRunnerConfig;
 
-    /** Constructs an instance. */
-constructor(config: GitHubRunnerConfig) {
+  /** Constructs an instance. */
+  constructor(config: GitHubRunnerConfig) {
     if (!config.owner || !config.repository || !config.registrationToken) {
       throw new Error("GitHub Actions runner requires owner, repository, and registrationToken");
     }
     this.config = { ...config, runnerDir: config.runnerDir ?? defaultDir() };
   }
 
-    /** runnerDir implementation. */
-get runnerDir(): string {
+  /** runnerDir implementation. */
+  get runnerDir(): string {
     return this.config.runnerDir ?? defaultDir();
   }
 
-    /** runnerName implementation. */
-get runnerName(): string {
+  /** runnerName implementation. */
+  get runnerName(): string {
     return this.config.runnerName ?? `dsh-${platform()}-${arch()}`;
   }
 
-    /** status implementation. */
-status(): GitHubRunnerStatus {
+  /** status implementation. */
+  status(): GitHubRunnerStatus {
     return {
       installed: false,
       running: false,
@@ -109,8 +109,8 @@ fi
 `;
   }
 
-    /** writeInstallScript implementation. */
-async writeInstallScript(): Promise<string> {
+  /** writeInstallScript implementation. */
+  async writeInstallScript(): Promise<string> {
     await mkdir(this.runnerDir, { recursive: true });
     const path = join(this.runnerDir, "install.sh");
     await writeFile(path, this.generateUnixInstallScript(), "utf8");

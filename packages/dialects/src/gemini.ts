@@ -146,8 +146,8 @@ function buildUrl(base: string): string {
 export const geminiDialect: Dialect = {
   id: "gemini",
 
-    /** serialize implementation. */
-serialize(
+  /** serialize implementation. */
+  serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -202,8 +202,8 @@ serialize(
     };
   },
 
-    /** parse implementation. */
-parse(body, onActivity) {
+  /** parse implementation. */
+  parse(body, onActivity) {
     return translateGemini(parseNdjson(body, onActivity));
   },
 };

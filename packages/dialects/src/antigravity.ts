@@ -126,8 +126,8 @@ async function readAll(body: ReadableStream<BufferSource>): Promise<string> {
 export const antigravityDialect: Dialect = {
   id: "antigravity",
 
-    /** serialize implementation. */
-serialize(
+  /** serialize implementation. */
+  serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -170,8 +170,8 @@ serialize(
     };
   },
 
-    /** parse implementation. */
-async *parse(body: ReadableStream<BufferSource>): AsyncGenerator<StreamChunk> {
+  /** parse implementation. */
+  async *parse(body: ReadableStream<BufferSource>): AsyncGenerator<StreamChunk> {
     const raw = await readAll(body);
     let chunks: WireChatChunk[];
     try {

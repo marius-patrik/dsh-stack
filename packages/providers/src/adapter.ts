@@ -282,18 +282,18 @@ export function httpErrorCode(status: number, detail: string | undefined): strin
  * selects the route facts for the operation.
  */
 export class DialectAdapter extends LlmAdapter {
-    /** Constructs an instance. */
-constructor(private readonly config: DialectAdapterOptions) {
+  /** Constructs an instance. */
+  constructor(private readonly config: DialectAdapterOptions) {
     super();
   }
 
-    /** providerInfo implementation. */
-override providerInfo(provider: string): LlmProviderInfo {
+  /** providerInfo implementation. */
+  override providerInfo(provider: string): LlmProviderInfo {
     return { id: provider, name: this.config.options(provider).displayName };
   }
 
-    /** providerRetryPolicy implementation. */
-override providerRetryPolicy(_provider: string): ResolvedRetryPolicy {
+  /** providerRetryPolicy implementation. */
+  override providerRetryPolicy(_provider: string): ResolvedRetryPolicy {
     return this.config.options(_provider).retryPolicy;
   }
 
@@ -336,8 +336,8 @@ override providerRetryPolicy(_provider: string): ResolvedRetryPolicy {
     });
   }
 
-    /** listModels implementation. */
-override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
+  /** listModels implementation. */
+  override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
     const connection = this.config.options(provider);
     const gate = await this.config.gate(provider, connection);
     if (gate !== undefined) {
@@ -348,8 +348,8 @@ override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
     return models.map((model) => modelInfo(provider, model));
   }
 
-    /** resolveModel implementation. */
-override async resolveModel(
+  /** resolveModel implementation. */
+  override async resolveModel(
     provider: string,
     model: string,
     _signal?: AbortSignal,
@@ -385,8 +385,8 @@ override async resolveModel(
     });
   }
 
-    /** stream implementation. */
-async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
+  /** stream implementation. */
+  async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
     // One resolution per stream call: connection facts and credentials freeze
     // here for this whole request, so an in-flight stream never observes a
     // configuration change and the next call re-resolves.
@@ -454,8 +454,8 @@ async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
     }
   }
 
-    /** request implementation. */
-private async *request(
+  /** request implementation. */
+  private async *request(
     options: GenerateOptions,
     signal: AbortSignal,
     connection: ProviderConnection,

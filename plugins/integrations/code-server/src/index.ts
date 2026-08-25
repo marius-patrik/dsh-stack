@@ -21,8 +21,8 @@ export class CodeServerManager {
     url: "http://127.0.0.1:8080",
   };
 
-    /** Constructs an instance. */
-constructor(
+  /** Constructs an instance. */
+  constructor(
     private ctx: Context,
     private config: any,
   ) {
@@ -32,13 +32,13 @@ constructor(
     }
   }
 
-    /** getStatus implementation. */
-getStatus(): CodeServerStatus {
+  /** getStatus implementation. */
+  getStatus(): CodeServerStatus {
     return { ...this.status };
   }
 
-    /** startServer implementation. */
-async startServer(): Promise<CodeServerStatus> {
+  /** startServer implementation. */
+  async startServer(): Promise<CodeServerStatus> {
     this.status.running = true;
     this.status.pid = 9999;
     if ((this.ctx as any).emit) {
@@ -47,8 +47,8 @@ async startServer(): Promise<CodeServerStatus> {
     return this.getStatus();
   }
 
-    /** stopServer implementation. */
-async stopServer(): Promise<boolean> {
+  /** stopServer implementation. */
+  async stopServer(): Promise<boolean> {
     this.status.running = false;
     this.status.pid = undefined;
     if ((this.ctx as any).emit) {

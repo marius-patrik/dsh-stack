@@ -52,16 +52,16 @@ export function installPlanToggle(ctx: Context): unknown {
 export function installForkUndo(ctx: Context): unknown {
   return ctx.inject(["commands", "sessions"], (commandCtx) => {
     const disposers: (() => void)[] = [];
-    const     /** make implementation. */
-make = (name: string, description: string, direction: -1 | 1): void => {
-      disposers.push(
-        commandCtx.commands.register({
-          name,
-          description,
-          handler: (invocation) => forkSession(commandCtx.sessions, invocation.agent, direction),
-        }),
-      );
-    };
+    const /** make implementation. */
+      make = (name: string, description: string, direction: -1 | 1): void => {
+        disposers.push(
+          commandCtx.commands.register({
+            name,
+            description,
+            handler: (invocation) => forkSession(commandCtx.sessions, invocation.agent, direction),
+          }),
+        );
+      };
     make("undo", "Fork this session from the previous message boundary", -1);
     make("redo", "Fork this session from the latest message boundary", 1);
     return () => {

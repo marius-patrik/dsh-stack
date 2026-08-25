@@ -16,18 +16,18 @@ export class ThemeStudioService {
   private themes = new Map<string, ThemeDefinition>();
   private activeTheme = "dark";
 
-    /** registerTheme implementation. */
-registerTheme(theme: ThemeDefinition): void {
+  /** registerTheme implementation. */
+  registerTheme(theme: ThemeDefinition): void {
     this.themes.set(theme.id, theme);
   }
 
-    /** setTheme implementation. */
-setTheme(id: string): void {
+  /** setTheme implementation. */
+  setTheme(id: string): void {
     if (this.themes.has(id)) this.activeTheme = id;
   }
 
-    /** getActiveTheme implementation. */
-getActiveTheme(): string {
+  /** getActiveTheme implementation. */
+  getActiveTheme(): string {
     return this.activeTheme;
   }
 }

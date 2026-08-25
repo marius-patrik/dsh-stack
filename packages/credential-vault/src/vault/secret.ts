@@ -58,8 +58,8 @@ const NODE_INSPECT = Symbol.for("nodejs.util.inspect.custom");
 export class SecretValue {
   readonly #value: string;
 
-    /** Constructs an instance. */
-constructor(value: string) {
+  /** Constructs an instance. */
+  constructor(value: string) {
     if (typeof value !== "string" || value.length === 0)
       throw new Error("secret value must be a non-empty string");
     this.#value = value;
@@ -78,18 +78,18 @@ constructor(value: string) {
     return timingSafeEqual(left, right);
   }
 
-    /** toString implementation. */
-toString(): string {
+  /** toString implementation. */
+  toString(): string {
     return REDACTED;
   }
 
-    /** toJSON implementation. */
-toJSON(): string {
+  /** toJSON implementation. */
+  toJSON(): string {
     return REDACTED;
   }
 
-    /** [Symbol.toStringTag] implementation. */
-get [Symbol.toStringTag](): string {
+  /** [Symbol.toStringTag] implementation. */
+  get [Symbol.toStringTag](): string {
     return "SecretValue";
   }
 }
@@ -197,8 +197,8 @@ export class EncryptedFileCredentialStore implements CredentialStore {
   readonly #suppliedKey: Uint8Array | null;
   #key: Buffer | null = null;
 
-    /** Constructs an instance. */
-constructor(options: EncryptedFileCredentialStoreOptions) {
+  /** Constructs an instance. */
+  constructor(options: EncryptedFileCredentialStoreOptions) {
     if (!options.directory.trim()) throw new Error("credential store requires a directory");
     if (options.key && options.key.byteLength !== KEY_BYTES) {
       throw new Error(`credential store key must be ${KEY_BYTES} bytes`);
@@ -207,13 +207,13 @@ constructor(options: EncryptedFileCredentialStoreOptions) {
     this.#suppliedKey = options.key ? Uint8Array.from(options.key) : null;
   }
 
-    /** directory implementation. */
-get directory(): string {
+  /** directory implementation. */
+  get directory(): string {
     return this.#directory;
   }
 
-    /** get implementation. */
-async get(id: string): Promise<ProviderCredential | null> {
+  /** get implementation. */
+  async get(id: string): Promise<ProviderCredential | null> {
     const file = this.#file(id);
     if (!(await exists(file))) return null;
     const envelope = parseEnvelope(await readFile(file, "utf8"), file);
@@ -234,8 +234,8 @@ async get(id: string): Promise<ProviderCredential | null> {
     return decodeCredential(JSON.parse(plaintext) as unknown, id);
   }
 
-    /** put implementation. */
-async put(id: string, credential: ProviderCredential): Promise<void> {
+  /** put implementation. */
+  async put(id: string, credential: ProviderCredential): Promise<void> {
     const file = this.#file(id);
     const key = await this.#dataKey();
     const iv = randomBytes(IV_BYTES);
@@ -255,16 +255,16 @@ async put(id: string, credential: ProviderCredential): Promise<void> {
     await writePrivateFile(file, `${JSON.stringify(envelope)}\n`);
   }
 
-    /** delete implementation. */
-async delete(id: string): Promise<boolean> {
+  /** delete implementation. */
+  async delete(id: string): Promise<boolean> {
     const file = this.#file(id);
     if (!(await exists(file))) return false;
     await rm(file, { force: true });
     return true;
   }
 
-    /** list implementation. */
-async list(): Promise<string[]> {
+  /** list implementation. */
+  async list(): Promise<string[]> {
     if (!(await exists(this.#directory))) return [];
     const entries = await readdir(this.#directory, { withFileTypes: true });
     return entries
@@ -274,14 +274,14 @@ async list(): Promise<string[]> {
       .sort();
   }
 
-    /** #file implementation. */
-#file(id: string): string {
+  /** #file implementation. */
+  #file(id: string): string {
     if (!CREDENTIAL_ID.test(id)) throw new Error(`invalid credential id: ${id}`);
     return path.join(this.#directory, `${id}${CREDENTIAL_SUFFIX}`);
   }
 
-    /** #dataKey implementation. */
-async #dataKey(): Promise<Buffer> {
+  /** #dataKey implementation. */
+  async #dataKey(): Promise<Buffer> {
     if (this.#key) return this.#key;
     if (this.#suppliedKey) {
       this.#key = Buffer.from(this.#suppliedKey);

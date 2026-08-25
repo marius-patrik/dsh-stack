@@ -137,24 +137,24 @@ export function apply(ctx: Context, config: Config = {}): void {
 
   const commands = (ctx as unknown as { commands?: { register(definition: unknown): () => void } })
     .commands;
-  const   /** safeRegister implementation. */
-safeRegister = (definition: unknown) => {
-    try {
-      commands?.register(definition);
-    } catch {
-      // Built-in or existing command already registered
-    }
-  };
-  const   /** selectHandler implementation. */
-selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
-    const id = rawInput.trim();
-    if (!catalog.ids().includes(id)) return { kind: "error", text: `Unknown preset: ${id}` };
-    const result = controller.set(agent, id);
-    return {
-      kind: "success",
-      text: result === "noop" ? `Preset already ${id}` : `Preset queued: ${id}`,
+  const /** safeRegister implementation. */
+    safeRegister = (definition: unknown) => {
+      try {
+        commands?.register(definition);
+      } catch {
+        // Built-in or existing command already registered
+      }
     };
-  };
+  const /** selectHandler implementation. */
+    selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
+      const id = rawInput.trim();
+      if (!catalog.ids().includes(id)) return { kind: "error", text: `Unknown preset: ${id}` };
+      const result = controller.set(agent, id);
+      return {
+        kind: "success",
+        text: result === "noop" ? `Preset already ${id}` : `Preset queued: ${id}`,
+      };
+    };
   safeRegister({
     name: "preset",
     description: "Select the agent preset",
@@ -267,49 +267,49 @@ selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
         }): () => void;
       };
     };
-    const     /** json implementation. */
-json = (res: any, status: number, body: unknown): void => {
-      res.writeHead(status, {
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "no-store",
+    const /** json implementation. */
+      json = (res: any, status: number, body: unknown): void => {
+        res.writeHead(status, {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+        });
+        res.end(JSON.stringify(body));
+      };
+    const /** describe implementation. */
+      describe = (action: ActionSpec) => ({
+        id: action.id,
+        name: action.name ?? action.id,
+        description: action.description ?? null,
+        tools: action.tools ?? null,
+        route: action.route ?? null,
+        source: action.source ?? null,
+        builtIn: BUILT_IN_ACTIONS.some((builtIn) => builtIn.id === action.id),
       });
-      res.end(JSON.stringify(body));
-    };
-    const     /** describe implementation. */
-describe = (action: ActionSpec) => ({
-      id: action.id,
-      name: action.name ?? action.id,
-      description: action.description ?? null,
-      tools: action.tools ?? null,
-      route: action.route ?? null,
-      source: action.source ?? null,
-      builtIn: BUILT_IN_ACTIONS.some((builtIn) => builtIn.id === action.id),
-    });
 
     // The action vocabulary (built-ins + file-defined) — also the run palette's data.
-    const     /** listHandler implementation. */
-listHandler = async (_req: unknown, res: any) => {
-      await catalog.load();
-      json(res, 200, {
-        defaultAction,
-        root,
-        actions: catalog.list().map(describe),
-        commands: [
-          {
-            id: "reload-app",
-            name: "Reload App",
-            description: "Reload the browser UI; server-side agents keep running and reattach.",
-            kind: "soft",
-          },
-          {
-            id: "force-reload",
-            name: "Force Reload",
-            description: "Restart the dsh web server itself, then reload the UI.",
-            kind: "force",
-          },
-        ],
-      });
-    };
+    const /** listHandler implementation. */
+      listHandler = async (_req: unknown, res: any) => {
+        await catalog.load();
+        json(res, 200, {
+          defaultAction,
+          root,
+          actions: catalog.list().map(describe),
+          commands: [
+            {
+              id: "reload-app",
+              name: "Reload App",
+              description: "Reload the browser UI; server-side agents keep running and reattach.",
+              kind: "soft",
+            },
+            {
+              id: "force-reload",
+              name: "Force Reload",
+              description: "Restart the dsh web server itself, then reload the UI.",
+              kind: "force",
+            },
+          ],
+        });
+      };
     webCtx.webServer.register({ kind: "exact", path: "/actions", handler: listHandler });
     // Compat: the pre-rename route.
     webCtx.webServer.register({ kind: "exact", path: "/session-modes", handler: listHandler });

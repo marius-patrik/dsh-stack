@@ -412,12 +412,12 @@ export function providerIdForPurpose(purpose: string): string {
  */
 export function allowedHostsFor(record: SecretRecord): string[] {
   const hosts = new Set<string>();
-  const   /** addUrl implementation. */
-addUrl = (value: string | null | undefined): void => {
-    if (!value) return;
-    const host = hostOf(value);
-    if (host) hosts.add(host);
-  };
+  const /** addUrl implementation. */
+    addUrl = (value: string | null | undefined): void => {
+      if (!value) return;
+      const host = hostOf(value);
+      if (host) hosts.add(host);
+    };
 
   const descriptor = findProviderDescriptor(providerIdForPurpose(record.purpose));
   if (descriptor) {
@@ -691,8 +691,8 @@ export class VaultToolset {
   readonly #windowMs: number;
   readonly #usage = new Map<string, UsageState>();
 
-    /** Constructs an instance. */
-constructor(options: VaultToolsetOptions) {
+  /** Constructs an instance. */
+  constructor(options: VaultToolsetOptions) {
     this.#vault = options.vault;
     this.#identity = { workspace: options.identity.workspace, agent: options.identity.agent };
     this.#audit = options.audit ?? null;
@@ -704,8 +704,8 @@ constructor(options: VaultToolsetOptions) {
     this.#windowMs = options.limits?.windowMs ?? 60_000;
   }
 
-    /** identity implementation. */
-get identity(): AgentIdentity {
+  /** identity implementation. */
+  get identity(): AgentIdentity {
     return { ...this.#identity };
   }
 
@@ -1283,8 +1283,8 @@ get identity(): AgentIdentity {
   /* Internals                                                               */
   /* ---------------------------------------------------------------------- */
 
-    /** #git implementation. */
-async #git(
+  /** #git implementation. */
+  async #git(
     purpose: string,
     subcommand: "push" | "fetch",
     request: GitRequest,
@@ -1415,8 +1415,8 @@ async #git(
     );
   }
 
-    /** #spawn implementation. */
-async #spawn(
+  /** #spawn implementation. */
+  async #spawn(
     operation: VaultToolOperation,
     purpose: string,
     record: SecretRecord,
@@ -1501,8 +1501,8 @@ async #spawn(
     return { ok: true };
   }
 
-    /** #usageFor implementation. */
-#usageFor(purpose: string): UsageState {
+  /** #usageFor implementation. */
+  #usageFor(purpose: string): UsageState {
     const existing = this.#usage.get(purpose);
     if (existing) return existing;
     const created: UsageState = { calls: 0, denials: 0, window: [], lastAt: null };
@@ -1522,8 +1522,8 @@ async #spawn(
     return records;
   }
 
-    /** #credentialFor implementation. */
-async #credentialFor(
+  /** #credentialFor implementation. */
+  async #credentialFor(
     purpose: string,
     credentialId: string | undefined,
     preference: readonly SecretType[],
@@ -1572,8 +1572,8 @@ async #credentialFor(
     };
   }
 
-    /** #denyFound implementation. */
-async #denyFound(
+  /** #denyFound implementation. */
+  async #denyFound(
     operation: VaultToolOperation,
     purpose: string,
     targetHost: string | null,
@@ -1590,8 +1590,8 @@ async #denyFound(
     return { ok: false, denial: found.reason, detail: found.agentDetail };
   }
 
-    /** #deny implementation. */
-async #deny(
+  /** #deny implementation. */
+  async #deny(
     operation: VaultToolOperation,
     purpose: string,
     record: SecretRecord | null,
@@ -1604,8 +1604,8 @@ async #deny(
     return { ok: false, denial: reason, detail };
   }
 
-    /** #summarize implementation. */
-async #summarize(record: SecretRecord): Promise<CredentialSummary> {
+  /** #summarize implementation. */
+  async #summarize(record: SecretRecord): Promise<CredentialSummary> {
     const descriptor = descriptorOf(record);
     const provider = findProviderDescriptor(providerIdForPurpose(record.purpose));
     let health: CredentialHealthSummary | null = null;
@@ -1639,8 +1639,8 @@ async #summarize(record: SecretRecord): Promise<CredentialSummary> {
     };
   }
 
-    /** #log implementation. */
-async #log(
+  /** #log implementation. */
+  async #log(
     operation: VaultToolOperation,
     record: SecretRecord | null,
     targetHost: string | null,

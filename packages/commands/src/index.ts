@@ -15,19 +15,19 @@ export class CommandsService extends Service {
   static inject = ["slots", "sessions", "actions"];
   private readonly commands = new Map<string, SlashCommand>();
 
-    /** Constructs an instance. */
-constructor(ctx: Context) {
+  /** Constructs an instance. */
+  constructor(ctx: Context) {
     super(ctx, "commands");
   }
 
-    /** register implementation. */
-register(cmd: SlashCommand): void {
+  /** register implementation. */
+  register(cmd: SlashCommand): void {
     if (!cmd.name.trim()) throw new Error("Slash command name must be non-empty");
     this.commands.set(cmd.name, cmd);
   }
 
-    /** list implementation. */
-list(): SlashCommand[] {
+  /** list implementation. */
+  list(): SlashCommand[] {
     return Array.from(this.commands.values());
   }
 }

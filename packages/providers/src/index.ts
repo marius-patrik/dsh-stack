@@ -308,8 +308,8 @@ function toConnection(
  * instead of duplicating mode or credential logic.
  */
 export class ProviderPolicy extends Service {
-    /** Constructs an instance. */
-constructor(
+  /** Constructs an instance. */
+  constructor(
     ctx: Context,
     private readonly gateImpl: (provider: string) => Promise<ProviderGate | undefined>,
   ) {
@@ -334,57 +334,56 @@ declare module "@deepseek-ai/cordis" {
 
 /** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
-  let   /** current implementation. */
-current: () => Config = () => config;
+  let /** current implementation. */ current: () => Config = () => config;
   let lastRaw: Config | undefined;
   let lastGood: ResolvedProvidersOptions | undefined;
-  const   /** resolved implementation. */
-resolved = (): ResolvedProvidersOptions => {
-    const raw = current();
-    if (raw === lastRaw && lastGood !== undefined) return lastGood;
-    try {
-      const next = resolveProvidersOptions(raw);
-      lastRaw = raw;
-      lastGood = next;
-      return next;
-    } catch (error) {
-      if (lastGood === undefined) throw error;
-      lastRaw = raw;
-      ctx.logger.error(
-        "dsh-providers: keeping the last good configuration after an invalid settings section",
-      );
-      ctx.logger.error(error);
-      return lastGood;
-    }
-  };
+  const /** resolved implementation. */
+    resolved = (): ResolvedProvidersOptions => {
+      const raw = current();
+      if (raw === lastRaw && lastGood !== undefined) return lastGood;
+      try {
+        const next = resolveProvidersOptions(raw);
+        lastRaw = raw;
+        lastGood = next;
+        return next;
+      } catch (error) {
+        if (lastGood === undefined) throw error;
+        lastRaw = raw;
+        ctx.logger.error(
+          "dsh-providers: keeping the last good configuration after an invalid settings section",
+        );
+        ctx.logger.error(error);
+        return lastGood;
+      }
+    };
   resolved();
 
-  const   /** connections implementation. */
-connections = (provider: string): ProviderConnection =>
-    toConnection(providerRoute(provider), resolved());
+  const /** connections implementation. */
+    connections = (provider: string): ProviderConnection =>
+      toConnection(providerRoute(provider), resolved());
 
   const memory = new Map<string, string>();
 
-  const   /** read implementation. */
-read = async (ref: string): Promise<string | undefined> => {
-    const mem = memory.get(ref);
-    if (mem !== undefined) return mem;
-    const accounts = ctx.get("accounts") as AccountsService | undefined;
-    const credentials = ctx.get("credentials") as CredentialProvider | undefined;
-    if (accounts !== undefined) return (await accounts.resolve(ref))?.value;
-    if (credentials !== undefined) return (await credentials.resolve(credentialRef(ref)))?.value;
-    return undefined;
-  };
+  const /** read implementation. */
+    read = async (ref: string): Promise<string | undefined> => {
+      const mem = memory.get(ref);
+      if (mem !== undefined) return mem;
+      const accounts = ctx.get("accounts") as AccountsService | undefined;
+      const credentials = ctx.get("credentials") as CredentialProvider | undefined;
+      if (accounts !== undefined) return (await accounts.resolve(ref))?.value;
+      if (credentials !== undefined) return (await credentials.resolve(credentialRef(ref)))?.value;
+      return undefined;
+    };
 
-  const   /** write implementation. */
-write = async (ref: string, value: string): Promise<void> => {
-    const accounts = ctx.get("accounts") as AccountsService | undefined;
-    if (accounts !== undefined) {
-      await accounts.set(ref, value);
-      return;
-    }
-    memory.set(ref, value);
-  };
+  const /** write implementation. */
+    write = async (ref: string, value: string): Promise<void> => {
+      const accounts = ctx.get("accounts") as AccountsService | undefined;
+      if (accounts !== undefined) {
+        await accounts.set(ref, value);
+        return;
+      }
+      memory.set(ref, value);
+    };
 
   const refreshInflight = new Map<string, Promise<string | undefined>>();
   const refreshed = new Map<string, { access: string; expires: number }>();
@@ -433,19 +432,19 @@ write = async (ref: string, value: string): Promise<void> => {
         : { ...refresher, clientId };
     const inflight = refreshInflight.get(provider);
     if (inflight !== undefined) return inflight;
-    const     /** attempt implementation. */
-attempt = () =>
-      refreshOAuthToken(spec, refreshToken).then(async (token) => {
-        // Write order matters for single-use rotating refresh tokens: persist
-        // the NEW refresh token first. If the process dies after the provider
-        // consumed the old token, the vault must hold the valid rotation, not
-        // a fresh access token paired with a dead refresh token.
-        if (token.refresh !== undefined) await write(refresher.refreshRef, token.refresh);
-        await write(refresher.tokenRef, token.access);
-        await write(refresher.expiresRef, String(token.expires));
-        refreshed.set(provider, { access: token.access, expires: token.expires });
-        return token.access;
-      });
+    const /** attempt implementation. */
+      attempt = () =>
+        refreshOAuthToken(spec, refreshToken).then(async (token) => {
+          // Write order matters for single-use rotating refresh tokens: persist
+          // the NEW refresh token first. If the process dies after the provider
+          // consumed the old token, the vault must hold the valid rotation, not
+          // a fresh access token paired with a dead refresh token.
+          if (token.refresh !== undefined) await write(refresher.refreshRef, token.refresh);
+          await write(refresher.tokenRef, token.access);
+          await write(refresher.expiresRef, String(token.expires));
+          refreshed.set(provider, { access: token.access, expires: token.expires });
+          return token.access;
+        });
     const run = attempt().catch((err: unknown) => {
       if ((err as { permanent?: boolean }).permanent === true) throw err;
       // one retry for transient failures (network blip, token-endpoint 5xx/429)
@@ -521,13 +520,13 @@ attempt = () =>
     return { auth, missing, stored };
   };
 
-  const   /** missingCredential implementation. */
-missingCredential = (provider: string, missing: readonly string[]): LlmError =>
-    new LlmError(
-      `dsh-providers: no credential for "${provider}"; store ${missing.join(", ")} through the` +
-        " account manager (dsh-credentials) or the harness credentials service",
-      "MISSING_CREDENTIAL",
-    );
+  const /** missingCredential implementation. */
+    missingCredential = (provider: string, missing: readonly string[]): LlmError =>
+      new LlmError(
+        `dsh-providers: no credential for "${provider}"; store ${missing.join(", ")} through the` +
+          " account manager (dsh-credentials) or the harness credentials service",
+        "MISSING_CREDENTIAL",
+      );
 
   /** A route that was logged in once and whose stored login no longer resolves. */
   const staleCredential = (provider: string, missing: readonly string[]): LlmError =>
@@ -538,15 +537,15 @@ missingCredential = (provider: string, missing: readonly string[]): LlmError =>
       "MISSING_CREDENTIAL",
     );
 
-  const   /** resolveAuth implementation. */
-resolveAuth = async (
-    provider: string,
-    connection: ProviderConnection,
-  ): Promise<DialectAuth> => {
-    const { auth, missing } = await credentialsFor(provider, connection);
-    if (missing.length > 0) throw missingCredential(provider, missing);
-    return auth;
-  };
+  const /** resolveAuth implementation. */
+    resolveAuth = async (
+      provider: string,
+      connection: ProviderConnection,
+    ): Promise<DialectAuth> => {
+      const { auth, missing } = await credentialsFor(provider, connection);
+      if (missing.length > 0) throw missingCredential(provider, missing);
+      return auth;
+    };
 
   /**
    * The filter gate: whether one provider may be offered under the current
@@ -592,8 +591,8 @@ resolveAuth = async (
   };
 
   let userId: AnonymousUserId | undefined;
-  const   /** resolveUserId implementation. */
-resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
+  const /** resolveUserId implementation. */
+    resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
 
   // The service gate is a boundary for callers that see arbitrary providers
   // (the agent-scoped remap row reads every request's provider): a provider
@@ -627,21 +626,21 @@ resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId())
   const registration = ctx.llm.registerAdapter([...PROVIDER_IDS], adapter);
   let registeredPolicy = resolved().retryPolicy;
   let registeredCatalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
-  const   /** ensureRegistrationFacts implementation. */
-ensureRegistrationFacts = (): void => {
-    // Base URLs, the live-catalog toggle and the TTL all change what a listing
-    // would return, so drop the discovered entries and let the next read
-    // refetch rather than serving a catalog from the previous configuration.
-    const catalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
-    if (!deepEqualJson(catalogFacts, registeredCatalogFacts)) {
-      modelCatalog.clear();
-      registeredCatalogFacts = catalogFacts;
-    }
-    const policy = resolved().retryPolicy;
-    if (deepEqualJson(policy, registeredPolicy)) return;
-    registration.replace([...PROVIDER_IDS]);
-    registeredPolicy = policy;
-  };
+  const /** ensureRegistrationFacts implementation. */
+    ensureRegistrationFacts = (): void => {
+      // Base URLs, the live-catalog toggle and the TTL all change what a listing
+      // would return, so drop the discovered entries and let the next read
+      // refetch rather than serving a catalog from the previous configuration.
+      const catalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
+      if (!deepEqualJson(catalogFacts, registeredCatalogFacts)) {
+        modelCatalog.clear();
+        registeredCatalogFacts = catalogFacts;
+      }
+      const policy = resolved().retryPolicy;
+      if (deepEqualJson(policy, registeredPolicy)) return;
+      registration.replace([...PROVIDER_IDS]);
+      registeredPolicy = policy;
+    };
 
   installSettingsSection(ctx, NS, Config, config, {
     setSource: (source) => {
