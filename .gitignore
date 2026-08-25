@@ -3,10 +3,17 @@ node_modules/
 .hub/
 .vite/
 
+# git worktrees
+/worktrees/
+
 # harness build output
 harness/apps/*/lib/
 harness/packages/*/lib/
 harness/*/dist/
+
+# stack package build output
+plugins/*/lib/
+packages/*/lib/
 
 # state (never commit) — .agents/ in repo is docs + hooks (tracked);
 # ~/.agents is the harness home (state folder, never committed)
