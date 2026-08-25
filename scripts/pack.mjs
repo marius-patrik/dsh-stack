@@ -9,7 +9,7 @@ if (!["build", "typecheck", "test", "verify"].includes(command)) {
 }
 
 const root = process.cwd();
-const workspace = resolve(root, "..");
+const repositoryRoot = resolve(root, "../..");
 
 /** readJson implementation. */
 async function readJson(path) {
@@ -18,15 +18,23 @@ async function readJson(path) {
 
 /** discoverStackPackages implementation. */
 async function discoverStackPackages() {
-  const entries = await fs.readdir(workspace, { withFileTypes: true });
   const byId = new Map();
-  for (const entry of entries) {
-    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
-    const dir = join(workspace, entry.name);
+  for (const catalogRoot of ["packages", "extensions", "packs"]) {
+    const catalogDir = join(repositoryRoot, catalogRoot);
+    let entries;
     try {
-      const manifest = await readJson(join(dir, "stack.json"));
-      if (typeof manifest.id === "string") byId.set(manifest.id, { dir, manifest });
-    } catch {}
+      entries = await fs.readdir(catalogDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+      const dir = join(catalogDir, entry.name);
+      try {
+        const manifest = await readJson(join(dir, "stack.json"));
+        if (typeof manifest.id === "string") byId.set(manifest.id, { dir, manifest });
+      } catch {}
+    }
   }
   return byId;
 }
@@ -45,7 +53,7 @@ dependencies.sort((a, b) => a.id.localeCompare(b.id));
 const /** run implementation. */
   run = (child) =>
     new Promise((resolvePromise, reject) => {
-      const childProcess = spawn("pnpm", ["run", command], {
+      const childProcess = spawn("pnpm", ["run", "--if-present", command], {
         cwd: child.dir,
         stdio: "inherit",
         shell: process.platform === "win32",

@@ -1,0 +1,16 @@
+{
+  "id": "stack.pack.ai",
+  "name": "@dsh-stack/pack-ai",
+  "version": "0.3.0",
+  "kind": "pack",
+  "description": "AI protocol and model dialect composition pack.",
+  "files": [
+    "package.json",
+    "stack.json",
+    "README.md"
+  ],
+  "dependencies": [
+    "stack.ai.providers"
+  ],
+  "optionalDependencies": []
+}

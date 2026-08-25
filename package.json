@@ -14,7 +14,7 @@
     "format:check": "npx --yes @biomejs/biome@2.2.0 format --write . && git diff --exit-code",
     "verify:plugin-readmes": "node scripts/verify-plugin-readmes.mjs",
     "verify:jsdocs": "node scripts/verify-jsdocs.mjs",
-    "verify:duplicates": "pnpm dlx jscpd@5.0.16 --min-lines 5 --min-tokens 50 --threshold 0 --ignore '**/{node_modules,lib,dist,.next,.turbo}/**' packages plugins scripts",
+    "verify:duplicates": "pnpm dlx jscpd@5.0.16 --min-lines 5 --min-tokens 50 --threshold 0 --ignore '**/{node_modules,lib,dist,.next,.turbo}/**' packages extensions packs plugins scripts",
     "verify:dead-code": "pnpm dlx knip@6.32.2 --no-progress",
     "verify": "pnpm run verify:plugin-readmes && pnpm run verify:jsdocs && pnpm run verify:duplicates && pnpm run verify:dead-code && node scripts/verify-stack.mjs && pnpm -r --if-present verify",
     "test": "pnpm -r --if-present test",

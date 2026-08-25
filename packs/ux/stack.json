@@ -1,0 +1,28 @@
+{
+  "id": "stack.pack.ux",
+  "name": "@dsh-stack/pack-ux",
+  "version": "0.3.0",
+  "kind": "pack",
+  "description": "Presentation, editor, terminal, themes and media composition pack.",
+  "files": [
+    "package.json",
+    "stack.json",
+    "README.md"
+  ],
+  "dependencies": [
+    "stack.media.voice",
+    "stack.ui.icons",
+    "stack.ui.profile.runtime",
+    "stack.ui.sidebar-preferences",
+    "stack.ui.skin.claude",
+    "stack.ui.skin.codex",
+    "stack.ui.skin.deepseek",
+    "stack.ui.skin.runtime",
+    "stack.ui.skin.settings",
+    "stack.ui.themes",
+    "stack.ui.tui",
+    "stack.workspace.files",
+    "stack.workspace.tabs"
+  ],
+  "optionalDependencies": []
+}

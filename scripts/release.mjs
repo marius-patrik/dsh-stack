@@ -7,6 +7,8 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
 const packagesDir = join(root, "packages");
+const extensionsDir = join(root, "extensions");
+const packsDir = join(root, "packs");
 const pluginsDir = join(root, "plugins");
 const command = process.argv[2];
 const bumpArg = process.argv[3] ?? "patch";
@@ -46,20 +48,28 @@ function bumpVersion(version, kind) {
   return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
 }
 
-/** Discover package implementations from the flat packages directory. */
+/** Discover package implementations from the canonical packages and extensions directories. */
 async function discoverPackages() {
-  const entries = await fs.readdir(packagesDir, { withFileTypes: true });
   const packages = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
-    const dir = join(packagesDir, entry.name);
+  for (const catalogDir of [packagesDir, extensionsDir]) {
+    let entries;
     try {
-      const [stack, pkg] = await Promise.all([
-        readJson(join(dir, "stack.json")),
-        readJson(join(dir, "package.json")),
-      ]);
-      packages.push({ dir, stack, pkg });
-    } catch {}
+      entries = await fs.readdir(catalogDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+      const dir = join(catalogDir, entry.name);
+      try {
+        const [stack, pkg] = await Promise.all([
+          readJson(join(dir, "stack.json")),
+          readJson(join(dir, "package.json")),
+        ]);
+        if (!stack || typeof stack.id !== "string") continue;
+        packages.push({ dir, stack, pkg });
+      } catch {}
+    }
   }
   packages.sort((a, b) => a.stack.id.localeCompare(b.stack.id));
   return packages;
@@ -86,7 +96,10 @@ async function discoverComponentDirectories(baseDir, relativePrefix = "") {
 
 /** Read pack/profile membership from the composition catalog. */
 async function catalogMembership() {
-  const source = await fs.readFile(join(pluginsDir, "composition", "src", "catalog.ts"), "utf8");
+  const source = await fs.readFile(
+    join(packagesDir, "composition", "src", "catalog.ts"),
+    "utf8",
+  );
   const packs = {};
   const profiles = {};
   let section = null;
@@ -101,14 +114,14 @@ async function catalogMembership() {
       section = "profiles";
       continue;
     }
-    const objectMatch = line.match(/^id:\s*'([^']+)'/);
+    const objectMatch = line.match(/^id:\s*["']([^"']+)["']/);
     if (objectMatch) {
       current = objectMatch[1];
       if (section === "packs") packs[current] = [];
       else if (section === "profiles") profiles[current] = [];
       continue;
     }
-    const quoted = line.match(/'([^']+)'/g)?.map((value) => value.slice(1, -1)) ?? [];
+    const quoted = line.match(/["']([^"']+)["']/g)?.map((value) => value.slice(1, -1)) ?? [];
     if (current !== null) {
       if (section === "packs")
         for (const id of quoted) if (id.startsWith("stack.")) packs[current].push(id);
@@ -187,19 +200,23 @@ async function zipComponent(component, outputDir, kind, stageDir) {
   return archive;
 }
 
-/** Build individual ZIP assets for every plugin and every pack in the repository. */
+/** Build individual ZIP assets for every plugin, extension and pack in the repository. */
 async function componentArchives(outputDir) {
   const stageDir = join(outputDir, ".stage");
   await fs.rm(stageDir, { recursive: true, force: true });
   await fs.mkdir(stageDir, { recursive: true });
 
   const pluginComponents = await discoverComponentDirectories(pluginsDir);
-  const packComponents = await discoverComponentDirectories(join(pluginsDir, "packs"));
+  const extensionComponents = await discoverComponentDirectories(extensionsDir);
+  const packComponents = await discoverComponentDirectories(packsDir);
   const archives = [];
 
   for (const component of pluginComponents) {
     if (component.relativePath === "packs" || component.relativePath.startsWith("packs/")) continue;
     archives.push(await zipComponent(component, outputDir, "plugin", stageDir));
+  }
+  for (const component of extensionComponents) {
+    archives.push(await zipComponent(component, outputDir, "extension", stageDir));
   }
   for (const component of packComponents) {
     archives.push(await zipComponent(component, outputDir, "pack", stageDir));
@@ -221,6 +238,11 @@ async function assets() {
     format: 1,
     plugins: archives
       .filter((file) => file.includes("/plugin-") || file.startsWith(join(outputDir, "plugin-")))
+      .map((file) => relative(outputDir, file)),
+    extensions: archives
+      .filter(
+        (file) => file.includes("/extension-") || file.startsWith(join(outputDir, "extension-")),
+      )
       .map((file) => relative(outputDir, file)),
     packs: archives
       .filter((file) => file.includes("/pack-") || file.startsWith(join(outputDir, "pack-")))
@@ -257,14 +279,14 @@ async function version() {
 
   const packages = await discoverPackages();
   for (const item of packages) {
-    const dirName = relative(packagesDir, item.dir);
+    const relativeDir = relative(root, item.dir);
     const changed = await exec("git", [
       "diff",
       "--name-only",
       "HEAD^",
       "HEAD",
       "--",
-      `packages/${dirName}`,
+      relativeDir,
     ]);
     if (!changed) continue;
     const messages = await exec("git", [
@@ -273,7 +295,7 @@ async function version() {
       "-n",
       "50",
       "--",
-      `packages/${dirName}`,
+      relativeDir,
     ]);
     const bump = /BREAKING CHANGE|^[^\n]*!:/m.test(messages)
       ? "major"

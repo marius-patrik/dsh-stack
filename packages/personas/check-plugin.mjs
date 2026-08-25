@@ -5,6 +5,13 @@ assert.strictEqual(plugin.name, "personas");
 assert.strictEqual(typeof plugin.apply, "function");
 
 const ctx = { personas: null, llm: {}, sessions: {}, slots: {} };
+// Mirror the cordis runtime: Service construction mounts itself on the context
+// through reflect.provide.
+ctx.reflect = {
+  provide: (name, service) => {
+    ctx[name] = service;
+  },
+};
 plugin.apply(ctx);
 assert.ok(ctx.personas);
 ctx.personas.register({

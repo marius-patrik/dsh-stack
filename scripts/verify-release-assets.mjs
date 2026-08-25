@@ -6,6 +6,8 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
 const pluginsDir = join(root, "plugins");
+const extensionsDir = join(root, "extensions");
+const packsDir = join(root, "packs");
 const releaseDir = join(root, ".release");
 
 /** Recursively discover plugin or pack directories, including symlinked component directories. */
@@ -42,7 +44,7 @@ async function verifyArchive(archive) {
   }
 }
 
-/** Verify that the release contains one valid ZIP for every plugin and pack. */
+/** Verify that the release contains one valid ZIP for every plugin, extension and pack. */
 async function main() {
   const inventory = JSON.parse(
     await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"),
@@ -50,9 +52,13 @@ async function main() {
   const expectedPlugins = (await discoverComponents(pluginsDir)).filter(
     (path) => !path.startsWith("packs/"),
   );
-  const expectedPacks = await discoverComponents(join(pluginsDir, "packs"));
+  const expectedExtensions = await discoverComponents(extensionsDir);
+  const expectedPacks = await discoverComponents(packsDir);
   const pluginZips = inventory.plugins
     .map((name) => name.replace(/^plugin-/, "").replace(/\.zip$/, ""))
+    .sort();
+  const extensionZips = inventory.extensions
+    .map((name) => name.replace(/^extension-/, "").replace(/\.zip$/, ""))
     .sort();
   const packZips = inventory.packs
     .map((name) => name.replace(/^pack-/, "").replace(/\.zip$/, ""))
@@ -62,19 +68,24 @@ async function main() {
       `Plugin ZIP inventory mismatch: expected ${expectedPlugins.length}, generated ${pluginZips.length}`,
     );
   }
+  if (JSON.stringify(extensionZips) !== JSON.stringify(expectedExtensions)) {
+    throw new Error(
+      `Extension ZIP inventory mismatch: expected ${expectedExtensions.length}, generated ${extensionZips.length}`,
+    );
+  }
   if (JSON.stringify(packZips) !== JSON.stringify(expectedPacks)) {
     throw new Error(
       `Pack ZIP inventory mismatch: expected ${expectedPacks.length}, generated ${packZips.length}`,
     );
   }
-  for (const asset of [...inventory.plugins, ...inventory.packs]) {
+  for (const asset of [...inventory.plugins, ...inventory.extensions, ...inventory.packs]) {
     const archive = join(releaseDir, asset);
     const stat = await fs.stat(archive);
     if (!stat.isFile() || stat.size === 0) throw new Error(`Invalid release asset: ${asset}`);
     await verifyArchive(archive);
   }
   console.log(
-    `Validated ${expectedPlugins.length} plugin ZIPs and ${expectedPacks.length} pack ZIPs.`,
+    `Validated ${expectedPlugins.length} plugin ZIPs, ${expectedExtensions.length} extension ZIPs and ${expectedPacks.length} pack ZIPs.`,
   );
 }
 

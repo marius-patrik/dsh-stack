@@ -168,7 +168,11 @@ assert.equal(creq.framing, "sse");
   );
   const oauthBody = JSON.parse(oauth.body);
   assert.deepEqual(oauthBody.system, [
-    { type: "text", text: "You are Claude Code, Anthropic's official CLI for Claude." },
+    {
+      type: "text",
+      text: "You are Claude Code, Anthropic's official CLI for Claude.",
+      cache_control: { type: "ephemeral" },
+    },
   ]);
 
   // The caller's own prompt is kept, after the identity, never dropped.
@@ -179,8 +183,12 @@ assert.equal(creq.framing, "sse");
     defaults,
   );
   assert.deepEqual(JSON.parse(withSystem.body).system, [
-    { type: "text", text: "You are Claude Code, Anthropic's official CLI for Claude." },
-    { type: "text", text: "Be terse." },
+    {
+      type: "text",
+      text: "You are Claude Code, Anthropic's official CLI for Claude.",
+      cache_control: { type: "ephemeral" },
+    },
+    { type: "text", text: "Be terse.", cache_control: { type: "ephemeral" } },
   ]);
 
   // An API key gets no injected identity.
@@ -364,7 +372,7 @@ assert.equal(cusage.inputTokens, 8);
 assert.equal(cusage.outputTokens, 3);
 const cfin = cchunks.at(-1);
 assert.equal(cfin.reason.kind, "tool-calls");
-assert.deepEqual(cfin.replayState, { messageId: "msg_1" });
+assert.deepEqual(cfin.replayState, { response: { messageId: "msg_1" } });
 const ctool = cchunks.find((c) => c.type === "block-end").block;
 assert.equal(ctool.name, "search");
 assert.equal(ctool.arguments, '{"q":"x"}');

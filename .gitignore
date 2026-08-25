@@ -14,6 +14,8 @@ harness/*/dist/
 # stack package build output
 plugins/*/lib/
 packages/*/lib/
+extensions/*/lib/
+packs/*/lib/
 pnpm-lock.yaml
 
 # state (never commit) — .agents/ in repo is docs + hooks (tracked);
