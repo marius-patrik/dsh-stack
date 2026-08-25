@@ -30,11 +30,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Typecheck Stack workspace
-        run: pnpm typecheck
-
       - name: Build Stack workspace
         run: pnpm build
+
+      - name: Typecheck Stack workspace
+        run: pnpm typecheck
 
       - name: Verify Stack workspace
         run: pnpm verify
