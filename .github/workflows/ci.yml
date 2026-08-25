@@ -5,51 +5,7 @@ on:
   push:
     branches: ['**']
 
-permissions:
-  contents: write
-
 jobs:
-  retrofit-jsdocs:
-    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'refactor/remove-dsh-from-package-plugin-names' && !contains(github.event.pull_request.title, '[jsdoc-autofix]') }}
-    name: Retrofit strict JSDoc
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.head_ref }}
-          submodules: recursive
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.19.0
-          package-manager-cache: false
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.7.0
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Add missing JSDoc
-        run: node scripts/fix-jsdocs.mjs
-
-      - name: Verify strict JSDoc coverage
-        run: pnpm verify:jsdocs
-
-      - name: Commit retrofit
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add packages plugins scripts
-          git diff --cached --quiet && exit 0
-          git commit -m 'chore(docs): add JSDoc to all declarations [jsdoc-autofix]'
-          git pull --rebase origin ${{ github.head_ref }}
-          git push origin HEAD:${{ github.head_ref }}
-
   verify:
     name: Canonical Stack workspace
     runs-on: ubuntu-latest
