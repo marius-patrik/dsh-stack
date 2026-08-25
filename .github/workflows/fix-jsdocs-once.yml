@@ -1,21 +1,21 @@
 name: One-shot JSDoc retrofit
 
 on:
-  push:
-    branches:
-      - refactor/remove-dsh-from-package-plugin-names
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   retrofit:
-    if: ${{ !contains(github.event.head_commit.message, '[jsdoc-autofix]') }}
+    if: ${{ github.head_ref == 'refactor/remove-dsh-from-package-plugin-names' && !contains(github.event.pull_request.title, '[jsdoc-autofix]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
+          ref: ${{ github.head_ref }}
           submodules: recursive
 
       - name: Set up Node.js
@@ -45,4 +45,4 @@ jobs:
           git add packages plugins scripts
           git diff --cached --quiet && exit 0
           git commit -m 'chore(docs): add JSDoc to all declarations [jsdoc-autofix]'
-          git push
+          git push origin HEAD:${{ github.head_ref }}
