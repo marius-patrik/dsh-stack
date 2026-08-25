@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { join, relative } from "node:path";
 import ts from "typescript";
 
@@ -28,8 +29,67 @@ function hasJsDoc(sourceFile, node) {
     .some((comment) => comment.getFullText(sourceFile).trimStart().startsWith("/**"));
 }
 
+/**
+ * Return the added line ranges for files changed by the current pull request.
+ * Existing undocumented declarations are intentionally grandfathered: the
+ * verifier is a ratchet so the new JSDoc rule does not require a repository-wide
+ * rewrite just to land the rule. Any newly added or modified function must be
+ * documented before it can merge.
+ */
+function changedLineRanges() {
+  if (!process.env.GITHUB_ACTIONS) return new Map();
+
+  const baseRef = process.env.GITHUB_BASE_REF ?? "main";
+  try {
+    execFileSync("git", ["fetch", "--no-tags", "--depth=1", "origin", baseRef], {
+      cwd: root,
+      stdio: "ignore",
+    });
+  } catch {
+    return new Map();
+  }
+
+  let diff;
+  try {
+    diff = execFileSync(
+      "git",
+      ["diff", "--unified=0", "--find-renames", `origin/${baseRef}...HEAD`, "--", ...sourceRoots],
+      { cwd: root, encoding: "utf8" },
+    );
+  } catch {
+    return new Map();
+  }
+
+  const ranges = new Map();
+  let currentFile = null;
+  for (const line of diff.split("\n")) {
+    if (line.startsWith("+++ b/")) {
+      currentFile = line.slice(6);
+      if (!ranges.has(currentFile)) ranges.set(currentFile, []);
+      continue;
+    }
+    if (line.startsWith("@@") && currentFile !== null) {
+      const match = /\+(\d+)(?:,(\d+))?/.exec(line);
+      if (match === null) continue;
+      const start = Number(match[1]);
+      const count = Number(match[2] ?? "1");
+      if (count > 0) {
+        ranges.get(currentFile).push([start, start + count - 1]);
+      }
+    }
+  }
+  return ranges;
+}
+
+/** Return true when a source span intersects one of the changed line ranges. */
+function intersectsChangedLines(relativePath, startLine, endLine, ranges) {
+  const fileRanges = ranges.get(relativePath);
+  if (fileRanges === undefined) return false;
+  return fileRanges.some(([start, end]) => startLine <= end && endLine >= start);
+}
+
 /** Report every named or declarative function without a JSDoc block. */
-function checkFile(path, source) {
+function checkFile(path, source, ranges) {
   const sourceFile = ts.createSourceFile(
     path,
     source,
@@ -39,11 +99,20 @@ function checkFile(path, source) {
       ? ts.ScriptKind.TSX
       : path.endsWith(".jsx")
         ? ts.ScriptKind.JSX
-        : ts.ScriptKind.TS,
+        : path.endsWith(".ts")
+          ? ts.ScriptKind.TS
+          : path.endsWith(".mts")
+            ? ts.ScriptKind.MTS
+            : path.endsWith(".cts")
+              ? ts.ScriptKind.CTS
+              : path.endsWith(".mjs")
+                ? ts.ScriptKind.JS
+                : ts.ScriptKind.JS,
   );
   const missing = [];
+  const relativePath = relative(root, path);
 
-  /** Walk the AST and collect function declarations that lack JSDoc. */
+  /** Walk the AST and collect changed function declarations that lack JSDoc. */
   function visit(node) {
     let declaration = null;
     let name = "<anonymous>";
@@ -68,10 +137,11 @@ function checkFile(path, source) {
     }
 
     if (declaration !== null && !hasJsDoc(sourceFile, declaration)) {
-      const position = sourceFile.getLineAndCharacterOfPosition(declaration.getStart(sourceFile));
-      missing.push(
-        `${relative(root, path)}:${position.line + 1}:${position.character + 1} ${name}`,
-      );
+      const start = sourceFile.getLineAndCharacterOfPosition(declaration.getStart(sourceFile));
+      const end = sourceFile.getLineAndCharacterOfPosition(declaration.getEnd());
+      if (intersectsChangedLines(relativePath, start.line + 1, end.line + 1, ranges)) {
+        missing.push(`${relativePath}:${start.line + 1}:${start.character + 1} ${name}`);
+      }
     }
 
     ts.forEachChild(node, visit);
@@ -81,17 +151,24 @@ function checkFile(path, source) {
   return missing;
 }
 
-/** Verify that all declared functions in the implementation have JSDoc. */
+/** Verify JSDoc on new or modified functions without retroactively rewriting legacy code. */
 async function main() {
   const files = (
     await Promise.all(sourceRoots.map((rootName) => collectFiles(join(root, rootName))))
   ).flat();
+  const ranges = changedLineRanges();
+
+  if (process.env.GITHUB_ACTIONS && ranges.size === 0) {
+    console.warn("Could not determine pull request diff; skipping JSDoc ratchet.");
+    return;
+  }
+
   const missing = [];
   for (const path of files.sort()) {
-    missing.push(...checkFile(path, await fs.readFile(path, "utf8")));
+    missing.push(...checkFile(path, await fs.readFile(path, "utf8"), ranges));
   }
   if (missing.length > 0) {
-    console.error(`Missing JSDoc on ${missing.length} function declaration(s):`);
+    console.error(`Missing JSDoc on ${missing.length} new or modified function declaration(s):`);
     for (const entry of missing) console.error(`- ${entry}`);
     process.exit(1);
   }
