@@ -8,6 +8,11 @@ harness/apps/*/lib/
 harness/packages/*/lib/
 harness/*/dist/
 
+# stack package build output
+plugins/*/lib/
+packages/*/lib/
+pnpm-lock.yaml
+
 # state (never commit) — .agents/ in repo is docs + hooks (tracked);
 # ~/.agents is the harness home (state folder, never committed)
 .agents/*
