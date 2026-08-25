@@ -30,10 +30,7 @@ export function apply(ctx: ClientContext): void {
   const Name = () => createElement(selected.name);
 
   ctx.slots.inject("sidebar.brand.mark", function* () {
-    yield ctx.slots.register(
-      { name: "sidebar.brand.mark", inject: () => ({ size: 24 }) },
-      Mark,
-    );
+    yield ctx.slots.register({ name: "sidebar.brand.mark", inject: () => ({ size: 24 }) }, Mark);
   });
 
   ctx.slots.inject("sidebar.brand.name", function* () {
