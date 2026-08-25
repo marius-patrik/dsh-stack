@@ -22,6 +22,7 @@ const components: Record<string, SkinComponents> = {
   codex: { mark: CodexBrandMark, name: CodexBrandName },
 };
 
+/** Register the active skin's branding components in the declared UI slots. */
 export function apply(ctx: ClientContext): void {
   const active = runtime.getActive();
   const selected = components[active] ?? components.deepseek!;
