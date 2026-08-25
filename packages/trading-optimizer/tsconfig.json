@@ -12,7 +12,11 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@dsh-stack/trading-research": ["../trading-research/src/index.ts"],
+      "@dsh-stack/trading-backtest": ["../trading-backtest/src/index.ts"]
+    }
   },
   "include": ["src"]
 }
