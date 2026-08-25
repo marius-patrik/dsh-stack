@@ -1,5 +1,7 @@
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { ComponentType } from "react";
+import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
+import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import { createSkinRuntime } from "@dsh-stack/skin-runtime";
 import { CodexBrandMark, CodexBrandName } from "@dsh-stack/skin-codex/client";
 import { ClaudeBrandMark, ClaudeBrandName } from "@dsh-stack/skin-claude/client";
