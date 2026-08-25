@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "..",
+    "skipLibCheck": true,
     "paths": {
       "@dsh-stack/skin-runtime": ["../skin-runtime/src/index.ts"],
       "@dsh-stack/skin-codex/client": ["../skin-codex/src/client.tsx"],
