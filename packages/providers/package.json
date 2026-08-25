@@ -2,7 +2,6 @@
   "name": "providers",
   "description": "Subscription and API provider adapters for dsh, wired onto Stack dialects and the harness credential seam",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -36,16 +35,17 @@
     "lib",
     "cordis.patch.yml",
     "presets",
-    "client.js"
+    "client.js",
+    "README.md"
   ],
   "scripts": {
-    "build": "tsc && cp client.js lib/client.js",
+    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client.js > lib/client.js",
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
     "test": "node check-plugin.mjs"
   },
   "dependencies": {
-    "dsh-dialects": "file:../dialects",
-    "dsh-credentials": "file:../credential-vault"
+    "dialects": "workspace:*",
+    "credentials": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
@@ -57,7 +57,8 @@
     "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
     "@deepseek-ai/dsh-host-webserver": "0.1.1-rc.2",
     "dialects": "workspace:*",
-    "credentials": "workspace:*"
+    "credentials": "workspace:*",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
@@ -72,5 +73,12 @@
     "@deepseek-ai/dsh-host-webserver": "0.1.1-rc.2",
     "dialects": "workspace:*",
     "credentials": "workspace:*"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.ai.providers"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

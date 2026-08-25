@@ -1,13 +1,13 @@
 /**
- * `dsh-formatters`: owns file formatting on the web profile. The harness web
+ * `formatters`: owns file formatting on the web profile. The harness web
  * UI is read-only, so this plugin works through the seams the agent uses to
  * write: a model-facing `format` tool over per-extension formatter commands
  * (`prettier`, `black`, `gofmt`, ...) and, when enabled, automatic reformatting
  * after every successful `edit`/`write` via the `tools/post-execute` waterfall.
  * Formatters run through `ctx.subprocess` — never shell-interpreted. The
- * `dsh formatter` CLI (bin/formatter.mjs) manages the `dsh-formatters` settings
+ * `dsh formatter` CLI (bin/formatter.mjs) manages the `formatters` settings
  * section; changes apply on the next boot.
- * @module dsh-formatters
+ * @module formatters
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -31,7 +31,7 @@ import { formatFile, resolveTarget, targetPathFromArguments } from "./format.js"
 export type * from "./settings.js";
 export type * from "./format.js";
 
-export const name = "dsh-formatters";
+export const name = "formatters";
 export const inject = ["fs", "subprocess", "tools"];
 
 export const Config: z<FormatterConfig> = FormatterConfig;
@@ -136,7 +136,7 @@ export function apply(ctx: Context, config: FormatterConfigType): void {
           `before:\n${outcome.before}\nafter:\n${outcome.after}`;
         const noteMessage = createUserMessage({
           content: [{ type: "text", text: note }],
-          source: { kind: "plugin", plugin: "dsh-formatters" },
+          source: { kind: "plugin", plugin: "formatters" },
         });
         return {
           ...downstream,
@@ -144,7 +144,7 @@ export function apply(ctx: Context, config: FormatterConfigType): void {
         };
       } catch (error: unknown) {
         ctx.logger.warn(
-          `dsh-formatters: auto-format failed for ${rawPath}: ${error instanceof Error ? error.message : String(error)}`,
+          `formatters: auto-format failed for ${rawPath}: ${error instanceof Error ? error.message : String(error)}`,
         );
         return next();
       }

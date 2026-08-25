@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * The `dsh theme` command: the owner surface over the dsh-themes store and
+ * The `dsh theme` command: the owner surface over the themes store and
  * Open VSX catalog. It resolves the same agent home the harness boots
- * (DSH_HOME), reads the `dsh-themes` deployment knobs from `settings.yaml`
+ * (DSH_HOME), reads the `themes` deployment knobs from `settings.yaml`
  * (root + catalogUrl), then operates on the installed theme files / catalog.
  *
  * Verbs:
@@ -46,7 +46,7 @@ async function readThemesConfig() {
   let root = "themes";
   let catalogUrl = "https://open-vsx.org";
   try {
-    for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "dsh-themes")) {
+    for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "themes")) {
       if (key === "root") root = value;
       if (key === "catalogUrl") catalogUrl = value;
     }
@@ -59,7 +59,7 @@ async function readThemesConfig() {
 /** readActive implementation. */
 async function readActive() {
   try {
-    for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "dsh-themes")) {
+    for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "themes")) {
       if (key === "active") return value;
     }
   } catch {
@@ -76,8 +76,8 @@ async function writeActive(id) {
   } catch {
     /* new file */
   }
-  const pattern = /^dsh-themes\s*:\s*[\s\S]*?(?=^\S|$)/gm;
-  const section = `dsh-themes:\n  active: ${JSON.stringify(id)}\n`;
+  const pattern = /^themes\s*:\s*[\s\S]*?(?=^\S|$)/gm;
+  const section = `themes:\n  active: ${JSON.stringify(id)}\n`;
   const withoutThemes = text.replace(pattern, "");
   const rest = withoutThemes.replace(/\n{3,}/g, "\n\n").trim();
   text = `${rest}${rest.endsWith("\n") ? "" : "\n"}${section}`;

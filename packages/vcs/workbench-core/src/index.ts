@@ -8,6 +8,16 @@ export const name = "workbench-core";
 export const inject = ["tools", "webServer"];
 export const optional = ["icons"];
 
+/** The subset of the model-facing tool registry that workbench-core relies on. */
+export interface WorkbenchToolRegistry {
+  registerTool: (tool: {
+    name: string;
+    description: string;
+    parameters: unknown;
+    execute: (params: any) => Promise<unknown>;
+  }) => void;
+}
+
 export interface RepoDetails {
   path: string;
   branch: string;
@@ -87,7 +97,7 @@ export class ReposWorkbenchService {
 
   /** registerVcsTools implementation. */
   private registerVcsTools(): void {
-    const tools = (this.ctx as any).tools;
+    const tools = this.ctx.tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 
     // 1. git_status
@@ -178,8 +188,15 @@ export const Config = Schema.object({
   supportLocalOnly: Schema.boolean().default(true),
 });
 
+declare module "@deepseek-ai/cordis" {
+  interface Context {
+    tools: WorkbenchToolRegistry;
+    repos: ReposWorkbenchService;
+  }
+}
+
 /** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new ReposWorkbenchService(ctx);
-  (ctx as any).repos = service;
+  ctx.repos = service;
 }

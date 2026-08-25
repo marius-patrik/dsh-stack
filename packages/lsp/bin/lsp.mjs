@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * The `dsh lsp` command: the owner surface over the dsh-lsp server table. It
- * reads/writes the `dsh-lsp` section of `settings.yaml` under the same agent
+ * The `dsh lsp` command: the owner surface over the lsp server table. It
+ * reads/writes the `lsp` section of `settings.yaml` under the same agent
  * home the harness boots (DSH_HOME); the plugin mounts those servers on the
  * next boot.
  *
@@ -57,7 +57,7 @@ async function readServers() {
   try {
     const text = await readFile(settingsPath, "utf8");
     const section = {};
-    for (const [key, value] of readSection(text, "dsh-lsp")) {
+    for (const [key, value] of readSection(text, "lsp")) {
       section[key] = parseJsonValue(value);
     }
     return section;
@@ -75,8 +75,8 @@ async function writeServers(servers) {
   } catch {
     /* new file */
   }
-  const pattern = /^dsh-lsp[^\n]*\n(?:[ \t][^\n]*\n)*/m;
-  const section = `dsh-lsp:\n  servers: ${JSON.stringify(servers.servers ?? {})}\n`;
+  const pattern = /^lsp[^\n]*\n(?:[ \t][^\n]*\n)*/m;
+  const section = `lsp:\n  servers: ${JSON.stringify(servers.servers ?? {})}\n`;
   const without = text.replace(pattern, "");
   const rest = without.replace(/\n{3,}/g, "\n\n").trim();
   const out = `${rest}${rest.endsWith("\n") ? "" : "\n"}${section}`;

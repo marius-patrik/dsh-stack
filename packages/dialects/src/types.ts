@@ -4,7 +4,7 @@
  * resolve credentials, assemble base URLs, and call {@link Dialect.serialize}
  * and {@link Dialect.parse}.
  *
- * @module dsh-dialects/types
+ * @module dialects/types
  */
 
 import type { GenerateOptions, StreamChunk } from "@deepseek-ai/dsh-llm";

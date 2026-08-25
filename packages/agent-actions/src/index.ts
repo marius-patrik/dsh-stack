@@ -1,9 +1,9 @@
 /**
- * `dsh-actions`: explicit per-session actions (formerly session modes) with
+ * `agent-actions`: explicit per-session actions (formerly session modes) with
  * durable state, executor policy, request routing, a file-defined vocabulary
  * under `.agents/actions`, and the reload actions (soft client reload and the
  * hard server self-restart).
- * @module dsh-actions
+ * @module agent-actions
  */
 
 import { homedir } from "node:os";
@@ -18,42 +18,28 @@ export {
   ACTIONS,
   BUILT_IN_ACTIONS,
   DEFAULT_ACTION,
-  MODES,
   parseAction,
   sanitizeId,
 } from "./action.js";
 export type { ActionRoute, ActionSpec, BuiltInAction } from "./action.js";
 export { ActionCatalog } from "./catalog.js";
 export type { ActionCatalogConfig } from "./catalog.js";
-export {
-  ACTION_SELECTED,
-  LEGACY_MODE_SELECTED,
-  ActionsController,
-  ModesController,
-  foldAction,
-} from "./controller.js";
+export { ACTION_SELECTED, LEGACY_MODE_SELECTED, ActionsController, foldAction } from "./controller.js";
 export type { ActionState } from "./controller.js";
 export * from "./reload.js";
 
-export const name = "dsh-actions";
+export const name = "agent-actions";
 export const inject = ["commands", "systemPrompt", "webServer"];
 
 declare module "@deepseek-ai/cordis" {
   interface Context {
     actions: ActionsController;
-    /** @deprecated compat alias for the pre-rename service name. */
-    sessionModes: ActionsController;
   }
 }
-
-/** @deprecated compat alias for the pre-rename type name. */
-export type SessionMode = string;
 
 export interface Config {
   /** The action a fresh session runs on. */
   defaultAction?: string;
-  /** @deprecated compat alias for {@link Config.defaultAction}. */
-  defaultMode?: string;
   /** Per-action provider/model routing. */
   routes?: Record<string, ActionRoute>;
   /** Per-action tool allowlists. */
@@ -71,12 +57,11 @@ function dshHome(): string {
 export function apply(ctx: Context, config: Config = {}): void {
   const root = config.actionsRoot ?? join(dshHome(), "actions");
   const catalog = new ActionCatalog({ root });
-  const defaultAction = config.defaultAction ?? config.defaultMode ?? DEFAULT_ACTION;
+  const defaultAction = config.defaultAction ?? DEFAULT_ACTION;
   const controller = new ActionsController(defaultAction, (id) => catalog.ids().includes(id));
 
   const provider = ctx as unknown as { provide(name: string, value: unknown): unknown };
   provider.provide("actions", controller);
-  provider.provide("sessionModes", controller);
 
   void catalog.load();
 
@@ -95,7 +80,7 @@ export function apply(ctx: Context, config: Config = {}): void {
         const session = payload.agent?.session as
           | { append?: (type: string, data: unknown) => unknown }
           | undefined;
-        session?.append?.(ACTION_SELECTED, { action: pending, mode: pending });
+        session?.append?.(ACTION_SELECTED, { action: pending });
       }
     }
     return decision;
@@ -163,13 +148,6 @@ export function apply(ctx: Context, config: Config = {}): void {
   });
   safeRegister({
     name: "action",
-    description: "Select the session preset (alias of /preset)",
-    input: { hint: `[${catalog.ids().join("|")}]` },
-    handler: selectHandler,
-  });
-  // Compat: the pre-rename command name keeps working.
-  safeRegister({
-    name: "mode",
     description: "Select the session preset (alias of /preset)",
     input: { hint: `[${catalog.ids().join("|")}]` },
     handler: selectHandler,
@@ -311,8 +289,6 @@ export function apply(ctx: Context, config: Config = {}): void {
         });
       };
     webCtx.webServer.register({ kind: "exact", path: "/actions", handler: listHandler });
-    // Compat: the pre-rename route.
-    webCtx.webServer.register({ kind: "exact", path: "/session-modes", handler: listHandler });
 
     // The hard path: server self-restart that answers before it exits.
     webCtx.webServer.register({

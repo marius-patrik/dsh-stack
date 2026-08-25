@@ -3,7 +3,7 @@
  * never sees a credential: the TTS and STT routes proxy their upstreams
  * server-side, and the config route publishes only the non-secret slice the
  * client bundle needs (engine choices, voice list, current voice/speed).
- * @module dsh-voice/routes
+ * @module voice/routes
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";

@@ -4,7 +4,7 @@
  * `extension/themes/`. The system `unzip` extracts the vsix into a temp dir —
  * every target platform ships one, so no zip library is needed. Network work
  * is a small pure-function seam so tests inject a local catalog server.
- * @module dsh-themes/catalog
+ * @module themes/catalog
  */
 
 import { execFile } from "node:child_process";
@@ -51,7 +51,7 @@ export async function searchCatalog(
   url.searchParams.set("size", String(limit));
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`dsh-themes: catalog search failed (HTTP ${response.status})`);
+    throw new Error(`themes: catalog search failed (HTTP ${response.status})`);
   }
   const body = (await response.json()) as { extensions?: Array<Record<string, unknown>> };
   return (body.extensions ?? []).map(parseExtension);
@@ -75,7 +75,7 @@ export async function resolveCatalogExtension(
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
-      `dsh-themes: catalog resolve failed for ${namespace}.${name} (HTTP ${response.status})`,
+      `themes: catalog resolve failed for ${namespace}.${name} (HTTP ${response.status})`,
     );
   }
   const body = (await response.json()) as Record<string, unknown>;
@@ -91,10 +91,10 @@ export async function resolveCatalogExtension(
 export async function downloadVsix(url: string): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`dsh-themes: vsix download failed (HTTP ${response.status})`);
+    throw new Error(`themes: vsix download failed (HTTP ${response.status})`);
   }
   const buffer = Buffer.from(await response.arrayBuffer());
-  const temp = await mkdtemp(join(tmpdir(), "dsh-themes-vsix-"));
+  const temp = await mkdtemp(join(tmpdir(), "themes-vsix-"));
   const path = join(temp, "extension.vsix");
   await writeFile(path, buffer);
   return path;
@@ -138,7 +138,7 @@ export async function extractThemesFromVsix(
   vsixPath: string,
   warn?: (message: string) => void,
 ): Promise<ThemeSource[]> {
-  const temp = await mkdtemp(join(tmpdir(), "dsh-themes-"));
+  const temp = await mkdtemp(join(tmpdir(), "themes-"));
   try {
     await execFileAsync("unzip", ["-q", "-o", vsixPath, "-d", temp]);
     const themesDir = join(temp, "extension", "themes");
@@ -159,7 +159,7 @@ export async function extractThemesFromVsix(
             : parseVsCodeTheme(text, file.replace(/\.json$/, "")),
         );
       } catch (error) {
-        warn?.(`dsh-themes: skipping theme ${file}: ${String(error)}`);
+        warn?.(`themes: skipping theme ${file}: ${String(error)}`);
       }
     }
     return sources;

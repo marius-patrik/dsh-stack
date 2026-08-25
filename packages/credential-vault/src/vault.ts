@@ -8,7 +8,7 @@
  * independently nonce'd; writes rewrite the whole document atomically at
  * 0600, and a corrupt or unreadable document reads as empty rather than
  * crashing the service.
- * @module dsh-credentials/vault
+ * @module credentials/vault
  */
 
 import { randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
@@ -120,7 +120,7 @@ function encrypt(key: Buffer, value: string): StoredEntry {
 function decrypt(key: Buffer, entry: StoredEntry): string {
   const iv = Buffer.from(entry.v, "base64");
   const payload = Buffer.from(entry.c, "base64");
-  if (payload.byteLength < TAG_BYTES) throw new Error("dsh-credentials: vault entry is truncated");
+  if (payload.byteLength < TAG_BYTES) throw new Error("credentials: vault entry is truncated");
   const tag = payload.subarray(payload.byteLength - TAG_BYTES);
   const ciphertext = payload.subarray(0, payload.byteLength - TAG_BYTES);
   const decipher = createDecipheriv("aes-256-gcm", key, iv);
@@ -184,7 +184,7 @@ export class Vault {
   /** set implementation. */
   async set(ref: string, value: string): Promise<void> {
     if (value.length === 0)
-      throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
+      throw new Error(`credentials: refusing to store an empty value for ${ref}`);
     const key = await loadOrCreateKey(this.keyFile);
     const stored = await this.load();
     stored.entries[ref] = encrypt(key, value);

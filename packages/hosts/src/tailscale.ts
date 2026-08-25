@@ -1,5 +1,5 @@
 /**
- * Tailscale CLI scanner and integration for dsh-hosts.
+ * Tailscale CLI scanner and integration for hosts.
  */
 
 import { execFile } from "node:child_process";

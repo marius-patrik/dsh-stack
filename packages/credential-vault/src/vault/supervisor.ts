@@ -31,7 +31,7 @@
  * (`provider-descriptor.ts`) rather than Andromeda's hardcoded built-in table,
  * so the default resolver returns an OAuth configuration only when the adapter
  * has one registered.
- * @module dsh-credentials/vault/supervisor
+ * @module credentials/vault/supervisor
  */
 
 import { OAuthTokenRefresher, type OAuthTransport } from "./oauth.js";
@@ -262,7 +262,7 @@ export function planReauth(
       materials: [passkey.id],
       humanPresenceRequired: false,
       automatedToday: false,
-      caveat: "the WebAuthn signing ceremony is not implemented in this slice",
+      caveat: "the WebAuthn signing ceremony belongs to a future passkey slice, not this one",
     };
   }
 
@@ -273,7 +273,7 @@ export function planReauth(
       materials: [password.id, totp.id],
       humanPresenceRequired: false,
       automatedToday: false,
-      caveat: "browser-driven login is not implemented in this slice",
+      caveat: "browser-driven login belongs to a future browser-automation slice, not this one",
     };
   }
 

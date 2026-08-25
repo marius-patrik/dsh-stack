@@ -1,12 +1,9 @@
 import * as plugin from "./lib/index.js";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-if (plugin.name !== "dsh-dialects") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
+assertLoaderShape(plugin, "dialects");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
 const ctx = new Context();

@@ -12,8 +12,7 @@
     "sapling-driver",
     "workbench-core",
     "package.json",
-    "README.md",
-    "LICENSE"
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

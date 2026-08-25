@@ -1,5 +1,5 @@
 /**
- * `dsh-repos`: repo workflows (status, branch, commit, push, PR) for the dsh
+ * `repos`: repo workflows (status, branch, commit, push, PR) for the dsh
  * harness. All `git` commands run through `ctx.subprocess` — never
  * shell-interpreted — against the working directory the caller names, so the
  * tools work over the same backend the filesystem seam serves. GitHub pushes
@@ -7,10 +7,10 @@
  * the `GITHUB_OAUTH_TOKEN`/`GH_TOKEN` environment fallback; this plugin never
  * stores credentials itself.
  *
- * The `dsh repos` CLI (bin/repos.mjs) manages the `dsh-repos` settings section
+ * The `dsh repos` CLI (bin/repos.mjs) manages the `repos` settings section
  * (default remote and base branch); the model-facing tools read the same
  * section at call time.
- * @module dsh-repos
+ * @module repos
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -35,7 +35,7 @@ export type * from "./settings.js";
 export type * from "./git.js";
 export type * from "./github.js";
 
-export const name = "dsh-repos";
+export const name = "repos";
 export const inject = ["subprocess", "tools"];
 
 export const Config: z<RepoConfig> = RepoConfig;
@@ -53,7 +53,7 @@ async function requiredToken(ctx: Context): Promise<string> {
   const token = await resolveGitHubToken(ctx);
   if (token === null) {
     throw new Error(
-      "dsh-repos: no GitHub credential available — run `dsh accounts import` (gh hosts.yml) or set GITHUB_OAUTH_TOKEN/GH_TOKEN",
+      "repos: no GitHub credential available — run `dsh accounts import` (gh hosts.yml) or set GITHUB_OAUTH_TOKEN/GH_TOKEN",
     );
   }
   return token;
@@ -189,7 +189,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
           const name =
             typeof args.name === "string" && args.name.length > 0 ? args.name : undefined;
           if (action !== "list" && name === undefined)
-            throw new Error(`dsh-repos: repo-branch ${action} requires a branch name`);
+            throw new Error(`repos: repo-branch ${action} requires a branch name`);
           if (action === "create") await runGit(ctx, path, ["branch", name as string], exec.signal);
           if (action === "switch")
             await runGit(ctx, path, ["checkout", name as string], exec.signal);
@@ -322,7 +322,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             typeof args.branch === "string" && args.branch.length > 0
               ? args.branch
               : await currentBranch(ctx, path, exec.signal);
-          if (branch === null) throw new Error("dsh-repos: cannot push a detached HEAD");
+          if (branch === null) throw new Error("repos: cannot push a detached HEAD");
           const token = await requiredToken(ctx);
           await runGit(
             ctx,
@@ -394,7 +394,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             typeof args.head === "string" && args.head.length > 0
               ? args.head
               : await currentBranch(ctx, path, exec.signal);
-          if (head === null) throw new Error("dsh-repos: cannot open a PR from a detached HEAD");
+          if (head === null) throw new Error("repos: cannot open a PR from a detached HEAD");
           const base =
             typeof args.base === "string" && args.base.length > 0
               ? args.base
@@ -408,7 +408,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
           );
           const ownerRepo = ownerRepoFromRemote(urlOut);
           if (ownerRepo === null)
-            throw new Error(`dsh-repos: cannot determine owner/repo from remote ${urlOut}`);
+            throw new Error(`repos: cannot determine owner/repo from remote ${urlOut}`);
           const token = await requiredToken(ctx);
           const url = await createPullRequest(token, {
             ownerRepo,
@@ -417,7 +417,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             title: args.title,
             ...(args.body !== undefined ? { body: args.body } : {}),
           });
-          if (url === null) throw new Error("dsh-repos: GitHub did not return a pull-request URL");
+          if (url === null) throw new Error("repos: GitHub did not return a pull-request URL");
           return { url, ownerRepo, head, base };
         },
       }),

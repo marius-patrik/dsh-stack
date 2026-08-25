@@ -1,14 +1,14 @@
 /**
- * GitHub API access for dsh-repos: credential resolution and the PR/remote
- * plumbing. The token comes from the shared vault (`ctx.accounts` — dsh-repos
+ * GitHub API access for repos: credential resolution and the PR/remote
+ * plumbing. The token comes from the shared vault (`ctx.accounts` — repos
  * never stores credentials itself), so the API surface here stays thin: resolve
  * the token once per operation, then hand it to git (push) or the GitHub REST
  * API (PR creation) without ever writing it to disk.
  *
  * `env` may carry `GITHUB_OAUTH_TOKEN` as a fallback so the plugin also works
- * in deployments without dsh-credentials. All other GitHub credential entry
+ * in deployments without credentials. All other GitHub credential entry
  * points are deliberately absent — this plugin is not a credential store.
- * @module dsh-repos/github
+ * @module repos/github
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -64,7 +64,7 @@ async function githubFetch(
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
       "Content-Type": "application/json",
-      "User-Agent": "dsh-repos",
+      "User-Agent": "repos",
       "X-GitHub-Api-Version": "2022-11-28",
     },
     ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),

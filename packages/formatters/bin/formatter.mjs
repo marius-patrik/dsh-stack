@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * The `dsh formatter` command: the owner surface over the dsh-formatters
- * formatter table. It reads/writes the `dsh-formatters` section of
+ * The `dsh formatter` command: the owner surface over the formatters
+ * formatter table. It reads/writes the `formatters` section of
  * `settings.yaml` under the same agent home the harness boots (DSH_HOME); the
  * plugin mounts those commands on the next boot.
  *
@@ -58,7 +58,7 @@ async function readSectionData() {
   try {
     const text = await readFile(settingsPath, "utf8");
     const section = {};
-    for (const [key, value] of readSection(text, "dsh-formatters")) {
+    for (const [key, value] of readSection(text, "formatters")) {
       section[key] = parseJsonValue(value);
     }
     return section;
@@ -76,9 +76,9 @@ async function writeSectionData(section) {
   } catch {
     /* new file */
   }
-  const pattern = /^dsh-formatters[^\n]*\n(?:[ \t][^\n]*\n)*/m;
+  const pattern = /^formatters[^\n]*\n(?:[ \t][^\n]*\n)*/m;
   const block =
-    `dsh-formatters:\n  autoFormatOnEdit: ${section.autoFormatOnEdit ?? true}\n` +
+    `formatters:\n  autoFormatOnEdit: ${section.autoFormatOnEdit ?? true}\n` +
     `  formatters: ${JSON.stringify(section.formatters ?? {})}\n`;
   const without = text.replace(pattern, "");
   const rest = without.replace(/\n{3,}/g, "\n\n").trim();

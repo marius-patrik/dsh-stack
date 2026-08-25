@@ -2,7 +2,7 @@
 /**
  * `dsh share <sessionId>` — publish a read-only share link for one session.
  * Interactive (token-gated) sharing is opt-in: pass `--interactive` and the
- * `dsh-tweaks.share.allowInteractive` setting must be true. Prints the URL.
+ * `tweaks.share.allowInteractive` setting must be true. Prints the URL.
  *
  * Usage: dsh share <sessionId> [--interactive] [--advertised-host <host>]
  */

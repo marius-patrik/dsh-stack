@@ -22,7 +22,7 @@
 })();
 
 window.__ModuleLoader__.load({
-  id: "dsh-providers",
+  id: "providers",
   factory: function (require) {
     var module = { exports: {} };
     var exports = module.exports;
@@ -30,9 +30,11 @@ window.__ModuleLoader__.load({
     var React = require("react");
     var h = React.createElement;
     var Fragment = React.Fragment;
+    var createGlyphComponent = __dshCreateGlyphComponent(h);
+    var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
     var P = require("@deepseek-ai/dsh-client-ui-primitives");
 
-    var NS = "dsh-providers";
+    var NS = "providers";
     var VAULT_API = "/vault/api";
     var QUOTAS_API = "/quotas/api";
 
@@ -1005,79 +1007,28 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     ];
 
     /** ProvidersGlyph implementation. */
-    function ProvidersGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-providers";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ProvidersGlyph = createGlyphComponent(16, "dsh-icon-providers", false, true, false, function () {
+      return [
         h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
         h("path", {
           d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
         }),
         h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
         h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" }),
-      );
-    }
+      ];
+    });
 
     /** TerminalsGlyph implementation. */
-    function TerminalsGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-terminal";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var TerminalsGlyph = createGlyphComponent(16, "dsh-icon-terminal", false, true, false, function () {
+      return [
         h("polyline", { points: "4 17 10 11 4 5" }),
         h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
-      );
-    }
+      ];
+    });
 
     /** ContainersGlyph implementation. */
-    function ContainersGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-containers";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ContainersGlyph = createGlyphComponent(16, "dsh-icon-containers", false, true, false, function () {
+      return [
         h("path", {
           d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
         }),
@@ -1096,588 +1047,218 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         h("path", { d: "M12 8 7.26 5.15" }),
         h("path", { d: "m12 8 4.74-2.85" }),
         h("path", { d: "M12 13.5V8" }),
-      );
-    }
+      ];
+    });
 
     /** ToolsGlyph implementation. */
-    function ToolsGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-tools";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ToolsGlyph = createGlyphComponent(16, "dsh-icon-tools", false, true, false, function () {
+      return [
         h("path", {
           d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
         }),
-      );
-    }
+      ];
+    });
 
     /** LoopsGlyph implementation. */
-    function LoopsGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-refresh";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var LoopsGlyph = createGlyphComponent(16, "dsh-icon-refresh", false, true, false, function () {
+      return [
         h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
         h("path", { d: "M21 3v5h-5" }),
         h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
         h("path", { d: "M8 16H3v5" }),
-      );
-    }
+      ];
+    });
 
     /** TriangleRightFill14 implementation. */
-    function TriangleRightFill14(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-chevron";
-      var style = props && props.style ? props.style : undefined;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          style: style,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var TriangleRightFill14 = createGlyphComponent(14, "dsh-icon-chevron", true, true, false, function () {
+      return [
         h("polyline", { points: "9 18 15 12 9 6" }),
-      );
-    }
+      ];
+    });
 
     /** PassGlyph implementation. */
-    function PassGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-pass";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var PassGlyph = createGlyphComponent(16, "dsh-icon-pass", false, true, false, function () {
+      return [
         h("circle", { cx: "7.5", cy: "15.5", r: "5.5" }),
         h("path", { d: "m21 2-9.6 9.6" }),
         h("path", { d: "m15.5 7.5 3 3L22 7l-3-3" }),
-      );
-    }
+      ];
+    });
 
     /** DataGlyph implementation. */
-    function DataGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-data";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var DataGlyph = createGlyphComponent(16, "dsh-icon-data", false, true, false, function () {
+      return [
         h("polygon", { points: "12 2 2 7 12 12 22 7 12 2" }),
         h("polyline", { points: "2 17 12 22 22 17" }),
         h("polyline", { points: "2 12 12 17 22 12" }),
-      );
-    }
+      ];
+    });
 
     /** ChatGlyph implementation. */
-    function ChatGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-chat";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ChatGlyph = createGlyphComponent(16, "dsh-icon-chat", false, true, false, function () {
+      return [
         h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }),
-      );
-    }
+      ];
+    });
 
     /** RefreshGlyph implementation. */
-    function RefreshGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-refresh";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var RefreshGlyph = createGlyphComponent(16, "dsh-icon-refresh", false, true, false, function () {
+      return [
         h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
         h("path", { d: "M21 3v5h-5" }),
         h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
         h("path", { d: "M8 16H3v5" }),
-      );
-    }
+      ];
+    });
 
     /** TrashGlyph implementation. */
-    function TrashGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-trash";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var TrashGlyph = createGlyphComponent(16, "dsh-icon-trash", false, true, false, function () {
+      return [
         h("path", { d: "M3 6h18" }),
         h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
         h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
         h("line", { x1: "10", x2: "10", y1: "11", y2: "17" }),
         h("line", { x1: "14", x2: "14", y1: "11", y2: "17" }),
-      );
-    }
+      ];
+    });
 
     /** EditGlyph implementation. */
-    function EditGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-edit";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var EditGlyph = createGlyphComponent(16, "dsh-icon-edit", false, true, false, function () {
+      return [
         h("path", { d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" }),
         h("path", { d: "m15 5 4 4" }),
-      );
-    }
+      ];
+    });
 
     /** FileGlyph implementation. */
-    function FileGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-file";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var FileGlyph = createGlyphComponent(14, "dsh-icon-file", false, true, false, function () {
+      return [
         h("path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" }),
         h("path", { d: "M14 2v4a2 2 0 0 0 2 2h4" }),
-      );
-    }
+      ];
+    });
 
     /** SubagentGlyph implementation. */
-    function SubagentGlyph(props) {
-      var size = props && props.size ? props.size : 12;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-subagent";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var SubagentGlyph = createGlyphComponent(12, "dsh-icon-subagent", false, true, false, function () {
+      return [
         h("circle", { cx: "12", cy: "18", r: "3" }),
         h("circle", { cx: "6", cy: "6", r: "3" }),
         h("circle", { cx: "18", cy: "6", r: "3" }),
         h("path", { d: "M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9" }),
         h("path", { d: "M12 12v3" }),
-      );
-    }
+      ];
+    });
 
     /** CutGlyph implementation. */
-    function CutGlyph(props) {
-      var size = props && props.size ? props.size : 13;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-cut";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var CutGlyph = createGlyphComponent(13, "dsh-icon-cut", false, false, false, function () {
+      return [
         h("circle", { cx: "6", cy: "6", r: "3" }),
         h("circle", { cx: "6", cy: "18", r: "3" }),
         h("line", { x1: "20", y1: "4", x2: "8.12", y2: "15.88" }),
         h("line", { x1: "14.47", y1: "14.48", x2: "20", y2: "20" }),
         h("line", { x1: "8.12", y1: "8.12", x2: "12", y2: "12" }),
-      );
-    }
+      ];
+    });
 
     /** CopyGlyph implementation. */
-    function CopyGlyph(props) {
-      var size = props && props.size ? props.size : 13;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-copy";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var CopyGlyph = createGlyphComponent(13, "dsh-icon-copy", false, false, false, function () {
+      return [
         h("rect", { x: "9", y: "9", width: "13", height: "13", rx: "2", ry: "2" }),
         h("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" }),
-      );
-    }
+      ];
+    });
 
     /** PlusGlyph implementation. */
-    function PlusGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-plus";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var PlusGlyph = createGlyphComponent(14, "dsh-icon-plus", false, false, false, function () {
+      return [
         h("path", { d: "M5 12h14" }),
         h("path", { d: "M12 5v14" }),
-      );
-    }
+      ];
+    });
 
     /** EllipsisGlyph implementation. */
-    function EllipsisGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-ellipsis";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var EllipsisGlyph = createGlyphComponent(14, "dsh-icon-ellipsis", false, false, false, function () {
+      return [
         h("circle", { cx: "12", cy: "12", r: "1" }),
         h("circle", { cx: "19", cy: "12", r: "1" }),
         h("circle", { cx: "5", cy: "12", r: "1" }),
-      );
-    }
+      ];
+    });
 
     /** EyeGlyph implementation. */
-    function EyeGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-eye";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var EyeGlyph = createGlyphComponent(14, "dsh-icon-eye", false, false, false, function () {
+      return [
         h("path", { d: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" }),
         h("circle", { cx: "12", cy: "12", r: "3" }),
-      );
-    }
+      ];
+    });
 
     /** DockToggleGlyph implementation. */
-    function DockToggleGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-dock";
-      var style = (props && props.style) || undefined;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          style: style,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var DockToggleGlyph = createGlyphComponent(14, "dsh-icon-dock", true, false, false, function () {
+      return [
         h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
         h("path", { d: "M9 3v18" }),
-      );
-    }
+      ];
+    });
 
     /** PanelBottomGlyph implementation. */
-    function PanelBottomGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-panel-bottom";
-      var style = (props && props.style) || undefined;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          style: style,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
-        h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
-        h("line", { x1: "3", x2: "21", y1: "15", y2: "15" }),
-      );
-    }
+    var PanelBottomGlyph = createGlyphComponent(
+      14,
+      "dsh-icon-panel-bottom",
+      true,
+      false,
+      false,
+      function () {
+        return [
+          h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
+          h("line", { x1: "3", x2: "21", y1: "15", y2: "15" }),
+        ];
+      },
+    );
 
     /** PanelRightGlyph implementation. */
-    function PanelRightGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-dock";
-      var style = (props && props.style) || undefined;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          style: style,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var PanelRightGlyph = createGlyphComponent(14, "dsh-icon-dock", true, false, false, function () {
+      return [
         h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
         h("line", { x1: "15", x2: "15", y1: "3", y2: "21" }),
-      );
-    }
+      ];
+    });
 
     /** BranchGlyph implementation. */
-    function BranchGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-branch";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var BranchGlyph = createGlyphComponent(14, "dsh-icon-branch", false, false, false, function () {
+      return [
         h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
         h("circle", { cx: "18", cy: "6", r: "3" }),
         h("circle", { cx: "6", cy: "18", r: "3" }),
         h("path", { d: "M18 9a9 9 0 0 1-9 9" }),
-      );
-    }
+      ];
+    });
 
     /** FolderOpenGlyph implementation. */
-    function FolderOpenGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-folder";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var FolderOpenGlyph = createGlyphComponent(14, "dsh-icon-folder", false, false, false, function () {
+      return [
         h("path", {
           d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2",
         }),
-      );
-    }
+      ];
+    });
 
     /** SearchGlyph implementation. */
-    function SearchGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-search";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var SearchGlyph = createGlyphComponent(14, "dsh-icon-search", false, false, false, function () {
+      return [
         h("circle", { cx: "11", cy: "11", r: "8" }),
         h("path", { d: "m21 21-4.3-4.3" }),
-      );
-    }
+      ];
+    });
 
     /** MicGlyph implementation. */
-    function MicGlyph(props) {
-      var size = (props && props.size) || 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-mic";
-      var style = (props && props.style) || undefined;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          style: style,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var MicGlyph = createGlyphComponent(14, "dsh-icon-mic", true, false, false, function () {
+      return [
         h("path", { d: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" }),
         h("path", { d: "M19 10v2a7 7 0 0 1-14 0v-2" }),
         h("line", { x1: "12", x2: "12", y1: "19", y2: "22" }),
-      );
-    }
+      ];
+    });
 
     /** formatTokenCount implementation. */
     function formatTokenCount(num) {
@@ -3109,6 +2690,105 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
+    /** Shared labeled settings row (title + description + a control) used by the settings sections below. */
+    function renderSettingsRow(title, desc, control) {
+      return h(
+        "div",
+        {
+          style: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            background: "var(--dsw-alias-surface-l1)",
+            border: "1px solid var(--dsw-alias-border-l1)",
+          },
+        },
+        h(
+          "div",
+          null,
+          h("div", { style: { fontSize: "14px", fontWeight: 600 } }, title),
+          h(
+            "div",
+            { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+            desc,
+          ),
+        ),
+        control,
+      );
+    }
+
+    /** Shared settings-section shell (header + row list + save footer) used by the settings sections below. */
+    function renderSettingsSectionShell(title, desc, rows, saved, handleSave, saveLabel) {
+      return h(
+        "div",
+        {
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
+            padding: "4px 0",
+            maxWidth: "800px",
+          },
+        },
+        h(
+          "div",
+          {
+            style: {
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+              paddingBottom: "16px",
+            },
+          },
+          h(
+            "h2",
+            { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } },
+            title,
+          ),
+          h(
+            "div",
+            { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
+            desc,
+          ),
+        ),
+        h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          rows.concat([
+            h(
+              "div",
+              { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } },
+              h(
+                "button",
+                {
+                  onClick: handleSave,
+                  style: {
+                    padding: "8px 18px",
+                    borderRadius: "7px",
+                    border: "none",
+                    background: "var(--dsw-alias-primary, #6366f1)",
+                    color: "#fff",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  },
+                },
+                saved ? "Saved & Applied ✓" : saveLabel,
+              ),
+            ),
+          ]),
+        ),
+      );
+    }
+
+    /** Shared select-control style used by the settings rows below. */
+    var SETTINGS_SELECT_STYLE = {
+      padding: "6px 12px",
+      borderRadius: "6px",
+      border: "1px solid var(--dsw-alias-border-l2)",
+      background: "var(--dsw-alias-surface-l2)",
+      color: "inherit",
+    };
+
     // 2. SETTINGS: TMUX CONFIGURATION
     /** TmuxSettingsSection implementation. */
     function TmuxSettingsSection() {
@@ -3136,62 +2816,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           }, 2500);
         };
 
-      return h(
-        "div",
-        {
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-            padding: "4px 0",
-            maxWidth: "800px",
-          },
-        },
-        h(
-          "div",
-          {
-            style: {
-              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-              paddingBottom: "16px",
-            },
-          },
-          h(
-            "h2",
-            { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } },
-            "Tmux Engine Configuration",
-          ),
-          h(
-            "div",
-            { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
-            "Configure the in-process tmux multiplexer, default shell, scrollback buffer, and agent containment.",
-          ),
-        ),
-        h(
-          "div",
-          { style: { display: "flex", flexDirection: "column", gap: "16px" } },
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Default Shell"),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Shell executed when launching new tmux terminal sessions",
-              ),
-            ),
+      return renderSettingsSectionShell(
+        "Tmux Engine Configuration",
+        "Configure the in-process tmux multiplexer, default shell, scrollback buffer, and agent containment.",
+        [
+          renderSettingsRow(
+            "Default Shell",
+            "Shell executed when launching new tmux terminal sessions",
             h(
               "select",
               {
@@ -3199,46 +2830,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 onChange: function (e) {
                   setShell(e.target.value);
                 },
-                style: {
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "var(--dsw-alias-surface-l2)",
-                  color: "inherit",
-                },
+                style: SETTINGS_SELECT_STYLE,
               },
               h("option", { value: "/bin/zsh" }, "Zsh (/bin/zsh)"),
               h("option", { value: "/bin/bash" }, "Bash (/bin/bash)"),
               h("option", { value: "/bin/sh" }, "POSIX Shell (/bin/sh)"),
             ),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h(
-                "div",
-                { style: { fontSize: "14px", fontWeight: 600 } },
-                "Scrollback History Limit",
-              ),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Maximum line count retained in terminal screen buffer",
-              ),
-            ),
+          renderSettingsRow(
+            "Scrollback History Limit",
+            "Maximum line count retained in terminal screen buffer",
             h("input", {
               type: "number",
               value: history,
@@ -3255,29 +2856,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               },
             }),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Mouse Mode Support"),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Enable mouse scrolling and pane focus (set -g mouse on)",
-              ),
-            ),
+          renderSettingsRow(
+            "Mouse Mode Support",
+            "Enable mouse scrolling and pane focus (set -g mouse on)",
             h("input", {
               type: "checkbox",
               checked: mouse,
@@ -3287,29 +2868,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               style: { width: "18px", height: "18px", cursor: "pointer" },
             }),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Agent Task Containment"),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Automatically contain and multiplex background agent CLI subprocesses inside tmux",
-              ),
-            ),
+          renderSettingsRow(
+            "Agent Task Containment",
+            "Automatically contain and multiplex background agent CLI subprocesses inside tmux",
             h("input", {
               type: "checkbox",
               checked: autoContain,
@@ -3319,27 +2880,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               style: { width: "18px", height: "18px", cursor: "pointer" },
             }),
           ),
-          h(
-            "div",
-            { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } },
-            h(
-              "button",
-              {
-                onClick: handleSave,
-                style: {
-                  padding: "8px 18px",
-                  borderRadius: "7px",
-                  border: "none",
-                  background: "var(--dsw-alias-primary, #6366f1)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                },
-              },
-              saved ? "Saved & Applied ✓" : "Save Tmux Configuration",
-            ),
-          ),
-        ),
+        ],
+        saved,
+        handleSave,
+        "Save Tmux Configuration",
       );
     }
 
@@ -3370,62 +2914,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           }, 2500);
         };
 
-      return h(
-        "div",
-        {
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-            padding: "4px 0",
-            maxWidth: "800px",
-          },
-        },
-        h(
-          "div",
-          {
-            style: {
-              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-              paddingBottom: "16px",
-            },
-          },
-          h(
-            "h2",
-            { style: { margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600 } },
-            "Docker Sandbox Configuration",
-          ),
-          h(
-            "div",
-            { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
-            "Configure default container isolation images, memory quotas, and network sandboxing.",
-          ),
-        ),
-        h(
-          "div",
-          { style: { display: "flex", flexDirection: "column", gap: "16px" } },
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Default Sandbox Image"),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Base container image for agent sandboxed execution",
-              ),
-            ),
+      return renderSettingsSectionShell(
+        "Docker Sandbox Configuration",
+        "Configure default container isolation images, memory quotas, and network sandboxing.",
+        [
+          renderSettingsRow(
+            "Default Sandbox Image",
+            "Base container image for agent sandboxed execution",
             h(
               "select",
               {
@@ -3433,42 +2928,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 onChange: function (e) {
                   setImage(e.target.value);
                 },
-                style: {
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "var(--dsw-alias-surface-l2)",
-                  color: "inherit",
-                },
+                style: SETTINGS_SELECT_STYLE,
               },
               h("option", { value: "node:22-alpine" }, "Node.js 22 Alpine (Fast & Lightweight)"),
               h("option", { value: "python:3.11-slim" }, "Python 3.11 Slim (Data & Scripting)"),
               h("option", { value: "ubuntu:22.04" }, "Ubuntu 22.04 LTS (Full Environment)"),
             ),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Container Memory Quota"),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Maximum RAM allocated per sandboxed container",
-              ),
-            ),
+          renderSettingsRow(
+            "Container Memory Quota",
+            "Maximum RAM allocated per sandboxed container",
             h(
               "select",
               {
@@ -3476,13 +2945,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 onChange: function (e) {
                   setMemory(e.target.value);
                 },
-                style: {
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "var(--dsw-alias-surface-l2)",
-                  color: "inherit",
-                },
+                style: SETTINGS_SELECT_STYLE,
               },
               h("option", { value: "1GB" }, "1 GB"),
               h("option", { value: "2GB" }, "2 GB (Recommended)"),
@@ -3490,29 +2953,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               h("option", { value: "8GB" }, "8 GB"),
             ),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h("div", { style: { fontSize: "14px", fontWeight: 600 } }, "Network Sandboxing"),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Isolation mode for agent container networking",
-              ),
-            ),
+          renderSettingsRow(
+            "Network Sandboxing",
+            "Isolation mode for agent container networking",
             h(
               "select",
               {
@@ -3520,46 +2963,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 onChange: function (e) {
                   setNetwork(e.target.value);
                 },
-                style: {
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "var(--dsw-alias-surface-l2)",
-                  color: "inherit",
-                },
+                style: SETTINGS_SELECT_STYLE,
               },
               h("option", { value: "bridge" }, "Bridge (Standard Outbound Access)"),
               h("option", { value: "none" }, "None / Air-Gapped (No Network Access)"),
               h("option", { value: "host" }, "Host Network"),
             ),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "var(--dsw-alias-surface-l1)",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            h(
-              "div",
-              null,
-              h(
-                "div",
-                { style: { fontSize: "14px", fontWeight: 600 } },
-                "Auto-Prune Idle Sandboxes",
-              ),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Automatically clean up stopped sandboxes after session completion",
-              ),
-            ),
+          renderSettingsRow(
+            "Auto-Prune Idle Sandboxes",
+            "Automatically clean up stopped sandboxes after session completion",
             h("input", {
               type: "checkbox",
               checked: autoPrune,
@@ -3569,27 +2982,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               style: { width: "18px", height: "18px", cursor: "pointer" },
             }),
           ),
-          h(
-            "div",
-            { style: { display: "flex", justifyContent: "flex-end", marginTop: "8px" } },
-            h(
-              "button",
-              {
-                onClick: handleSave,
-                style: {
-                  padding: "8px 18px",
-                  borderRadius: "7px",
-                  border: "none",
-                  background: "var(--dsw-alias-primary, #6366f1)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                },
-              },
-              saved ? "Saved & Applied ✓" : "Save Docker Configuration",
-            ),
-          ),
-        ),
+        ],
+        saved,
+        handleSave,
+        "Save Docker Configuration",
       );
     }
 
@@ -10205,68 +9601,48 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     /** RepoGlyph implementation. */
-    function RepoGlyph(props) {
-      var size = props && props.size ? props.size : 15;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
-        h("circle", { cx: "18", cy: "6", r: "3" }),
-        h("circle", { cx: "6", cy: "18", r: "3" }),
-        h("path", { d: "M18 9a9 9 0 0 1-9 9" }),
-      );
-    }
+    var RepoGlyph = createDecoratedGlyphComponent(
+      15,
+      "",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [
+          h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
+          h("circle", { cx: "18", cy: "6", r: "3" }),
+          h("circle", { cx: "6", cy: "18", r: "3" }),
+          h("path", { d: "M18 9a9 9 0 0 1-9 9" }),
+        ];
+      },
+    );
 
     /** WorkspaceGlyph implementation. */
-    function WorkspaceGlyph(props) {
-      var size = props && props.size ? props.size : 15;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-workspace";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-info, #38bdf8)",
-          },
-        },
-        h("rect", { x: "2", y: "7", width: "20", height: "14", rx: "2", ry: "2" }),
-        h("path", { d: "M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" }),
-      );
-    }
+    var WorkspaceGlyph = createDecoratedGlyphComponent(
+      15,
+      "dsh-icon-workspace",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-info, #38bdf8)",
+      },
+      false,
+      function () {
+        return [
+          h("rect", { x: "2", y: "7", width: "20", height: "14", rx: "2", ry: "2" }),
+          h("path", { d: "M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" }),
+        ];
+      },
+    );
 
     /** renderAppIcon implementation. */
     function renderAppIcon(appName, size, filePath) {
@@ -10353,537 +9729,357 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     /** LibraryGlyph implementation. */
-    function LibraryGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-library";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-label-tertiary)",
-          },
-        },
-        h("path", { d: "m16 6 4 14" }),
-        h("path", { d: "M12 6v14" }),
-        h("path", { d: "M8 8v12" }),
-        h("path", { d: "M4 4v16" }),
-      );
-    }
+    var LibraryGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-library",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-label-tertiary)",
+      },
+      false,
+      function () {
+        return [
+          h("path", { d: "m16 6 4 14" }),
+          h("path", { d: "M12 6v14" }),
+          h("path", { d: "M8 8v12" }),
+          h("path", { d: "M4 4v16" }),
+        ];
+      },
+    );
 
     /** SystemGlyph implementation. */
-    function SystemGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-system";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-label-tertiary)",
-          },
-        },
-        h("rect", { width: "16", height: "16", x: "4", y: "4", rx: "2" }),
-        h("rect", { width: "6", height: "6", x: "9", y: "9", rx: "1" }),
-        h("path", { d: "M15 2v2" }),
-        h("path", { d: "M15 20v2" }),
-        h("path", { d: "M2 15h2" }),
-        h("path", { d: "M2 9h2" }),
-        h("path", { d: "M20 15h2" }),
-        h("path", { d: "M20 9h2" }),
-        h("path", { d: "M9 2v2" }),
-        h("path", { d: "M9 20v2" }),
-      );
-    }
+    var SystemGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-system",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-label-tertiary)",
+      },
+      false,
+      function () {
+        return [
+          h("rect", { width: "16", height: "16", x: "4", y: "4", rx: "2" }),
+          h("rect", { width: "6", height: "6", x: "9", y: "9", rx: "1" }),
+          h("path", { d: "M15 2v2" }),
+          h("path", { d: "M15 20v2" }),
+          h("path", { d: "M2 15h2" }),
+          h("path", { d: "M2 9h2" }),
+          h("path", { d: "M20 15h2" }),
+          h("path", { d: "M20 9h2" }),
+          h("path", { d: "M9 2v2" }),
+          h("path", { d: "M9 20v2" }),
+        ];
+      },
+    );
 
     /** UsersGlyph implementation. */
-    function UsersGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-users";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-label-tertiary)",
-          },
-        },
-        h("path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }),
-        h("circle", { cx: "9", cy: "7", r: "4" }),
-        h("path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }),
-        h("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" }),
-      );
-    }
+    var UsersGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-users",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-label-tertiary)",
+      },
+      false,
+      function () {
+        return [
+          h("path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }),
+          h("circle", { cx: "9", cy: "7", r: "4" }),
+          h("path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }),
+          h("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" }),
+        ];
+      },
+    );
 
     /** ArchiveBoxGlyph implementation. */
-    function ArchiveBoxGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-archive";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }),
-        h("path", { d: "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" }),
-        h("path", { d: "M10 12h4" }),
-      );
-    }
+    var ArchiveBoxGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-archive",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [
+          h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }),
+          h("path", { d: "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" }),
+          h("path", { d: "M10 12h4" }),
+        ];
+      },
+    );
 
     /** RestoreGlyph implementation. */
-    function RestoreGlyph(props) {
-      var size = props && props.size ? props.size : 13;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-refresh";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-          },
-        },
-        h("polyline", { points: "1 4 1 10 7 10" }),
-        h("path", { d: "M3.51 15a9 9 0 1 0 2.13-9.36L1 10" }),
-      );
-    }
+    var RestoreGlyph = createDecoratedGlyphComponent(
+      13,
+      "dsh-icon-refresh",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+      },
+      false,
+      function () {
+        return [
+          h("polyline", { points: "1 4 1 10 7 10" }),
+          h("path", { d: "M3.51 15a9 9 0 1 0 2.13-9.36L1 10" }),
+        ];
+      },
+    );
 
     /** BlueFolderGlyph implementation. */
-    function BlueFolderGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-folder";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("path", {
-          d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
-        }),
-      );
-    }
+    var BlueFolderGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-folder",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [
+          h("path", {
+            d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
+          }),
+        ];
+      },
+    );
 
     /** FolderPlusGlyph implementation. */
-    function FolderPlusGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-folder-plus";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: Object.assign(
-            {
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              verticalAlign: "middle",
-              flexShrink: 0,
-            },
-            (props && props.style) || {},
-          ),
-        },
-        h("path", {
-          d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
-        }),
-        h("line", { x1: "12", y1: "10", x2: "12", y2: "16" }),
-        h("line", { x1: "9", y1: "13", x2: "15", y2: "13" }),
-      );
-    }
+    var FolderPlusGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-folder-plus",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+      },
+      true,
+      function () {
+        return [
+          h("path", {
+            d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
+          }),
+          h("line", { x1: "12", y1: "10", x2: "12", y2: "16" }),
+          h("line", { x1: "9", y1: "13", x2: "15", y2: "13" }),
+        ];
+      },
+    );
 
     /** SlidersGlyph implementation. */
-    function SlidersGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-sliders";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: Object.assign(
-            {
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              verticalAlign: "middle",
-              flexShrink: 0,
-            },
-            (props && props.style) || {},
-          ),
-        },
-        h("line", { x1: "4", y1: "21", x2: "4", y2: "14" }),
-        h("line", { x1: "4", y1: "10", x2: "4", y2: "3" }),
-        h("line", { x1: "12", y1: "21", x2: "12", y2: "12" }),
-        h("line", { x1: "12", y1: "8", x2: "12", y2: "3" }),
-        h("line", { x1: "20", y1: "21", x2: "20", y2: "16" }),
-        h("line", { x1: "20", y1: "12", x2: "20", y2: "3" }),
-        h("line", { x1: "1", y1: "14", x2: "7", y2: "14" }),
-        h("line", { x1: "9", y1: "8", x2: "15", y2: "8" }),
-        h("line", { x1: "17", y1: "16", x2: "23", y2: "16" }),
-      );
-    }
+    var SlidersGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-sliders",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+      },
+      true,
+      function () {
+        return [
+          h("line", { x1: "4", y1: "21", x2: "4", y2: "14" }),
+          h("line", { x1: "4", y1: "10", x2: "4", y2: "3" }),
+          h("line", { x1: "12", y1: "21", x2: "12", y2: "12" }),
+          h("line", { x1: "12", y1: "8", x2: "12", y2: "3" }),
+          h("line", { x1: "20", y1: "21", x2: "20", y2: "16" }),
+          h("line", { x1: "20", y1: "12", x2: "20", y2: "3" }),
+          h("line", { x1: "1", y1: "14", x2: "7", y2: "14" }),
+          h("line", { x1: "9", y1: "8", x2: "15", y2: "8" }),
+          h("line", { x1: "17", y1: "16", x2: "23", y2: "16" }),
+        ];
+      },
+    );
 
     /** PinGlyph implementation. */
-    function PinGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-pin";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }),
-        h("path", {
-          d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z",
-        }),
-      );
-    }
+    var PinGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-pin",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [
+          h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }),
+          h("path", {
+            d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z",
+          }),
+        ];
+      },
+    );
 
     /** ActiveGlyph implementation. */
-    function ActiveGlyph(props) {
-      var size = props && props.size ? props.size : 14;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-active";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" }),
-      );
-    }
+    var ActiveGlyph = createDecoratedGlyphComponent(
+      14,
+      "dsh-icon-active",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" })];
+      },
+    );
 
     /** HostMachineGlyph implementation. */
-    function HostMachineGlyph(props) {
-      var size = props && props.size ? props.size : 15;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-system";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("rect", { width: "20", height: "14", x: "2", y: "3", rx: "2" }),
-        h("line", { x1: "8", x2: "16", y1: "21", y2: "21" }),
-        h("line", { x1: "12", x2: "12", y1: "17", y2: "21" }),
-      );
-    }
+    var HostMachineGlyph = createDecoratedGlyphComponent(
+      15,
+      "dsh-icon-system",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [
+          h("rect", { width: "20", height: "14", x: "2", y: "3", rx: "2" }),
+          h("line", { x1: "8", x2: "16", y1: "21", y2: "21" }),
+          h("line", { x1: "12", x2: "12", y1: "17", y2: "21" }),
+        ];
+      },
+    );
 
     /** HardDriveGlyph implementation. */
-    function HardDriveGlyph(props) {
-      var size = props && props.size ? props.size : 15;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-label-secondary, #94a3b8)",
-          },
-        },
-        h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
-        h("path", {
-          d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
-        }),
-        h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
-        h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" }),
-      );
-    }
+    var HardDriveGlyph = createDecoratedGlyphComponent(
+      15,
+      "",
+      {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-label-secondary, #94a3b8)",
+      },
+      false,
+      function () {
+        return [
+          h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
+          h("path", {
+            d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+          }),
+          h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
+          h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" }),
+        ];
+      },
+    );
 
     /** SparklesGlyph implementation. */
-    function SparklesGlyph(props) {
-      var size = props.size || 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          style: {
-            display: "inline-block",
-            verticalAlign: "middle",
-            flexShrink: 0,
-            color: "var(--dsw-alias-primary, #6366f1)",
-          },
-        },
-        h("path", {
-          d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
-        }),
-      );
-    }
+    var SparklesGlyph = createDecoratedGlyphComponent(
+      14,
+      "",
+      {
+        display: "inline-block",
+        verticalAlign: "middle",
+        flexShrink: 0,
+        color: "var(--dsw-alias-primary, #6366f1)",
+      },
+      false,
+      function () {
+        return [
+          h("path", {
+            d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
+          }),
+        ];
+      },
+    );
 
     /** AccountsGlyph implementation. */
-    function AccountsGlyph(props) {
-      var size = props.size || 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var AccountsGlyph = createGlyphComponent(16, "", false, false, false, function () {
+      return [
         h("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
         h("circle", { cx: "12", cy: "7", r: "4" }),
-      );
-    }
+      ];
+    });
 
     /** ModelsGlyph implementation. */
-    function ModelsGlyph(props) {
-      var size = props.size || 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var ModelsGlyph = createGlyphComponent(16, "", false, false, false, function () {
+      return [
         h("path", {
           d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
         }),
-      );
-    }
+      ];
+    });
 
     /** AppsGlyph implementation. */
-    function AppsGlyph(props) {
-      var size = props.size || 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var AppsGlyph = createGlyphComponent(16, "", false, false, false, function () {
+      return [
         h("rect", { x: "3", y: "3", width: "7", height: "7" }),
         h("rect", { x: "14", y: "3", width: "7", height: "7" }),
         h("rect", { x: "14", y: "14", width: "7", height: "7" }),
         h("rect", { x: "3", y: "14", width: "7", height: "7" }),
-      );
-    }
+      ];
+    });
 
     /** IconsGlyph implementation. */
-    function IconsGlyph(props) {
-      var size = props.size || 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    var IconsGlyph = createGlyphComponent(16, "", false, false, false, function () {
+      return [
         h("path", {
           d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
         }),
+      ];
+    });
+
+    /** Shared 24x24 lucide-style icon SVG wrapper used by LUCIDE_ICONS_CATALOG entries. */
+    function renderLucideSvg(s, c) {
+      var children = Array.prototype.slice.call(arguments, 2);
+      return h.apply(
+        null,
+        [
+          "svg",
+          {
+            width: s,
+            height: s,
+            className: c,
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+          },
+        ].concat(children),
       );
     }
 
@@ -10892,19 +10088,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Folder: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
             }),
@@ -10914,19 +10098,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       FolderGit2: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z",
             }),
@@ -10937,19 +10109,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       HardDrive: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
             h("path", {
               d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
@@ -10962,19 +10122,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Server: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { width: "20", height: "8", x: "2", y: "2", rx: "2", ry: "2" }),
             h("rect", { width: "20", height: "8", x: "2", y: "14", rx: "2", ry: "2" }),
             h("line", { x1: "6", x2: "6.01", y1: "6", y2: "6" }),
@@ -10985,19 +10133,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Cpu: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { width: "16", height: "16", x: "4", y: "4", rx: "2" }),
             h("rect", { width: "6", height: "6", x: "9", y: "9", rx: "1" }),
             h("path", { d: "M15 2v2" }),
@@ -11014,19 +10150,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       AppWindow: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { x: "2", y: "4", width: "20", height: "16", rx: "2" }),
             h("path", { d: "M10 4v4" }),
             h("path", { d: "M2 8h20" }),
@@ -11037,19 +10161,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Library: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "m16 6 4 14" }),
             h("path", { d: "M12 6v14" }),
             h("path", { d: "M8 8v12" }),
@@ -11060,19 +10172,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Users: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }),
             h("circle", { cx: "9", cy: "7", r: "4" }),
             h("path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }),
@@ -11083,19 +10183,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Archive: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { width: "20", height: "5", x: "2", y: "3", rx: "1" }),
             h("path", { d: "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" }),
             h("path", { d: "M10 12h4" }),
@@ -11105,19 +10193,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       RotateCcw: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }),
             h("path", { d: "M3 3v5h5" }),
           );
@@ -11126,19 +10202,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Pin: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("line", { x1: "12", x2: "12", y1: "17", y2: "22" }),
             h("path", {
               d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z",
@@ -11149,19 +10213,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Activity: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" }),
           );
         },
@@ -11169,19 +10221,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       ShieldCheck: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
             h("path", { d: "m9 12 2 2 4-4" }),
           );
@@ -11190,19 +10230,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       KeyRound: {
         category: "System & OS",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" }),
             h("circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor" }),
           );
@@ -11213,19 +10241,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Terminal: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("polyline", { points: "4 17 10 11 4 5" }),
             h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
           );
@@ -11234,19 +10250,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       FileCode: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z",
             }),
@@ -11259,19 +10263,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Code: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("polyline", { points: "16 18 22 12 16 6" }),
             h("polyline", { points: "8 6 2 12 8 18" }),
           );
@@ -11280,19 +10272,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       FileText: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z",
             }),
@@ -11306,19 +10286,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Database: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("ellipse", { cx: "12", cy: "5", rx: "9", ry: "3" }),
             h("path", { d: "M3 5V19A9 3 0 0 0 21 19V5" }),
             h("path", { d: "M3 12A9 3 0 0 0 21 12" }),
@@ -11328,19 +10296,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Braces: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1",
             }),
@@ -11353,19 +10309,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Boxes: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
             }),
@@ -11381,19 +10325,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       GitFork: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("circle", { cx: "12", cy: "18", r: "3" }),
             h("circle", { cx: "6", cy: "6", r: "3" }),
             h("circle", { cx: "18", cy: "6", r: "3" }),
@@ -11405,19 +10337,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       GitBranch: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
             h("circle", { cx: "18", cy: "6", r: "3" }),
             h("circle", { cx: "6", cy: "18", r: "3" }),
@@ -11428,19 +10348,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Hammer: {
         category: "Development",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9",
             }),
@@ -11456,19 +10364,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Bot: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M12 8V4H8" }),
             h("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
             h("path", { d: "M2 14h2" }),
@@ -11481,19 +10377,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Brain: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-5.04Z",
             }),
@@ -11506,19 +10390,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Sparkles: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
             }),
@@ -11528,19 +10400,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Calendar: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", ry: "2" }),
             h("line", { x1: "16", x2: "16", y1: "2", y2: "6" }),
             h("line", { x1: "8", x2: "8", y1: "2", y2: "6" }),
@@ -11551,19 +10411,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       PlayCircle: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("circle", { cx: "12", cy: "12", r: "10" }),
             h("polygon", { points: "10 8 16 12 10 16 10 8" }),
           );
@@ -11572,19 +10420,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Network: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { x: "16", y: "16", width: "6", height: "6", rx: "1" }),
             h("rect", { x: "2", y: "16", width: "6", height: "6", rx: "1" }),
             h("rect", { x: "9", y: "2", width: "6", height: "6", rx: "1" }),
@@ -11596,19 +10432,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       CheckSquare: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("polyline", { points: "9 11 12 14 22 4" }),
             h("path", { d: "M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" }),
           );
@@ -11617,19 +10441,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       RefreshCw: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
             h("path", { d: "M21 3v5h-5" }),
             h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
@@ -11640,19 +10452,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Wrench: {
         category: "Agents & Roles",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", {
               d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
             }),
@@ -11664,19 +10464,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       SlidersHorizontal: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("line", { x1: "21", x2: "14", y1: "4", y2: "4" }),
             h("line", { x1: "10", x2: "3", y1: "4", y2: "4" }),
             h("line", { x1: "21", x2: "12", y1: "12", y2: "12" }),
@@ -11692,19 +10480,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Palette: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
             h("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }),
             h("circle", { cx: "8.5", cy: "7.5", r: ".5", fill: "currentColor" }),
@@ -11718,19 +10494,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       MessageSquare: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }),
           );
         },
@@ -11738,19 +10502,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Image: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2" }),
             h("circle", { cx: "9", cy: "9", r: "2" }),
             h("path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }),
@@ -11760,19 +10512,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Globe: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("circle", { cx: "12", cy: "12", r: "10" }),
             h("line", { x1: "2", x2: "22", y1: "12", y2: "12" }),
             h("path", {
@@ -11784,19 +10524,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Compass: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("circle", { cx: "12", cy: "12", r: "10" }),
             h("polygon", { points: "16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" }),
           );
@@ -11805,19 +10533,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Music: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M9 18V5l12-2v13" }),
             h("circle", { cx: "6", cy: "18", r: "3" }),
             h("circle", { cx: "18", cy: "16", r: "3" }),
@@ -11827,19 +10543,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Trash2: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M3 6h18" }),
             h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
             h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
@@ -11851,19 +10555,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Pencil: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("path", { d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" }),
             h("path", { d: "m15 5 4 4" }),
           );
@@ -11872,19 +10564,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Copy: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2" }),
             h("path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" }),
           );
@@ -11893,19 +10573,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       Scissors: {
         category: "UI & Media",
         render: function (s, c) {
-          return h(
-            "svg",
-            {
-              width: s,
-              height: s,
-              className: c,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
+          return renderLucideSvg(s, c,
             h("circle", { cx: "6", cy: "6", r: "3" }),
             h("circle", { cx: "6", cy: "18", r: "3" }),
             h("line", { x1: "20", x2: "8.12", y1: "4", y2: "15.88" }),
@@ -16158,7 +14826,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             UnifiedWorkspacesBrowser,
           );
         },
-        "dsh-providers: dynamic filesystem and workspaces browser",
+        "providers: dynamic filesystem and workspaces browser",
       );
 
       // 0b. Global Terminals & Containers Manager + Top Tab Bar
@@ -16174,7 +14842,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             GlobalTerminalAndContainerManager,
           );
         },
-        "dsh-providers: global terminals manager and top tab bar",
+        "providers: global terminals manager and top tab bar",
       );
 
       // 1. Accounts Settings Section (Order 8)
@@ -16198,7 +14866,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             AccountsSection,
           );
         },
-        "dsh-providers: accounts section",
+        "providers: accounts section",
       );
 
       ctx.slots.inject(
@@ -16214,7 +14882,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             AccountsGlyph,
           );
         },
-        "dsh-providers: accounts nav glyph",
+        "providers: accounts nav glyph",
       );
 
       // 2. Models Settings Section (Order 9)
@@ -16238,7 +14906,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             ModelsSection,
           );
         },
-        "dsh-providers: models section",
+        "providers: models section",
       );
 
       ctx.slots.inject(
@@ -16254,7 +14922,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             ModelsGlyph,
           );
         },
-        "dsh-providers: models nav glyph",
+        "providers: models nav glyph",
       );
 
       // 3. Apps Settings Section (Order 10)
@@ -16278,7 +14946,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             AppsSection,
           );
         },
-        "dsh-providers: apps section",
+        "providers: apps section",
       );
 
       ctx.slots.inject(
@@ -16294,7 +14962,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             AppsGlyph,
           );
         },
-        "dsh-providers: apps nav glyph",
+        "providers: apps nav glyph",
       );
 
       // 2. Terminals Settings Section (Order 11)
@@ -16318,7 +14986,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             TmuxSettingsSection,
           );
         },
-        "dsh-providers: terminals configuration section",
+        "providers: terminals configuration section",
       );
 
       ctx.slots.inject(
@@ -16334,7 +15002,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             TerminalsGlyph,
           );
         },
-        "dsh-providers: terminals nav glyph",
+        "providers: terminals nav glyph",
       );
 
       // 3. Containers Settings Section (Order 12)
@@ -16358,7 +15026,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             DockerSettingsSection,
           );
         },
-        "dsh-providers: containers configuration section",
+        "providers: containers configuration section",
       );
 
       ctx.slots.inject(
@@ -16374,7 +15042,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             ContainersGlyph,
           );
         },
-        "dsh-providers: containers nav glyph",
+        "providers: containers nav glyph",
       );
 
       // 4. Tools Settings Section (Order 25)
@@ -16398,7 +15066,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             ToolsSection,
           );
         },
-        "dsh-providers: tools section",
+        "providers: tools section",
       );
 
       ctx.slots.inject(
@@ -16414,7 +15082,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             ToolsGlyph,
           );
         },
-        "dsh-providers: tools nav glyph",
+        "providers: tools nav glyph",
       );
 
       // 5. Loops Settings Section (Order 26)
@@ -16438,7 +15106,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             LoopsSection,
           );
         },
-        "dsh-providers: loops section",
+        "providers: loops section",
       );
 
       ctx.slots.inject(
@@ -16454,7 +15122,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             LoopsGlyph,
           );
         },
-        "dsh-providers: loops nav glyph",
+        "providers: loops nav glyph",
       );
 
       // 6. Icons Settings Section (Order 7)
@@ -16478,7 +15146,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             IconsSection,
           );
         },
-        "dsh-providers: icons section",
+        "providers: icons section",
       );
 
       ctx.slots.inject(
@@ -16494,7 +15162,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             IconsGlyph,
           );
         },
-        "dsh-providers: icons nav glyph",
+        "providers: icons nav glyph",
       );
     }
 

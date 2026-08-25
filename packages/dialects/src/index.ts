@@ -1,10 +1,10 @@
 /**
- * dsh-dialects: provider wire dialects as a harness plugin. Registers the
+ * dialects: provider wire dialects as a harness plugin. Registers the
  * `ctx.dialects` service and the bundled `openai`, `claude`, `gemini`, and
- * `code-assist` dialects; LLM adapter plugins (e.g. dsh-providers) resolve a
+ * `code-assist` dialects; LLM adapter plugins (e.g. providers) resolve a
  * dialect by id to serialize requests and translate response streams.
  *
- * @module dsh-dialects
+ * @module dialects
  */
 
 import { Context, Service } from "@deepseek-ai/cordis";
@@ -52,7 +52,7 @@ export class DialectRegistry extends Service {
    */
   register(dialect: Dialect): void {
     if (this.dialects.has(dialect.id)) {
-      throw new Error(`dsh-dialects: duplicate dialect "${dialect.id}"`);
+      throw new Error(`dialects: duplicate dialect "${dialect.id}"`);
     }
     this.dialects.set(dialect.id, dialect);
   }
@@ -73,7 +73,7 @@ export class DialectRegistry extends Service {
   get(id: DialectId): Dialect {
     const dialect = this.dialects.get(id);
     if (dialect === undefined) {
-      throw new Error(`dsh-dialects: unknown dialect "${id}"`);
+      throw new Error(`dialects: unknown dialect "${id}"`);
     }
     return dialect;
   }
@@ -90,10 +90,10 @@ declare module "@deepseek-ai/cordis" {
   }
 }
 
-export const name = "dsh-dialects";
+export const name = "dialects";
 export const inject: never[] = [];
 
-/** dsh-dialects configuration; empty — the bundled dialects are built in. */
+/** dialects configuration; empty — the bundled dialects are built in. */
 export interface Config {}
 
 /** Schemastery configuration for the plugin. */

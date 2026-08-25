@@ -1,5 +1,5 @@
 /**
- * dsh-actions self-restart: the "Force Reload" hard path. The web server
+ * agent-actions self-restart: the "Force Reload" hard path. The web server
  * spawns a DETACHED replacement process with the same argv/cwd/env, answers
  * the HTTP request, and only then exits — the caller never dies mid-call.
  *
@@ -10,7 +10,7 @@
  *
  * The probe/spawn helpers are ported from dsh-desktop's lifecycle.ts so the
  * same wait/probe discipline is exercised here and in check-plugin.
- * @module dsh-actions/reload
+ * @module agent-actions/reload
  */
 
 import { spawn, type ChildProcess } from "node:child_process";

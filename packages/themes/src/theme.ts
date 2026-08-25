@@ -6,7 +6,7 @@
  * theme can change the whole palette through the same override layer the
  * browser registry applies. Unmapped VS Code keys fall back to sensible
  * defaults per color scheme so a theme never renders unreadable.
- * @module dsh-themes/theme
+ * @module themes/theme
  */
 
 /** The token keys the dsh web UI exposes for override (see ui-theme inspection). */
@@ -152,7 +152,7 @@ export function parseVsCodeTheme(text: string, nameOverride?: string): ThemeSour
   const json = JSON.parse(text) as Record<string, unknown>;
   const type = typeof json.type === "string" ? json.type : "dark";
   if (type !== "light" && type !== "dark" && type !== "hc") {
-    throw new Error(`dsh-themes: unsupported theme type "${type}"`);
+    throw new Error(`themes: unsupported theme type "${type}"`);
   }
   const name = typeof json.name === "string" ? json.name : (nameOverride ?? "theme");
   const colors =

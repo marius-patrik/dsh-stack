@@ -1,10 +1,10 @@
 /**
- * dsh-agents settings: the `dsh-agents` section owns where authoring root
+ * agents settings: the `agents` section owns where authoring root
  * lives (the directory of JSON/MD persona files) and which shipped preset
  * materialized personas are composed from by default. The `dsh agents` CLI
  * and the plugin's boot/watch sync read the same section, so authoring and
  * runtime agree on where personas live and what base each gets.
- * @module dsh-agents/settings
+ * @module agents/settings
  */
 
 import { join } from "node:path";
@@ -12,7 +12,7 @@ import z from "@deepseek-ai/schemastery";
 import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the persona authoring configuration. */
-export const NS = settingsNamespace("dsh-agents");
+export const NS = settingsNamespace("agents");
 
 /** The authoring directory default: `<dshHome>/agents`. */
 export const DEFAULT_ROOT = "agents";

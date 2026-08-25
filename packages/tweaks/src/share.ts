@@ -1,12 +1,12 @@
 /**
- * dsh-tweaks share links: a self-hosted read-only snapshot route. The plugin
+ * tweaks share links: a self-hosted read-only snapshot route. The plugin
  * registers `<basePath>/<id>` as a prefix route on the harness web server;
  * the handler reads the session's durable JSONL log and renders a static,
  * dependency-free HTML transcript. Interactive mode (opt-in) additionally
  * requires `?token=<random>` in the URL, checked against the value the
  * `dsh share` verb wrote to the section. Read-only is the default: without a
  * token the page is a pure snapshot with no interactive controls.
- * @module dsh-tweaks/share
+ * @module tweaks/share
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";

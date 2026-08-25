@@ -1,6 +1,6 @@
 /**
  * Contract types for the dsh account vault.
- * @module dsh-credentials/types
+ * @module credentials/types
  */
 
 /**

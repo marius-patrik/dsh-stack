@@ -1,14 +1,12 @@
 import assert from "node:assert";
 import { readFileSync } from "node:fs";
+import { assertLoaderShape, loadClientLoaderSpec } from "../../scripts/plugin-check-kit.mjs";
 
 const plugin = await import("./lib/index.js");
-assert.equal(plugin.name, "dsh-actions");
-assert.equal(typeof plugin.apply, "function");
-assert.ok(Array.isArray(plugin.inject));
-assert.equal(plugin.default, undefined);
-assert.deepEqual(plugin.MODES, ["tool", "search", "action", "plan", "agent", "shell", "code"]);
+assertLoaderShape(plugin, "agent-actions");
+assert.deepEqual(plugin.ACTIONS, ["tool", "search", "action", "plan", "agent", "shell", "code"]);
 
-const controller = new plugin.ModesController("agent");
+const controller = new plugin.ActionsController("agent");
 const agent = {};
 assert.deepEqual(controller.get(agent), { active: "agent" });
 assert.equal(controller.set(agent, "shell"), "queued");
@@ -54,10 +52,8 @@ plugin.apply(ctx, {
 });
 assert.ok(commands.length >= 2);
 const actionCmd = commands.find((c) => c.name === "action");
-const modeCmd = commands.find((c) => c.name === "mode");
 const presetCmd = commands.find((c) => c.name === "preset");
 assert.ok(actionCmd);
-assert.ok(modeCmd);
 assert.ok(presetCmd);
 assert.deepEqual(actionCmd.handler({ agent, rawInput: "shell" }), {
   kind: "success",
@@ -78,7 +74,7 @@ const step = await preStep({ agent, signal: new AbortController().signal }, asyn
   messages: [],
 }));
 assert.equal(step.kind, "enter");
-assert.deepEqual(appended, { type: "action/selected", data: { action: "shell", mode: "shell" } });
+assert.deepEqual(appended, { type: "action/selected", data: { action: "shell" } });
 
 const preExecute = listeners.get("tools/pre-execute");
 assert.deepEqual(await preExecute({ agent, name: "bash" }, async () => ({ kind: "allow" })), {
@@ -104,14 +100,13 @@ const rejected = await preStep(
   async () => ({ kind: "reject" }),
 );
 assert.equal(rejected.kind, "reject");
-assert.deepEqual(ctx.sessionModes.get(rejectedAgent), { active: "plan", pending: "code" });
+assert.deepEqual(ctx.actions.get(rejectedAgent), { active: "plan", pending: "code" });
 console.log("session mode hooks ok");
 
-assert.equal(routes.length, 3);
+assert.equal(routes.length, 2);
 assert.equal(routes[0].kind, "exact");
 assert.equal(routes[0].path, "/actions");
-assert.equal(routes[1].path, "/session-modes");
-assert.equal(routes[2].path, "/actions/api/reload");
+assert.equal(routes[1].path, "/actions/api/reload");
 const res = {
   _status: 0,
   _body: "",
@@ -141,16 +136,8 @@ assert.ok(readFileSync(clientPath, "utf8").includes("__ModuleLoader__.load"));
 assert.ok(
   readFileSync(new URL("./client.js", import.meta.url), "utf8").includes("__ModuleLoader__.load"),
 );
-const loader = {};
-globalThis.window = {
-  __ModuleLoader__: {
-    load: (spec) => {
-      loader.spec = spec;
-    },
-  },
-};
-await import(clientPath);
-assert.equal(loader.spec.id, "dsh-actions");
+const loader = await loadClientLoaderSpec(clientPath);
+assert.equal(loader.spec.id, "agent-actions");
 const clientExports = loader.spec.factory((spec) => {
   if (spec === "react") return {};
   throw new Error("unexpected require: " + spec);

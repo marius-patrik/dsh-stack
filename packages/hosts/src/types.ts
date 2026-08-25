@@ -1,5 +1,5 @@
 /**
- * Types for the dsh-hosts multi-node cluster and network device manager.
+ * Types for the hosts multi-node cluster and network device manager.
  */
 
 export type NodeRole = "coordinator" | "worker" | "peer" | "client";

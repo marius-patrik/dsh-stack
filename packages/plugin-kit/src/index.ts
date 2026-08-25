@@ -1,3 +1,10 @@
+export {
+  sanitizeAuthoringId,
+  authoringScalar,
+  parseAuthoringFrontmatter,
+  splitAuthoringMarkdown,
+} from "./authoring-file.js";
+
 export type DependencyKind = "required" | "optional";
 
 export interface PluginDependency {

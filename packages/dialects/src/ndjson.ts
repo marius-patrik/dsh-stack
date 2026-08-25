@@ -3,7 +3,7 @@
  * Optional SSE `data: ` prefixes are tolerated so the same reader serves
  * `alt=sse` endpoints; a literal `[DONE]` payload terminates the stream.
  *
- * @module dsh-dialects/ndjson
+ * @module dialects/ndjson
  */
 
 /** The terminal payload some NDJSON-compatible servers send after the last chunk. */

@@ -5,8 +5,9 @@ import { spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-repos-"));
+const root = mkdtempSync(join(tmpdir(), "repos-"));
 const env = { ...process.env };
 
 const plugin = await import("./lib/index.js");
@@ -15,12 +16,8 @@ const { runGit, currentBranch, GitCommandError } = await import("./lib/git.js");
 const { resolveGitHubToken, createPullRequest, GITHUB_OAUTH_REF } = await import("./lib/github.js");
 const { ownerRepoFromRemote } = plugin;
 
-if (plugin.name !== "dsh-repos") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
-assert.equal(NS, "dsh-repos");
+assertLoaderShape(plugin, "repos");
+assert.equal(NS, "repos");
 assert.equal(plugin.inject.join(","), "subprocess,tools");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
@@ -78,8 +75,8 @@ gitCtx.subprocess = {
 };
 const { stdout: initOut } = await runGit(gitCtx, repo, ["init", "-b", "main"]);
 assert.equal(await currentBranch(gitCtx, repo), "main");
-await runGit(gitCtx, repo, ["config", "user.email", "dsh-repos@example.com"]);
-await runGit(gitCtx, repo, ["config", "user.name", "dsh-repos"]);
+await runGit(gitCtx, repo, ["config", "user.email", "repos@example.com"]);
+await runGit(gitCtx, repo, ["config", "user.name", "repos"]);
 writeFileSync(join(repo, "a.txt"), "hello\n");
 await runGit(gitCtx, repo, ["add", "a.txt"]);
 await runGit(gitCtx, repo, ["commit", "-m", "initial"]);
@@ -233,7 +230,7 @@ const cli = new URL("./bin/repos.mjs", import.meta.url).pathname;
   assert.ok(listRes.stdout.includes("remote: upstream"));
   assert.ok(listRes.stdout.includes("defaultBaseBranch: main"));
   const text = readFileSync(join(cliHome, "settings.yaml"), "utf8");
-  assert.ok(text.includes("dsh-repos:"));
+  assert.ok(text.includes("repos:"));
   assert.ok(text.includes("defaultBaseBranch: main"));
 }
 console.log("cli settings round-trip ok");

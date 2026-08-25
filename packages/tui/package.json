@@ -2,7 +2,6 @@
   "name": "tui",
   "description": "Standalone terminal TUI client for the DeepSeek Harness — connects over HTTP, no cordis dependency",
   "version": "0.2.0",
-  "private": true,
   "type": "module",
   "bin": {
     "dsh-tui": "./bin/dsh-tui.mjs"
@@ -17,7 +16,8 @@
   },
   "files": [
     "lib",
-    "bin"
+    "bin",
+    "README.md"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -27,5 +27,12 @@
   "devDependencies": {
     "typescript": "^5.9.0",
     "@types/node": "^22.0.0"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.ui.tui"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

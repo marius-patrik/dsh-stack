@@ -3,7 +3,7 @@
  * through `ctx.subprocess`, returning the before/after text. Both the model
  * `format` tool and the auto-format-on-edit hook share this path, so the
  * presentation (`{ path, before, after }`) is consistent everywhere.
- * @module dsh-formatters/format
+ * @module formatters/format
  */
 
 import type { Context } from "@deepseek-ai/cordis";

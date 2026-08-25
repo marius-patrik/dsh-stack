@@ -5,10 +5,10 @@
  * `action/selected` event; replay folds the log, so host restarts and cold
  * reads recover the active action from events alone.
  *
- * Compat: sessions logged before the dsh-session-modes → dsh-actions rename
+ * Compat: sessions logged before the dsh-session-modes → agent-actions rename
  * carry `session-mode/selected` events with a `mode` field; the fold reads
  * both event names (and both payload fields) so those logs keep their state.
- * @module dsh-actions/controller
+ * @module agent-actions/controller
  */
 
 /** The session-log event appended when a pending selection commits. */
@@ -91,6 +91,3 @@ export class ActionsController {
     return current.pending;
   }
 }
-
-/** @deprecated Compat alias for the pre-rename name; use {@link ActionsController}. */
-export const ModesController = ActionsController;

@@ -4,12 +4,12 @@
  * wire dialect it speaks, the endpoint it talks to, the fixed headers and
  * credential slots it needs, and the advisory model catalog it advertises to
  * discovery consumers.
- * @module dsh-providers/providers
+ * @module providers/providers
  */
 
-import type { DialectId } from "dsh-dialects";
+import type { DialectId } from "dialects";
 import type { CatalogSource } from "./catalog.js";
-import { ANTIGRAVITY_PROJECT_HEADER } from "dsh-dialects";
+import { ANTIGRAVITY_PROJECT_HEADER } from "dialects";
 
 /** How a provider authenticates; the launcher filter and account UI group on this. */
 export type AuthKind = "api-key" | "oauth" | "none";
@@ -191,7 +191,7 @@ const ZEN_CLAUDE_MAX_OUTPUT = 128_000;
 /**
  * The provider routes: the five subscription adapters plus eight billable
  * API-key routes. Base URLs and model catalogs are advisory v1 defaults;
- * per-provider overrides arrive through the `dsh-providers` settings section
+ * per-provider overrides arrive through the `providers` settings section
  * without a restart. Under the default `subscription-only` filter the API
  * routes are hidden from discovery and refused at dispatch; `mode: "all"`
  * offers them.
@@ -1001,6 +1001,6 @@ const BY_ID = new Map(PROVIDER_ROUTES.map((route) => [route.id, route]));
 /** Look up a route by id; throws on unknown ids. */
 export function providerRoute(id: string): ProviderRoute {
   const route = BY_ID.get(id);
-  if (route === undefined) throw new Error(`dsh-providers: unknown provider route "${id}"`);
+  if (route === undefined) throw new Error(`providers: unknown provider route "${id}"`);
   return route;
 }

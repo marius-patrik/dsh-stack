@@ -1,5 +1,5 @@
 /**
- * Bi-Directional State Synchronizer for dsh-hosts cluster.
+ * Bi-Directional State Synchronizer for hosts cluster.
  * Synchronizes sessions, vaults, and presets across multiple nodes.
  */
 

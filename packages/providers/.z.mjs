@@ -1,7 +1,7 @@
 import { createDecipheriv } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { Context } from "@deepseek-ai/cordis";
-import * as dialects from "dsh-dialects";
+import * as dialects from "dialects";
 import { DialectAdapter } from "./lib/adapter.js";
 import { ModelCatalog } from "./lib/catalog.js";
 import { PROVIDER_ROUTES } from "./lib/providers.js";

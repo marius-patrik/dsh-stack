@@ -5,9 +5,9 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import * as providers from "./lib/index.js";
-import * as dialects from "dsh-dialects";
+import * as dialects from "dialects";
 import { Context } from "@deepseek-ai/cordis";
-import { AccountsService } from "/Users/user/Projects/dsh-stack/plugins/dsh-credentials/lib/index.js";
+import { AccountsService } from "../credential-vault/lib/index.js";
 
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const ctx = new Context();

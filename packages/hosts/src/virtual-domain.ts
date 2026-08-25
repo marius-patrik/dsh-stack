@@ -51,7 +51,7 @@ export class VirtualDomainManager {
           "dns-sd",
           ["-R", "dsh", "_http._tcp", "local", String(this.config.permanentPort)],
           (err) => {
-            if (err) console.warn("[dsh-hosts] mDNS notice:", err.message);
+            if (err) console.warn("[hosts] mDNS notice:", err.message);
           },
         );
         return true;

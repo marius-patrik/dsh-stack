@@ -33,11 +33,12 @@
     "client.js"
   ],
   "scripts": {
-    "build": "tsc && cp client.js lib/client.js",
+    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js client.js > lib/client.js",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1"
+    "@deepseek-ai/cordis": "^4.0.1",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * The `dsh repos` command: the owner surface over the dsh-repos repo workflows.
- * It reads/writes the `dsh-repos` section of `settings.yaml` under the same
+ * The `dsh repos` command: the owner surface over the repos repo workflows.
+ * It reads/writes the `repos` section of `settings.yaml` under the same
  * agent home the harness boots (DSH_HOME) and runs the same `git` commands the
  * model-facing tools run — never shell-interpreted. GitHub push/PR flows are
  * the model tools' job; this CLI stops at local repo state and the settings
@@ -25,7 +25,7 @@ import { spawnSync } from "node:child_process";
 
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
-const NS = "dsh-repos";
+const NS = "repos";
 
 /** readSection implementation. */
 function* readSection(text, section) {
@@ -84,8 +84,8 @@ async function writeSectionData(section) {
   } catch {
     /* new file */
   }
-  const pattern = /^dsh-repos[^\n]*\n(?:[ \t][^\n]*\n)*/m;
-  const block = `dsh-repos:\n  remote: ${section.remote ?? "origin"}\n  defaultBaseBranch: ${section.defaultBaseBranch ?? "main"}\n`;
+  const pattern = /^repos[^\n]*\n(?:[ \t][^\n]*\n)*/m;
+  const block = `repos:\n  remote: ${section.remote ?? "origin"}\n  defaultBaseBranch: ${section.defaultBaseBranch ?? "main"}\n`;
   const without = text.replace(pattern, "");
   const rest = without.replace(/\n{3,}/g, "\n\n").trim();
   const out = `${rest}${rest.endsWith("\n") ? "" : "\n"}${block}`;

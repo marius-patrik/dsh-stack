@@ -4,8 +4,9 @@ import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape, loadClientLoaderSpec } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-agents-"));
+const root = mkdtempSync(join(tmpdir(), "agents-"));
 
 const plugin = await import("./lib/index.js");
 const { authoringRoot, defaultBase, defaultPersona, NS } = await import("./lib/settings.js");
@@ -20,12 +21,8 @@ const { PERSONA_SELECTED, PersonaController, foldPersona, hasOpenTurn } = await 
 );
 
 // ── loader shape ──
-if (plugin.name !== "dsh-agents") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
-assert.equal(NS, "dsh-agents");
+assertLoaderShape(plugin, "agents");
+assert.equal(NS, "agents");
 assert.equal(plugin.inject.length, 0);
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
@@ -497,16 +494,8 @@ assert.ok(readFileSync(clientPath, "utf8").includes("__ModuleLoader__.load"));
 assert.ok(
   readFileSync(new URL("./client.js", import.meta.url), "utf8").includes("__ModuleLoader__.load"),
 );
-const loader = {};
-globalThis.window = {
-  __ModuleLoader__: {
-    load: (spec) => {
-      loader.spec = spec;
-    },
-  },
-};
-await import(clientPath);
-assert.equal(loader.spec.id, "dsh-agents");
+const loader = await loadClientLoaderSpec(clientPath);
+assert.equal(loader.spec.id, "agents");
 const stubRoster = [
   { id: "reviewer", name: "PR Reviewer", description: "Reviews PRs" },
   { id: "tester", description: "Runs tests" },

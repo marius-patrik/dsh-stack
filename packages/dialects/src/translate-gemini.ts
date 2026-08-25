@@ -7,7 +7,7 @@
  * strictly first-seen order). Usage and the terminal finish flush at EOF, so
  * no chunk follows `finish`.
  *
- * @module dsh-dialects/translate-gemini
+ * @module dialects/translate-gemini
  */
 
 import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";

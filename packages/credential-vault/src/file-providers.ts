@@ -3,7 +3,7 @@
  * Each importer recognizes its tool's on-disk credential file and reads raw
  * secret values out of it under the canonical reference names the providers
  * resolve.
- * @module dsh-credentials/file-providers
+ * @module credentials/file-providers
  */
 
 import { DatabaseSync } from "node:sqlite";
@@ -48,7 +48,7 @@ export const claudeFileProvider: FileSecretProvider = {
   async read(path: string): Promise<Record<string, string>> {
     const parsed = await readJson(path);
     if (typeof parsed !== "object" || parsed === null) {
-      throw new Error(`dsh-credentials: ${path} is not a JSON object`);
+      throw new Error(`credentials: ${path} is not a JSON object`);
     }
     const object = parsed as Record<string, unknown>;
     const out: Record<string, string> = {};

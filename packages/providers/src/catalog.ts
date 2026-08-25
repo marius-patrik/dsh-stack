@@ -16,7 +16,7 @@
  *   returns the static table. Discovery can only ever add to what already
  *   worked.
  *
- * @module dsh-providers/catalog
+ * @module providers/catalog
  */
 
 import type { ProbeAuthStyle, ProviderCatalogModel } from "./providers.js";

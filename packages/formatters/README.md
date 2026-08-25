@@ -1,4 +1,4 @@
-# dsh-formatters
+# formatters
 
 DeepSeek Harness (`dsh`) plugin: per-extension formatter commands with a
 model-facing `format` tool and optional auto-format-on-edit.
@@ -11,10 +11,10 @@ Formatters run through `ctx.subprocess` — never shell-interpreted.
 
 ## Settings
 
-`dsh-formatters:` section of `settings.yaml`:
+`formatters:` section of `settings.yaml`:
 
 ```yaml
-dsh-formatters:
+formatters:
   autoFormatOnEdit: true
   formatters:
     ".ts": { argv: [npx, prettier, --write] }
@@ -34,7 +34,7 @@ dsh formatter set-auto <on|off>
 
 ## Layout
 
-- `src/settings.ts` — the `dsh-formatters` settings namespace, formatter schema,
+- `src/settings.ts` — the `formatters` settings namespace, formatter schema,
   and `formatterFor` / `autoFormatEnabled` helpers.
 - `src/format.ts` — the shared formatting runner (`formatFile`) and path helpers.
 - `src/index.ts` — plugin: settings section, `format` tool, auto-format hook.

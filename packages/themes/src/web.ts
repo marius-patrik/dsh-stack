@@ -1,11 +1,11 @@
 /**
- * dsh-themes browser-facing API: the `/themes/api` prefix route the settings
+ * themes browser-facing API: the `/themes/api` prefix route the settings
  * Catalog/Installed panes call. Search proxies the configured Open VSX
  * catalog; install resolves the extension metadata node-side (the browser
  * sends only the namespace/name identity, never a download URL), downloads the
  * vsix, and stores every theme it carries; apply/remove persist through the
  * settings scope captured at mount. Follows the mountQuotaWeb pattern.
- * @module dsh-themes/web
+ * @module themes/web
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";

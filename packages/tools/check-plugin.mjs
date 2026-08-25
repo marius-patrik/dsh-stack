@@ -4,19 +4,16 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-tools-"));
+const root = mkdtempSync(join(tmpdir(), "agent-tools-"));
 
 const plugin = await import("./lib/index.js");
 const { NS, ToolSettings } = await import("./lib/settings.js");
 const { toolsFor, substitutePlaceholder, commandArgv } = await import("./lib/settings.js");
 
-if (plugin.name !== "dsh-tools") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
-assert.equal(NS, "dsh-tools");
+assertLoaderShape(plugin, "agent-tools");
+assert.equal(NS, "agent-tools");
 assert.equal(plugin.inject.join(","), "subprocess,tools");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
@@ -152,7 +149,7 @@ const cli = new URL("./bin/tool.mjs", import.meta.url).pathname;
   assert.equal(listRes.status, 0, listRes.stderr);
   assert.ok(listRes.stdout.includes("lint-py"));
   const text = readFileSync(join(cliHome, "settings.yaml"), "utf8");
-  assert.ok(text.includes("dsh-tools:"));
+  assert.ok(text.includes("agent-tools:"));
   assert.ok(text.includes("ruff"));
   const rmRes = spawnSync(process.execPath, [cli, "remove", "lint-py"], {
     env: cliEnv,

@@ -5,19 +5,16 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-lsp-"));
+const root = mkdtempSync(join(tmpdir(), "lsp-"));
 const lspCli = new URL("./bin/lsp.mjs", import.meta.url).pathname;
 
 const plugin = await import("./lib/index.js");
 const { NS, LspSettings, LspConfig } = await import("./lib/settings.js");
 
-if (plugin.name !== "dsh-lsp") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
-assert.equal(NS, "dsh-lsp");
+assertLoaderShape(plugin, "lsp");
+assert.equal(NS, "lsp");
 assert.equal(typeof LspSettings, "function");
 assert.equal(typeof LspConfig, "function");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
@@ -121,7 +118,7 @@ execFileSync(
   { env: { ...process.env, DSH_HOME: home } },
 );
 const text = readFileSync(settingsPath, "utf8");
-assert.ok(text.includes("dsh-lsp:"));
+assert.ok(text.includes("lsp:"));
 assert.ok(text.includes('"typescript"'));
 assert.ok(text.includes(".ts"));
 execFileSync(process.execPath, [lspCli, "list"], { env: { ...process.env, DSH_HOME: home } });

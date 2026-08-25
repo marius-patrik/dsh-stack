@@ -6,7 +6,7 @@
  * only on tool-call turns. Core image blocks are rejected explicitly because
  * this wire route is text-only.
  *
- * @module dsh-dialects/openai
+ * @module dialects/openai
  */
 
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";

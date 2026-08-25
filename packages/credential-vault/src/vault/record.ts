@@ -35,7 +35,7 @@
  * signs a WebAuthn assertion or drives a browser. They are declared now so the
  * automation slice adds behaviour rather than a storage migration, exactly as
  * `secret.ts` declared its `oauth` variant ahead of the OAuth slice.
- * @module dsh-credentials/vault/record
+ * @module credentials/vault/record
  */
 
 import { randomUUID } from "node:crypto";

@@ -1,7 +1,6 @@
 {
   "name": "@dsh-stack/trading-optimizer",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -17,9 +16,21 @@
     "verify": "node verify.mjs"
   },
   "dependencies": {
-    "@dsh-stack/trading-backtest": "workspace:*"
+    "@dsh-stack/trading-backtest": "workspace:*",
+    "@dsh-stack/trading-research": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
-  }
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.trading.optimizer"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ]
 }

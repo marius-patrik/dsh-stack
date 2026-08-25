@@ -10,7 +10,7 @@
  * token endpoint until the user completes authorization. No external CLI is
  * required.
  *
- * @module dsh-credentials/login
+ * @module credentials/login
  */
 
 import { randomBytes } from "node:crypto";

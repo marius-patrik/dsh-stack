@@ -58,7 +58,7 @@
  * agent to hand anything to.
  *
  * Ported verbatim from Andromeda `src/utils/redirects.ts`.
- * @module dsh-credentials/vault/redirects
+ * @module credentials/vault/redirects
  */
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);

@@ -6,7 +6,7 @@
  * surfaced whenever the wire emits it. An empty initial reasoning delta does
  * not open a block.
  *
- * @module dsh-dialects/translate-openai
+ * @module dialects/translate-openai
  */
 
 import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";

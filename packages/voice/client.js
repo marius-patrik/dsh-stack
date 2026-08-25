@@ -1,4 +1,4 @@
-// dsh-voice client half (hand-authored bundle, no build step):
+// voice client half (hand-authored bundle, no build step):
 //  • 🎤 at conversation.input.left — Web Speech API with interim results
 //    streamed into the draft, or MediaRecorder → /voice/api/stt (Whisper)
 //    where the browser lacks SpeechRecognition; the engine comes from the
@@ -10,7 +10,7 @@
 //  • "Voice" settings section (order 42) + speaker nav glyph.
 
 window.__ModuleLoader__.load({
-  id: "dsh-voice",
+  id: "voice",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
@@ -377,7 +377,7 @@ window.__ModuleLoader__.load({
         {
           type: "button",
           className:
-            "dsh-voice-btn dsh-voice-mic" +
+            "voice-btn voice-mic" +
             (state === "recording" || state === "listening" ? " is-live" : "") +
             (state === "error" ? " is-error" : ""),
           onClick: onClick,
@@ -498,7 +498,7 @@ window.__ModuleLoader__.load({
         "button",
         {
           type: "button",
-          className: "dsh-voice-btn dsh-voice-speaker" + (playing ? " is-live" : ""),
+          className: "voice-btn voice-speaker" + (playing ? " is-live" : ""),
           onClick: speak,
           title: title,
           "aria-label": title,
@@ -641,7 +641,7 @@ window.__ModuleLoader__.load({
         return h(
           "div",
           { style: { color: "var(--dsw-alias-state-error-primary)" } },
-          "The host does not expose a voice settings namespace — is dsh-voice loaded on the server?",
+          "The host does not expose a voice settings namespace — is voice loaded on the server?",
         );
       if (view.status === "error")
         return h(
@@ -873,20 +873,20 @@ window.__ModuleLoader__.load({
     // ──────────────────────────────────────────────────────────────────────
     /** apply implementation. */
     function apply(ctx) {
-      var styleEl = document.getElementById("dsh-voice-style");
+      var styleEl = document.getElementById("voice-style");
       if (!styleEl) {
         styleEl = document.createElement("style");
-        styleEl.id = "dsh-voice-style";
+        styleEl.id = "voice-style";
         styleEl.textContent = [
-          ".dsh-voice-btn{",
+          ".voice-btn{",
           "  appearance:none;background:transparent;border:1px solid transparent;color:inherit;",
           "  border-radius:6px;cursor:pointer;line-height:1;display:inline-flex;align-items:center;",
           "  padding:4px 6px;opacity:.7;transition:opacity .12s, background .12s, border-color .12s;",
           "}",
-          ".dsh-voice-btn:hover{opacity:1;background:rgba(128,128,128,.12)}",
-          ".dsh-voice-btn:disabled{opacity:.35;cursor:default}",
-          ".dsh-voice-btn.is-live{color:#e5484d;border-color:#e5484d;opacity:1}",
-          ".dsh-voice-btn.is-error{color:#f59e0b;border-color:#f59e0b;opacity:1}",
+          ".voice-btn:hover{opacity:1;background:rgba(128,128,128,.12)}",
+          ".voice-btn:disabled{opacity:.35;cursor:default}",
+          ".voice-btn.is-live{color:#e5484d;border-color:#e5484d;opacity:1}",
+          ".voice-btn.is-error{color:#f59e0b;border-color:#f59e0b;opacity:1}",
         ].join("\n");
         document.head.append(styleEl);
       }
@@ -894,28 +894,28 @@ window.__ModuleLoader__.load({
         return function () {
           if (styleEl && styleEl.isConnected) styleEl.remove();
         };
-      }, "dsh-voice: remove styles");
+      }, "voice: remove styles");
 
       ctx.slots.inject(
         "conversation.input.left",
         function () {
           return ctx.slots.register(
-            { name: "conversation.input.left", id: "dsh-voice-mic", order: 20 },
+            { name: "conversation.input.left", id: "voice-mic", order: 20 },
             MicButton,
           );
         },
-        "dsh-voice: composer mic",
+        "voice: composer mic",
       );
 
       ctx.slots.inject(
         "conversation.chat.assistant-actions",
         function () {
           return ctx.slots.register(
-            { name: "conversation.chat.assistant-actions", id: "dsh-voice-speaker", order: 30 },
+            { name: "conversation.chat.assistant-actions", id: "voice-speaker", order: 30 },
             SpeakerButton,
           );
         },
-        "dsh-voice: read-aloud action",
+        "voice: read-aloud action",
       );
 
       ctx.slots.inject(
@@ -945,7 +945,7 @@ window.__ModuleLoader__.load({
             VoiceSection,
           );
         },
-        "dsh-voice: voice settings section",
+        "voice: voice settings section",
       );
 
       ctx.slots.inject(
@@ -956,7 +956,7 @@ window.__ModuleLoader__.load({
             VoiceGlyph,
           );
         },
-        "dsh-voice: voice nav glyph",
+        "voice: voice nav glyph",
       );
     }
 

@@ -1,10 +1,10 @@
 /**
- * Thin `git` runner over `ctx.subprocess`. Everything dsh-repos does with the
+ * Thin `git` runner over `ctx.subprocess`. Everything repos does with the
  * working tree goes through `runGit`, so the whole plugin shares one spawn
  * shape: collect-mode stdio, a sane stdout cap, and a nonzero-exit policy that
  * surfaces the stderr tail instead of silent empty results. Commands are never
  * shell-interpreted.
- * @module dsh-repos/git
+ * @module repos/git
  */
 
 import type { Context } from "@deepseek-ai/cordis";

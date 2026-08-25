@@ -1,5 +1,5 @@
 /**
- * dsh-tweaks session UX: wires the existing harness seams that the backlog
+ * tweaks session UX: wires the existing harness seams that the backlog
  * calls out as missing first-class surfaces.
  *
  * - Plan/Build toggle: registers `/build`, delegating to the harness plan-mode
@@ -10,7 +10,7 @@
  * - Slash commands: registers config-file commands from the settings section
  *   through `ctx.commands.register`.
  * - Keybinds: a settings surface the client consumes (greenfield).
- * @module dsh-tweaks/session
+ * @module tweaks/session
  */
 
 import type { Context } from "@deepseek-ai/cordis";

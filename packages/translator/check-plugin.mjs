@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * dsh-translator: boot-verify harness.
+ * translator: boot-verify harness.
  */
 import { readFileSync } from "node:fs";
 
@@ -14,7 +14,7 @@ const /** assert implementation. */
   };
 
 const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
-assert(pkg.name === "dsh-translator", `name should be dsh-translator, got ${pkg.name}`);
+assert(pkg.name === "translator", `name should be translator, got ${pkg.name}`);
 console.log(`loader shape ok: ${pkg.name} inject= []`);
 
 const src = await import("./lib/index.js");
@@ -22,7 +22,7 @@ assert(typeof src.name === "string", "name should be string");
 assert(typeof src.apply === "function", "apply should be function");
 assert(Array.isArray(src.inject), "inject should be array");
 assert(!("default" in src), "should not have default export");
-assert(src.name === "dsh-translator", `name should be dsh-translator, got ${src.name}`);
+assert(src.name === "translator", `name should be translator, got ${src.name}`);
 
 // Test translator registry
 const registry = new src.TranslatorRegistry();

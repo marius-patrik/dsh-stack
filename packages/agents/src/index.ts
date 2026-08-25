@@ -1,5 +1,5 @@
 /**
- * `dsh-agents`: custom agents as JSON/Markdown persona files for the dsh
+ * `agents`: custom agents as JSON/Markdown persona files for the dsh
  * harness. A persona file in the authoring directory (default `<dshHome>/agents`)
  * is materialized as an agent preset under the harness's user preset root, so
  * it appears in every preset picker without a restart. The materialized preset
@@ -15,7 +15,7 @@
  * client folds into its composer badge and switcher. Switching changes session
  * state only — never the mounted composition (blank-session-locked) — so it
  * works mid-conversation.
- * @module dsh-agents
+ * @module agents
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -46,7 +46,7 @@ export type * from "./catalog.js";
 export type * from "./controller.js";
 export type * from "./types.js";
 
-export const name = "dsh-agents";
+export const name = "agents";
 export const inject: string[] = [];
 
 /** Deployment configuration: the same fields the settings section carries. */
@@ -141,25 +141,25 @@ async function syncOnce(
   try {
     const report = await syncPersonas(home, root, baseDir);
     if (report.failed.length > 0) {
-      for (const failure of report.failed) ctx.logger.warn(`dsh-agents: ${failure}`);
+      for (const failure of report.failed) ctx.logger.warn(`agents: ${failure}`);
     }
     if (report.materialized.length > 0 || report.pruned.length > 0) {
       ctx.logger.info(
-        `dsh-agents: ${report.materialized.map((m) => m.id).join(", ") || "no presets"} materialized; ` +
+        `agents: ${report.materialized.map((m) => m.id).join(", ") || "no presets"} materialized; ` +
           `${report.pruned.join(", ") || "nothing"} pruned`,
       );
     }
     return report.failed.length === 0;
   } catch (error) {
     ctx.logger.warn(
-      `dsh-agents: sync failed: ${error instanceof Error ? error.message : String(error)}`,
+      `agents: sync failed: ${error instanceof Error ? error.message : String(error)}`,
     );
     return false;
   }
 }
 
 /**
- * Install the plugin: register the `dsh-agents` settings section, then (once
+ * Install the plugin: register the `agents` settings section, then (once
  * the settings service is live) resolve the authoring directory, load the
  * runtime catalog, sync once at boot, re-sync debounced whenever the
  * authoring directory changes, and mount the live-persona surface — the
@@ -208,7 +208,7 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
       try {
         controller.commitPending(payload.agent.session);
       } catch (error) {
-        ctx.logger.warn("dsh-agents: failed to append selected persona at step start: %o", error);
+        ctx.logger.warn("agents: failed to append selected persona at step start: %o", error);
       }
       return decision;
     });
@@ -230,7 +230,7 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
             order: 45,
             text: (context) => personaPolicyText(context, controller, catalog, fallback),
           }),
-        "dsh-agents: persona:policy section",
+        "agents: persona:policy section",
       );
     });
 
@@ -264,7 +264,7 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
             view: (state) => state,
             stateVersion: 1,
           }),
-        "dsh-agents: persona projection",
+        "agents: persona projection",
       );
     });
 
@@ -307,7 +307,7 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
               }
             },
           }),
-        "dsh-agents: /persona command",
+        "agents: /persona command",
       );
     });
 
@@ -324,7 +324,7 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
           }, WATCH_DEBOUNCE_MS);
         });
         watcher.on("error", (error) =>
-          ctx.logger.warn(`dsh-agents: watching ${root} failed: ${error.message}`),
+          ctx.logger.warn(`agents: watching ${root} failed: ${error.message}`),
         );
         watcher.unref();
         sctx.effect(
@@ -332,7 +332,7 @@ export function apply(ctx: Context, config: AgentSettingsType): void {
             if (timer !== undefined) clearTimeout(timer);
             watcher.close();
           },
-          "dsh-agents.watch()",
+          "agents.watch()",
         );
       })
       .catch(() => {});

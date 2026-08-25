@@ -1,6 +1,6 @@
 /**
- * `dsh-tweaks`: the user-facing harness tweaks surface. v1 registered the
- * `dsh-tweaks` settings namespace (homeRoot, command) and mirrored it into
+ * `tweaks`: the user-facing harness tweaks surface. v1 registered the
+ * `tweaks` settings namespace (homeRoot, command) and mirrored it into
  * every agent home's settings document. v2 adds the backlog's session-UX
  * features by wiring the harness seams the roadmap calls out:
  *
@@ -11,7 +11,7 @@
  * - session UX: `/plan` toggle (plan-mode seam), `/undo` `/redo` (fork-based),
  *   drag-drop images (attachment seam), config-file slash commands, and a
  *   keybind settings surface.
- * @module dsh-tweaks
+ * @module tweaks
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -61,7 +61,7 @@ export {
 export type { TweaksSection } from "./mirror.js";
 export type * from "./settings.js";
 
-export const name = "dsh-tweaks";
+export const name = "tweaks";
 export const inject: string[] = [];
 
 const DEFAULT_HOME = join(homedir(), ".agents");
@@ -91,9 +91,9 @@ export const Config: z<Config> = z.object({
 });
 
 /**
- * Mirror the effective `dsh-tweaks` (homeRoot/command) section into the
+ * Mirror the effective `tweaks` (homeRoot/command) section into the
  * settings document of every agent home (see `mirror.ts`). The launcher reads
- * only this top-level section; the v2 sections live under `dsh-tweaks.*`
+ * only this top-level section; the v2 sections live under `tweaks.*`
  * namespaces the web Settings UI edits directly.
  */
 export function mirrorTweaks(
@@ -112,7 +112,7 @@ export function mirrorTweaks(
         if (sectionsEqual(existing, effective)) return;
         await writeTweaksSection(path, effective);
       } catch (error) {
-        log.warn(`dsh-tweaks: could not mirror settings to ${path}`);
+        log.warn(`tweaks: could not mirror settings to ${path}`);
         log.warn(error);
       }
     }),
@@ -157,7 +157,7 @@ export function apply(ctx: Context, config: Config): void {
   });
 
   // Register the ui-onboarding namespace that ui-settings-general used to own.
-  // The web profile disables ui-settings-general (dsh-tweaks took over the settings
+  // The web profile disables ui-settings-general (tweaks took over the settings
   // surface), but ui-settings-models still writes welcomeNoticeVersion through
   // the settings API. Without this registration, settings.mutate fails silently.
   ctx.inject(["settings"], (settingsCtx) => {
@@ -168,7 +168,7 @@ export function apply(ctx: Context, config: Config): void {
   });
 
   // v2: sections default to their schema defaults when the composition entry
-  // does not spell them out (the web profile composes dsh-tweaks bare).
+  // does not spell them out (the web profile composes tweaks bare).
   const share: ShareConfigType = {
     enabled: config.share?.enabled ?? true,
     allowInteractive: config.share?.allowInteractive ?? false,

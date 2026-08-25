@@ -3,7 +3,7 @@
  */
 import { Service, type Context } from "@deepseek-ai/cordis";
 
-export const name = "dsh-translator";
+export const name = "translator";
 export const inject: string[] = [];
 
 export type Format = "opencode" | "claude" | "dsh";
@@ -180,5 +180,5 @@ declare module "@deepseek-ai/cordis" {
 /** apply implementation. */
 export function apply(ctx: Context, config: Config = {}): void {
   ctx.plugin(TranslatorService, config);
-  ctx.logger.info(`dsh-translator loaded: 6 converters registered`);
+  ctx.logger.info(`translator loaded: 6 converters registered`);
 }

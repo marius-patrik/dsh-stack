@@ -1,14 +1,11 @@
 import * as providers from "./lib/index.js";
-import * as dialects from "dsh-dialects";
+import * as dialects from "dialects";
 import { Context } from "@deepseek-ai/cordis";
 import { LlmError } from "@deepseek-ai/dsh-llm";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-if (providers.name !== "dsh-providers") throw new Error("bad name");
-if (typeof providers.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(providers.inject)) throw new Error("bad inject");
-if (providers.default !== undefined)
-  throw new Error("function plugins must not have a default export");
+assertLoaderShape(providers, "providers");
 assert.deepEqual(providers.PROVIDER_IDS, [
   "kimi-code",
   "kimi-sub",

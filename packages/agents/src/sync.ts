@@ -4,11 +4,11 @@
  *
  * The harness discovers presets live on every roster read, so writing a
  * preset directory IS the integration point — no harness service is required,
- * and dsh-agents composes nothing itself. A materialized preset carries the
+ * and agents composes nothing itself. A materialized preset carries the
  * base composition with a neutral persona row; the live persona is resolved
  * by the `persona:policy` prompt section, never by embedded text. Each
  * materialized preset is marked
- * with a `.dsh-agents-source` file naming its persona file; sync prunes ONLY
+ * with a `.agents-source` file naming its persona file; sync prunes ONLY
  * marked presets whose source is gone, so a hand-authored preset in the same
  * root is never touched.
  *
@@ -16,7 +16,7 @@
  * installed harness (overridable with `DSH_AGENTS_BASE_DIR`); when the
  * harness checkout is not reachable, materialization degrades to the bare
  * persona row.
- * @module dsh-agents/sync
+ * @module agents/sync
  */
 
 import { mkdir, readdir, readFile, rm, writeFile, rename } from "node:fs/promises";
@@ -29,9 +29,9 @@ import { parsePersona, type Persona } from "./persona.js";
 export const PRESET_ROOT = ".agent-presets";
 
 /** Marker naming the persona file a materialized preset was derived from. */
-export const SOURCE_MARKER = ".dsh-agents-source";
+export const SOURCE_MARKER = ".agents-source";
 
-/** The authoring file extensions dsh-agents turns into presets. */
+/** The authoring file extensions agents turns into presets. */
 const PERSONA_EXTENSIONS = new Set([".md", ".json"]);
 
 /** One materialized preset's report entry. */

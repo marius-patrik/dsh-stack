@@ -1,16 +1,16 @@
 /**
- * dsh-formatters settings: the `dsh-formatters` section owns the per-extension
+ * formatters settings: the `formatters` section owns the per-extension
  * formatter table and the auto-format-on-edit toggle. The plugin exposes a
  * model-facing `format` tool over the table and reformats files on `edit` /
  * `write` (via the `tools/post-execute` waterfall) when auto-format is on.
- * @module dsh-formatters/settings
+ * @module formatters/settings
  */
 
 import z from "@deepseek-ai/schemastery";
 import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the formatter table. */
-export const NS = settingsNamespace("dsh-formatters");
+export const NS = settingsNamespace("formatters");
 
 /**
  * One formatter command: argv[0] is the executable (absolute, or on PATH),

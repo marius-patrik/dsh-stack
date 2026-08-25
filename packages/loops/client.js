@@ -1,3 +1,3 @@
-// dsh-loops client scaffold
+// agent-loops client scaffold
 /** function implementation. */
 export default function (ctx) {}

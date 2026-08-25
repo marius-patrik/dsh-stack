@@ -5,7 +5,7 @@
  * OVERRIDES a built-in of the same id. The prompt section, command
  * validation, and tool/route policies read the catalog synchronously, so it
  * is an in-memory index, not a per-read filesystem walk.
- * @module dsh-actions/catalog
+ * @module agent-actions/catalog
  */
 
 import { readFile, readdir } from "node:fs/promises";

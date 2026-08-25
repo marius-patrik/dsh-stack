@@ -1,5 +1,5 @@
 /**
- * dsh-tools settings: the `dsh-tools` section owns the config-file custom tool
+ * agent-tools settings: the `agent-tools` section owns the config-file custom tool
  * registry — a map of tool name → definition. Each definition carries a
  * description, an optional parameter schema, and the `argv` to run (through
  * `ctx.subprocess`, never shell-interpreted). `{name}` placeholders in the
@@ -9,14 +9,14 @@
  * personal and ephemeral — wrapper scripts, project-specific commands, or a
  * one-off CLI the agent should reach without a new plugin. Changes apply on
  * the next boot (the `dsh tool` CLI manages the section).
- * @module dsh-tools/settings
+ * @module agent-tools/settings
  */
 
 import z from "@deepseek-ai/schemastery";
 import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the custom tool registry. */
-export const NS = settingsNamespace("dsh-tools");
+export const NS = settingsNamespace("agent-tools");
 
 /** One custom tool parameter: its JSON type and whether the model must supply it. */
 export interface ToolParameter {

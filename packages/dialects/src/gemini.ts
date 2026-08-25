@@ -4,7 +4,7 @@
  * and image blocks are unsupported on this route. Tool results resolve their
  * tool name from the request's own assistant tool-call history.
  *
- * @module dsh-dialects/gemini
+ * @module dialects/gemini
  */
 
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";

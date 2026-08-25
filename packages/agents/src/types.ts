@@ -4,7 +4,7 @@
  * packages; these narrow faces cover only the seams `PersonaController` and
  * the `persona:policy` section touch — the session log, the composed-preset
  * header, the pre-step hook, and the prompt-section context.
- * @module dsh-agents/types
+ * @module agents/types
  */
 
 /** A session log event as the controller folds it. */

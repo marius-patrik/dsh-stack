@@ -4,7 +4,7 @@
  * `voice_transcribe` turns an audio file into text through the
  * Whisper-compatible upstream. Both resolve credentials per call from the
  * account vault, so the model never sees a key.
- * @module dsh-voice/tools
+ * @module voice/tools
  */
 
 import { readFile, writeFile } from "node:fs/promises";
@@ -50,7 +50,7 @@ export function registerVoiceTools(
         outPath: {
           type: "string",
           description:
-            "Optional absolute output path (default: <cwd>/dsh-voice-<timestamp>.<format>).",
+            "Optional absolute output path (default: <cwd>/voice-<timestamp>.<format>).",
         },
         voice: {
           type: "string",
@@ -103,7 +103,7 @@ export function registerVoiceTools(
         const out =
           args.outPath !== undefined
             ? resolve(args.outPath)
-            : resolve(process.cwd(), `dsh-voice-${Date.now()}.${format}`);
+            : resolve(process.cwd(), `voice-${Date.now()}.${format}`);
         await writeFile(out, audio);
         return { path: out, bytes: audio.length, voice: overrides.voice ?? target.voice };
       },

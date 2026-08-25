@@ -1,16 +1,16 @@
 /**
- * `dsh-providers`: fourteen provider adapters (kimi-code, kimi-sub,
+ * `providers`: fourteen provider adapters (kimi-code, kimi-sub,
  * claude-sub, grok-sub, gemini-sub, openai-api, anthropic-api, gemini-api,
  * grok-api, deepseek-api, mistral-api, groq-api, openrouter-api, zen) wired
- * onto dsh-dialects wire dialects. The quotas subpackage provides quota
+ * onto dialects wire dialects. The quotas subpackage provides quota
  * probing, the `/quotas/api/*` web routes, and the `dsh-quotas` settings
  * section — merged from the standalone dsh-quotas plugin to eliminate data
  * duplication. Connection facts resolve per request from the optional
- * `dsh-providers` user-settings section, and credential material resolves
+ * `providers` user-settings section, and credential material resolves
  * per request through the account seam (`ctx.accounts`) with the harness
  * credential seam as fallback, so a changed base URL or secret reaches the
  * very next request without restarting anything.
- * @module dsh-providers
+ * @module providers
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -25,7 +25,7 @@ import {
   settingsNamespace,
 } from "@deepseek-ai/dsh-settings";
 import { MAX_TIMER_DELAY_MS } from "@deepseek-ai/dsh-timeout";
-import type { AccountsService } from "dsh-credentials";
+import type { AccountsService } from "credentials";
 import {
   getOrCreateAnonymousUserId,
   type AnonymousUserId,
@@ -35,7 +35,7 @@ import { ModelCatalog, DEFAULT_CATALOG_TTL_MS } from "./catalog.js";
 import type { ProviderConnection, ProviderGate, ProviderRouteAuthSlot } from "./adapter.js";
 import { PROVIDER_IDS, PROVIDER_ROUTES, providerRoute, type ProviderRoute } from "./providers.js";
 import { applyQuotas, type QuotasConfig } from "./quotas/index.js";
-import type { DialectAuth, DialectId } from "dsh-dialects";
+import type { DialectAuth, DialectId } from "dialects";
 
 export {
   DialectAdapter,
@@ -195,14 +195,14 @@ async function refreshOAuthToken(
   };
 }
 
-export const name = "dsh-providers";
+export const name = "providers";
 export const inject = ["llm", "dialects"];
 
-const NS = settingsNamespace("dsh-providers");
+const NS = settingsNamespace("providers");
 
 /**
  * Plugin config, validated by the same-named schemastery schema and doubling
- * as the `dsh-providers` settings-section shape. Every field is optional:
+ * as the `providers` settings-section shape. Every field is optional:
  * routes carry advisory defaults, per-provider base URL overrides land here,
  * the retry policy defaults to the harness normal policy, and the provider
  * filter defaults to the single-seat subscription-only mode.
@@ -243,7 +243,7 @@ export const Config: z<Config> = z.object({
   quotas: z.any(),
 });
 
-/** Validated, detached provider facts for the `dsh-providers` section. */
+/** Validated, detached provider facts for the `providers` section. */
 export interface ResolvedProvidersOptions {
   baseURLs: Record<string, string>;
   streamIdleTimeoutMs: number;
@@ -262,19 +262,19 @@ export function resolveProvidersOptions(config: Config): ResolvedProvidersOption
     streamIdleTimeoutMs > MAX_TIMER_DELAY_MS
   ) {
     throw new Error(
-      `dsh-providers: streamIdleTimeoutMs must be a positive finite number no greater than ${MAX_TIMER_DELAY_MS}`,
+      `providers: streamIdleTimeoutMs must be a positive finite number no greater than ${MAX_TIMER_DELAY_MS}`,
     );
   }
   const catalogTtlMs = config.catalogTtlMs ?? DEFAULT_CATALOG_TTL_MS;
   if (!Number.isFinite(catalogTtlMs) || catalogTtlMs <= 0 || catalogTtlMs > MAX_TIMER_DELAY_MS) {
     throw new Error(
-      `dsh-providers: catalogTtlMs must be a positive finite number no greater than ${MAX_TIMER_DELAY_MS}`,
+      `providers: catalogTtlMs must be a positive finite number no greater than ${MAX_TIMER_DELAY_MS}`,
     );
   }
   return {
     baseURLs: config.baseURLs ?? {},
     streamIdleTimeoutMs,
-    retryPolicy: resolveRetryPolicy(config.retryPolicy, "dsh-providers: retryPolicy"),
+    retryPolicy: resolveRetryPolicy(config.retryPolicy, "providers: retryPolicy"),
     mode: config.mode ?? "subscription-only",
     liveCatalog: config.liveCatalog ?? true,
     catalogTtlMs,
@@ -350,7 +350,7 @@ export function apply(ctx: Context, config: Config): void {
         if (lastGood === undefined) throw error;
         lastRaw = raw;
         ctx.logger.error(
-          "dsh-providers: keeping the last good configuration after an invalid settings section",
+          "providers: keeping the last good configuration after an invalid settings section",
         );
         ctx.logger.error(error);
         return lastGood;
@@ -523,15 +523,15 @@ export function apply(ctx: Context, config: Config): void {
   const /** missingCredential implementation. */
     missingCredential = (provider: string, missing: readonly string[]): LlmError =>
       new LlmError(
-        `dsh-providers: no credential for "${provider}"; store ${missing.join(", ")} through the` +
-          " account manager (dsh-credentials) or the harness credentials service",
+        `providers: no credential for "${provider}"; store ${missing.join(", ")} through the` +
+          " account manager (credentials) or the harness credentials service",
         "MISSING_CREDENTIAL",
       );
 
   /** A route that was logged in once and whose stored login no longer resolves. */
   const staleCredential = (provider: string, missing: readonly string[]): LlmError =>
     new LlmError(
-      `dsh-providers: the stored credential for "${provider}" is no longer valid` +
+      `providers: the stored credential for "${provider}" is no longer valid` +
         ` (${missing.join(", ")} could not be resolved or refreshed); sign in again` +
         " from the account manager",
       "MISSING_CREDENTIAL",
@@ -563,7 +563,7 @@ export function apply(ctx: Context, config: Config): void {
       return {
         visible: false,
         reason: new LlmError(
-          `dsh-providers: provider "${provider}" is a pay-as-you-go API route and is disabled` +
+          `providers: provider "${provider}" is a pay-as-you-go API route and is disabled` +
             ' in subscription-only mode (single seat); configure mode "all" to allow billed usage',
           "PROVIDER_DISABLED",
         ),

@@ -1,15 +1,15 @@
 /**
- * The quotas half of dsh-providers (merged from the standalone dsh-quotas
+ * The quotas half of providers (merged from the standalone dsh-quotas
  * plugin): a registry of quota providers, one snapshot per provider, the
  * `/quotas/api/*` web routes with the HTML dashboard, the built-in probe
  * providers with a staggered 15-minute auto-refresh, and the `dsh-quotas`
  * settings section.
- * @module dsh-providers/quotas
+ * @module providers/quotas
  */
 
 import type { Context } from "@deepseek-ai/cordis";
 import { installSettingsSection } from "@deepseek-ai/dsh-settings";
-import type { AccountsService } from "dsh-credentials";
+import type { AccountsService } from "credentials";
 import { NS, QuotaSettings, type QuotaSettings as QuotaSettingsValue } from "./settings.js";
 import { mountQuotaWeb } from "./web.js";
 import { createBuiltinProviders, PROBE_ROUTE_IDS } from "./providers.js";
@@ -132,7 +132,7 @@ export interface QuotasConfig {
 
 /**
  * Resolve one credential reference for a probe: the account seam
- * (dsh-credentials) first, then the credential environment variable as the
+ * (credentials) first, then the credential environment variable as the
  * fallback. Probes never read vault files directly.
  */
 async function resolveProbeToken(ctx: Context, ref: string): Promise<string | undefined> {

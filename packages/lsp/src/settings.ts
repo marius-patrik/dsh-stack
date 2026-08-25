@@ -1,10 +1,10 @@
 /**
- * dsh-lsp settings: the `dsh-lsp` section owns the LSP server table. The
+ * lsp settings: the `lsp` section owns the LSP server table. The
  * plugin mounts the harness LSP capability (service definition, the stdio
  * provider with this table, and the model-facing `lsp` tool) on the web
  * profile, so `goToDefinition`/`findReferences`/`goToImplementation`/`hover`
  * work for the agent without touching the pristine harness.
- * @module dsh-lsp/settings
+ * @module lsp/settings
  */
 
 import z from "@deepseek-ai/schemastery";
@@ -12,7 +12,7 @@ import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 import type { LspLocalServerConfig } from "@deepseek-ai/dsh-lsp-stdio";
 
 /** Settings namespace owning the LSP server table. */
-export const NS = settingsNamespace("dsh-lsp");
+export const NS = settingsNamespace("lsp");
 
 /** One stdio language server the plugin mounts through `dsh-lsp-stdio`. */
 export type LspServerEntry = LspLocalServerConfig;

@@ -1,16 +1,16 @@
 /**
- * dsh-themes settings: the `dsh-themes` section and the deployment knobs the
+ * themes settings: the `themes` section and the deployment knobs the
  * plugin reads from its composition entry. The active theme is a user choice
  * (settings document); the themes directory and catalog base are deployment
  * facts (Config).
- * @module dsh-themes/settings
+ * @module themes/settings
  */
 
 import z from "@deepseek-ai/schemastery";
 import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the active-theme choice. */
-export const NS = settingsNamespace("dsh-themes");
+export const NS = settingsNamespace("themes");
 
 /** The default directory (under the agent home) installed themes live in. */
 export const DEFAULT_THEMES_DIR = "themes";

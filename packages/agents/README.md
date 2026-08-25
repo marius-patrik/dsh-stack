@@ -1,4 +1,4 @@
-# dsh-agents
+# agents
 
 Custom agents as JSON/Markdown persona files for the dsh harness.
 
@@ -54,7 +54,7 @@ Materialization is filesystem-to-filesystem: `sync` writes each persona as a
 preset directory under `<dshHome>/.agent-presets/` (the harness's user preset
 root) — `agent.cordis.yml` (base composition with the persona row swapped, a
 verbatim text splice so the `!!js` dialect round-trips untouched) and
-`preset.yml` (picker metadata). A `.dsh-agents-source` marker names the
+`preset.yml` (picker metadata). A `.agents-source` marker names the
 deriving file; sync prunes only marked presets whose source is gone, so a
 hand-authored preset in the same root is never touched. When the shipped
 preset tree is unreachable (`DSH_AGENTS_BASE_DIR` can point at it elsewhere),

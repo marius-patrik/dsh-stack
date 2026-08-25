@@ -4,7 +4,7 @@
  * OpenAI-compatible framing with a terminal `[DONE]` payload, where truncation
  * (EOF before the sentinel) is a broken response and throws.
  *
- * @module dsh-dialects/sse
+ * @module dialects/sse
  */
 
 import { EventSourceParserStream } from "eventsource-parser/stream";

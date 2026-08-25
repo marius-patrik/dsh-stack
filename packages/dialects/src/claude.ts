@@ -5,7 +5,7 @@
  * is not configured on this route), and core image blocks are rejected because
  * this wire route is text-only.
  *
- * @module dsh-dialects/claude
+ * @module dialects/claude
  */
 
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";

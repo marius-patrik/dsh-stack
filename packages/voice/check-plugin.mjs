@@ -1,10 +1,8 @@
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
 const plugin = await import("./lib/index.js");
-assert.equal(plugin.name, "dsh-voice");
-assert.equal(typeof plugin.apply, "function");
-assert.ok(Array.isArray(plugin.inject));
-assert.equal(plugin.default, undefined);
+assertLoaderShape(plugin, "voice");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
 // Config schema validates
@@ -43,7 +41,7 @@ import { readFileSync } from "node:fs";
 const clientPath = new URL("./lib/client.js", import.meta.url);
 const clientSrc = readFileSync(clientPath, "utf8");
 assert.ok(clientSrc.includes("__ModuleLoader__.load"), "client bundle uses __ModuleLoader__");
-assert.ok(clientSrc.includes("dsh-voice"), "client bundle has plugin id");
+assert.ok(clientSrc.includes("voice"), "client bundle has plugin id");
 console.log("voice client ok");
 
 console.log("plugin check passed");

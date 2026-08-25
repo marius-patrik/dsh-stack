@@ -18,7 +18,7 @@
  * `hotpCode` is RFC 4226 §5.3 verbatim, the counter is a BigInt because
  * RFC 6238's own test vectors run past 2^32 seconds, and code comparison is
  * constant-time so verification does not leak a prefix.
- * @module dsh-credentials/vault/totp
+ * @module credentials/vault/totp
  */
 
 import { createHmac, timingSafeEqual } from "node:crypto";

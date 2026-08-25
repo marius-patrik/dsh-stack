@@ -5,7 +5,7 @@
  * through a per-request resolver, so the registering plugin owns validation,
  * layering, and credential policy. The provider id carried by the harness
  * request selects the route; the model name is passed through to the wire.
- * @module dsh-providers/adapter
+ * @module providers/adapter
  */
 
 import {
@@ -29,7 +29,7 @@ import type {
 } from "@deepseek-ai/dsh-llm";
 import type { AnonymousUserId } from "@deepseek-ai/dsh-anonymous-user-id";
 import { idleWatchdog, timeoutOf } from "@deepseek-ai/dsh-timeout";
-import type { Dialect, DialectAuth, DialectId } from "dsh-dialects";
+import type { Dialect, DialectAuth, DialectId } from "dialects";
 import type { ProviderCatalogModel } from "./providers.js";
 import { ModelCatalog, type CatalogSource } from "./catalog.js";
 

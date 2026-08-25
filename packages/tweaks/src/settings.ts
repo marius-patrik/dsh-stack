@@ -1,32 +1,32 @@
 /**
- * dsh-tweaks v2 settings: the settings-surface schemas for every new feature.
+ * tweaks v2 settings: the settings-surface schemas for every new feature.
  * Each feature's config is a plain schemastery schema shared between the
  * composition entry, the settings document, and (for the CLI verbs) the
  * launcher-read `settings.yaml` — so the same section shape drives the web
  * Settings UI and the standalone verbs.
- * @module dsh-tweaks/settings
+ * @module tweaks/settings
  */
 
 import z from "@deepseek-ai/schemastery";
 import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Namespace of the original state-folder + command section. */
-export const NS = settingsNamespace("dsh-tweaks");
+export const NS = settingsNamespace("tweaks");
 
 /** Namespace of the v2 share-links section. */
-export const NS_SHARE = settingsNamespace("dsh-tweaks-share");
+export const NS_SHARE = settingsNamespace("tweaks-share");
 
 /** Namespace of the v2 observability (stats) section. */
-export const NS_STATS = settingsNamespace("dsh-tweaks-stats");
+export const NS_STATS = settingsNamespace("tweaks-stats");
 
 /** Namespace of the v2 session-UX section. */
-export const NS_SESSION = settingsNamespace("dsh-tweaks-session");
+export const NS_SESSION = settingsNamespace("tweaks-session");
 
 /** Namespace of the v2 slash-command registry section. */
-export const NS_COMMANDS = settingsNamespace("dsh-tweaks-commands");
+export const NS_COMMANDS = settingsNamespace("tweaks-commands");
 
 /** Namespace of the v2 keybind section. */
-export const NS_KEYBINDS = settingsNamespace("dsh-tweaks-keybinds");
+export const NS_KEYBINDS = settingsNamespace("tweaks-keybinds");
 
 /** One self-hosted share-link configuration. */
 export interface ShareConfig {

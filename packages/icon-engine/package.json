@@ -1,7 +1,6 @@
 {
   "name": "@dsh-stack/icon-engine",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -10,6 +9,14 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     }
+  },
+  "files": ["lib", "README.md"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.ui.icons"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -13,7 +13,7 @@
  * probes ask — does this endpoint accept this credential right now — instead of
  * reporting only whether a route exists.
  *
- * @module dsh-providers/quotas/configured
+ * @module providers/quotas/configured
  */
 
 import type { QuotaProvider, QuotaSnapshot } from "./index.js";

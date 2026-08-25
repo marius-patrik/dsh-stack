@@ -1,4 +1,4 @@
-# dsh-repos
+# repos
 
 Repo workflows (status / branch / commit / push / PR) for the dsh harness.
 
@@ -20,7 +20,7 @@ credentials.
 
 ## Owner CLI
 
-`dsh repos` manages the `dsh-repos` settings section and runs the same git
+`dsh repos` manages the `repos` settings section and runs the same git
 verbs locally:
 
 ```
@@ -33,7 +33,7 @@ dsh repos commit <path> <message>
 
 ## Settings
 
-The `dsh-repos` section of `settings.yaml`:
+The `repos` section of `settings.yaml`:
 
 - `remote` — default remote name (default `origin`)
 - `defaultBaseBranch` — default PR base branch (default `main`)

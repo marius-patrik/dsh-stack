@@ -5,7 +5,7 @@
  * This mirrors the harness's own plan-mode controller (`plan/mode`): UIs
  * observe committed flips through `session/event`, and resume/fork restore
  * the state from the log alone because events never re-fire on seeded logs.
- * @module dsh-agents/controller
+ * @module agents/controller
  */
 
 import type {

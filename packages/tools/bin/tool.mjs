@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * The `dsh tool` command: the owner surface over the dsh-tools config-file
- * custom tool registry. It reads/writes the `dsh-tools` section of
+ * The `dsh tool` command: the owner surface over the agent-tools config-file
+ * custom tool registry. It reads/writes the `agent-tools` section of
  * `settings.yaml` under the same agent home the harness boots (DSH_HOME); the
  * plugin registers those tools on the next boot.
  *
@@ -17,7 +17,7 @@ import { dirname, join, resolve } from "node:path";
 
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
-const NS = "dsh-tools";
+const NS = "agent-tools";
 
 /** readSection implementation. */
 function* readSection(text, section) {
@@ -76,8 +76,8 @@ async function writeSectionData(section) {
   } catch {
     /* new file */
   }
-  const pattern = /^dsh-tools[^\n]*\n(?:[ \t][^\n]*\n)*/m;
-  const block = `dsh-tools:\n  tools: ${JSON.stringify(section.tools ?? {})}\n`;
+  const pattern = /^agent-tools[^\n]*\n(?:[ \t][^\n]*\n)*/m;
+  const block = `agent-tools:\n  tools: ${JSON.stringify(section.tools ?? {})}\n`;
   const without = text.replace(pattern, "");
   const rest = without.replace(/\n{3,}/g, "\n\n").trim();
   const out = `${rest}${rest.endsWith("\n") ? "" : "\n"}${block}`;

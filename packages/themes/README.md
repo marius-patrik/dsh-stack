@@ -1,2 +1,2 @@
-# dsh-themes
-dsh plugin: dsh-themes
+# themes
+dsh plugin: themes

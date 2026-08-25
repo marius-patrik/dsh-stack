@@ -4,14 +4,14 @@
 # listener applied the session's provider/model choice.
 #
 # `subscription-remap` steers requests that resolved to a provider the
-# `dsh-providers` filter hides (subscription-only mode, pay-as-you-go API
+# `providers` filter hides (subscription-only mode, pay-as-you-go API
 # route) to the configured subscription default; visible failures (a
 # subscription that is not logged in) stay loud.
 #
 # Merged from the standalone dsh-subscriptions package; the plugin now ships
-# as the `./remap` submodule of dsh-providers.
+# as the `./remap` submodule of providers.
 - id: subscription-remap
-  name: 'dsh-providers/remap'
+  name: 'providers/remap'
   config:
     default:
       provider: kimi-sub

@@ -1,10 +1,10 @@
 /**
- * dsh-tweaks observability: reads the harness's persisted projection cache
+ * tweaks observability: reads the harness's persisted projection cache
  * (`storages/session_projcache.json`) and the session store directory to
  * power the `dsh stats` and `dsh sessions` verbs. The cache is a durable
  * fold shortcut (never an authority), so the verbs report what the harness
  * last checkpointed — the same numbers the web UI shows.
- * @module dsh-tweaks/stats
+ * @module tweaks/stats
  */
 
 import { join } from "node:path";

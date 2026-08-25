@@ -1,7 +1,7 @@
-# The dsh-hosts bundle patch: mounts hosts manager & loopback gateway
+# The hosts bundle patch: mounts hosts manager & loopback gateway
 - insert:
     - id: hosts
-      name: dsh-hosts
+      name: hosts
       config:
         gatewayPort: 3080
         backendPort: 3081

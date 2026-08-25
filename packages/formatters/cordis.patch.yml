@@ -1,9 +1,9 @@
-# The dsh-formatters bundle patch: mounts the formatter plugin, which installs
-# the `dsh-formatters` settings section (per-extension formatter commands and
+# The formatters bundle patch: mounts the formatter plugin, which installs
+# the `formatters` settings section (per-extension formatter commands and
 # the auto-format toggle), registers the `format` tool, and hooks the
 # `tools/post-execute` waterfall for auto-format-on-edit.
 
 - insert:
     - id: formatters
-      name: 'dsh-formatters'
+      name: 'formatters'
       config: {}

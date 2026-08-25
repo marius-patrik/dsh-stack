@@ -22,7 +22,7 @@
  * threaded `options` (and therefore the validation path) never reaches them.
  * A custom type's resolver does receive `options`, so refine failures report
  * the same dotted path zod would.
- * @module dsh-credentials/vault/zod
+ * @module credentials/vault/zod
  */
 
 import _z from "@deepseek-ai/schemastery";

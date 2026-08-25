@@ -6,8 +6,9 @@ import { createServer } from "node:http";
 import { execFileSync } from "node:child_process";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-themes-"));
+const root = mkdtempSync(join(tmpdir(), "themes-"));
 
 const plugin = await import("./lib/index.js");
 const theme = await import("./lib/theme.js");
@@ -15,11 +16,7 @@ const store = await import("./lib/store.js");
 const catalog = await import("./lib/catalog.js");
 const { NS } = await import("./lib/settings.js");
 
-if (plugin.name !== "dsh-themes") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
+assertLoaderShape(plugin, "themes");
 assert.equal(plugin.THEMES_ROUTE, "/themes.json");
 assert.equal(plugin.ALIAS_TOKENS.length, 13);
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
@@ -215,7 +212,7 @@ console.log("plugin route wiring ok");
 // apply + inject(['slots','theme']).
 const bundleText = readFileSync(new URL("./lib/client.js", import.meta.url), "utf8");
 assert.ok(bundleText.includes("__ModuleLoader__.load"));
-assert.ok(bundleText.includes('id: "dsh-themes"'));
+assert.ok(bundleText.includes('id: "themes"'));
 assert.ok(bundleText.includes("exports.apply = apply"));
 assert.ok(bundleText.includes('exports.inject = ["slots", "theme"]'));
 const loader = {};
@@ -227,7 +224,7 @@ globalThis.window = {
   },
 };
 await import(new URL("./lib/client.js", import.meta.url));
-assert.equal(loader.spec.id, "dsh-themes");
+assert.equal(loader.spec.id, "themes");
 const clientExports = loader.spec.factory((spec) => {
   if (spec === "react") return {};
   throw new Error("unexpected require: " + spec);

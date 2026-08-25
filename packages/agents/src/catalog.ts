@@ -3,7 +3,7 @@
  * root at boot and whenever the authoring directory changes. The `persona:policy`
  * prompt section reads it synchronously on every assembly, so the catalog is
  * an in-memory index, not a per-assembly filesystem walk.
- * @module dsh-agents/catalog
+ * @module agents/catalog
  */
 
 import { readFile, readdir } from "node:fs/promises";

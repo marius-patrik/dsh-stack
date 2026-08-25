@@ -6,7 +6,7 @@
  * so no chunk follows `finish`. The Anthropic message id is returned as
  * adapter replay state.
  *
- * @module dsh-dialects/translate-claude
+ * @module dialects/translate-claude
  */
 
 import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";

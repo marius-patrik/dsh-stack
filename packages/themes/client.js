@@ -1,11 +1,11 @@
 window.__ModuleLoader__.load({
-  id: "dsh-themes",
+  id: "themes",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
     //#region lib/client.js
     /**
-     * dsh-themes client half (hand-authored bundle, no build step): after the
+     * themes client half (hand-authored bundle, no build step): after the
      * harness ui-theme service exists, fetch the node half's theme directory
      * (`/themes.json`), register every installed theme into `ctx.theme`, and
      * apply the stored active choice. The node half already mapped each VS
@@ -174,7 +174,7 @@ window.__ModuleLoader__.load({
           strokeWidth: "2",
           strokeLinecap: "round",
           strokeLinejoin: "round",
-          className: "dsh-themes-navGlyph dsh-icon-animated",
+          className: "themes-navGlyph dsh-icon-animated",
         },
         React.createElement("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
         React.createElement("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }),
@@ -665,7 +665,7 @@ window.__ModuleLoader__.load({
         return () => {
           themeObservable.dispose();
         };
-      }, "dsh-themes: theme snapshot source");
+      }, "themes: theme snapshot source");
       ctx.effect(() => {
         var disposed = false;
         var registrations = [];
@@ -693,7 +693,7 @@ window.__ModuleLoader__.load({
         var cancel = fetch(THEMES_ROUTE)
           .then((response) => {
             if (!response.ok)
-              throw new Error(`dsh-themes: ${THEMES_ROUTE} failed (HTTP ${response.status})`);
+              throw new Error(`themes: ${THEMES_ROUTE} failed (HTTP ${response.status})`);
             return response.json();
           })
           .then((body) => {
@@ -731,14 +731,14 @@ window.__ModuleLoader__.load({
             }
           })
           .catch((error) => {
-            console.error("[dsh-themes]", error);
+            console.error("[themes]", error);
           });
         return () => {
           disposed = true;
           for (var i = 0; i < registrations.length; i++) registrations[i]();
           registrations = [];
         };
-      }, "dsh-themes: theme directory sync");
+      }, "themes: theme directory sync");
       ctx.slots.inject(
         "settings.section",
         () =>
@@ -756,14 +756,14 @@ window.__ModuleLoader__.load({
                   try {
                     ctx.theme.setTheme(id);
                   } catch (err) {
-                    console.error("[dsh-themes] failed to set theme:", err);
+                    console.error("[themes] failed to set theme:", err);
                   }
                 },
               }),
             },
             ThemesSection,
           ),
-        "dsh-themes: themes settings section",
+        "themes: themes settings section",
       );
       ctx.slots.inject(
         "settings.section.icon",
@@ -776,7 +776,7 @@ window.__ModuleLoader__.load({
             },
             ThemesGlyph,
           ),
-        "dsh-themes: themes nav glyph",
+        "themes: themes nav glyph",
       );
     }
     //#endregion

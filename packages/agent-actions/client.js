@@ -1,11 +1,11 @@
 window.__ModuleLoader__.load({
-  id: "dsh-actions",
+  id: "agent-actions",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
     //#region lib/client.js
     /**
-     * dsh-actions client half (hand-authored bundle, no build step):
+     * agent-actions client half (hand-authored bundle, no build step):
      * contributes the Actions page to the Settings section. The node
      * half owns the per-session controller (`/mode` command,
      * agent/pre-step + tools/pre-execute + agent/request hooks); this bundle
@@ -32,7 +32,7 @@ window.__ModuleLoader__.load({
           strokeWidth: "2",
           strokeLinecap: "round",
           strokeLinejoin: "round",
-          className: "dsh-actions-navGlyph dsh-icon-animated",
+          className: "agent-actions-navGlyph dsh-icon-animated",
         },
         React.createElement("line", { x1: "21", x2: "14", y1: "4", y2: "4" }),
         React.createElement("line", { x1: "10", x2: "3", y1: "4", y2: "4" }),
@@ -64,7 +64,7 @@ window.__ModuleLoader__.load({
             if (!cancelled) setPayload(body);
           })
           .catch(function (error) {
-            console.error("[dsh-actions]", error);
+            console.error("[agent-actions]", error);
           });
         return function () {
           cancelled = true;
@@ -188,7 +188,7 @@ window.__ModuleLoader__.load({
             },
             SessionModesSection,
           ),
-        "dsh-actions: session modes settings",
+        "agent-actions: session modes settings",
       );
       ctx.slots.inject(
         "settings.section.icon",
@@ -201,7 +201,7 @@ window.__ModuleLoader__.load({
             },
             SessionModesGlyph,
           ),
-        "dsh-actions: session modes nav glyph",
+        "agent-actions: session modes nav glyph",
       );
     }
     //#endregion

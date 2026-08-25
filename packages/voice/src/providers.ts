@@ -5,7 +5,7 @@
  * configuration alone (`provider: custom` + `apiBase`). Resolution merges a
  * table row with the user's `voice.tts` settings into one
  * {@link ResolvedTts} the speech client consumes.
- * @module dsh-voice/providers
+ * @module voice/providers
  */
 
 /** How the upstream expects its credential: HTTP auth style. */
@@ -142,12 +142,12 @@ export function resolveTts(settings: TtsSettings): ResolvedTts {
   const provider = TTS_PROVIDERS.find((row) => row.id === settings.provider);
   if (provider === undefined) {
     const known = TTS_PROVIDERS.map((row) => row.id).join(", ");
-    throw new Error(`dsh-voice: unknown tts provider "${settings.provider}" (known: ${known})`);
+    throw new Error(`voice: unknown tts provider "${settings.provider}" (known: ${known})`);
   }
   const baseURL = settings.apiBase || provider.baseURL;
   if (baseURL.length === 0) {
     throw new Error(
-      `dsh-voice: provider "${provider.id}" needs a base URL — set voice.tts.apiBase (e.g. https://api.openai.com/v1 or your gateway)`,
+      `voice: provider "${provider.id}" needs a base URL — set voice.tts.apiBase (e.g. https://api.openai.com/v1 or your gateway)`,
     );
   }
   const path = settings.path || provider.path;

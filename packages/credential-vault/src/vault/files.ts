@@ -27,7 +27,7 @@
  *   correct. `publishFileAtMode` is the only place in the engine that writes a
  *   file whose contents are a secret; `clis/import.ts` copies credentials
  *   through it for exactly this reason.
- * @module dsh-credentials/vault/files
+ * @module credentials/vault/files
  */
 
 import path from "node:path";

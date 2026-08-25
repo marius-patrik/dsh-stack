@@ -9,7 +9,7 @@
  * revealed only through the single-ref reveal route, so the list page cannot
  * leak everything at once. The routes trust the harness localhost web server
  * model (unauthenticated 127.0.0.1), consistent with the rest of the web UI.
- * @module dsh-credentials/web
+ * @module credentials/web
  */
 
 import { randomBytes } from "node:crypto";
@@ -183,7 +183,7 @@ export function makeVaultHandler(
             kind: p.kind,
             description:
               p.kind === "manual"
-                ? (p as any).description
+                ? p.description
                 : p.kind === "cli"
                   ? "CLI-based sign in (opens browser)"
                   : undefined,
@@ -263,7 +263,7 @@ export function makeVaultHandler(
           if (result.access_token) await accounts.set(refs.accessToken, result.access_token);
           if (result.refresh_token && refs.refreshToken)
             await accounts.set(refs.refreshToken, result.refresh_token);
-          // The expiry REF is consumed by dsh-providers as epoch millis; the ISO form stays display-only.
+          // The expiry REF is consumed by providers as epoch millis; the ISO form stays display-only.
           if (expiresAt && refs.expires)
             await accounts.set(refs.expires, String(Date.parse(expiresAt)));
           devicePollState.delete(parsed.pollToken!);

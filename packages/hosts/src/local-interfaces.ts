@@ -4,7 +4,7 @@
 
 import { networkInterfaces } from "node:os";
 
-export interface LocalInterfaceInfo {
+interface LocalInterfaceInfo {
   name: string;
   address: string;
   family: string;
@@ -12,7 +12,7 @@ export interface LocalInterfaceInfo {
 }
 
 /** scanLocalInterfaces implementation. */
-export function scanLocalInterfaces(): LocalInterfaceInfo[] {
+function scanLocalInterfaces(): LocalInterfaceInfo[] {
   const ifaces = networkInterfaces();
   const results: LocalInterfaceInfo[] = [];
 

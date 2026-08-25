@@ -8,7 +8,7 @@
  * the agent machine will dispatch it — after the model-selection listener on
  * the inner agent context applied the session's provider/model choice.
  *
- * Only providers the `dsh-providers` filter hides from the catalog
+ * Only providers the `providers` filter hides from the catalog
  * (`visible: false`) are remapped; a provider that fails visibly
  * (`MISSING_CREDENTIAL`) is left to fail loud so the operator logs in instead
  * of silently running on another seat. Providers outside the filter
@@ -16,7 +16,7 @@
  *
  * Merged from the standalone dsh-subscriptions package; the plugin name stays
  * `subscription-remap` so existing preset rows keep resolving.
- * @module dsh-providers/remap
+ * @module providers/remap
  */
 
 import type { Context } from "@deepseek-ai/cordis";

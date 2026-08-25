@@ -4,7 +4,7 @@ import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 /**
  * The quotas settings namespace keeps the browser-facing `dsh-quotas` id so
  * the tweaks nav and any stored user settings survive the merge of the
- * standalone dsh-quotas plugin into dsh-providers.
+ * standalone dsh-quotas plugin into providers.
  */
 export const NS = settingsNamespace("dsh-quotas");
 

@@ -2,7 +2,6 @@
   "name": "repos",
   "description": "Repo workflows (status/branch/commit/push/PR) for the dsh harness, consuming the shared vault GitHub token",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -16,7 +15,8 @@
   },
   "files": [
     "lib",
-    "bin"
+    "bin",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc",
@@ -38,5 +38,12 @@
     "@deepseek-ai/dsh-subprocess": "0.1.1-rc.2",
     "@deepseek-ai/dsh-tools": "0.1.1-rc.2",
     "@deepseek-ai/schemastery": "^3.0.0"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.vcs.repos"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

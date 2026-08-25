@@ -1,8 +1,8 @@
-# dsh-tools
+# agent-tools
 
 Config-file custom tools for the dsh harness.
 
-The plugin reads the `dsh-tools` settings section — a map of tool name →
+The plugin reads the `agent-tools` settings section — a map of tool name →
 definition — and registers each definition as a model-facing `ctx.tools` entry
 that runs its `command` through `ctx.subprocess` (never shell-interpreted),
 with `{name}` argument placeholders substituted from the call. Custom tools are
@@ -11,10 +11,10 @@ output contract, same post-execute pipeline.
 
 ## Config-file format
 
-The `dsh-tools` section of `settings.yaml`:
+The `agent-tools` section of `settings.yaml`:
 
 ```yaml
-dsh-tools:
+agent-tools:
   tools:
     echo-name:
       description: Echo the name argument

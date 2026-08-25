@@ -1,4 +1,4 @@
-// dsh-tweaks client half (hand-authored bundle, no build step): owns the
+// tweaks client half (hand-authored bundle, no build step): owns the
 // two replaced web-profile shells.
 //
 //   sidebar occupant (TweaksSidebarRoot)  — replaces ui-sidebar. Column
@@ -655,40 +655,20 @@ const SETTINGS_EN = {
 };
 
 const COLLAPSE_SETTLE_MS = 150;
-(function () {
-  if (typeof globalThis.crypto === "undefined") globalThis.crypto = {};
-  if (typeof globalThis.crypto.randomUUID !== "function") {
-    globalThis.crypto.randomUUID = function () {
-      if (typeof globalThis.crypto.getRandomValues === "function") {
-        try {
-          return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
-            return (
-              c ^
-              (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-            ).toString(16);
-          });
-        } catch (e) {}
-      }
-      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-        var r = (Math.random() * 16) | 0,
-          v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-    };
-  }
-})();
+// crypto.randomUUID polyfill: see scripts/client-runtime/crypto-polyfill.js,
+// prepended ahead of this file's content at build time.
 
 window.__ModuleLoader__.load({
-  id: "dsh-tweaks",
+  id: "tweaks",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
     //#region lib/client.js
     if (typeof document !== "undefined") {
-      var style = document.querySelector('style[data-plugin-css="dsh-tweaks-shells"]');
+      var style = document.querySelector('style[data-plugin-css="tweaks-shells"]');
       if (style === null) {
         style = document.createElement("style");
-        style.setAttribute("data-plugin-css", "dsh-tweaks-shells");
+        style.setAttribute("data-plugin-css", "tweaks-shells");
         style.textContent = SHELL_CSS;
         document.head.appendChild(style);
       }
@@ -706,75 +686,32 @@ window.__ModuleLoader__.load({
     var bindSnapshotSelector = webReact.bindSnapshotSelector;
     var h = React.createElement;
     var Fragment = React.Fragment;
+    var createGlyphComponent = __dshCreateGlyphComponent(h);
+    var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
 
     /** KeychainNavIcon implementation. */
-    function KeychainNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var KeychainNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
         h("path", { d: "m9 12 2 2 4-4" }),
-      );
-    }
+      ];
+    });
 
     /** ProvidersNavIcon implementation. */
-    function ProvidersNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ProvidersNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("line", { x1: "22", x2: "2", y1: "12", y2: "12" }),
         h("path", {
           d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
         }),
         h("line", { x1: "6", x2: "6.01", y1: "16", y2: "16" }),
         h("line", { x1: "10", x2: "10.01", y1: "16", y2: "16" }),
-      );
-    }
+      ];
+    });
 
     /** GeneralNavIcon implementation. */
-    function GeneralNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var GeneralNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("line", { x1: "21", x2: "14", y1: "4", y2: "4" }),
         h("line", { x1: "10", x2: "3", y1: "4", y2: "4" }),
         h("line", { x1: "21", x2: "12", y1: "12", y2: "12" }),
@@ -784,50 +721,20 @@ window.__ModuleLoader__.load({
         h("line", { x1: "14", x2: "14", y1: "2", y2: "6" }),
         h("line", { x1: "8", x2: "8", y1: "10", y2: "14" }),
         h("line", { x1: "16", x2: "16", y1: "18", y2: "22" }),
-      );
-    }
+      ];
+    });
 
     /** TerminalsNavIcon implementation. */
-    function TerminalsNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var TerminalsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("polyline", { points: "4 17 10 11 4 5" }),
         h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
-      );
-    }
+      ];
+    });
 
     /** ContainersNavIcon implementation. */
-    function ContainersNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ContainersNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", {
           d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
         }),
@@ -846,154 +753,60 @@ window.__ModuleLoader__.load({
         h("path", { d: "M12 8 7.26 5.15" }),
         h("path", { d: "m12 8 4.74-2.85" }),
         h("path", { d: "M12 13.5V8" }),
-      );
-    }
+      ];
+    });
 
     /** PlugNavIcon implementation. */
-    function PlugNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var PlugNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("rect", { width: "7", height: "7", x: "14", y: "3", rx: "1" }),
         h("path", {
           d: "M10 21V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H3",
         }),
-      );
-    }
+      ];
+    });
 
     /** ToolsNavIcon implementation. */
-    function ToolsNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var ToolsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", {
           d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
         }),
-      );
-    }
+      ];
+    });
 
     /** LoopsNavIcon implementation. */
-    function LoopsNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-refresh";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var LoopsNavIcon = createGlyphComponent(16, "dsh-icon-refresh", false, true, false, function () {
+      return [
         h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
         h("path", { d: "M21 3v5h-5" }),
         h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
         h("path", { d: "M8 16H3v5" }),
-      );
-    }
+      ];
+    });
 
     /** TriangleRightFill14 implementation. */
-    function TriangleRightFill14(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      var style = props && props.style ? props.style : undefined;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          style: style,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var TriangleRightFill14 = createGlyphComponent(14, "", true, true, false, function () {
+      return [
         h("polyline", { points: "9 18 15 12 9 6" }),
-      );
-    }
+      ];
+    });
 
     /** RobotHeadNavIcon implementation. */
-    function RobotHeadNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var RobotHeadNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", { d: "M12 8V4H8" }),
         h("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
         h("path", { d: "M2 14h2" }),
         h("path", { d: "M20 14h2" }),
         h("path", { d: "M15 13v2" }),
         h("path", { d: "M9 13v2" }),
-      );
-    }
+      ];
+    });
 
     /** KeyboardNavIcon implementation. */
-    function KeyboardNavIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var KeyboardNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("rect", { width: "20", height: "16", x: "2", y: "4", rx: "2" }),
         h("path", { d: "M6 8h.01" }),
         h("path", { d: "M10 8h.01" }),
@@ -1003,148 +816,56 @@ window.__ModuleLoader__.load({
         h("path", { d: "M12 12h.01" }),
         h("path", { d: "M16 12h.01" }),
         h("path", { d: "M7 16h10" }),
-      );
-    }
+      ];
+    });
 
     /** DataGlyph implementation. */
-    function DataGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var DataGlyph = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("polygon", { points: "12 2 2 7 12 12 22 7 12 2" }),
         h("polyline", { points: "2 17 12 22 22 17" }),
         h("polyline", { points: "2 12 12 17 22 12" }),
-      );
-    }
+      ];
+    });
 
     /** SettingsIcon implementation. */
-    function SettingsIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        "dsh-icon-animated dsh-icon-settings";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var SettingsIcon = createGlyphComponent(16, "dsh-icon-settings", false, true, false, function () {
+      return [
         h("path", {
           d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
         }),
         h("circle", { cx: "12", cy: "12", r: "3" }),
-      );
-    }
+      ];
+    });
 
     /** SidebarCollapseIcon implementation. */
-    function SidebarCollapseIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var SidebarCollapseIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("rect", { width: "18", height: "18", x: "3", y: "3", rx: "2" }),
         h("path", { d: "M9 3v18" }),
-      );
-    }
+      ];
+    });
 
     /** CloseIcon implementation. */
-    function CloseIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var CloseIcon = createGlyphComponent(14, "", false, true, false, function () {
+      return [
         h("path", { d: "M18 6 6 18" }),
         h("path", { d: "m6 6 12 12" }),
-      );
-    }
+      ];
+    });
 
     /** CommandsIcon implementation. */
-    function CommandsIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var CommandsIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", { d: "m18 16 4-4-4-4" }),
         h("path", { d: "m6 8-4 4 4 4" }),
         h("path", { d: "m14.5 4-5 16" }),
-      );
-    }
+      ];
+    });
 
     /** PaletteIcon implementation. */
-    function PaletteIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var PaletteIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
         h("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }),
         h("circle", { cx: "8.5", cy: "7.5", r: ".5", fill: "currentColor" }),
@@ -1152,108 +873,48 @@ window.__ModuleLoader__.load({
         h("path", {
           d: "M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z",
         }),
-      );
-    }
+      ];
+    });
 
     /** AgentPresetIcon implementation. */
-    function AgentPresetIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var AgentPresetIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", { d: "M12 8V4H8" }),
         h("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
         h("path", { d: "M2 14h2" }),
         h("path", { d: "M20 14h2" }),
         h("path", { d: "M15 13v2" }),
         h("path", { d: "M9 13v2" }),
-      );
-    }
+      ];
+    });
 
     /** EllipsisIcon implementation. */
-    function EllipsisIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var EllipsisIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("circle", { cx: "12", cy: "12", r: "1" }),
         h("circle", { cx: "19", cy: "12", r: "1" }),
         h("circle", { cx: "5", cy: "12", r: "1" }),
-      );
-    }
+      ];
+    });
 
     /** DownloadIcon implementation. */
-    function DownloadIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var DownloadIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
         h("polyline", { points: "7 10 12 15 17 10" }),
         h("line", { x1: "12", x2: "12", y1: "15", y2: "3" }),
-      );
-    }
+      ];
+    });
 
     /** BranchIcon implementation. */
-    function BranchIcon(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          "aria-hidden": "true",
-        },
+    var BranchIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
         h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
         h("circle", { cx: "18", cy: "6", r: "3" }),
         h("circle", { cx: "6", cy: "18", r: "3" }),
         h("path", { d: "M18 9a9 9 0 0 1-9 9" }),
-      );
-    }
+      ];
+    });
 
     /** navIcon implementation. */
     function navIcon(id) {
@@ -1299,96 +960,62 @@ window.__ModuleLoader__.load({
     }
 
     /** NotepadPencilGlyph implementation. */
-    function NotepadPencilGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          className: "dsh-icon-animated dsh-icon-notepad",
-          style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
-        },
-        h("path", { d: "M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" }),
-        h("path", { d: "M2 6h4" }),
-        h("path", { d: "M2 10h4" }),
-        h("path", { d: "M2 14h4" }),
-        h("path", { d: "M2 18h4" }),
-        h("path", { d: "M18.4 2.6a2.12 2.12 0 0 1 3 3L11 16l-4 1 1-4Z" }),
-      );
-    }
+    var NotepadPencilGlyph = createDecoratedGlyphComponent(
+      16,
+      "dsh-icon-notepad",
+      { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
+      false,
+      function () {
+        return [
+          h("path", { d: "M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" }),
+          h("path", { d: "M2 6h4" }),
+          h("path", { d: "M2 10h4" }),
+          h("path", { d: "M2 14h4" }),
+          h("path", { d: "M2 18h4" }),
+          h("path", { d: "M18.4 2.6a2.12 2.12 0 0 1 3 3L11 16l-4 1 1-4Z" }),
+        ];
+      },
+    );
 
     /** ChatGlyph implementation. */
-    function ChatGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          className: "dsh-icon-animated",
-          style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
-        },
-        h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }),
-      );
-    }
+    var ChatGlyph = createDecoratedGlyphComponent(
+      16,
+      "",
+      { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
+      false,
+      function () {
+        return [h("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })];
+      },
+    );
 
     /** TerminalsGlyph implementation. */
-    function TerminalsGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          className: "dsh-icon-animated",
-          style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
-        },
-        h("polyline", { points: "4 17 10 11 4 5" }),
-        h("line", { x1: "12", y1: "19", x2: "20", y2: "19" }),
-      );
-    }
+    var TerminalsGlyph = createDecoratedGlyphComponent(
+      16,
+      "",
+      { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
+      false,
+      function () {
+        return [
+          h("polyline", { points: "4 17 10 11 4 5" }),
+          h("line", { x1: "12", y1: "19", x2: "20", y2: "19" }),
+        ];
+      },
+    );
 
     /** ContainersGlyph implementation. */
-    function ContainersGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          className: "dsh-icon-animated",
-          style: { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
-        },
-        h("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2", ry: "2" }),
-        h("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
-        h("line", { x1: "12", y1: "17", x2: "12", y2: "21" }),
-      );
-    }
+    var ContainersGlyph = createDecoratedGlyphComponent(
+      16,
+      "",
+      { display: "inline-flex", verticalAlign: "middle", flexShrink: 0 },
+      false,
+      function () {
+        return [
+          h("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2", ry: "2" }),
+          h("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
+          h("line", { x1: "12", y1: "17", x2: "12", y2: "21" }),
+        ];
+      },
+    );
 
     var SettingsPanelErrorBoundary = (function (_super) {
       /** SettingsPanelErrorBoundary implementation. */
@@ -2891,8 +2518,8 @@ window.__ModuleLoader__.load({
       var newThemeName = newThemeNameState[0],
         setNewThemeName = newThemeNameState[1];
 
-      var /** applyPaletteToDOM implementation. */
-        applyPaletteToDOM = function (palette, themeType) {
+      var /** applyPaletteToPage implementation. */
+        applyPaletteToPage = function (palette, themeType) {
           if (typeof document === "undefined") return;
           var styleEl = document.getElementById("dsh-custom-theme-vars");
           if (!styleEl) {
@@ -2958,7 +2585,7 @@ window.__ModuleLoader__.load({
         selectPreset = function (preset) {
           setActiveTheme(preset.id);
           setCustomPalette(Object.assign({}, preset.colors));
-          applyPaletteToDOM(preset.colors, preset.type);
+          applyPaletteToPage(preset.colors, preset.type);
           if (typeof window !== "undefined" && window.localStorage) {
             window.localStorage.setItem("dsh_active_theme", preset.id);
             window.localStorage.setItem("dsh_custom_palette", JSON.stringify(preset.colors));
@@ -2971,7 +2598,7 @@ window.__ModuleLoader__.load({
           updated[key] = value;
           setCustomPalette(updated);
           setActiveTheme("custom");
-          applyPaletteToDOM(updated, "custom");
+          applyPaletteToPage(updated, "custom");
           if (typeof window !== "undefined" && window.localStorage) {
             window.localStorage.setItem("dsh_active_theme", "custom");
             window.localStorage.setItem("dsh_custom_palette", JSON.stringify(updated));
@@ -3021,7 +2648,7 @@ window.__ModuleLoader__.load({
           var url = URL.createObjectURL(blob);
           var a = document.createElement("a");
           a.href = url;
-          a.download = "dsh-themes.json";
+          a.download = "themes.json";
           document.body.appendChild(a);
           a.click();
           setTimeout(function () {
@@ -3463,7 +3090,7 @@ window.__ModuleLoader__.load({
                           onClick: function () {
                             setActiveTheme(ct.id);
                             setCustomPalette(ct.colors);
-                            applyPaletteToDOM(ct.colors, "custom");
+                            applyPaletteToPage(ct.colors, "custom");
                           },
                           style: {
                             padding: "4px 10px",
@@ -3650,7 +3277,7 @@ window.__ModuleLoader__.load({
           id: "dsh accounts",
           name: "Credentials CLI",
           desc: "Command-line management for OAuth tokens, provider API keys, and secure vault.",
-          path: "plugins/dsh-credentials/bin/accounts.mjs",
+          path: "packages/credential-vault/bin/accounts.mjs",
           executable: true,
         },
         {
@@ -4058,79 +3685,79 @@ window.__ModuleLoader__.load({
     function PluginsSettingsSection() {
       var pluginList = [
         {
-          id: "dsh-actions",
+          id: "agent-actions",
           name: "Actions & Shortcuts",
           desc: "Session modes, slash commands, hotkey actions",
           version: "0.1.0",
         },
         {
-          id: "dsh-agents",
+          id: "agents",
           name: "Agents & Personas",
           desc: "Custom agent personas, system prompts, role rosters",
           version: "0.1.0",
         },
         {
-          id: "dsh-credentials",
+          id: "credentials",
           name: "Credentials Vault",
           desc: "Encrypted API key vault with biometric & hardware lock",
           version: "0.1.0",
         },
         {
-          id: "dsh-dialects",
+          id: "dialects",
           name: "Dialect Transforms",
           desc: "Multi-dialect prompt templates and model translation",
           version: "0.1.0",
         },
         {
-          id: "dsh-formatters",
+          id: "formatters",
           name: "Code Formatters",
           desc: "Multi-language code formatting on file edit",
           version: "0.1.0",
         },
         {
-          id: "dsh-hosts",
+          id: "hosts",
           name: "Deploy & Cluster",
           desc: "Multi-machine cluster nodes, remote deploy, mesh ingress",
           version: "0.1.0",
         },
         {
-          id: "dsh-loops",
+          id: "agent-loops",
           name: "Autonomous Work Loops",
           desc: "Background agent loops, continuous build, DarkFactory",
           version: "0.1.0",
         },
         {
-          id: "dsh-lsp",
+          id: "lsp",
           name: "Language Server Protocol",
           desc: "Real-time typechecking, diagnostics, symbol outline",
           version: "0.1.0",
         },
         {
-          id: "dsh-providers",
+          id: "providers",
           name: "Providers & Workspaces",
           desc: "Filesystem explorer, monorepo hierarchy, tabs & models",
           version: "0.1.0",
         },
         {
-          id: "dsh-repos",
+          id: "repos",
           name: "Repository Parity",
           desc: "Full GitHub repository parity: code, diffs, commits, branches",
           version: "0.1.0",
         },
         {
-          id: "dsh-themes",
+          id: "themes",
           name: "Themes & Appearance",
           desc: "OLED pitch black, accent colors, theme switching",
           version: "0.1.0",
         },
         {
-          id: "dsh-tools",
+          id: "agent-tools",
           name: "Tools & MCP Engine",
           desc: "Tool registry, Model Context Protocol server connectors",
           version: "0.1.0",
         },
         {
-          id: "dsh-translator",
+          id: "translator",
           name: "Real-time Translator",
           desc: "Cross-language translation for assistant dialogues",
           version: "0.1.0",
@@ -4142,13 +3769,13 @@ window.__ModuleLoader__.load({
           version: "0.1.0",
         },
         {
-          id: "dsh-tweaks",
+          id: "tweaks",
           name: "UI & Layout Tweaks",
           desc: "Layout customizer, keybind recorder, settings manager",
           version: "0.1.0",
         },
         {
-          id: "dsh-voice",
+          id: "voice",
           name: "Voice & Speech Engine",
           desc: "Voice input speech-to-text and audio response playback",
           version: "0.1.0",
@@ -5592,10 +5219,10 @@ window.__ModuleLoader__.load({
     function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register("sidebar", { zh: SIDEBAR_ZH, en: SIDEBAR_EN });
-      }, "dsh-tweaks: sidebar dictionaries");
+      }, "tweaks: sidebar dictionaries");
       ctx.effect(function () {
         ctx.locale.register("settings", { zh: SETTINGS_ZH, en: SETTINGS_EN });
-      }, "dsh-tweaks: settings dictionaries");
+      }, "tweaks: settings dictionaries");
 
       var tSettings = ctx.locale.bind("settings");
       var connection = ctx.get("connection");
@@ -5614,7 +5241,7 @@ window.__ModuleLoader__.load({
         ctx.on("connection/reset", function () {
           refreshDocumentIfLoaded(documentController);
         });
-      }, "dsh-tweaks: metadata invalidations");
+      }, "tweaks: metadata invalidations");
 
       var /** startSession implementation. */
         startSession = function (workspaceId) {
@@ -5649,7 +5276,7 @@ window.__ModuleLoader__.load({
             TweaksSidebarRoot,
           );
         },
-        "dsh-tweaks: sidebar registration",
+        "tweaks: sidebar registration",
       );
 
       ctx.slots.inject(
@@ -5666,7 +5293,7 @@ window.__ModuleLoader__.load({
             NewSessionButton,
           );
         },
-        "dsh-tweaks: new session content",
+        "tweaks: new session content",
       );
 
       ctx.slots.inject(
@@ -5690,7 +5317,7 @@ window.__ModuleLoader__.load({
             TweaksSettingsRoot,
           );
         },
-        "dsh-tweaks: settings shell",
+        "tweaks: settings shell",
       );
 
       ctx.slots.inject(
@@ -5701,21 +5328,21 @@ window.__ModuleLoader__.load({
             TriggerContent,
           );
         },
-        "dsh-tweaks: trigger content",
+        "tweaks: trigger content",
       );
       ctx.slots.inject(
         "settings.header",
         function () {
           return ctx.slots.register({ name: "settings.header", locale: "settings" }, HeaderContent);
         },
-        "dsh-tweaks: header content",
+        "tweaks: header content",
       );
       ctx.slots.inject(
         "settings.close",
         function () {
           return ctx.slots.register({ name: "settings.close", locale: "settings" }, CloseLabel);
         },
-        "dsh-tweaks: close label",
+        "tweaks: close label",
       );
       if (documentInjected !== undefined) {
         ctx.slots.inject(
@@ -5732,7 +5359,7 @@ window.__ModuleLoader__.load({
               SettingsDocumentAction,
             );
           },
-          "dsh-tweaks: open-document action",
+          "tweaks: open-document action",
         );
       }
       ctx.slots.inject(
@@ -5753,7 +5380,7 @@ window.__ModuleLoader__.load({
             GeneralSection,
           );
         },
-        "dsh-tweaks: general section",
+        "tweaks: general section",
       );
 
       ctx.slots.inject(
@@ -5775,7 +5402,7 @@ window.__ModuleLoader__.load({
             ThemeSettingsSection,
           );
         },
-        "dsh-tweaks: themes section",
+        "tweaks: themes section",
       );
 
       ctx.slots.inject(
@@ -5797,7 +5424,7 @@ window.__ModuleLoader__.load({
             KeybindsSettingsSection,
           );
         },
-        "dsh-tweaks: keybinds section",
+        "tweaks: keybinds section",
       );
 
       ctx.slots.inject(
@@ -5819,7 +5446,7 @@ window.__ModuleLoader__.load({
             CustomizationSettingsSection,
           );
         },
-        "dsh-tweaks: customization section",
+        "tweaks: customization section",
       );
 
       ctx.slots.inject(
@@ -5841,11 +5468,11 @@ window.__ModuleLoader__.load({
             PluginsSettingsSection,
           );
         },
-        "dsh-tweaks: plugins section",
+        "tweaks: plugins section",
       );
 
       // Harness-owned sections cannot register a glyph from their own bundles
-      // (the harness checkout is kept pristine), so dsh-tweaks owns the three
+      // (the harness checkout is kept pristine), so tweaks owns the three
       // mark seats — models, plugins, agent-presets — under the shared
       // settings.section.icon seat keyed by section id.
       /** GeneralGlyph implementation. */
@@ -5893,37 +5520,37 @@ window.__ModuleLoader__.load({
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("general", GeneralGlyph),
-        "dsh-tweaks: general nav glyph",
+        "tweaks: general nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("themes", ThemesGlyph),
-        "dsh-tweaks: themes nav glyph",
+        "tweaks: themes nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("appearance", ThemesGlyph),
-        "dsh-tweaks: appearance nav glyph",
+        "tweaks: appearance nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("customization", CustomizationGlyph),
-        "dsh-tweaks: customization nav glyph",
+        "tweaks: customization nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("keybinds", KeybindsGlyph),
-        "dsh-tweaks: keybinds nav glyph",
+        "tweaks: keybinds nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("plugins", PluginsGlyph),
-        "dsh-tweaks: plugins nav glyph",
+        "tweaks: plugins nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
         harnessGlyph("agent-presets", AgentPresetsGlyph),
-        "dsh-tweaks: agent presets nav glyph",
+        "tweaks: agent presets nav glyph",
       );
 
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
@@ -6104,7 +5731,7 @@ window.__ModuleLoader__.load({
             SessionHeaderUtilities,
           );
         },
-        "dsh-tweaks: 3-dots session header utilities",
+        "tweaks: 3-dots session header utilities",
       );
 
       // 2. Subagents Dock above input bar
@@ -6406,7 +6033,7 @@ window.__ModuleLoader__.load({
             SubagentsDock,
           );
         },
-        "dsh-tweaks: subagents dock above input bar",
+        "tweaks: subagents dock above input bar",
       );
 
       // 3. Shadow header subagent catalog and agent-preset
@@ -6425,7 +6052,7 @@ window.__ModuleLoader__.load({
             },
           );
         },
-        "dsh-tweaks: hide header subagent catalog",
+        "tweaks: hide header subagent catalog",
       );
 
       ctx.slots.inject(
@@ -6443,7 +6070,7 @@ window.__ModuleLoader__.load({
             },
           );
         },
-        "dsh-tweaks: hide header agent-preset",
+        "tweaks: hide header agent-preset",
       );
 
       // APP-WIDE CUSTOM RIGHT-CLICK CONTEXT MENU ABSTRACTION

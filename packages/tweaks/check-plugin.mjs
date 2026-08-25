@@ -3,8 +3,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-tweaks-"));
+const root = mkdtempSync(join(tmpdir(), "tweaks-"));
 process.env.HOME = root;
 process.env.DSH_HOME = join(root, ".agents");
 
@@ -16,11 +17,7 @@ const { readTweaksSection, writeTweaksSection, normalizeSection, sectionsEqual }
   "./lib/mirror.js"
 );
 
-if (plugin.name !== "dsh-tweaks") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
+assertLoaderShape(plugin, "tweaks");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
 const home = join(root, ".agents");
@@ -311,9 +308,21 @@ console.log("fork helper ok");
 // harness browser loads at runtime.
 const clientPath = join(import.meta.dirname, "lib", "client.js");
 assert.ok(existsSync(clientPath), "lib/client.js missing — run `npm run build`");
+const cryptoPolyfill = readFileSync(
+  join(import.meta.dirname, "..", "..", "scripts", "client-runtime", "crypto-polyfill.js"),
+  "utf8",
+);
+const glyphFactory = readFileSync(
+  join(import.meta.dirname, "..", "..", "scripts", "client-runtime", "glyph-factory.js"),
+  "utf8",
+);
 const rootClient = readFileSync(join(import.meta.dirname, "client.js"), "utf8");
 const builtClient = readFileSync(clientPath, "utf8");
-assert.equal(builtClient, rootClient, "lib/client.js must be the built copy of client.js");
+assert.equal(
+  builtClient,
+  cryptoPolyfill + glyphFactory + rootClient,
+  "lib/client.js must be the shared crypto polyfill + glyph factory + client.js",
+);
 
 globalThis.window = {
   __ModuleLoader__: {
@@ -324,7 +333,7 @@ globalThis.window = {
 };
 await import("./lib/client.js");
 const clientSpec = globalThis.__clientSpec;
-assert.equal(clientSpec.id, "dsh-tweaks");
+assert.equal(clientSpec.id, "tweaks");
 assert.equal(typeof clientSpec.factory, "function");
 
 const stubModules = {

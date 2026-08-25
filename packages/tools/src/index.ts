@@ -1,6 +1,6 @@
 /**
- * `dsh-tools`: config-file custom tools for the dsh harness. The plugin reads
- * the `dsh-tools` settings section (a map of tool name → definition) and
+ * `agent-tools`: config-file custom tools for the dsh harness. The plugin reads
+ * the `agent-tools` settings section (a map of tool name → definition) and
  * registers each definition as a model-facing `ctx.tools` entry that runs its
  * `command` through `ctx.subprocess` — never shell-interpreted — with `{name}`
  * argument placeholders substituted from the call. The `dsh tool` CLI
@@ -9,7 +9,7 @@
  * The `tools` seam this registers into is the harness' own tool registry, so a
  * custom tool is indistinguishable from a shipped one to the model: same schema
  * validation, same output contract, same post-execute pipeline.
- * @module dsh-tools
+ * @module agent-tools
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -33,7 +33,7 @@ import {
 
 export type * from "./settings.js";
 
-export const name = "dsh-tools";
+export const name = "agent-tools";
 export const inject = ["subprocess", "tools"];
 
 export const Config: z<ToolsConfig> = ToolsConfig;

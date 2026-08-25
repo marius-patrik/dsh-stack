@@ -1,4 +1,4 @@
-/** GitHub Actions self-hosted runner provisioning for dsh-hosts. */
+/** GitHub Actions self-hosted runner provisioning for hosts. */
 
 import { mkdir, writeFile, chmod } from "node:fs/promises";
 import { join } from "node:path";

@@ -1,5 +1,5 @@
 /**
- * Persona files: the authoring input dsh-agents turns into agent presets.
+ * Persona files: the authoring input agents turns into agent presets.
  *
  * A persona file is either Markdown (optional `---` frontmatter with scalar
  * keys `name`, `description`, `base`; the body is the system prompt) or JSON
@@ -10,10 +10,11 @@
  * `base` names a shipped preset whose composition the materialized preset is
  * copied from, with the persona text swapped in; absent, the settings
  * `defaultBase` applies, then `standard`.
- * @module dsh-agents/persona
+ * @module agents/persona
  */
 
 import { basename, extname } from "node:path";
+import { sanitizeAuthoringId, splitAuthoringMarkdown } from "@dsh-stack/plugin-kit";
 
 /** A parsed persona file, ready to be materialized as an agent preset. */
 export interface Persona {
@@ -35,45 +36,7 @@ export interface Persona {
  * (empty after cleanup) falls back to `agent`.
  */
 export function sanitizeId(stem: string): string {
-  const cleaned = stem
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^[^a-z0-9]+/, "");
-  return cleaned === "" ? "agent" : cleaned;
-}
-
-/** A scalar value from a persona file, trimmed and unquoted. */
-function scalar(raw: string | undefined): string | undefined {
-  if (raw === undefined) return undefined;
-  const trimmed = raw.trim();
-  if (trimmed === "") return undefined;
-  const quoted = trimmed.match(/^(['"])([\s\S]*)\1$/);
-  return quoted !== null ? quoted[2] : trimmed;
-}
-
-/** Parse the `key: value` lines of a YAML-ish frontmatter block. */
-function frontmatter(text: string): Record<string, string | undefined> {
-  const out: Record<string, string | undefined> = {};
-  for (const line of text.split("\n")) {
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
-    if (match !== null) {
-      const key = match[1];
-      if (key !== undefined) out[key] = scalar(match[2]);
-    }
-  }
-  return out;
-}
-
-/** The `---` frontmatter block of a Markdown persona, split from its body. */
-function splitMarkdown(content: string): {
-  fields: Record<string, string | undefined>;
-  body: string;
-} {
-  const fenced = content.match(/^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)/);
-  if (fenced === null || fenced[1] === undefined || fenced[0] === undefined)
-    return { fields: {}, body: content };
-  return { fields: frontmatter(fenced[1]), body: content.slice(fenced[0].length) };
+  return sanitizeAuthoringId(stem, "agent");
 }
 
 /** A persona's optional display metadata, from either frontmatter or JSON. */
@@ -114,7 +77,7 @@ export function parsePersona(filePath: string, content: string): Persona {
       base: typeof parsed.base === "string" ? parsed.base : undefined,
     };
   } else if (extension === ".md") {
-    const { fields: parsed, body } = splitMarkdown(content);
+    const { fields: parsed, body } = splitAuthoringMarkdown(content);
     fields = { name: parsed.name, description: parsed.description, base: parsed.base };
     prompt = body;
   } else {

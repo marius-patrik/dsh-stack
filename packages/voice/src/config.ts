@@ -4,7 +4,7 @@
  * registers), keeping the established `stt` keys and adding the neural-TTS
  * `tts` table and the `readAloud` section. Credentials are references into
  * the dsh account vault (`credentialRef`), never stored values.
- * @module dsh-voice/config
+ * @module voice/config
  */
 
 import z from "@deepseek-ai/schemastery";

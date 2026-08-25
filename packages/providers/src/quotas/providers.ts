@@ -3,14 +3,14 @@
  *
  * Each provider makes a lightweight probe request against the real endpoint
  * and reports the HTTP status as quota availability. Probe routes derive from
- * the single PROVIDER_ROUTES table in dsh-providers: a route's probe endpoint
+ * the single PROVIDER_ROUTES table in providers: a route's probe endpoint
  * is the per-route `probe` extension field, its fixed headers and display
  * name come from the route itself, and its token reference is the route's
  * first credential slot. Probe tokens resolve through the account seam
- * (dsh-credentials) with the credential environment variable as fallback —
+ * (credentials) with the credential environment variable as fallback —
  * the probes never read vault files directly.
  *
- * @module dsh-providers/quotas/providers
+ * @module providers/quotas/providers
  */
 
 import { PROVIDER_ROUTES, type ProviderRoute } from "../providers.js";

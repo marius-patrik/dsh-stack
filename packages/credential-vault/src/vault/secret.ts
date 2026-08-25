@@ -24,7 +24,7 @@
  * `src/vault/files.ts`; the plugin keeps a single copy in `vault/files.ts` and
  * imports it here, so the two cannot drift into different durability
  * guarantees.
- * @module dsh-credentials/vault/secret
+ * @module credentials/vault/secret
  */
 
 import path from "node:path";

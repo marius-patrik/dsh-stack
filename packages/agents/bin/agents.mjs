@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * The `dsh agents` command: the owner surface over dsh-agents persona
- * authoring. It reads/writes the authoring directory (the `dsh-agents` root,
+ * The `dsh agents` command: the owner surface over agents persona
+ * authoring. It reads/writes the authoring directory (the `agents` root,
  * default `<home>/agents`) under the same agent home the harness boots
  * (DSH_HOME) and materializes presets into `<home>/.agent-presets`, where the
  * harness roster picks them up live.
@@ -22,7 +22,7 @@ import { authoringRoot, defaultBase } from "../lib/settings.js";
 
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
-const NS = "dsh-agents";
+const NS = "agents";
 
 /** readSection implementation. */
 function* readSection(text, section) {

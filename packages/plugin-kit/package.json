@@ -15,8 +15,7 @@
   "files": [
     "lib",
     "package.json",
-    "README.md",
-    "LICENSE"
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

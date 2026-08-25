@@ -15,10 +15,10 @@
  * response is a JSON **array** of chunk objects carrying `markdown`, rather
  * than SSE or NDJSON.
  *
- * See `dsh-providers/ANTIGRAVITY.md` for how the wire shape was established
+ * See `providers/ANTIGRAVITY.md` for how the wire shape was established
  * and what remains unmapped.
  *
- * @module dsh-dialects/antigravity
+ * @module dialects/antigravity
  */
 
 import { LlmError } from "@deepseek-ai/dsh-llm";

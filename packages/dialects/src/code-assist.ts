@@ -8,7 +8,7 @@
  * `model`, `project`, and `user_prompt_id`. Response SSE payloads are wrapped
  * as `{traceId, response}` and unwrapped before the shared Gemini translator.
  *
- * @module dsh-dialects/code-assist
+ * @module dialects/code-assist
  */
 
 import { randomUUID } from "node:crypto";

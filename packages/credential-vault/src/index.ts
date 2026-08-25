@@ -22,7 +22,7 @@
  * File-based importers move existing Claude Code and Cursor credentials into
  * the vault in one command; the harness owns login and obtaining for the
  * remaining providers.
- * @module dsh-credentials
+ * @module credentials
  */
 
 import { Service, type Context } from "@deepseek-ai/cordis";
@@ -55,7 +55,7 @@ export type { VaultListRow } from "./web.js";
 export type { FileSecretProvider, ImportResult, ResolvedSecret } from "./types.js";
 export * from "./refs.js";
 
-export const name = "dsh-credentials";
+export const name = "credentials";
 export const inject: string[] = [];
 
 /** Resolve the agent home directory: config overrides `$DSH_HOME`, then `~/.agents`. */
@@ -221,7 +221,7 @@ export class AccountsService extends Service {
   async set(ref: string, value: string, account?: string): Promise<void> {
     await this.ready;
     if (value.length === 0)
-      throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
+      throw new Error(`credentials: refusing to store an empty value for ${ref}`);
     await this.vault.put(recordForRef(ref, value, account !== undefined ? { account } : {}));
   }
 
@@ -292,11 +292,11 @@ export class AccountsService extends Service {
         results.push({ ref, provider: provider.id, source: path });
       }
       if (results.length === 0) {
-        throw new Error(`dsh-credentials: ${path} holds no known secrets for ${provider.id}`);
+        throw new Error(`credentials: ${path} holds no known secrets for ${provider.id}`);
       }
       return results;
     }
-    throw new Error(`dsh-credentials: no file provider recognized ${path}`);
+    throw new Error(`credentials: no file provider recognized ${path}`);
   }
 
   /**
@@ -342,7 +342,7 @@ export class AccountsService extends Service {
       }
       await rename(legacyFile, retiredLegacyVaultPath(options.home));
     } catch (error) {
-      this.ctx.logger.error("dsh-credentials: legacy vault migration failed");
+      this.ctx.logger.error("credentials: legacy vault migration failed");
       this.ctx.logger.error(error);
     }
   }

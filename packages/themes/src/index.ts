@@ -1,5 +1,5 @@
 /**
- * `dsh-themes`: VS Code/TextMate theme support for the dsh web UI. The node
+ * `themes`: VS Code/TextMate theme support for the dsh web UI. The node
  * half owns the installed theme store (files under the agent home), a
  * `/themes.json` route the browser half registers from, the Open VSX catalog
  * seam (search/download), and the `dsh theme` CLI verbs. The browser half
@@ -10,7 +10,7 @@
  * The registry surface accepts only the semantic `--dsw-alias-*` token layer,
  * so every installed source is mapped to that vocabulary at install time (see
  * `theme.ts`) — the browser never parses VS Code color keys.
- * @module dsh-themes
+ * @module themes
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -54,7 +54,7 @@ export type { CatalogExtension } from "./catalog.js";
 export { mountThemeWeb, THEMES_API_PREFIX } from "./web.js";
 export type { ThemeWebDeps } from "./web.js";
 
-export const name = "dsh-themes";
+export const name = "themes";
 export const inject: string[] = [];
 const DEFAULT_HOME_DIR = join(".agents") as string;
 
@@ -127,7 +127,7 @@ export function apply(ctx: Context, config: ThemesConfigType): void {
       return () => {
         writer = undefined;
       };
-    }, "dsh-themes: active-theme writer");
+    }, "themes: active-theme writer");
   });
 
   mountThemeWeb(ctx, {
@@ -136,7 +136,7 @@ export function apply(ctx: Context, config: ThemesConfigType): void {
     catalogUrl,
     active: () => activeThemeId(ctx),
     setActive: async (id) => {
-      if (writer === undefined) throw new Error("dsh-themes: no settings service is mounted");
+      if (writer === undefined) throw new Error("themes: no settings service is mounted");
       await writer(id);
     },
   });
@@ -160,7 +160,7 @@ export function apply(ctx: Context, config: ThemesConfigType): void {
             res.end(body);
           },
         }),
-      "dsh-themes: themes route",
+      "themes: themes route",
     );
   });
 }

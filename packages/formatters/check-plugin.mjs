@@ -4,19 +4,16 @@ import { join, resolve as pathResolve } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-const root = mkdtempSync(join(tmpdir(), "dsh-formatters-"));
+const root = mkdtempSync(join(tmpdir(), "formatters-"));
 const cli = new URL("./bin/formatter.mjs", import.meta.url).pathname;
 
 const plugin = await import("./lib/index.js");
 const { NS } = await import("./lib/settings.js");
 
-if (plugin.name !== "dsh-formatters") throw new Error("bad name");
-if (typeof plugin.apply !== "function") throw new Error("bad apply");
-if (!Array.isArray(plugin.inject)) throw new Error("bad inject");
-if (plugin.default !== undefined)
-  throw new Error("function plugins must not have a default export");
-assert.equal(NS, "dsh-formatters");
+assertLoaderShape(plugin, "formatters");
+assert.equal(NS, "formatters");
 assert.equal(plugin.inject.join(","), "fs,subprocess,tools");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
@@ -157,7 +154,7 @@ const home = join(root, "cli-home");
 const env = { ...process.env, DSH_HOME: home };
 execFileSync(process.execPath, [cli, "add", ".py", "black", "-q"], { env });
 const text = readFileSync(join(home, "settings.yaml"), "utf8");
-assert.ok(text.includes("dsh-formatters:"));
+assert.ok(text.includes("formatters:"));
 assert.ok(text.includes('".py"'));
 assert.ok(text.includes("black"));
 execFileSync(process.execPath, [cli, "set-auto", "off"], { env });

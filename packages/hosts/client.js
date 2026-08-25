@@ -1,28 +1,5 @@
-(function () {
-  if (typeof globalThis.crypto === "undefined") globalThis.crypto = {};
-  if (typeof globalThis.crypto.randomUUID !== "function") {
-    globalThis.crypto.randomUUID = function () {
-      if (typeof globalThis.crypto.getRandomValues === "function") {
-        try {
-          return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
-            return (
-              c ^
-              (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-            ).toString(16);
-          });
-        } catch (e) {}
-      }
-      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-        var r = (Math.random() * 16) | 0,
-          v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-    };
-  }
-})();
-
 window.__ModuleLoader__.load({
-  id: "dsh-hosts",
+  id: "hosts",
   factory: function (require) {
     var module = { exports: {} };
     var exports = module.exports;
@@ -736,7 +713,7 @@ window.__ModuleLoader__.load({
             DeploySettingsSection,
           );
         },
-        "dsh-hosts: deploy settings section",
+        "hosts: deploy settings section",
       );
 
       ctx.slots.inject(
@@ -752,7 +729,7 @@ window.__ModuleLoader__.load({
             DeployGlyph,
           );
         },
-        "dsh-hosts: deploy nav glyph",
+        "hosts: deploy nav glyph",
       );
     }
 

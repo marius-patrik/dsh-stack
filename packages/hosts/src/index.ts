@@ -1,6 +1,6 @@
 /**
- * dsh-hosts: Multi-node device and cluster manager Cordis plugin.
- * @module dsh-hosts
+ * hosts: Multi-node device and cluster manager Cordis plugin.
+ * @module hosts
  */
 
 import { Service, type Context } from "@deepseek-ai/cordis";
@@ -15,8 +15,9 @@ import { VirtualDomainManager } from "./virtual-domain.js";
 import type { AccessConfig, ClusterStatus, IHostsService, NetworkNode } from "./types.js";
 
 export * from "./types.js";
+export * from "./github-actions-runner.js";
 
-export const name = "dsh-hosts";
+export const name = "hosts";
 export const inject = ["webServer"];
 
 declare module "@deepseek-ai/cordis" {
@@ -106,7 +107,7 @@ export class HostsService extends Service implements IHostsService {
 
     void this.gateway.start().catch((err: unknown) => {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn(`[dsh-hosts] gateway notice: ${message}`);
+      console.warn(`[hosts] gateway notice: ${message}`);
     });
     ctx.effect(
       () => () => {
@@ -115,7 +116,7 @@ export class HostsService extends Service implements IHostsService {
           this.gateway = null;
         }
       },
-      "dsh-hosts: gateway lifecycle",
+      "hosts: gateway lifecycle",
     );
   }
 

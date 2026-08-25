@@ -1,5 +1,5 @@
 /**
- * Action files: the authoring input dsh-actions merges into the built-in
+ * Action files: the authoring input agent-actions merges into the built-in
  * action vocabulary.
  *
  * An action file is either Markdown (optional `---` frontmatter with scalar
@@ -11,10 +11,11 @@
  * A file whose id matches a built-in action OVERRIDES that built-in
  * (description, tools allowlist, route, and policy all come from the file);
  * any other id adds a custom action to the vocabulary.
- * @module dsh-actions/action
+ * @module agent-actions/action
  */
 
 import { basename, extname } from "node:path";
+import { sanitizeAuthoringId, splitAuthoringMarkdown } from "@dsh-stack/plugin-kit";
 
 /** One action's routing hint: the provider/model the session's requests use. */
 export interface ActionRoute {
@@ -45,9 +46,6 @@ export const ACTIONS = ["tool", "search", "action", "plan", "agent", "shell", "c
 
 /** A built-in action id. */
 export type BuiltInAction = (typeof ACTIONS)[number];
-
-/** @deprecated Compat alias for the pre-rename name; use {@link ACTIONS}. */
-export const MODES = ACTIONS;
 
 /** The default action a fresh session runs on. */
 export const DEFAULT_ACTION: BuiltInAction = "agent";
@@ -103,45 +101,7 @@ export const BUILT_IN_ACTIONS: readonly ActionSpec[] = [
  * Unusable input (empty after cleanup) falls back to `action`.
  */
 export function sanitizeId(stem: string): string {
-  const cleaned = stem
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^[^a-z0-9]+/, "");
-  return cleaned === "" ? "action" : cleaned;
-}
-
-/** A scalar value from an action file, trimmed and unquoted. */
-function scalar(raw: string | undefined): string | undefined {
-  if (raw === undefined) return undefined;
-  const trimmed = raw.trim();
-  if (trimmed === "") return undefined;
-  const quoted = trimmed.match(/^(['"])([\s\S]*)\1$/);
-  return quoted !== null ? quoted[2] : trimmed;
-}
-
-/** Parse the `key: value` lines of a YAML-ish frontmatter block. */
-function frontmatter(text: string): Record<string, string | undefined> {
-  const out: Record<string, string | undefined> = {};
-  for (const line of text.split("\n")) {
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/);
-    if (match !== null) {
-      const key = match[1];
-      if (key !== undefined) out[key] = scalar(match[2]);
-    }
-  }
-  return out;
-}
-
-/** The `---` frontmatter block of a Markdown action, split from its body. */
-function splitMarkdown(content: string): {
-  fields: Record<string, string | undefined>;
-  body: string;
-} {
-  const fenced = content.match(/^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)/);
-  if (fenced === null || fenced[1] === undefined || fenced[0] === undefined)
-    return { fields: {}, body: content };
-  return { fields: frontmatter(fenced[1]), body: content.slice(fenced[0].length) };
+  return sanitizeAuthoringId(stem, "action");
 }
 
 /** Parse a comma-separated tool allowlist, or undefined when absent/empty. */
@@ -224,7 +184,7 @@ export function parseAction(filePath: string, content: string): ActionSpec {
       route: jsonRoute(parsed, filePath),
     };
   } else if (extension === ".md") {
-    const { fields: parsed, body } = splitMarkdown(content);
+    const { fields: parsed, body } = splitAuthoringMarkdown(content);
     fields = {
       name: parsed.name,
       description: parsed.description,

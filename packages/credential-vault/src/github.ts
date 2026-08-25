@@ -1,7 +1,7 @@
 /**
  * The GitHub OAuth route + refresh supplement for the vault adapter.
  *
- * `dsh-providers` `PROVIDER_ROUTES` carries the LLM wire routes; GitHub is not
+ * `providers` `PROVIDER_ROUTES` carries the LLM wire routes; GitHub is not
  * an LLM provider, so it has no route there. This module registers the GitHub
  * credential route (`github` — the api.github.com target plus the OAuth
  * authorization server) through the same injected adapter
@@ -13,7 +13,7 @@
  * GitHub OAuth uses PKCE; a GitHub OAuth App issues a public client id. The
  * redirect is the RFC 8252 loopback (the `gh` CLI uses the same shape).
  *
- * @module dsh-credentials/github
+ * @module credentials/github
  */
 
 import type { OAuthPkceAuth } from "./vault/descriptor.js";

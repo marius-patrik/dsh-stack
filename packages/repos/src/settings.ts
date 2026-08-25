@@ -1,17 +1,17 @@
 /**
- * dsh-repos settings: the `dsh-repos` section owns the repo workflow defaults
+ * repos settings: the `repos` section owns the repo workflow defaults
  * (default remote and branch). The plugin exposes model-facing repo tools
  * (`repo-status`, `repo-branch`, `repo-commit`, `repo-push`, `repo-pr`) that
  * run `git` through `ctx.subprocess`; GitHub pushes and PRs consume the vault
- * token resolved by dsh-credentials — this plugin never stores credentials.
- * @module dsh-repos/settings
+ * token resolved by credentials — this plugin never stores credentials.
+ * @module repos/settings
  */
 
 import z from "@deepseek-ai/schemastery";
 import { settingsNamespace } from "@deepseek-ai/dsh-settings";
 
 /** Settings namespace owning the repo workflow defaults. */
-export const NS = settingsNamespace("dsh-repos");
+export const NS = settingsNamespace("repos");
 
 /** The user-facing section: remote and branch defaults for the repo tools. */
 export interface RepoSettings {

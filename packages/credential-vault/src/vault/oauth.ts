@@ -5,7 +5,7 @@
  * Ported from Andromeda `src/server/gateway/providers/oauth.ts`, with the
  * `CredentialStore`/`ProviderCredential`/`SecretValue` surface imported from
  * `./secret.js` and the cross-origin redirect guard from `./redirects.js`.
- * @module dsh-credentials/vault/oauth
+ * @module credentials/vault/oauth
  */
 
 import { createHash, randomBytes } from "node:crypto";

@@ -1,11 +1,11 @@
 window.__ModuleLoader__.load({
-  id: "dsh-agents",
+  id: "agents",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
     //#region lib/client.js
     /**
-     * dsh-agents client half (hand-authored bundle, no build step):
+     * agents client half (hand-authored bundle, no build step):
      * contributes the Agents page to the Settings section, the `/persona`
      * switcher (a commandUi popupSelect ported from ui-model-selection),
      * and the active-persona badge in the composer tool row.
@@ -37,7 +37,7 @@ window.__ModuleLoader__.load({
           strokeWidth: "2",
           strokeLinecap: "round",
           strokeLinejoin: "round",
-          className: "dsh-agents-navGlyph dsh-icon-animated",
+          className: "agents-navGlyph dsh-icon-animated",
         },
         React.createElement("path", { d: "M12 8V4H8" }),
         React.createElement("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
@@ -218,7 +218,7 @@ window.__ModuleLoader__.load({
               strokeWidth: "2",
               strokeLinecap: "round",
               strokeLinejoin: "round",
-              className: "dsh-agents-personaGlyph dsh-icon-animated",
+              className: "agents-personaGlyph dsh-icon-animated",
             },
             h("path", { d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" }),
             h("circle", { cx: "12", cy: "7", r: "4" }),
@@ -280,7 +280,7 @@ window.__ModuleLoader__.load({
             },
             AgentsSection,
           ),
-        "dsh-agents: agents settings section",
+        "agents: agents settings section",
       );
       ctx.slots.inject(
         "settings.section.icon",
@@ -293,7 +293,7 @@ window.__ModuleLoader__.load({
             },
             AgentsGlyph,
           ),
-        "dsh-agents: agents nav glyph",
+        "agents: agents nav glyph",
       );
       ctx.slots.inject(
         "conversation.input.left",
@@ -306,7 +306,7 @@ window.__ModuleLoader__.load({
             },
             PersonaChip,
           ),
-        "dsh-agents: persona composer badge",
+        "agents: persona composer badge",
       );
 
       ctx.inject(["commandUi", "sessions"], (scope) => {
@@ -344,7 +344,7 @@ window.__ModuleLoader__.load({
                     }),
               },
             }),
-          "dsh-agents: /persona contribution",
+          "agents: /persona contribution",
         );
       });
     }

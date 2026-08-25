@@ -5,12 +5,12 @@
  * stored by this plugin — every call resolves its key fresh from
  * `ctx.accounts` (vault first, harness credential seam second) with an
  * environment variable of the same reference name as the final fallback.
- * @module dsh-voice/speech
+ * @module voice/speech
  */
 
 import { authHeaders, joinUrl, type ResolvedTts } from "./providers.js";
 
-/** The slice of the dsh-credentials account service this plugin consumes. */
+/** The slice of the credentials account service this plugin consumes. */
 export interface AccountsLike {
   /** Resolve a canonical reference, vault first; undefined when absent. */
   resolve(ref: string): Promise<{ value: string; origin: string } | undefined>;

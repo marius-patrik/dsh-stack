@@ -1,5 +1,5 @@
 /**
- * Loopback Access Gateway for dsh-hosts.
+ * Loopback Access Gateway for hosts.
  * Binds the public/Tailscale port and transparently proxies to the local 127.0.0.1 harness backend.
  */
 

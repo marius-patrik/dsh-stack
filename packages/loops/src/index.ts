@@ -1,6 +1,6 @@
 import type { Context } from "@deepseek-ai/cordis";
 
-export const name = "dsh-loops";
+export const name = "agent-loops";
 export const inject = ["tools"];
 
 /** apply implementation. */

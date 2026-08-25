@@ -305,8 +305,16 @@ export async function main(): Promise<void> {
 
 export { DshClient } from "./client.js";
 export type { DshClientConfig } from "./client.js";
-export type { MuxFrame, SessionDescriptor, SessionEvent, ModelDescriptor } from "./protocol.js";
+export type {
+  MuxFrame,
+  ServerRequest,
+  SessionDescriptor,
+  SessionEvent,
+  ModelDescriptor,
+  GoalDescriptor,
+} from "./protocol.js";
 export { commands, findCommand } from "./commands.js";
+export type { Command, CommandContext, CommandResult } from "./commands.js";
 export {
   createInitialState,
   render,

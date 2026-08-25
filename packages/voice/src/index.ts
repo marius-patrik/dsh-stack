@@ -1,5 +1,5 @@
 /**
- * dsh-voice — a natural, human-sounding voice for the dsh harness.
+ * voice — a natural, human-sounding voice for the dsh harness.
  *
  * Three layers:
  *
@@ -15,11 +15,11 @@
  *     agent can speak with the same good voice and hear recordings.
  *
  * Credentials resolve per request from the dsh account vault via
- * `ctx.accounts` (dsh-credentials), referenced by name (`OPENAI_API_KEY` by
+ * `ctx.accounts` (credentials), referenced by name (`OPENAI_API_KEY` by
  * default) and never stored by this plugin. Providers are a table
  * (providers.ts): base URL, path, auth style, voices, models — any
  * OpenAI-compatible gateway works by configuration.
- * @module dsh-voice
+ * @module voice
  */
 
 import type { Context } from "@deepseek-ai/cordis";
@@ -65,12 +65,12 @@ declare module "@deepseek-ai/cordis" {
   interface Context {
     /** The dsh host web server route registry. */
     webServer: { register(route: WebRouteLike): () => void };
-    /** The dsh-credentials account vault service. */
+    /** The credentials account vault service. */
     accounts: AccountsLike;
   }
 }
 
-export const name = "dsh-voice";
+export const name = "voice";
 export const inject = ["tools", "settings", "webServer", "accounts"];
 
 /**
@@ -98,7 +98,7 @@ export function apply(ctx: Context, config: VoiceConfig): void {
         path: "/voice/api/tts",
         handler: makeTtsHandler(() => current(), accounts),
       }),
-    "dsh-voice: /voice/api/tts route",
+    "voice: /voice/api/tts route",
   );
   ctx.effect(
     () =>
@@ -107,7 +107,7 @@ export function apply(ctx: Context, config: VoiceConfig): void {
         path: "/voice/api/stt",
         handler: makeSttHandler(() => current(), accounts),
       }),
-    "dsh-voice: /voice/api/stt route",
+    "voice: /voice/api/stt route",
   );
   ctx.effect(
     () =>
@@ -116,12 +116,12 @@ export function apply(ctx: Context, config: VoiceConfig): void {
         path: "/voice/api/config",
         handler: makeConfigHandler(() => current()),
       }),
-    "dsh-voice: /voice/api/config route",
+    "voice: /voice/api/config route",
   );
 
   registerVoiceTools(ctx.tools, () => current(), accounts);
 
   ctx
-    .logger("[dsh-voice]")
+    .logger("[voice]")
     .info("mounted /voice/api/{tts,stt,config} + voice_speak + voice_transcribe");
 }

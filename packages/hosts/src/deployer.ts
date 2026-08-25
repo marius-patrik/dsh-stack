@@ -32,7 +32,7 @@ export class RemoteDeployer {
 # dsh worker node automatic cluster bootstrapper
 set -euo pipefail
 
-echo "==> [dsh-hosts] Deploying dsh worker node to cluster..."
+echo "==> [hosts] Deploying dsh worker node to cluster..."
 COORDINATOR="${coordinatorUrl}"
 
 # 1. Check Node.js
@@ -56,7 +56,7 @@ echo "==> Worker daemon ready."
   generateWindowsBootstrap(coordinatorUrl: string): string {
     return `# dsh Windows worker node bootstrapper
 $ErrorActionPreference = "Stop"
-Write-Host "==> [dsh-hosts] Deploying dsh Windows worker node..." -ForegroundColor Cyan
+Write-Host "==> [hosts] Deploying dsh Windows worker node..." -ForegroundColor Cyan
 $Coordinator = "${coordinatorUrl}"
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {

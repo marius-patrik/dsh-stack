@@ -4,7 +4,7 @@
  * web route and CLI verbs read one format and the browser registers straight
  * from it. Reads are tolerant of one corrupt file (skipped with a warning) so
  * a hand-edited store cannot break every other theme.
- * @module dsh-themes/store
+ * @module themes/store
  */
 
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -71,7 +71,7 @@ export async function listThemes(
     try {
       themes.push(await readTheme(handle, name));
     } catch (error) {
-      warn?.(`dsh-themes: skipping unreadable theme file ${name}: ${String(error)}`);
+      warn?.(`themes: skipping unreadable theme file ${name}: ${String(error)}`);
     }
   }
   themes.sort((a, b) => a.name.localeCompare(b.name));

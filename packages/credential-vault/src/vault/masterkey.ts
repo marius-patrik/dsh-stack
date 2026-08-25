@@ -30,7 +30,7 @@
  *
  * Ported from Andromeda `src/vault/masterkey.ts`, with `Bun.file(...).text()`
  * replaced by node's `readFile` for the two file reads.
- * @module dsh-credentials/vault/masterkey
+ * @module credentials/vault/masterkey
  */
 
 import path from "node:path";
