@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "paths": {
+      "@dsh-stack/trading-research": ["../trading-research/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}
