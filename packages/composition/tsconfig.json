@@ -1,18 +1,11 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "declaration": true,
-    "outDir": "lib",
-    "rootDir": "src",
     "noEmitOnError": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@dsh-stack/plugin-kit": ["../plugin-kit/src/index.ts"]
-    }
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

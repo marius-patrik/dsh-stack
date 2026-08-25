@@ -1,22 +1,18 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "outDir": "lib",
-    "rootDir": "src",
     "paths": {
-      "@dsh-stack/trading-research": ["../trading-research/lib/index.d.ts"],
-      "@dsh-stack/trading-backtest": ["../trading-backtest/lib/index.d.ts"]
-    }
+      "@dsh-stack/trading-research": [
+        "../trading-research/lib/index.d.ts"
+      ],
+      "@dsh-stack/trading-backtest": [
+        "../trading-backtest/lib/index.d.ts"
+      ]
+    },
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
