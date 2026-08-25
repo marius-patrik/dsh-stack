@@ -47,6 +47,7 @@ jobs:
           git add packages plugins scripts
           git diff --cached --quiet && exit 0
           git commit -m 'chore(docs): add JSDoc to all declarations [jsdoc-autofix]'
+          git pull --rebase origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}
 
   verify:
