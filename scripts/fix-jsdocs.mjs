@@ -174,7 +174,9 @@ async function main() {
   }
 
   if (!remaining.passed) {
-    throw new Error(`JSDoc retrofit incomplete: ${remaining.failures.length} declaration(s) remain`);
+    throw new Error(
+      `JSDoc retrofit incomplete: ${remaining.failures.length} declaration(s) remain`,
+    );
   }
 
   console.log(`Added ${added} JSDoc blocks across the repository.`);
