@@ -34,10 +34,7 @@ export function apply(ctx: ClientContext): void {
   });
 
   ctx.slots.inject("sidebar.brand.name", function* () {
-    yield ctx.slots.register(
-      { name: "sidebar.brand.name", inject: () => ({}) },
-      selected.name,
-    );
+    yield ctx.slots.register({ name: "sidebar.brand.name", inject: () => ({}) }, selected.name);
   });
 
   ctx.slots.inject("conversation.hero.brand.mark", function* () {
