@@ -61,7 +61,7 @@ export function SkinSettings({ close }: SettingsSectionOwnerProps) {
 
 export function apply(ctx: ClientContext): void {
   ctx.slots.register(
-    { name: "stack-skin-settings", id: "skins", order: 35, label: "Skins" },
+    { name: "settings.section", id: "skins", order: 35, label: "Skins" },
     SkinSettings,
   );
 }
