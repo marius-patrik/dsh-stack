@@ -82,7 +82,8 @@ export function registerVoiceTools(
           },
         ],
       },
-      async execute(args) {
+            /** execute implementation. */
+async execute(args) {
         const config = current();
         if (!config.tts.enabled) throw new Error("TTS is disabled (voice.tts.enabled)");
         const target = resolveTts(config.tts);
@@ -137,7 +138,8 @@ export function registerVoiceTools(
         },
         render: (_args, value) => [{ type: "text", text: value.text }],
       },
-      async execute(args) {
+            /** execute implementation. */
+async execute(args) {
         const config = current();
         if (!config.stt.enabled) throw new Error("STT is disabled (voice.stt.enabled)");
         const audio = await readFile(resolve(args.path));

@@ -9,23 +9,27 @@ export class SkillLoaderService extends Service {
   static inject = ["tools"];
   private loadedSkills = new Set<string>();
 
-  constructor(ctx: Context) {
+    /** Constructs an instance. */
+constructor(ctx: Context) {
     super(ctx, "skills");
   }
 
-  loadSkill(skillName: string): boolean {
+    /** loadSkill implementation. */
+loadSkill(skillName: string): boolean {
     if (!skillName.trim()) return false;
     this.loadedSkills.add(skillName);
     return true;
   }
 
-  hasSkill(skillName: string): boolean {
+    /** hasSkill implementation. */
+hasSkill(skillName: string): boolean {
     return this.loadedSkills.has(skillName);
   }
 }
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context): void {
   new SkillLoaderService(ctx);
 }

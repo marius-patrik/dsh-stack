@@ -4,6 +4,7 @@ export interface SkinBrandProps {
   readonly size?: number;
 }
 
+/** ClaudeBrandMark implementation. */
 export function ClaudeBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   return (
     <span
@@ -15,6 +16,7 @@ export function ClaudeBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   );
 }
 
+/** ClaudeBrandName implementation. */
 export function ClaudeBrandName(): JSX.Element {
   return <span style={{ fontWeight: 650, letterSpacing: "-0.01em" }}>Claude</span>;
 }

@@ -47,7 +47,8 @@ window.__ModuleLoader__.load({
         React.createElement("path", { d: "M9 13v2" }),
       );
     }
-    function AgentsSection(props) {
+        /** AgentsSection implementation. */
+function AgentsSection(props) {
       var React = require("react");
       var h = React.createElement;
       var useState = React.useState,
@@ -95,7 +96,8 @@ window.__ModuleLoader__.load({
         );
       }
       var presets = payload.presets || [];
-      var presetRow = function (preset) {
+      var       /** presetRow implementation. */
+presetRow = function (preset) {
         var label = preset.name || preset.id;
         return h(
           "div",
@@ -236,9 +238,11 @@ window.__ModuleLoader__.load({
         ],
       );
     }
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       var roster = { value: null, pending: null };
-      var ensureRoster = function () {
+      var       /** ensureRoster implementation. */
+ensureRoster = function () {
         if (roster.value !== null) return Promise.resolve(roster.value);
         if (roster.pending !== null) return roster.pending;
         roster.pending = ctx.connection.api.agentPresets.list({}).then(function (response) {
@@ -251,7 +255,8 @@ window.__ModuleLoader__.load({
         });
         return roster.pending;
       };
-      var nameFor = function (personaId) {
+      var       /** nameFor implementation. */
+nameFor = function (personaId) {
         var entries = roster.value;
         if (entries === null) return personaId;
         for (var i = 0; i < entries.length; i++) {

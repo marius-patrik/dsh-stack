@@ -41,7 +41,8 @@ export {
 export class DialectRegistry extends Service {
   private readonly dialects = new Map<DialectId, Dialect>();
 
-  constructor(ctx: Context) {
+    /** Constructs an instance. */
+constructor(ctx: Context) {
     super(ctx, "dialects");
   }
 
@@ -98,6 +99,7 @@ export interface Config {}
 /** Schemastery configuration for the plugin. */
 export const Config: z<Config> = z.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context, _config: Config): void {
   new DialectRegistry(ctx);
   for (const dialect of [

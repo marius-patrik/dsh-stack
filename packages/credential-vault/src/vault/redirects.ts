@@ -74,7 +74,8 @@ export class CrossOriginRedirectError extends Error {
   readonly requestOrigin: string;
   readonly redirectOrigin: string;
 
-  constructor(requestOrigin: string, redirectOrigin: string, status: number) {
+    /** Constructs an instance. */
+constructor(requestOrigin: string, redirectOrigin: string, status: number) {
     super(
       `refusing to follow a ${status} redirect from ${requestOrigin} to ${redirectOrigin}: ` +
         "the request carries credentials, and neither headers nor a request body are reliably " +
@@ -161,6 +162,7 @@ function nextRequest(request: RequestInit, status: number): RequestInit {
   return request;
 }
 
+/** isReplayableBody implementation. */
 function isReplayableBody(body: unknown): boolean {
   return (
     typeof body === "string" ||

@@ -30,9 +30,11 @@ export class AccessGateway {
   private server: http.Server | null = null;
   private running = false;
 
-  constructor(private config: AccessConfig) {}
+    /** Constructs an instance. */
+constructor(private config: AccessConfig) {}
 
-  start(): Promise<void> {
+    /** start implementation. */
+start(): Promise<void> {
     if (this.running) return Promise.resolve();
 
     return new Promise((resolve, reject) => {
@@ -138,7 +140,8 @@ export class AccessGateway {
     });
   }
 
-  stop(): Promise<void> {
+    /** stop implementation. */
+stop(): Promise<void> {
     if (!this.running || !this.server) return Promise.resolve();
     return new Promise((resolve) => {
       this.server?.close(() => {
@@ -149,7 +152,8 @@ export class AccessGateway {
     });
   }
 
-  isRunning(): boolean {
+    /** isRunning implementation. */
+isRunning(): boolean {
     return this.running;
   }
 }

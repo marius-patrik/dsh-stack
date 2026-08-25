@@ -17,11 +17,13 @@ export interface DetectedRuntime {
 export class PackageManagersService {
   private customRunners = new Map<string, (script: string, cwd: string) => Promise<string>>();
 
-  constructor(private ctx: Context) {
+    /** Constructs an instance. */
+constructor(private ctx: Context) {
     this.registerPackageTools();
   }
 
-  detect(projectPath: string): DetectedRuntime[] {
+    /** detect implementation. */
+detect(projectPath: string): DetectedRuntime[] {
     const results: DetectedRuntime[] = [];
 
     const checks: Array<{ lock: string; type: DetectedRuntime["type"]; cmd: string }> = [
@@ -65,7 +67,8 @@ export class PackageManagersService {
     return results;
   }
 
-  private registerPackageTools(): void {
+    /** registerPackageTools implementation. */
+private registerPackageTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 
@@ -160,6 +163,7 @@ export const Config = Schema.object({
   autoSwitchNode: Schema.boolean().default(true),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new PackageManagersService(ctx);
   (ctx as any).packageManagers = service;

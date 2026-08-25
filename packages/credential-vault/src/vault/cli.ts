@@ -80,6 +80,7 @@ export interface VaultCliIo {
   now(): number;
 }
 
+/** defaultVaultCliIo implementation. */
 export function defaultVaultCliIo(): VaultCliIo {
   return {
     out: (text) => process.stdout.write(text),
@@ -142,33 +143,39 @@ export function parseVaultArguments(argv: readonly string[]): ParsedArguments {
   return { positional, options, booleans };
 }
 
+/** push implementation. */
 function push(map: Map<string, string[]>, key: string, value: string): void {
   const existing = map.get(key);
   if (existing) existing.push(value);
   else map.set(key, [value]);
 }
 
+/** optional implementation. */
 function optional(args: ParsedArguments, name: string): string | null {
   return args.options.get(name)?.at(-1) ?? null;
 }
 
+/** many implementation. */
 function many(args: ParsedArguments, name: string): string[] {
   return [...(args.options.get(name) ?? [])];
 }
 
+/** required implementation. */
 function required(args: ParsedArguments, name: string): string {
   const value = optional(args, name);
   if (!value) throw new VaultCliError(`--${name} is required`);
   return value;
 }
 
+/** boolean implementation. */
 function boolean(args: ParsedArguments, name: string): boolean {
   return args.booleans.has(name) || optional(args, name) === "true";
 }
 
 /** A fault the owner can fix by retyping the command. Reported without a stack. */
 export class VaultCliError extends Error {
-  constructor(message: string) {
+    /** Constructs an instance. */
+constructor(message: string) {
     super(message);
     this.name = "VaultCliError";
   }
@@ -196,6 +203,7 @@ export function fingerprint(field: string, value: string): Fingerprint {
   return { field, prefix: value.slice(0, 4), length: value.length };
 }
 
+/** formatFingerprint implementation. */
 export function formatFingerprint(print: Fingerprint): string {
   return `${print.field}=${print.prefix}…(${print.length})`;
 }
@@ -235,10 +243,12 @@ export function resolveVaultDirectory(
   return vaultDirectory(path.join(home, ".agents", "secrets"));
 }
 
+/** vaultConfigFile implementation. */
 export function vaultConfigFile(directory: string): string {
   return path.join(directory, CONFIG_FILE);
 }
 
+/** readVaultConfig implementation. */
 async function readVaultConfig(directory: string): Promise<VaultConfig | null> {
   const file = vaultConfigFile(directory);
   if (!(await exists(file))) return null;
@@ -277,6 +287,7 @@ export interface OpenedVault {
   store: EncryptedFileVault;
 }
 
+/** openVault implementation. */
 export async function openVault(io: VaultCliIo): Promise<OpenedVault> {
   const directory = resolveVaultDirectory(io.env, io.home);
   const config = await readVaultConfig(directory);
@@ -432,6 +443,7 @@ export function totpParametersFromInput(raw: string, options: MaterialOptions = 
   });
 }
 
+/** jsonObject implementation. */
 function jsonObject(text: string): Record<string, unknown> | null {
   if (!text.startsWith("{")) return null;
   try {
@@ -444,6 +456,7 @@ function jsonObject(text: string): Record<string, unknown> | null {
   }
 }
 
+/** stringField implementation. */
 function stringField(document: Record<string, unknown>, field: string): string | null {
   const value = document[field];
   return typeof value === "string" && value.length > 0 ? value : null;
@@ -557,6 +570,7 @@ export interface CredentialSource {
   environment(): Promise<Record<string, string>>;
 }
 
+/** joinSource implementation. */
 export function joinSource(...parts: string[]): string {
   return parts.join("/").replace(/\/+/g, "/");
 }
@@ -582,7 +596,8 @@ export class LocalSource implements CredentialSource {
   readonly #env: Record<string, string | undefined>;
   readonly #keychainTimeoutMs: number;
 
-  constructor(options: {
+    /** Constructs an instance. */
+constructor(options: {
     machine?: string;
     home: string;
     platform?: SourcePlatform;
@@ -607,7 +622,8 @@ export class LocalSource implements CredentialSource {
     this.#keychainTimeoutMs = options.keychainTimeoutMs ?? 3_000;
   }
 
-  async readFile(file: string): Promise<string | null> {
+    /** readFile implementation. */
+async readFile(file: string): Promise<string | null> {
     try {
       return await readFileFromDisk(file, "utf8");
     } catch {
@@ -615,7 +631,8 @@ export class LocalSource implements CredentialSource {
     }
   }
 
-  async listDirectory(directory: string): Promise<string[]> {
+    /** listDirectory implementation. */
+async listDirectory(directory: string): Promise<string[]> {
     try {
       const entries = await readdir(directory, { withFileTypes: true });
       return entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
@@ -711,14 +728,16 @@ export class LocalSource implements CredentialSource {
     return value === null ? null : value.trim();
   }
 
-  async environment(): Promise<Record<string, string>> {
+    /** environment implementation. */
+async environment(): Promise<Record<string, string>> {
     const out: Record<string, string> = {};
     for (const [key, value] of Object.entries(this.#env))
       if (typeof value === "string") out[key] = value;
     return out;
   }
 
-  async #security(args: string[], timeoutMs: number): Promise<string | null> {
+    /** #security implementation. */
+async #security(args: string[], timeoutMs: number): Promise<string | null> {
     return runCommand("security", args, timeoutMs);
   }
 }
@@ -748,7 +767,8 @@ export class SshSource implements CredentialSource {
   readonly #host: string;
   readonly #timeoutMs: number;
 
-  constructor(options: SshSourceOptions) {
+    /** Constructs an instance. */
+constructor(options: SshSourceOptions) {
     this.#host = options.host;
     this.machine = options.machine ?? options.host;
     this.platform = options.platform;
@@ -756,7 +776,8 @@ export class SshSource implements CredentialSource {
     this.#timeoutMs = options.timeoutMs ?? 30_000;
   }
 
-  async readFile(file: string): Promise<string | null> {
+    /** readFile implementation. */
+async readFile(file: string): Promise<string | null> {
     if (this.platform === "win32") {
       return this.#powershell(
         `$p = ${psLiteral(file)}\nif (Test-Path -LiteralPath $p) { [Console]::Out.Write([IO.File]::ReadAllText($p)) }`,
@@ -765,7 +786,8 @@ export class SshSource implements CredentialSource {
     return this.#posix(["cat", "--", file]);
   }
 
-  async listDirectory(directory: string): Promise<string[]> {
+    /** listDirectory implementation. */
+async listDirectory(directory: string): Promise<string[]> {
     const raw =
       this.platform === "win32"
         ? await this.#powershell(
@@ -784,11 +806,13 @@ export class SshSource implements CredentialSource {
     return [];
   }
 
-  async keychainSecret(): Promise<string | null> {
+    /** keychainSecret implementation. */
+async keychainSecret(): Promise<string | null> {
     return null;
   }
 
-  async environment(): Promise<Record<string, string>> {
+    /** environment implementation. */
+async environment(): Promise<Record<string, string>> {
     const raw =
       this.platform === "win32"
         ? await this.#powershell(
@@ -803,7 +827,8 @@ export class SshSource implements CredentialSource {
     return out;
   }
 
-  async #powershell(script: string): Promise<string | null> {
+    /** #powershell implementation. */
+async #powershell(script: string): Promise<string | null> {
     const preamble =
       "$ProgressPreference='SilentlyContinue'; $ErrorActionPreference='SilentlyContinue';\n";
     const encoded = Buffer.from(preamble + script, "utf16le").toString("base64");
@@ -819,7 +844,8 @@ export class SshSource implements CredentialSource {
     );
   }
 
-  async #posix(args: string[]): Promise<string | null> {
+    /** #posix implementation. */
+async #posix(args: string[]): Promise<string | null> {
     return runCommand(
       "ssh",
       ["-o", "BatchMode=yes", this.#host, args.map(shellQuote).join(" ")],
@@ -838,7 +864,8 @@ export class MemorySource implements CredentialSource {
   readonly #items: KeychainItem[];
   readonly #env: Record<string, string>;
 
-  constructor(options: {
+    /** Constructs an instance. */
+constructor(options: {
     machine?: string;
     platform?: SourcePlatform;
     home?: string;
@@ -858,26 +885,31 @@ export class MemorySource implements CredentialSource {
     this.#env = options.environment ?? {};
   }
 
-  async readFile(file: string): Promise<string | null> {
+    /** readFile implementation. */
+async readFile(file: string): Promise<string | null> {
     return this.#files.get(file) ?? null;
   }
 
-  async listDirectory(directory: string): Promise<string[]> {
+    /** listDirectory implementation. */
+async listDirectory(directory: string): Promise<string[]> {
     const prefix = `${directory.replace(/\/$/, "")}/`;
     return [...this.#files.keys()]
       .filter((file) => file.startsWith(prefix) && !file.slice(prefix.length).includes("/"))
       .map((file) => file.slice(prefix.length));
   }
 
-  async keychainItems(): Promise<KeychainItem[]> {
+    /** keychainItems implementation. */
+async keychainItems(): Promise<KeychainItem[]> {
     return [...this.#items];
   }
 
-  async keychainSecret(service: string): Promise<string | null> {
+    /** keychainSecret implementation. */
+async keychainSecret(service: string): Promise<string | null> {
     return this.#keychain.get(service) ?? null;
   }
 
-  async environment(): Promise<Record<string, string>> {
+    /** environment implementation. */
+async environment(): Promise<Record<string, string>> {
     return { ...this.#env };
   }
 }
@@ -919,10 +951,12 @@ async function runCommand(
   });
 }
 
+/** shellQuote implementation. */
 function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
+/** psLiteral implementation. */
 function psLiteral(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
 }
@@ -1152,6 +1186,7 @@ export interface Finding {
 /** A finding with its material removed. The only shape that is ever printed. */
 export type RedactedFinding = Omit<Finding, "material"> & { importable: boolean; expired: boolean };
 
+/** redactFinding implementation. */
 export function redactFinding(finding: Finding, nowMs: number): RedactedFinding {
   const expiresAtMs = finding.expiresAt ? Date.parse(finding.expiresAt) : Number.NaN;
   return {
@@ -1200,6 +1235,7 @@ export interface Detector {
   detect(source: CredentialSource, context: ScanContext): Promise<Finding[]>;
 }
 
+/** origin implementation. */
 function origin(
   source: CredentialSource,
   kind: CredentialOrigin["kind"],
@@ -1240,27 +1276,32 @@ export function jwtClaims(token: string): Record<string, unknown> | null {
   }
 }
 
+/** claimString implementation. */
 function claimString(claims: Record<string, unknown> | null, key: string): string | null {
   const value = claims?.[key];
   return typeof value === "string" && value ? value : null;
 }
 
+/** isoFromSeconds implementation. */
 function isoFromSeconds(value: unknown): string | null {
   return typeof value === "number" && Number.isFinite(value)
     ? new Date(value * 1_000).toISOString()
     : null;
 }
 
+/** isoFromMilliseconds implementation. */
 function isoFromMilliseconds(value: unknown): string | null {
   return typeof value === "number" && Number.isFinite(value) ? new Date(value).toISOString() : null;
 }
 
+/** isoFromText implementation. */
 function isoFromText(value: unknown): string | null {
   if (typeof value !== "string" || !value) return null;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
 }
 
+/** parseJson implementation. */
 function parseJson(raw: string | null): Record<string, unknown> | null {
   if (!raw) return null;
   try {
@@ -1273,6 +1314,7 @@ function parseJson(raw: string | null): Record<string, unknown> | null {
   }
 }
 
+/** record implementation. */
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -1296,7 +1338,8 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const codexAuthJson: Detector = {
   name: "codex-auth-json",
   provider: "openai",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const file = joinSource(source.home, ".codex/auth.json");
     const document = parseJson(await source.readFile(file));
     if (!document) return [];
@@ -1422,7 +1465,8 @@ function claudeOauthFinding(
 const claudeCredentialsFile: Detector = {
   name: "claude-credentials-file",
   provider: "anthropic",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const file = joinSource(source.home, ".claude/.credentials.json");
     const document = parseJson(await source.readFile(file));
     if (!document) return [];
@@ -1440,7 +1484,8 @@ const claudeCredentialsFile: Detector = {
 const claudeKeychain: Detector = {
   name: "claude-keychain",
   provider: "anthropic",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const services = (await source.keychainItems())
       .map((item) => item.service)
@@ -1487,7 +1532,8 @@ const claudeKeychain: Detector = {
 const grokAuthJson: Detector = {
   name: "grok-auth-json",
   provider: "xai",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const file = joinSource(source.home, ".grok/auth.json");
     const document = parseJson(await source.readFile(file));
     if (!document) return [];
@@ -1536,7 +1582,8 @@ const grokAuthJson: Detector = {
 const geminiOauthCreds: Detector = {
   name: "gemini-oauth-creds",
   provider: "google",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const file = joinSource(source.home, ".gemini/oauth_creds.json");
     const document = parseJson(await source.readFile(file));
     const accessToken = document ? stringField(document, "access_token") : null;
@@ -1583,7 +1630,8 @@ const geminiOauthCreds: Detector = {
 const antigravityKeychain: Detector = {
   name: "antigravity-keychain",
   provider: "google",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const read = await readKeychainItem(source, context, "gemini", "antigravity");
     if (read.state === "absent") return [];
@@ -1644,7 +1692,8 @@ const antigravityKeychain: Detector = {
 const cursorKeychain: Detector = {
   name: "cursor-keychain",
   provider: "cursor",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const access = await readKeychainItem(source, context, "cursor-access-token", null);
     if (access.state === "absent") return [];
@@ -1713,7 +1762,8 @@ const cursorKeychain: Detector = {
 const githubHosts: Detector = {
   name: "github-hosts",
   provider: "github",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const candidates = [
       joinSource(source.home, ".config/gh/hosts.yml"),
       joinSource(source.home, "AppData/Roaming/GitHub CLI/hosts.yml"),
@@ -1759,7 +1809,8 @@ export { parseGitHubHosts } from "../file-providers.js";
 const githubKeychain: Detector = {
   name: "github-keychain",
   provider: "github",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const services = (await source.keychainItems())
       .map((item) => item.service)
@@ -1815,7 +1866,8 @@ const githubKeychain: Detector = {
 const agentOsSecrets: Detector = {
   name: "agent-os-secrets",
   provider: "andromeda",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const directory = joinSource(source.home, ".agents/secrets");
     const names = await source.listDirectory(directory);
     const findings: Finding[] = [];
@@ -1913,7 +1965,8 @@ const ENV_DENYLIST = new Set([
 const environmentVariables: Detector = {
   name: "environment-variables",
   provider: "environment",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const environment = await source.environment();
     const findings: Finding[] = [];
     for (const [name, value] of Object.entries(environment).sort(([left], [right]) =>
@@ -1945,6 +1998,7 @@ const environmentVariables: Detector = {
   },
 };
 
+/** providerFromEnvName implementation. */
 function providerFromEnvName(name: string): string {
   const head = name.replace(/_(API_KEY|TOKEN)$/, "").toLowerCase();
   return head || "environment";
@@ -1987,6 +2041,7 @@ const KEYCHAIN_SECRET_SOURCES: readonly KeychainSecretSource[] = [
   { service: /^GitHub - https:\/\/api\.github\.com$/, provider: "github", purpose: () => "github" },
 ];
 
+/** keychainSecretSourceFor implementation. */
 function keychainSecretSourceFor(service: string): KeychainSecretSource | null {
   return KEYCHAIN_SECRET_SOURCES.find((entry) => entry.service.test(service)) ?? null;
 }
@@ -2079,7 +2134,8 @@ async function openKeychainSecret(
 const macosKeychainSecrets: Detector = {
   name: "macos-keychain-secrets",
   provider: "keychain",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     if (source.platform !== "darwin") return [];
     // Collect the allowlisted items, then resolve them concurrently.
     //
@@ -2129,7 +2185,8 @@ const KEYCHAIN_IGNORED =
 const macosKeychainInventory: Detector = {
   name: "macos-keychain-inventory",
   provider: "keychain",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const claimed = new Set(["gemini", "cursor-access-token", "cursor-refresh-token"]);
     const findings: Finding[] = [];
@@ -2248,7 +2305,8 @@ function sshPublicKeyComment(publicKey: string): string | null {
 const sshKeys: Detector = {
   name: "ssh-keys",
   provider: "ssh",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const directory = joinSource(source.home, ".ssh");
     const names = await source.listDirectory(directory);
     const findings: Finding[] = [];
@@ -2363,9 +2421,11 @@ const PASSWORD_STORES: readonly PasswordStoreProbe[] = [
 const passwordStores: Detector = {
   name: "password-stores",
   provider: "password-store",
-  async detect(source, context) {
+    /** detect implementation. */
+async detect(source, context) {
     const findings: Finding[] = [];
-    const push = (
+    const     /** push implementation. */
+push = (
       provider: string,
       location: string,
       note: string,
@@ -2549,6 +2609,7 @@ export function provenanceTags(finding: Finding, importedAt: string): string[] {
   ];
 }
 
+/** importFindings implementation. */
 export async function importFindings(
   vault: VaultStore,
   findings: readonly Finding[],
@@ -2598,6 +2659,7 @@ export async function importFindings(
 /* Rendering                                                                   */
 /* -------------------------------------------------------------------------- */
 
+/** table implementation. */
 function table(rows: readonly (readonly string[])[]): string {
   if (rows.length === 0) return "";
   const widths: number[] = [];
@@ -2613,6 +2675,7 @@ function table(rows: readonly (readonly string[])[]): string {
     .join("\n");
 }
 
+/** renderScanReport implementation. */
 export function renderScanReport(findings: readonly Finding[], nowMs: number): string {
   if (findings.length === 0) return "no credentials found\n";
   const rows: string[][] = [
@@ -2669,10 +2732,12 @@ it only when the owner is at the machine.
 Types: ${SECRET_TYPES.join(", ")}
 `;
 
+/** isSecretType implementation. */
 function isSecretType(value: string): value is SecretType {
   return (SECRET_TYPES as readonly string[]).includes(value);
 }
 
+/** readMaterialInput implementation. */
 async function readMaterialInput(args: ParsedArguments, io: VaultCliIo): Promise<string> {
   const file = optional(args, "file");
   if (file) {
@@ -2686,15 +2751,18 @@ async function readMaterialInput(args: ParsedArguments, io: VaultCliIo): Promise
   return io.readStdin();
 }
 
+/** scopeFrom implementation. */
 function scopeFrom(args: ParsedArguments): SecretScope {
   return { workspace: optional(args, "workspace") ?? "*", agents: many(args, "agent") };
 }
 
+/** warnEmptyScope implementation. */
 function warnEmptyScope(scope: SecretScope, io: VaultCliIo): void {
   if (scope.agents.length === 0)
     io.err("warning: no --agent given, so no agent can read this record until it is re-scoped\n");
 }
 
+/** initCommand implementation. */
 async function initCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const directory = resolveVaultDirectory(io.env, io.home);
   if (await readVaultConfig(directory))
@@ -2716,6 +2784,7 @@ async function initCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   return 0;
 }
 
+/** addCommand implementation. */
 async function addCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store } = await openVault(io);
   const id = required(args, "id");
@@ -2760,6 +2829,7 @@ async function addCommand(args: ParsedArguments, io: VaultCliIo): Promise<number
   return 0;
 }
 
+/** importTotpCommand implementation. */
 async function importTotpCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store } = await openVault(io);
   const raw = await readMaterialInput(args, io);
@@ -2787,6 +2857,7 @@ async function importTotpCommand(args: ParsedArguments, io: VaultCliIo): Promise
   return 0;
 }
 
+/** healthById implementation. */
 async function healthById(
   store: VaultStore,
   io: VaultCliIo,
@@ -2796,6 +2867,7 @@ async function healthById(
   return new Map(health.map((entry) => [entry.id, entry]));
 }
 
+/** listCommand implementation. */
 async function listCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store, directory } = await openVault(io);
   const descriptors = await store.describe();
@@ -2829,6 +2901,7 @@ async function listCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   return 0;
 }
 
+/** getCommand implementation. */
 async function getCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const id = required(args, "id");
   const { store } = await openVault(io);
@@ -2855,6 +2928,7 @@ async function getCommand(args: ParsedArguments, io: VaultCliIo): Promise<number
   return 0;
 }
 
+/** totpCommand implementation. */
 async function totpCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const id = required(args, "id");
   const { store } = await openVault(io);
@@ -2873,6 +2947,7 @@ async function totpCommand(args: ParsedArguments, io: VaultCliIo): Promise<numbe
   return 0;
 }
 
+/** statusCommand implementation. */
 async function statusCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store, directory, config } = await openVault(io);
   const supervisor = new ReauthSupervisor({ vault: store, now: io.now });
@@ -2916,6 +2991,7 @@ async function statusCommand(args: ParsedArguments, io: VaultCliIo): Promise<num
   return 0;
 }
 
+/** sourceFromArguments implementation. */
 function sourceFromArguments(args: ParsedArguments, io: VaultCliIo): CredentialSource {
   const host = optional(args, "ssh");
   if (!host) {
@@ -2944,6 +3020,7 @@ function sourceFromArguments(args: ParsedArguments, io: VaultCliIo): CredentialS
   });
 }
 
+/** scanCommand implementation. */
 async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const source = sourceFromArguments(args, io);
   // The one place a human can consent to being prompted. It is a flag rather than

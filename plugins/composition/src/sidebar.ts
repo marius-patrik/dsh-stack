@@ -52,6 +52,7 @@ export const defaultSidebarPreferences: SidebarPreferences = {
   fileSectionLabel: "Files",
 };
 
+/** visiblePrimaryNavigation implementation. */
 export function visiblePrimaryNavigation(preferences: SidebarPreferences): readonly string[] {
   return preferences.showNewConversation
     ? sidebarPrimaryNavigation

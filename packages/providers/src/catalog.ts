@@ -46,10 +46,12 @@ const CATALOG_TIMEOUT_MS = 15_000;
 /** How long a failed discovery is remembered, so a broken endpoint is not hammered. */
 const FAILURE_TTL_MS = 60_000;
 
+/** positiveInteger implementation. */
 function positiveInteger(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
+/** nonEmptyString implementation. */
 function nonEmptyString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
@@ -214,7 +216,8 @@ export class ModelCatalog {
   readonly #ttlMs: number;
   readonly #fetch: typeof fetch;
 
-  constructor(options: { ttlMs?: number; fetch?: typeof fetch } = {}) {
+    /** Constructs an instance. */
+constructor(options: { ttlMs?: number; fetch?: typeof fetch } = {}) {
     this.#ttlMs = options.ttlMs ?? DEFAULT_CATALOG_TTL_MS;
     this.#fetch = options.fetch ?? fetch;
   }
@@ -263,7 +266,8 @@ export class ModelCatalog {
     return run;
   }
 
-  async #discover(request: CatalogRequest): Promise<readonly ProviderCatalogModel[]> {
+    /** #discover implementation. */
+async #discover(request: CatalogRequest): Promise<readonly ProviderCatalogModel[]> {
     const { url, init } = catalogRequestInit(request);
     const response = await this.#fetch(url, init);
     if (!response.ok) throw new Error(`model listing failed (HTTP ${response.status})`);

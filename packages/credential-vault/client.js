@@ -175,7 +175,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function PlusIcon(props) {
+        /** PlusIcon implementation. */
+function PlusIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -196,7 +197,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function LinkIcon(props) {
+        /** LinkIcon implementation. */
+function LinkIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -217,7 +219,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function EyeIcon(props) {
+        /** EyeIcon implementation. */
+function EyeIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -238,7 +241,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function DownloadIcon(props) {
+        /** DownloadIcon implementation. */
+function DownloadIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -260,7 +264,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function RefreshIcon(props) {
+        /** RefreshIcon implementation. */
+function RefreshIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -283,7 +288,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function CheckIcon(props) {
+        /** CheckIcon implementation. */
+function CheckIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -303,7 +309,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ChevronRightIcon(props) {
+        /** ChevronRightIcon implementation. */
+function ChevronRightIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -323,7 +330,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ExternalLinkIcon(props) {
+        /** ExternalLinkIcon implementation. */
+function ExternalLinkIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -345,7 +353,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TrashIcon(props) {
+        /** TrashIcon implementation. */
+function TrashIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -369,19 +378,22 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function createVaultStore() {
+        /** createVaultStore implementation. */
+function createVaultStore() {
       var listeners = new Set();
       var state = { rows: [], snapshots: {}, status: "idle", error: null };
       var revealed = {}; // keyed by `ref` or `ref:account`
       var probing = {}; // keyed by probeId
 
-      function emit() {
+            /** emit implementation. */
+function emit() {
         listeners.forEach(function (fn) {
           fn();
         });
       }
 
-      function load() {
+            /** load implementation. */
+function load() {
         state = { rows: state.rows, snapshots: state.snapshots, status: "loading", error: null };
         emit();
 
@@ -429,7 +441,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function probeProvider(probeId) {
+            /** probeProvider implementation. */
+function probeProvider(probeId) {
         probing[probeId] = true;
         emit();
 
@@ -448,7 +461,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function probeAll() {
+            /** probeAll implementation. */
+function probeAll() {
         return fetch(QUOTAS_API + "/refresh", { method: "POST" })
           .then(function (res) {
             return res.json();
@@ -463,7 +477,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function reveal(ref, account) {
+            /** reveal implementation. */
+function reveal(ref, account) {
         var key = ref + (account ? ":" + account : "");
         if (revealed[key]) {
           delete revealed[key];
@@ -486,7 +501,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function setSecret(ref, value, account) {
+            /** setSecret implementation. */
+function setSecret(ref, value, account) {
         var url =
           VAULT_API +
           "/accounts/" +
@@ -502,7 +518,8 @@ window.__ModuleLoader__.load({
         });
       }
 
-      function unsetSecret(ref, account) {
+            /** unsetSecret implementation. */
+function unsetSecret(ref, account) {
         var url =
           VAULT_API +
           "/accounts/" +
@@ -516,7 +533,8 @@ window.__ModuleLoader__.load({
         });
       }
 
-      function unsetMultiple(items) {
+            /** unsetMultiple implementation. */
+function unsetMultiple(items) {
         return Promise.all(
           items.map(function (item) {
             var url =
@@ -535,7 +553,8 @@ window.__ModuleLoader__.load({
         });
       }
 
-      function importLocal() {
+            /** importLocal implementation. */
+function importLocal() {
         return fetch(VAULT_API + "/import", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -660,7 +679,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function KeychainSection() {
+        /** KeychainSection implementation. */
+function KeychainSection() {
       var storeState = React.useSyncExternalStore(
         globalVaultStore.subscribe,
         globalVaultStore.getSnapshot,
@@ -702,7 +722,8 @@ window.__ModuleLoader__.load({
       var toastMsg = toastMsgState[0];
       var setToastMsg = toastMsgState[1];
 
-      function showToast(msg) {
+            /** showToast implementation. */
+function showToast(msg) {
         setToastMsg(msg);
         setTimeout(function () {
           setToastMsg(null);
@@ -713,7 +734,8 @@ window.__ModuleLoader__.load({
         globalVaultStore.load();
       }, []);
 
-      function toggleProvider(providerId) {
+            /** toggleProvider implementation. */
+function toggleProvider(providerId) {
         setExpandedProviders(function (prev) {
           var next = Object.assign({}, prev);
           next[providerId] = !next[providerId];
@@ -721,7 +743,8 @@ window.__ModuleLoader__.load({
         });
       }
 
-      function copyText(text, label) {
+            /** copyText implementation. */
+function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
           showToast(label || "Copied to clipboard!");
@@ -1908,7 +1931,8 @@ window.__ModuleLoader__.load({
       var saving = savingState[0];
       var setSaving = savingState[1];
 
-      function handleSave() {
+            /** handleSave implementation. */
+function handleSave() {
         var trimmedRef = refVal.trim().toUpperCase();
         var trimmedSec = secretVal.trim();
         var trimmedAcc = accountVal.trim() || undefined;
@@ -2137,7 +2161,8 @@ window.__ModuleLoader__.load({
       var saving = savingState[0];
       var setSaving = savingState[1];
 
-      function handleSave() {
+            /** handleSave implementation. */
+function handleSave() {
         var trimmed = secretVal.trim();
         if (!trimmed) {
           setError("Secret value cannot be empty.");
@@ -2245,7 +2270,8 @@ window.__ModuleLoader__.load({
       var deleting = deletingState[0];
       var setDeleting = deletingState[1];
 
-      function handleDelete() {
+            /** handleDelete implementation. */
+function handleDelete() {
         setDeleting(true);
         globalVaultStore
           .unsetMultiple(target.items)
@@ -2332,7 +2358,8 @@ window.__ModuleLoader__.load({
         [initial],
       );
 
-      function startOAuth(provider) {
+            /** startOAuth implementation. */
+function startOAuth(provider) {
         setSelectedProvider(provider);
         setAuthStatus("starting");
         setError(null);
@@ -2357,7 +2384,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function pollTokenLoop(pollToken, providerLabel) {
+            /** pollTokenLoop implementation. */
+function pollTokenLoop(pollToken, providerLabel) {
         var interval = setInterval(function () {
           fetch(VAULT_API + "/login/device/poll", {
             method: "POST",
@@ -2540,7 +2568,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register(NS, {
           en: { vault: "Keychain & Accounts" },

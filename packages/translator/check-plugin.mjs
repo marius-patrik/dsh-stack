@@ -5,7 +5,8 @@
 import { readFileSync } from "node:fs";
 
 let ok = true;
-const assert = (cond, msg) => {
+const /** assert implementation. */
+assert = (cond, msg) => {
   if (!cond) {
     ok = false;
     console.error(`FAIL: ${msg}`);

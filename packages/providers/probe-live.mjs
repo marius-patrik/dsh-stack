@@ -18,10 +18,12 @@ const accounts = new AccountsService(ctx, { home, keyFile: join(home, "accounts.
 const llm = {
   configurable: [],
   adapter: undefined,
-  registerConfigurableProviders(entries) {
+    /** registerConfigurableProviders implementation. */
+registerConfigurableProviders(entries) {
     this.configurable.push(...entries);
   },
-  registerAdapter(_ids, adapter) {
+    /** registerAdapter implementation. */
+registerAdapter(_ids, adapter) {
     this.adapter = adapter;
     return { replace: () => {}, dispose: () => {} };
   },
@@ -46,7 +48,8 @@ const modelOverride = modelArg
       return [s.slice(0, i), s.slice(i + 1)];
     })()
   : null;
-const firstModel = async (id) => {
+const /** firstModel implementation. */
+firstModel = async (id) => {
   const route = providers.providerRoute(id);
   try {
     const models = await llm.adapter.listModels(id);

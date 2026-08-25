@@ -54,11 +54,13 @@ interface WireChatChunk {
   };
 }
 
+/** textOf implementation. */
 function textOf(content: GenerateOptions["messages"][number]["content"]): string {
   if (typeof content === "string") return content;
   return content.map((part) => (part.type === "text" ? part.text : "")).join("");
 }
 
+/** count implementation. */
 function count(value: string | number | undefined): number | undefined {
   if (value === undefined) return undefined;
   const parsed = typeof value === "number" ? value : Number(value);
@@ -124,7 +126,8 @@ async function readAll(body: ReadableStream<BufferSource>): Promise<string> {
 export const antigravityDialect: Dialect = {
   id: "antigravity",
 
-  serialize(
+    /** serialize implementation. */
+serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -167,7 +170,8 @@ export const antigravityDialect: Dialect = {
     };
   },
 
-  async *parse(body: ReadableStream<BufferSource>): AsyncGenerator<StreamChunk> {
+    /** parse implementation. */
+async *parse(body: ReadableStream<BufferSource>): AsyncGenerator<StreamChunk> {
     const raw = await readAll(body);
     let chunks: WireChatChunk[];
     try {

@@ -58,6 +58,7 @@ export const name = "dsh-themes";
 export const inject: string[] = [];
 const DEFAULT_HOME_DIR = join(".agents") as string;
 
+/** resolveHome implementation. */
 export function resolveHome(): string {
   return resolve(process.env["DSH_HOME"] ?? join(homedir(), DEFAULT_HOME_DIR));
 }
@@ -70,6 +71,7 @@ export interface InstallThemeOptions {
   extension?: string;
 }
 
+/** installThemeSource implementation. */
 export async function installThemeSource(
   home: string,
   root: string,
@@ -87,6 +89,7 @@ export async function installThemeSource(
   return stored;
 }
 
+/** installVsix implementation. */
 export async function installVsix(
   home: string,
   root: string,
@@ -99,10 +102,12 @@ export async function installVsix(
   return stored;
 }
 
+/** listInstalled implementation. */
 export async function listInstalled(home: string, root: string): Promise<StoredTheme[]> {
   return listThemes(storeHandle(home, root));
 }
 
+/** activeThemeId implementation. */
 function activeThemeId(ctx: Context): string {
   const settings = ctx.get("settings");
   if (settings === undefined) return "";
@@ -110,6 +115,7 @@ function activeThemeId(ctx: Context): string {
   return section?.active ?? "";
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config: ThemesConfigType): void {
   const root = config.root ?? DEFAULT_THEMES_DIR;
   const catalogUrl = config.catalogUrl ?? DEFAULT_CATALOG_URL;

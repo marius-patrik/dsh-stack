@@ -31,6 +31,7 @@ import { findCommand } from "./commands.js";
 /* CLI arg parsing                                                              */
 /* -------------------------------------------------------------------------- */
 
+/** parseArgs implementation. */
 function parseArgs(argv: string[]): { url: string } {
   let url = "http://127.0.0.1:3080";
   for (let i = 2; i < argv.length; i++) {
@@ -48,6 +49,7 @@ function parseArgs(argv: string[]): { url: string } {
 /* SSE frame handling                                                           */
 /* -------------------------------------------------------------------------- */
 
+/** handleMuxFrame implementation. */
 function handleMuxFrame(frame: MuxFrame, state: TuiState, sessionId: string | null): void {
   // Only process frames for our active session
   const payload = frame.payload as Record<string, unknown>;
@@ -83,6 +85,7 @@ function handleMuxFrame(frame: MuxFrame, state: TuiState, sessionId: string | nu
   }
 }
 
+/** handleSessionEvent implementation. */
 function handleSessionEvent(event: SessionEvent, state: TuiState): void {
   switch (event.type) {
     case "turn/start": {
@@ -138,6 +141,7 @@ function handleSessionEvent(event: SessionEvent, state: TuiState): void {
 /* Main REPL loop                                                               */
 /* -------------------------------------------------------------------------- */
 
+/** main implementation. */
 export async function main(): Promise<void> {
   const { url } = parseArgs(process.argv);
 
@@ -188,7 +192,8 @@ export async function main(): Promise<void> {
 
   // Subscribe to mux stream
   let unsubscribe: (() => void) | null = null;
-  const subscribeMux = () => {
+  const   /** subscribeMux implementation. */
+subscribeMux = () => {
     unsubscribe = client.subscribeMux(
       (frame) => handleMuxFrame(frame, state, state.sessionId),
       (err) => {

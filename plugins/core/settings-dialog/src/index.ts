@@ -12,6 +12,7 @@ export const Config = Schema.object({
 
 export const settingsSections = ["general", "profiles"] as const;
 
+/** apply implementation. */
 export function apply(ctx: Context, config: Record<string, unknown> = {}) {
   // Uses the normal DSH settings surface. Stack only contributes the Profiles
   // section and its compact selectors; it does not replace the settings shell.

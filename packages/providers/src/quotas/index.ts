@@ -57,22 +57,26 @@ export class QuotaRegistry {
   private readonly providers = new Map<string, QuotaProvider>();
   private readonly snapshots = new Map<string, QuotaSnapshot>();
 
-  register(provider: QuotaProvider): () => void {
+    /** register implementation. */
+register(provider: QuotaProvider): () => void {
     this.providers.set(provider.id, provider);
     return () => {
       if (this.providers.get(provider.id) === provider) this.providers.delete(provider.id);
     };
   }
 
-  snapshot(provider: string): QuotaSnapshot | undefined {
+    /** snapshot implementation. */
+snapshot(provider: string): QuotaSnapshot | undefined {
     return this.snapshots.get(provider);
   }
 
-  all(): readonly QuotaSnapshot[] {
+    /** all implementation. */
+all(): readonly QuotaSnapshot[] {
     return [...this.snapshots.values()];
   }
 
-  async refresh(
+    /** refresh implementation. */
+async refresh(
     provider: string,
     signal: { readonly aborted: boolean } = { aborted: false },
   ): Promise<QuotaSnapshot> {
@@ -180,7 +184,8 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   // endpoint is declared in code.
   const covered = new Set([...PROBE_ROUTE_IDS, ...PROVIDER_IDS]);
   const configuredIds = new Set<string>();
-  const syncConfiguredProviders = (): void => {
+  const   /** syncConfiguredProviders implementation. */
+syncConfiguredProviders = (): void => {
     const llm = ctx.get("llm") as
       | {
           listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];

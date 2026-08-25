@@ -412,7 +412,8 @@ export function providerIdForPurpose(purpose: string): string {
  */
 export function allowedHostsFor(record: SecretRecord): string[] {
   const hosts = new Set<string>();
-  const addUrl = (value: string | null | undefined): void => {
+  const   /** addUrl implementation. */
+addUrl = (value: string | null | undefined): void => {
     if (!value) return;
     const host = hostOf(value);
     if (host) hosts.add(host);
@@ -483,10 +484,12 @@ export function hostAllowed(patterns: readonly string[], hostname: string): bool
   });
 }
 
+/** normalizeHost implementation. */
 function normalizeHost(value: string): string {
   return value.trim().toLowerCase().replace(/\.$/, "");
 }
 
+/** hostOf implementation. */
 function hostOf(value: string): string | null {
   try {
     return normalizeHost(new URL(value).hostname);
@@ -628,6 +631,7 @@ function redactionTokens(record: SecretRecord): string[] {
     .sort((left, right) => right.length - left.length);
 }
 
+/** redact implementation. */
 function redact(value: string, tokens: readonly string[]): string {
   let out = value;
   for (const token of tokens) {
@@ -687,7 +691,8 @@ export class VaultToolset {
   readonly #windowMs: number;
   readonly #usage = new Map<string, UsageState>();
 
-  constructor(options: VaultToolsetOptions) {
+    /** Constructs an instance. */
+constructor(options: VaultToolsetOptions) {
     this.#vault = options.vault;
     this.#identity = { workspace: options.identity.workspace, agent: options.identity.agent };
     this.#audit = options.audit ?? null;
@@ -699,7 +704,8 @@ export class VaultToolset {
     this.#windowMs = options.limits?.windowMs ?? 60_000;
   }
 
-  get identity(): AgentIdentity {
+    /** identity implementation. */
+get identity(): AgentIdentity {
     return { ...this.#identity };
   }
 
@@ -1277,7 +1283,8 @@ export class VaultToolset {
   /* Internals                                                               */
   /* ---------------------------------------------------------------------- */
 
-  async #git(
+    /** #git implementation. */
+async #git(
     purpose: string,
     subcommand: "push" | "fetch",
     request: GitRequest,
@@ -1408,7 +1415,8 @@ export class VaultToolset {
     );
   }
 
-  async #spawn(
+    /** #spawn implementation. */
+async #spawn(
     operation: VaultToolOperation,
     purpose: string,
     record: SecretRecord,
@@ -1493,7 +1501,8 @@ export class VaultToolset {
     return { ok: true };
   }
 
-  #usageFor(purpose: string): UsageState {
+    /** #usageFor implementation. */
+#usageFor(purpose: string): UsageState {
     const existing = this.#usage.get(purpose);
     if (existing) return existing;
     const created: UsageState = { calls: 0, denials: 0, window: [], lastAt: null };
@@ -1513,7 +1522,8 @@ export class VaultToolset {
     return records;
   }
 
-  async #credentialFor(
+    /** #credentialFor implementation. */
+async #credentialFor(
     purpose: string,
     credentialId: string | undefined,
     preference: readonly SecretType[],
@@ -1562,7 +1572,8 @@ export class VaultToolset {
     };
   }
 
-  async #denyFound(
+    /** #denyFound implementation. */
+async #denyFound(
     operation: VaultToolOperation,
     purpose: string,
     targetHost: string | null,
@@ -1579,7 +1590,8 @@ export class VaultToolset {
     return { ok: false, denial: found.reason, detail: found.agentDetail };
   }
 
-  async #deny(
+    /** #deny implementation. */
+async #deny(
     operation: VaultToolOperation,
     purpose: string,
     record: SecretRecord | null,
@@ -1592,7 +1604,8 @@ export class VaultToolset {
     return { ok: false, denial: reason, detail };
   }
 
-  async #summarize(record: SecretRecord): Promise<CredentialSummary> {
+    /** #summarize implementation. */
+async #summarize(record: SecretRecord): Promise<CredentialSummary> {
     const descriptor = descriptorOf(record);
     const provider = findProviderDescriptor(providerIdForPurpose(record.purpose));
     let health: CredentialHealthSummary | null = null;
@@ -1626,7 +1639,8 @@ export class VaultToolset {
     };
   }
 
-  async #log(
+    /** #log implementation. */
+async #log(
     operation: VaultToolOperation,
     record: SecretRecord | null,
     targetHost: string | null,
@@ -1652,6 +1666,7 @@ export class VaultToolset {
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/** auditActionFor implementation. */
 function auditActionFor(
   operation: VaultToolOperation,
 ): "tool_fetch" | "tool_totp" | "tool_process" | "tool_sign" | "tool_describe" {
@@ -1687,6 +1702,7 @@ function credentialSecret(record: SecretRecord): SecretValue | null {
   }
 }
 
+/** accountOf implementation. */
 function accountOf(record: SecretRecord): string | null {
   const tag = record.tags.find((entry) => entry.startsWith(ACCOUNT_TAG));
   if (tag) return tag.slice(ACCOUNT_TAG.length) || null;

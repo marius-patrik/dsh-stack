@@ -53,6 +53,7 @@ interface OpenBlock {
   name?: string;
 }
 
+/** mapClaudeFinishReason implementation. */
 export function mapClaudeFinishReason(reason: string): FinishReason {
   switch (reason) {
     case "end_turn":
@@ -71,6 +72,7 @@ export function mapClaudeFinishReason(reason: string): FinishReason {
   }
 }
 
+/** mapClaudeUsage implementation. */
 export function mapClaudeUsage(usage: WireUsage): TokenUsage {
   return {
     inputTokens: usage.input_tokens ?? 0,
@@ -84,6 +86,7 @@ export function mapClaudeUsage(usage: WireUsage): TokenUsage {
   };
 }
 
+/** closeBlock implementation. */
 function closeBlock(block: OpenBlock): ContentBlock {
   switch (block.kind) {
     case "text":
@@ -100,6 +103,7 @@ function closeBlock(block: OpenBlock): ContentBlock {
   }
 }
 
+/** translateClaude implementation. */
 export async function* translateClaude(
   events: AsyncIterable<SseEvent>,
 ): AsyncGenerator<StreamChunk> {

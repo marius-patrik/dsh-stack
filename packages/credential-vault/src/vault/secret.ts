@@ -58,7 +58,8 @@ const NODE_INSPECT = Symbol.for("nodejs.util.inspect.custom");
 export class SecretValue {
   readonly #value: string;
 
-  constructor(value: string) {
+    /** Constructs an instance. */
+constructor(value: string) {
     if (typeof value !== "string" || value.length === 0)
       throw new Error("secret value must be a non-empty string");
     this.#value = value;
@@ -77,15 +78,18 @@ export class SecretValue {
     return timingSafeEqual(left, right);
   }
 
-  toString(): string {
+    /** toString implementation. */
+toString(): string {
     return REDACTED;
   }
 
-  toJSON(): string {
+    /** toJSON implementation. */
+toJSON(): string {
     return REDACTED;
   }
 
-  get [Symbol.toStringTag](): string {
+    /** [Symbol.toStringTag] implementation. */
+get [Symbol.toStringTag](): string {
     return "SecretValue";
   }
 }
@@ -193,7 +197,8 @@ export class EncryptedFileCredentialStore implements CredentialStore {
   readonly #suppliedKey: Uint8Array | null;
   #key: Buffer | null = null;
 
-  constructor(options: EncryptedFileCredentialStoreOptions) {
+    /** Constructs an instance. */
+constructor(options: EncryptedFileCredentialStoreOptions) {
     if (!options.directory.trim()) throw new Error("credential store requires a directory");
     if (options.key && options.key.byteLength !== KEY_BYTES) {
       throw new Error(`credential store key must be ${KEY_BYTES} bytes`);
@@ -202,11 +207,13 @@ export class EncryptedFileCredentialStore implements CredentialStore {
     this.#suppliedKey = options.key ? Uint8Array.from(options.key) : null;
   }
 
-  get directory(): string {
+    /** directory implementation. */
+get directory(): string {
     return this.#directory;
   }
 
-  async get(id: string): Promise<ProviderCredential | null> {
+    /** get implementation. */
+async get(id: string): Promise<ProviderCredential | null> {
     const file = this.#file(id);
     if (!(await exists(file))) return null;
     const envelope = parseEnvelope(await readFile(file, "utf8"), file);
@@ -227,7 +234,8 @@ export class EncryptedFileCredentialStore implements CredentialStore {
     return decodeCredential(JSON.parse(plaintext) as unknown, id);
   }
 
-  async put(id: string, credential: ProviderCredential): Promise<void> {
+    /** put implementation. */
+async put(id: string, credential: ProviderCredential): Promise<void> {
     const file = this.#file(id);
     const key = await this.#dataKey();
     const iv = randomBytes(IV_BYTES);
@@ -247,14 +255,16 @@ export class EncryptedFileCredentialStore implements CredentialStore {
     await writePrivateFile(file, `${JSON.stringify(envelope)}\n`);
   }
 
-  async delete(id: string): Promise<boolean> {
+    /** delete implementation. */
+async delete(id: string): Promise<boolean> {
     const file = this.#file(id);
     if (!(await exists(file))) return false;
     await rm(file, { force: true });
     return true;
   }
 
-  async list(): Promise<string[]> {
+    /** list implementation. */
+async list(): Promise<string[]> {
     if (!(await exists(this.#directory))) return [];
     const entries = await readdir(this.#directory, { withFileTypes: true });
     return entries
@@ -264,12 +274,14 @@ export class EncryptedFileCredentialStore implements CredentialStore {
       .sort();
   }
 
-  #file(id: string): string {
+    /** #file implementation. */
+#file(id: string): string {
     if (!CREDENTIAL_ID.test(id)) throw new Error(`invalid credential id: ${id}`);
     return path.join(this.#directory, `${id}${CREDENTIAL_SUFFIX}`);
   }
 
-  async #dataKey(): Promise<Buffer> {
+    /** #dataKey implementation. */
+async #dataKey(): Promise<Buffer> {
     if (this.#key) return this.#key;
     if (this.#suppliedKey) {
       this.#key = Buffer.from(this.#suppliedKey);
@@ -280,6 +292,7 @@ export class EncryptedFileCredentialStore implements CredentialStore {
   }
 }
 
+/** loadOrCreateKeyFile implementation. */
 async function loadOrCreateKeyFile(file: string): Promise<Buffer> {
   if (await exists(file)) {
     const key = Buffer.from((await readFile(file, "utf8")).trim(), "base64");
@@ -294,6 +307,7 @@ async function loadOrCreateKeyFile(file: string): Promise<Buffer> {
   return loadOrCreateKeyFile(file);
 }
 
+/** encodeCredential implementation. */
 function encodeCredential(credential: ProviderCredential): CredentialPayload {
   // Explicit field-by-field encoding, not JSON.stringify over the credential:
   // SecretValue redacts itself, so the only way plaintext reaches the cipher is
@@ -319,6 +333,7 @@ function encodeCredential(credential: ProviderCredential): CredentialPayload {
   };
 }
 
+/** decodeCredential implementation. */
 function decodeCredential(value: unknown, id: string): ProviderCredential {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`stored credential is not an object: ${id}`);
@@ -354,12 +369,14 @@ function decodeCredential(value: unknown, id: string): ProviderCredential {
   throw new Error(`stored credential has an unsupported kind: ${id}`);
 }
 
+/** requireString implementation. */
 function requireString(value: unknown, field: string, id: string): string {
   if (typeof value !== "string" || !value)
     throw new Error(`stored credential ${id} requires ${field}`);
   return value;
 }
 
+/** optionalString implementation. */
 function optionalString(value: unknown, field: string, id: string): string | null {
   if (value === null || value === undefined) return null;
   if (typeof value !== "string")
@@ -367,6 +384,7 @@ function optionalString(value: unknown, field: string, id: string): string | nul
   return value;
 }
 
+/** parseEnvelope implementation. */
 function parseEnvelope(raw: string, file: string): CredentialEnvelope {
   const parsed = JSON.parse(raw) as Partial<CredentialEnvelope>;
   if (

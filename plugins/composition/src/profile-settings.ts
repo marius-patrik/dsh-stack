@@ -17,6 +17,7 @@ export const profilesSettingsTab: ProfileSettingsTab = {
   description: "Choose and configure the active Stack profile.",
 };
 
+/** createProfileSelectorState implementation. */
 export function createProfileSelectorState(
   activeProfileId: string,
   profiles: readonly ProfileDefinition[],

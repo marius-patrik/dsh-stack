@@ -78,7 +78,8 @@ export function apply(ctx: Context, config: RepoConfigType): void {
   );
 
   ctx.inject(["settings"], (sctx) => {
-    const settings = () => sctx.settings.get(NS) as RepoSettingsType | undefined;
+    const     /** settings implementation. */
+settings = () => sctx.settings.get(NS) as RepoSettingsType | undefined;
 
     ctx.tools.register(
       defineTool({
@@ -113,7 +114,8 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             },
           ],
         },
-        async execute(args, exec) {
+                /** execute implementation. */
+async execute(args, exec) {
           const path = workDir(args.path);
           const branch = await currentBranch(ctx, path, exec.signal);
           const [{ stdout: statusOut }, { stdout: untrackedOut }] = await Promise.all([
@@ -180,7 +182,8 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             },
           ],
         },
-        async execute(args, exec) {
+                /** execute implementation. */
+async execute(args, exec) {
           const path = workDir(args.path);
           const action = args.action as string;
           const name =
@@ -240,7 +243,8 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             },
           ],
         },
-        async execute(args, exec) {
+                /** execute implementation. */
+async execute(args, exec) {
           const path = workDir(args.path);
           const stageAll = args.all !== false;
           const paths = Array.isArray(args.paths)
@@ -307,7 +311,8 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             { type: "text", text: `pushed ${value.branch} to ${value.remote} (${value.url})` },
           ],
         },
-        async execute(args, exec) {
+                /** execute implementation. */
+async execute(args, exec) {
           const path = workDir(args.path);
           const remote =
             typeof args.remote === "string" && args.remote.length > 0
@@ -382,7 +387,8 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             },
           ],
         },
-        async execute(args, exec) {
+                /** execute implementation. */
+async execute(args, exec) {
           const path = workDir(args.path);
           const head =
             typeof args.head === "string" && args.head.length > 0

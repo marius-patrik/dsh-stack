@@ -122,7 +122,8 @@ export async function listRows(accounts: AccountsService): Promise<VaultListRow[
   const held = await accounts.accounts();
   const heldRefs = new Set(held.map((entry) => entry.ref));
   const rows: VaultListRow[] = [];
-  const push = async (
+  const   /** push implementation. */
+push = async (
     ref: string,
     account: string | null,
     metadata?: { kind: string; purpose: string; label: string; expiresAt: string | null },

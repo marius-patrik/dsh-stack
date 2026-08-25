@@ -428,7 +428,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 `;
 
     var stylesInjected = false;
-    function ensureTreeStyles() {
+        /** ensureTreeStyles implementation. */
+function ensureTreeStyles() {
       if (stylesInjected || typeof document === "undefined") return;
       var el = document.createElement("style");
       el.textContent = TREE_STYLES;
@@ -437,12 +438,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     var modelDecoratorInstalled = false;
-    function ensureModelPickerDecoration() {
+        /** ensureModelPickerDecoration implementation. */
+function ensureModelPickerDecoration() {
       if (typeof document === "undefined" || typeof MutationObserver === "undefined") return;
       if (modelDecoratorInstalled) return;
       modelDecoratorInstalled = true;
 
-      var getFavoriteModels = function () {
+      var       /** getFavoriteModels implementation. */
+getFavoriteModels = function () {
         try {
           var raw = window.localStorage.getItem("dsh_favorite_models");
           return raw ? JSON.parse(raw) : [];
@@ -451,7 +454,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         }
       };
 
-      var setFavoriteModels = function (favs) {
+      var       /** setFavoriteModels implementation. */
+setFavoriteModels = function (favs) {
         try {
           window.localStorage.setItem("dsh_favorite_models", JSON.stringify(favs));
         } catch (e) {}
@@ -463,12 +467,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
       var updateTimer = null;
-      var scheduleUpdate = function () {
+      var       /** scheduleUpdate implementation. */
+scheduleUpdate = function () {
         if (updateTimer) clearTimeout(updateTimer);
         updateTimer = setTimeout(updateModelDecorations, 100);
       };
 
-      var updateModelDecorations = function () {
+      var       /** updateModelDecorations implementation. */
+updateModelDecorations = function () {
         // 1. Remove old inline brand icons if any
         var oldBrandIcons = document.querySelectorAll(".dsh-prov-brand-icon");
         oldBrandIcons.forEach(function (icon) {
@@ -489,7 +495,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
           var favOptionsMap = {};
 
-          var stopAll = function (e) {
+          var           /** stopAll implementation. */
+stopAll = function (e) {
             if (e) {
               e.preventDefault();
               e.stopPropagation();
@@ -529,7 +536,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               starBtn.style.marginLeft = "auto";
               starBtn.style.zIndex = "10";
 
-              var toggleFav = function (e) {
+              var               /** toggleFav implementation. */
+toggleFav = function (e) {
                 stopAll(e);
                 var currentFavs = getFavoriteModels();
                 var idx = currentFavs.indexOf(modelKey);
@@ -638,7 +646,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
               var cloneStar = clone.querySelector(".dsh-model-star-btn");
               if (cloneStar) {
-                var handleCloneToggle = function (e) {
+                var                 /** handleCloneToggle implementation. */
+handleCloneToggle = function (e) {
                   stopAll(e);
                   var currentFavs = getFavoriteModels();
                   var idx = currentFavs.indexOf(key);
@@ -991,7 +1000,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       },
     ];
 
-    function ProvidersGlyph(props) {
+        /** ProvidersGlyph implementation. */
+function ProvidersGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1019,7 +1029,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function TerminalsGlyph(props) {
+        /** TerminalsGlyph implementation. */
+function TerminalsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1043,7 +1054,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function ContainersGlyph(props) {
+        /** ContainersGlyph implementation. */
+function ContainersGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1083,7 +1095,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function ToolsGlyph(props) {
+        /** ToolsGlyph implementation. */
+function ToolsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1108,7 +1121,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function LoopsGlyph(props) {
+        /** LoopsGlyph implementation. */
+function LoopsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1134,7 +1148,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function TriangleRightFill14(props) {
+        /** TriangleRightFill14 implementation. */
+function TriangleRightFill14(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1159,7 +1174,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function PassGlyph(props) {
+        /** PassGlyph implementation. */
+function PassGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-pass";
@@ -1183,7 +1199,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function DataGlyph(props) {
+        /** DataGlyph implementation. */
+function DataGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-data";
@@ -1207,7 +1224,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function ChatGlyph(props) {
+        /** ChatGlyph implementation. */
+function ChatGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-chat";
@@ -1229,7 +1247,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function RefreshGlyph(props) {
+        /** RefreshGlyph implementation. */
+function RefreshGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1255,7 +1274,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function TrashGlyph(props) {
+        /** TrashGlyph implementation. */
+function TrashGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1282,7 +1302,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function EditGlyph(props) {
+        /** EditGlyph implementation. */
+function EditGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-edit";
@@ -1305,7 +1326,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function FileGlyph(props) {
+        /** FileGlyph implementation. */
+function FileGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-file";
@@ -1328,7 +1350,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function SubagentGlyph(props) {
+        /** SubagentGlyph implementation. */
+function SubagentGlyph(props) {
       var size = props && props.size ? props.size : 12;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1355,7 +1378,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function CutGlyph(props) {
+        /** CutGlyph implementation. */
+function CutGlyph(props) {
       var size = props && props.size ? props.size : 13;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-cut";
@@ -1380,7 +1404,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function CopyGlyph(props) {
+        /** CopyGlyph implementation. */
+function CopyGlyph(props) {
       var size = props && props.size ? props.size : 13;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-copy";
@@ -1402,7 +1427,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function PlusGlyph(props) {
+        /** PlusGlyph implementation. */
+function PlusGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-plus";
@@ -1424,7 +1450,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function EllipsisGlyph(props) {
+        /** EllipsisGlyph implementation. */
+function EllipsisGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1448,7 +1475,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function EyeGlyph(props) {
+        /** EyeGlyph implementation. */
+function EyeGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-eye";
@@ -1470,7 +1498,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function DockToggleGlyph(props) {
+        /** DockToggleGlyph implementation. */
+function DockToggleGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-dock";
@@ -1494,7 +1523,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function PanelBottomGlyph(props) {
+        /** PanelBottomGlyph implementation. */
+function PanelBottomGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1519,7 +1549,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function PanelRightGlyph(props) {
+        /** PanelRightGlyph implementation. */
+function PanelRightGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-dock";
@@ -1543,7 +1574,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function BranchGlyph(props) {
+        /** BranchGlyph implementation. */
+function BranchGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1568,7 +1600,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function FolderOpenGlyph(props) {
+        /** FolderOpenGlyph implementation. */
+function FolderOpenGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1592,7 +1625,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function SearchGlyph(props) {
+        /** SearchGlyph implementation. */
+function SearchGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1615,7 +1649,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function MicGlyph(props) {
+        /** MicGlyph implementation. */
+function MicGlyph(props) {
       var size = (props && props.size) || 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-mic";
@@ -1640,7 +1675,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function formatTokenCount(num) {
+        /** formatTokenCount implementation. */
+function formatTokenCount(num) {
       if (num === undefined || num === null || isNaN(num)) return "0";
       if (num >= 1000000000) return (num / 1000000000).toFixed(1) + "B";
       if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
@@ -1649,7 +1685,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // High-speed ANSI to HTML converter
-    function ansiToHtml(raw) {
+        /** ansiToHtml implementation. */
+function ansiToHtml(raw) {
       if (!raw) return "";
       var text = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -1735,7 +1772,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return html;
     }
 
-    function ProviderBrandIcon(props) {
+        /** ProviderBrandIcon implementation. */
+function ProviderBrandIcon(props) {
       var id = (props.id || "").toLowerCase();
       var size = props.size || 18;
 
@@ -1774,7 +1812,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 1a. SETTINGS: ACCOUNTS SECTION
-    function AccountsSection() {
+        /** AccountsSection implementation. */
+function AccountsSection() {
       var state = React.useState({
         accounts: [],
         snapshots: [],
@@ -1853,7 +1892,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         [load],
       );
 
-      var handleProbe = function (providerId) {
+      var       /** handleProbe implementation. */
+handleProbe = function (providerId) {
         setProbing(function (s) {
           var n = Object.assign({}, s);
           n[providerId] = true;
@@ -1872,7 +1912,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
       };
 
-      var handleProbeAll = function () {
+      var       /** handleProbeAll implementation. */
+handleProbeAll = function () {
         setProbing(function (s) {
           return Object.assign({}, s, { all: true });
         });
@@ -1889,7 +1930,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
       };
 
-      var toggleKeys = function (provId) {
+      var       /** toggleKeys implementation. */
+toggleKeys = function (provId) {
         setExpandedKeys(function (s) {
           var n = Object.assign({}, s);
           n[provId] = !n[provId];
@@ -1897,7 +1939,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var toggleReveal = function (keyId) {
+      var       /** toggleReveal implementation. */
+toggleReveal = function (keyId) {
         if (revealed[keyId]) {
           setRevealed(function (s) {
             var n = Object.assign({}, s);
@@ -2581,7 +2624,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 1b. SETTINGS: MODELS SECTION
-    function ModelsSection() {
+        /** ModelsSection implementation. */
+function ModelsSection() {
       var addModelModalState = React.useState(null);
       var addModelModal = addModelModalState[0],
         setAddModelModal = addModelModalState[1];
@@ -2819,7 +2863,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 1c. SETTINGS: APPS SECTION
-    function AppsSection() {
+        /** AppsSection implementation. */
+function AppsSection() {
       var state = React.useState({
         integrationsMeta: null,
         loading: true,
@@ -3061,7 +3106,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 2. SETTINGS: TMUX CONFIGURATION
-    function TmuxSettingsSection() {
+        /** TmuxSettingsSection implementation. */
+function TmuxSettingsSection() {
       var shellState = React.useState("/bin/zsh");
       var shell = shellState[0],
         setShell = shellState[1];
@@ -3078,7 +3124,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var saved = savedState[0],
         setSaved = savedState[1];
 
-      var handleSave = function () {
+      var       /** handleSave implementation. */
+handleSave = function () {
         setSaved(true);
         setTimeout(function () {
           setSaved(false);
@@ -3293,7 +3340,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 3. SETTINGS: DOCKER CONFIGURATION
-    function DockerSettingsSection() {
+        /** DockerSettingsSection implementation. */
+function DockerSettingsSection() {
       var imageState = React.useState("node:22-alpine");
       var image = imageState[0],
         setImage = imageState[1];
@@ -3310,7 +3358,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var saved = savedState[0],
         setSaved = savedState[1];
 
-      var handleSave = function () {
+      var       /** handleSave implementation. */
+handleSave = function () {
         setSaved(true);
         setTimeout(function () {
           setSaved(false);
@@ -3541,7 +3590,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 4. SETTINGS: TOOLS SECTION
-    function ToolsSection() {
+        /** ToolsSection implementation. */
+function ToolsSection() {
       var TOOLS_LIST = [
         {
           id: "read_file",
@@ -3720,7 +3770,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 5. SETTINGS: LOOPS SECTION
-    function LoopsSection() {
+        /** LoopsSection implementation. */
+function LoopsSection() {
       var LOOPS_LIST = [
         {
           id: "darkfactory-orchestrator",
@@ -3893,7 +3944,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 6. DOCKED BOTTOM TERMINAL PANEL WITH TABS
-    function BottomTerminalPanel(props) {
+        /** BottomTerminalPanel implementation. */
+function BottomTerminalPanel(props) {
       ensureTreeStyles();
       var onClose = props.onClose;
       var initialSession = props.initialSession || "0";
@@ -3964,17 +4016,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var terminalPreRef = React.useRef(null);
 
       // Drag to resize handler
-      var handleResizeStart = function (e) {
+      var       /** handleResizeStart implementation. */
+handleResizeStart = function (e) {
         e.preventDefault();
         var startY = e.clientY;
         var startHeight = height;
-        var handleMove = function (moveEvent) {
+        var         /** handleMove implementation. */
+handleMove = function (moveEvent) {
           var delta = startY - moveEvent.clientY;
           var newHeight = Math.max(160, Math.min(window.innerHeight * 0.88, startHeight + delta));
           setHeight(newHeight);
           setIsMaximized(false);
         };
-        var handleUp = function () {
+        var         /** handleUp implementation. */
+handleUp = function () {
           document.removeEventListener("pointermove", handleMove);
           document.removeEventListener("pointerup", handleUp);
         };
@@ -4105,7 +4160,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
       React.useEffect(
         function () {
-          var onOpenTerm = function (e) {
+          var           /** onOpenTerm implementation. */
+onOpenTerm = function (e) {
             var sess = e && e.detail && e.detail.session ? e.detail.session : "0";
             setActiveView("terminal");
             setSelectedSession(sess);
@@ -4114,7 +4170,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             loadBuffer(sess);
             loadWindows(sess);
           };
-          var onOpenCont = function (e) {
+          var           /** onOpenCont implementation. */
+onOpenCont = function (e) {
             var id = e && e.detail && e.detail.id ? e.detail.id : null;
             setActiveView("container");
             setSelectedContainer(id);
@@ -4162,7 +4219,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         [activeView, selectedContainer, loadContainerLogs],
       );
 
-      var handleContainerAction = function (cId, action) {
+      var       /** handleContainerAction implementation. */
+handleContainerAction = function (cId, action) {
         fetch(QUOTAS_API + "/docker/containers/action", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -4172,14 +4230,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var selectTerminalTab = function (name) {
+      var       /** selectTerminalTab implementation. */
+selectTerminalTab = function (name) {
         setActiveView("terminal");
         setSelectedSession(name);
         setSelectedContainer(null);
         setIsCollapsed(false);
       };
 
-      var selectContainerTab = function (c) {
+      var       /** selectContainerTab implementation. */
+selectContainerTab = function (c) {
         setActiveView("container");
         setSelectedContainer(c.id);
         setSelectedSession(null);
@@ -4187,7 +4247,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       };
 
       // Send key actions
-      var sendKey = function (key) {
+      var       /** sendKey implementation. */
+sendKey = function (key) {
         fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -4199,7 +4260,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var sendLiteral = function (text, pressEnter) {
+      var       /** sendLiteral implementation. */
+sendLiteral = function (text, pressEnter) {
         fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -4216,14 +4278,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleExecuteCommand = function (e) {
+      var       /** handleExecuteCommand implementation. */
+handleExecuteCommand = function (e) {
         if (e) e.preventDefault();
         if (!cmd.trim()) return;
         sendLiteral(cmd, true);
         setCmd("");
       };
 
-      var handleKeyDown = function (e) {
+      var       /** handleKeyDown implementation. */
+handleKeyDown = function (e) {
         if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
 
         if (e.key === "Enter") {
@@ -4270,7 +4334,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         }
       };
 
-      var handleSelectWindow = function (idx) {
+      var       /** handleSelectWindow implementation. */
+handleSelectWindow = function (idx) {
         fetch(QUOTAS_API + "/tmux/sessions/select-window", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -4281,7 +4346,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleNewWindow = function () {
+      var       /** handleNewWindow implementation. */
+handleNewWindow = function () {
         var winName = prompt("New Window Name:", "sh");
         if (!winName) return;
         fetch(QUOTAS_API + "/tmux/sessions/new-window", {
@@ -4294,7 +4360,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleKill = function (name) {
+      var       /** handleKill implementation. */
+handleKill = function (name) {
         if (!confirm("Kill tmux session '" + name + "'?")) return;
         fetch(QUOTAS_API + "/tmux/sessions/kill", {
           method: "POST",
@@ -4313,7 +4380,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setDetailsWidth = detailsWidthState[1];
 
       React.useEffect(function () {
-        var updateOffsets = function () {
+        var         /** updateOffsets implementation. */
+updateOffsets = function () {
           var centerEl = document.querySelector('[class*="centerCol"]');
           if (centerEl) {
             var cRect = centerEl.getBoundingClientRect();
@@ -5410,7 +5478,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     var FullPageTerminalsWorkspace = BottomTerminalPanel;
 
     // 7. DOCKABLE CONTAINERS WORKSPACE
-    function FullPageContainersWorkspace(props) {
+        /** FullPageContainersWorkspace implementation. */
+function FullPageContainersWorkspace(props) {
       var onClose = props.onClose;
       var initialContainerId = props.initialContainerId;
       var state = React.useState({ containers: [], loading: true, error: null });
@@ -5432,7 +5501,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
       React.useLayoutEffect(function () {
         if (!containerRef.current) return;
-        var checkWidth = function () {
+        var         /** checkWidth implementation. */
+checkWidth = function () {
           if (containerRef.current) {
             setIsNarrow(containerRef.current.clientWidth < 420);
           }
@@ -5499,7 +5569,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         [selectedContainer, loadLogs],
       );
 
-      var handleAction = function (id, action) {
+      var       /** handleAction implementation. */
+handleAction = function (id, action) {
         setActionMap(function (s) {
           var n = Object.assign({}, s);
           n[id] = action;
@@ -5704,7 +5775,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function SelectDropdownMenu(props) {
+        /** SelectDropdownMenu implementation. */
+function SelectDropdownMenu(props) {
       var open = props.open,
         onClose = props.onClose,
         items = props.items,
@@ -5757,7 +5829,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       React.useEffect(
         function () {
           if (!open) return;
-          var handlePointerDown = function (e) {
+          var           /** handlePointerDown implementation. */
+handlePointerDown = function (e) {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
               if (anchorRef && anchorRef.current && anchorRef.current.contains(e.target)) return;
               if (menuRef.current.parentElement && menuRef.current.parentElement.contains(e.target))
@@ -5848,7 +5921,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // Interactive Tmux Terminal Component (Unified for Main Area, Bottom Panel, and Right Sidebar)
-    function InteractiveTmuxTerminal(props) {
+        /** InteractiveTmuxTerminal implementation. */
+function InteractiveTmuxTerminal(props) {
       var sessionName = props.sessionName || "0";
       var style = props.style || {};
       var bufferState = React.useState("Connecting to " + sessionName + "…");
@@ -5860,7 +5934,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var isFocused = isFocusedState[0],
         setIsFocused = isFocusedState[1];
 
-      var sendKey = function (key) {
+      var       /** sendKey implementation. */
+sendKey = function (key) {
         fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -5878,7 +5953,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var sendLiteral = function (text) {
+      var       /** sendLiteral implementation. */
+sendLiteral = function (text) {
         fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -5896,7 +5972,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleKeyDown = function (e) {
+      var       /** handleKeyDown implementation. */
+handleKeyDown = function (e) {
         if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
         if (e.key === "Enter") {
           sendKey("Enter");
@@ -5942,7 +6019,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         }
       };
 
-      var handleSessionExited = function () {
+      var       /** handleSessionExited implementation. */
+handleSessionExited = function () {
         if (props.onClose) {
           props.onClose();
         }
@@ -5956,7 +6034,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       React.useEffect(
         function () {
           var consecutiveErrors = 0;
-          var load = function () {
+          var           /** load implementation. */
+load = function () {
             fetch(
               QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
             )
@@ -6064,7 +6143,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // Empty Area New Tab Fallback Picker
-    function EmptyAreaNewTabPicker(props) {
+        /** EmptyAreaNewTabPicker implementation. */
+function EmptyAreaNewTabPicker(props) {
       var areaName = props.areaName || "Area";
       return h(
         "div",
@@ -6185,7 +6265,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // Secondary Sidebar Dock Component
-    function RightSidebarDock(props) {
+        /** RightSidebarDock implementation. */
+function RightSidebarDock(props) {
       var isOpenState = React.useState(false);
       var isOpen = isOpenState[0],
         setIsOpen = isOpenState[1];
@@ -6229,12 +6310,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
 
       React.useEffect(function () {
-        var onToggle = function () {
+        var         /** onToggle implementation. */
+onToggle = function () {
           setIsOpen(function (v) {
             return !v;
           });
         };
-        var onMoveToRight = function (e) {
+        var         /** onMoveToRight implementation. */
+onMoveToRight = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -6249,7 +6332,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           setActiveTab(tab.id);
           setIsOpen(true);
         };
-        var onMoveToTop = function (e) {
+        var         /** onMoveToTop implementation. */
+onMoveToTop = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -6258,7 +6342,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             });
           });
         };
-        var onMoveToBottom = function (e) {
+        var         /** onMoveToBottom implementation. */
+onMoveToBottom = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -6281,7 +6366,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         };
       }, []);
 
-      var handleResizeStart = function (e) {
+      var       /** handleResizeStart implementation. */
+handleResizeStart = function (e) {
         e.preventDefault();
         setIsResizing(true);
         var startX = e.clientX;
@@ -6289,12 +6375,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         var isSwapped =
           typeof document !== "undefined" &&
           document.body.classList.contains("dsh-sidebars-swapped");
-        var onMove = function (moveEv) {
+        var         /** onMove implementation. */
+onMove = function (moveEv) {
           var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;
           var nextW = Math.max(180, Math.min(600, startW + delta));
           setWidth(nextW);
         };
-        var onUp = function () {
+        var         /** onUp implementation. */
+onUp = function () {
           setIsResizing(false);
           document.removeEventListener("pointermove", onMove);
           document.removeEventListener("pointerup", onUp);
@@ -6577,7 +6665,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function getCenterBounds() {
+        /** getCenterBounds implementation. */
+function getCenterBounds() {
       if (typeof document === "undefined") return { left: 240, right: 0, top: 0 };
       var centerEl = document.querySelector('div[class*="centerCol"], [class*="centerCol"], main');
       if (centerEl && centerEl.getBoundingClientRect) {
@@ -6623,13 +6712,15 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       };
     }
 
-    function useCenterBounds() {
+        /** useCenterBounds implementation. */
+function useCenterBounds() {
       var boundsState = React.useState(getCenterBounds);
       var bounds = boundsState[0],
         setBounds = boundsState[1];
 
       React.useEffect(function () {
-        var update = function () {
+        var         /** update implementation. */
+update = function () {
           var next = getCenterBounds();
           setBounds(function (prev) {
             if (prev.left !== next.left || prev.right !== next.right || prev.top !== next.top) {
@@ -6653,7 +6744,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return bounds;
     }
 
-    function MainViewTerminalOccupant(props) {
+        /** MainViewTerminalOccupant implementation. */
+function MainViewTerminalOccupant(props) {
       var sessionName = props.sessionName || "0";
       var bounds = useCenterBounds();
       var panelHeightState = React.useState(function () {
@@ -6666,7 +6758,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setPanelHeight = panelHeightState[1];
 
       React.useEffect(function () {
-        var onGeom = function (e) {
+        var         /** onGeom implementation. */
+onGeom = function (e) {
           if (e && e.detail && e.detail.height) {
             setPanelHeight(e.detail.height);
           }
@@ -6698,7 +6791,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function MainViewContainerOccupant(props) {
+        /** MainViewContainerOccupant implementation. */
+function MainViewContainerOccupant(props) {
       var bounds = useCenterBounds();
       var panelHeightState = React.useState(function () {
         if (typeof window !== "undefined" && window.__dsh_panel_height__) {
@@ -6710,7 +6804,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setPanelHeight = panelHeightState[1];
 
       React.useEffect(function () {
-        var onGeom = function (e) {
+        var         /** onGeom implementation. */
+onGeom = function (e) {
           if (e && e.detail && e.detail.height) {
             setPanelHeight(e.detail.height);
           }
@@ -6741,7 +6836,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function MainViewFileEditorOccupant(props) {
+        /** MainViewFileEditorOccupant implementation. */
+function MainViewFileEditorOccupant(props) {
       var filePath = props.filePath || "";
       var fileName = props.fileName || (filePath ? filePath.split("/").pop() : "File");
       var onClose = props.onClose;
@@ -6794,7 +6890,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         [filePath],
       );
 
-      var handleSave = function () {
+      var       /** handleSave implementation. */
+handleSave = function () {
         if (saving) return;
         setSaving(true);
         setStatusMsg("Saving…");
@@ -6827,7 +6924,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
       React.useEffect(
         function () {
-          var onKeyDown = function (e) {
+          var           /** onKeyDown implementation. */
+onKeyDown = function (e) {
             if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
               e.preventDefault();
               handleSave();
@@ -7077,7 +7175,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function MainViewRepoOccupant(props) {
+        /** MainViewRepoOccupant implementation. */
+function MainViewRepoOccupant(props) {
       var repoPath = props.repoPath || "";
       var repoName = props.repoName || (repoPath ? repoPath.split("/").pop() : "Repository");
       var onClose = props.onClose;
@@ -7231,12 +7330,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         [activeTab, selectedDiffFile, fetchDiff],
       );
 
-      var handleNavigateSubPath = function (newSp) {
+      var       /** handleNavigateSubPath implementation. */
+handleNavigateSubPath = function (newSp) {
         setSubPath(newSp);
         fetchOverview(newSp);
       };
 
-      var handleCommitAndPush = function () {
+      var       /** handleCommitAndPush implementation. */
+handleCommitAndPush = function () {
         if (!commitMsg.trim()) return;
         setActionStatus("Committing changes…");
         fetch(QUOTAS_API + "/git/commit", {
@@ -7277,7 +7378,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
       };
 
-      var handleDiscardChanges = function (file) {
+      var       /** handleDiscardChanges implementation. */
+handleDiscardChanges = function (file) {
         if (
           !confirm(
             file
@@ -7302,7 +7404,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleStashChanges = function () {
+      var       /** handleStashChanges implementation. */
+handleStashChanges = function () {
         setActionStatus("Stashing changes…");
         fetch(QUOTAS_API + "/git/stash", {
           method: "POST",
@@ -7318,7 +7421,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleSwitchBranch = function (bName, createNew) {
+      var       /** handleSwitchBranch implementation. */
+handleSwitchBranch = function (bName, createNew) {
         setActionStatus("Switching branch to " + bName + "…");
         fetch(QUOTAS_API + "/git/checkout", {
           method: "POST",
@@ -7342,7 +7446,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
       };
 
-      var handleCreateNewBranch = function () {
+      var       /** handleCreateNewBranch implementation. */
+handleCreateNewBranch = function () {
         var name = prompt("New branch name:");
         if (name && name.trim()) {
           handleSwitchBranch(name.trim(), true);
@@ -9157,7 +9262,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function TopConversationTabBar(props) {
+        /** TopConversationTabBar implementation. */
+function TopConversationTabBar(props) {
       var topPlusBtnRef = React.useRef(null);
       var plusOpenState = React.useState(false);
       var plusOpen = plusOpenState[0],
@@ -9206,7 +9312,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
       // Sync live chat title from active session or document
       React.useEffect(function () {
-        var updateTitle = function () {
+        var         /** updateTitle implementation. */
+updateTitle = function () {
           var title =
             typeof window !== "undefined" && window.__dsh_current_session_title__
               ? window.__dsh_current_session_title__
@@ -9238,7 +9345,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       }, []);
 
       React.useEffect(function () {
-        var onTabMovedToTop = function (e) {
+        var         /** onTabMovedToTop implementation. */
+onTabMovedToTop = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -9252,7 +9360,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
           setActiveTab(tab.id);
         };
-        var onTabMovedToBottom = function (e) {
+        var         /** onTabMovedToBottom implementation. */
+onTabMovedToBottom = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -9266,7 +9375,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             return curr;
           });
         };
-        var onTabMovedToRight = function (e) {
+        var         /** onTabMovedToRight implementation. */
+onTabMovedToRight = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -9279,7 +9389,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             return curr;
           });
         };
-        var onOpenFileTab = function (e) {
+        var         /** onOpenFileTab implementation. */
+onOpenFileTab = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -9293,7 +9404,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
           setActiveTab(tab.id);
         };
-        var onOpenRepoTab = function (e) {
+        var         /** onOpenRepoTab implementation. */
+onOpenRepoTab = function (e) {
           var tab = e.detail;
           if (!tab) return;
           setTabs(function (prev) {
@@ -9308,7 +9420,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           setActiveTab(tab.id);
         };
 
-        var onOpenTerminal = function (e) {
+        var         /** onOpenTerminal implementation. */
+onOpenTerminal = function (e) {
           var target = (e && e.detail && e.detail.target) || "bottom";
           if (target === "top") {
             var sess = (e && e.detail && e.detail.session) || "0";
@@ -9326,7 +9439,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           }
         };
 
-        var onOpenContainer = function (e) {
+        var         /** onOpenContainer implementation. */
+onOpenContainer = function (e) {
           var target = (e && e.detail && e.detail.target) || "bottom";
           if (target === "top") {
             var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
@@ -9352,7 +9466,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           }
         };
 
-        var onFocusChat = function (e) {
+        var         /** onFocusChat implementation. */
+onFocusChat = function (e) {
           var tTitle =
             (e && e.detail && e.detail.title) ||
             (typeof window !== "undefined" && window.__dsh_current_session_title__) ||
@@ -9375,7 +9490,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           setActiveTab("chat-main");
         };
 
-        var onCloseTerminalTab = function (e) {
+        var         /** onCloseTerminalTab implementation. */
+onCloseTerminalTab = function (e) {
           var sess = e && e.detail ? e.detail.session || e.detail.id : null;
           if (!sess) return;
           setTabs(function (prev) {
@@ -9425,7 +9541,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         };
       }, []);
 
-      var handleDropOnTop = function (e) {
+      var       /** handleDropOnTop implementation. */
+handleDropOnTop = function (e) {
         e.preventDefault();
         try {
           var raw = e.dataTransfer.getData("text/dsh-tab");
@@ -9436,7 +9553,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         } catch (err) {}
       };
 
-      var removeTab = function (tabId, e) {
+      var       /** removeTab implementation. */
+removeTab = function (tabId, e) {
         if (e) e.stopPropagation();
         setTabs(function (prev) {
           var idx = prev.findIndex(function (t) {
@@ -9457,7 +9575,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var checkIsTrajectory = function () {
+      var       /** checkIsTrajectory implementation. */
+checkIsTrajectory = function () {
         var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
         if (activeTabEl) {
           var txt = (activeTabEl.textContent || "").trim().toLowerCase();
@@ -9475,7 +9594,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         );
       };
 
-      var handleToggleView = function () {
+      var       /** handleToggleView implementation. */
+handleToggleView = function () {
         var onTrajectoryNow = checkIsTrajectory();
         var targetName = onTrajectoryNow ? "chat" : "trajectory";
         var allTabs = Array.from(
@@ -9503,7 +9623,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         }
       };
 
-      var handleDownloadSessionLog = function () {
+      var       /** handleDownloadSessionLog implementation. */
+handleDownloadSessionLog = function () {
         try {
           var activeSessId =
             typeof window !== "undefined" && window.__dsh_current_session_id__
@@ -9932,7 +10053,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function RenameTerminalModal(props) {
+        /** RenameTerminalModal implementation. */
+function RenameTerminalModal(props) {
       var oldName = props.oldName,
         onClose = props.onClose,
         onRenamed = props.onRenamed;
@@ -9943,7 +10065,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var saving = savingState[0],
         setSaving = savingState[1];
 
-      var handleRename = function () {
+      var       /** handleRename implementation. */
+handleRename = function () {
         if (!name.trim()) return;
         setSaving(true);
         fetch(QUOTAS_API + "/tmux/sessions/rename", {
@@ -10064,7 +10187,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function RepoGlyph(props) {
+        /** RepoGlyph implementation. */
+function RepoGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10095,7 +10219,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function WorkspaceGlyph(props) {
+        /** WorkspaceGlyph implementation. */
+function WorkspaceGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10126,7 +10251,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function renderAppIcon(appName, size, filePath) {
+        /** renderAppIcon implementation. */
+function renderAppIcon(appName, size, filePath) {
       var s = size || 15;
       var raw = (appName || "").trim();
       var cleanName = raw.replace(/\.app$/i, "").trim();
@@ -10201,14 +10327,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return null;
     }
 
-    function AppGlyph(props) {
+        /** AppGlyph implementation. */
+function AppGlyph(props) {
       return renderAppIcon(
         props && props.appName ? props.appName : "app",
         props && props.size ? props.size : 14,
       );
     }
 
-    function LibraryGlyph(props) {
+        /** LibraryGlyph implementation. */
+function LibraryGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10241,7 +10369,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function SystemGlyph(props) {
+        /** SystemGlyph implementation. */
+function SystemGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10280,7 +10409,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function UsersGlyph(props) {
+        /** UsersGlyph implementation. */
+function UsersGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10313,7 +10443,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function ArchiveBoxGlyph(props) {
+        /** ArchiveBoxGlyph implementation. */
+function ArchiveBoxGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10345,7 +10476,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function RestoreGlyph(props) {
+        /** RestoreGlyph implementation. */
+function RestoreGlyph(props) {
       var size = props && props.size ? props.size : 13;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10375,7 +10507,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function BlueFolderGlyph(props) {
+        /** BlueFolderGlyph implementation. */
+function BlueFolderGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10407,7 +10540,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function FolderPlusGlyph(props) {
+        /** FolderPlusGlyph implementation. */
+function FolderPlusGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10443,7 +10577,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function SlidersGlyph(props) {
+        /** SlidersGlyph implementation. */
+function SlidersGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10483,7 +10618,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function PinGlyph(props) {
+        /** PinGlyph implementation. */
+function PinGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") + "dsh-icon-animated dsh-icon-pin";
@@ -10515,7 +10651,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function ActiveGlyph(props) {
+        /** ActiveGlyph implementation. */
+function ActiveGlyph(props) {
       var size = props && props.size ? props.size : 14;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10545,7 +10682,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function HostMachineGlyph(props) {
+        /** HostMachineGlyph implementation. */
+function HostMachineGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -10577,7 +10715,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function HardDriveGlyph(props) {
+        /** HardDriveGlyph implementation. */
+function HardDriveGlyph(props) {
       var size = props && props.size ? props.size : 15;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10610,7 +10749,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function SparklesGlyph(props) {
+        /** SparklesGlyph implementation. */
+function SparklesGlyph(props) {
       var size = props.size || 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10638,7 +10778,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function AccountsGlyph(props) {
+        /** AccountsGlyph implementation. */
+function AccountsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10659,7 +10800,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function ModelsGlyph(props) {
+        /** ModelsGlyph implementation. */
+function ModelsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10681,7 +10823,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function AppsGlyph(props) {
+        /** AppsGlyph implementation. */
+function AppsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -10704,7 +10847,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function IconsGlyph(props) {
+        /** IconsGlyph implementation. */
+function IconsGlyph(props) {
       var size = props.size || 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -11755,7 +11899,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       },
     };
 
-    function renderCatalogIcon(iconName, size, className) {
+        /** renderCatalogIcon implementation. */
+function renderCatalogIcon(iconName, size, className) {
       var s = size || 16;
       var c = (className ? className + " " : "") + "dsh-icon-animated";
       if (
@@ -11844,7 +11989,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       },
     };
 
-    function loadCustomIconMappings() {
+        /** loadCustomIconMappings implementation. */
+function loadCustomIconMappings() {
       try {
         if (typeof window !== "undefined" && window.localStorage) {
           var raw = window.localStorage.getItem("dsh_custom_icon_mappings");
@@ -11857,7 +12003,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
     }
 
-    function saveCustomIconMappings(mappings) {
+        /** saveCustomIconMappings implementation. */
+function saveCustomIconMappings(mappings) {
       try {
         if (typeof window !== "undefined" && window.localStorage) {
           window.localStorage.setItem("dsh_custom_icon_mappings", JSON.stringify(mappings));
@@ -11876,7 +12023,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       };
     }
 
-    function IconsSection() {
+        /** IconsSection implementation. */
+function IconsSection() {
       var mappingsState = React.useState(loadCustomIconMappings);
       var mappings = mappingsState[0],
         setMappings = mappingsState[1];
@@ -11917,7 +12065,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         return matchCat && matchSearch;
       });
 
-      var handleAddMapping = function () {
+      var       /** handleAddMapping implementation. */
+handleAddMapping = function () {
         if (!newTarget.trim()) return;
         var next = JSON.parse(JSON.stringify(mappings));
         if (!next[activeMappingCategory]) next[activeMappingCategory] = {};
@@ -11927,7 +12076,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setNewTarget("");
       };
 
-      var handleRemoveMapping = function (key) {
+      var       /** handleRemoveMapping implementation. */
+handleRemoveMapping = function (key) {
         var next = JSON.parse(JSON.stringify(mappings));
         if (next[activeMappingCategory] && next[activeMappingCategory][key]) {
           delete next[activeMappingCategory][key];
@@ -11936,7 +12086,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         }
       };
 
-      var handleResetCategory = function () {
+      var       /** handleResetCategory implementation. */
+handleResetCategory = function () {
         var next = JSON.parse(JSON.stringify(mappings));
         next[activeMappingCategory] = Object.assign(
           {},
@@ -11946,7 +12097,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         saveCustomIconMappings(next);
       };
 
-      var handleResetAll = function () {
+      var       /** handleResetAll implementation. */
+handleResetAll = function () {
         var next = JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
         setMappings(next);
         saveCustomIconMappings(next);
@@ -12514,7 +12666,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // Helper Modals
-    function NewSessionModal(props) {
+        /** NewSessionModal implementation. */
+function NewSessionModal(props) {
       var onClose = props.onClose,
         onCreated = props.onCreated;
       var nameState = React.useState("");
@@ -12524,7 +12677,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var creating = creatingState[0],
         setCreating = creatingState[1];
 
-      var handleCreate = function () {
+      var       /** handleCreate implementation. */
+handleCreate = function () {
         setCreating(true);
         fetch(QUOTAS_API + "/tmux/sessions/new", {
           method: "POST",
@@ -12632,7 +12786,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function EditValueModal(props) {
+        /** EditValueModal implementation. */
+function EditValueModal(props) {
       var target = props.target,
         onClose = props.onClose,
         onSaved = props.onSaved;
@@ -12643,7 +12798,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var saving = savingState[0],
         setSaving = savingState[1];
 
-      var handleSave = function () {
+      var       /** handleSave implementation. */
+handleSave = function () {
         setSaving(true);
         fetch(
           VAULT_API +
@@ -12765,7 +12921,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function AddKeyModal(props) {
+        /** AddKeyModal implementation. */
+function AddKeyModal(props) {
       var target = props.target,
         onClose = props.onClose,
         onSaved = props.onSaved;
@@ -12783,7 +12940,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var saving = savingState[0],
         setSaving = savingState[1];
 
-      var handleSave = function () {
+      var       /** handleSave implementation. */
+handleSave = function () {
         setSaving(true);
         fetch(
           VAULT_API +
@@ -12927,7 +13085,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function AddModelModal(props) {
+        /** AddModelModal implementation. */
+function AddModelModal(props) {
       var target = props.target,
         onClose = props.onClose,
         onSaved = props.onSaved;
@@ -12942,7 +13101,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var context = contextState[0],
         setContext = contextState[1];
 
-      var handleSave = function () {
+      var       /** handleSave implementation. */
+handleSave = function () {
         prov.models.push({ id: id, name: name || id, context: context, tags: ["Custom"] });
         onSaved();
         onClose();
@@ -13070,7 +13230,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function OAuthFlowModal(props) {
+        /** OAuthFlowModal implementation. */
+function OAuthFlowModal(props) {
       var target = props.target,
         onClose = props.onClose;
       var flowState = React.useState(null);
@@ -13211,7 +13372,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 9. UNIFIED FILESYSTEM & WORKSPACES BROWSER
-    function FileViewerModal(props) {
+        /** FileViewerModal implementation. */
+function FileViewerModal(props) {
       var file = props.file,
         onClose = props.onClose;
       var loadingState = React.useState(!file.content && !file.error);
@@ -13390,7 +13552,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function formatTimeAgo(timestamp) {
+        /** formatTimeAgo implementation. */
+function formatTimeAgo(timestamp) {
       if (!timestamp) return "";
       var seconds = Math.floor((Date.now() - timestamp) / 1000);
       if (seconds < 60) return "now";
@@ -13402,7 +13565,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return days + "d";
     }
 
-    function UnifiedWorkspacesBrowser(props) {
+        /** UnifiedWorkspacesBrowser implementation. */
+function UnifiedWorkspacesBrowser(props) {
       ensureTreeStyles();
       ensureModelPickerDecoration();
       var wide = Boolean(props && props.wide);
@@ -13492,7 +13656,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setShowSearch = showSearchState[1];
 
       React.useEffect(function () {
-        var onToggle = function (e) {
+        var         /** onToggle implementation. */
+onToggle = function (e) {
           if (e && e.detail && e.detail.enabled !== undefined) {
             setShowSearch(e.detail.enabled);
           }
@@ -13543,7 +13708,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setShowSearchButton = showSearchButtonState[1];
 
       React.useEffect(function () {
-        var onSearchToggle = function (e) {
+        var         /** onSearchToggle implementation. */
+onSearchToggle = function (e) {
           var enabled =
             e && e.detail && e.detail.enabled !== undefined
               ? e.detail.enabled
@@ -13580,7 +13746,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setUngroupedMenuOpen = ungroupedMenuState[1];
 
       React.useEffect(function () {
-        var onTriggerSearch = function () {
+        var         /** onTriggerSearch implementation. */
+onTriggerSearch = function () {
           setSearchExpanded(true);
           window.dispatchEvent(new CustomEvent("dsh:expand-sidebar"));
           setTimeout(function () {
@@ -13598,7 +13765,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         };
       }, []);
 
-      var toggleSubagentExpand = function (sessionId) {
+      var       /** toggleSubagentExpand implementation. */
+toggleSubagentExpand = function (sessionId) {
         setExpandedSubagents(function (prev) {
           var n = Object.assign({}, prev);
           if (n[sessionId]) delete n[sessionId];
@@ -13682,17 +13850,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             : Object.keys(sessionsById);
       var currentSessionId = sessionList ? sessionList.current : undefined;
 
-      var getParentId = function (s) {
+      var       /** getParentId implementation. */
+getParentId = function (s) {
         if (!s) return null;
         return s.parentId || s.parentSessionId || s.parentSession || s.parent || null;
       };
 
-      var isSubagentChild = function (s) {
+      var       /** isSubagentChild implementation. */
+isSubagentChild = function (s) {
         var pId = getParentId(s);
         return Boolean(pId && (sessionsById[pId] || sessionIds.indexOf(pId) !== -1));
       };
 
-      var getSubagents = function (parentId) {
+      var       /** getSubagents implementation. */
+getSubagents = function (parentId) {
         if (!parentId) return [];
         return sessionIds
           .map(function (id) {
@@ -13724,7 +13895,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       } catch (e) {}
 
-      var isArchivedSession = function (s, sId) {
+      var       /** isArchivedSession implementation. */
+isArchivedSession = function (s, sId) {
         if (!s && !sId) return false;
         var id = sId || (s && s.id);
         if (id && archivedSet.has(id)) return true;
@@ -13740,7 +13912,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       } catch (e) {}
 
-      var isPinnedSession = function (s, sId) {
+      var       /** isPinnedSession implementation. */
+isPinnedSession = function (s, sId) {
         if (!s && !sId) return false;
         var id = sId || (s && s.id);
         if (id && pinnedSet.has(id)) return true;
@@ -13748,7 +13921,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         return false;
       };
 
-      var togglePinSession = function (sessionId) {
+      var       /** togglePinSession implementation. */
+togglePinSession = function (sessionId) {
         if (pinnedSet.has(sessionId)) {
           pinnedSet.delete(sessionId);
         } else {
@@ -13869,7 +14043,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var isArchivedOpen = isArchivedOpenState[0],
         setIsArchivedOpen = isArchivedOpenState[1];
 
-      var handleArchiveChat = function (sessionId) {
+      var       /** handleArchiveChat implementation. */
+handleArchiveChat = function (sessionId) {
         if (archiveSession) archiveSession(sessionId);
         archivedSet.add(sessionId);
         try {
@@ -13878,7 +14053,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         loadAll();
       };
 
-      var unarchiveSession = function (sessionId) {
+      var       /** unarchiveSession implementation. */
+unarchiveSession = function (sessionId) {
         archivedSet.delete(sessionId);
         try {
           localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
@@ -13891,7 +14067,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         loadAll();
       };
 
-      var handleOpenChat = function (sessionId, sessionTitle) {
+      var       /** handleOpenChat implementation. */
+handleOpenChat = function (sessionId, sessionTitle) {
         if (!sessionId) return;
         if (typeof window !== "undefined") {
           window.__dsh_current_session_id__ = sessionId;
@@ -13914,7 +14091,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         );
       };
 
-      var deletePermanentSession = function (sessionId) {
+      var       /** deletePermanentSession implementation. */
+deletePermanentSession = function (sessionId) {
         archivedSet.delete(sessionId);
         try {
           localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
@@ -13927,7 +14105,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         loadAll();
       };
 
-      var handleArchivePongSessions = function () {
+      var       /** handleArchivePongSessions implementation. */
+handleArchivePongSessions = function () {
         sessionIds.forEach(function (id) {
           var s = sessionsById[id];
           var title = (s && (s.displayTitle || s.title || s.name || "")) || "";
@@ -13952,7 +14131,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
       };
 
-      var toggleExpand = function (dirPath) {
+      var       /** toggleExpand implementation. */
+toggleExpand = function (dirPath) {
         setExpandedPaths(function (prev) {
           var n = Object.assign({}, prev);
           if (n[dirPath]) {
@@ -13967,7 +14147,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleNewTerminalInDir = function (dirPath) {
+      var       /** handleNewTerminalInDir implementation. */
+handleNewTerminalInDir = function (dirPath) {
         var baseName = dirPath.split("/").pop() || "term";
         var name = prompt(
           "Terminal session name:",
@@ -13984,7 +14165,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var handleStartSessionInDir = function (dirPath) {
+      var       /** handleStartSessionInDir implementation. */
+handleStartSessionInDir = function (dirPath) {
         var existing = workspaces.find(function (w) {
           return w.path === dirPath;
         });
@@ -14014,7 +14196,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         var totalLive = liveSessions.length + liveContainers.length;
         var railPlusBtnRef = React.useRef(null);
 
-        var handleExpand = function (e) {
+        var         /** handleExpand implementation. */
+handleExpand = function (e) {
           if (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -14253,7 +14436,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       });
       var totalLive = liveSessions.length + liveContainers.length;
 
-      var renderUnifiedPlusButton = function (targetDir, anchorKey) {
+      var       /** renderUnifiedPlusButton implementation. */
+renderUnifiedPlusButton = function (targetDir, anchorKey) {
         var isMenuOpen = Boolean(
           plusMenu && (plusMenu === anchorKey || plusMenu.key === anchorKey),
         );
@@ -14360,7 +14544,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         );
       };
 
-      var renderChatRow = function (chat, padLeft) {
+      var       /** renderChatRow implementation. */
+renderChatRow = function (chat, padLeft) {
         var isChatActive = chat.id === currentSessionId;
         var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "chat::" + chat.id);
         var subagents = getSubagents(chat.id);
@@ -14649,7 +14834,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         );
       };
 
-      var renderArchivedChatRow = function (chat, padLeft) {
+      var       /** renderArchivedChatRow implementation. */
+renderArchivedChatRow = function (chat, padLeft) {
         var isChatActive = chat.id === currentSessionId;
         var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "archived-chat::" + chat.id);
         return h(
@@ -14769,7 +14955,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         );
       };
 
-      var renderDirEntries = function (dirPath, depth) {
+      var       /** renderDirEntries implementation. */
+renderDirEntries = function (dirPath, depth) {
         var entries = dirCache[dirPath];
         var itemLeftPad = 8 + depth * 16;
 
@@ -15019,7 +15206,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         });
       };
 
-      var filterBySearch = function (chat) {
+      var       /** filterBySearch implementation. */
+filterBySearch = function (chat) {
         if (!searchQuery || !searchQuery.trim()) return true;
         var q = searchQuery.trim().toLowerCase();
         return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
@@ -15766,7 +15954,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    function GlobalTerminalAndContainerManager() {
+        /** GlobalTerminalAndContainerManager implementation. */
+function GlobalTerminalAndContainerManager() {
       var isBottomOpenState = React.useState(false);
       var isBottomOpen = isBottomOpenState[0],
         setBottomOpen = isBottomOpenState[1];
@@ -15775,24 +15964,28 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         setPanel = panelState[1];
 
       React.useEffect(function () {
-        var onToggleBottom = function () {
+        var         /** onToggleBottom implementation. */
+onToggleBottom = function () {
           setBottomOpen(function (v) {
             return !v;
           });
         };
-        var onMoveToBottom = function (e) {
+        var         /** onMoveToBottom implementation. */
+onMoveToBottom = function (e) {
           var tab = e.detail;
           if (tab) {
             setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
             setBottomOpen(true);
           }
         };
-        var onOpenTerm = function (e) {
+        var         /** onOpenTerm implementation. */
+onOpenTerm = function (e) {
           var sess = (e && e.detail && e.detail.session) || "0";
           setPanel({ type: "terminal", session: sess, id: sess });
           setBottomOpen(true);
         };
-        var onOpenCont = function (e) {
+        var         /** onOpenCont implementation. */
+onOpenCont = function (e) {
           var id = (e && e.detail && e.detail.id) || null;
           setPanel({ type: "container", session: null, id: id });
           setBottomOpen(true);
@@ -15804,7 +15997,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         window.addEventListener("dsh:open-container", onOpenCont);
 
         // Global Keyboard Shortcuts
-        var onGlobalKeyDown = function (e) {
+        var         /** onGlobalKeyDown implementation. */
+onGlobalKeyDown = function (e) {
           var isMac =
             typeof navigator !== "undefined" &&
             /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
@@ -15879,14 +16073,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
     }
 
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       if (typeof window !== "undefined") {
         window.__dsh_ctx__ = ctx;
         window.__dsh_UnifiedWorkspacesBrowser = UnifiedWorkspacesBrowser;
       }
       ensureModelPickerDecoration();
       // Injected helper methods for dynamic workspaces and sessions
-      var browserInjected = function () {
+      var       /** browserInjected implementation. */
+browserInjected = function () {
         return {
           startSession: function (workspaceId) {
             ctx.workspaces && ctx.workspaces.startSession(workspaceId);

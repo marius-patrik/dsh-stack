@@ -67,6 +67,7 @@ function dshHome(): string {
   return resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config: Config = {}): void {
   const root = config.actionsRoot ?? join(dshHome(), "actions");
   const catalog = new ActionCatalog({ root });
@@ -136,14 +137,16 @@ export function apply(ctx: Context, config: Config = {}): void {
 
   const commands = (ctx as unknown as { commands?: { register(definition: unknown): () => void } })
     .commands;
-  const safeRegister = (definition: unknown) => {
+  const   /** safeRegister implementation. */
+safeRegister = (definition: unknown) => {
     try {
       commands?.register(definition);
     } catch {
       // Built-in or existing command already registered
     }
   };
-  const selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
+  const   /** selectHandler implementation. */
+selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
     const id = rawInput.trim();
     if (!catalog.ids().includes(id)) return { kind: "error", text: `Unknown preset: ${id}` };
     const result = controller.set(agent, id);
@@ -264,14 +267,16 @@ export function apply(ctx: Context, config: Config = {}): void {
         }): () => void;
       };
     };
-    const json = (res: any, status: number, body: unknown): void => {
+    const     /** json implementation. */
+json = (res: any, status: number, body: unknown): void => {
       res.writeHead(status, {
         "content-type": "application/json; charset=utf-8",
         "cache-control": "no-store",
       });
       res.end(JSON.stringify(body));
     };
-    const describe = (action: ActionSpec) => ({
+    const     /** describe implementation. */
+describe = (action: ActionSpec) => ({
       id: action.id,
       name: action.name ?? action.id,
       description: action.description ?? null,
@@ -282,7 +287,8 @@ export function apply(ctx: Context, config: Config = {}): void {
     });
 
     // The action vocabulary (built-ins + file-defined) — also the run palette's data.
-    const listHandler = async (_req: unknown, res: any) => {
+    const     /** listHandler implementation. */
+listHandler = async (_req: unknown, res: any) => {
       await catalog.load();
       json(res, 200, {
         defaultAction,

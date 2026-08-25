@@ -72,6 +72,7 @@ export interface TuiState {
   commandMode: boolean;
 }
 
+/** createInitialState implementation. */
 export function createInitialState(): TuiState {
   return {
     sessionId: null,

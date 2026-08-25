@@ -26,8 +26,10 @@ const components: Record<string, SkinComponents> = {
 export function apply(ctx: ClientContext): void {
   const active = runtime.getActive();
   const selected = components[active] ?? components.deepseek!;
-  const Mark = (props: { size?: number }) => createElement(selected.mark, props);
-  const Name = () => createElement(selected.name);
+  const   /** Mark implementation. */
+Mark = (props: { size?: number }) => createElement(selected.mark, props);
+  const   /** Name implementation. */
+Name = () => createElement(selected.name);
 
   ctx.slots.inject("sidebar.brand.mark", function* () {
     yield ctx.slots.register({ name: "sidebar.brand.mark", inject: () => ({ size: 24 }) }, Mark);

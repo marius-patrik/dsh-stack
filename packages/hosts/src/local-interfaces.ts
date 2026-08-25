@@ -11,6 +11,7 @@ export interface LocalInterfaceInfo {
   internal: boolean;
 }
 
+/** scanLocalInterfaces implementation. */
 export function scanLocalInterfaces(): LocalInterfaceInfo[] {
   const ifaces = networkInterfaces();
   const results: LocalInterfaceInfo[] = [];
@@ -33,6 +34,7 @@ export function scanLocalInterfaces(): LocalInterfaceInfo[] {
   return results;
 }
 
+/** getPrimaryLanIp implementation. */
 export function getPrimaryLanIp(): string | undefined {
   const list = scanLocalInterfaces();
   const preferred = list.find((i) => i.name === "en0" || i.name === "eth0" || i.name === "wlan0");

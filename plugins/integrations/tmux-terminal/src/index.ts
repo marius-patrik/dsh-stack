@@ -18,11 +18,13 @@ export interface TmuxSession {
 export class TmuxService {
   private sessions = new Map<string, TmuxSession>();
 
-  constructor(private ctx: Context) {
+    /** Constructs an instance. */
+constructor(private ctx: Context) {
     this.registerTmuxTools();
   }
 
-  createSession(name: string, command: string = "zsh", cwd: string = process.cwd()): TmuxSession {
+    /** createSession implementation. */
+createSession(name: string, command: string = "zsh", cwd: string = process.cwd()): TmuxSession {
     const id = "tmux-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
     const session: TmuxSession = {
       id,
@@ -40,7 +42,8 @@ export class TmuxService {
     return session;
   }
 
-  sendInput(id: string, input: string): boolean {
+    /** sendInput implementation. */
+sendInput(id: string, input: string): boolean {
     const s = this.sessions.get(id);
     if (!s || !s.running) return false;
     s.history.push(input);
@@ -50,17 +53,20 @@ export class TmuxService {
     return true;
   }
 
-  captureOutput(id: string, linesCount: number = 50): string {
+    /** captureOutput implementation. */
+captureOutput(id: string, linesCount: number = 50): string {
     const s = this.sessions.get(id);
     if (!s) return "";
     return s.history.slice(-linesCount).join("\n");
   }
 
-  listSessions(): TmuxSession[] {
+    /** listSessions implementation. */
+listSessions(): TmuxSession[] {
     return Array.from(this.sessions.values());
   }
 
-  killSession(id: string): boolean {
+    /** killSession implementation. */
+killSession(id: string): boolean {
     const s = this.sessions.get(id);
     if (!s) return false;
     s.running = false;
@@ -71,7 +77,8 @@ export class TmuxService {
     return true;
   }
 
-  private registerTmuxTools(): void {
+    /** registerTmuxTools implementation. */
+private registerTmuxTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 
@@ -147,6 +154,7 @@ export const Config = Schema.object({
   scrollback: Schema.number().default(5000),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new TmuxService(ctx);
   (ctx as any).tmux = service;

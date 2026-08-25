@@ -7,6 +7,7 @@ export const optional: string[] = [];
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context) {
   // Mounts Docker sandbox manager
 }

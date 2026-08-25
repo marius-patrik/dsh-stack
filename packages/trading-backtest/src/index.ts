@@ -50,6 +50,7 @@ export interface BacktestOptions {
   readonly slippageBps?: number;
 }
 
+/** runBacktest implementation. */
 export function runBacktest(
   candles: readonly Candle[],
   strategy: Strategy,
@@ -66,9 +67,11 @@ export function runBacktest(
   const trades: Trade[] = [];
   const equityCurve: number[] = [];
 
-  const executionPrice = (price: number, side: "buy" | "sell"): number =>
+  const   /** executionPrice implementation. */
+executionPrice = (price: number, side: "buy" | "sell"): number =>
     side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
-  const mark = (price: number): number =>
+  const   /** mark implementation. */
+mark = (price: number): number =>
     position === null
       ? cash
       : cash + (position.side === "long" ? position.quantity * price : -position.quantity * price);
@@ -130,19 +133,22 @@ export function runBacktest(
     trades,
   };
 
-  function openLong(quantity: number): void {
+    /** openLong implementation. */
+function openLong(quantity: number): void {
     const price = executionPrice(currentCandle.close, "buy");
     position = { side: "long", quantity, entryPrice: price, entryTime: currentCandle.time };
     cash -= quantity * price + commission;
   }
 
-  function openShort(quantity: number): void {
+    /** openShort implementation. */
+function openShort(quantity: number): void {
     const price = executionPrice(currentCandle.close, "sell");
     position = { side: "short", quantity, entryPrice: price, entryTime: currentCandle.time };
     cash += quantity * price - commission;
   }
 
-  function closeAt(price: number, time: number): void {
+    /** closeAt implementation. */
+function closeAt(price: number, time: number): void {
     if (position === null) return;
     const exitPrice =
       position.side === "long" ? executionPrice(price, "sell") : executionPrice(price, "buy");
@@ -166,7 +172,8 @@ export function runBacktest(
     position = null;
   }
 
-  function close(): void {
+    /** close implementation. */
+function close(): void {
     closeAt(currentCandle.close, currentCandle.time);
   }
 }

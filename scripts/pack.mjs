@@ -11,10 +11,12 @@ if (!["build", "typecheck", "test", "verify"].includes(command)) {
 const root = process.cwd();
 const workspace = resolve(root, "..");
 
+/** readJson implementation. */
 async function readJson(path) {
   return JSON.parse(await fs.readFile(path, "utf8"));
 }
 
+/** discoverStackPackages implementation. */
 async function discoverStackPackages() {
   const entries = await fs.readdir(workspace, { withFileTypes: true });
   const byId = new Map();
@@ -40,7 +42,8 @@ const dependencies = dependencyIds.map((id) => {
 
 dependencies.sort((a, b) => a.id.localeCompare(b.id));
 
-const run = (child) =>
+const /** run implementation. */
+run = (child) =>
   new Promise((resolvePromise, reject) => {
     const childProcess = spawn("pnpm", ["run", command], {
       cwd: child.dir,

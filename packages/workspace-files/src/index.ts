@@ -55,6 +55,7 @@ export const defaultFileSections: readonly FileSection[] = [
   { id: "archived", label: "Archived", iconTone: "muted" },
 ];
 
+/** createFileRow implementation. */
 export function createFileRow(node: FileNode, expanded = false): FileRowModel {
   const extension = extensionOf(node.name);
   const folder =
@@ -74,6 +75,7 @@ export function createFileRow(node: FileNode, expanded = false): FileRowModel {
   };
 }
 
+/** extensionOf implementation. */
 function extensionOf(name: string): string | undefined {
   const dot = name.lastIndexOf(".");
   if (dot <= 0 || dot === name.length - 1) return undefined;

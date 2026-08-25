@@ -74,6 +74,7 @@ function parseToolInput(argumentsJson: string): Record<string, unknown> {
   }
 }
 
+/** serializeAssistant implementation. */
 function serializeAssistant(message: Message): WireMessage {
   const parts: WirePart[] = [];
   for (const block of message.content) {
@@ -90,6 +91,7 @@ function serializeAssistant(message: Message): WireMessage {
   return { role: "assistant", content: parts };
 }
 
+/** serializeUser implementation. */
 function serializeUser(message: Message): WireMessage {
   const parts: WirePart[] = [];
   for (const block of message.content) {
@@ -106,6 +108,7 @@ function serializeUser(message: Message): WireMessage {
   return { role: "user", content: parts };
 }
 
+/** stripTrailingSlash implementation. */
 function stripTrailingSlash(base: string): string {
   return base.endsWith("/") ? base.slice(0, -1) : base;
 }
@@ -198,7 +201,8 @@ export function serializeThinking(
 export const claudeDialect: Dialect = {
   id: "claude",
 
-  serialize(
+    /** serialize implementation. */
+serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -262,7 +266,8 @@ export const claudeDialect: Dialect = {
     };
   },
 
-  parse(body, onActivity) {
+    /** parse implementation. */
+parse(body, onActivity) {
     return translateClaude(parseSseEvents(body, onActivity));
   },
 };

@@ -144,6 +144,7 @@ const TOKEN_REFRESH_TIMEOUT_MS = 15_000;
 
 type RefreshedToken = { access: string; refresh?: string; expires: number };
 
+/** refreshOAuthToken implementation. */
 async function refreshOAuthToken(
   spec: OAuthRefresher & { clientId: string },
   refreshToken: string,
@@ -280,6 +281,7 @@ export function resolveProvidersOptions(config: Config): ResolvedProvidersOption
   };
 }
 
+/** toConnection implementation. */
 function toConnection(
   route: ProviderRoute,
   resolved: ResolvedProvidersOptions,
@@ -306,7 +308,8 @@ function toConnection(
  * instead of duplicating mode or credential logic.
  */
 export class ProviderPolicy extends Service {
-  constructor(
+    /** Constructs an instance. */
+constructor(
     ctx: Context,
     private readonly gateImpl: (provider: string) => Promise<ProviderGate | undefined>,
   ) {
@@ -329,11 +332,14 @@ declare module "@deepseek-ai/cordis" {
   }
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
-  let current: () => Config = () => config;
+  let   /** current implementation. */
+current: () => Config = () => config;
   let lastRaw: Config | undefined;
   let lastGood: ResolvedProvidersOptions | undefined;
-  const resolved = (): ResolvedProvidersOptions => {
+  const   /** resolved implementation. */
+resolved = (): ResolvedProvidersOptions => {
     const raw = current();
     if (raw === lastRaw && lastGood !== undefined) return lastGood;
     try {
@@ -353,12 +359,14 @@ export function apply(ctx: Context, config: Config): void {
   };
   resolved();
 
-  const connections = (provider: string): ProviderConnection =>
+  const   /** connections implementation. */
+connections = (provider: string): ProviderConnection =>
     toConnection(providerRoute(provider), resolved());
 
   const memory = new Map<string, string>();
 
-  const read = async (ref: string): Promise<string | undefined> => {
+  const   /** read implementation. */
+read = async (ref: string): Promise<string | undefined> => {
     const mem = memory.get(ref);
     if (mem !== undefined) return mem;
     const accounts = ctx.get("accounts") as AccountsService | undefined;
@@ -368,7 +376,8 @@ export function apply(ctx: Context, config: Config): void {
     return undefined;
   };
 
-  const write = async (ref: string, value: string): Promise<void> => {
+  const   /** write implementation. */
+write = async (ref: string, value: string): Promise<void> => {
     const accounts = ctx.get("accounts") as AccountsService | undefined;
     if (accounts !== undefined) {
       await accounts.set(ref, value);
@@ -424,7 +433,8 @@ export function apply(ctx: Context, config: Config): void {
         : { ...refresher, clientId };
     const inflight = refreshInflight.get(provider);
     if (inflight !== undefined) return inflight;
-    const attempt = () =>
+    const     /** attempt implementation. */
+attempt = () =>
       refreshOAuthToken(spec, refreshToken).then(async (token) => {
         // Write order matters for single-use rotating refresh tokens: persist
         // the NEW refresh token first. If the process dies after the provider
@@ -511,7 +521,8 @@ export function apply(ctx: Context, config: Config): void {
     return { auth, missing, stored };
   };
 
-  const missingCredential = (provider: string, missing: readonly string[]): LlmError =>
+  const   /** missingCredential implementation. */
+missingCredential = (provider: string, missing: readonly string[]): LlmError =>
     new LlmError(
       `dsh-providers: no credential for "${provider}"; store ${missing.join(", ")} through the` +
         " account manager (dsh-credentials) or the harness credentials service",
@@ -527,7 +538,8 @@ export function apply(ctx: Context, config: Config): void {
       "MISSING_CREDENTIAL",
     );
 
-  const resolveAuth = async (
+  const   /** resolveAuth implementation. */
+resolveAuth = async (
     provider: string,
     connection: ProviderConnection,
   ): Promise<DialectAuth> => {
@@ -580,7 +592,8 @@ export function apply(ctx: Context, config: Config): void {
   };
 
   let userId: AnonymousUserId | undefined;
-  const resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
+  const   /** resolveUserId implementation. */
+resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
 
   // The service gate is a boundary for callers that see arbitrary providers
   // (the agent-scoped remap row reads every request's provider): a provider
@@ -614,7 +627,8 @@ export function apply(ctx: Context, config: Config): void {
   const registration = ctx.llm.registerAdapter([...PROVIDER_IDS], adapter);
   let registeredPolicy = resolved().retryPolicy;
   let registeredCatalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
-  const ensureRegistrationFacts = (): void => {
+  const   /** ensureRegistrationFacts implementation. */
+ensureRegistrationFacts = (): void => {
     // Base URLs, the live-catalog toggle and the TTL all change what a listing
     // would return, so drop the discovered entries and let the next read
     // refetch rather than serving a catalog from the previous configuration.

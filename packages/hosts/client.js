@@ -29,15 +29,18 @@ window.__ModuleLoader__.load({
 
     var STATUS_ROUTE = "/hosts/api/status";
 
-    function createHostsStore() {
+        /** createHostsStore implementation. */
+function createHostsStore() {
       var listeners = new Set();
       var state = { data: null, status: "idle", error: null };
-      function emit() {
+            /** emit implementation. */
+function emit() {
         listeners.forEach(function (listener) {
           listener();
         });
       }
-      function load() {
+            /** load implementation. */
+function load() {
         state = { data: state.data, status: "loading", error: null };
         emit();
         return fetch(STATUS_ROUTE)
@@ -72,7 +75,8 @@ window.__ModuleLoader__.load({
       };
     }
 
-    function DeployGlyph() {
+        /** DeployGlyph implementation. */
+function DeployGlyph() {
       var React = require("react");
       return React.createElement(
         "svg",
@@ -99,7 +103,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function DeploySettingsSection(props) {
+        /** DeploySettingsSection implementation. */
+function DeploySettingsSection(props) {
       var React = require("react");
       var h = React.createElement;
       var state = props.useHosts
@@ -166,7 +171,8 @@ window.__ModuleLoader__.load({
         [state && state.status],
       );
 
-      function copyText(text, label) {
+            /** copyText implementation. */
+function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
           setCopyMsg(label || "Copied!");
@@ -176,7 +182,8 @@ window.__ModuleLoader__.load({
         }
       }
 
-      var handleTriggerDeploy = function () {
+      var       /** handleTriggerDeploy implementation. */
+handleTriggerDeploy = function () {
         setIsDeploying(true);
         var timeStr = new Date().toLocaleTimeString();
         setDeployLogs(function (prev) {
@@ -199,7 +206,8 @@ window.__ModuleLoader__.load({
         }, 1200);
       };
 
-      var nodeCard = function (node) {
+      var       /** nodeCard implementation. */
+nodeCard = function (node) {
         var isOnline = node.online;
         var isSelf = node.isSelf;
         var dotColor = isOnline ? "#3fb950" : "#8b949e";
@@ -697,7 +705,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       var store = createHostsStore();
       ctx.slots.inject(
         "settings.section",

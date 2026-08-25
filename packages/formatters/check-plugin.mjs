@@ -91,7 +91,8 @@ const sections = new Map([
 ]);
 actx.provide("settings", {
   get: (ns) => sections.get(ns),
-  register(_ns, _schema, opts) {
+    /** register implementation. */
+register(_ns, _schema, opts) {
     if (!sections.has(_ns)) sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };
   },

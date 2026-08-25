@@ -215,6 +215,7 @@ async function readBody(req: ReloadRequest): Promise<unknown> {
   return text === "" ? undefined : JSON.parse(text);
 }
 
+/** respond implementation. */
 function respond(res: ReloadResponse, status: number, body: Record<string, unknown>): void {
   res.writeHead(status, {
     "content-type": "application/json; charset=utf-8",

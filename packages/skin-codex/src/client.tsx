@@ -4,6 +4,7 @@ export interface SkinBrandProps {
   readonly size?: number;
 }
 
+/** CodexBrandMark implementation. */
 export function CodexBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   return (
     <span
@@ -15,6 +16,7 @@ export function CodexBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   );
 }
 
+/** CodexBrandName implementation. */
 export function CodexBrandName(): JSX.Element {
   return <span style={{ fontWeight: 650, letterSpacing: "-0.01em" }}>Codex</span>;
 }

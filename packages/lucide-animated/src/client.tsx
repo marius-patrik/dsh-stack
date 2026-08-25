@@ -55,6 +55,7 @@ import {
 
 const styleId = "dsh-stack-lucide-animated-styles";
 
+/** ensureAnimationStyles implementation. */
 function ensureAnimationStyles(): void {
   if (typeof document === "undefined" || document.getElementById(styleId)) return;
   const style = document.createElement("style");
@@ -73,6 +74,7 @@ type AnimationMode = "bounce" | "spin" | "pulse" | "nudge";
 type AnimatedIconProps = Omit<HTMLAttributes<HTMLSpanElement>, "color"> &
   Pick<LucideProps, "color" | "strokeWidth"> & { size?: number | string };
 
+/** makeAnimatedIcon implementation. */
 function makeAnimatedIcon(Icon: LucideIcon, mode: AnimationMode): LucideIcon {
   return forwardRef<HTMLSpanElement, AnimatedIconProps>(
     ({ className, size = 18, color, strokeWidth, style, ...props }, ref) => {

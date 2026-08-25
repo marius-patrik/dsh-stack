@@ -110,13 +110,15 @@ export class EncryptedFileVault implements VaultStore {
   readonly #masterKey: MasterKeySource;
   #key: Buffer | null = null;
 
-  constructor(options: EncryptedFileVaultOptions) {
+    /** Constructs an instance. */
+constructor(options: EncryptedFileVaultOptions) {
     if (!options.directory.trim()) throw new Error("vault requires a directory");
     this.#directory = path.resolve(options.directory);
     this.#masterKey = options.masterKey;
   }
 
-  get directory(): string {
+    /** directory implementation. */
+get directory(): string {
     return this.#directory;
   }
 
@@ -125,7 +127,8 @@ export class EncryptedFileVault implements VaultStore {
     return this.#masterKey.description;
   }
 
-  async get(id: string): Promise<SecretRecord | null> {
+    /** get implementation. */
+async get(id: string): Promise<SecretRecord | null> {
     const file = this.#file(id);
     if (!(await exists(file))) return null;
     const envelope = parseEnvelope(await readFile(file, "utf8"), file);
@@ -152,7 +155,8 @@ export class EncryptedFileVault implements VaultStore {
     return record;
   }
 
-  async put(record: SecretRecord): Promise<void> {
+    /** put implementation. */
+async put(record: SecretRecord): Promise<void> {
     const file = this.#file(record.id);
     const key = await this.#dataKey();
     const iv = randomBytes(IV_BYTES);
@@ -174,14 +178,16 @@ export class EncryptedFileVault implements VaultStore {
     await writePrivateFile(file, `${JSON.stringify(envelope)}\n`);
   }
 
-  async delete(id: string): Promise<boolean> {
+    /** delete implementation. */
+async delete(id: string): Promise<boolean> {
     const file = this.#file(id);
     if (!(await exists(file))) return false;
     await rm(file, { force: true });
     return true;
   }
 
-  async list(): Promise<string[]> {
+    /** list implementation. */
+async list(): Promise<string[]> {
     if (!(await exists(this.#directory))) return [];
     const entries = await readdir(this.#directory, { withFileTypes: true });
     return entries
@@ -191,7 +197,8 @@ export class EncryptedFileVault implements VaultStore {
       .sort();
   }
 
-  async describe(): Promise<SecretDescriptor[]> {
+    /** describe implementation. */
+async describe(): Promise<SecretDescriptor[]> {
     const descriptors: SecretDescriptor[] = [];
     for (const id of await this.list()) {
       const record = await this.get(id);
@@ -200,12 +207,14 @@ export class EncryptedFileVault implements VaultStore {
     return descriptors;
   }
 
-  #file(id: string): string {
+    /** #file implementation. */
+#file(id: string): string {
     if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`);
     return path.join(this.#directory, `${id}${RECORD_SUFFIX}`);
   }
 
-  async #dataKey(): Promise<Buffer> {
+    /** #dataKey implementation. */
+async #dataKey(): Promise<Buffer> {
     if (this.#key) return this.#key;
     const key = await this.#masterKey.key();
     if (key.byteLength !== 32) throw new Error("vault master key must be 32 bytes");
@@ -223,25 +232,30 @@ export class EncryptedFileVault implements VaultStore {
 export class MemoryVault implements VaultStore {
   readonly #records = new Map<string, SecretRecord>();
 
-  async get(id: string): Promise<SecretRecord | null> {
+    /** get implementation. */
+async get(id: string): Promise<SecretRecord | null> {
     if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`);
     return this.#records.get(id) ?? null;
   }
 
-  async put(record: SecretRecord): Promise<void> {
+    /** put implementation. */
+async put(record: SecretRecord): Promise<void> {
     if (!RECORD_ID.test(record.id)) throw new Error(`invalid vault record id: ${record.id}`);
     this.#records.set(record.id, record);
   }
 
-  async delete(id: string): Promise<boolean> {
+    /** delete implementation. */
+async delete(id: string): Promise<boolean> {
     return this.#records.delete(id);
   }
 
-  async list(): Promise<string[]> {
+    /** list implementation. */
+async list(): Promise<string[]> {
     return [...this.#records.keys()].sort();
   }
 
-  async describe(): Promise<SecretDescriptor[]> {
+    /** describe implementation. */
+async describe(): Promise<SecretDescriptor[]> {
     return (await this.list()).map((id) => descriptorOf(this.#records.get(id)!));
   }
 }
@@ -277,7 +291,8 @@ export class VaultCredentialStore implements CredentialStore {
   readonly #defaults: NonNullable<VaultCredentialStoreOptions["defaults"]>;
   readonly #now: () => number;
 
-  constructor(options: VaultCredentialStoreOptions) {
+    /** Constructs an instance. */
+constructor(options: VaultCredentialStoreOptions) {
     this.#vault = options.vault;
     this.#now = options.now ?? (() => Date.now());
     this.#defaults =
@@ -285,7 +300,8 @@ export class VaultCredentialStore implements CredentialStore {
       ((id) => ({ label: id, purpose: id, scope: { workspace: "*", agents: [] } }));
   }
 
-  async get(id: string): Promise<ProviderCredential | null> {
+    /** get implementation. */
+async get(id: string): Promise<ProviderCredential | null> {
     const record = await this.#vault.get(id);
     if (!record) return null;
     if (record.type === "api_key") {
@@ -311,7 +327,8 @@ export class VaultCredentialStore implements CredentialStore {
     return null;
   }
 
-  async put(id: string, credential: ProviderCredential): Promise<void> {
+    /** put implementation. */
+async put(id: string, credential: ProviderCredential): Promise<void> {
     const material = credentialToMaterial(credential);
     const existing = await this.#vault.get(id);
     if (existing) {
@@ -335,13 +352,15 @@ export class VaultCredentialStore implements CredentialStore {
     );
   }
 
-  async delete(id: string): Promise<boolean> {
+    /** delete implementation. */
+async delete(id: string): Promise<boolean> {
     const record = await this.#vault.get(id);
     if (!record || !isCredentialType(record.type)) return false;
     return this.#vault.delete(id);
   }
 
-  async list(): Promise<string[]> {
+    /** list implementation. */
+async list(): Promise<string[]> {
     const descriptors = await this.#vault.describe();
     return descriptors
       .filter((descriptor) => isCredentialType(descriptor.type))
@@ -350,10 +369,12 @@ export class VaultCredentialStore implements CredentialStore {
   }
 }
 
+/** isCredentialType implementation. */
 function isCredentialType(type: SecretType): boolean {
   return type === "api_key" || type === "oauth_token";
 }
 
+/** credentialToMaterial implementation. */
 function credentialToMaterial(credential: ProviderCredential): SecretMaterial {
   if (credential.kind === "api_key") {
     return { type: "api_key", apiKey: credential.apiKey, header: null };
@@ -369,10 +390,12 @@ function credentialToMaterial(credential: ProviderCredential): SecretMaterial {
   };
 }
 
+/** aad implementation. */
 function aad(id: string, type: SecretType): Buffer {
   return Buffer.from(`${id}${AAD_SEPARATOR}${type}`, "utf8");
 }
 
+/** parseEnvelope implementation. */
 function parseEnvelope(raw: string, file: string): VaultEnvelope {
   let parsed: Partial<VaultEnvelope>;
   try {

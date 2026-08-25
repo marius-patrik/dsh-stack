@@ -86,6 +86,7 @@ export function modelsEndpoint(baseURL: string): string {
   return `${baseURL.replace(/\/+$/, "")}/models`;
 }
 
+/** snapshot implementation. */
 function snapshot(
   provider: string,
   rest: Omit<QuotaSnapshot, "provider" | "fetchedAt">,
@@ -221,7 +222,8 @@ export function createConfiguredProviders(deps: ConfiguredProbeDeps): QuotaProvi
     if (readConfiguredProfile(entry, descriptors)?.baseURL === undefined) continue;
     providers.push({
       id: entry.provider,
-      async read(signal): Promise<QuotaSnapshot> {
+            /** read implementation. */
+async read(signal): Promise<QuotaSnapshot> {
         if (signal.aborted) {
           return snapshot(entry.provider, {
             status: "unknown",

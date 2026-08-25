@@ -11,11 +11,14 @@ import { translateOpenAi } from "./lib/translate-openai.js";
 import { translateClaude } from "./lib/translate-claude.js";
 import { translateGemini } from "./lib/translate-gemini.js";
 
-const id = () => crypto.randomUUID();
+const /** id implementation. */
+id = () => crypto.randomUUID();
 
+/** userMessage implementation. */
 function userMessage(text) {
   return { id: id(), role: "user", content: [{ type: "text", text }], source: { kind: "user" } };
 }
+/** assistantText implementation. */
 function assistantText(text) {
   return {
     id: id(),
@@ -25,13 +28,15 @@ function assistantText(text) {
   };
 }
 
+/** collect implementation. */
 async function collect(gen) {
   const out = [];
   for await (const c of gen) out.push(c);
   return out;
 }
 
-const ok = (name) => {
+const /** ok implementation. */
+ok = (name) => {
   console.log("ok -", name);
 };
 
@@ -265,7 +270,8 @@ assert.equal(creq.framing, "sse");
     { markdown: "king", usageMetadata: { candidatesTokenCount: "2", totalTokenCount: "10" } },
   ]);
   const stream = new ReadableStream({
-    start(c) {
+        /** start implementation. */
+start(c) {
       c.enqueue(new TextEncoder().encode(wire));
       c.close();
     },
@@ -285,7 +291,8 @@ assert.equal(creq.framing, "sse");
 
   // An empty answer is an error finish, not a silent success.
   const empty = new ReadableStream({
-    start(c) {
+        /** start implementation. */
+start(c) {
       c.enqueue(new TextEncoder().encode("[]"));
       c.close();
     },

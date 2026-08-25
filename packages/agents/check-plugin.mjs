@@ -208,12 +208,14 @@ const ctrlCatalog = new PersonaCatalog({ root: catalogRoot2 });
 await ctrlCatalog.load();
 const controller = new PersonaController({ resolve: (id) => ctrlCatalog.get(id) !== undefined });
 
-const makeSession = (header = {}) => {
+const /** makeSession implementation. */
+makeSession = (header = {}) => {
   const events = [];
   return {
     events,
     header,
-    append(type, data) {
+        /** append implementation. */
+append(type, data) {
       events.push({ type, data });
     },
   };
@@ -291,7 +293,9 @@ assert.equal(
 const s6 = makeSession();
 assert.equal(
   plugin.personaPolicyText(
-    { agent: { session: { events: [], header: { agentPreset: "reviewer" }, append() {} } } },
+    { agent: { session: { events: [], header: { agentPreset: "reviewer" },     /** append implementation. */
+/** append implementation. */
+append() {} } } },
     controller,
     ctrlCatalog,
     undefined,
@@ -302,7 +306,9 @@ assert.equal(
 const s7 = makeSession();
 assert.equal(
   plugin.personaPolicyText(
-    { agent: { session: { events: [], header: { agentPreset: "unknown" }, append() {} } } },
+    { agent: { session: { events: [], header: { agentPreset: "unknown" },     /** append implementation. */
+/** append implementation. */
+append() {} } } },
     controller,
     ctrlCatalog,
     undefined,
@@ -330,7 +336,8 @@ let capturedCommand = null;
 const actx = new Context();
 actx.provide("settings", {
   get: (ns) => sections.get(ns),
-  register(_ns, _schema, opts) {
+    /** register implementation. */
+register(_ns, _schema, opts) {
     if (!sections.has(_ns)) sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };
   },
@@ -375,7 +382,9 @@ assert.equal(capturedSection.name, "persona:policy");
 assert.equal(capturedSection.order, 45);
 assert.equal(typeof capturedSection.text, "function");
 assert.equal(capturedSection.text({}), "", "no agent → empty");
-const bootAgentSession = { events: [], header: { agentPreset: "boot" }, append() {} };
+const bootAgentSession = { events: [], header: { agentPreset: "boot" }, /** append implementation. */
+/** append implementation. */
+append() {} };
 assert.equal(
   capturedSection.text({ agent: { session: bootAgentSession } }),
   "Boot persona.",
@@ -501,26 +510,33 @@ assert.deepEqual(
 );
 const clientRegistrants = new Map();
 const clientCtx = {
-  effect(fn) {
+    /** effect implementation. */
+effect(fn) {
     fn();
   },
   slots: {
-    inject(name, fn) {
+        /** inject implementation. */
+inject(name, fn) {
       clientRegistrants.set(name, fn);
     },
-    register(spec) {
+        /** register implementation. */
+register(spec) {
       return spec;
     },
   },
-  inject(services, cb) {
+    /** inject implementation. */
+inject(services, cb) {
     const scope = {
-      effect(fn) {
+            /** effect implementation. */
+effect(fn) {
         fn();
       },
-      get(name) {
+            /** get implementation. */
+get(name) {
         if (name === "commandUi")
           return {
-            register(spec) {
+                        /** register implementation. */
+register(spec) {
               commandUiRegistrants.push(spec);
               return () => {};
             },
@@ -528,10 +544,12 @@ const clientCtx = {
         return undefined;
       },
       sessions: {
-        get() {
+                /** get implementation. */
+get() {
           return {
             projections: {
-              get() {
+                            /** get implementation. */
+get() {
                 return currentProjection;
               },
             },
@@ -544,7 +562,8 @@ const clientCtx = {
   connection: {
     api: {
       agentPresets: {
-        list() {
+                /** list implementation. */
+list() {
           return Promise.resolve({ result: { ok: true, value: { presets: stubRoster } } });
         },
       },
@@ -552,7 +571,8 @@ const clientCtx = {
   },
   remote: {
     commands: {
-      execute(sessionId, line) {
+            /** execute implementation. */
+execute(sessionId, line) {
         executedCommands.push({ sessionId, line });
         return Promise.resolve({ ok: true });
       },

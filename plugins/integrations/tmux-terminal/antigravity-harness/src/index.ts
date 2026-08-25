@@ -7,6 +7,7 @@ export const optional = [];
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context) {
   // Registers antigravity-harness interactive tmux runner
 }

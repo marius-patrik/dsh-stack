@@ -26,7 +26,8 @@ export interface PersonaCatalogConfig {
 export class PersonaCatalog {
   private readonly personas = new Map<string, Persona>();
 
-  constructor(private readonly config: PersonaCatalogConfig) {}
+    /** Constructs an instance. */
+constructor(private readonly config: PersonaCatalogConfig) {}
 
   /** Re-index the authoring root. Never throws; unreadable files are skipped. */
   async load(): Promise<void> {

@@ -6,7 +6,8 @@ export const inject = ["webServer", "slots"];
 export const optional = ["llm"];
 
 export class VoiceSynthesisService {
-  speak(text: string): boolean {
+    /** speak implementation. */
+speak(text: string): boolean {
     return true;
   }
 }
@@ -16,6 +17,7 @@ export const Config = Schema.object({
   voice: Schema.string().default("default"),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context) {
   (ctx as any).voice = new VoiceSynthesisService();
 }

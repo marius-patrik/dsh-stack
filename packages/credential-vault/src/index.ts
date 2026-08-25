@@ -90,9 +90,11 @@ class KeychainOrKeyFileMasterKey implements MasterKeySource {
   readonly description = "macOS Keychain (dsh.accounts) or 0600 key file";
   #key: Uint8Array | null = null;
 
-  constructor(private readonly keyFile: string) {}
+    /** Constructs an instance. */
+constructor(private readonly keyFile: string) {}
 
-  async key(): Promise<Uint8Array> {
+    /** key implementation. */
+async key(): Promise<Uint8Array> {
     if (this.#key === null) this.#key = Uint8Array.from(await loadOrCreateKey(this.keyFile));
     return Uint8Array.from(this.#key);
   }
@@ -112,7 +114,8 @@ export class AccountsService extends Service {
   private readonly providers: Map<string, FileSecretProvider> = new Map();
   private readonly ready: Promise<void>;
 
-  constructor(
+    /** Constructs an instance. */
+constructor(
     ctx: Context,
     private readonly options: { home: string; keyFile: string },
   ) {
@@ -127,19 +130,23 @@ export class AccountsService extends Service {
     this.registerFileProvider(githubFileProvider);
   }
 
-  vaultPath(): string {
+    /** vaultPath implementation. */
+vaultPath(): string {
     return this.vault.directory;
   }
 
-  registerFileProvider(provider: FileSecretProvider): void {
+    /** registerFileProvider implementation. */
+registerFileProvider(provider: FileSecretProvider): void {
     this.providers.set(provider.id, provider);
   }
 
-  getFileProviders(): FileSecretProvider[] {
+    /** getFileProviders implementation. */
+getFileProviders(): FileSecretProvider[] {
     return [...this.providers.values()];
   }
 
-  async resolve(ref: string): Promise<ResolvedSecret | undefined> {
+    /** resolve implementation. */
+async resolve(ref: string): Promise<ResolvedSecret | undefined> {
     return this.resolveFor(ref, undefined);
   }
 
@@ -210,20 +217,23 @@ export class AccountsService extends Service {
     return out;
   }
 
-  async set(ref: string, value: string, account?: string): Promise<void> {
+    /** set implementation. */
+async set(ref: string, value: string, account?: string): Promise<void> {
     await this.ready;
     if (value.length === 0)
       throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
     await this.vault.put(recordForRef(ref, value, account !== undefined ? { account } : {}));
   }
 
-  async unset(ref: string, account?: string): Promise<void> {
+    /** unset implementation. */
+async unset(ref: string, account?: string): Promise<void> {
     await this.ready;
     const record = await this.recordForRef(ref, account);
     if (record !== null) await this.vault.delete(record.id);
   }
 
-  async list(): Promise<string[]> {
+    /** list implementation. */
+async list(): Promise<string[]> {
     await this.ready;
     const refs = new Set<string>();
     for (const descriptor of await this.vault.describe()) refs.add(canonicalRefOf(descriptor));
@@ -269,7 +279,8 @@ export class AccountsService extends Service {
     return out;
   }
 
-  async importFile(path: string): Promise<ImportResult[]> {
+    /** importFile implementation. */
+async importFile(path: string): Promise<ImportResult[]> {
     await this.ready;
     for (const provider of this.providers.values()) {
       if (!(await provider.detect(path))) continue;
@@ -343,6 +354,7 @@ declare module "@deepseek-ai/cordis" {
   }
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
   const home = resolveHome(config.home);
   const keyFile = config.keyFile ?? join(home, "accounts.key");

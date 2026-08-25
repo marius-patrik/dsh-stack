@@ -23,20 +23,24 @@ export interface IconRequest {
 export class IconEngine {
   private readonly packs = new Map<string, IconPack>();
 
-  registerPack(pack: IconPack): void {
+    /** registerPack implementation. */
+registerPack(pack: IconPack): void {
     if (this.packs.has(pack.id)) throw new Error(`Icon pack already registered: ${pack.id}`);
     this.packs.set(pack.id, pack);
   }
 
-  removePack(id: string): boolean {
+    /** removePack implementation. */
+removePack(id: string): boolean {
     return this.packs.delete(id);
   }
 
-  packsList(): readonly IconPack[] {
+    /** packsList implementation. */
+packsList(): readonly IconPack[] {
     return [...this.packs.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   }
 
-  resolve(request: IconRequest): string {
+    /** resolve implementation. */
+resolve(request: IconRequest): string {
     const packs = this.packsList();
     for (const key of keysFor(request)) {
       for (const pack of packs) {
@@ -48,6 +52,7 @@ export class IconEngine {
   }
 }
 
+/** keysFor implementation. */
 function keysFor(request: IconRequest): readonly string[] {
   const keys: string[] = [];
   if (request.fileName) keys.push(`file:${request.fileName}`);
@@ -68,6 +73,7 @@ function keysFor(request: IconRequest): readonly string[] {
   return keys;
 }
 
+/** apply implementation. */
 export function apply(ctx: Context): void {
   ctx.provide("stack.icons", new IconEngine());
 }

@@ -117,10 +117,12 @@ function parseExtension(raw: Record<string, unknown>): CatalogExtension {
   };
 }
 
+/** stringOf implementation. */
 function stringOf(value: unknown, fallback: string): string {
   return typeof value === "string" ? value : fallback;
 }
 
+/** numberOr implementation. */
 function numberOr(value: unknown, fallback: number): number {
   return typeof value === "number" ? value : fallback;
 }

@@ -8,6 +8,7 @@ import type { Context } from "@deepseek-ai/cordis";
 import type {} from "@deepseek-ai/dsh-host-webserver";
 import type { QuotaRegistry, QuotaSnapshot } from "./index.js";
 
+/** probeBinariesAndUsage implementation. */
 function probeBinariesAndUsage() {
   const home = os.homedir();
   const binaries: Record<
@@ -213,6 +214,7 @@ function probeBinariesAndUsage() {
 
 export const QUOTAS_PREFIX = "/quotas";
 
+/** mountQuotaWeb implementation. */
 export function mountQuotaWeb(ctx: Context, registry: QuotaRegistry): unknown {
   return ctx.inject(["webServer"], (httpCtx) =>
     httpCtx.webServer.register({
@@ -245,6 +247,7 @@ function meterBar(used: number, limit: number, width = 20): string {
   return `${color}[${"█".repeat(filled)}${"░".repeat(empty)}]${reset} ${pct}%`;
 }
 
+/** readBody implementation. */
 async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     let d = "";
@@ -261,6 +264,7 @@ async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> 
   });
 }
 
+/** makeQuotaHandler implementation. */
 function makeQuotaHandler(
   registry: QuotaRegistry,
 ): (req: IncomingMessage, res: ServerResponse) => void {
@@ -1401,6 +1405,7 @@ function makeQuotaHandler(
 /* HTML Dashboard                                                              */
 /* -------------------------------------------------------------------------- */
 
+/** renderDashboard implementation. */
 function renderDashboard(snapshots: readonly QuotaSnapshot[]): string {
   const rows = snapshots
     .map((s: QuotaSnapshot) => {
@@ -1457,6 +1462,7 @@ function renderDashboard(snapshots: readonly QuotaSnapshot[]): string {
 </html>`;
 }
 
+/** escapeHtml implementation. */
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")

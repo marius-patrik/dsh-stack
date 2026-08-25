@@ -137,10 +137,13 @@ function installSection<T>(
   });
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
   const currentHome = resolveHome();
-  let current: () => Config = () => config;
-  const mirror = (): void => {
+  let   /** current implementation. */
+current: () => Config = () => config;
+  const   /** mirror implementation. */
+mirror = (): void => {
     void mirrorTweaks(currentHome, current, ctx.logger);
   };
   // The launcher reads settings.yaml before this process exists, so the first

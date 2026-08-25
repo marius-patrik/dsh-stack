@@ -9,7 +9,9 @@ const candles = Array.from({ length: 20 }, (_, time) => ({
   close: 100 + time,
   volume: 1000,
 }));
-const evaluations = gridSearch(candles, () => ({ id: "hold", onCandle() {} }), 0.7, {
+const evaluations = gridSearch(candles, () => ({ id: "hold", /** onCandle implementation. */
+/** onCandle implementation. */
+onCandle() {} }), 0.7, {
   size: [1, 2],
   enabled: [true, false],
 });

@@ -18,20 +18,24 @@ export class ProvidersRegistryService extends Service {
   static optional = ["icons"];
   private readonly routes = new Map<string, ProviderRoute>();
 
-  constructor(ctx: Context) {
+    /** Constructs an instance. */
+constructor(ctx: Context) {
     super(ctx, "providers");
   }
 
-  registerRoute(route: ProviderRoute): void {
+    /** registerRoute implementation. */
+registerRoute(route: ProviderRoute): void {
     if (!route.id.trim()) throw new Error("Provider route id must be non-empty");
     this.routes.set(route.id, { ...route, models: [...route.models] });
   }
 
-  getRoute(id: string): ProviderRoute | undefined {
+    /** getRoute implementation. */
+getRoute(id: string): ProviderRoute | undefined {
     return this.routes.get(id);
   }
 
-  listRoutes(): ProviderRoute[] {
+    /** listRoutes implementation. */
+listRoutes(): ProviderRoute[] {
     return Array.from(this.routes.values(), (route) => ({ ...route, models: [...route.models] }));
   }
 }
@@ -43,13 +47,15 @@ export interface QuotaMeter {
 }
 
 export class QuotasService extends Service {
-  constructor(ctx: Context) {
+    /** Constructs an instance. */
+constructor(ctx: Context) {
     super(ctx, "quotas");
   }
 
   private readonly meters = new Map<string, QuotaMeter>();
 
-  setQuota(provider: string, used: number, limit: number): void {
+    /** setQuota implementation. */
+setQuota(provider: string, used: number, limit: number): void {
     if (!provider.trim()) throw new Error("Quota provider id must be non-empty");
     if (!Number.isFinite(used) || !Number.isFinite(limit) || limit < 0 || used < 0) {
       throw new Error("Quota values must be finite non-negative numbers");
@@ -57,7 +63,8 @@ export class QuotasService extends Service {
     this.meters.set(provider, { used, limit, remaining: Math.max(0, limit - used) });
   }
 
-  getQuota(provider: string): QuotaMeter | undefined {
+    /** getQuota implementation. */
+getQuota(provider: string): QuotaMeter | undefined {
     const meter = this.meters.get(provider);
     return meter ? { ...meter } : undefined;
   }
@@ -65,6 +72,7 @@ export class QuotasService extends Service {
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context): void {
   new ProvidersRegistryService(ctx);
   new QuotasService(ctx);

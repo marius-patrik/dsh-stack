@@ -126,6 +126,7 @@ export function serializeMessages(messages: Message[]): WireMessage[] {
   return wire;
 }
 
+/** stripTrailingSlash implementation. */
 function stripTrailingSlash(base: string): string {
   return base.endsWith("/") ? base.slice(0, -1) : base;
 }
@@ -141,7 +142,8 @@ function stripTrailingSlash(base: string): string {
 export const openaiDialect: Dialect = {
   id: "openai",
 
-  serialize(
+    /** serialize implementation. */
+serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -199,7 +201,8 @@ export const openaiDialect: Dialect = {
     };
   },
 
-  parse(body, onActivity) {
+    /** parse implementation. */
+parse(body, onActivity) {
     return translateOpenAi(parseSseData(body, onActivity));
   },
 };

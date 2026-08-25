@@ -316,6 +316,7 @@ export function planReauth(
   );
 }
 
+/** human implementation. */
 function human(record: SecretRecord, reason: TerminalReason, requirement: string): ReauthPlan {
   return {
     strategy: "human_presence_required",
@@ -327,6 +328,7 @@ function human(record: SecretRecord, reason: TerminalReason, requirement: string
   };
 }
 
+/** describeHumanReason implementation. */
 function describeHumanReason(reason: TerminalReason): string {
   switch (reason) {
     case "captcha_required":
@@ -344,6 +346,7 @@ function describeHumanReason(reason: TerminalReason): string {
   }
 }
 
+/** reasonCaveat implementation. */
 function reasonCaveat(reason: TerminalReason): string | null {
   return reason === "unknown"
     ? "the provider gave no machine-readable reason; the classification is a fallback"
@@ -447,7 +450,8 @@ export class ReauthSupervisor {
   readonly #emitted = new Map<string, TerminalReason>();
   readonly #events: ReauthRequired[] = [];
 
-  constructor(options: ReauthSupervisorOptions) {
+    /** Constructs an instance. */
+constructor(options: ReauthSupervisorOptions) {
     this.#vault = options.vault;
     this.#now = options.now ?? (() => Date.now());
     this.#refreshSkewMs = options.refreshSkewMs ?? 120_000;
@@ -606,7 +610,8 @@ export class ReauthSupervisor {
     this.#emitted.delete(id);
   }
 
-  async #refreshOAuth(
+    /** #refreshOAuth implementation. */
+async #refreshOAuth(
     record: OAuthTokenRecord,
     options: { force?: boolean } = {},
   ): Promise<EnsureFreshOutcome> {
@@ -664,13 +669,15 @@ export class ReauthSupervisor {
     return { kind: "refreshed", record: stored ?? record };
   }
 
-  #isDue(record: SecretRecord): boolean {
+    /** #isDue implementation. */
+#isDue(record: SecretRecord): boolean {
     const expiresAt = effectiveExpiryMs(record);
     if (expiresAt === null) return false;
     return this.#now() + this.#refreshSkewMs >= expiresAt;
   }
 
-  #healthOf(record: SecretRecord, all: readonly SecretRecord[], nowMs: number): CredentialHealth {
+    /** #healthOf implementation. */
+#healthOf(record: SecretRecord, all: readonly SecretRecord[], nowMs: number): CredentialHealth {
     const descriptor = descriptorOf(record);
     const expiryMs = effectiveExpiryMs(record);
     const failure = this.#failures.get(record.id);
@@ -718,7 +725,8 @@ export class ReauthSupervisor {
     };
   }
 
-  async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequired> {
+    /** #raise implementation. */
+async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequired> {
     const all: SecretRecord[] = [];
     for (const id of await this.#vault.list()) {
       const peer = await this.#vault.get(id);
@@ -754,7 +762,8 @@ export class ReauthSupervisor {
     return event;
   }
 
-  #recordRecoverable(id: string, reason: string): number {
+    /** #recordRecoverable implementation. */
+#recordRecoverable(id: string, reason: string): number {
     const previous = this.#failures.get(id);
     const attempts = (previous?.terminalReason ? 0 : (previous?.attempts ?? 0)) + 1;
     this.#failures.set(id, {
@@ -766,13 +775,15 @@ export class ReauthSupervisor {
     return attempts;
   }
 
-  #backoff(attempt: number): number {
+    /** #backoff implementation. */
+#backoff(attempt: number): number {
     const core = Math.min(this.#maxBackoffMs, this.#baseBackoffMs * 2 ** Math.max(0, attempt));
     const jitter = core * 0.2 * (this.#random() * 2 - 1);
     return Math.max(0, Math.round(core + jitter));
   }
 }
 
+/** oauthRefreshPlan implementation. */
 function oauthRefreshPlan(id: string): ReauthPlan {
   return {
     strategy: "oauth_refresh",
@@ -799,12 +810,14 @@ export function providerDescriptorAuthResolver(): OAuthAuthResolver {
   };
 }
 
+/** isPast implementation. */
 function isPast(value: string | null, nowMs: number): boolean {
   if (!value) return false;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) && nowMs >= parsed;
 }
 
+/** describeError implementation. */
 function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }

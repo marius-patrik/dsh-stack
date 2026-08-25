@@ -32,6 +32,7 @@ interface TailscaleStatusJson {
   >;
 }
 
+/** normalizeOS implementation. */
 function normalizeOS(osRaw?: string): NetworkNode["os"] {
   const os = (osRaw || "").toLowerCase();
   if (os.includes("mac") || os.includes("darwin")) return "macos";
@@ -42,6 +43,7 @@ function normalizeOS(osRaw?: string): NetworkNode["os"] {
   return "other";
 }
 
+/** normalizeRole implementation. */
 function normalizeRole(node: {
   isSelf: boolean;
   os: NetworkNode["os"];
@@ -53,6 +55,7 @@ function normalizeRole(node: {
   return "peer";
 }
 
+/** scanTailscaleTopology implementation. */
 export async function scanTailscaleTopology(): Promise<{
   self: NetworkNode | null;
   peers: NetworkNode[];

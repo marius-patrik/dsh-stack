@@ -707,7 +707,8 @@ window.__ModuleLoader__.load({
     var h = React.createElement;
     var Fragment = React.Fragment;
 
-    function KeychainNavIcon(props) {
+        /** KeychainNavIcon implementation. */
+function KeychainNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -729,7 +730,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ProvidersNavIcon(props) {
+        /** ProvidersNavIcon implementation. */
+function ProvidersNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -755,7 +757,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function GeneralNavIcon(props) {
+        /** GeneralNavIcon implementation. */
+function GeneralNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -784,7 +787,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TerminalsNavIcon(props) {
+        /** TerminalsNavIcon implementation. */
+function TerminalsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -806,7 +810,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ContainersNavIcon(props) {
+        /** ContainersNavIcon implementation. */
+function ContainersNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -844,7 +849,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function PlugNavIcon(props) {
+        /** PlugNavIcon implementation. */
+function PlugNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -868,7 +874,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ToolsNavIcon(props) {
+        /** ToolsNavIcon implementation. */
+function ToolsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -891,7 +898,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function LoopsNavIcon(props) {
+        /** LoopsNavIcon implementation. */
+function LoopsNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -917,7 +925,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TriangleRightFill14(props) {
+        /** TriangleRightFill14 implementation. */
+function TriangleRightFill14(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       var style = props && props.style ? props.style : undefined;
@@ -940,7 +949,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function RobotHeadNavIcon(props) {
+        /** RobotHeadNavIcon implementation. */
+function RobotHeadNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -966,7 +976,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function KeyboardNavIcon(props) {
+        /** KeyboardNavIcon implementation. */
+function KeyboardNavIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -995,7 +1006,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function DataGlyph(props) {
+        /** DataGlyph implementation. */
+function DataGlyph(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1018,7 +1030,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function SettingsIcon(props) {
+        /** SettingsIcon implementation. */
+function SettingsIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className =
         (props && props.className ? props.className + " " : "") +
@@ -1044,7 +1057,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function SidebarCollapseIcon(props) {
+        /** SidebarCollapseIcon implementation. */
+function SidebarCollapseIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1066,7 +1080,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function CloseIcon(props) {
+        /** CloseIcon implementation. */
+function CloseIcon(props) {
       var size = props && props.size ? props.size : 14;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1088,7 +1103,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function CommandsIcon(props) {
+        /** CommandsIcon implementation. */
+function CommandsIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1111,7 +1127,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function PaletteIcon(props) {
+        /** PaletteIcon implementation. */
+function PaletteIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1138,7 +1155,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function AgentPresetIcon(props) {
+        /** AgentPresetIcon implementation. */
+function AgentPresetIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1164,7 +1182,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function EllipsisIcon(props) {
+        /** EllipsisIcon implementation. */
+function EllipsisIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1187,7 +1206,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function DownloadIcon(props) {
+        /** DownloadIcon implementation. */
+function DownloadIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1210,7 +1230,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function BranchIcon(props) {
+        /** BranchIcon implementation. */
+function BranchIcon(props) {
       var size = props && props.size ? props.size : 16;
       var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
       return h(
@@ -1234,7 +1255,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function navIcon(id) {
+        /** navIcon implementation. */
+function navIcon(id) {
       if (id === "general") return h(GeneralNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "integrations" || id === "providers")
         return h(ProvidersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
@@ -1265,7 +1287,8 @@ window.__ModuleLoader__.load({
 
     // Glyph seat: a registrant's glyph wins; an id with no glyph falls back to
     // the static map so every nav cell keeps a mark.
-    function navGlyph(renderSlot, row) {
+        /** navGlyph implementation. */
+function navGlyph(renderSlot, row) {
       try {
         if (typeof renderSlot === "function") {
           var content = renderSlot("settings.section.icon", {}, { only: row.id });
@@ -1275,7 +1298,8 @@ window.__ModuleLoader__.load({
       return navIcon(row.id);
     }
 
-    function NotepadPencilGlyph(props) {
+        /** NotepadPencilGlyph implementation. */
+function NotepadPencilGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1300,7 +1324,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ChatGlyph(props) {
+        /** ChatGlyph implementation. */
+function ChatGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1320,7 +1345,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TerminalsGlyph(props) {
+        /** TerminalsGlyph implementation. */
+function TerminalsGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1341,7 +1367,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ContainersGlyph(props) {
+        /** ContainersGlyph implementation. */
+function ContainersGlyph(props) {
       var size = props && props.size ? props.size : 16;
       return h(
         "svg",
@@ -1364,7 +1391,8 @@ window.__ModuleLoader__.load({
     }
 
     var SettingsPanelErrorBoundary = (function (_super) {
-      function SettingsPanelErrorBoundary(props) {
+            /** SettingsPanelErrorBoundary implementation. */
+function SettingsPanelErrorBoundary(props) {
         if (_super && typeof _super === "function") {
           try {
             _super.call(this, props);
@@ -1483,7 +1511,8 @@ window.__ModuleLoader__.load({
       return SettingsPanelErrorBoundary;
     })(React ? React.Component : undefined);
 
-    function SelectDropdownMenu(props) {
+        /** SelectDropdownMenu implementation. */
+function SelectDropdownMenu(props) {
       var open = props.open,
         onClose = props.onClose,
         items = props.items,
@@ -1493,7 +1522,8 @@ window.__ModuleLoader__.load({
       React.useEffect(
         function () {
           if (!open) return;
-          var handlePointerDown = function (e) {
+          var           /** handlePointerDown implementation. */
+handlePointerDown = function (e) {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
               onClose();
             }
@@ -1577,7 +1607,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function NewSessionButton(props) {
+        /** NewSessionButton implementation. */
+function NewSessionButton(props) {
       var wide = props.wide,
         startSession = props.startSession,
         t = props.t;
@@ -1585,7 +1616,8 @@ window.__ModuleLoader__.load({
       var menuOpen = menuState[0],
         setMenuOpen = menuState[1];
 
-      var handleSelect = function (id) {
+      var       /** handleSelect implementation. */
+handleSelect = function (id) {
         if (id === "chat") {
           startSession();
         } else if (id === "terminal") {
@@ -1657,7 +1689,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TweaksSidebarRoot(props) {
+        /** TweaksSidebarRoot implementation. */
+function TweaksSidebarRoot(props) {
       var collapsed = props.collapsed,
         width = props.width,
         startSession = props.startSession;
@@ -1720,21 +1753,24 @@ window.__ModuleLoader__.load({
       var pointerInside = pointerState[0],
         setPointerInside = pointerState[1];
       var lingerTimer = React.useRef(undefined);
-      var armLinger = function () {
+      var       /** armLinger implementation. */
+armLinger = function () {
         if (lingerTimer.current !== undefined) return;
         lingerTimer.current = window.setTimeout(function () {
           lingerTimer.current = undefined;
           setPointerInside(false);
         }, SCROLLBAR_LINGER_MS);
       };
-      var cancelLinger = function () {
+      var       /** cancelLinger implementation. */
+cancelLinger = function () {
         window.clearTimeout(lingerTimer.current);
         lingerTimer.current = undefined;
       };
       React.useEffect(
         function () {
           if (!pointerInside) return;
-          var onMove = function (event) {
+          var           /** onMove implementation. */
+onMove = function (event) {
             var rect = column.current && column.current.getBoundingClientRect();
             if (rect === undefined) return;
             var inside =
@@ -1756,7 +1792,8 @@ window.__ModuleLoader__.load({
 
       React.useEffect(
         function () {
-          var onKeyDown = function (e) {
+          var           /** onKeyDown implementation. */
+onKeyDown = function (e) {
             var target = e.target;
             var isEditable =
               target &&
@@ -1799,7 +1836,8 @@ window.__ModuleLoader__.load({
             }
           };
 
-          var onExpandSidebar = function () {
+          var           /** onExpandSidebar implementation. */
+onExpandSidebar = function () {
             if (collapsed) toggleSidebar();
           };
 
@@ -1951,7 +1989,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TriggerContent(props) {
+        /** TriggerContent implementation. */
+function TriggerContent(props) {
       var wide = Boolean(props && props.wide);
       var t = props && props.t;
       var label = typeof t === "function" ? t("trigger") : "Settings";
@@ -1987,17 +2026,20 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function HeaderContent(props) {
+        /** HeaderContent implementation. */
+function HeaderContent(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("title") : "Settings");
     }
 
-    function CloseLabel(props) {
+        /** CloseLabel implementation. */
+function CloseLabel(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("close") : "Close");
     }
 
-    function GeneralSection(props) {
+        /** GeneralSection implementation. */
+function GeneralSection(props) {
       var noticeState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return false;
         return window.localStorage.getItem("dsh_suppress_welcome_notice") === "false";
@@ -2069,7 +2111,8 @@ window.__ModuleLoader__.load({
       var autoScroll = autoScrollState[0],
         setAutoScroll = autoScrollState[1];
 
-      var handleToggleNotice = function (e) {
+      var       /** handleToggleNotice implementation. */
+handleToggleNotice = function (e) {
         var checked = e.target.checked;
         setNoticeEnabled(checked);
         if (typeof window !== "undefined" && window.localStorage) {
@@ -2077,7 +2120,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var handleToggleSearch = function (e) {
+      var       /** handleToggleSearch implementation. */
+handleToggleSearch = function (e) {
         var checked = e.target.checked;
         setSearchEnabled(checked);
         if (typeof window !== "undefined" && window.localStorage) {
@@ -2088,7 +2132,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var handleToggleSwapSidebars = function (e) {
+      var       /** handleToggleSwapSidebars implementation. */
+handleToggleSwapSidebars = function (e) {
         var checked = e.target.checked;
         setSwapSidebars(checked);
         if (typeof window !== "undefined" && window.localStorage) {
@@ -2110,7 +2155,8 @@ window.__ModuleLoader__.load({
       var hideSendButton = hideSendState[0],
         setHideSendButton = hideSendState[1];
 
-      var handleToggleHideSend = function (e) {
+      var       /** handleToggleHideSend implementation. */
+handleToggleHideSend = function (e) {
         var checked = e.target.checked;
         setHideSendButton(checked);
         if (typeof window !== "undefined" && window.localStorage) {
@@ -2129,7 +2175,8 @@ window.__ModuleLoader__.load({
       var composerLayout = composerLayoutState[0],
         setComposerLayout = composerLayoutState[1];
 
-      var handleSelectComposerLayout = function (e) {
+      var       /** handleSelectComposerLayout implementation. */
+handleSelectComposerLayout = function (e) {
         var val = e.target.value;
         setComposerLayout(val);
         if (typeof window !== "undefined" && window.localStorage) {
@@ -2691,7 +2738,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ThemeSettingsSection() {
+        /** ThemeSettingsSection implementation. */
+function ThemeSettingsSection() {
       var THEME_PRESETS = [
         {
           id: "dark",
@@ -2841,7 +2889,8 @@ window.__ModuleLoader__.load({
       var newThemeName = newThemeNameState[0],
         setNewThemeName = newThemeNameState[1];
 
-      var applyPaletteToDOM = function (palette, themeType) {
+      var       /** applyPaletteToDOM implementation. */
+applyPaletteToDOM = function (palette, themeType) {
         if (typeof document === "undefined") return;
         var styleEl = document.getElementById("dsh-custom-theme-vars");
         if (!styleEl) {
@@ -2903,7 +2952,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var selectPreset = function (preset) {
+      var       /** selectPreset implementation. */
+selectPreset = function (preset) {
         setActiveTheme(preset.id);
         setCustomPalette(Object.assign({}, preset.colors));
         applyPaletteToDOM(preset.colors, preset.type);
@@ -2913,7 +2963,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var updateColor = function (key, value) {
+      var       /** updateColor implementation. */
+updateColor = function (key, value) {
         var updated = Object.assign({}, customPalette);
         updated[key] = value;
         setCustomPalette(updated);
@@ -2925,7 +2976,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var handleSaveCustomTheme = function () {
+      var       /** handleSaveCustomTheme implementation. */
+handleSaveCustomTheme = function () {
         var name = (newThemeName || "").trim();
         if (!name) {
           name = "Custom Theme " + (customThemes.length + 1);
@@ -2944,7 +2996,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var handleDeleteCustomTheme = function (themeId, e) {
+      var       /** handleDeleteCustomTheme implementation. */
+handleDeleteCustomTheme = function (themeId, e) {
         if (e) e.stopPropagation();
         var nextList = customThemes.filter(function (t) {
           return t.id !== themeId;
@@ -2955,7 +3008,8 @@ window.__ModuleLoader__.load({
         }
       };
 
-      var handleExportThemes = function () {
+      var       /** handleExportThemes implementation. */
+handleExportThemes = function () {
         var data = {
           activeTheme: activeTheme,
           customPalette: customPalette,
@@ -3449,7 +3503,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function CustomizationSettingsSection() {
+        /** CustomizationSettingsSection implementation. */
+function CustomizationSettingsSection() {
       var subtabState = React.useState("skills");
       var subtab = subtabState[0],
         setSubtab = subtabState[1];
@@ -3612,7 +3667,8 @@ window.__ModuleLoader__.load({
         },
       ];
 
-      var handleRunHookTest = function (hookId) {
+      var       /** handleRunHookTest implementation. */
+handleRunHookTest = function (hookId) {
         setHookRunning(hookId);
         setHookOutput("Running validation for " + hookId + "...\n");
         setTimeout(function () {
@@ -3996,7 +4052,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function PluginsSettingsSection() {
+        /** PluginsSettingsSection implementation. */
+function PluginsSettingsSection() {
       var pluginList = [
         {
           id: "dsh-actions",
@@ -4100,7 +4157,8 @@ window.__ModuleLoader__.load({
       var reloadingId = reloadingState[0],
         setReloadingId = reloadingState[1];
 
-      var handleReloadPlugin = function (pId) {
+      var       /** handleReloadPlugin implementation. */
+handleReloadPlugin = function (pId) {
         setReloadingId(pId);
         setTimeout(function () {
           setReloadingId(null);
@@ -4267,7 +4325,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function createObservable(initial) {
+        /** createObservable implementation. */
+function createObservable(initial) {
       var snapshot = initial;
       var listeners = new Set();
       return {
@@ -4291,7 +4350,8 @@ window.__ModuleLoader__.load({
       };
     }
 
-    function messageOf(error) {
+        /** messageOf implementation. */
+function messageOf(error) {
       return error instanceof Error ? error.message : String(error);
     }
 
@@ -4299,7 +4359,8 @@ window.__ModuleLoader__.load({
     // snapshot-store engine (dsh-client-runtime/client) is not a platform seed
     // word, so the state rides a hand-rolled observable bound through the
     // framework-made bindSnapshotSelector.
-    function SettingsDocumentStore(api) {
+        /** SettingsDocumentStore implementation. */
+function SettingsDocumentStore(api) {
       this.api = api;
       this.observable = createObservable({ status: "idle", opening: false, error: null });
       this.generation = 0;
@@ -4367,12 +4428,14 @@ window.__ModuleLoader__.load({
         });
     };
 
-    function refreshDocumentIfLoaded(controller) {
+        /** refreshDocumentIfLoaded implementation. */
+function refreshDocumentIfLoaded(controller) {
       if (controller === undefined || controller.observable.getSnapshot().status === "idle") return;
       controller.load();
     }
 
-    function SettingsDocumentAction(props) {
+        /** SettingsDocumentAction implementation. */
+function SettingsDocumentAction(props) {
       var controller = props.controller,
         useSnapshot = props.useSnapshot,
         t = props.t;
@@ -4407,7 +4470,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function KeybindsSettingsSection() {
+        /** KeybindsSettingsSection implementation. */
+function KeybindsSettingsSection() {
       var isMac =
         typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
       var defaultSidebarKey = isMac ? "⌘B" : "Ctrl+B";
@@ -4477,7 +4541,8 @@ window.__ModuleLoader__.load({
         [isRecording, handleRecordKey],
       );
 
-      var handleReset = function () {
+      var       /** handleReset implementation. */
+handleReset = function () {
         try {
           localStorage.removeItem("dsh_keybind_toggle_sidebar");
           localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
@@ -4656,7 +4721,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function SettingsPanel(props) {
+        /** SettingsPanel implementation. */
+function SettingsPanel(props) {
       var rows = props.rows,
         renderSlot = props.renderSlot,
         activeId = props.activeId;
@@ -4677,7 +4743,8 @@ window.__ModuleLoader__.load({
 
       React.useEffect(
         function () {
-          var onKeyDown = function (e) {
+          var           /** onKeyDown implementation. */
+onKeyDown = function (e) {
             if (e.key === "Escape") onClose();
           };
           document.addEventListener("keydown", onKeyDown);
@@ -4793,20 +4860,23 @@ window.__ModuleLoader__.load({
         setDialogPos = dialogPosState[1];
 
       // Drag modal window handler
-      var handleHeaderPointerDown = function (e) {
+      var       /** handleHeaderPointerDown implementation. */
+handleHeaderPointerDown = function (e) {
         if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
           return;
         e.preventDefault();
         var startX = e.clientX - dialogPos.x;
         var startY = e.clientY - dialogPos.y;
 
-        var onMove = function (moveEv) {
+        var         /** onMove implementation. */
+onMove = function (moveEv) {
           setDialogPos({
             x: moveEv.clientX - startX,
             y: moveEv.clientY - startY,
           });
         };
-        var onUp = function () {
+        var         /** onUp implementation. */
+onUp = function () {
           document.removeEventListener("pointermove", onMove);
           document.removeEventListener("pointerup", onUp);
         };
@@ -4815,7 +4885,8 @@ window.__ModuleLoader__.load({
       };
 
       // Resize settings window handler (direction: 'se', 'e', 's')
-      var handleWindowResizePointerDown = function (e, direction) {
+      var       /** handleWindowResizePointerDown implementation. */
+handleWindowResizePointerDown = function (e, direction) {
         e.preventDefault();
         e.stopPropagation();
         setIsWindowResizing(true);
@@ -4824,7 +4895,8 @@ window.__ModuleLoader__.load({
         var startW = windowSize.w;
         var startH = windowSize.h;
 
-        var onMove = function (moveEv) {
+        var         /** onMove implementation. */
+onMove = function (moveEv) {
           var deltaX = moveEv.clientX - startX;
           var deltaY = moveEv.clientY - startY;
           var nextW = startW;
@@ -4844,7 +4916,8 @@ window.__ModuleLoader__.load({
           }
         };
 
-        var onUp = function () {
+        var         /** onUp implementation. */
+onUp = function () {
           setIsWindowResizing(false);
           document.removeEventListener("pointermove", onMove);
           document.removeEventListener("pointerup", onUp);
@@ -4854,14 +4927,16 @@ window.__ModuleLoader__.load({
       };
 
       // Resize nav width handler
-      var handleResizePointerDown = function (e) {
+      var       /** handleResizePointerDown implementation. */
+handleResizePointerDown = function (e) {
         e.preventDefault();
         e.stopPropagation();
         setIsResizing(true);
         var startX = e.clientX;
         var startW = isNavCollapsed ? 56 : navWidth;
 
-        var onMove = function (moveEv) {
+        var         /** onMove implementation. */
+onMove = function (moveEv) {
           var delta = moveEv.clientX - startX;
           var nextW = Math.max(130, Math.min(380, startW + delta));
           setNavWidth(nextW);
@@ -4875,7 +4950,8 @@ window.__ModuleLoader__.load({
             window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
           }
         };
-        var onUp = function () {
+        var         /** onUp implementation. */
+onUp = function () {
           setIsResizing(false);
           document.removeEventListener("pointermove", onMove);
           document.removeEventListener("pointerup", onUp);
@@ -4884,7 +4960,8 @@ window.__ModuleLoader__.load({
         document.addEventListener("pointerup", onUp);
       };
 
-      var toggleNavCollapse = function (e) {
+      var       /** toggleNavCollapse implementation. */
+toggleNavCollapse = function (e) {
         e.stopPropagation();
         setIsNavCollapsed(function (prev) {
           var next = !prev;
@@ -4899,7 +4976,8 @@ window.__ModuleLoader__.load({
       var collapsedGroups = collapsedGroupsState[0],
         setCollapsedGroups = collapsedGroupsState[1];
 
-      function toggleGroup(groupName) {
+            /** toggleGroup implementation. */
+function toggleGroup(groupName) {
         setCollapsedGroups(function (s) {
           var n = Object.assign({}, s);
           n[groupName] = !n[groupName];
@@ -4907,7 +4985,8 @@ window.__ModuleLoader__.load({
         });
       }
 
-      function renderNavRow(row) {
+            /** renderNavRow implementation. */
+function renderNavRow(row) {
         return h(
           "button",
           {
@@ -4925,7 +5004,8 @@ window.__ModuleLoader__.load({
         );
       }
 
-      function renderGroupHeader(label, count) {
+            /** renderGroupHeader implementation. */
+function renderGroupHeader(label, count) {
         if (isNavCollapsed) return null;
         var isCollapsed = Boolean(collapsedGroups[label]);
         return h(
@@ -5183,7 +5263,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function TweaksSettingsRoot(props) {
+        /** TweaksSettingsRoot implementation. */
+function TweaksSettingsRoot(props) {
       var wide = Boolean(props && props.wide);
       var useSections = props && props.useSections;
       var useOnboardingSteps = props && props.useOnboardingSteps;
@@ -5212,7 +5293,8 @@ window.__ModuleLoader__.load({
       }, []);
 
       React.useEffect(function () {
-        var onOpenSettings = function (e) {
+        var         /** onOpenSettings implementation. */
+onOpenSettings = function (e) {
           var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
           if (sec) setActiveId(sec);
           setOpen(true);
@@ -5427,7 +5509,8 @@ window.__ModuleLoader__.load({
     // Ledger -> nav-row / coordinator projections as observable sources (uSES
     // contract: getSnapshot returns the cached rows until the ledger or the
     // locale revision moves). Ported from ui-settings-general's apply.
-    function makeShellInjected(ctx) {
+        /** makeShellInjected implementation. */
+function makeShellInjected(ctx) {
       var rowsVersion = -1;
       var rowsRevision = -1;
       var rows = [];
@@ -5503,7 +5586,8 @@ window.__ModuleLoader__.load({
       };
     }
 
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register("sidebar", { zh: SIDEBAR_ZH, en: SIDEBAR_EN });
       }, "dsh-tweaks: sidebar dictionaries");
@@ -5530,10 +5614,12 @@ window.__ModuleLoader__.load({
         });
       }, "dsh-tweaks: metadata invalidations");
 
-      var startSession = function (workspaceId) {
+      var       /** startSession implementation. */
+startSession = function (workspaceId) {
         ctx.workspaces.startSession(workspaceId);
       };
-      var sidebarInjected = function () {
+      var       /** sidebarInjected implementation. */
+sidebarInjected = function () {
         return {
           startSession: startSession,
           toggleSidebar: function () {
@@ -5760,28 +5846,36 @@ window.__ModuleLoader__.load({
       // (the harness checkout is kept pristine), so dsh-tweaks owns the three
       // mark seats — models, plugins, agent-presets — under the shared
       // settings.section.icon seat keyed by section id.
-      function GeneralGlyph() {
+            /** GeneralGlyph implementation. */
+function GeneralGlyph() {
         return navIcon("general");
       }
-      function ThemesGlyph() {
+            /** ThemesGlyph implementation. */
+function ThemesGlyph() {
         return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      function CustomizationGlyph() {
+            /** CustomizationGlyph implementation. */
+function CustomizationGlyph() {
         return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      function ModelsGlyph() {
+            /** ModelsGlyph implementation. */
+function ModelsGlyph() {
         return navIcon("models");
       }
-      function PluginsGlyph() {
+            /** PluginsGlyph implementation. */
+function PluginsGlyph() {
         return navIcon("plugins");
       }
-      function AgentPresetsGlyph() {
+            /** AgentPresetsGlyph implementation. */
+function AgentPresetsGlyph() {
         return navIcon("agent-presets");
       }
-      function KeybindsGlyph() {
+            /** KeybindsGlyph implementation. */
+function KeybindsGlyph() {
         return navIcon("keybinds");
       }
-      function harnessGlyph(id, component) {
+            /** harnessGlyph implementation. */
+function harnessGlyph(id, component) {
         return function () {
           return ctx.slots.register(
             {
@@ -5831,7 +5925,8 @@ window.__ModuleLoader__.load({
       );
 
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
-      function SessionHeaderUtilities(props) {
+            /** SessionHeaderUtilities implementation. */
+function SessionHeaderUtilities(props) {
         var sessionId = props.sessionId;
         var menuState = React.useState(false);
         var menuOpen = menuState[0],
@@ -5843,7 +5938,8 @@ window.__ModuleLoader__.load({
         var isTrajectory = trajState[0],
           setIsTrajectory = trajState[1];
 
-        var checkIsTrajectory = function () {
+        var         /** checkIsTrajectory implementation. */
+checkIsTrajectory = function () {
           var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
           if (activeTab) {
             var txt = (activeTab.textContent || "").trim().toLowerCase();
@@ -5862,7 +5958,8 @@ window.__ModuleLoader__.load({
         };
 
         React.useEffect(function () {
-          var update = function () {
+          var           /** update implementation. */
+update = function () {
             setIsTrajectory(checkIsTrajectory());
           };
           update();
@@ -5872,7 +5969,8 @@ window.__ModuleLoader__.load({
           };
         }, []);
 
-        var handleToggleView = function () {
+        var         /** handleToggleView implementation. */
+handleToggleView = function () {
           setMenuOpen(false);
           var onTrajectoryNow = checkIsTrajectory();
           var targetName = onTrajectoryNow ? "chat" : "trajectory";
@@ -5907,7 +6005,8 @@ window.__ModuleLoader__.load({
           }, 80);
         };
 
-        var handleDownloadLog = function () {
+        var         /** handleDownloadLog implementation. */
+handleDownloadLog = function () {
           setMenuOpen(false);
           setBusy(true);
           try {
@@ -6007,7 +6106,8 @@ window.__ModuleLoader__.load({
       );
 
       // 2. Subagents Dock above input bar
-      function SubagentsDock(props) {
+            /** SubagentsDock implementation. */
+function SubagentsDock(props) {
         var sessionId = props.sessionId;
         var useSessions = props.useSessions;
         var openChild = props.openChild;
@@ -6074,7 +6174,8 @@ window.__ModuleLoader__.load({
         if (completedCount > 0) progressParts.push(completedCount + " completed");
         var progressStr = progressParts.join(" · ") || childList.length + " subagents";
 
-        var getRoleBadgeStyle = function (role) {
+        var         /** getRoleBadgeStyle implementation. */
+getRoleBadgeStyle = function (role) {
           if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
             return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
           } else if (role.indexOf("exec") !== -1) {
@@ -6362,15 +6463,18 @@ window.__ModuleLoader__.load({
         menuContainer.style.display = "none";
         document.body.appendChild(menuContainer);
 
-        var closeMenu = function () {
+        var         /** closeMenu implementation. */
+closeMenu = function () {
           menuContainer.style.display = "none";
           menuContainer.innerHTML = "";
         };
 
-        var onKeyDown = function (e) {
+        var         /** onKeyDown implementation. */
+onKeyDown = function (e) {
           if (e.key === "Escape") closeMenu();
         };
-        var onContextMenu = function (e) {
+        var         /** onContextMenu implementation. */
+onContextMenu = function (e) {
           e.preventDefault();
           e.stopPropagation();
 
@@ -6763,7 +6867,8 @@ window.__ModuleLoader__.load({
       })();
 
       // Universal Lucide Animated Icons DOM Decorator
-      function ensureUniversalLucideIcons() {
+            /** ensureUniversalLucideIcons implementation. */
+function ensureUniversalLucideIcons() {
         if (typeof document === "undefined" || !document.body) return;
         var svgs = document.querySelectorAll("svg");
         for (var i = 0; i < svgs.length; i++) {

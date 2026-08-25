@@ -21,7 +21,8 @@ export class CodeServerManager {
     url: "http://127.0.0.1:8080",
   };
 
-  constructor(
+    /** Constructs an instance. */
+constructor(
     private ctx: Context,
     private config: any,
   ) {
@@ -31,11 +32,13 @@ export class CodeServerManager {
     }
   }
 
-  getStatus(): CodeServerStatus {
+    /** getStatus implementation. */
+getStatus(): CodeServerStatus {
     return { ...this.status };
   }
 
-  async startServer(): Promise<CodeServerStatus> {
+    /** startServer implementation. */
+async startServer(): Promise<CodeServerStatus> {
     this.status.running = true;
     this.status.pid = 9999;
     if ((this.ctx as any).emit) {
@@ -44,7 +47,8 @@ export class CodeServerManager {
     return this.getStatus();
   }
 
-  async stopServer(): Promise<boolean> {
+    /** stopServer implementation. */
+async stopServer(): Promise<boolean> {
     this.status.running = false;
     this.status.pid = undefined;
     if ((this.ctx as any).emit) {
@@ -60,6 +64,7 @@ export const Config = Schema.object({
   telemetry: Schema.boolean().default(false),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new CodeServerManager(ctx, config);
   (ctx as any).codeServer = service;

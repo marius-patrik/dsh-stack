@@ -41,6 +41,7 @@ export type WorkspaceTabsAction =
 const DEFAULT_MAIN_PANE = "pane-main";
 const DEFAULT_DOCK_HEIGHT = 280;
 
+/** createWorkspaceTabs implementation. */
 export function createWorkspaceTabs(options: WorkspaceTabsOptions = {}): WorkspaceTabsState {
   const mainPaneId = DEFAULT_MAIN_PANE;
   return {
@@ -59,6 +60,7 @@ export function createWorkspaceTabs(options: WorkspaceTabsOptions = {}): Workspa
   };
 }
 
+/** reduceWorkspaceTabs implementation. */
 export function reduceWorkspaceTabs(
   state: WorkspaceTabsState,
   action: WorkspaceTabsAction,
@@ -88,6 +90,7 @@ export function reduceWorkspaceTabs(
   }
 }
 
+/** openTab implementation. */
 function openTab(state: WorkspaceTabsState, tab: WorkspaceTab, paneId: string): WorkspaceTabsState {
   const pane = state.panes[paneId] ?? state.panes[state.mainPaneId]!;
   const nextTabs = pane.tabs.includes(tab.id) ? [...pane.tabs] : [...pane.tabs, tab.id];
@@ -97,6 +100,7 @@ function openTab(state: WorkspaceTabsState, tab: WorkspaceTab, paneId: string): 
   return { ...state, tabs, panes };
 }
 
+/** closeTab implementation. */
 function closeTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState {
   const tab = state.tabs[tabId];
   if (!tab) return state;
@@ -115,6 +119,7 @@ function closeTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState 
   return { ...state, tabs, panes };
 }
 
+/** closeOtherTabs implementation. */
 function closeOtherTabs(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState {
   const tab = state.tabs[tabId];
   if (!tab) return state;
@@ -127,6 +132,7 @@ function closeOtherTabs(state: WorkspaceTabsState, tabId: string): WorkspaceTabs
   return next;
 }
 
+/** activateTab implementation. */
 function activateTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState {
   if (!state.tabs[tabId]) return state;
   const panes = clonePanes(state.panes);
@@ -136,6 +142,7 @@ function activateTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsSta
   return { ...state, panes };
 }
 
+/** splitPane implementation. */
 function splitPane(
   state: WorkspaceTabsState,
   sourcePaneId: string,
@@ -166,16 +173,19 @@ function splitPane(
   return { ...state, panes };
 }
 
+/** clonePanes implementation. */
 function clonePanes(panes: Readonly<Record<string, WorkspacePane>>): Record<string, WorkspacePane> {
   return Object.fromEntries(
     Object.entries(panes).map(([id, pane]) => [id, { ...pane, tabs: [...pane.tabs] }]),
   );
 }
 
+/** clampDockHeight implementation. */
 function clampDockHeight(value: number): number {
   return Math.min(800, Math.max(160, Math.round(value)));
 }
 
+/** newId implementation. */
 function newId(): string {
   return `pane-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }

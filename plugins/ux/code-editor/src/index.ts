@@ -27,11 +27,13 @@ export class CodeEditorService {
   private buffers = new Map<string, EditorBuffer>();
   private activePath: string | null = null;
 
-  constructor(private ctx: Context) {
+    /** Constructs an instance. */
+constructor(private ctx: Context) {
     this.listenToLspEvents();
   }
 
-  openBuffer(path: string, content: string = "", language?: string): EditorBuffer {
+    /** openBuffer implementation. */
+openBuffer(path: string, content: string = "", language?: string): EditorBuffer {
     const lang = language || this.detectLanguage(path);
     let buf = this.buffers.get(path);
     if (!buf) {
@@ -52,7 +54,8 @@ export class CodeEditorService {
     return buf;
   }
 
-  updateContent(path: string, newContent: string): void {
+    /** updateContent implementation. */
+updateContent(path: string, newContent: string): void {
     const buf = this.buffers.get(path);
     if (buf) {
       buf.content = newContent;
@@ -63,7 +66,8 @@ export class CodeEditorService {
     }
   }
 
-  saveBuffer(path: string): boolean {
+    /** saveBuffer implementation. */
+saveBuffer(path: string): boolean {
     const buf = this.buffers.get(path);
     if (!buf) return false;
     buf.originalContent = buf.content;
@@ -74,7 +78,8 @@ export class CodeEditorService {
     return true;
   }
 
-  closeBuffer(path: string): void {
+    /** closeBuffer implementation. */
+closeBuffer(path: string): void {
     this.buffers.delete(path);
     if (this.activePath === path) {
       const remaining = Array.from(this.buffers.keys());
@@ -82,15 +87,18 @@ export class CodeEditorService {
     }
   }
 
-  getBuffer(path: string): EditorBuffer | undefined {
+    /** getBuffer implementation. */
+getBuffer(path: string): EditorBuffer | undefined {
     return this.buffers.get(path);
   }
 
-  getActiveBuffer(): EditorBuffer | null {
+    /** getActiveBuffer implementation. */
+getActiveBuffer(): EditorBuffer | null {
     return this.activePath ? this.buffers.get(this.activePath) || null : null;
   }
 
-  setMarkers(path: string, markers: EditorMarker[]): void {
+    /** setMarkers implementation. */
+setMarkers(path: string, markers: EditorMarker[]): void {
     const buf = this.buffers.get(path);
     if (buf) {
       buf.markers = markers;
@@ -100,7 +108,8 @@ export class CodeEditorService {
     }
   }
 
-  private detectLanguage(filePath: string): string {
+    /** detectLanguage implementation. */
+private detectLanguage(filePath: string): string {
     const ext = filePath.includes(".") ? filePath.split(".").pop()?.toLowerCase() || "" : "";
     const map: Record<string, string> = {
       ts: "typescript",
@@ -121,7 +130,8 @@ export class CodeEditorService {
     return map[ext] || "plaintext";
   }
 
-  private listenToLspEvents(): void {
+    /** listenToLspEvents implementation. */
+private listenToLspEvents(): void {
     if ((this.ctx as any).on) {
       (this.ctx as any).on("lsp:diagnostics", (data: { filePath: string; diagnostics: any[] }) => {
         const markers: EditorMarker[] = (data.diagnostics || []).map((d) => ({
@@ -145,6 +155,7 @@ export const Config = Schema.object({
   wordWrap: Schema.boolean().default(true),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new CodeEditorService(ctx);
   (ctx as any).codeEditor = service;

@@ -86,6 +86,7 @@ export function sessionStatsFromCache(
   };
 }
 
+/** num implementation. */
 function num(value: unknown): number {
   return typeof value === "number" ? value : 0;
 }
@@ -142,7 +143,8 @@ export function formatTable(rows: SessionStatsRow[]): string {
     String(row.decodeTokens),
   ]);
   const widths = header.map((h, i) => Math.max(h.length, ...body.map((r) => (r[i] ?? "").length)));
-  const line = (cells: string[]): string =>
+  const   /** line implementation. */
+line = (cells: string[]): string =>
     cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
   return [line(header), body.map(line).join("\n")].join("\n");
 }
@@ -169,6 +171,7 @@ export function formatCsv(rows: SessionStatsRow[]): string {
   return [header, ...body].join("\n");
 }
 
+/** csv implementation. */
 function csv(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }

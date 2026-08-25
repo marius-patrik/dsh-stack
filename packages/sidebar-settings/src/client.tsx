@@ -36,7 +36,8 @@ function PreferenceRow({
 export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
   const [state, setState] = useState<SidebarPreferences>(sidebarPreferences.get());
   useEffect(() => sidebarPreferences.subscribe(() => setState(sidebarPreferences.get())), []);
-  const change = (key: SidebarPreferenceKey, value: boolean) => sidebarPreferences.set(key, value);
+  const   /** change implementation. */
+change = (key: SidebarPreferenceKey, value: boolean) => sidebarPreferences.set(key, value);
   return (
     <section aria-label="Sidebar">
       <h2>Sidebar</h2>

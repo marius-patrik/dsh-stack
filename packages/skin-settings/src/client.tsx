@@ -5,6 +5,7 @@ import { createSkinRuntime, defaultSkins, type SkinId } from "@dsh-stack/skin-ru
 
 const runtime = createSkinRuntime(undefined, () => window.location.reload());
 
+/** SkinSettings implementation. */
 export function SkinSettings({ close }: SettingsSectionOwnerProps) {
   const [active, setActive] = useState<SkinId>(runtime.getActive());
   useEffect(() => runtime.subscribe(() => setActive(runtime.getActive())), []);
@@ -59,6 +60,7 @@ export function SkinSettings({ close }: SettingsSectionOwnerProps) {
   );
 }
 
+/** apply implementation. */
 export function apply(ctx: ClientContext): void {
   ctx.slots.register(
     { name: "settings.section", id: "skins", order: 35, label: "Skins" },

@@ -105,11 +105,13 @@ export interface AuditSink {
 export class MemoryAuditLog implements AuditSink {
   readonly #entries: AuditEntry[] = [];
 
-  record(entry: AuditEntry): void {
+    /** record implementation. */
+record(entry: AuditEntry): void {
     this.#entries.push(entry);
   }
 
-  entries(): readonly AuditEntry[] {
+    /** entries implementation. */
+entries(): readonly AuditEntry[] {
     return [...this.#entries];
   }
 }
@@ -122,7 +124,8 @@ export class VaultAccessError extends Error {
   readonly reason = "denied" as const;
   readonly recordId: string;
 
-  constructor(recordId: string, identity: AgentIdentity) {
+    /** Constructs an instance. */
+constructor(recordId: string, identity: AgentIdentity) {
     super(`vault record is not accessible to ${identity.workspace}/${identity.agent}: ${recordId}`);
     this.name = "VaultAccessError";
     this.recordId = recordId;
@@ -144,7 +147,8 @@ export class VaultMaterialSealedError extends Error {
   readonly reason = "sealed" as const;
   readonly recordId: string;
 
-  constructor(recordId: string, identity: AgentIdentity) {
+    /** Constructs an instance. */
+constructor(recordId: string, identity: AgentIdentity) {
     super(
       `vault material is sealed for ${identity.workspace}/${identity.agent}: ${recordId}. ` +
         "Use a VaultToolset capability instead — secrets do not leave the vault.",
@@ -173,7 +177,8 @@ export class PrivilegedVaultCustodian {
   readonly #now: () => number;
   readonly #custody: VaultCustody;
 
-  constructor(options: PrivilegedVaultCustodianOptions) {
+    /** Constructs an instance. */
+constructor(options: PrivilegedVaultCustodianOptions) {
     this.#vault = options.vault;
     this.#identity = { workspace: options.identity.workspace, agent: options.identity.agent };
     this.#supervisor = options.supervisor ?? null;
@@ -182,7 +187,8 @@ export class PrivilegedVaultCustodian {
     this.#custody = options.custody ?? "privileged";
   }
 
-  get identity(): AgentIdentity {
+    /** identity implementation. */
+get identity(): AgentIdentity {
     return { ...this.#identity };
   }
 
@@ -327,7 +333,8 @@ export class PrivilegedVaultCustodian {
     return record;
   }
 
-  async #accessibleDescriptors(): Promise<SecretDescriptor[]> {
+    /** #accessibleDescriptors implementation. */
+async #accessibleDescriptors(): Promise<SecretDescriptor[]> {
     const descriptors: SecretDescriptor[] = [];
     for (const id of await this.#vault.list()) {
       const record = await this.#vault.get(id);
@@ -337,12 +344,14 @@ export class PrivilegedVaultCustodian {
     return descriptors;
   }
 
-  #requireSupervisor(): ReauthSupervisor {
+    /** #requireSupervisor implementation. */
+#requireSupervisor(): ReauthSupervisor {
     if (!this.#supervisor) throw new Error("this vault agent was not given a re-auth supervisor");
     return this.#supervisor;
   }
 
-  async #log(
+    /** #log implementation. */
+async #log(
     action: AuditAction,
     record: SecretRecord | null,
     id: string | null,

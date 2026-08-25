@@ -45,34 +45,40 @@ export class LspClientService {
   private servers = new Map<string, LspServerHandler>();
   private diagnosticsCache = new Map<string, LspDiagnostic[]>();
 
-  constructor(private ctx: Context) {
+    /** Constructs an instance. */
+constructor(private ctx: Context) {
     this.registerLspTools();
   }
 
-  registerServer(lang: string, server: LspServerHandler): void {
+    /** registerServer implementation. */
+registerServer(lang: string, server: LspServerHandler): void {
     this.servers.set(lang, server);
     for (const l of server.languages || [lang]) {
       this.servers.set(l, server);
     }
   }
 
-  getServerForFile(filePath: string): LspServerHandler | undefined {
+    /** getServerForFile implementation. */
+getServerForFile(filePath: string): LspServerHandler | undefined {
     const ext = filePath.includes(".") ? filePath.split(".").pop() || "" : filePath;
     return this.servers.get(ext);
   }
 
-  setDiagnostics(filePath: string, diagnostics: LspDiagnostic[]): void {
+    /** setDiagnostics implementation. */
+setDiagnostics(filePath: string, diagnostics: LspDiagnostic[]): void {
     this.diagnosticsCache.set(filePath, diagnostics);
     if ((this.ctx as any).emit) {
       (this.ctx as any).emit("lsp:diagnostics", { filePath, diagnostics });
     }
   }
 
-  getDiagnostics(filePath: string): LspDiagnostic[] {
+    /** getDiagnostics implementation. */
+getDiagnostics(filePath: string): LspDiagnostic[] {
     return this.diagnosticsCache.get(filePath) || [];
   }
 
-  private registerLspTools(): void {
+    /** registerLspTools implementation. */
+private registerLspTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 
@@ -153,6 +159,7 @@ export const Config = Schema.object({
   diagnosticsDebounceMs: Schema.number().default(250),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new LspClientService(ctx);
   (ctx as any).lsp = service;

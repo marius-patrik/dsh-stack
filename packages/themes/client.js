@@ -22,7 +22,8 @@ window.__ModuleLoader__.load({
      * the section + glyph re-register through the slot ledger.
      */
     var THEMES_ROUTE = "/themes.json";
-    function createThemeObservable(ctx) {
+        /** createThemeObservable implementation. */
+function createThemeObservable(ctx) {
       var listeners = new Set();
       var snapshot = ctx.theme.getTheme();
       var off = ctx.on("theme/change", function (next) {
@@ -44,7 +45,8 @@ window.__ModuleLoader__.load({
         dispose: off,
       };
     }
-    function applyBorderStyle(style) {
+        /** applyBorderStyle implementation. */
+function applyBorderStyle(style) {
       if (typeof document === "undefined") return;
       var id = "dsh-border-style-override";
       var el = document.getElementById(id);
@@ -85,7 +87,8 @@ window.__ModuleLoader__.load({
       }
     }
 
-    function applyOledStyles(isOled) {
+        /** applyOledStyles implementation. */
+function applyOledStyles(isOled) {
       if (typeof document === "undefined") return;
       var id = "dsh-oled-style-override";
       var el = document.getElementById(id);
@@ -156,7 +159,8 @@ window.__ModuleLoader__.load({
       }
     }
 
-    function ThemesGlyph(props) {
+        /** ThemesGlyph implementation. */
+function ThemesGlyph(props) {
       var React = require("react");
       var size = (props && props.size) || 16;
       return React.createElement(
@@ -182,7 +186,8 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function ThemesSection(props) {
+        /** ThemesSection implementation. */
+function ThemesSection(props) {
       var React = require("react");
       var h = React.createElement;
       var useThemeSnapshot = props.useThemeSnapshot,
@@ -215,7 +220,8 @@ window.__ModuleLoader__.load({
       var showHeroBanner = heroBannerState[0],
         setShowHeroBanner = heroBannerState[1];
 
-      var setBorderChoice = function (style) {
+      var       /** setBorderChoice implementation. */
+setBorderChoice = function (style) {
         setBorderStyle(style);
         try {
           if (typeof window !== "undefined" && window.localStorage) {
@@ -227,7 +233,8 @@ window.__ModuleLoader__.load({
           window.dispatchEvent(new CustomEvent("dsh:settings-change"));
       };
 
-      var toggleHeroBanner = function () {
+      var       /** toggleHeroBanner implementation. */
+toggleHeroBanner = function () {
         var next = !showHeroBanner;
         setShowHeroBanner(next);
         try {
@@ -246,7 +253,8 @@ window.__ModuleLoader__.load({
         var theme = themes[i];
         (groups[theme.colorScheme] = groups[theme.colorScheme] || []).push(theme);
       }
-      var themeButton = function (theme) {
+      var       /** themeButton implementation. */
+themeButton = function (theme) {
         var isActive = theme.id === active;
         return h(
           "button",
@@ -291,7 +299,8 @@ window.__ModuleLoader__.load({
             : null,
         );
       };
-      var schemeGroup = function (scheme) {
+      var       /** schemeGroup implementation. */
+schemeGroup = function (scheme) {
         var list = groups[scheme];
         if (!list || list.length === 0) return null;
         return h(
@@ -618,9 +627,11 @@ window.__ModuleLoader__.load({
       },
     };
 
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       var themeObservable;
-      var getSavedTheme = function () {
+      var       /** getSavedTheme implementation. */
+getSavedTheme = function () {
         try {
           if (typeof window !== "undefined" && window.localStorage) {
             return window.localStorage.getItem("dsh_active_theme");
@@ -628,7 +639,8 @@ window.__ModuleLoader__.load({
         } catch (e) {}
         return null;
       };
-      var saveActiveTheme = function (id) {
+      var       /** saveActiveTheme implementation. */
+saveActiveTheme = function (id) {
         try {
           if (typeof window !== "undefined" && window.localStorage) {
             window.localStorage.setItem("dsh_active_theme", id);

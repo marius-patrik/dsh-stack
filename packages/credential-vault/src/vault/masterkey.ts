@@ -81,14 +81,16 @@ export class StaticMasterKey implements MasterKeySource {
   readonly description: string;
   readonly #key: Uint8Array;
 
-  constructor(key: Uint8Array, description = "static key supplied by the caller") {
+    /** Constructs an instance. */
+constructor(key: Uint8Array, description = "static key supplied by the caller") {
     if (key.byteLength !== KEY_BYTES)
       throw new Error(`vault master key must be ${KEY_BYTES} bytes`);
     this.#key = Uint8Array.from(key);
     this.description = description;
   }
 
-  async key(): Promise<Uint8Array> {
+    /** key implementation. */
+async key(): Promise<Uint8Array> {
     return Uint8Array.from(this.#key);
   }
 }
@@ -117,7 +119,8 @@ export class PassphraseMasterKey implements MasterKeySource {
   readonly #parameters: ScryptParameters;
   #cached: Uint8Array | null = null;
 
-  constructor(options: PassphraseMasterKeyOptions) {
+    /** Constructs an instance. */
+constructor(options: PassphraseMasterKeyOptions) {
     if (!options.directory.trim()) throw new Error("passphrase master key requires a directory");
     this.#file = path.join(path.resolve(options.directory), KDF_FILE);
     this.#passphrase = options.passphrase;
@@ -132,7 +135,8 @@ export class PassphraseMasterKey implements MasterKeySource {
     return this.#file;
   }
 
-  async key(): Promise<Uint8Array> {
+    /** key implementation. */
+async key(): Promise<Uint8Array> {
     if (this.#cached) return Uint8Array.from(this.#cached);
     const stored = await this.#loadOrCreateParameters();
     const passphrase =
@@ -142,7 +146,8 @@ export class PassphraseMasterKey implements MasterKeySource {
     return Uint8Array.from(derived);
   }
 
-  async #loadOrCreateParameters(): Promise<{ salt: Uint8Array; parameters: ScryptParameters }> {
+    /** #loadOrCreateParameters implementation. */
+async #loadOrCreateParameters(): Promise<{ salt: Uint8Array; parameters: ScryptParameters }> {
     if (await exists(this.#file))
       return parseKdfFile(await readFile(this.#file, "utf8"), this.#file);
     const salt = randomBytes(16);
@@ -178,22 +183,26 @@ export class KeyFileMasterKey implements MasterKeySource {
   readonly #file: string;
   #cached: Uint8Array | null = null;
 
-  constructor(options: KeyFileMasterKeyOptions) {
+    /** Constructs an instance. */
+constructor(options: KeyFileMasterKeyOptions) {
     if (!options.directory.trim()) throw new Error("key file master key requires a directory");
     this.#file = path.join(path.resolve(options.directory), options.fileName ?? KEY_FILE);
   }
 
-  get keyFile(): string {
+    /** keyFile implementation. */
+get keyFile(): string {
     return this.#file;
   }
 
-  async key(): Promise<Uint8Array> {
+    /** key implementation. */
+async key(): Promise<Uint8Array> {
     if (this.#cached) return Uint8Array.from(this.#cached);
     this.#cached = await this.#loadOrCreate();
     return Uint8Array.from(this.#cached);
   }
 
-  async #loadOrCreate(): Promise<Uint8Array> {
+    /** #loadOrCreate implementation. */
+async #loadOrCreate(): Promise<Uint8Array> {
     if (await exists(this.#file)) {
       const key = Buffer.from((await readFile(this.#file, "utf8")).trim(), "base64");
       if (key.byteLength !== KEY_BYTES)
@@ -248,6 +257,7 @@ export function sameKey(left: Uint8Array, right: Uint8Array): boolean {
   return timingSafeEqual(Buffer.from(left), Buffer.from(right));
 }
 
+/** parseKdfFile implementation. */
 function parseKdfFile(
   raw: string,
   file: string,

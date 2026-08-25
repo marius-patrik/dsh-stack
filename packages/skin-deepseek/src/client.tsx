@@ -5,6 +5,7 @@ export interface SkinBrandProps {
   readonly size?: number;
 }
 
+/** DeepSeekBrandMark implementation. */
 export function DeepSeekBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   const style: CSSProperties = { width: size, height: size, display: "block", flex: "0 0 auto" };
   return (
@@ -17,6 +18,7 @@ export function DeepSeekBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   );
 }
 
+/** DeepSeekBrandName implementation. */
 export function DeepSeekBrandName(): JSX.Element {
   return <span style={{ fontWeight: 650, letterSpacing: "-0.01em" }}>DeepSeek</span>;
 }

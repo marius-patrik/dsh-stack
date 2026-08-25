@@ -52,6 +52,7 @@ function isAnthropic(url: string): boolean {
 /** How long a quota probe may wait before it is reported as unreachable. */
 const PROBE_TIMEOUT_MS = 15_000;
 
+/** probeEndpoint implementation. */
 async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSnapshot> {
   const probe = route.probe;
   const now = new Date().toISOString();
@@ -177,6 +178,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
   }
 }
 
+/** parseHeader implementation. */
 function parseHeader(res: Response, name: string): number | undefined {
   const val = res.headers.get(name);
   if (!val) return undefined;
@@ -184,6 +186,7 @@ function parseHeader(res: Response, name: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
+/** parseRateLimitReset implementation. */
 function parseRateLimitReset(res: Response): string | undefined {
   const reset = res.headers.get("x-ratelimit-reset");
   if (reset) {
@@ -212,7 +215,8 @@ export function createBuiltinProviders(read: ProbeTokenReader): QuotaProvider[] 
     const tokenRef = probeTokenRef(route);
     return {
       id: route.id,
-      async read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot> {
+            /** read implementation. */
+async read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot> {
         if (signal.aborted) {
           return {
             provider: route.id,

@@ -34,7 +34,8 @@ export class HostsService extends Service implements IHostsService {
   private cachedStatus: ClusterStatus | null = null;
   private lastScan = 0;
 
-  constructor(
+    /** Constructs an instance. */
+constructor(
     ctx: Context,
     public readonly config?: Partial<AccessConfig>,
   ) {
@@ -118,7 +119,8 @@ export class HostsService extends Service implements IHostsService {
     );
   }
 
-  getAccessConfig(): AccessConfig {
+    /** getAccessConfig implementation. */
+getAccessConfig(): AccessConfig {
     const gatewayPort = this.config?.gatewayPort ?? 3080;
     const backendPort = this.config?.backendPort ?? 3081;
     const mode = this.config?.mode ?? "tailnet";
@@ -137,18 +139,21 @@ export class HostsService extends Service implements IHostsService {
     };
   }
 
-  async listNodes(): Promise<NetworkNode[]> {
+    /** listNodes implementation. */
+async listNodes(): Promise<NetworkNode[]> {
     const status = await this.getClusterStatus();
     return status.nodes;
   }
 
-  async getClusterStatus(): Promise<ClusterStatus> {
+    /** getClusterStatus implementation. */
+async getClusterStatus(): Promise<ClusterStatus> {
     const now = Date.now();
     if (this.cachedStatus && now - this.lastScan < 10000) return this.cachedStatus;
     return this.rescanTopology();
   }
 
-  async rescanTopology(): Promise<ClusterStatus> {
+    /** rescanTopology implementation. */
+async rescanTopology(): Promise<ClusterStatus> {
     const ts = await scanTailscaleTopology();
     const access = this.getAccessConfig();
     const nodes: NetworkNode[] = [];
@@ -176,7 +181,8 @@ export class HostsService extends Service implements IHostsService {
     return this.cachedStatus;
   }
 
-  async deployWorker(nodeId: string): Promise<{ ok: boolean; message: string; command?: string }> {
+    /** deployWorker implementation. */
+async deployWorker(nodeId: string): Promise<{ ok: boolean; message: string; command?: string }> {
     const status = await this.getClusterStatus();
     const node = status.nodes.find((candidate) => candidate.id === nodeId);
     if (!node) return { ok: false, message: `Node with id ${nodeId} not found` };
@@ -189,6 +195,7 @@ export class HostsService extends Service implements IHostsService {
   }
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config?: Partial<AccessConfig>): void {
   ctx.plugin(HostsService, config);
 }

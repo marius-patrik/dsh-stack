@@ -7,6 +7,7 @@ export const optional = ["claude", "hermes"];
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context) {
   // Registers ollama-cli interactive tmux runner
 }

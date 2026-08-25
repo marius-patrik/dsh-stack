@@ -21,23 +21,28 @@ export interface RepoDetails {
 export class ReposWorkbenchService {
   private repos = new Map<string, RepoDetails>();
 
-  constructor(private ctx: Context) {
+    /** Constructs an instance. */
+constructor(private ctx: Context) {
     this.registerVcsTools();
   }
 
-  registerRepo(details: RepoDetails): void {
+    /** registerRepo implementation. */
+registerRepo(details: RepoDetails): void {
     this.repos.set(details.path, details);
   }
 
-  getRepo(targetPath: string): RepoDetails | undefined {
+    /** getRepo implementation. */
+getRepo(targetPath: string): RepoDetails | undefined {
     return this.repos.get(targetPath);
   }
 
-  listRepos(): RepoDetails[] {
+    /** listRepos implementation. */
+listRepos(): RepoDetails[] {
     return Array.from(this.repos.values());
   }
 
-  getOverview(repoPath: string) {
+    /** getOverview implementation. */
+getOverview(repoPath: string) {
     let branch = "main";
     let isLocalOnly = true;
     let remoteUrl: string | undefined;
@@ -80,7 +85,8 @@ export class ReposWorkbenchService {
     };
   }
 
-  private registerVcsTools(): void {
+    /** registerVcsTools implementation. */
+private registerVcsTools(): void {
     const tools = (this.ctx as any).tools;
     if (!tools || typeof tools.registerTool !== "function") return;
 
@@ -172,6 +178,7 @@ export const Config = Schema.object({
   supportLocalOnly: Schema.boolean().default(true),
 });
 
+/** apply implementation. */
 export function apply(ctx: Context, config: any) {
   const service = new ReposWorkbenchService(ctx);
   (ctx as any).repos = service;

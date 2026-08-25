@@ -24,6 +24,7 @@ const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 const NS = "dsh-agents";
 
+/** readSection implementation. */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -40,6 +41,7 @@ function* readSection(text, section) {
   }
 }
 
+/** readSettings implementation. */
 async function readSettings() {
   try {
     const text = await readFile(settingsPath, "utf8");
@@ -51,6 +53,7 @@ async function readSettings() {
   }
 }
 
+/** main implementation. */
 async function main() {
   const verb = process.argv[2];
   const argv = process.argv.slice(3);
@@ -170,6 +173,7 @@ verbs:
   process.exitCode = 1;
 }
 
+/** printReport implementation. */
 function printReport(report) {
   for (const item of report.materialized) {
     process.stdout.write(
@@ -187,6 +191,7 @@ function printReport(report) {
   }
 }
 
+/** exists implementation. */
 async function exists(path) {
   try {
     await readFile(path, "utf8");

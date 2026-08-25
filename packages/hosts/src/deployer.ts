@@ -19,7 +19,8 @@ export interface DeploymentProgress {
 export class RemoteDeployer {
   private activeDeployments = new Map<string, DeploymentProgress>();
 
-  getProgress(nodeId: string): DeploymentProgress | undefined {
+    /** getProgress implementation. */
+getProgress(nodeId: string): DeploymentProgress | undefined {
     return this.activeDeployments.get(nodeId);
   }
 

@@ -14,17 +14,20 @@ export interface DialectSerializer {
 export class DialectsService {
   private serializers = new Map<string, DialectSerializer>();
 
-  register(name: string, serializer: DialectSerializer): void {
+    /** register implementation. */
+register(name: string, serializer: DialectSerializer): void {
     this.serializers.set(name, serializer);
   }
 
-  get(name: string) {
+    /** get implementation. */
+get(name: string) {
     return this.serializers.get(name);
   }
 }
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context) {
   (ctx as any).dialects = new DialectsService();
 }

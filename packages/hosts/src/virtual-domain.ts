@@ -17,7 +17,8 @@ export interface VirtualDomainConfig {
 export class VirtualDomainManager {
   private config: VirtualDomainConfig;
 
-  constructor(config?: Partial<VirtualDomainConfig>) {
+    /** Constructs an instance. */
+constructor(config?: Partial<VirtualDomainConfig>) {
     this.config = {
       clusterDomain: config?.clusterDomain || "dsh.local",
       enableMdns: config?.enableMdns ?? true,

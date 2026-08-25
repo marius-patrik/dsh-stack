@@ -36,18 +36,22 @@ export interface PluginCatalog {
   readonly profiles: readonly StackProfileDefinition[];
 }
 
+/** definePlugin implementation. */
 export function definePlugin<const T extends FeaturePluginDefinition>(plugin: T): T {
   return plugin;
 }
 
+/** definePack implementation. */
 export function definePack<const T extends PluginPackDefinition>(pack: T): T {
   return pack;
 }
 
+/** defineProfile implementation. */
 export function defineProfile<const T extends StackProfileDefinition>(profile: T): T {
   return profile;
 }
 
+/** validateCatalog implementation. */
 export function validateCatalog(catalog: PluginCatalog): void {
   assertUnique(
     catalog.plugins.map((plugin) => plugin.id),
@@ -99,6 +103,7 @@ export function validateCatalog(catalog: PluginCatalog): void {
   }
 }
 
+/** assertUnique implementation. */
 function assertUnique(values: readonly string[], label: string): void {
   const seen = new Set<string>();
   for (const value of values) {

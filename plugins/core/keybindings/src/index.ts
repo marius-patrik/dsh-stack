@@ -16,22 +16,26 @@ export class KeybindingsService extends Service {
   static inject = ["slots"];
   private readonly bindings = new Map<string, KeybindingRule>();
 
-  constructor(ctx: Context) {
+    /** Constructs an instance. */
+constructor(ctx: Context) {
     super(ctx, "keybindings");
   }
 
-  register(rule: KeybindingRule): void {
+    /** register implementation. */
+register(rule: KeybindingRule): void {
     if (!rule.id.trim()) throw new Error("Keybinding id must be non-empty");
     this.bindings.set(rule.id, rule);
   }
 
-  get(id: string): KeybindingRule | undefined {
+    /** get implementation. */
+get(id: string): KeybindingRule | undefined {
     return this.bindings.get(id);
   }
 }
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context): void {
   new KeybindingsService(ctx);
 }

@@ -24,11 +24,13 @@ async function readBody(req: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+/** sendJson implementation. */
 function sendJson(res: ServerResponse, status: number, payload: unknown): void {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(payload));
 }
 
+/** sendError implementation. */
 function sendError(res: ServerResponse, err: unknown, notConfiguredStatus = 400): void {
   const e = err as { code?: string; message?: string };
   const status = e?.code === "NOT_CONFIGURED" ? notConfiguredStatus : 502;

@@ -19,25 +19,30 @@ export class PersonasService extends Service {
   static optional = ["icons"];
   private roster = new Map<string, AgentPersona>();
 
-  constructor(ctx: Context) {
+    /** Constructs an instance. */
+constructor(ctx: Context) {
     super(ctx, "personas");
   }
 
-  register(persona: AgentPersona): void {
+    /** register implementation. */
+register(persona: AgentPersona): void {
     this.roster.set(persona.id, persona);
   }
 
-  get(id: string): AgentPersona | undefined {
+    /** get implementation. */
+get(id: string): AgentPersona | undefined {
     return this.roster.get(id);
   }
 
-  list(): AgentPersona[] {
+    /** list implementation. */
+list(): AgentPersona[] {
     return Array.from(this.roster.values());
   }
 }
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context): void {
   new PersonasService(ctx);
 }

@@ -12,10 +12,12 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { FileSecretProvider } from "./types.js";
 
+/** home implementation. */
 function home(): string {
   return homedir();
 }
 
+/** readJson implementation. */
 function readJson(path: string): Promise<unknown> {
   return fs.readFile(path, "utf8").then((text) => JSON.parse(text));
 }
@@ -32,7 +34,8 @@ export const claudeFileProvider: FileSecretProvider = {
     "Imports the primary API key and subscription OAuth token from Claude Code's credential file.",
   defaultPaths: [join(home(), ".claude", ".credentials.json")],
 
-  async detect(path: string): Promise<boolean> {
+    /** detect implementation. */
+async detect(path: string): Promise<boolean> {
     try {
       const parsed = await readJson(path);
       return typeof parsed === "object" && parsed !== null;
@@ -41,7 +44,8 @@ export const claudeFileProvider: FileSecretProvider = {
     }
   },
 
-  async read(path: string): Promise<Record<string, string>> {
+    /** read implementation. */
+async read(path: string): Promise<Record<string, string>> {
     const parsed = await readJson(path);
     if (typeof parsed !== "object" || parsed === null) {
       throw new Error(`dsh-credentials: ${path} is not a JSON object`);
@@ -87,7 +91,8 @@ export const cursorFileProvider: FileSecretProvider = {
     ),
   ],
 
-  async detect(path: string): Promise<boolean> {
+    /** detect implementation. */
+async detect(path: string): Promise<boolean> {
     try {
       const db = new DatabaseSync(path, { readOnly: true });
       try {
@@ -103,7 +108,8 @@ export const cursorFileProvider: FileSecretProvider = {
     }
   },
 
-  async read(path: string): Promise<Record<string, string>> {
+    /** read implementation. */
+async read(path: string): Promise<Record<string, string>> {
     const db = new DatabaseSync(path, { readOnly: true });
     try {
       const out: Record<string, string> = {};
@@ -138,7 +144,8 @@ export const githubFileProvider: FileSecretProvider = {
   description: "Imports the GitHub CLI OAuth token from its hosts.yml credential file.",
   defaultPaths: [join(home(), ".config", "gh", "hosts.yml")],
 
-  async detect(path: string): Promise<boolean> {
+    /** detect implementation. */
+async detect(path: string): Promise<boolean> {
     try {
       const raw = await fs.readFile(path, "utf8");
       return /oauth_token\s*:/.test(raw);
@@ -147,7 +154,8 @@ export const githubFileProvider: FileSecretProvider = {
     }
   },
 
-  async read(path: string): Promise<Record<string, string>> {
+    /** read implementation. */
+async read(path: string): Promise<Record<string, string>> {
     const raw = await fs.readFile(path, "utf8");
     const out: Record<string, string> = {};
     const github = parseGitHubHosts(raw).find((entry) => entry.host === "github.com");
@@ -181,7 +189,8 @@ export function parseGitHubHosts(raw: string): GitHubHostEntry[] {
   let host: string | null = null;
   let user: string | null = null;
   let token: string | null = null;
-  const flush = () => {
+  const   /** flush implementation. */
+flush = () => {
     if (host && token) entries.push({ host, user, token });
     user = null;
     token = null;

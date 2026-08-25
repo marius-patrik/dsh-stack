@@ -146,7 +146,8 @@ export async function* translateOpenAi(
   let pendingFinish: FinishReason | undefined;
   let pendingUsage: TokenUsage | undefined;
 
-  function open(kind: OpenBlock["kind"]): OpenBlock {
+    /** open implementation. */
+function open(kind: OpenBlock["kind"]): OpenBlock {
     const block: OpenBlock = { index: nextIndex++, kind, text: "" };
     order.push(block);
     return block;

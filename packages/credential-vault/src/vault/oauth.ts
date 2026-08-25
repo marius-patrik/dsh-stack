@@ -123,14 +123,17 @@ export const oauthTransport: OAuthTransport = async ({ url, method, headers, bod
   return { status: response.status, body: parsed };
 };
 
+/** createPkceCodeVerifier implementation. */
 export function createPkceCodeVerifier(random: () => Buffer = () => randomBytes(32)): string {
   return base64Url(random());
 }
 
+/** derivePkceCodeChallengeS256 implementation. */
 export function derivePkceCodeChallengeS256(codeVerifier: string): string {
   return base64Url(createHash("sha256").update(codeVerifier).digest());
 }
 
+/** runPkceAuthorizationFlow implementation. */
 export async function runPkceAuthorizationFlow(
   options: OAuthPkceFlowOptions,
 ): Promise<OAuthLoginResult> {
@@ -181,6 +184,7 @@ export async function runPkceAuthorizationFlow(
   }
 }
 
+/** runDeviceAuthorizationFlow implementation. */
 export async function runDeviceAuthorizationFlow(
   options: OAuthDeviceFlowOptions,
 ): Promise<OAuthLoginResult> {
@@ -246,7 +250,8 @@ export class OAuthTokenRefresher {
   readonly #inflight = new Map<string, Promise<(ProviderCredential & { kind: "oauth" }) | null>>();
   readonly #state = new Map<string, RefreshState>();
 
-  constructor(options: OAuthTokenRefreshOptions) {
+    /** Constructs an instance. */
+constructor(options: OAuthTokenRefreshOptions) {
     this.#store = options.store;
     this.#transport = options.transport ?? oauthTransport;
     this.#now = options.now ?? (() => Date.now());
@@ -259,11 +264,13 @@ export class OAuthTokenRefresher {
     this.#maxAttempts = options.maxAttempts ?? 5;
   }
 
-  state(providerId: string): RefreshState {
+    /** state implementation. */
+state(providerId: string): RefreshState {
     return this.#state.get(providerId) ?? "ready";
   }
 
-  async ensureFreshCredential(
+    /** ensureFreshCredential implementation. */
+async ensureFreshCredential(
     providerId: string,
     auth: OAuthAuthConfig,
   ): Promise<(ProviderCredential & { kind: "oauth" }) | null> {
@@ -274,7 +281,8 @@ export class OAuthTokenRefresher {
     return this.#singleFlightRefresh(providerId, auth, credential);
   }
 
-  async #singleFlightRefresh(
+    /** #singleFlightRefresh implementation. */
+async #singleFlightRefresh(
     providerId: string,
     auth: OAuthAuthConfig,
     credential: ProviderCredential & { kind: "oauth" },
@@ -288,7 +296,8 @@ export class OAuthTokenRefresher {
     return refresh;
   }
 
-  async #refresh(
+    /** #refresh implementation. */
+async #refresh(
     providerId: string,
     auth: OAuthAuthConfig,
     credential: ProviderCredential & { kind: "oauth" },
@@ -373,6 +382,7 @@ async function resolveClientSecret(
   return record.kind === "api_key" ? record.apiKey : null;
 }
 
+/** resolveOAuthEndpoints implementation. */
 export async function resolveOAuthEndpoints(
   auth: OAuthPkceAuth,
   transport: OAuthTransport,
@@ -432,6 +442,7 @@ function resolveTokenEndpoint(auth: OAuthAuthConfig): string {
   return auth.tokenUrl;
 }
 
+/** fetchDiscovery implementation. */
 async function fetchDiscovery(url: string, transport: OAuthTransport): Promise<DiscoveryDocument> {
   const response = await transport({
     url,
@@ -499,6 +510,7 @@ function assertDiscoveryIssuer(discoveryUrl: string, issuer: string | null): voi
   }
 }
 
+/** expectedIssuer implementation. */
 function expectedIssuer(discoveryUrl: string): string | null {
   const url = new URL(discoveryUrl);
   const segments = url.pathname.split("/").filter((segment) => segment.length > 0);
@@ -508,10 +520,12 @@ function expectedIssuer(discoveryUrl: string): string | null {
   return remainder.length === 0 ? url.origin : `${url.origin}/${remainder.join("/")}`;
 }
 
+/** trimTrailingSlash implementation. */
 function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
+/** oauthTokenRequest implementation. */
 async function oauthTokenRequest(
   transport: OAuthTransport,
   url: string,
@@ -530,6 +544,7 @@ async function oauthTokenRequest(
   return asRecord(response.body);
 }
 
+/** tokenToCredential implementation. */
 function tokenToCredential(
   tokenResponse: Record<string, unknown>,
   nowMs: number,
@@ -555,6 +570,7 @@ function tokenToCredential(
   };
 }
 
+/** shouldRefresh implementation. */
 function shouldRefresh(
   credential: ProviderCredential & { kind: "oauth" },
   nowMs: number,
@@ -565,6 +581,7 @@ function shouldRefresh(
   return Number.isFinite(expiresAt) && nowMs + skewMs >= expiresAt;
 }
 
+/** jitteredBackoff implementation. */
 function jitteredBackoff(
   baseMs: number,
   maxMs: number,
@@ -576,6 +593,7 @@ function jitteredBackoff(
   return Math.max(0, Math.round(core + jitter));
 }
 
+/** isTransientRefreshError implementation. */
 function isTransientRefreshError(error: string | null): boolean {
   return (
     error === null ||
@@ -585,6 +603,7 @@ function isTransientRefreshError(error: string | null): boolean {
   );
 }
 
+/** createLoopbackListener implementation. */
 async function createLoopbackListener(
   pathname: string,
   timeoutMs: number,
@@ -665,6 +684,7 @@ async function createLoopbackListener(
   };
 }
 
+/** base64Url implementation. */
 function base64Url(bytes: Uint8Array): string {
   return Buffer.from(bytes)
     .toString("base64")
@@ -673,12 +693,14 @@ function base64Url(bytes: Uint8Array): string {
     .replace(/=+$/g, "");
 }
 
+/** asRecord implementation. */
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
 }
 
+/** requiredString implementation. */
 function requiredString(value: Record<string, unknown>, field: string): string {
   const raw = value[field];
   if (typeof raw !== "string" || raw.length === 0)
@@ -686,11 +708,13 @@ function requiredString(value: Record<string, unknown>, field: string): string {
   return raw;
 }
 
+/** optionalString implementation. */
 function optionalString(value: Record<string, unknown>, field: string): string | null {
   const raw = value[field];
   return typeof raw === "string" && raw.length > 0 ? raw : null;
 }
 
+/** optionalFiniteNumber implementation. */
 function optionalFiniteNumber(value: Record<string, unknown>, field: string): number | null {
   const raw = value[field];
   const parsed = typeof raw === "string" ? Number(raw) : raw;

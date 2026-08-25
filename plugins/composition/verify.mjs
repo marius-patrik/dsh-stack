@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { packs, plugins, profiles, resolveProfile } from "./lib/index.js";
 
+/** assertUnique implementation. */
 function assertUnique(values, label) {
   const seen = new Set();
   for (const value of values) {

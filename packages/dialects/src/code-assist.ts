@@ -57,6 +57,7 @@ function assertTextOnly(blocks: readonly ContentBlock[]): void {
   }
 }
 
+/** buildUrl implementation. */
 function buildUrl(base: string): string {
   if (base.includes(":streamGenerateContent")) {
     return base.includes("?") ? base : `${base}?alt=sse`;
@@ -74,7 +75,8 @@ function buildUrl(base: string): string {
 export const codeAssistDialect: Dialect = {
   id: "code-assist",
 
-  serialize(
+    /** serialize implementation. */
+serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -135,8 +137,10 @@ export const codeAssistDialect: Dialect = {
     };
   },
 
-  parse(body, onActivity) {
-    async function* unwrap(): AsyncIterable<string> {
+    /** parse implementation. */
+parse(body, onActivity) {
+        /** unwrap implementation. */
+async function* unwrap(): AsyncIterable<string> {
       for await (const { data } of parseSseEvents(body, onActivity)) {
         let parsed: unknown;
         try {

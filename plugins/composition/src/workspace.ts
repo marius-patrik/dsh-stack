@@ -31,6 +31,7 @@ export interface WorkspaceThemeState {
   readonly skins: readonly SkinDefinition[];
 }
 
+/** resolveSidebarLogo implementation. */
 export function resolveSidebarLogo(
   settings: SidebarSettings,
   skin: SkinDefinition,
@@ -48,6 +49,7 @@ export function resolveSidebarLogo(
   };
 }
 
+/** shouldShowNewConversation implementation. */
 export function shouldShowNewConversation(settings: SidebarConversationSettings): boolean {
   return settings.showNewConversation;
 }

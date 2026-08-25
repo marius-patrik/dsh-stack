@@ -17,13 +17,16 @@ const stackIds = new Map();
 const publicPackages = new Map();
 const sourceHashes = new Map();
 
+/** fail implementation. */
 function fail(message) {
   errors.push(message);
 }
+/** assert implementation. */
 function assert(condition, message) {
   if (!condition) fail(message);
 }
 
+/** readJson implementation. */
 async function readJson(path, label) {
   try {
     return JSON.parse(await fs.readFile(path, "utf8"));
@@ -33,6 +36,7 @@ async function readJson(path, label) {
   }
 }
 
+/** exists implementation. */
 async function exists(path) {
   try {
     await fs.access(path);
@@ -42,6 +46,7 @@ async function exists(path) {
   }
 }
 
+/** walk implementation. */
 async function* walk(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
@@ -52,6 +57,7 @@ async function* walk(dir) {
   }
 }
 
+/** trackedGeneratedFiles implementation. */
 async function trackedGeneratedFiles() {
   try {
     const { stdout } = await execFileAsync(
@@ -78,6 +84,7 @@ async function trackedGeneratedFiles() {
   }
 }
 
+/** verifyCanonicalPackage implementation. */
 async function verifyCanonicalPackage(dir) {
   const relDir = relative(root, dir);
   const packagePath = join(dir, "package.json");
@@ -162,6 +169,7 @@ async function verifyCanonicalPackage(dir) {
   }
 }
 
+/** verifyPluginTree implementation. */
 async function verifyPluginTree() {
   const children = await fs.readdir(pluginsDir, { withFileTypes: true });
   for (const child of children) {
@@ -187,6 +195,7 @@ async function verifyPluginTree() {
   }
 }
 
+/** main implementation. */
 async function main() {
   assert(await exists(packagesDir), "packages/ canonical implementation root is missing");
   assert(await exists(pluginsDir), "plugins/ composition root is missing");

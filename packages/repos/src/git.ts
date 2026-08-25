@@ -60,7 +60,8 @@ export class GitCommandError extends Error {
   readonly command: string[];
   readonly exitCode: number;
 
-  constructor(command: readonly string[], exitCode: number, stderr: string) {
+    /** Constructs an instance. */
+constructor(command: readonly string[], exitCode: number, stderr: string) {
     super(`git ${command.join(" ")} exited ${exitCode}${stderr.length > 0 ? `: ${stderr}` : ""}`);
     this.name = "GitCommandError";
     this.command = [...command];

@@ -24,6 +24,7 @@ import { mapTheme, themeId } from "../lib/theme.js";
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 
+/** readSection implementation. */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -40,6 +41,7 @@ function* readSection(text, section) {
   }
 }
 
+/** readThemesConfig implementation. */
 async function readThemesConfig() {
   let root = "themes";
   let catalogUrl = "https://open-vsx.org";
@@ -54,6 +56,7 @@ async function readThemesConfig() {
   return { root, catalogUrl };
 }
 
+/** readActive implementation. */
 async function readActive() {
   try {
     for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "dsh-themes")) {
@@ -65,6 +68,7 @@ async function readActive() {
   return "";
 }
 
+/** writeActive implementation. */
 async function writeActive(id) {
   let text = "";
   try {
@@ -80,6 +84,7 @@ async function writeActive(id) {
   await writeFile(settingsPath, text, "utf8");
 }
 
+/** printHelp implementation. */
 function printHelp() {
   process.stdout.write(`usage: dsh theme <verb> [args]
 
@@ -92,6 +97,7 @@ function printHelp() {
 `);
 }
 
+/** main implementation. */
 async function main(argv) {
   const verb = argv[0];
   if (verb === undefined || verb === "--help" || verb === "-h") {
@@ -227,6 +233,7 @@ async function main(argv) {
   process.exitCode = 1;
 }
 
+/** rmQuiet implementation. */
 async function rmQuiet(path) {
   const { rm } = await import("node:fs/promises");
   try {

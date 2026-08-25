@@ -43,32 +43,37 @@ const base = {
 const ctx = new Context();
 const registered = [];
 const settings = {
-  register(_ns, _schema, opts) {
+    /** register implementation. */
+register(_ns, _schema, opts) {
     return { get: () => opts.base, watch: () => undefined };
   },
 };
 ctx.provide("settings", settings);
 ctx.provide("commands", {
-  register(def) {
+    /** register implementation. */
+register(def) {
     registered.push({ name: def.name, description: def.description });
     return () => undefined;
   },
 });
 ctx.provide("webServer", {
-  register(route) {
+    /** register implementation. */
+register(route) {
     assert.equal(route.kind, "prefix");
     assert.equal(route.path, "/share");
     return () => undefined;
   },
 });
 ctx.provide("planMode", {
-  set(_agent, active) {
+    /** set implementation. */
+set(_agent, active) {
     assert.equal(active, false);
     return "committed";
   },
 });
 ctx.provide("sessions", {
-  create() {
+    /** create implementation. */
+create() {
     return {};
   },
 });
@@ -172,14 +177,17 @@ assert.deepEqual(ids, ["abc"]);
 // with a token when allowInteractive is false.
 rmSync(join(home, "share.token"), { force: true });
 const handler = share.makeShareHandler(home, "/share", true);
-const respond = async (url) => {
+const /** respond implementation. */
+respond = async (url) => {
   const res = {
     _status: 0,
     _body: "",
-    writeHead(s) {
+        /** writeHead implementation. */
+writeHead(s) {
       this._status = s;
     },
-    end(b) {
+        /** end implementation. */
+end(b) {
       this._body = b;
     },
   };
@@ -198,10 +206,12 @@ const roHandler = share.makeShareHandler(home, "/share", false);
 const roRes = {
   _status: 0,
   _body: "",
-  writeHead(s) {
+    /** writeHead implementation. */
+writeHead(s) {
     this._status = s;
   },
-  end(b) {
+    /** end implementation. */
+end(b) {
     this._body = b;
   },
 };
@@ -279,7 +289,8 @@ const forkSeed = [
 const agent = { session: { events: forkSeed } };
 const forks = [];
 const sessionsStub = {
-  create(_id, opts) {
+    /** create implementation. */
+create(_id, opts) {
     forks.push(opts);
     return {};
   },
@@ -326,7 +337,8 @@ const stubModules = {
     bindSnapshotSelector: (observable) => (selector) => selector(observable.getSnapshot()),
   },
 };
-const stubRequire = (name) => stubModules[name];
+const /** stubRequire implementation. */
+stubRequire = (name) => stubModules[name];
 const clientModule = clientSpec.factory(stubRequire);
 assert.equal(typeof clientModule.apply, "function", "client bundle apply must be a function");
 assert.deepEqual(clientModule.inject, [
@@ -344,28 +356,33 @@ const localeEntries = new Map();
 let localeRevision = 0;
 const allRecords = [];
 const slotsStub = {
-  register(entry, component) {
+    /** register implementation. */
+register(entry, component) {
     records.set(entry.name, { entry, component });
     allRecords.push({ entry, component });
     return () => {
       records.delete(entry.name);
     };
   },
-  inject(name, fn) {
+    /** inject implementation. */
+inject(name, fn) {
     const dispose = fn();
     return () => {
       if (dispose) dispose();
     };
   },
-  entries(name) {
+    /** entries implementation. */
+entries(name) {
     const list = [];
     for (const rec of allRecords) if (rec.entry.name === name) list.push(rec);
     return list.map((rec) => ({ options: rec.entry }));
   },
-  getVersion() {
+    /** getVersion implementation. */
+getVersion() {
     return 1;
   },
-  subscribe() {
+    /** subscribe implementation. */
+subscribe() {
     return () => {};
   },
 };
@@ -379,39 +396,51 @@ const connectionStub = {
   },
 };
 const ctxStub = {
-  effect(fn) {
+    /** effect implementation. */
+effect(fn) {
     fn();
     return () => {};
   },
-  on() {
+    /** on implementation. */
+on() {
     return () => {};
   },
-  get(name) {
+    /** get implementation. */
+get(name) {
     if (name === "connection") return connectionStub;
     throw new Error("unexpected get: " + name);
   },
   locale: {
-    register(ns, dicts) {
+        /** register implementation. */
+register(ns, dicts) {
       localeEntries.set(ns, dicts);
     },
-    bind(ns) {
+        /** bind implementation. */
+bind(ns) {
       const dicts = localeEntries.get(ns);
       return (key) => (dicts && dicts.zh[key] !== undefined ? dicts.zh[key] : key);
     },
-    getSnapshot() {
+        /** getSnapshot implementation. */
+getSnapshot() {
       return { revision: localeRevision };
     },
-    subscribe() {
+        /** subscribe implementation. */
+subscribe() {
       return () => {};
     },
   },
-  layout: { toggleSidebar() {} },
-  workspaces: { startSession() {} },
+  layout: {   /** toggleSidebar implementation. */
+/** toggleSidebar implementation. */
+toggleSidebar() {} },
+  workspaces: {   /** startSession implementation. */
+/** startSession implementation. */
+startSession() {} },
   slots: slotsStub,
 };
 clientModule.apply(ctxStub);
 
-const assertRegistered = (name, reason) =>
+const /** assertRegistered implementation. */
+assertRegistered = (name, reason) =>
   assert.ok(records.has(name), `${reason}: ${name} not registered`);
 assertRegistered("sidebar", "Phase A");
 assertRegistered("sidebar.newSession", "Phase A");

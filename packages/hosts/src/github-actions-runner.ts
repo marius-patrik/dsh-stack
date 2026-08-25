@@ -20,10 +20,12 @@ export interface GitHubRunnerStatus {
   runnerName: string;
 }
 
+/** defaultDir implementation. */
 function defaultDir(): string {
   return join(process.env.DSH_HOME ?? join(homedir(), ".agents"), "github-runner");
 }
 
+/** runnerArchive implementation. */
 function runnerArchive(): string {
   const os = platform() === "darwin" ? "osx" : platform();
   const cpu = arch() === "arm64" ? "arm64" : "x64";
@@ -33,22 +35,26 @@ function runnerArchive(): string {
 export class GitHubActionsRunnerManager {
   readonly config: GitHubRunnerConfig;
 
-  constructor(config: GitHubRunnerConfig) {
+    /** Constructs an instance. */
+constructor(config: GitHubRunnerConfig) {
     if (!config.owner || !config.repository || !config.registrationToken) {
       throw new Error("GitHub Actions runner requires owner, repository, and registrationToken");
     }
     this.config = { ...config, runnerDir: config.runnerDir ?? defaultDir() };
   }
 
-  get runnerDir(): string {
+    /** runnerDir implementation. */
+get runnerDir(): string {
     return this.config.runnerDir ?? defaultDir();
   }
 
-  get runnerName(): string {
+    /** runnerName implementation. */
+get runnerName(): string {
     return this.config.runnerName ?? `dsh-${platform()}-${arch()}`;
   }
 
-  status(): GitHubRunnerStatus {
+    /** status implementation. */
+status(): GitHubRunnerStatus {
     return {
       installed: false,
       running: false,
@@ -103,7 +109,8 @@ fi
 `;
   }
 
-  async writeInstallScript(): Promise<string> {
+    /** writeInstallScript implementation. */
+async writeInstallScript(): Promise<string> {
     await mkdir(this.runnerDir, { recursive: true });
     const path = join(this.runnerDir, "install.sh");
     await writeFile(path, this.generateUnixInstallScript(), "utf8");

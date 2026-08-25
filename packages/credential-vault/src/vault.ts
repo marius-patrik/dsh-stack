@@ -37,10 +37,12 @@ interface StoredVault {
   entries: Record<string, StoredEntry>;
 }
 
+/** emptyVault implementation. */
 function emptyVault(): StoredVault {
   return { version: VAULT_VERSION, entries: {} };
 }
 
+/** readKeyChain implementation. */
 async function readKeyChain(): Promise<Buffer | undefined> {
   try {
     const { stdout } = await execFileAsync("security", [
@@ -58,6 +60,7 @@ async function readKeyChain(): Promise<Buffer | undefined> {
   }
 }
 
+/** writeKeyChain implementation. */
 async function writeKeyChain(key: Buffer): Promise<void> {
   await execFileAsync("security", [
     "add-generic-password",
@@ -70,6 +73,7 @@ async function writeKeyChain(key: Buffer): Promise<void> {
   ]);
 }
 
+/** readKeyFile implementation. */
 async function readKeyFile(keyFile: string): Promise<Buffer | undefined> {
   try {
     const hex = (await fs.readFile(keyFile, "utf8")).trim();
@@ -100,6 +104,7 @@ export async function loadOrCreateKey(keyFile: string): Promise<Buffer> {
   return key;
 }
 
+/** encrypt implementation. */
 function encrypt(key: Buffer, value: string): StoredEntry {
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
@@ -111,6 +116,7 @@ function encrypt(key: Buffer, value: string): StoredEntry {
   return { v: iv.toString("base64"), c: ciphertext.toString("base64") };
 }
 
+/** decrypt implementation. */
 function decrypt(key: Buffer, entry: StoredEntry): string {
   const iv = Buffer.from(entry.v, "base64");
   const payload = Buffer.from(entry.c, "base64");
@@ -128,12 +134,14 @@ function decrypt(key: Buffer, entry: StoredEntry): string {
  * is written by one process at a time in practice).
  */
 export class Vault {
-  constructor(
+    /** Constructs an instance. */
+constructor(
     readonly filePath: string,
     readonly keyFile: string,
   ) {}
 
-  private async load(): Promise<StoredVault> {
+    /** load implementation. */
+private async load(): Promise<StoredVault> {
     try {
       const parsed: unknown = JSON.parse(await fs.readFile(this.filePath, "utf8"));
       if (
@@ -150,7 +158,8 @@ export class Vault {
     return emptyVault();
   }
 
-  private async save(stored: StoredVault): Promise<void> {
+    /** save implementation. */
+private async save(stored: StoredVault): Promise<void> {
     const serialized = JSON.stringify(stored);
     await fs.mkdir(dirname(this.filePath), { recursive: true });
     const temp = `${this.filePath}.tmp`;
@@ -158,7 +167,8 @@ export class Vault {
     await fs.rename(temp, this.filePath);
   }
 
-  async get(ref: string): Promise<string | undefined> {
+    /** get implementation. */
+async get(ref: string): Promise<string | undefined> {
     const entry = (await this.load()).entries[ref];
     if (entry === undefined) return undefined;
     const key = await loadOrCreateKey(this.keyFile);
@@ -171,7 +181,8 @@ export class Vault {
     }
   }
 
-  async set(ref: string, value: string): Promise<void> {
+    /** set implementation. */
+async set(ref: string, value: string): Promise<void> {
     if (value.length === 0)
       throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
     const key = await loadOrCreateKey(this.keyFile);
@@ -180,14 +191,16 @@ export class Vault {
     await this.save(stored);
   }
 
-  async unset(ref: string): Promise<void> {
+    /** unset implementation. */
+async unset(ref: string): Promise<void> {
     const stored = await this.load();
     if (!(ref in stored.entries)) return;
     delete stored.entries[ref];
     await this.save(stored);
   }
 
-  async list(): Promise<string[]> {
+    /** list implementation. */
+async list(): Promise<string[]> {
     return Object.keys((await this.load()).entries).sort();
   }
 }

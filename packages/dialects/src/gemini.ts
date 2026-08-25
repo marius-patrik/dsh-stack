@@ -130,6 +130,7 @@ export function serializeContents(messages: Message[]): WireContent[] {
   return contents;
 }
 
+/** buildUrl implementation. */
 function buildUrl(base: string): string {
   if (base.includes("?")) return base;
   if (base.endsWith(":streamGenerateContent")) return `${base}?alt=sse`;
@@ -145,7 +146,8 @@ function buildUrl(base: string): string {
 export const geminiDialect: Dialect = {
   id: "gemini",
 
-  serialize(
+    /** serialize implementation. */
+serialize(
     options: GenerateOptions,
     auth: DialectAuth,
     baseURL: string,
@@ -200,7 +202,8 @@ export const geminiDialect: Dialect = {
     };
   },
 
-  parse(body, onActivity) {
+    /** parse implementation. */
+parse(body, onActivity) {
     return translateGemini(parseNdjson(body, onActivity));
   },
 };

@@ -12,6 +12,7 @@ export interface ResolvedComposition {
   readonly plugins: readonly PluginDefinition[];
 }
 
+/** resolveProfile implementation. */
 export function resolveProfile(
   catalog: CompositionCatalog,
   profileId: string,
@@ -34,6 +35,7 @@ export function resolveProfile(
   return { profile, packs, plugins };
 }
 
+/** resolvePluginClosure implementation. */
 function resolvePluginClosure(
   registry: ReadonlyMap<string, PluginDefinition>,
   selected: ReadonlySet<string>,
@@ -41,7 +43,8 @@ function resolvePluginClosure(
   const resolved = new Map<string, PluginDefinition>();
   const visiting = new Set<string>();
 
-  const visit = (pluginId: string): void => {
+  const   /** visit implementation. */
+visit = (pluginId: string): void => {
     if (resolved.has(pluginId)) return;
     if (visiting.has(pluginId)) throw new Error(`Plugin dependency cycle detected at ${pluginId}`);
 

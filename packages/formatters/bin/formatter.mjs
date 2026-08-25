@@ -19,6 +19,7 @@ import { dirname, join, resolve } from "node:path";
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 
+/** readSection implementation. */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -35,6 +36,7 @@ function* readSection(text, section) {
   }
 }
 
+/** parseJsonValue implementation. */
 function parseJsonValue(raw) {
   if (raw === "" || raw === "null") return null;
   if (raw[0] === "{" || raw[0] === "[") {
@@ -51,6 +53,7 @@ function parseJsonValue(raw) {
   return raw;
 }
 
+/** readSectionData implementation. */
 async function readSectionData() {
   try {
     const text = await readFile(settingsPath, "utf8");
@@ -65,6 +68,7 @@ async function readSectionData() {
   return {};
 }
 
+/** writeSectionData implementation. */
 async function writeSectionData(section) {
   let text = "";
   try {
@@ -83,6 +87,7 @@ async function writeSectionData(section) {
   await writeFile(settingsPath, out, "utf8");
 }
 
+/** printHelp implementation. */
 function printHelp() {
   process.stdout.write(`usage: dsh formatter <verb> [args]
 
@@ -94,6 +99,7 @@ verbs:
 `);
 }
 
+/** main implementation. */
 async function main() {
   const verb = process.argv[2];
   const argv = process.argv.slice(3);

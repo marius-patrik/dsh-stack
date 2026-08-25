@@ -714,7 +714,8 @@ rmSync(legacyHome, { recursive: true, force: true });
   });
   await vault.put(oauth);
   const calls = [];
-  const transport = async (request) => {
+  const   /** transport implementation. */
+transport = async (request) => {
     calls.push(request.url);
     return {
       status: 200,
@@ -726,7 +727,8 @@ rmSync(legacyHome, { recursive: true, force: true });
       },
     };
   };
-  const authFor = async () => ({
+  const   /** authFor implementation. */
+authFor = async () => ({
     method: "oauth_pkce",
     authorizeUrl: "https://auth.example/authorize",
     tokenUrl: "https://token.example/token",
@@ -1036,6 +1038,7 @@ console.log("plugin check passed");
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/** firstSecret implementation. */
 function firstSecret(material) {
   switch (material.type) {
     case "api_key":
@@ -1059,9 +1062,11 @@ function firstSecret(material) {
   }
 }
 
+/** materialEquals implementation. */
 function materialEquals(a, b) {
   if (a.type !== b.type) return false;
-  const reveal = (value) => value?.reveal?.();
+  const   /** reveal implementation. */
+reveal = (value) => value?.reveal?.();
   switch (a.type) {
     case "api_key":
       return reveal(a.apiKey) === reveal(b.apiKey) && a.header === b.header;
@@ -1155,15 +1160,20 @@ assert.deepEqual(clientExports.inject, ["slots", "locale"]);
 const registrants = new Map();
 const registrations = [];
 const clientCtx = {
-  effect(fn) {
+    /** effect implementation. */
+effect(fn) {
     fn();
   },
-  locale: { register() {} },
+  locale: {   /** register implementation. */
+/** register implementation. */
+register() {} },
   slots: {
-    inject(name, fn) {
+        /** inject implementation. */
+inject(name, fn) {
       registrants.set(name, fn);
     },
-    register(spec) {
+        /** register implementation. */
+register(spec) {
       registrations.push(spec);
       return spec;
     },

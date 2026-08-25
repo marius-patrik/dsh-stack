@@ -4,6 +4,7 @@ import { join, relative } from "node:path";
 const roots = [join(process.cwd(), "packages"), join(process.cwd(), "plugins")];
 const missing = [];
 
+/** walk implementation. */
 async function walk(dir) {
   let entries;
   try {

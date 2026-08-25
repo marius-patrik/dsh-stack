@@ -23,7 +23,8 @@ window.__ModuleLoader__.load({
 
     // ── host config (non-secret slice) ─────────────────────────────────────
     var hostConfig = { value: null, pending: null };
-    function fetchHostConfig(force) {
+        /** fetchHostConfig implementation. */
+function fetchHostConfig(force) {
       if (hostConfig.value !== null && !force) return Promise.resolve(hostConfig.value);
       if (hostConfig.pending !== null && !force) return hostConfig.pending;
       hostConfig.pending = fetch("/voice/api/config")
@@ -44,7 +45,8 @@ window.__ModuleLoader__.load({
 
     // ── streaming TTS player (stop-on-new) ─────────────────────────────────
     var player = { audio: null, token: 0 };
-    function stopPlayback() {
+        /** stopPlayback implementation. */
+function stopPlayback() {
       player.token += 1;
       if (player.audio !== null) {
         try {
@@ -141,7 +143,8 @@ window.__ModuleLoader__.load({
     // ──────────────────────────────────────────────────────────────────────
     // Mic button — browser SpeechRecognition (interim) or Whisper fallback
     // ──────────────────────────────────────────────────────────────────────
-    function MicButton(props) {
+        /** MicButton implementation. */
+function MicButton(props) {
       var useInput = props.useInput,
         inputActions = props.inputActions;
       var stateTuple = useState("idle"); // idle | listening | recording | transcribing | error
@@ -165,15 +168,18 @@ window.__ModuleLoader__.load({
       var inputRef = useRef(null);
       inputRef.current = input;
 
-      function setStateBoth(s) {
+            /** setStateBoth implementation. */
+function setStateBoth(s) {
         stateRef.current = s;
         setState(s);
       }
-      function setDraft(text) {
+            /** setDraft implementation. */
+function setDraft(text) {
         if (!inputActions) return;
         inputActions.setDraft(text);
       }
-      function pushTranscript(finalText, interimText) {
+            /** pushTranscript implementation. */
+function pushTranscript(finalText, interimText) {
         var base = baseRef.current;
         var sep = base && !/[\s\u3000]$/.test(base) && (finalText || interimText) ? " " : "";
         setDraft(
@@ -205,7 +211,8 @@ window.__ModuleLoader__.load({
         };
       }, []);
 
-      function startBrowserRecognition(SpeechRecognitionCtor) {
+            /** startBrowserRecognition implementation. */
+function startBrowserRecognition(SpeechRecognitionCtor) {
         var rec;
         try {
           rec = new SpeechRecognitionCtor();
@@ -250,7 +257,8 @@ window.__ModuleLoader__.load({
         }
       }
 
-      function startWhisperRecording() {
+            /** startWhisperRecording implementation. */
+function startWhisperRecording() {
         navigator.mediaDevices
           .getUserMedia({ audio: true })
           .then(function (stream) {
@@ -315,7 +323,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function start() {
+            /** start implementation. */
+function start() {
         setError("");
         fetchHostConfig()
           .then(function (cfg) {
@@ -338,7 +347,8 @@ window.__ModuleLoader__.load({
           });
       }
 
-      function onClick() {
+            /** onClick implementation. */
+function onClick() {
         var s = stateRef.current;
         if (s === "listening") {
           var rec = recRef.current;
@@ -383,7 +393,8 @@ window.__ModuleLoader__.load({
     // Speaker button — neural read-aloud for one assistant message
     // ──────────────────────────────────────────────────────────────────────
     var lastAutoPlayed = { id: null };
-    function SpeakerButton(props) {
+        /** SpeakerButton implementation. */
+function SpeakerButton(props) {
       var messageId = props.messageId,
         useSession = props.useSession;
       var speakTuple = useState("idle"); // idle | loading | speaking
@@ -418,7 +429,8 @@ window.__ModuleLoader__.load({
         [session, messageId],
       );
 
-      function speak() {
+            /** speak implementation. */
+function speak() {
         if (stateRef.current === "speaking" || stateRef.current === "loading") {
           stopPlayback();
           setState("idle");
@@ -499,11 +511,13 @@ window.__ModuleLoader__.load({
     // ──────────────────────────────────────────────────────────────────────
     // Voice settings section
     // ──────────────────────────────────────────────────────────────────────
-    function VoiceGlyph() {
+        /** VoiceGlyph implementation. */
+function VoiceGlyph() {
       return SPEAKER_SVG;
     }
 
-    function row(label, control, hint) {
+        /** row implementation. */
+function row(label, control, hint) {
       return h(
         "div",
         { style: { display: "grid", gap: "4px" } },
@@ -527,7 +541,8 @@ window.__ModuleLoader__.load({
       color: "var(--dsw-alias-label-primary)",
     };
 
-    function TextField(props) {
+        /** TextField implementation. */
+function TextField(props) {
       var local = useState(props.value);
       var value = local[0],
         setValue = local[1];
@@ -536,7 +551,8 @@ window.__ModuleLoader__.load({
         lastProp.current = props.value;
         if (value !== props.value) setValue(props.value);
       }
-      function commit() {
+            /** commit implementation. */
+function commit() {
         if (value !== props.value) props.onCommit(value);
       }
       return h("input", {
@@ -553,7 +569,8 @@ window.__ModuleLoader__.load({
       });
     }
 
-    function VoiceSection(props) {
+        /** VoiceSection implementation. */
+function VoiceSection(props) {
       var settings = props.settings; // { describe, mutate } injected from apply
       var viewTuple = useState({ status: "loading", view: null, error: null });
       var view = viewTuple[0],
@@ -565,7 +582,8 @@ window.__ModuleLoader__.load({
       var preview = prevTuple[0],
         setPreview = prevTuple[1];
 
-      function load() {
+            /** load implementation. */
+function load() {
         setView({ status: "loading", view: null, error: null });
         settings
           .describe({})
@@ -587,7 +605,8 @@ window.__ModuleLoader__.load({
       }
       useEffect(load, []);
 
-      function mutate(ops) {
+            /** mutate implementation. */
+function mutate(ops) {
         var current = view.view;
         if (!current) return;
         settings
@@ -605,7 +624,8 @@ window.__ModuleLoader__.load({
             setView(Object.assign({}, view, { error: String((err && err.message) || err) }));
           });
       }
-      function set(path) {
+            /** set implementation. */
+function set(path) {
         return function (value) {
           mutate([{ op: "set", path: path, value: value }]);
         };
@@ -644,7 +664,8 @@ window.__ModuleLoader__.load({
               { id: "custom", label: "OpenAI-compatible endpoint" },
             ];
 
-      function selectField(label, value, options, onChange) {
+            /** selectField implementation. */
+function selectField(label, value, options, onChange) {
         return row(
           label,
           h(
@@ -663,7 +684,8 @@ window.__ModuleLoader__.load({
         );
       }
 
-      function previewVoice() {
+            /** previewVoice implementation. */
+function previewVoice() {
         if (preview === "loading" || preview === "playing") {
           stopPlayback();
           setPreview("idle");
@@ -849,7 +871,8 @@ window.__ModuleLoader__.load({
     // ──────────────────────────────────────────────────────────────────────
     // Plugin body
     // ──────────────────────────────────────────────────────────────────────
-    function apply(ctx) {
+        /** apply implementation. */
+function apply(ctx) {
       var styleEl = document.getElementById("dsh-voice-style");
       if (!styleEl) {
         styleEl = document.createElement("style");

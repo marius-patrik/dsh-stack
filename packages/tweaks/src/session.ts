@@ -52,7 +52,8 @@ export function installPlanToggle(ctx: Context): unknown {
 export function installForkUndo(ctx: Context): unknown {
   return ctx.inject(["commands", "sessions"], (commandCtx) => {
     const disposers: (() => void)[] = [];
-    const make = (name: string, description: string, direction: -1 | 1): void => {
+    const     /** make implementation. */
+make = (name: string, description: string, direction: -1 | 1): void => {
       disposers.push(
         commandCtx.commands.register({
           name,

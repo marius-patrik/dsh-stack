@@ -119,6 +119,7 @@ export interface DialectAdapterOptions {
 /** One model entry advertised by {@link DialectAdapter}. */
 export interface ProviderModel extends ProviderCatalogModel {}
 
+/** modelInfo implementation. */
 function modelInfo(provider: string, model: ProviderModel): LlmModelInfo {
   return {
     provider,
@@ -196,6 +197,7 @@ function parseErrorBody(text: string): { message?: string; detail?: string } {
   return {};
 }
 
+/** providerRetryAfterMs implementation. */
 function providerRetryAfterMs(value: string | null): number | undefined {
   if (value === null) return undefined;
   if (/^\d+$/.test(value)) {
@@ -206,6 +208,7 @@ function providerRetryAfterMs(value: string | null): number | undefined {
   return Number.isFinite(delay) && delay > 0 ? delay : undefined;
 }
 
+/** requestId implementation. */
 function requestId(headers: Headers): ReturnType<typeof ProviderRequestId> | undefined {
   for (const name of [
     "x-request-id",
@@ -279,15 +282,18 @@ export function httpErrorCode(status: number, detail: string | undefined): strin
  * selects the route facts for the operation.
  */
 export class DialectAdapter extends LlmAdapter {
-  constructor(private readonly config: DialectAdapterOptions) {
+    /** Constructs an instance. */
+constructor(private readonly config: DialectAdapterOptions) {
     super();
   }
 
-  override providerInfo(provider: string): LlmProviderInfo {
+    /** providerInfo implementation. */
+override providerInfo(provider: string): LlmProviderInfo {
     return { id: provider, name: this.config.options(provider).displayName };
   }
 
-  override providerRetryPolicy(_provider: string): ResolvedRetryPolicy {
+    /** providerRetryPolicy implementation. */
+override providerRetryPolicy(_provider: string): ResolvedRetryPolicy {
     return this.config.options(_provider).retryPolicy;
   }
 
@@ -330,7 +336,8 @@ export class DialectAdapter extends LlmAdapter {
     });
   }
 
-  override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
+    /** listModels implementation. */
+override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
     const connection = this.config.options(provider);
     const gate = await this.config.gate(provider, connection);
     if (gate !== undefined) {
@@ -341,7 +348,8 @@ export class DialectAdapter extends LlmAdapter {
     return models.map((model) => modelInfo(provider, model));
   }
 
-  override async resolveModel(
+    /** resolveModel implementation. */
+override async resolveModel(
     provider: string,
     model: string,
     _signal?: AbortSignal,
@@ -377,7 +385,8 @@ export class DialectAdapter extends LlmAdapter {
     });
   }
 
-  async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
+    /** stream implementation. */
+async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
     // One resolution per stream call: connection facts and credentials freeze
     // here for this whole request, so an in-flight stream never observes a
     // configuration change and the next call re-resolves.
@@ -445,7 +454,8 @@ export class DialectAdapter extends LlmAdapter {
     }
   }
 
-  private async *request(
+    /** request implementation. */
+private async *request(
     options: GenerateOptions,
     signal: AbortSignal,
     connection: ProviderConnection,

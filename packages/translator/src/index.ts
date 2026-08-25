@@ -31,6 +31,7 @@ export interface DshEvent {
   [key: string]: unknown;
 }
 
+/** detectFormat implementation. */
 export function detectFormat(data: unknown): Format | null {
   if (data === null || typeof data !== "object") return null;
   const obj = data as Record<string, unknown>;
@@ -45,22 +46,26 @@ export type TranslateFn = (input: unknown) => unknown;
 export class TranslatorRegistry {
   private readonly converters = new Map<string, TranslateFn>();
 
-  register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
+    /** register implementation. */
+register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
     this.converters.set(`${sourceFormat}->${targetFormat}`, fn);
   }
 
-  translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
+    /** translate implementation. */
+translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     if (sourceFormat === targetFormat) return data;
     const fn = this.converters.get(`${sourceFormat}->${targetFormat}`);
     if (fn === undefined) throw new Error(`no converter for ${sourceFormat} -> ${targetFormat}`);
     return fn(data);
   }
 
-  supportedConversions(): readonly string[] {
+    /** supportedConversions implementation. */
+supportedConversions(): readonly string[] {
     return [...this.converters.keys()];
   }
 }
 
+/** opencodeToDsh implementation. */
 function opencodeToDsh(data: unknown): unknown {
   if (!data || typeof data !== "object" || !("messages" in data) || !Array.isArray(data.messages))
     throw new Error("invalid opencode document");
@@ -82,6 +87,7 @@ function opencodeToDsh(data: unknown): unknown {
   };
 }
 
+/** dshToOpencode implementation. */
 function dshToOpencode(data: unknown): unknown {
   if (!data || typeof data !== "object" || !("events" in data) || !Array.isArray(data.events))
     throw new Error("invalid dsh document");
@@ -97,6 +103,7 @@ function dshToOpencode(data: unknown): unknown {
   };
 }
 
+/** claudeToDsh implementation. */
 function claudeToDsh(data: unknown): unknown {
   if (!data || typeof data !== "object" || !("entries" in data) || !Array.isArray(data.entries))
     throw new Error("invalid claude document");
@@ -116,6 +123,7 @@ function claudeToDsh(data: unknown): unknown {
   };
 }
 
+/** dshToClaude implementation. */
 function dshToClaude(data: unknown): unknown {
   if (!data || typeof data !== "object" || !("events" in data) || !Array.isArray(data.events))
     throw new Error("invalid dsh document");
@@ -138,7 +146,8 @@ export class TranslatorService extends Service {
   static inject: string[] = [];
   readonly registry = new TranslatorRegistry();
 
-  constructor(ctx: Context, _config: Config = {}) {
+    /** Constructs an instance. */
+constructor(ctx: Context, _config: Config = {}) {
     super(ctx, "translators");
     this.registry.register("opencode", "dsh", opencodeToDsh);
     this.registry.register("dsh", "opencode", dshToOpencode);
@@ -148,13 +157,16 @@ export class TranslatorService extends Service {
     this.registry.register("claude", "opencode", (data) => dshToOpencode(claudeToDsh(data)));
   }
 
-  register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
+    /** register implementation. */
+register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
     this.registry.register(sourceFormat, targetFormat, fn);
   }
-  translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
+    /** translate implementation. */
+translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     return this.registry.translate(data, sourceFormat, targetFormat);
   }
-  supportedConversions(): readonly string[] {
+    /** supportedConversions implementation. */
+supportedConversions(): readonly string[] {
     return this.registry.supportedConversions();
   }
 }
@@ -165,6 +177,7 @@ declare module "@deepseek-ai/cordis" {
   }
 }
 
+/** apply implementation. */
 export function apply(ctx: Context, config: Config = {}): void {
   ctx.plugin(TranslatorService, config);
   ctx.logger.info(`dsh-translator loaded: 6 converters registered`);

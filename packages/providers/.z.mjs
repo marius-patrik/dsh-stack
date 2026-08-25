@@ -8,7 +8,8 @@ import { PROVIDER_ROUTES } from "./lib/providers.js";
 const dir = "/Users/user/.agents/vault",
   SEP = String.fromCharCode(31);
 const key = Buffer.from(readFileSync(`${dir}/master.key`, "utf8").trim(), "base64");
-const read = (id) => {
+const /** read implementation. */
+read = (id) => {
   const e = JSON.parse(readFileSync(`${dir}/${id}.vault`, "utf8"));
   const d = createDecipheriv("aes-256-gcm", key, Buffer.from(e.iv, "base64"));
   d.setAAD(Buffer.from(`${e.id}${SEP}${e.type}`, "utf8"));

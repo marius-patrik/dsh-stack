@@ -326,7 +326,8 @@ export function isExpired(record: SecretRecord, nowMs: number): boolean {
  */
 export function effectiveExpiryMs(record: SecretRecord): number | null {
   const candidates: number[] = [];
-  const push = (value: string | null) => {
+  const   /** push implementation. */
+push = (value: string | null) => {
     if (!value) return;
     const parsed = Date.parse(value);
     if (Number.isFinite(parsed)) candidates.push(parsed);
@@ -336,6 +337,7 @@ export function effectiveExpiryMs(record: SecretRecord): number | null {
   return candidates.length === 0 ? null : Math.min(...candidates);
 }
 
+/** bind implementation. */
 function bind(metadata: SecretMetadata, material: SecretMaterial): SecretRecord {
   if (metadata.type !== material.type) {
     throw new Error(
@@ -403,10 +405,12 @@ export interface SecretRecordPayload {
   material: SecretMaterialPayload;
 }
 
+/** encodeSecretRecord implementation. */
 export function encodeSecretRecord(record: SecretRecord): SecretRecordPayload {
   return { metadata: descriptorOf(record), material: encodeSecretMaterial(record.material) };
 }
 
+/** decodeSecretRecord implementation. */
 export function decodeSecretRecord(value: unknown, id: string): SecretRecord {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`stored secret is not an object: ${id}`);
@@ -418,6 +422,7 @@ export function decodeSecretRecord(value: unknown, id: string): SecretRecord {
   return bind(metadata, decodeSecretMaterial(record.material, id));
 }
 
+/** encodeSecretMaterial implementation. */
 function encodeSecretMaterial(material: SecretMaterial): SecretMaterialPayload {
   switch (material.type) {
     case "api_key":
@@ -482,6 +487,7 @@ function encodeSecretMaterial(material: SecretMaterial): SecretMaterialPayload {
   }
 }
 
+/** decodeSecretMaterial implementation. */
 function decodeSecretMaterial(value: unknown, id: string): SecretMaterial {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`stored secret has no material: ${id}`);
@@ -570,22 +576,26 @@ function decodeSecretMaterial(value: unknown, id: string): SecretMaterial {
   }
 }
 
+/** requireString implementation. */
 function requireString(value: unknown, field: string, id: string): string {
   if (typeof value !== "string" || !value) throw new Error(`stored secret ${id} requires ${field}`);
   return value;
 }
 
+/** optionalString implementation. */
 function optionalString(value: unknown, field: string, id: string): string | null {
   if (value === null || value === undefined) return null;
   if (typeof value !== "string") throw new Error(`stored secret ${id} has a malformed ${field}`);
   return value;
 }
 
+/** requireStringArray implementation. */
 function requireStringArray(value: unknown, field: string, id: string): string[] {
   if (!Array.isArray(value)) throw new Error(`stored secret ${id} has a malformed ${field}`);
   return value.map((entry) => requireString(entry, field, id));
 }
 
+/** requireFiniteNumber implementation. */
 function requireFiniteNumber(value: unknown, field: string, id: string): number {
   if (typeof value !== "number" || !Number.isFinite(value))
     throw new Error(`stored secret ${id} has a malformed ${field}`);

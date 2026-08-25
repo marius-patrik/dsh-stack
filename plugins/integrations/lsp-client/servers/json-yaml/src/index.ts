@@ -7,6 +7,7 @@ export const optional: string[] = [];
 
 export const Config = Schema.object({});
 
+/** apply implementation. */
 export function apply(ctx: Context) {
   if ((ctx as any).lsp) {
     (ctx as any).lsp.registerServer("json-yaml", { name: "json-yaml-server" });

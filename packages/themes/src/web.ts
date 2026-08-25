@@ -136,6 +136,7 @@ async function installCatalogExtension(
   }
 }
 
+/** makeThemeHandler implementation. */
 function makeThemeHandler(
   deps: ThemeWebDeps,
 ): (req: IncomingMessage, res: ServerResponse) => Promise<void> {

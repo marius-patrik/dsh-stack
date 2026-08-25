@@ -27,6 +27,7 @@ const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 const NS = "dsh-repos";
 
+/** readSection implementation. */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -43,6 +44,7 @@ function* readSection(text, section) {
   }
 }
 
+/** parseJsonValue implementation. */
 function parseJsonValue(raw) {
   if (raw === "" || raw === "null") return null;
   if (raw[0] === "{" || raw[0] === "[") {
@@ -59,6 +61,7 @@ function parseJsonValue(raw) {
   return raw;
 }
 
+/** readSectionData implementation. */
 async function readSectionData() {
   try {
     const text = await readFile(settingsPath, "utf8");
@@ -73,6 +76,7 @@ async function readSectionData() {
   return {};
 }
 
+/** writeSectionData implementation. */
 async function writeSectionData(section) {
   let text = "";
   try {
@@ -89,6 +93,7 @@ async function writeSectionData(section) {
   await writeFile(settingsPath, out, "utf8");
 }
 
+/** git implementation. */
 function git(cwd, args) {
   const res = spawnSync("git", args, { cwd, encoding: "utf8" });
   if (res.status !== 0) {
@@ -97,15 +102,18 @@ function git(cwd, args) {
   return (res.stdout ?? "").trim();
 }
 
+/** currentBranch implementation. */
 function currentBranch(cwd) {
   const out = git(cwd, ["branch", "--show-current"]);
   return out.length > 0 ? out : null;
 }
 
+/** workDir implementation. */
 function workDir(rawPath) {
   return rawPath !== undefined && rawPath.length > 0 ? rawPath : process.cwd();
 }
 
+/** printHelp implementation. */
 function printHelp() {
   process.stdout.write(`usage: dsh repos <verb> [args]
 
@@ -121,6 +129,7 @@ verbs:
 `);
 }
 
+/** main implementation. */
 async function main() {
   const verb = process.argv[2];
   const argv = process.argv.slice(3);
