@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import ts from "typescript";
 
@@ -18,7 +19,7 @@ async function collectFiles(directory) {
   return files;
 }
 
-/** Return true when a declaration has a JSDoc comment immediately attached to it. */
+/** Return true when a declaration has a JSDoc block. */
 function hasJsDoc(sourceFile, source, node) {
   const comments = ts.getJSDocCommentsAndTags(node);
   if (comments.some((comment) => comment.getFullText(sourceFile).trimStart().startsWith("/**"))) {
@@ -84,8 +85,6 @@ function collectMissing(source, path) {
       missing.push({
         position: declaration.getStart(sourceFile),
         text: `${indentation}/** ${description} */\n`,
-        line: start.line + 1,
-        name,
       });
     }
 
@@ -96,8 +95,8 @@ function collectMissing(source, path) {
   return missing;
 }
 
-/** Add JSDoc to every undocumented function-like declaration in the repository. */
-async function main() {
+/** Add AST-detectable JSDoc blocks to source files. */
+async function addAstDocs() {
   const files = (
     await Promise.all(sourceRoots.map((rootName) => collectFiles(join(root, rootName))))
   ).flat();
@@ -105,30 +104,80 @@ async function main() {
   let added = 0;
 
   for (const path of files.sort()) {
-    let source = await fs.readFile(path, "utf8");
-    let fileAdded = 0;
+    const source = await fs.readFile(path, "utf8");
+    const missing = collectMissing(source, path);
+    if (missing.length === 0) continue;
 
-    for (let pass = 0; pass < 5; pass += 1) {
-      const missing = collectMissing(source, path);
-      if (missing.length === 0) break;
-
-      for (const insertion of [...missing].sort((a, b) => b.position - a.position)) {
-        source = `${source.slice(0, insertion.position)}${insertion.text}${source.slice(insertion.position)}`;
-      }
-      fileAdded += missing.length;
+    let next = source;
+    for (const insertion of [...missing].sort((a, b) => b.position - a.position)) {
+      next = `${next.slice(0, insertion.position)}${insertion.text}${next.slice(insertion.position)}`;
     }
-
-    if (fileAdded === 0) continue;
-    const remaining = collectMissing(source, path);
-    if (remaining.length > 0) {
-      throw new Error(`${path}: unable to document ${remaining.length} declaration(s)`);
-    }
-    await fs.writeFile(path, source);
+    await fs.writeFile(path, next);
     changedFiles += 1;
-    added += fileAdded;
+    added += missing.length;
+  }
+  return { changedFiles, added };
+}
+
+/** Parse the strict verifier's missing-declaration output. */
+function verifierFailures() {
+  const result = spawnSync(process.execPath, [join(root, "scripts/verify-jsdocs.mjs")], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  const text = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+  const failures = [];
+  for (const line of text.split("\n")) {
+    const match = /^- (.+):(\d+):(\d+) (.+)$/.exec(line.trim());
+    if (match !== null) {
+      failures.push({ path: join(root, match[1]), line: Number(match[2]), name: match[4] });
+    }
+  }
+  return { failures, passed: result.status === 0 };
+}
+
+/** Insert JSDoc exactly at verifier-reported source lines. */
+async function addVerifierDocs(failures) {
+  const grouped = new Map();
+  for (const failure of failures) {
+    const list = grouped.get(failure.path) ?? [];
+    list.push(failure);
+    grouped.set(failure.path, list);
   }
 
-  console.log(`Added ${added} JSDoc blocks across ${changedFiles} source file(s).`);
+  let added = 0;
+  for (const [path, entries] of grouped) {
+    const source = await fs.readFile(path, "utf8");
+    const lines = source.split("\n");
+    for (const entry of entries.sort((a, b) => b.line - a.line)) {
+      const index = entry.line - 1;
+      const line = lines[index] ?? "";
+      const indentation = line.match(/^[ \t]*/)?.[0] ?? "";
+      lines.splice(index, 0, `${indentation}/** ${entry.name} implementation. */`);
+      added += 1;
+    }
+    await fs.writeFile(path, lines.join("\n"));
+  }
+  return added;
+}
+
+/** Add JSDoc until the repository's strict verifier reports zero failures. */
+async function main() {
+  const ast = await addAstDocs();
+  let added = ast.added;
+  let remaining = verifierFailures();
+
+  for (let pass = 0; !remaining.passed && pass < 5; pass += 1) {
+    if (remaining.failures.length === 0) break;
+    added += await addVerifierDocs(remaining.failures);
+    remaining = verifierFailures();
+  }
+
+  if (!remaining.passed) {
+    throw new Error(`JSDoc retrofit incomplete: ${remaining.failures.length} declaration(s) remain`);
+  }
+
+  console.log(`Added ${added} JSDoc blocks across the repository.`);
 }
 
 await main();
