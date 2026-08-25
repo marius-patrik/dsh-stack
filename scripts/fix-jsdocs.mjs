@@ -37,7 +37,13 @@ function scriptKind(path) {
 
 /** Collect missing JSDoc insertion points from a source file. */
 function collectMissing(source, path) {
-  const sourceFile = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true, scriptKind(path));
+  const sourceFile = ts.createSourceFile(
+    path,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKind(path),
+  );
   const missing = [];
 
   /** Walk the AST and collect every undocumented function-like declaration. */
@@ -69,7 +75,8 @@ function collectMissing(source, path) {
     if (declaration !== null && !hasJsDoc(sourceFile, declaration)) {
       const start = sourceFile.getLineAndCharacterOfPosition(declaration.getStart(sourceFile));
       const lineStart = source.lastIndexOf("\n", declaration.getStart(sourceFile) - 1) + 1;
-      const indentation = source.slice(lineStart, declaration.getStart(sourceFile)).match(/^[ \t]*/)?.[0] ?? "";
+      const indentation =
+        source.slice(lineStart, declaration.getStart(sourceFile)).match(/^[ \t]*/)?.[0] ?? "";
       if (description === "Function implementation.") description = `${name} implementation.`;
       missing.push({
         position: declaration.getStart(sourceFile),
