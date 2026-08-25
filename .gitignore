@@ -3,6 +3,9 @@ node_modules/
 .hub/
 .vite/
 
+# git worktrees
+/worktrees/
+
 # harness build output
 harness/apps/*/lib/
 harness/packages/*/lib/
