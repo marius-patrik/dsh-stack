@@ -18,11 +18,14 @@ async function collectFiles(directory) {
   return files;
 }
 
-/** Return true when a declaration already has a JSDoc block. */
-function hasJsDoc(sourceFile, node) {
-  return ts
-    .getJSDocCommentsAndTags(node)
-    .some((comment) => comment.getFullText(sourceFile).trimStart().startsWith("/**"));
+/** Return true when a declaration has a JSDoc comment immediately attached to it. */
+function hasJsDoc(sourceFile, source, node) {
+  const comments = ts.getJSDocCommentsAndTags(node);
+  if (comments.some((comment) => comment.getFullText(sourceFile).trimStart().startsWith("/**"))) {
+    return true;
+  }
+  const trivia = source.slice(node.getFullStart(), node.getStart(sourceFile));
+  return /\/\*[\s\S]*\*\/\s*$/.test(trivia) && trivia.includes("/**");
 }
 
 /** Return the parser kind for a source file extension. */
@@ -72,7 +75,7 @@ function collectMissing(source, path) {
       }
     }
 
-    if (declaration !== null && !hasJsDoc(sourceFile, declaration)) {
+    if (declaration !== null && !hasJsDoc(sourceFile, source, declaration)) {
       const start = sourceFile.getLineAndCharacterOfPosition(declaration.getStart(sourceFile));
       const lineStart = source.lastIndexOf("\n", declaration.getStart(sourceFile) - 1) + 1;
       const indentation =
@@ -102,17 +105,27 @@ async function main() {
   let added = 0;
 
   for (const path of files.sort()) {
-    const source = await fs.readFile(path, "utf8");
-    const missing = collectMissing(source, path);
-    if (missing.length === 0) continue;
+    let source = await fs.readFile(path, "utf8");
+    let fileAdded = 0;
 
-    let next = source;
-    for (const insertion of [...missing].sort((a, b) => b.position - a.position)) {
-      next = `${next.slice(0, insertion.position)}${insertion.text}${next.slice(insertion.position)}`;
+    for (let pass = 0; pass < 5; pass += 1) {
+      const missing = collectMissing(source, path);
+      if (missing.length === 0) break;
+
+      for (const insertion of [...missing].sort((a, b) => b.position - a.position)) {
+        source = `${source.slice(0, insertion.position)}${insertion.text}${source.slice(insertion.position)}`;
+      }
+      fileAdded += missing.length;
     }
-    await fs.writeFile(path, next);
+
+    if (fileAdded === 0) continue;
+    const remaining = collectMissing(source, path);
+    if (remaining.length > 0) {
+      throw new Error(`${path}: unable to document ${remaining.length} declaration(s)`);
+    }
+    await fs.writeFile(path, source);
     changedFiles += 1;
-    added += missing.length;
+    added += fileAdded;
   }
 
   console.log(`Added ${added} JSDoc blocks across ${changedFiles} source file(s).`);
