@@ -29,18 +29,21 @@ jobs:
           node-version: 22.19.0
           package-manager-cache: false
 
+      # Isolate the pnpm install per runner: pnpm/action-setup defaults to
+      # ~/setup-pnpm, which every self-hosted runner on this machine shares.
+      # Two jobs installing pnpm concurrently raced on that directory and
+      # failed with ENOTEMPTY / "Cannot find module .../pnpm/dist/worker.js".
+      # Keying on runner.name also lets the pool grow without new collisions.
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 11.7.0
+          dest: ~/setup-pnpm-${{ runner.name }}
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-${{ runner.os }}-
+      # No actions/cache step for the store: each self-hosted runner already
+      # keeps a persistent per-runner store (npm_config_store_dir in its .env),
+      # and the cached path above pointed at ~/.local/share/pnpm/store, which
+      # is not where either runner actually stores packages.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -77,14 +80,12 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 11.7.0
+          dest: ~/setup-pnpm-${{ runner.name }}
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store
-          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-${{ runner.os }}-
+      # No actions/cache step for the store: each self-hosted runner already
+      # keeps a persistent per-runner store (npm_config_store_dir in its .env),
+      # and the cached path above pointed at ~/.local/share/pnpm/store, which
+      # is not where either runner actually stores packages.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
