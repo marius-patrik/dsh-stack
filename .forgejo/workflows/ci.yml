@@ -3,6 +3,9 @@ name: CI (Forgejo)
 on:
   push:
   pull_request:
+  # Manual trigger so this stays usable as a fallback surface when GitHub
+  # Actions is degraded: POST /api/v1/repos/<owner>/<repo>/actions/workflows/<id>/dispatches
+  workflow_dispatch:
 
 jobs:
   verify:
