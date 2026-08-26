@@ -1,0 +1,35 @@
+name: CI (Forgejo)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    name: Canonical Stack workspace
+    runs-on: docker
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Enable pnpm via corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.7.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Stack workspace
+        run: pnpm build
+
+      - name: Typecheck Stack workspace
+        run: pnpm typecheck
+
+      - name: Verify Stack workspace
+        run: pnpm verify
+
+      - name: Test Stack workspace
+        run: pnpm test
