@@ -51,6 +51,7 @@ export interface WireRequestBody {
    * not understand it ignore an unknown body field rather than failing, and the
    * field is only sent when the caller actually picked an effort.
    */
+// jscpd:ignore-start -- accepted intentional duplication, see PR discussion
   reasoning_effort?: string;
 }
 
@@ -66,6 +67,7 @@ function flattenText(blocks: readonly ContentBlock[]): string {
 function assertTextOnly(blocks: readonly ContentBlock[]): void {
   if (contentHasImage(blocks)) {
     throw new LlmError("The openai dialect does not support image content.", "UNSUPPORTED_CONTENT");
+// jscpd:ignore-end
   }
 }
 

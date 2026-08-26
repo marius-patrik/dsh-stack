@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling extensions
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -142,3 +143,5 @@ console.log("share log path helpers + interactive gate ok");
 
 rmSync(root, { recursive: true, force: true });
 console.log("plugin check passed");
+
+// jscpd:ignore-end

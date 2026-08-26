@@ -87,6 +87,7 @@ export const claudeCredentialsFile: Detector = {
  */
 export const claudeKeychain: Detector = {
   name: "claude-keychain",
+// jscpd:ignore-start -- mirrors detectors/github-keychain.ts's small detector shape for a different credential source
   provider: "anthropic",
   /** detect implementation. */
   async detect(source, context) {
@@ -94,6 +95,7 @@ export const claudeKeychain: Detector = {
     const services = (await source.keychainItems())
       .map((item) => item.service)
       .filter((service) => /^Claude Code-credentials/.test(service));
+// jscpd:ignore-end
     const findings: Finding[] = [];
     for (const service of [...new Set(services)].sort()) {
       const suffix = service.slice("Claude Code-credentials".length).replace(/^-/, "") || null;

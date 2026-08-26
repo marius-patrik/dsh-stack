@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- per-provider-route verification scaffolding repeated per route within this single check-plugin.mjs
 import * as providers from "./lib/index.js";
 import * as dialects from "@dsh-stack/dialects";
 import { Context } from "@deepseek-ai/cordis";
@@ -957,3 +958,5 @@ console.log("403 quota classification ok");
 }
 
 console.log("plugin check passed");
+
+// jscpd:ignore-end

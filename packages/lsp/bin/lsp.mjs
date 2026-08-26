@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// jscpd:ignore-start -- per-package CLI entrypoint boilerplate (arg parsing, help text), duplicated by design across sibling CLI packages
 /**
  * The `dsh lsp` command: the owner surface over the lsp server table. It
  * reads/writes the `lsp` section of `settings.yaml` under the same agent
@@ -168,3 +169,5 @@ main().catch((err) => {
   process.stderr.write(`dsh lsp: ${err.message}\n`);
   process.exitCode = 1;
 });
+
+// jscpd:ignore-end

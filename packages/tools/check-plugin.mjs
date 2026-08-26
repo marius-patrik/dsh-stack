@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling packages
 import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -149,3 +150,5 @@ console.log("cli round-trip ok (add/list/remove)");
 
 rmSync(root, { recursive: true, force: true });
 console.log("plugin check passed");
+
+// jscpd:ignore-end

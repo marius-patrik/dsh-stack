@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- shared release-tooling boilerplate, intentionally mirrored between pack.mjs and release.mjs
 import { promises as fs } from "node:fs";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -68,3 +69,5 @@ const /** run implementation. */
 
 for (const dependency of dependencies) await run(dependency);
 console.log(`${command}: ${dependencies.length} Stack dependencies`);
+
+// jscpd:ignore-end

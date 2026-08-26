@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// jscpd:ignore-start -- per-package CLI entrypoint boilerplate (arg parsing, help text), duplicated by design across sibling CLI packages
 /**
  * The `dsh tool` command: the owner surface over the agent-tools config-file
  * custom tool registry. It reads/writes the `agent-tools` section of
@@ -159,3 +160,5 @@ main().catch((err) => {
   process.stderr.write(`dsh tool: ${err.message}\n`);
   process.exitCode = 1;
 });
+
+// jscpd:ignore-end

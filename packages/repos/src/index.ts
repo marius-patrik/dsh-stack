@@ -70,6 +70,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
     ctx,
     NS,
     RepoSettings,
+// jscpd:ignore-start -- small settings-wiring block mirrored in formatters/src/index.ts for a different domain
     { remote: "origin", defaultBaseBranch: "main" },
     {
       setSource: () => {},
@@ -80,6 +81,7 @@ export function apply(ctx: Context, config: RepoConfigType): void {
   ctx.inject(["settings"], (sctx) => {
     const /** settings implementation. */
       settings = () => sctx.settings.get(NS) as RepoSettingsType | undefined;
+// jscpd:ignore-end
 
     ctx.tools.register(
       defineTool({

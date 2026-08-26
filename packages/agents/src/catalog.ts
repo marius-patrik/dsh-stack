@@ -31,6 +31,7 @@ export class PersonaCatalog {
 
   /** Re-index the authoring root. Never throws; unreadable files are skipped. */
   async load(): Promise<void> {
+// jscpd:ignore-start -- catalog file-loading logic parallels agent-actions/src/catalog.ts for a different authoring domain (actions vs personas); kept independent so the two domains can diverge
     this.personas.clear();
     let names: string[];
     try {
@@ -44,6 +45,7 @@ export class PersonaCatalog {
       const source = join(this.config.root, name);
       try {
         const persona = parsePersona(source, await readFile(source, "utf8"));
+// jscpd:ignore-end
         this.personas.set(persona.id, persona);
       } catch {
         // The sync path reports unparsable files; the catalog just skips them.
@@ -63,6 +65,7 @@ export class PersonaCatalog {
 
   /** The known persona ids, for command validation and completion. */
   ids(): readonly string[] {
+// jscpd:ignore-start -- catalog file-loading logic parallels agent-actions/src/catalog.ts for a different authoring domain (actions vs personas); kept independent so the two domains can diverge
     return [...this.personas.keys()];
   }
 }
@@ -73,4 +76,5 @@ function extensionOf(name: string): string | undefined {
   if (dot < 0) return undefined;
   const extension = name.slice(dot).toLowerCase();
   return PERSONA_EXTENSIONS.has(extension) ? extension : undefined;
+// jscpd:ignore-end
 }

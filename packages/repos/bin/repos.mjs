@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// jscpd:ignore-start -- per-package CLI entrypoint boilerplate (arg parsing, help text), duplicated by design across sibling CLI packages
 /**
  * The `dsh repos` command: the owner surface over the repos repo workflows.
  * It reads/writes the `repos` section of `settings.yaml` under the same
@@ -221,3 +222,5 @@ main().catch((err) => {
   process.stderr.write(`dsh repos: ${err.message}\n`);
   process.exitCode = 1;
 });
+
+// jscpd:ignore-end

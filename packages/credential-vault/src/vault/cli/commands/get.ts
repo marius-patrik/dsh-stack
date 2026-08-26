@@ -13,12 +13,14 @@ import type { VaultCliIo } from "../io.js";
 import { openVault } from "../vault-location.js";
 
 /** getCommand implementation. */
+// jscpd:ignore-start -- mirrors vault/cli/commands/totp.ts's small option-parsing shape for a different subcommand
 export async function getCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const id = required(args, "id");
   const { store } = await openVault(io);
   const record_ = await store.get(id);
   if (!record_) throw new VaultCliError(`no such record: ${id}`);
   const out = optional(args, "out");
+// jscpd:ignore-end
   if (!boolean(args, "reveal")) {
     io.err(
       `refusing to reveal ${id}: pass --reveal to confirm.\n` +

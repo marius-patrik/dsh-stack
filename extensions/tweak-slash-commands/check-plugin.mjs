@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling extensions
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
 import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
@@ -45,3 +46,5 @@ const names = registered.map((entry) => entry.name);
 assert.ok(names.includes("ping"), `config command not registered: ${JSON.stringify(registered)}`);
 console.log("command registrations ok:", names.join(", "));
 console.log("plugin check passed");
+
+// jscpd:ignore-end

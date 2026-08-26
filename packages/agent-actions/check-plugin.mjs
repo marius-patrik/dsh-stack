@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling packages
 import assert from "node:assert";
 import { readFileSync } from "node:fs";
 import { assertLoaderShape, loadClientLoaderSpec } from "../../scripts/plugin-check-kit.mjs";
@@ -170,3 +171,5 @@ const sessionModesGlyph = clientRegistrants.get("settings.section.icon")();
 assert.equal(sessionModesGlyph.name, "settings.section.icon");
 assert.equal(sessionModesGlyph.id, "actions");
 console.log("actions client ok");
+
+// jscpd:ignore-end

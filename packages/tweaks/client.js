@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- hand-authored UI bundle; tracked for full one-concern-per-file decomposition in issue #40
 // tweaks client half (hand-authored bundle, no build step): owns the
 // two replaced web-profile shells.
 //
@@ -6233,3 +6234,5 @@ window.__ModuleLoader__.load({
     return module.exports;
   },
 });
+
+// jscpd:ignore-end

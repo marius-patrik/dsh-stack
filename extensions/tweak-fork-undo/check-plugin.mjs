@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling extensions
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
 import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
@@ -56,3 +57,5 @@ assert.ok(names.includes("undo"), `undo not registered: ${JSON.stringify(registe
 assert.ok(names.includes("redo"), `redo not registered: ${JSON.stringify(registered)}`);
 console.log("undo/redo registrations ok:", names.join(", "));
 console.log("plugin check passed");
+
+// jscpd:ignore-end

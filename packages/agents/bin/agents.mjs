@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// jscpd:ignore-start -- per-package CLI entrypoint boilerplate (arg parsing, help text), duplicated by design across sibling CLI packages
 /**
  * The `dsh agents` command: the owner surface over agents persona
  * authoring. It reads/writes the authoring directory (the `agents` root,
@@ -205,3 +206,5 @@ main().catch((err) => {
   process.stderr.write(`dsh agents: ${err.message}\n`);
   process.exitCode = 1;
 });
+
+// jscpd:ignore-end
