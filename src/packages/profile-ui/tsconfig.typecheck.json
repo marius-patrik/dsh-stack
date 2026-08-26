@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "paths": {
+      "@dsh-stack/lucide-animated/client": [
+        "../../../publish/extensions/lucide-animated/src/client.tsx"
+      ],
+      "@dsh-stack/profile-runtime": ["../profile-runtime/src/index.ts"]
+    },
+    "rootDir": "../../.."
+  },
+  "include": ["src"]
+}

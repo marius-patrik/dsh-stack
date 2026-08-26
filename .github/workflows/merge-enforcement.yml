@@ -13,7 +13,7 @@ permissions:
 jobs:
   merge-enforcement:
     name: Merge enforcement
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout PR head
         uses: actions/checkout@v5

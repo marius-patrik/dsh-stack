@@ -12,21 +12,19 @@ harness/packages/*/lib/
 harness/*/dist/
 
 # stack package build output
-plugins/*/lib/
-packages/*/lib/
-extensions/*/lib/
-packs/*/lib/
+publish/plugins/*/lib/
+src/packages/*/lib/
+publish/extensions/*/lib/
+publish/packs/*/lib/
 
-# state (never commit) — .agents/ in repo is docs + hooks (tracked);
-# ~/.agents is the harness home (state folder, never committed)
-.agents/*
-!.agents/*.md
-!.agents/hooks/
-!.agents/hooks/**
-!.agents/rules/
-!.agents/rules/**
-!.agents/requests/
-!.agents/requests/**
+# repo .agents/ (docs, hooks, rules, requests, notes) is an ordinary
+# tracked directory — do not confuse it with ~/.agents, the user-home
+# harness home (runtime state), which is never part of this repo.
+# .claude is a local symlink to .agents/ for Claude Code's own session
+# state, which lives alongside the tracked docs here but is never itself
+# committed.
+.agents/RESUME.md
+.agents/scheduled_tasks.lock
 .dsh/
 .credentials.yaml
 accounts.vault
