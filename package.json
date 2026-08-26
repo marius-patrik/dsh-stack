@@ -20,7 +20,7 @@
     "test": "pnpm -r --if-present test",
     "release:manifest": "node scripts/release.mjs manifest",
     "release:version": "node scripts/release.mjs version",
-    "release:assets": "node scripts/release.mjs assets && node scripts/release-assets.mjs",
+    "release:assets": "node scripts/release.mjs assets",
     "release:verify": "node scripts/verify-release-assets.mjs"
   },
   "devDependencies": {

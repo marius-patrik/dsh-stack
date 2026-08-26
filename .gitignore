@@ -39,3 +39,6 @@ accounts.vault
 
 # editor
 .DS_Store
+
+# release build output
+/.release/

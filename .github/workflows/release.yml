@@ -56,9 +56,7 @@ jobs:
           echo "tag=$next_version" >> "$GITHUB_OUTPUT"
 
       - name: Build complete release assets
-        run: |
-          node scripts/release.mjs assets
-          node scripts/release-assets.mjs
+        run: node scripts/release.mjs assets
 
       - name: Validate every plugin and pack ZIP asset
         run: node scripts/verify-release-assets.mjs

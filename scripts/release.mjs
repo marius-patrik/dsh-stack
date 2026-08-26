@@ -195,7 +195,12 @@ async function zipComponent(component, outputDir, kind, stageDir) {
   const archive = join(outputDir, `${kind}-${slug}.zip`);
   const staged = join(stageDir, kind, slug);
   await fs.mkdir(join(stageDir, kind), { recursive: true });
-  await fs.cp(component.dir, staged, { recursive: true, dereference: true, force: true });
+  await fs.cp(component.dir, staged, {
+    recursive: true,
+    dereference: true,
+    force: true,
+    filter: (source) => !relative(component.dir, source).split("/").includes("node_modules"),
+  });
   await exec("zip", ["-qr", archive, "."], { cwd: staged });
   return archive;
 }
