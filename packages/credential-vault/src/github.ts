@@ -1,7 +1,7 @@
 /**
  * The GitHub OAuth route + refresh supplement for the vault adapter.
  *
- * `providers` `PROVIDER_ROUTES` carries the LLM wire routes; GitHub is not
+ * `providers`' route registry carries the LLM wire routes; GitHub is not
  * an LLM provider, so it has no route there. This module registers the GitHub
  * credential route (`github` — the api.github.com target plus the OAuth
  * authorization server) through the same injected adapter

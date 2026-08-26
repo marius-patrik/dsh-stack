@@ -3,7 +3,7 @@
  *
  * In Andromeda, the supervisor resolves OAuth refresh configurations from a
  * hardcoded built-in descriptor table. This plugin already has a provider
- * registry — `providers` `PROVIDER_ROUTES` — so the table is not ported;
+ * registry (`ctx.providers`, populated by `@dsh-stack/provider-<id>` extensions) — so the table is not ported;
  * instead this module is an *injected* adapter over whatever route registry the
  * composition root registers, which is how `providers` is wired in without
  * credentials depending on it (their peer dependency runs the other way).
@@ -15,7 +15,7 @@
  *   `providers`' `ProviderRoute` (id, displayName, authKind) satisfies the
  *   structural type, so this module never imports the plugin.
  * - `registerOAuthSupplement` supplies the refresh-capable OAuth endpoints for
- *   the OAuth routes. `PROVIDER_ROUTES` carries the wire facts (dialect, base
+ *   the OAuth routes. Each provider route carries the wire facts (dialect, base
  *   url, credential refs) but not OAuth authorization-server endpoints, so
  *   those arrive here, validated by the same https-or-loopback rule the
  *   descriptor schema enforced.
