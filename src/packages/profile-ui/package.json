@@ -33,7 +33,8 @@
   },
   "dependencies": {
     "@dsh-stack/lucide-animated": "workspace:*",
-    "@dsh-stack/profile-runtime": "workspace:*"
+    "@dsh-stack/profile-runtime": "workspace:*",
+    "@dsh-stack/settings-panel": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",

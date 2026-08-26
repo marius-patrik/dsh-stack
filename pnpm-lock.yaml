@@ -1235,6 +1235,9 @@ importers:
       '@dsh-stack/profile-runtime':
         specifier: workspace:*
         version: link:../profile-runtime
+      '@dsh-stack/settings-panel':
+        specifier: workspace:*
+        version: link:../settings-panel
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -1340,6 +1343,18 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  src/packages/settings-panel:
+    devDependencies:
+      '@types/react':
+        specifier: ~18.3.1
+        version: 18.3.31
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   src/packages/sidebar-preferences:
     devDependencies:
       typescript:
@@ -1357,6 +1372,9 @@ importers:
       '@deepseek-ai/dsh-client-ui-slots':
         specifier: ^0.1.1-rc.2
         version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))
+      '@dsh-stack/settings-panel':
+        specifier: workspace:*
+        version: link:../settings-panel
       '@dsh-stack/sidebar-preferences':
         specifier: workspace:*
         version: link:../sidebar-preferences
@@ -1468,6 +1486,9 @@ importers:
       '@deepseek-ai/dsh-client-ui-slots':
         specifier: ^0.1.1-rc.2
         version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))
+      '@dsh-stack/settings-panel':
+        specifier: workspace:*
+        version: link:../settings-panel
       '@dsh-stack/skin-runtime':
         specifier: workspace:*
         version: link:../skin-runtime

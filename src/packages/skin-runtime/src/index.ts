@@ -1,3 +1,5 @@
+import { publishCrossBundle, subscribeCrossBundle } from "./cross-bundle-channel.js";
+
 export type SkinId = "deepseek" | "claude" | "codex";
 
 export interface SkinOption {
@@ -6,6 +8,13 @@ export interface SkinOption {
 }
 
 const STORAGE_KEY = "dsh-stack.ui.skin";
+
+/**
+ * Cross-bundle change channel. This module is inlined into both
+ * `@dsh-stack/skin-settings` and `@dsh-stack/skin-host`, so a module-local
+ * listener set never crosses between them -- see ./cross-bundle-channel.ts.
+ */
+const CHANGE_CHANNEL = "dsh-stack.ui.skin:changed";
 
 export const defaultSkins: readonly SkinOption[] = [
   { id: "deepseek", label: "DeepSeek" },
@@ -26,27 +35,25 @@ export function createSkinRuntime(
 ): SkinRuntime {
   if (options.length === 0) throw new Error("At least one skin is required");
   const allowed = new Set(options.map((skin) => skin.id));
-  const listeners = new Set<() => void>();
-  let active = readStoredSkin(allowed) ?? options[0]!.id;
+  const fallback = options[0]!.id;
 
   return {
-    getActive: () => active,
+    // Deliberately re-read rather than memoised: storage is the single source
+    // of truth shared by every bundled copy of this module.
+    getActive: () => readStoredSkin(allowed) ?? fallback,
     setActive: (id) => {
       if (!allowed.has(id)) throw new Error(`Unknown skin: ${id}`);
-      if (id === active) return;
-      active = id;
+      if (id === (readStoredSkin(allowed) ?? fallback)) return;
       try {
         localStorage.setItem(STORAGE_KEY, id);
       } catch {
-        // In-memory selection still applies for this process.
+        // Storage is unavailable; the broadcast below still updates live
+        // subscribers for this page's lifetime.
       }
-      for (const listener of listeners) listener();
+      publishCrossBundle(CHANGE_CHANNEL);
       reload();
     },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
+    subscribe: (listener) => subscribeCrossBundle(CHANGE_CHANNEL, listener),
   };
 }
 
