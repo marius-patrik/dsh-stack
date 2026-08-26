@@ -43,7 +43,12 @@ assert.strictEqual(entries[0].sourceId, "test-source");
 
 // Two sources with the same id cannot both register.
 assert.throws(() => {
-  ctx.marketplace.register({ id: "test-source", async listEntries() { return []; } });
+  ctx.marketplace.register({
+    id: "test-source",
+    async listEntries() {
+      return [];
+    },
+  });
 });
 
 // Disposing a source's registration withdraws it from both discovery and
