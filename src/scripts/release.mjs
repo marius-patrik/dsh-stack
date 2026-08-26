@@ -49,10 +49,10 @@ function bumpVersion(version, kind) {
   return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
 }
 
-/** Discover package implementations from the canonical packages and extensions directories. */
+/** Discover package implementations from the canonical packages, extensions, and packs directories. */
 async function discoverPackages() {
   const packages = [];
-  for (const catalogDir of [packagesDir, extensionsDir]) {
+  for (const catalogDir of [packagesDir, extensionsDir, packsDir]) {
     let entries;
     try {
       entries = await fs.readdir(catalogDir, { withFileTypes: true });
