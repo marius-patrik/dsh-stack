@@ -3,6 +3,9 @@ import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
 import { createSkinRuntime, defaultSkins, type SkinId } from "@dsh-stack/skin-runtime";
 
+/** Cordis client services this plugin's `apply` reaches for; activation waits on them. */
+export const inject = ["slots"];
+
 const runtime = createSkinRuntime(undefined, () => window.location.reload());
 
 /** SkinSettings implementation. */
@@ -22,6 +25,8 @@ export function SkinSettings({ close }: SettingsSectionOwnerProps) {
       <div style={{ display: "grid", gap: 8 }}>
         {defaultSkins.map((skin) => {
           const selected = active === skin.id;
+          // jscpd:ignore-start -- small panel shape mirrored in
+          // profile-ui/src/client/index.tsx for a different settings surface
           return (
             <button
               key={skin.id}
@@ -48,11 +53,10 @@ export function SkinSettings({ close }: SettingsSectionOwnerProps) {
               }}
             >
               <span>{skin.label}</span>
-              // jscpd:ignore-start -- small panel shape mirrored in profile-ui/src/client/index.tsx
-              for a different settings surface
               {selected ? <span aria-hidden="true">✓</span> : null}
             </button>
           );
+          // jscpd:ignore-end
         })}
       </div>
       <button type="button" onClick={close} style={{ justifySelf: "start" }}>
@@ -64,9 +68,10 @@ export function SkinSettings({ close }: SettingsSectionOwnerProps) {
 
 /** apply implementation. */
 export function apply(ctx: ClientContext): void {
-  ctx.slots.register(
-    // jscpd:ignore-end
-    { name: "settings.section", id: "skins", order: 35, label: "Skins" },
-    SkinSettings,
+  ctx.slots.inject("settings.section", () =>
+    ctx.slots.register(
+      { name: "settings.section", id: "skins", order: 35, label: "Skins", inject: () => ({}) },
+      SkinSettings,
+    ),
   );
 }

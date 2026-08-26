@@ -110,7 +110,7 @@ globalThis.window = {
 };
 await import("./lib/client.js");
 const clientSpec = globalThis.__clientSpec;
-assert.equal(clientSpec.id, "tweaks");
+assert.equal(clientSpec.id, "@dsh-stack/tweaks");
 assert.equal(typeof clientSpec.factory, "function");
 
 const stubModules = {
@@ -231,8 +231,17 @@ clientModule.apply(ctxStub);
 const /** assertRegistered implementation. */
   assertRegistered = (name, reason) =>
     assert.ok(records.has(name), `${reason}: ${name} not registered`);
-assertRegistered("sidebar", "Phase A");
-assertRegistered("sidebar.newSession", "Phase A");
+// @dsh-stack/sidebar-shell is the canonical declarer of the `sidebar` slot and
+// its children. Two entries may not declare the same child slot, so tweaks must
+// not register a `sidebar` root of its own -- doing so made the client loader
+// throw `slot "sidebar.workspaces" is already declared` and the web UI failed
+// to boot. tweaks still owns the settings shell, which seats into the
+// `sidebar.settings` slot that sidebar-shell declares.
+assert.ok(!records.has("sidebar"), "tweaks must not re-declare the sidebar root (sidebar-shell owns it)");
+assert.ok(
+  !records.has("sidebar.newSession"),
+  "tweaks must not register sidebar.newSession (it belonged to the removed sidebar root)",
+);
 assertRegistered("sidebar.settings", "Phase A");
 assertRegistered("settings.trigger", "Phase A");
 assertRegistered("settings.header", "Phase A");
@@ -241,18 +250,6 @@ assertRegistered("settings.action", "Phase A");
 assertRegistered("settings.section", "Phase A");
 assert.ok(localeEntries.has("sidebar"), "sidebar dictionaries not registered");
 assert.ok(localeEntries.has("settings"), "settings dictionaries not registered");
-
-const sidebarEntry = records.get("sidebar").entry;
-for (const hole of [
-  "sidebar.workspaces",
-  "sidebar.settings",
-  "sidebar.footer.action",
-  "sidebar.newSession",
-  "sidebar.history",
-]) {
-  assert.ok(sidebarEntry.children[hole], `sidebar must declare ${hole}`);
-}
-assert.equal(sidebarEntry.locale, "sidebar");
 
 const shellEntry = records.get("sidebar.settings").entry;
 for (const hole of [

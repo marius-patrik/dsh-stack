@@ -29,7 +29,7 @@
     "id": "stack.agent.loops"
   },
   "scripts": {
-    "build": "tsc && cp client.js lib/client.js",
+    "build": "tsc && tsdown",
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs",
     "verify": "node check-plugin.mjs"
