@@ -6,12 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  KIMI_CONTEXT,
-  KIMI_MAX_OUTPUT,
-  TOKEN,
-  kimiCoreModels,
-} from "@dsh-stack/providers";
+import { KIMI_CONTEXT, KIMI_MAX_OUTPUT, TOKEN, kimiCoreModels } from "@dsh-stack/providers";
 
 /** The `kimi-sub` provider route. */
 export const route: ProviderRoute = {

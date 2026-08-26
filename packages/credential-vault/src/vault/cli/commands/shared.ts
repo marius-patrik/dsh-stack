@@ -1,7 +1,13 @@
 import { readFile as readFileFromDisk } from "node:fs/promises";
 import { SECRET_TYPES, type SecretScope, type SecretType } from "../../record.js";
 import { exists } from "../../files.js";
-import { boolean, many, optional, VaultCliError, type ParsedArguments } from "../argument-parsing.js";
+import {
+  boolean,
+  many,
+  optional,
+  VaultCliError,
+  type ParsedArguments,
+} from "../argument-parsing.js";
 import type { VaultCliIo } from "../io.js";
 
 export const USAGE = `vault - agent-managed credential vault

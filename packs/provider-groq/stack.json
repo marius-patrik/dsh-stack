@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "kind": "pack",
   "description": "Groq provider route.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
-  "dependencies": [
-    "stack.ai.provider.groq-api"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
+  "dependencies": ["stack.ai.provider.groq-api"],
   "optionalDependencies": []
 }

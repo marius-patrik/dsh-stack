@@ -1,5 +1,11 @@
 import { createSecretRecord, SECRET_TYPES } from "../../record.js";
-import { many, optional, required, VaultCliError, type ParsedArguments } from "../argument-parsing.js";
+import {
+  many,
+  optional,
+  required,
+  VaultCliError,
+  type ParsedArguments,
+} from "../argument-parsing.js";
 import { fingerprintsOf, materialFromInput } from "../material-from-input.js";
 import { formatFingerprint } from "../fingerprint.js";
 import type { VaultCliIo } from "../io.js";

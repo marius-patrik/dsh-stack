@@ -1,4 +1,11 @@
-import { runCommand, shellQuote, psLiteral, type CredentialSource, type KeychainItem, type SourcePlatform } from "./credential-source.js";
+import {
+  runCommand,
+  shellQuote,
+  psLiteral,
+  type CredentialSource,
+  type KeychainItem,
+  type SourcePlatform,
+} from "./credential-source.js";
 
 export interface SshSourceOptions {
   host: string;

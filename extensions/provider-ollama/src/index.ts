@@ -18,9 +18,7 @@ export const route: ProviderRoute = {
   authSlots: [],
   catalog: { url: "http://127.0.0.1:11434/v1/models" },
   probe: { url: "http://127.0.0.1:11434/api/tags" },
-  models: [
-    { id: "qwen3.8:27b", name: "Qwen 3.8 27B", contextWindow: 131_072, maxTokens: 16_384 },
-  ],
+  models: [{ id: "qwen3.8:27b", name: "Qwen 3.8 27B", contextWindow: 131_072, maxTokens: 16_384 }],
   defaultMaxTokens: 16_384,
   defaultContextWindow: 131_072,
 };

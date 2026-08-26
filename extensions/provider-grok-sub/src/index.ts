@@ -6,13 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  EFFORTS,
-  HEADERS,
-  TOKEN,
-  XAI_CONTEXT,
-  XAI_MAX_OUTPUT,
-} from "@dsh-stack/providers";
+import { EFFORTS, HEADERS, TOKEN, XAI_CONTEXT, XAI_MAX_OUTPUT } from "@dsh-stack/providers";
 
 /** The `grok-sub` provider route. */
 export const route: ProviderRoute = {

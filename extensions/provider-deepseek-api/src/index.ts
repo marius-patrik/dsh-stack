@@ -6,12 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  API_KEY,
-  DEEPSEEK_CONTEXT,
-  DEEPSEEK_MAX_OUTPUT,
-  EFFORTS,
-} from "@dsh-stack/providers";
+import { API_KEY, DEEPSEEK_CONTEXT, DEEPSEEK_MAX_OUTPUT, EFFORTS } from "@dsh-stack/providers";
 
 /** The `deepseek-api` provider route. */
 export const route: ProviderRoute = {

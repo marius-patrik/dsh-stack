@@ -6,11 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  EFFORTS,
-  HEADER,
-  TOKEN,
-} from "@dsh-stack/providers";
+import { EFFORTS, HEADER, TOKEN } from "@dsh-stack/providers";
 import { ANTIGRAVITY_PROJECT_HEADER } from "@dsh-stack/dialects";
 
 /** The `antigravity-sub` provider route. */

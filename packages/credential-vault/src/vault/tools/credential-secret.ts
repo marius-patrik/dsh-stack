@@ -71,7 +71,9 @@ export function applyAuth(
 }
 
 /** PEM as-is; anything else is treated as base64 PKCS#8 DER. */
-export function privateKeyInput(value: string): string | { key: Buffer; format: "der"; type: "pkcs8" } {
+export function privateKeyInput(
+  value: string,
+): string | { key: Buffer; format: "der"; type: "pkcs8" } {
   if (value.includes("-----BEGIN")) return value;
   return { key: Buffer.from(value, "base64"), format: "der", type: "pkcs8" };
 }

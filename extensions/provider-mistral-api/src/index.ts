@@ -6,11 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  API_KEY,
-  MISTRAL_CONTEXT,
-  MISTRAL_MAX_OUTPUT,
-} from "@dsh-stack/providers";
+import { API_KEY, MISTRAL_CONTEXT, MISTRAL_MAX_OUTPUT } from "@dsh-stack/providers";
 
 /** The `mistral-api` provider route. */
 export const route: ProviderRoute = {

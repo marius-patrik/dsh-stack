@@ -1,6 +1,12 @@
 import path from "node:path";
 import { writePrivateFile } from "../../files.js";
-import { boolean, optional, required, VaultCliError, type ParsedArguments } from "../argument-parsing.js";
+import {
+  boolean,
+  optional,
+  required,
+  VaultCliError,
+  type ParsedArguments,
+} from "../argument-parsing.js";
 import { fingerprintsOf, revealField } from "../material-from-input.js";
 import { formatFingerprint } from "../fingerprint.js";
 import type { VaultCliIo } from "../io.js";

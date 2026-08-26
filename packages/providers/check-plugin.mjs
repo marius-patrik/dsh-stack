@@ -40,7 +40,6 @@ const extensions = new Map(
   ),
 );
 
-
 /** Apply the providers plugin, then every provider extension's route registration. */
 function applyProviders(ctx, config) {
   providers.apply(ctx, config);
