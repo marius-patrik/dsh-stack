@@ -198,7 +198,9 @@ async function resolveComponentVersion(component, kind) {
   }
   for (const canonicalDir of [packagesDir, extensionsDir]) {
     try {
-      const canonicalPkg = await readJson(join(canonicalDir, component.relativePath, "package.json"));
+      const canonicalPkg = await readJson(
+        join(canonicalDir, component.relativePath, "package.json"),
+      );
       if (typeof canonicalPkg.version === "string") return canonicalPkg.version;
     } catch {}
   }
