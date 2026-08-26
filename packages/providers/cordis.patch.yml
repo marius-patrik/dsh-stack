@@ -1,0 +1,37 @@
+# The providers bundle patch: the subscription plugin set and the
+# agent-presets roster default that makes the remap preset the composition,
+# applied as one insert (plugins) plus one config patch (agent-presets) over
+# the profile layer. Merged from the standalone dsh-subscriptions package; the
+# dsh-quotas insert row is gone because the quotas registry, web routes, and
+# settings section now mount from providers itself.
+#
+# `providers` defaults to subscription-only mode here; a deployment that
+# wants pay-as-you-go API routes overrides `mode: "all"` in its profile or
+# home patch (later layers win), or per-session through the `providers`
+# user-settings section. The `agent-presets` row already exists in the base
+# bundle with `default: standard`; this patch targets that same id and
+# REPLACES its whole config to point the roster at the `subscriptions` preset.
+# The shipped `subscriptions` preset file lives under the user preset root
+# (`$DSH_HOME/.agent-presets/`) and is discovered through `dsh-agent-presets'`
+# own `includeUserRoot` default.
+
+- insert:
+    - id: dialects
+      name: 'dialects'
+      config: {}
+
+    - id: accounts
+      name: 'credentials'
+      config: {}
+
+    - id: providers
+      name: 'providers'
+      config: {}
+
+    - id: tweaks
+      name: 'tweaks'
+      config: {}
+
+- id: agent-presets
+  config:
+    default: subscriptions

@@ -3,19 +3,19 @@
  *
  * In Andromeda, the supervisor resolves OAuth refresh configurations from a
  * hardcoded built-in descriptor table. This plugin already has a provider
- * registry — `dsh-providers` `PROVIDER_ROUTES` — so the table is not ported;
+ * registry (`ctx.providers`, populated by `@dsh-stack/provider-<id>` extensions) — so the table is not ported;
  * instead this module is an *injected* adapter over whatever route registry the
- * composition root registers, which is how `dsh-providers` is wired in without
- * dsh-credentials depending on it (their peer dependency runs the other way).
+ * composition root registers, which is how `providers` is wired in without
+ * credentials depending on it (their peer dependency runs the other way).
  *
  * Two sources, both injected:
  *
  * - `registerProviderRoutes` records which provider ids exist and whether each
  *   authenticates with an api key or OAuth. Any array shaped like
- *   `dsh-providers`' `ProviderRoute` (id, displayName, authKind) satisfies the
+ *   `providers`' `ProviderRoute` (id, displayName, authKind) satisfies the
  *   structural type, so this module never imports the plugin.
  * - `registerOAuthSupplement` supplies the refresh-capable OAuth endpoints for
- *   the OAuth routes. `PROVIDER_ROUTES` carries the wire facts (dialect, base
+ *   the OAuth routes. Each provider route carries the wire facts (dialect, base
  *   url, credential refs) but not OAuth authorization-server endpoints, so
  *   those arrive here, validated by the same https-or-loopback rule the
  *   descriptor schema enforced.
@@ -28,13 +28,13 @@
  *
  * Not part of the Andromeda port; new for this plugin (the injected-adapter
  * form of `built-in.ts`'s `findProviderDescriptor`).
- * @module dsh-credentials/vault/provider-descriptor
+ * @module credentials/vault/provider-descriptor
  */
 
 import type { OAuthAuthConfig } from "./descriptor.js";
 import { parseOAuthEndpointUrl } from "./descriptor.js";
 
-/** The minimal route facts the adapter needs. `dsh-providers`' `ProviderRoute` satisfies this. */
+/** The minimal route facts the adapter needs. `providers`' `ProviderRoute` satisfies this. */
 export interface ProviderRouteLike {
   id: string;
   displayName: string;
@@ -64,7 +64,7 @@ export interface ProviderAuthDescriptor {
   displayName: string;
   /** The route's default endpoint; its host is allowed for this provider's records. */
   baseUrl: string;
-  /** Advisory model catalog. `dsh-providers` routes carry static lists, so there is no endpoint URL to add. */
+  /** Advisory model catalog. `providers` routes carry static lists, so there is no endpoint URL to add. */
   modelCatalog: { kind: "static" } | { kind: "list_endpoint"; url: string };
   /**
    * The refresh-capable OAuth configuration, the api-key placement, or null.

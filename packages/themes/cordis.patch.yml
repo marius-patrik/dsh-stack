@@ -1,0 +1,8 @@
+# The themes bundle patch: mounts the theme plugin, which installs the
+# `themes` settings section (active theme) and the `/themes.json` route the
+# client bundle registers from.
+
+- insert:
+    - id: themes
+      name: 'themes'
+      config: {}

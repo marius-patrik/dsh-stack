@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "lib": ["ES2023", "DOM", "DOM.AsyncIterable"],
+    "paths": {
+      "@dsh-stack/dialects": ["../dialects/src/index.ts"],
+      "@dsh-stack/credential-vault": ["../credential-vault/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

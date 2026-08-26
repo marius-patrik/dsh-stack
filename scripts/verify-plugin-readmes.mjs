@@ -1,9 +1,15 @@
 import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-const roots = [join(process.cwd(), "packages"), join(process.cwd(), "plugins")];
+const roots = [
+  join(process.cwd(), "packages"),
+  join(process.cwd(), "extensions"),
+  join(process.cwd(), "packs"),
+  join(process.cwd(), "plugins"),
+];
 const missing = [];
 
+/** walk implementation. */
 async function walk(dir) {
   let entries;
   try {

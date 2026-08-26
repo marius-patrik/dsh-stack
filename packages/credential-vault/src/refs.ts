@@ -1,7 +1,7 @@
 /**
  * Canonical reference mapping for the account seam.
  *
- * The provider routes in `dsh-providers` resolve credentials through
+ * The provider routes in `providers` resolve credentials through
  * `ctx.accounts.resolve(ref)` with canonical slot references such as
  * `CLAUDE_SUB_OAUTH_TOKEN`. Those references are not valid vault record ids —
  * ids are lowercase kebab-case — so the seam addresses a record through a
@@ -11,7 +11,7 @@
  * The same mapping lets scanned findings land under the refs the providers
  * resolve, so an imported login and a manually stored secret are found by the
  * same name.
- * @module dsh-credentials/refs
+ * @module credentials/refs
  */
 
 import { SecretValue } from "./vault/secret.js";

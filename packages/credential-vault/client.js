@@ -1,28 +1,6 @@
-(function () {
-  if (typeof globalThis.crypto === "undefined") globalThis.crypto = {};
-  if (typeof globalThis.crypto.randomUUID !== "function") {
-    globalThis.crypto.randomUUID = function () {
-      if (typeof globalThis.crypto.getRandomValues === "function") {
-        try {
-          return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
-            return (
-              c ^
-              (globalThis.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-            ).toString(16);
-          });
-        } catch (e) {}
-      }
-      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-        var r = (Math.random() * 16) | 0,
-          v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-    };
-  }
-})();
-
+// jscpd:ignore-start -- hand-authored UI bundle; tracked for full one-concern-per-file decomposition in issue #40
 window.__ModuleLoader__.load({
-  id: "dsh-credentials",
+  id: "credentials",
   factory: function (require) {
     var module = { exports: {} };
     var exports = module.exports;
@@ -30,9 +8,10 @@ window.__ModuleLoader__.load({
     var React = require("react");
     var h = React.createElement;
     var Fragment = React.Fragment;
+    var createGlyphComponent = __dshCreateGlyphComponent(h);
     var P = require("@deepseek-ai/dsh-client-ui-primitives");
 
-    var NS = "dsh-credentials";
+    var NS = "credentials";
     var VAULT_API = "/vault/api";
     var QUOTAS_API = "/quotas/api";
 
@@ -152,235 +131,98 @@ window.__ModuleLoader__.load({
     /**
      * Dedicated Keychain Glyph: Lucide KeyRound / ShieldCheck
      */
-    function KeychainGlyph(props) {
-      var size = props && props.size ? props.size : 16;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          xmlns: "http://www.w3.org/2000/svg",
-          "aria-hidden": "true",
-        },
+    var KeychainGlyph = createGlyphComponent(16, "", false, true, true, function () {
+      return [
         h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
         h("path", { d: "m9 12 2 2 4-4" }),
-      );
-    }
+      ];
+    });
 
-    function PlusIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
-        h("path", { d: "M5 12h14" }),
-        h("path", { d: "M12 5v14" }),
-      );
-    }
+    /** PlusIcon implementation. */
+    var PlusIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [h("path", { d: "M5 12h14" }), h("path", { d: "M12 5v14" })];
+    });
 
-    function LinkIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    /** LinkIcon implementation. */
+    var LinkIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [
         h("path", { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }),
         h("path", { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" }),
-      );
-    }
+      ];
+    });
 
-    function EyeIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    /** EyeIcon implementation. */
+    var EyeIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [
         h("path", { d: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" }),
         h("circle", { cx: "12", cy: "12", r: "3" }),
-      );
-    }
+      ];
+    });
 
-    function DownloadIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    /** DownloadIcon implementation. */
+    var DownloadIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [
         h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
         h("polyline", { points: "7 10 12 15 17 10" }),
         h("line", { x1: "12", x2: "12", y1: "15", y2: "3" }),
-      );
-    }
+      ];
+    });
 
-    function RefreshIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    /** RefreshIcon implementation. */
+    var RefreshIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [
         h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
         h("path", { d: "M21 3v5h-5" }),
         h("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
         h("path", { d: "M8 16H3v5" }),
-      );
-    }
+      ];
+    });
 
-    function CheckIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
-        h("polyline", { points: "20 6 9 17 4 12" }),
-      );
-    }
+    /** CheckIcon implementation. */
+    var CheckIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [h("polyline", { points: "20 6 9 17 4 12" })];
+    });
 
-    function ChevronRightIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
-        h("polyline", { points: "9 18 15 12 9 6" }),
-      );
-    }
+    /** ChevronRightIcon implementation. */
+    var ChevronRightIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [h("polyline", { points: "9 18 15 12 9 6" })];
+    });
 
-    function ExternalLinkIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    /** ExternalLinkIcon implementation. */
+    var ExternalLinkIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [
         h("path", { d: "M15 3h6v6" }),
         h("path", { d: "M10 14 21 3" }),
         h("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
-      );
-    }
+      ];
+    });
 
-    function TrashIcon(props) {
-      var size = props && props.size ? props.size : 14;
-      var className = (props && props.className ? props.className + " " : "") + "dsh-icon-animated";
-      return h(
-        "svg",
-        {
-          width: size,
-          height: size,
-          className: className,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-        },
+    /** TrashIcon implementation. */
+    var TrashIcon = createGlyphComponent(14, "", false, false, false, function () {
+      return [
         h("path", { d: "M3 6h18" }),
         h("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
         h("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
         h("line", { x1: "10", x2: "10", y1: "11", y2: "17" }),
         h("line", { x1: "14", x2: "14", y1: "11", y2: "17" }),
-      );
-    }
+      ];
+    });
 
+    /** createVaultStore implementation. */
     function createVaultStore() {
       var listeners = new Set();
       var state = { rows: [], snapshots: {}, status: "idle", error: null };
       var revealed = {}; // keyed by `ref` or `ref:account`
       var probing = {}; // keyed by probeId
 
+      /** emit implementation. */
       function emit() {
         listeners.forEach(function (fn) {
           fn();
         });
       }
 
+      /** load implementation. */
       function load() {
         state = { rows: state.rows, snapshots: state.snapshots, status: "loading", error: null };
         emit();
@@ -429,6 +271,7 @@ window.__ModuleLoader__.load({
           });
       }
 
+      /** probeProvider implementation. */
       function probeProvider(probeId) {
         probing[probeId] = true;
         emit();
@@ -448,6 +291,7 @@ window.__ModuleLoader__.load({
           });
       }
 
+      /** probeAll implementation. */
       function probeAll() {
         return fetch(QUOTAS_API + "/refresh", { method: "POST" })
           .then(function (res) {
@@ -463,6 +307,7 @@ window.__ModuleLoader__.load({
           });
       }
 
+      /** reveal implementation. */
       function reveal(ref, account) {
         var key = ref + (account ? ":" + account : "");
         if (revealed[key]) {
@@ -486,6 +331,7 @@ window.__ModuleLoader__.load({
           });
       }
 
+      /** setSecret implementation. */
       function setSecret(ref, value, account) {
         var url =
           VAULT_API +
@@ -502,6 +348,7 @@ window.__ModuleLoader__.load({
         });
       }
 
+      /** unsetSecret implementation. */
       function unsetSecret(ref, account) {
         var url =
           VAULT_API +
@@ -516,6 +363,7 @@ window.__ModuleLoader__.load({
         });
       }
 
+      /** unsetMultiple implementation. */
       function unsetMultiple(items) {
         return Promise.all(
           items.map(function (item) {
@@ -535,6 +383,7 @@ window.__ModuleLoader__.load({
         });
       }
 
+      /** importLocal implementation. */
       function importLocal() {
         return fetch(VAULT_API + "/import", {
           method: "POST",
@@ -660,6 +509,7 @@ window.__ModuleLoader__.load({
       );
     }
 
+    /** KeychainSection implementation. */
     function KeychainSection() {
       var storeState = React.useSyncExternalStore(
         globalVaultStore.subscribe,
@@ -702,6 +552,7 @@ window.__ModuleLoader__.load({
       var toastMsg = toastMsgState[0];
       var setToastMsg = toastMsgState[1];
 
+      /** showToast implementation. */
       function showToast(msg) {
         setToastMsg(msg);
         setTimeout(function () {
@@ -713,6 +564,7 @@ window.__ModuleLoader__.load({
         globalVaultStore.load();
       }, []);
 
+      /** toggleProvider implementation. */
       function toggleProvider(providerId) {
         setExpandedProviders(function (prev) {
           var next = Object.assign({}, prev);
@@ -721,6 +573,7 @@ window.__ModuleLoader__.load({
         });
       }
 
+      /** copyText implementation. */
       function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
@@ -1908,6 +1761,7 @@ window.__ModuleLoader__.load({
       var saving = savingState[0];
       var setSaving = savingState[1];
 
+      /** handleSave implementation. */
       function handleSave() {
         var trimmedRef = refVal.trim().toUpperCase();
         var trimmedSec = secretVal.trim();
@@ -2137,6 +1991,7 @@ window.__ModuleLoader__.load({
       var saving = savingState[0];
       var setSaving = savingState[1];
 
+      /** handleSave implementation. */
       function handleSave() {
         var trimmed = secretVal.trim();
         if (!trimmed) {
@@ -2245,6 +2100,7 @@ window.__ModuleLoader__.load({
       var deleting = deletingState[0];
       var setDeleting = deletingState[1];
 
+      /** handleDelete implementation. */
       function handleDelete() {
         setDeleting(true);
         globalVaultStore
@@ -2332,6 +2188,7 @@ window.__ModuleLoader__.load({
         [initial],
       );
 
+      /** startOAuth implementation. */
       function startOAuth(provider) {
         setSelectedProvider(provider);
         setAuthStatus("starting");
@@ -2357,6 +2214,7 @@ window.__ModuleLoader__.load({
           });
       }
 
+      /** pollTokenLoop implementation. */
       function pollTokenLoop(pollToken, providerLabel) {
         var interval = setInterval(function () {
           fetch(VAULT_API + "/login/device/poll", {
@@ -2540,13 +2398,14 @@ window.__ModuleLoader__.load({
       );
     }
 
+    /** apply implementation. */
     function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register(NS, {
           en: { vault: "Keychain & Accounts" },
           zh: { vault: "钥匙串与账号" },
         });
-      }, "dsh-credentials: dictionaries");
+      }, "credentials: dictionaries");
 
       ctx.slots.inject(
         "settings.section",
@@ -2567,7 +2426,7 @@ window.__ModuleLoader__.load({
             KeychainSection,
           );
         },
-        "dsh-credentials: keychain settings section",
+        "credentials: keychain settings section",
       );
 
       ctx.slots.inject(
@@ -2582,7 +2441,7 @@ window.__ModuleLoader__.load({
             KeychainGlyph,
           );
         },
-        "dsh-credentials: keychain nav glyph",
+        "credentials: keychain nav glyph",
       );
     }
 
@@ -2591,3 +2450,5 @@ window.__ModuleLoader__.load({
     return module.exports;
   },
 });
+
+// jscpd:ignore-end

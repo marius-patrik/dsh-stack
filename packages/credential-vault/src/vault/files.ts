@@ -27,7 +27,7 @@
  *   correct. `publishFileAtMode` is the only place in the engine that writes a
  *   file whose contents are a secret; `clis/import.ts` copies credentials
  *   through it for exactly this reason.
- * @module dsh-credentials/vault/files
+ * @module credentials/vault/files
  */
 
 import path from "node:path";
@@ -36,6 +36,7 @@ import { randomUUID } from "node:crypto";
 
 const WINDOWS_TRANSIENT_RENAME_ERRORS = new Set(["EACCES", "EBUSY", "EPERM"]);
 
+/** exists implementation. */
 export async function exists(target: string): Promise<boolean> {
   try {
     await stat(target);
@@ -45,6 +46,7 @@ export async function exists(target: string): Promise<boolean> {
   }
 }
 
+/** ensurePrivateDirectory implementation. */
 export async function ensurePrivateDirectory(directory: string): Promise<void> {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   if (process.platform !== "win32") await chmod(directory, 0o700);
@@ -110,6 +112,7 @@ export async function writePrivateFileExclusive(file: string, content: string): 
   return true;
 }
 
+/** temporaryName implementation. */
 function temporaryName(file: string): string {
   return path.join(
     path.dirname(file),

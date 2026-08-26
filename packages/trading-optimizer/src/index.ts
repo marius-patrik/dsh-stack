@@ -17,6 +17,7 @@ export interface OptimizationOptions {
   readonly limit?: number;
 }
 
+/** gridSearch implementation. */
 export function gridSearch(
   candles: readonly Candle[],
   createStrategy: (parameters: Readonly<Record<string, ParameterValue>>) => Strategy,
@@ -50,8 +51,10 @@ export function gridSearch(
     : evaluations.slice(0, Math.max(0, options.limit));
 }
 
+/** combinations implementation. */
 function* combinations(grid: ParameterGrid): Generator<Record<string, ParameterValue>> {
   const entries = Object.entries(grid);
+  /** walk implementation. */
   function* walk(
     index: number,
     current: Record<string, ParameterValue>,

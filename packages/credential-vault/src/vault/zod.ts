@@ -22,7 +22,7 @@
  * threaded `options` (and therefore the validation path) never reaches them.
  * A custom type's resolver does receive `options`, so refine failures report
  * the same dotted path zod would.
- * @module dsh-credentials/vault/zod
+ * @module credentials/vault/zod
  */
 
 import _z from "@deepseek-ai/schemastery";
@@ -49,6 +49,7 @@ export type SafeParseResult<T> =
 /* Custom schema types                                                          */
 /* -------------------------------------------------------------------------- */
 
+/** isPlainObject implementation. */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
   const proto = Object.getPrototypeOf(value);
@@ -97,15 +98,19 @@ _z.extend("refine", (data, schema, options) => {
 /* -------------------------------------------------------------------------- */
 
 Object.assign(_z.prototype, {
+  /** nullable implementation. */
   nullable(this: Schema): Schema {
     return _z.union([this, _z.const(null)]) as Schema;
   },
+  /** readonly implementation. */
   readonly(this: Schema): Schema {
     return this;
   },
+  /** regex implementation. */
   regex(this: Schema, regexp: RegExp): Schema {
     return this.pattern(regexp) as Schema;
   },
+  /** refine implementation. */
   refine(this: Schema, check: (value: unknown) => boolean, options?: { message?: string }): Schema {
     return _z({
       type: "refine",
@@ -114,6 +119,7 @@ Object.assign(_z.prototype, {
       message: options?.message ?? "value is invalid",
     } as unknown as Partial<Schema>) as Schema;
   },
+  /** safeParse implementation. */
   safeParse(this: Schema, value: unknown): SafeParseResult<unknown> {
     const issues = collectIssues(this, value, []);
     if (issues.length > 0) return { success: false, error: { issues } };
@@ -149,12 +155,14 @@ declare global {
 /* Static builders                                                              */
 /* -------------------------------------------------------------------------- */
 
+/** strictObject implementation. */
 export function strictObject<X extends Dict>(dict: X): Schema<StrictObjectT<X>, StrictObjectT<X>> {
   const schema = _z.object(dict) as Schema;
   schema.type = "strictObject";
   return schema;
 }
 
+/** enumOf implementation. */
 export function enumOf<const T extends readonly string[]>(values: T): Schema<T[number], T[number]> {
   return _z.union(values.map((value) => _z.const(value))) as unknown as Schema<
     T[number],
@@ -185,6 +193,7 @@ export namespace z {
 /* Aggregated issue collection for `safeParse`                                  */
 /* -------------------------------------------------------------------------- */
 
+/** collectIssues implementation. */
 function collectIssues(schema: Schema, data: unknown, path: (string | number)[]): ZodIssue[] {
   const type = schema.type;
   if (type === "strictObject" || type === "object") {

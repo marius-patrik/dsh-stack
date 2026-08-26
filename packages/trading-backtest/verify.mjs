@@ -13,6 +13,7 @@ const candles = Array.from({ length: 4 }, (_, index) => ({
 let seen = 0;
 const result = runBacktest(candles, {
   id: "buy-on-first-close",
+  /** onCandle implementation. */
   onCandle(context) {
     if (seen === 0) context.buy(1);
     if (seen === candles.length - 1) context.close();

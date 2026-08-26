@@ -13,11 +13,15 @@
     "format": "npx --yes @biomejs/biome@2.2.0 format --write .",
     "format:check": "npx --yes @biomejs/biome@2.2.0 format --write . && git diff --exit-code",
     "verify:plugin-readmes": "node scripts/verify-plugin-readmes.mjs",
-    "verify": "pnpm run verify:plugin-readmes && node scripts/verify-stack.mjs && pnpm -r --if-present verify",
+    "verify:jsdocs": "node scripts/verify-jsdocs.mjs",
+    "verify:duplicates": "pnpm dlx jscpd@5.0.16 packages extensions packs plugins scripts",
+    "verify:dead-code": "pnpm dlx knip@6.32.2 --no-progress",
+    "verify": "pnpm run verify:plugin-readmes && pnpm run verify:jsdocs && pnpm run verify:duplicates && pnpm run verify:dead-code && node scripts/verify-stack.mjs && pnpm -r --if-present verify",
     "test": "pnpm -r --if-present test",
     "release:manifest": "node scripts/release.mjs manifest",
     "release:version": "node scripts/release.mjs version",
-    "release:assets": "node scripts/release.mjs assets"
+    "release:assets": "node scripts/release.mjs assets",
+    "release:verify": "node scripts/verify-release-assets.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",

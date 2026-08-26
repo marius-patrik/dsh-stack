@@ -49,7 +49,7 @@ jobs:
           case "$bump" in
             major) major=$((major + 1)); minor=0; patch=0 ;;
             minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)) ;;
+            patch) patch=$((patch + 1)); ;;
           esac
           next_version="v${major}.${minor}.${patch}"
           git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null && exit 1 || true
@@ -58,17 +58,8 @@ jobs:
       - name: Build complete release assets
         run: node scripts/release.mjs assets
 
-      - name: Validate complete catalog assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s .release/stack-release.json
-          test -s .release/stack-release.sha256
-          test -s .release/SHA256SUMS
-          test -s .release/dsh-stack-plugins-*.tar.gz
-          test -s .release/dsh-stack-packs-*.tar.gz
-          tar -tzf .release/dsh-stack-plugins-*.tar.gz | grep -q '^plugins/'
-          tar -tzf .release/dsh-stack-packs-*.tar.gz | grep -q '^plugins/packs/'
+      - name: Validate every plugin and pack ZIP asset
+        run: node scripts/verify-release-assets.mjs
 
       - name: Create GitHub release and upload all assets
         env:

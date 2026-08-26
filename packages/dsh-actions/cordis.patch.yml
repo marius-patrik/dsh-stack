@@ -1,5 +1,0 @@
-- insert:
-    - id: actions
-      name: 'dsh-actions'
-      config: {}
-

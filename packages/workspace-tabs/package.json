@@ -1,7 +1,6 @@
 {
   "name": "@dsh-stack/workspace-tabs",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -18,5 +17,16 @@
   },
   "devDependencies": {
     "typescript": "^6.0.3"
-  }
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.workspace.tabs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ]
 }

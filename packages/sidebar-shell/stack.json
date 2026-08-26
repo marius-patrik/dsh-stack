@@ -3,8 +3,8 @@
   "name": "@dsh-stack/sidebar-shell",
   "version": "0.1.0",
   "kind": "plugin",
-  "description": "Canonical Stack sidebar shell and DSH-native sidebar composition.",
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "dependencies": ["stack.core.composition"],
+  "description": "@dsh-stack/sidebar-shell",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
   "optionalDependencies": []
 }

@@ -31,7 +31,7 @@
  * (`provider-descriptor.ts`) rather than Andromeda's hardcoded built-in table,
  * so the default resolver returns an OAuth configuration only when the adapter
  * has one registered.
- * @module dsh-credentials/vault/supervisor
+ * @module credentials/vault/supervisor
  */
 
 import { OAuthTokenRefresher, type OAuthTransport } from "./oauth.js";
@@ -262,7 +262,7 @@ export function planReauth(
       materials: [passkey.id],
       humanPresenceRequired: false,
       automatedToday: false,
-      caveat: "the WebAuthn signing ceremony is not implemented in this slice",
+      caveat: "the WebAuthn signing ceremony belongs to a future passkey slice, not this one",
     };
   }
 
@@ -273,7 +273,7 @@ export function planReauth(
       materials: [password.id, totp.id],
       humanPresenceRequired: false,
       automatedToday: false,
-      caveat: "browser-driven login is not implemented in this slice",
+      caveat: "browser-driven login belongs to a future browser-automation slice, not this one",
     };
   }
 
@@ -316,6 +316,7 @@ export function planReauth(
   );
 }
 
+/** human implementation. */
 function human(record: SecretRecord, reason: TerminalReason, requirement: string): ReauthPlan {
   return {
     strategy: "human_presence_required",
@@ -327,6 +328,7 @@ function human(record: SecretRecord, reason: TerminalReason, requirement: string
   };
 }
 
+/** describeHumanReason implementation. */
 function describeHumanReason(reason: TerminalReason): string {
   switch (reason) {
     case "captcha_required":
@@ -344,6 +346,7 @@ function describeHumanReason(reason: TerminalReason): string {
   }
 }
 
+/** reasonCaveat implementation. */
 function reasonCaveat(reason: TerminalReason): string | null {
   return reason === "unknown"
     ? "the provider gave no machine-readable reason; the classification is a fallback"
@@ -447,6 +450,7 @@ export class ReauthSupervisor {
   readonly #emitted = new Map<string, TerminalReason>();
   readonly #events: ReauthRequired[] = [];
 
+  /** Constructs an instance. */
   constructor(options: ReauthSupervisorOptions) {
     this.#vault = options.vault;
     this.#now = options.now ?? (() => Date.now());
@@ -606,6 +610,7 @@ export class ReauthSupervisor {
     this.#emitted.delete(id);
   }
 
+  /** #refreshOAuth implementation. */
   async #refreshOAuth(
     record: OAuthTokenRecord,
     options: { force?: boolean } = {},
@@ -664,12 +669,14 @@ export class ReauthSupervisor {
     return { kind: "refreshed", record: stored ?? record };
   }
 
+  /** #isDue implementation. */
   #isDue(record: SecretRecord): boolean {
     const expiresAt = effectiveExpiryMs(record);
     if (expiresAt === null) return false;
     return this.#now() + this.#refreshSkewMs >= expiresAt;
   }
 
+  /** #healthOf implementation. */
   #healthOf(record: SecretRecord, all: readonly SecretRecord[], nowMs: number): CredentialHealth {
     const descriptor = descriptorOf(record);
     const expiryMs = effectiveExpiryMs(record);
@@ -718,6 +725,7 @@ export class ReauthSupervisor {
     };
   }
 
+  /** #raise implementation. */
   async #raise(record: SecretRecord, reason: TerminalReason): Promise<ReauthRequired> {
     const all: SecretRecord[] = [];
     for (const id of await this.#vault.list()) {
@@ -754,6 +762,7 @@ export class ReauthSupervisor {
     return event;
   }
 
+  /** #recordRecoverable implementation. */
   #recordRecoverable(id: string, reason: string): number {
     const previous = this.#failures.get(id);
     const attempts = (previous?.terminalReason ? 0 : (previous?.attempts ?? 0)) + 1;
@@ -766,6 +775,7 @@ export class ReauthSupervisor {
     return attempts;
   }
 
+  /** #backoff implementation. */
   #backoff(attempt: number): number {
     const core = Math.min(this.#maxBackoffMs, this.#baseBackoffMs * 2 ** Math.max(0, attempt));
     const jitter = core * 0.2 * (this.#random() * 2 - 1);
@@ -773,6 +783,7 @@ export class ReauthSupervisor {
   }
 }
 
+/** oauthRefreshPlan implementation. */
 function oauthRefreshPlan(id: string): ReauthPlan {
   return {
     strategy: "oauth_refresh",
@@ -799,12 +810,14 @@ export function providerDescriptorAuthResolver(): OAuthAuthResolver {
   };
 }
 
+/** isPast implementation. */
 function isPast(value: string | null, nowMs: number): boolean {
   if (!value) return false;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) && nowMs >= parsed;
 }
 
+/** describeError implementation. */
 function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }

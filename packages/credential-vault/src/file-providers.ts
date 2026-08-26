@@ -3,7 +3,7 @@
  * Each importer recognizes its tool's on-disk credential file and reads raw
  * secret values out of it under the canonical reference names the providers
  * resolve.
- * @module dsh-credentials/file-providers
+ * @module credentials/file-providers
  */
 
 import { DatabaseSync } from "node:sqlite";
@@ -12,10 +12,12 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { FileSecretProvider } from "./types.js";
 
+/** home implementation. */
 function home(): string {
   return homedir();
 }
 
+/** readJson implementation. */
 function readJson(path: string): Promise<unknown> {
   return fs.readFile(path, "utf8").then((text) => JSON.parse(text));
 }
@@ -32,6 +34,7 @@ export const claudeFileProvider: FileSecretProvider = {
     "Imports the primary API key and subscription OAuth token from Claude Code's credential file.",
   defaultPaths: [join(home(), ".claude", ".credentials.json")],
 
+  /** detect implementation. */
   async detect(path: string): Promise<boolean> {
     try {
       const parsed = await readJson(path);
@@ -41,10 +44,11 @@ export const claudeFileProvider: FileSecretProvider = {
     }
   },
 
+  /** read implementation. */
   async read(path: string): Promise<Record<string, string>> {
     const parsed = await readJson(path);
     if (typeof parsed !== "object" || parsed === null) {
-      throw new Error(`dsh-credentials: ${path} is not a JSON object`);
+      throw new Error(`credentials: ${path} is not a JSON object`);
     }
     const object = parsed as Record<string, unknown>;
     const out: Record<string, string> = {};
@@ -87,6 +91,7 @@ export const cursorFileProvider: FileSecretProvider = {
     ),
   ],
 
+  /** detect implementation. */
   async detect(path: string): Promise<boolean> {
     try {
       const db = new DatabaseSync(path, { readOnly: true });
@@ -103,6 +108,7 @@ export const cursorFileProvider: FileSecretProvider = {
     }
   },
 
+  /** read implementation. */
   async read(path: string): Promise<Record<string, string>> {
     const db = new DatabaseSync(path, { readOnly: true });
     try {
@@ -138,6 +144,7 @@ export const githubFileProvider: FileSecretProvider = {
   description: "Imports the GitHub CLI OAuth token from its hosts.yml credential file.",
   defaultPaths: [join(home(), ".config", "gh", "hosts.yml")],
 
+  /** detect implementation. */
   async detect(path: string): Promise<boolean> {
     try {
       const raw = await fs.readFile(path, "utf8");
@@ -147,6 +154,7 @@ export const githubFileProvider: FileSecretProvider = {
     }
   },
 
+  /** read implementation. */
   async read(path: string): Promise<Record<string, string>> {
     const raw = await fs.readFile(path, "utf8");
     const out: Record<string, string> = {};
@@ -181,11 +189,12 @@ export function parseGitHubHosts(raw: string): GitHubHostEntry[] {
   let host: string | null = null;
   let user: string | null = null;
   let token: string | null = null;
-  const flush = () => {
-    if (host && token) entries.push({ host, user, token });
-    user = null;
-    token = null;
-  };
+  const /** flush implementation. */
+    flush = () => {
+      if (host && token) entries.push({ host, user, token });
+      user = null;
+      token = null;
+    };
   for (const line of raw.split(/\r?\n/)) {
     if (!line.trim() || line.trim().startsWith("#")) continue;
     const top = /^([^\s#][^:]*):\s*$/.exec(line);

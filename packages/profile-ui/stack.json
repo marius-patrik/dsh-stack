@@ -3,8 +3,8 @@
   "name": "@dsh-stack/profile-ui",
   "version": "0.1.0",
   "kind": "plugin",
-  "description": "Profile selector and Profiles settings surface.",
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "dependencies": ["stack.core.composition", "stack.ui.sidebar-shell"],
+  "description": "@dsh-stack/profile-ui",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
   "optionalDependencies": []
 }

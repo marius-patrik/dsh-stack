@@ -1,15 +1,17 @@
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { SidebarRootInjected } from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import type {} from "@deepseek-ai/dsh-client-locale/client";
+import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import { SidebarRoot } from "./SidebarRoot.js";
 
 export const inject = ["slots", "layout", "workspaces", "locale"];
 
+/** Register the stack sidebar shell into the layout sidebar slot. */
 export function apply(ctx: ClientContext): void {
-  const injectProps = (): SidebarRootInjected => ({
-    startSession: (workspaceId) => ctx.workspaces.startSession(workspaceId),
-    toggleSidebar: () => ctx.layout.toggleSidebar(),
-  });
+  const /** injectProps implementation. */
+    injectProps = (): SidebarRootInjected => ({
+      startSession: (workspaceId) => ctx.workspaces.startSession(workspaceId),
+      toggleSidebar: () => ctx.layout.toggleSidebar(),
+    });
 
   ctx.effect(
     () =>

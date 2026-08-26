@@ -14,6 +14,8 @@ harness/*/dist/
 # stack package build output
 plugins/*/lib/
 packages/*/lib/
+extensions/*/lib/
+packs/*/lib/
 
 # state (never commit) — .agents/ in repo is docs + hooks (tracked);
 # ~/.agents is the harness home (state folder, never committed)
@@ -36,3 +38,6 @@ accounts.vault
 
 # editor
 .DS_Store
+
+# release build output
+/.release/

@@ -1,0 +1,10 @@
+{
+  "id": "stack.agent.translator",
+  "name": "@dsh-stack/translator",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "dsh plugin: translate between provider session/skill/hook formats and dsh native format",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

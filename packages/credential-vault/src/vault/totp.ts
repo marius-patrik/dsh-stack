@@ -18,7 +18,7 @@
  * `hotpCode` is RFC 4226 §5.3 verbatim, the counter is a BigInt because
  * RFC 6238's own test vectors run past 2^32 seconds, and code comparison is
  * constant-time so verification does not leak a prefix.
- * @module dsh-credentials/vault/totp
+ * @module credentials/vault/totp
  */
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -302,14 +302,17 @@ export function encodeBase32(bytes: Uint8Array): string {
   return output;
 }
 
+/** normalizeBase32 implementation. */
 function normalizeBase32(value: string): string {
   return value.replace(/[\s-]/g, "").replace(/=+$/, "").toUpperCase();
 }
 
+/** isTotpAlgorithm implementation. */
 function isTotpAlgorithm(value: string): value is TotpAlgorithm {
   return (TOTP_ALGORITHMS as readonly string[]).includes(value);
 }
 
+/** numericParameter implementation. */
 function numericParameter(raw: string | null, fallback: number, field: string): number {
   if (raw === null || raw.trim() === "") return fallback;
   const parsed = Number(raw);
@@ -317,6 +320,7 @@ function numericParameter(raw: string | null, fallback: number, field: string): 
   return parsed;
 }
 
+/** constantTimeEquals implementation. */
 function constantTimeEquals(left: string, right: string): boolean {
   const a = Buffer.from(left, "utf8");
   const b = Buffer.from(right, "utf8");
@@ -337,6 +341,7 @@ export interface TotpParametersPayload {
   account: string | null;
 }
 
+/** encodeTotpParameters implementation. */
 export function encodeTotpParameters(parameters: TotpParameters): TotpParametersPayload {
   return {
     secret: parameters.secret.reveal(),
@@ -348,6 +353,7 @@ export function encodeTotpParameters(parameters: TotpParameters): TotpParameters
   };
 }
 
+/** decodeTotpParameters implementation. */
 export function decodeTotpParameters(value: unknown, id: string): TotpParameters {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`stored secret ${id} has malformed totp parameters`);

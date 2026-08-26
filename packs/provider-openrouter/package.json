@@ -1,0 +1,28 @@
+{
+  "name": "@dsh-stack/pack-provider-openrouter",
+  "version": "0.1.0",
+  "description": "OpenRouter provider route.",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "package.json",
+    "stack.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "pack",
+    "id": "stack.pack.provider.openrouter"
+  },
+  "scripts": {
+    "build": "node ../../scripts/pack.mjs build",
+    "typecheck": "node ../../scripts/pack.mjs typecheck",
+    "test": "node ../../scripts/pack.mjs test",
+    "verify": "node ../../scripts/pack.mjs verify"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}

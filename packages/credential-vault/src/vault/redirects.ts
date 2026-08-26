@@ -58,7 +58,7 @@
  * agent to hand anything to.
  *
  * Ported verbatim from Andromeda `src/utils/redirects.ts`.
- * @module dsh-credentials/vault/redirects
+ * @module credentials/vault/redirects
  */
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
@@ -74,6 +74,7 @@ export class CrossOriginRedirectError extends Error {
   readonly requestOrigin: string;
   readonly redirectOrigin: string;
 
+  /** Constructs an instance. */
   constructor(requestOrigin: string, redirectOrigin: string, status: number) {
     super(
       `refusing to follow a ${status} redirect from ${requestOrigin} to ${redirectOrigin}: ` +
@@ -161,6 +162,7 @@ function nextRequest(request: RequestInit, status: number): RequestInit {
   return request;
 }
 
+/** isReplayableBody implementation. */
 function isReplayableBody(body: unknown): boolean {
   return (
     typeof body === "string" ||

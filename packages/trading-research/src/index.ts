@@ -31,6 +31,7 @@ export interface RegimeSnapshot {
   };
 }
 
+/** sma implementation. */
 export function sma(values: readonly number[], period: number): number | null {
   if (period <= 0 || values.length < period) return null;
   let sum = 0;
@@ -38,10 +39,12 @@ export function sma(values: readonly number[], period: number): number | null {
   return sum / period;
 }
 
+/** ema implementation. */
 export function ema(values: readonly number[], period: number): number | null {
   return emaSeries(values, period).at(-1) ?? null;
 }
 
+/** emaSeries implementation. */
 export function emaSeries(values: readonly number[], period: number): number[] {
   if (period <= 0 || values.length < period) return [];
   const alpha = 2 / (period + 1);
@@ -54,6 +57,7 @@ export function emaSeries(values: readonly number[], period: number): number[] {
   return result;
 }
 
+/** rsi implementation. */
 export function rsi(closes: readonly number[], period = 14): number | null {
   if (period <= 0 || closes.length <= period) return null;
   let gain = 0;
@@ -74,6 +78,7 @@ export function rsi(closes: readonly number[], period = 14): number | null {
   return 100 - 100 / (1 + avgGain / avgLoss);
 }
 
+/** atr implementation. */
 export function atr(candles: readonly Candle[], period = 14): number | null {
   if (period <= 0 || candles.length < period) return null;
   const ranges = trueRanges(candles);
@@ -82,6 +87,7 @@ export function atr(candles: readonly Candle[], period = 14): number | null {
   return value;
 }
 
+/** adx implementation. */
 export function adx(
   candles: readonly Candle[],
   period = 14,
@@ -123,6 +129,7 @@ export function adx(
   return { adx: adxValue, diPlus: lastPlus, diMinus: lastMinus };
 }
 
+/** mfi implementation. */
 export function mfi(candles: readonly Candle[], period = 14): number | null {
   if (period <= 0 || candles.length <= period) return null;
   const typical = candles.map((candle) => (candle.high + candle.low + candle.close) / 3);
@@ -137,6 +144,7 @@ export function mfi(candles: readonly Candle[], period = 14): number | null {
   return 100 - 100 / (1 + positive / negative);
 }
 
+/** bollinger implementation. */
 export function bollinger(
   closes: readonly number[],
   period = 20,
@@ -154,6 +162,7 @@ export function bollinger(
   };
 }
 
+/** snapshot implementation. */
 export function snapshot(candles: readonly Candle[]): RegimeSnapshot {
   const closes = candles.map((candle) => candle.close);
   const ema12 = emaSeries(closes, 12);
@@ -195,6 +204,7 @@ export function snapshot(candles: readonly Candle[]): RegimeSnapshot {
   };
 }
 
+/** trueRanges implementation. */
 function trueRanges(candles: readonly Candle[]): number[] {
   return candles.map((candle, index) => {
     const previous = candles[index - 1];

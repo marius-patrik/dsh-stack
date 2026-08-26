@@ -3,8 +3,8 @@
   "name": "@dsh-stack/sidebar-settings",
   "version": "0.1.0",
   "kind": "plugin",
-  "description": "Sidebar preferences including New Conversation and brand-logo visibility.",
-  "files": ["lib", "package.json", "README.md", "LICENSE"],
-  "dependencies": ["stack.ui.sidebar-shell"],
+  "description": "@dsh-stack/sidebar-settings",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
   "optionalDependencies": []
 }

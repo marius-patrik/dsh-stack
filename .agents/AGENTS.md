@@ -6,13 +6,25 @@
 
 ## Canonical structure
 
-- `packages/` is the canonical flat implementation layer. Every concrete implementation exists exactly once here.
+- `packages/` is the canonical flat implementation layer. Every concrete implementation exists exactly once here. Packages may import from other packages; there is no restriction against packages depending on one another.
 - `plugins/` is the full composition/catalog tree. It imports canonical implementations from `packages/` and does not duplicate implementation source.
-- `plugins/packs/` contains pack aliases/compositions only and is not a pnpm workspace.
+- `packs/` is a root-level folder, sibling to `packages/`/`plugins/`/`extensions/`, holding pack aliases/compositions only; it is not a pnpm workspace.
+- `extensions/` is a root-level folder, sibling to `packages/`/`plugins/`/`packs/`, holding extension implementations (see the plugin/extension/pack model below).
 - `notes/` is the canonical documentation root.
 - `AGENTS.md` and `CLAUDE.md` at repository root are symlinks to `.agents/AGENTS.md`.
 - `harness/` is upstream and must not be modified.
 - No duplicate implementation tree, compatibility bridge, migration shim, legacy runtime path, or parallel feature owner is allowed.
+- A plugin, extension, or pack does not have to correspond 1:1 with a canonical package; the composition tree and the implementation layer are independent axes.
+
+## Plugin, extension, and pack model
+
+The composition tree recomposes around three distinct roles, not one:
+
+- **Plugin** = a pure abstraction/extension-point layer. It defines the contract, registry, or mount point that concrete implementations plug into. A plugin does not itself bundle multiple unrelated concrete feature implementations.
+- **Extension** = one individual concrete implementation of a specific feature, plugged into a plugin's abstraction layer. Every actual individual implementation is its own extension — e.g. each skin (Claude, Codex, DeepSeek) is an extension of the skin abstraction; each icon set is an extension of the icon abstraction; each agent preset is an extension of the agent-preset abstraction; each per-tool terminal harness or per-language LSP server is its own extension, not bundled inside one umbrella plugin.
+- **Pack** = one per domain: a distribution/composition bundle over a domain's plugins and extensions.
+
+Target end state: one plugin per abstraction, one extension per feature, one pack per domain. When a plugin's canonical package registers several distinct, independently-meaningful capabilities in one `apply()` (multiple unrelated settings sections, multiple unrelated command families, multiple unrelated bundled features), that is a bundling smell — the individual features should split out into separate extensions, leaving the plugin as the abstraction/registry they plug into.
 
 ## Plugin and pack contract
 
@@ -47,6 +59,13 @@ CI automation is intended to run on a real DSH node managed through `dsh-hosts`,
 - Pull requests must have green Canonical Stack workspace, Format repository, and Merge enforcement checks.
 - Pull requests must contain the current `main` tip before merge.
 - Merged same-repository branches are automatically cleaned up.
+- Before a pull request merges, everything it touched must be scoped in attached issue(s): deferred work, follow-ups, or scope discovered mid-PR that isn't fully resolved in the PR gets its own linked GitHub issue, not an implicit or undocumented gap.
+- A pull request's description must precisely describe everything the PR actually did — an accurate, complete account of the changes, not a vague or partial summary.
+
+## File and naming granularity
+
+- Avoid monolith files: a source file should generally implement one function (one cohesive unit of behavior), not a grab-bag of unrelated helpers.
+- Avoid generic file/module names like `utils`, `helpers`, or `misc`. A name must capture the specific nuance of what the file does, not a catch-all category.
 
 ## Release model
 

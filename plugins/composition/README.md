@@ -1,9 +1,5 @@
-# Stack composition
+# Plugin composition wrapper
 
-This directory is the rewrite boundary for DSH Stack composition.
+This plugin-tree entry is a composition wrapper. Its implementation lives in the canonical flat `packages/` implementation layer and is imported from there.
 
-Runtime plugin dependency semantics remain DSH/Cordis-owned. Stack adds feature-plugin packages, reusable packs/bundles, and product profiles.
-
-- plugin: one independently usable feature
-- pack/bundle: a composition of feature plugins
-- profile: a product composition of packs/plugins and policy
+Do not add implementation source here. Changes to behavior belong in the corresponding package under `packages/`.

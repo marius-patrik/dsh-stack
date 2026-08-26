@@ -8,7 +8,7 @@
  * independently nonce'd; writes rewrite the whole document atomically at
  * 0600, and a corrupt or unreadable document reads as empty rather than
  * crashing the service.
- * @module dsh-credentials/vault
+ * @module credentials/vault
  */
 
 import { randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
@@ -37,10 +37,12 @@ interface StoredVault {
   entries: Record<string, StoredEntry>;
 }
 
+/** emptyVault implementation. */
 function emptyVault(): StoredVault {
   return { version: VAULT_VERSION, entries: {} };
 }
 
+/** readKeyChain implementation. */
 async function readKeyChain(): Promise<Buffer | undefined> {
   try {
     const { stdout } = await execFileAsync("security", [
@@ -58,6 +60,7 @@ async function readKeyChain(): Promise<Buffer | undefined> {
   }
 }
 
+/** writeKeyChain implementation. */
 async function writeKeyChain(key: Buffer): Promise<void> {
   await execFileAsync("security", [
     "add-generic-password",
@@ -70,6 +73,7 @@ async function writeKeyChain(key: Buffer): Promise<void> {
   ]);
 }
 
+/** readKeyFile implementation. */
 async function readKeyFile(keyFile: string): Promise<Buffer | undefined> {
   try {
     const hex = (await fs.readFile(keyFile, "utf8")).trim();
@@ -100,6 +104,7 @@ export async function loadOrCreateKey(keyFile: string): Promise<Buffer> {
   return key;
 }
 
+/** encrypt implementation. */
 function encrypt(key: Buffer, value: string): StoredEntry {
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
@@ -111,10 +116,11 @@ function encrypt(key: Buffer, value: string): StoredEntry {
   return { v: iv.toString("base64"), c: ciphertext.toString("base64") };
 }
 
+/** decrypt implementation. */
 function decrypt(key: Buffer, entry: StoredEntry): string {
   const iv = Buffer.from(entry.v, "base64");
   const payload = Buffer.from(entry.c, "base64");
-  if (payload.byteLength < TAG_BYTES) throw new Error("dsh-credentials: vault entry is truncated");
+  if (payload.byteLength < TAG_BYTES) throw new Error("credentials: vault entry is truncated");
   const tag = payload.subarray(payload.byteLength - TAG_BYTES);
   const ciphertext = payload.subarray(0, payload.byteLength - TAG_BYTES);
   const decipher = createDecipheriv("aes-256-gcm", key, iv);
@@ -128,11 +134,13 @@ function decrypt(key: Buffer, entry: StoredEntry): string {
  * is written by one process at a time in practice).
  */
 export class Vault {
+  /** Constructs an instance. */
   constructor(
     readonly filePath: string,
     readonly keyFile: string,
   ) {}
 
+  /** load implementation. */
   private async load(): Promise<StoredVault> {
     try {
       const parsed: unknown = JSON.parse(await fs.readFile(this.filePath, "utf8"));
@@ -150,6 +158,7 @@ export class Vault {
     return emptyVault();
   }
 
+  /** save implementation. */
   private async save(stored: StoredVault): Promise<void> {
     const serialized = JSON.stringify(stored);
     await fs.mkdir(dirname(this.filePath), { recursive: true });
@@ -158,6 +167,7 @@ export class Vault {
     await fs.rename(temp, this.filePath);
   }
 
+  /** get implementation. */
   async get(ref: string): Promise<string | undefined> {
     const entry = (await this.load()).entries[ref];
     if (entry === undefined) return undefined;
@@ -171,15 +181,17 @@ export class Vault {
     }
   }
 
+  /** set implementation. */
   async set(ref: string, value: string): Promise<void> {
     if (value.length === 0)
-      throw new Error(`dsh-credentials: refusing to store an empty value for ${ref}`);
+      throw new Error(`credentials: refusing to store an empty value for ${ref}`);
     const key = await loadOrCreateKey(this.keyFile);
     const stored = await this.load();
     stored.entries[ref] = encrypt(key, value);
     await this.save(stored);
   }
 
+  /** unset implementation. */
   async unset(ref: string): Promise<void> {
     const stored = await this.load();
     if (!(ref in stored.entries)) return;
@@ -187,6 +199,7 @@ export class Vault {
     await this.save(stored);
   }
 
+  /** list implementation. */
   async list(): Promise<string[]> {
     return Object.keys((await this.load()).entries).sort();
   }

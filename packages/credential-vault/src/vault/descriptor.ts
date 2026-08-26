@@ -27,7 +27,7 @@
  * endpoint any on-path attacker can answer, and answering it with a 307 is how
  * a refresh token gets replayed somewhere else. The redirect wrapper refuses to
  * *follow* such a redirect; this refuses to be in a position to receive one.
- * @module dsh-credentials/vault/descriptor
+ * @module credentials/vault/descriptor
  */
 
 /** `127.0.0.0/8`, `::1` and `localhost` — RFC 8252's native-app exception. */

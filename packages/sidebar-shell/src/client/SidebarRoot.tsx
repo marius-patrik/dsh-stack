@@ -11,6 +11,7 @@ import { sidebarPreferences } from "@dsh-stack/sidebar-preferences";
 const railWidth = 56;
 const transition = "width 180ms ease, opacity 150ms ease";
 
+/** SidebarRoot implementation. */
 export function SidebarRoot({
   collapsed,
   width,

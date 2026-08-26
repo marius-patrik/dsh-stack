@@ -17,6 +17,7 @@ export interface ProfileRuntime {
 
 const DEFAULT_KEY = "dsh-stack.profile";
 
+/** createProfileRuntime implementation. */
 export function createProfileRuntime(
   options: readonly ProfileOption[],
   runtimeOptions: ProfileRuntimeOptions = {},

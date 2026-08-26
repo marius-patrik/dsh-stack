@@ -1,7 +1,6 @@
 {
   "name": "@dsh-stack/profile-ui",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
@@ -29,8 +28,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "verify": "node verify.mjs"
+    "typecheck": "tsc -p tsconfig.typecheck.json --noEmit"
   },
   "dependencies": {
     "@dsh-stack/lucide-animated": "workspace:*",
@@ -57,5 +55,12 @@
     "@types/react": "~18.3.1",
     "react": "^18.3.1",
     "typescript": "^6.0.3"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.ui.profile"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

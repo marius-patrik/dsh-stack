@@ -1,0 +1,10 @@
+{
+  "id": "stack.dev.formatters",
+  "name": "@dsh-stack/formatters",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Per-extension formatter commands + format tool + auto-format-on-edit for the dsh web UI",
+  "files": ["lib", "bin", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

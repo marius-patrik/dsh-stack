@@ -19,6 +19,7 @@ export interface SkinRuntime {
   subscribe(listener: () => void): () => void;
 }
 
+/** createSkinRuntime implementation. */
 export function createSkinRuntime(
   options: readonly SkinOption[] = defaultSkins,
   reload: () => void = () => undefined,
@@ -49,6 +50,7 @@ export function createSkinRuntime(
   };
 }
 
+/** readStoredSkin implementation. */
 function readStoredSkin(allowed: ReadonlySet<SkinId>): SkinId | undefined {
   try {
     const value = localStorage.getItem(STORAGE_KEY) as SkinId | null;
