@@ -25,6 +25,11 @@ publish/packs/*/lib/
 # committed.
 .agents/RESUME.md
 .agents/scheduled_tasks.lock
+
+# dsh-tweaks.homeRoot can rehome the harness home root to <repo>/.data
+# instead of ~/.agents; its contents are pure runtime state, never
+# committed, same treatment as ~/.agents itself.
+.data/
 .dsh/
 .credentials.yaml
 accounts.vault
