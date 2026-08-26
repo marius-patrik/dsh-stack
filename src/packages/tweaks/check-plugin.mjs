@@ -237,7 +237,10 @@ const /** assertRegistered implementation. */
 // throw `slot "sidebar.workspaces" is already declared` and the web UI failed
 // to boot. tweaks still owns the settings shell, which seats into the
 // `sidebar.settings` slot that sidebar-shell declares.
-assert.ok(!records.has("sidebar"), "tweaks must not re-declare the sidebar root (sidebar-shell owns it)");
+assert.ok(
+  !records.has("sidebar"),
+  "tweaks must not re-declare the sidebar root (sidebar-shell owns it)",
+);
 assert.ok(
   !records.has("sidebar.newSession"),
   "tweaks must not register sidebar.newSession (it belonged to the removed sidebar root)",
