@@ -43,7 +43,7 @@ export interface WireRequestBody {
   max_tokens: number;
   tools?: WireTool[];
   temperature?: number;
-// jscpd:ignore-start -- structurally similar to gemini.ts/openai.ts's request-shaping block but encodes Claude-specific wire semantics; forcing a shared helper would blur real per-dialect differences
+  // jscpd:ignore-start -- structurally similar to gemini.ts/openai.ts's request-shaping block but encodes Claude-specific wire semantics; forcing a shared helper would blur real per-dialect differences
   stop_sequences?: string[];
 }
 
@@ -59,7 +59,7 @@ function flattenText(blocks: readonly ContentBlock[]): string {
 function assertTextOnly(blocks: readonly ContentBlock[]): void {
   if (contentHasImage(blocks)) {
     throw new LlmError("The claude dialect does not support image content.", "UNSUPPORTED_CONTENT");
-// jscpd:ignore-end
+    // jscpd:ignore-end
   }
 }
 

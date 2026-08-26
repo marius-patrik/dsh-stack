@@ -136,7 +136,7 @@ export class EncryptedFileVault implements VaultStore {
       throw new Error(`vault record ${id} carries a mismatched envelope id: ${envelope.id}`);
     const key = await this.#dataKey();
     const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(envelope.iv, "base64"));
-// jscpd:ignore-start -- mirrors vault/secret.ts's small field-normalizing block for a different data shape
+    // jscpd:ignore-start -- mirrors vault/secret.ts's small field-normalizing block for a different data shape
     decipher.setAAD(aad(envelope.id, envelope.type));
     decipher.setAuthTag(Buffer.from(envelope.authTag, "base64"));
     let plaintext: string;
@@ -144,7 +144,7 @@ export class EncryptedFileVault implements VaultStore {
       plaintext = decipher.update(envelope.ciphertext, "base64", "utf8") + decipher.final("utf8");
     } catch {
       throw new Error(
-// jscpd:ignore-end
+        // jscpd:ignore-end
         `vault record cannot be decrypted, it may be corrupt or written under a different key: ${id}`,
       );
     }
@@ -172,7 +172,7 @@ export class EncryptedFileVault implements VaultStore {
       schemaVersion: ENVELOPE_SCHEMA_VERSION,
       algorithm: ALGORITHM,
       id: record.id,
-// jscpd:ignore-start -- mirrors vault/secret.ts's small field-normalizing block for a different data shape
+      // jscpd:ignore-start -- mirrors vault/secret.ts's small field-normalizing block for a different data shape
       type: record.type,
       iv: iv.toString("base64"),
       ciphertext: ciphertext.toString("base64"),
@@ -193,12 +193,14 @@ export class EncryptedFileVault implements VaultStore {
   async list(): Promise<string[]> {
     if (!(await exists(this.#directory))) return [];
     const entries = await readdir(this.#directory, { withFileTypes: true });
-    return entries
-      .filter((entry) => entry.isFile() && entry.name.endsWith(RECORD_SUFFIX))
-// jscpd:ignore-end
-      .map((entry) => entry.name.slice(0, -RECORD_SUFFIX.length))
-      .filter((id) => RECORD_ID.test(id))
-      .sort();
+    return (
+      entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith(RECORD_SUFFIX))
+        // jscpd:ignore-end
+        .map((entry) => entry.name.slice(0, -RECORD_SUFFIX.length))
+        .filter((id) => RECORD_ID.test(id))
+        .sort()
+    );
   }
 
   /** describe implementation. */

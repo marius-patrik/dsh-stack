@@ -355,7 +355,7 @@ export class PrivilegedVaultCustodian {
     action: AuditAction,
     record: SecretRecord | null,
     id: string | null,
-// jscpd:ignore-start -- mirrors a matching block in vault/tools/toolset.ts's tool-outcome handling for a different call site
+    // jscpd:ignore-start -- mirrors a matching block in vault/tools/toolset.ts's tool-outcome handling for a different call site
     outcome: string,
   ): Promise<void> {
     if (!this.#audit) return;
@@ -363,7 +363,7 @@ export class PrivilegedVaultCustodian {
       at: new Date(this.#now()).toISOString(),
       actor: { ...this.#identity },
       action,
-// jscpd:ignore-end
+      // jscpd:ignore-end
       recordId: id,
       purpose: record ? record.purpose : null,
       auditRef: record ? record.auditRef : null,

@@ -59,7 +59,7 @@ export function apply(ctx: Context, config: FormatterConfigType): void {
     ctx,
     NS,
     FormatterSettings,
-// jscpd:ignore-start -- small settings-wiring block mirrored in repos/src/index.ts and tools/src/index.ts for different domains
+    // jscpd:ignore-start -- small settings-wiring block mirrored in repos/src/index.ts and tools/src/index.ts for different domains
     { formatters: {}, autoFormatOnEdit: true },
     {
       setSource: () => {
@@ -72,7 +72,7 @@ export function apply(ctx: Context, config: FormatterConfigType): void {
   ctx.inject(["settings"], (sctx) => {
     const /** settings implementation. */
       settings = () => sctx.settings.get(NS) as FormatterSettingsType | undefined;
-// jscpd:ignore-end
+    // jscpd:ignore-end
 
     ctx.tools.register(
       defineTool({

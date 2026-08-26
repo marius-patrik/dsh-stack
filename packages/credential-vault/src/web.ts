@@ -194,7 +194,7 @@ export function makeVaultHandler(
         return;
       }
 
-// jscpd:ignore-start -- internal near-duplicate route-handler blocks for distinct endpoints; also mirrors plugin-kit/src/json-response.ts's inline shape before that helper existed here
+      // jscpd:ignore-start -- internal near-duplicate route-handler blocks for distinct endpoints; also mirrors plugin-kit/src/json-response.ts's inline shape before that helper existed here
       if (pathname === `${VAULT_PREFIX}/api/login/device/start` && req.method === "POST") {
         const body = await readBody(req);
         let parsed: { providerId?: string };
@@ -206,7 +206,7 @@ export function makeVaultHandler(
         }
         const provider = PROVIDER_LOGINS.find(
           (p) => p.id === parsed.providerId && p.kind === "device",
-// jscpd:ignore-end
+          // jscpd:ignore-end
         ) as DeviceFlowProvider | undefined;
         if (!provider) {
           sendJson(res, 404, {
@@ -307,7 +307,7 @@ export function makeVaultHandler(
 
       // ---- CLI login flow endpoints ----
 
-// jscpd:ignore-start -- internal near-duplicate route-handler blocks for distinct endpoints; also mirrors plugin-kit/src/json-response.ts's inline shape before that helper existed here
+      // jscpd:ignore-start -- internal near-duplicate route-handler blocks for distinct endpoints; also mirrors plugin-kit/src/json-response.ts's inline shape before that helper existed here
       if (pathname === `${VAULT_PREFIX}/api/login/cli/start` && req.method === "POST") {
         const body = await readBody(req);
         let parsed: { providerId?: string };
@@ -319,7 +319,7 @@ export function makeVaultHandler(
         }
         const provider = PROVIDER_LOGINS.find(
           (p) => p.id === parsed.providerId && p.kind === "cli",
-// jscpd:ignore-end
+          // jscpd:ignore-end
         ) as CliLoginProvider | undefined;
         if (!provider) {
           sendJson(res, 404, {

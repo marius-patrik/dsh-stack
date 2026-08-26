@@ -133,7 +133,7 @@ export function formatTable(rows: SessionStatsRow[]): string {
     "OUT TOKENS",
   ];
   const body = rows.map((row) => [
-// jscpd:ignore-start -- formatTable/formatCsv intentionally build different field lists (table omits cwd/createdAt and truncates the session id; CSV includes them in full and CSV-escapes) -- not shared, see issue #40 discussion
+    // jscpd:ignore-start -- formatTable/formatCsv intentionally build different field lists (table omits cwd/createdAt and truncates the session id; CSV includes them in full and CSV-escapes) -- not shared, see issue #40 discussion
     row.sessionId.slice(0, 8),
     String(row.turns),
     String(row.steps),
@@ -143,7 +143,7 @@ export function formatTable(rows: SessionStatsRow[]): string {
     String(row.decodeMs),
     String(row.decodeTokens),
   ]);
-// jscpd:ignore-end
+  // jscpd:ignore-end
   const widths = header.map((h, i) => Math.max(h.length, ...body.map((r) => (r[i] ?? "").length)));
   const /** line implementation. */
     line = (cells: string[]): string => cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
@@ -157,7 +157,7 @@ export function formatCsv(rows: SessionStatsRow[]): string {
     [
       row.sessionId,
       row.cwd ?? "",
-// jscpd:ignore-start -- formatTable/formatCsv intentionally build different field lists (table omits cwd/createdAt and truncates the session id; CSV includes them in full and CSV-escapes) -- not shared, see issue #40 discussion
+      // jscpd:ignore-start -- formatTable/formatCsv intentionally build different field lists (table omits cwd/createdAt and truncates the session id; CSV includes them in full and CSV-escapes) -- not shared, see issue #40 discussion
       String(row.createdAt ?? ""),
       String(row.turns),
       String(row.steps),
@@ -167,7 +167,7 @@ export function formatCsv(rows: SessionStatsRow[]): string {
       String(row.decodeMs),
       String(row.decodeTokens),
     ]
-// jscpd:ignore-end
+      // jscpd:ignore-end
       .map(csv)
       .join(","),
   );

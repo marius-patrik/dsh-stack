@@ -41,8 +41,8 @@ export interface WireRequestBody {
     temperature?: number;
     maxOutputTokens?: number;
     stopSequences?: string[];
-// jscpd:ignore-start -- structurally similar to claude.ts's request-shaping block but encodes Gemini-specific wire semantics; forcing a shared helper would blur real per-dialect differences
-// jscpd:ignore-end
+    // jscpd:ignore-start -- structurally similar to claude.ts's request-shaping block but encodes Gemini-specific wire semantics; forcing a shared helper would blur real per-dialect differences
+    // jscpd:ignore-end
   };
 }
 
@@ -58,7 +58,7 @@ function flattenText(blocks: readonly ContentBlock[]): string {
 function assertTextOnly(blocks: readonly ContentBlock[]): void {
   if (contentHasImage(blocks)) {
     throw new LlmError("The gemini dialect does not support image content.", "UNSUPPORTED_CONTENT");
-// jscpd:ignore-end
+    // jscpd:ignore-end
   }
 }
 
@@ -162,7 +162,7 @@ export const geminiDialect: Dialect = {
     if (auth.cookies === undefined && auth.apiKey === undefined) {
       throw new LlmError("no cookies or API key supplied for a gemini dialect request", "AUTH");
     }
-// jscpd:ignore-start -- structurally similar to claude.ts's request-shaping block but encodes Gemini-specific wire semantics; forcing a shared helper would blur real per-dialect differences
+    // jscpd:ignore-start -- structurally similar to claude.ts's request-shaping block but encodes Gemini-specific wire semantics; forcing a shared helper would blur real per-dialect differences
     const body: WireRequestBody = {
       contents: serializeContents(options.messages),
       ...(options.system !== undefined
@@ -186,7 +186,7 @@ export const geminiDialect: Dialect = {
         ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
         ...(options.stop !== undefined ? { stopSequences: options.stop } : {}),
       },
-// jscpd:ignore-end
+      // jscpd:ignore-end
     };
 
     const cookieHeader =

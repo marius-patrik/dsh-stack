@@ -200,7 +200,7 @@ export function parseAction(filePath: string, content: string): ActionSpec {
   }
 
   const trimmed = policy.trim();
-// jscpd:ignore-start -- action/persona id-sanitizing logic mirrors agents/src/persona.ts's sanitizeId for a different authoring domain; kept independent so the two domains can diverge
+  // jscpd:ignore-start -- action/persona id-sanitizing logic mirrors agents/src/persona.ts's sanitizeId for a different authoring domain; kept independent so the two domains can diverge
   if (trimmed === "") throw new Error(`${filePath}: action policy must not be empty`);
 
   return {
@@ -208,7 +208,7 @@ export function parseAction(filePath: string, content: string): ActionSpec {
     ...(fields.name !== undefined ? { name: fields.name } : {}),
     ...(fields.description !== undefined ? { description: fields.description } : {}),
     ...(fields.tools !== undefined ? { tools: fields.tools } : {}),
-// jscpd:ignore-end
+    // jscpd:ignore-end
     ...(fields.route !== undefined ? { route: fields.route } : {}),
     policy: trimmed,
     source: filePath,

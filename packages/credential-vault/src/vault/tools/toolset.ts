@@ -445,7 +445,7 @@ export class VaultToolset {
    */
   async runAuthenticatedProcess(
     purpose: string,
-// jscpd:ignore-start -- internal/cross-file near-duplicate tool-outcome and host-check blocks kept independent per call site
+    // jscpd:ignore-start -- internal/cross-file near-duplicate tool-outcome and host-check blocks kept independent per call site
     request: AuthenticatedProcessRequest,
   ): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
     const gate = await this.#beginProcessOperation(purpose);
@@ -455,7 +455,7 @@ export class VaultToolset {
       "api_key",
       "oauth_token",
       "password",
-// jscpd:ignore-end
+      // jscpd:ignore-end
       "generic_note",
     ]);
     if (!found.ok) return this.#denyFound("authenticated_process", purpose, null, found);
@@ -718,7 +718,7 @@ export class VaultToolset {
   async #git(
     purpose: string,
     subcommand: "push" | "fetch",
-// jscpd:ignore-start -- internal/cross-file near-duplicate tool-outcome and host-check blocks kept independent per call site
+    // jscpd:ignore-start -- internal/cross-file near-duplicate tool-outcome and host-check blocks kept independent per call site
     request: GitRequest,
   ): Promise<MaterialFree<VaultToolResult<AuthenticatedProcessOk>>> {
     const gate = await this.#beginProcessOperation(purpose);
@@ -728,7 +728,7 @@ export class VaultToolset {
       "api_key",
       "oauth_token",
       "password",
-// jscpd:ignore-end
+      // jscpd:ignore-end
     ]);
     if (!found.ok) return this.#denyFound("authenticated_process", purpose, null, found);
     const record = found.record;
@@ -1112,7 +1112,7 @@ export class VaultToolset {
     record: SecretRecord | null,
     targetHost: string | null,
     outcome: string,
-// jscpd:ignore-start -- internal/cross-file near-duplicate tool-outcome and host-check blocks kept independent per call site
+    // jscpd:ignore-start -- internal/cross-file near-duplicate tool-outcome and host-check blocks kept independent per call site
     purpose: string,
   ): Promise<void> {
     if (!this.#audit) return;
@@ -1120,7 +1120,7 @@ export class VaultToolset {
       at: new Date(this.#now()).toISOString(),
       actor: { ...this.#identity },
       action: auditActionFor(operation),
-// jscpd:ignore-end
+      // jscpd:ignore-end
       recordId: record ? record.id : null,
       purpose: record ? record.purpose : purpose,
       auditRef: record ? record.auditRef : null,
