@@ -41,8 +41,10 @@ async function hasLoaderShape(packageDir, mainRelativePath) {
   } catch {
     return false;
   }
-  if (typeof mod.apply === "function") return typeof mod.name === "string" && mod.default === undefined;
-  if (mod.default && typeof mod.default === "object" && typeof mod.default.apply === "function") return true;
+  if (typeof mod.apply === "function")
+    return typeof mod.name === "string" && mod.default === undefined;
+  if (mod.default && typeof mod.default === "object" && typeof mod.default.apply === "function")
+    return true;
   return false;
 }
 
@@ -117,7 +119,8 @@ async function collectMountablePackageNames() {
   const union = new Set();
   for (const packName of domainPackNames) {
     const packManifest = await readJson(join(packsRoot, packName, "package.json"));
-    for (const dependencyName of Object.keys(packManifest.dependencies ?? {})) union.add(dependencyName);
+    for (const dependencyName of Object.keys(packManifest.dependencies ?? {}))
+      union.add(dependencyName);
   }
 
   const mountable = [];
@@ -129,7 +132,9 @@ async function collectMountablePackageNames() {
     const kind = manifest.stack?.kind;
     if (kind !== "plugin" && kind !== "extension") continue;
     if (KNOWN_CORDIS_MOUNT_INCOMPATIBILITIES.has(name)) {
-      skipped.push(`${name} (known cordis mount incompatibility, see KNOWN_CORDIS_MOUNT_INCOMPATIBILITIES)`);
+      skipped.push(
+        `${name} (known cordis mount incompatibility, see KNOWN_CORDIS_MOUNT_INCOMPATIBILITIES)`,
+      );
       continue;
     }
     if (await hasLoaderShape(dir, manifest.main)) mountable.push(name);
