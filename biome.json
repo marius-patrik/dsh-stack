@@ -9,7 +9,8 @@
       "!**/dist",
       "!**/lib",
       "!**/.turbo",
-      "!**/.next"
+      "!**/.next",
+      "!harness"
     ]
   },
   "formatter": {
