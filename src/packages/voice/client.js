@@ -10,7 +10,7 @@
 //  • "Voice" settings section (order 42) + speaker nav glyph.
 
 window.__ModuleLoader__.load({
-  id: "voice",
+  id: "@dsh-stack/voice",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;

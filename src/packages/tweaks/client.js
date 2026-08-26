@@ -660,7 +660,7 @@ const COLLAPSE_SETTLE_MS = 150;
 // prepended ahead of this file's content at build time.
 
 window.__ModuleLoader__.load({
-  id: "tweaks",
+  id: "@dsh-stack/tweaks",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
