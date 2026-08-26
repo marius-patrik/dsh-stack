@@ -1,6 +1,6 @@
 # Release and distribution contract
 
-The Stack root package is the release coordinator. Each `plugins/**` package is independently publishable.
+The Stack root package is the release coordinator. Each `publish/plugins/**`, `publish/extensions/**`, and `publish/packs/**` package is independently publishable.
 
 ## Versioning
 

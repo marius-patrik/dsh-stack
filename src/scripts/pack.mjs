@@ -10,7 +10,7 @@ if (!["build", "typecheck", "test", "verify"].includes(command)) {
 }
 
 const root = process.cwd();
-const repositoryRoot = resolve(root, "../..");
+const repositoryRoot = resolve(root, "../../..");
 
 /** readJson implementation. */
 async function readJson(path) {
@@ -20,7 +20,7 @@ async function readJson(path) {
 /** discoverStackPackages implementation. */
 async function discoverStackPackages() {
   const byId = new Map();
-  for (const catalogRoot of ["packages", "extensions", "packs"]) {
+  for (const catalogRoot of ["src/packages", "publish/extensions", "publish/packs"]) {
     const catalogDir = join(repositoryRoot, catalogRoot);
     let entries;
     try {

@@ -3,7 +3,13 @@ import { join, relative } from "node:path";
 import ts from "typescript";
 
 const root = process.cwd();
-const sourceRoots = ["packages", "extensions", "packs", "plugins", "scripts"];
+const sourceRoots = [
+  "src/packages",
+  "publish/extensions",
+  "publish/packs",
+  "publish/plugins",
+  "src/scripts",
+];
 const ignoredDirectories = new Set(["node_modules", "lib", "dist", ".next", ".turbo"]);
 
 /** Recursively collect source files that are part of the repository implementation. */

@@ -5,9 +5,9 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
-const pluginsDir = join(root, "plugins");
-const extensionsDir = join(root, "extensions");
-const packsDir = join(root, "packs");
+const pluginsDir = join(root, "publish/plugins");
+const extensionsDir = join(root, "publish/extensions");
+const packsDir = join(root, "publish/packs");
 const releaseDir = join(root, ".release");
 
 /** Recursively discover plugin or pack directories, including symlinked component directories. */

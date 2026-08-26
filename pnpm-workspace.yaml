@@ -1,4 +1,4 @@
 packages:
-  - "packages/*"
-  - "extensions/*"
-  - "packs/*"
+  - "src/packages/*"
+  - "publish/extensions/*"
+  - "publish/packs/*"

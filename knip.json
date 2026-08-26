@@ -6,10 +6,10 @@
   },
   "workspaces": {
     ".": {
-      "entry": ["scripts/*.mjs", "scripts/client-runtime/*.js"],
-      "project": ["scripts/**/*.{mjs,js}"]
+      "entry": ["src/scripts/*.mjs", "src/scripts/client-runtime/*.js"],
+      "project": ["src/scripts/**/*.{mjs,js}"]
     },
-    "packages/*": {
+    "src/packages/*": {
       "entry": [
         "src/index.{ts,tsx,mjs,js}",
         "src/client.{ts,tsx}",
@@ -19,25 +19,26 @@
       ],
       "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
     },
-    "extensions/skin-claude": {
+    "publish/extensions/skin-claude": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
       "project": ["src/**/*.{ts,tsx}", "*.mjs"],
       "ignoreDependencies": ["@types/react"]
     },
-    "extensions/skin-codex": {
+    "publish/extensions/skin-codex": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
       "project": ["src/**/*.{ts,tsx}", "*.mjs"],
       "ignoreDependencies": ["@types/react"]
     },
-    "extensions/*": {
+    "publish/extensions/*": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "bin/*.mjs"],
       "project": ["src/**/*.{ts,tsx}", "bin/*.mjs"]
     },
-    "packs/*": {
+    "publish/packs/*": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "*.mjs"],
-      "project": ["src/**/*.{ts,tsx}", "*.mjs"]
+      "project": ["src/**/*.{ts,tsx}", "*.mjs"],
+      "ignoreDependencies": ["@dsh-stack/*"]
     },
-    "plugins/**": {
+    "publish/plugins/**": {
       "entry": ["src/index.{mjs,ts}", "check-plugin.mjs"],
       "project": ["src/**/*.{ts,mjs}"]
     }

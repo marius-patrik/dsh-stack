@@ -2,7 +2,7 @@
 
 ## Source ownership
 
-The only application implementation root is `plugins/`. Each package directory containing a `package.json` is independently addressable as a plugin, pack, or support library. No implementation is duplicated between pack roots and child plugins.
+`src/packages/` is the canonical flat implementation layer; `publish/plugins/`, `publish/extensions/`, and `publish/packs/` compose those implementations without duplicating them. Each package directory containing a `package.json` is independently addressable. No implementation is duplicated between pack roots and child plugins/extensions.
 
 ## Runtime ownership
 

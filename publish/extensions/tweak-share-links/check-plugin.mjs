@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../../src/scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "tweak-share-links-"));
 process.env.HOME = root;

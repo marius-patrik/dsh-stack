@@ -1,6 +1,6 @@
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../../src/scripts/plugin-check-kit.mjs";
 
 const plugin = await import("./lib/index.js");
 const { validateKeybinds } = await import("./lib/keybinds.js");

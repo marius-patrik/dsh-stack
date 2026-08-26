@@ -2,16 +2,17 @@
 
 ## Repository mission
 
-`dsh-stack` is a distributable extension stack for DeepSeek Harness. The upstream `harness/` submodule is pinned and pristine. Stack owns the complete implementation catalog in `packages/` and the composed plugin tree in `plugins/`.
+`dsh-stack` is a distributable extension stack for DeepSeek Harness. The upstream `harness/` submodule is pinned and pristine. Stack owns the complete implementation catalog in `src/packages/` and the composed plugin tree in `publish/plugins/`.
 
 ## Canonical structure
 
-- `packages/` is the canonical flat implementation layer. Every concrete implementation exists exactly once here. Packages may import from other packages; there is no restriction against packages depending on one another.
-- `plugins/` is the full composition/catalog tree. It imports canonical implementations from `packages/` and does not duplicate implementation source.
-- `packs/` is a root-level folder, sibling to `packages/`/`plugins/`/`extensions/`, holding pack aliases/compositions only; it is not a pnpm workspace.
-- `extensions/` is a root-level folder, sibling to `packages/`/`plugins/`/`packs/`, holding extension implementations (see the plugin/extension/pack model below).
-- `notes/` is the canonical documentation root.
-- `AGENTS.md` and `CLAUDE.md` at repository root are symlinks to `.agents/AGENTS.md`.
+- `src/packages/` is the canonical flat implementation layer. Every concrete implementation exists exactly once here. Packages may import from other packages; there is no restriction against packages depending on one another.
+- `src/scripts/` is verification and release tooling, plus the `dsh` launcher/service-manager script and its aliases.
+- `publish/plugins/` is the full composition/catalog tree. It imports canonical implementations from `src/packages/` and does not duplicate implementation source.
+- `publish/packs/` is a folder under `publish/`, sibling to `publish/plugins/`/`publish/extensions/`, holding pack aliases/compositions only; it is not a pnpm workspace member on its own right (packs are, however, real pnpm workspace packages under `publish/packs/*`).
+- `publish/extensions/` is a folder under `publish/`, sibling to `publish/plugins/`/`publish/packs/`, holding extension implementations (see the plugin/extension/pack model below).
+- `.agents/notes/` is the canonical documentation root.
+- `README.md`, `AGENTS.md`, and `CLAUDE.md` at repository root are all symlinks to `.agents/AGENTS.md`.
 - `harness/` is upstream and must not be modified.
 - No duplicate implementation tree, compatibility bridge, migration shim, legacy runtime path, or parallel feature owner is allowed.
 - A plugin, extension, or pack does not have to correspond 1:1 with a canonical package; the composition tree and the implementation layer are independent axes.
@@ -40,6 +41,31 @@ There is exactly one implementation owner for every feature. Before adding code,
 
 The Stack profiles compose packages and plugins rather than embedding feature implementations.
 
+| Profile | Purpose |
+| --- | --- |
+| `@dsh-stack/profile-default` | general Stack experience |
+| `@dsh-stack/profile-coding` | coding, repositories, tools, editor/LSP and absorbed DarkFactory capabilities |
+| `@dsh-stack/profile-trading` | research, backtesting, optimization and absorbed MoneyMaker capabilities |
+| `@dsh-stack/profile-skyblock` | SkyBlock capabilities absorbed from SkyAgent |
+
+## UI
+
+The Stack shell uses DSH-native slots. The sidebar provides Files, file-row actions, profile selection, configurable New Conversation/logo visibility, skins, coherent collapsed/expanded behavior, and unified workspace/tab concepts. VS Code icons are an independent extension. DeepSeek, Claude and Codex skins are independent extensions.
+
+## Credentials and agents
+
+Credentials support typed secrets such as API keys, passwords, TOTP/QR provisioning, OAuth, passkeys, recovery codes, SSH keys, certificates and generic notes. Agents use DSH's native preset primitive; personas are durable session state independent from session actions.
+
+## Development
+
+```bash
+pnpm install
+pnpm typecheck
+pnpm build
+pnpm verify
+pnpm test
+```
+
 ## Web UI boundary
 
 The intended separate web UI base is `zhu1090093659/dsh-web-ui`, default branch `dev`. Its tab implementation is the reference/base for the Stack web UI. `zhu1090093659/DSH-better-sidebar` is a separate sidebar reference. Do not copy either project into `dsh-stack` as a second implementation.
@@ -50,7 +76,7 @@ CI automation is intended to run on a real DSH node managed through `dsh-hosts`,
 
 ## Documentation
 
-`notes/PRD.md` is the canonical product requirements document. Keep current architectural decisions in `notes/` and do not create a second documentation root.
+`.agents/notes/PRD.md` is the canonical product requirements document. Keep current architectural decisions in `.agents/notes/` and do not create a second documentation root.
 
 ## Branch and merge policy
 

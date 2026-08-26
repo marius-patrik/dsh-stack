@@ -2,10 +2,10 @@ import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 const roots = [
-  join(process.cwd(), "packages"),
-  join(process.cwd(), "extensions"),
-  join(process.cwd(), "packs"),
-  join(process.cwd(), "plugins"),
+  join(process.cwd(), "src/packages"),
+  join(process.cwd(), "publish/extensions"),
+  join(process.cwd(), "publish/packs"),
+  join(process.cwd(), "publish/plugins"),
 ];
 const missing = [];
 

@@ -1,7 +1,7 @@
 // jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling extensions
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../../src/scripts/plugin-check-kit.mjs";
 
 const plugin = await import("./lib/index.js");
 const { validateCommand, installConfiguredCommands } = await import("./lib/commands.js");

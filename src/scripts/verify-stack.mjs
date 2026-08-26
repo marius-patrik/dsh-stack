@@ -7,10 +7,10 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
-const packagesDir = join(root, "packages");
-const extensionsDir = join(root, "extensions");
-const packsDir = join(root, "packs");
-const pluginsDir = join(root, "plugins");
+const packagesDir = join(root, "src/packages");
+const extensionsDir = join(root, "publish/extensions");
+const packsDir = join(root, "publish/packs");
+const pluginsDir = join(root, "publish/plugins");
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
 const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib"]);
 const generatedFileNames = new Set(["package-lock.json", "pnpm-lock.yaml", "yarn.lock"]);
@@ -68,18 +68,18 @@ async function trackedGeneratedFiles() {
       [
         "ls-files",
         "--",
-        "packages/**/lib/**",
-        "packages/**/dist/**",
-        "packages/**/node_modules/**",
-        "extensions/**/lib/**",
-        "extensions/**/dist/**",
-        "extensions/**/node_modules/**",
-        "packs/**/lib/**",
-        "packs/**/dist/**",
-        "packs/**/node_modules/**",
-        "plugins/**/lib/**",
-        "plugins/**/dist/**",
-        "plugins/**/node_modules/**",
+        "src/packages/**/lib/**",
+        "src/packages/**/dist/**",
+        "src/packages/**/node_modules/**",
+        "publish/extensions/**/lib/**",
+        "publish/extensions/**/dist/**",
+        "publish/extensions/**/node_modules/**",
+        "publish/packs/**/lib/**",
+        "publish/packs/**/dist/**",
+        "publish/packs/**/node_modules/**",
+        "publish/plugins/**/lib/**",
+        "publish/plugins/**/dist/**",
+        "publish/plugins/**/node_modules/**",
       ],
       { cwd: root },
     );
@@ -207,8 +207,8 @@ async function verifyPluginTree() {
     if (!wrapperExists) continue;
     const source = await fs.readFile(join(dir, "src", "index.mjs"), "utf8");
     assert(
-      source.includes("../../../packages/") || source.includes("../../../extensions/"),
-      `${relative(root, dir)}/src/index.mjs must resolve its canonical package through packages/ or extensions/`,
+      source.includes("../../../../src/packages/") || source.includes("../../../extensions/"),
+      `${relative(root, dir)}/src/index.mjs must resolve its canonical package through src/packages/ or publish/extensions/`,
     );
   }
 }

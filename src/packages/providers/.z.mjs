@@ -4,7 +4,7 @@ import { Context } from "@deepseek-ai/cordis";
 import * as dialects from "@dsh-stack/dialects";
 import { DialectAdapter } from "./lib/adapter.js";
 import { ModelCatalog } from "./lib/catalog.js";
-import * as zenExtension from "../../extensions/provider-zen/lib/index.js";
+import * as zenExtension from "../../../publish/extensions/provider-zen/lib/index.js";
 const dir = "/Users/user/.agents/vault",
   SEP = String.fromCharCode(31);
 const key = Buffer.from(readFileSync(`${dir}/master.key`, "utf8").trim(), "base64");

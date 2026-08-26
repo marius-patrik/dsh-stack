@@ -6,7 +6,7 @@ DSH Stack is a polished, distributable extension system for DeepSeek Harness. DS
 
 ## Architecture
 
-The canonical source tree is `plugins/`. Every feature has one owner. Libraries implement reusable mechanics; plugins expose user-visible behavior or external integrations; packs compose plugins and never impersonate runtime services. The harness submodule is pinned and pristine.
+The canonical source tree is `src/packages/`, composed by `publish/plugins/`, `publish/extensions/`, and `publish/packs/`. Every feature has one owner. Libraries implement reusable mechanics; plugins/extensions expose user-visible behavior or external integrations; packs compose plugins/extensions and never impersonate runtime services. The harness submodule is pinned and pristine.
 
 Plugin composition supports required dependencies, optional dependencies, bundled dependencies, and plugin packs. External services are isolated into their own plugins. Profiles are compositions, not alternate implementations.
 
@@ -55,7 +55,7 @@ Every external service is its own plugin. At minimum the stack supports GitHub, 
 
 ## Packaging and distribution
 
-Every plugin and pack is its own publishable package under `plugins/**`, with the same package contract and its own semver. The Stack root package is a release coordinator rather than a substitute for plugin packages.
+Every plugin, extension, and pack is its own publishable package under `publish/**`, with the same package contract and its own semver. The Stack root package is a release coordinator rather than a substitute for plugin packages.
 
 Every merge to `main` increments the Stack version. Only modified plugins/packs receive version bumps, based on the semantic change within that package. The release pipeline builds every package, publishes every newly versioned package, generates a complete package catalog with exact versions, dependencies and integrity data, uploads package artifacts and the full manifest to the GitHub release, and updates the updater catalog.
 

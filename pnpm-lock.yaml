@@ -24,31 +24,31 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/agent-preset-coding:
+  publish/extensions/agent-preset-coding:
     dependencies:
       '@dsh-stack/agents':
         specifier: workspace:*
-        version: link:../../packages/agents
+        version: link:../../../src/packages/agents
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/agent-preset-default:
+  publish/extensions/agent-preset-default:
     dependencies:
       '@dsh-stack/agents':
         specifier: workspace:*
-        version: link:../../packages/agents
+        version: link:../../../src/packages/agents
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/lucide-animated:
+  publish/extensions/lucide-animated:
     dependencies:
       '@dsh-stack/icon-engine':
         specifier: workspace:*
-        version: link:../../packages/icon-engine
+        version: link:../../../src/packages/icon-engine
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@18.3.1)
@@ -63,241 +63,241 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-anthropic-api:
+  publish/extensions/provider-anthropic-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-antigravity-sub:
+  publish/extensions/provider-antigravity-sub:
     dependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-claude-sub:
+  publish/extensions/provider-claude-sub:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-deepseek-api:
+  publish/extensions/provider-deepseek-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-gemini-api:
+  publish/extensions/provider-gemini-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-gemini-sub:
+  publish/extensions/provider-gemini-sub:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-grok-api:
+  publish/extensions/provider-grok-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-grok-sub:
+  publish/extensions/provider-grok-sub:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-groq-api:
+  publish/extensions/provider-groq-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-kimi-code:
+  publish/extensions/provider-kimi-code:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-kimi-sub:
+  publish/extensions/provider-kimi-sub:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-llamacpp:
+  publish/extensions/provider-llamacpp:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-mistral-api:
+  publish/extensions/provider-mistral-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-ollama:
+  publish/extensions/provider-ollama:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-openai-api:
+  publish/extensions/provider-openai-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-openrouter-api:
+  publish/extensions/provider-openrouter-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-vllm:
+  publish/extensions/provider-vllm:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/provider-zen:
+  publish/extensions/provider-zen:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
-        version: link:../../packages/providers
+        version: link:../../../src/packages/providers
     devDependencies:
       '@dsh-stack/dialects':
         specifier: workspace:*
-        version: link:../../packages/dialects
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/skin-claude:
+  publish/extensions/skin-claude:
     dependencies:
       react:
         specifier: ^18.2.0
@@ -313,7 +313,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/skin-codex:
+  publish/extensions/skin-codex:
     dependencies:
       react:
         specifier: ^18.2.0
@@ -329,7 +329,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/skin-deepseek:
+  publish/extensions/skin-deepseek:
     dependencies:
       thesvg:
         specifier: ^3.3.1
@@ -345,11 +345,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-drag-drop:
+  publish/extensions/tweak-drag-drop:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -364,11 +364,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-fork-undo:
+  publish/extensions/tweak-fork-undo:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -389,11 +389,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-keybinds:
+  publish/extensions/tweak-keybinds:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -408,11 +408,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-plan-toggle:
+  publish/extensions/tweak-plan-toggle:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -433,14 +433,14 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-share-links:
+  publish/extensions/tweak-share-links:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
       '@dsh-stack/tweaks':
         specifier: workspace:*
-        version: link:../../packages/tweaks
+        version: link:../../../src/packages/tweaks
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -458,11 +458,11 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-slash-commands:
+  publish/extensions/tweak-slash-commands:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -480,14 +480,14 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  extensions/tweak-stats:
+  publish/extensions/tweak-stats:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
-        version: link:../../packages/plugin-kit
+        version: link:../../../src/packages/plugin-kit
       '@dsh-stack/tweaks':
         specifier: workspace:*
-        version: link:../../packages/tweaks
+        version: link:../../../src/packages/tweaks
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -502,7 +502,328 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/agent-actions:
+  publish/packs/agents:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/agent-actions':
+        specifier: workspace:*
+        version: link:../../../src/packages/agent-actions
+      '@dsh-stack/agent-commands':
+        specifier: workspace:*
+        version: link:../../../src/packages/commands
+      '@dsh-stack/agent-loops':
+        specifier: workspace:*
+        version: link:../../../src/packages/loops
+      '@dsh-stack/agent-personas':
+        specifier: workspace:*
+        version: link:../../../src/packages/personas
+      '@dsh-stack/agent-preset-coding':
+        specifier: workspace:*
+        version: link:../../extensions/agent-preset-coding
+      '@dsh-stack/agent-preset-default':
+        specifier: workspace:*
+        version: link:../../extensions/agent-preset-default
+      '@dsh-stack/agent-skills':
+        specifier: workspace:*
+        version: link:../../../src/packages/skills
+      '@dsh-stack/agent-tools':
+        specifier: workspace:*
+        version: link:../../../src/packages/tools
+      '@dsh-stack/agents':
+        specifier: workspace:*
+        version: link:../../../src/packages/agents
+      '@dsh-stack/translator':
+        specifier: workspace:*
+        version: link:../../../src/packages/translator
+
+  publish/packs/ai:
+    dependencies:
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+      '@dsh-stack/providers':
+        specifier: workspace:*
+        version: link:../../../src/packages/providers
+
+  publish/packs/core:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/composition':
+        specifier: workspace:*
+        version: link:../../../src/packages/composition
+      '@dsh-stack/credential-vault':
+        specifier: workspace:*
+        version: link:../../../src/packages/credential-vault
+      '@dsh-stack/plugin-kit':
+        specifier: workspace:*
+        version: link:../../../src/packages/plugin-kit
+
+  publish/packs/integrations:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/formatters':
+        specifier: workspace:*
+        version: link:../../../src/packages/formatters
+      '@dsh-stack/hosts':
+        specifier: workspace:*
+        version: link:../../../src/packages/hosts
+      '@dsh-stack/lsp':
+        specifier: workspace:*
+        version: link:../../../src/packages/lsp
+
+  publish/packs/provider-claude:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-anthropic-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-anthropic-api
+      '@dsh-stack/provider-claude-sub':
+        specifier: workspace:*
+        version: link:../../extensions/provider-claude-sub
+      '@dsh-stack/skin-claude':
+        specifier: workspace:*
+        version: link:../../extensions/skin-claude
+
+  publish/packs/provider-codex:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-openai-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-openai-api
+      '@dsh-stack/skin-codex':
+        specifier: workspace:*
+        version: link:../../extensions/skin-codex
+
+  publish/packs/provider-deepseek:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-deepseek-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-deepseek-api
+      '@dsh-stack/skin-deepseek':
+        specifier: workspace:*
+        version: link:../../extensions/skin-deepseek
+
+  publish/packs/provider-gemini:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-antigravity-sub':
+        specifier: workspace:*
+        version: link:../../extensions/provider-antigravity-sub
+      '@dsh-stack/provider-gemini-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-gemini-api
+      '@dsh-stack/provider-gemini-sub':
+        specifier: workspace:*
+        version: link:../../extensions/provider-gemini-sub
+
+  publish/packs/provider-grok:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-grok-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-grok-api
+      '@dsh-stack/provider-grok-sub':
+        specifier: workspace:*
+        version: link:../../extensions/provider-grok-sub
+
+  publish/packs/provider-groq:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-groq-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-groq-api
+
+  publish/packs/provider-kimi:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-kimi-code':
+        specifier: workspace:*
+        version: link:../../extensions/provider-kimi-code
+      '@dsh-stack/provider-kimi-sub':
+        specifier: workspace:*
+        version: link:../../extensions/provider-kimi-sub
+
+  publish/packs/provider-llamacpp:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-llamacpp':
+        specifier: workspace:*
+        version: link:../../extensions/provider-llamacpp
+
+  publish/packs/provider-mistral:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-mistral-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-mistral-api
+
+  publish/packs/provider-ollama:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-ollama':
+        specifier: workspace:*
+        version: link:../../extensions/provider-ollama
+
+  publish/packs/provider-openrouter:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-openrouter-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-openrouter-api
+
+  publish/packs/provider-vllm:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-vllm':
+        specifier: workspace:*
+        version: link:../../extensions/provider-vllm
+
+  publish/packs/provider-zen:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/provider-zen':
+        specifier: workspace:*
+        version: link:../../extensions/provider-zen
+
+  publish/packs/trading:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/trading-backtest':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-backtest
+      '@dsh-stack/trading-market-data':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-market-data
+      '@dsh-stack/trading-optimizer':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-optimizer
+      '@dsh-stack/trading-research':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-research
+
+  publish/packs/ux:
+    dependencies:
+      '@dsh-stack/icon-engine':
+        specifier: workspace:*
+        version: link:../../../src/packages/icon-engine
+      '@dsh-stack/lucide-animated':
+        specifier: workspace:*
+        version: link:../../extensions/lucide-animated
+      '@dsh-stack/profile-runtime':
+        specifier: workspace:*
+        version: link:../../../src/packages/profile-runtime
+      '@dsh-stack/profile-ui':
+        specifier: workspace:*
+        version: link:../../../src/packages/profile-ui
+      '@dsh-stack/sidebar-preferences':
+        specifier: workspace:*
+        version: link:../../../src/packages/sidebar-preferences
+      '@dsh-stack/sidebar-settings':
+        specifier: workspace:*
+        version: link:../../../src/packages/sidebar-settings
+      '@dsh-stack/sidebar-shell':
+        specifier: workspace:*
+        version: link:../../../src/packages/sidebar-shell
+      '@dsh-stack/skin-claude':
+        specifier: workspace:*
+        version: link:../../extensions/skin-claude
+      '@dsh-stack/skin-codex':
+        specifier: workspace:*
+        version: link:../../extensions/skin-codex
+      '@dsh-stack/skin-deepseek':
+        specifier: workspace:*
+        version: link:../../extensions/skin-deepseek
+      '@dsh-stack/skin-host':
+        specifier: workspace:*
+        version: link:../../../src/packages/skin-host
+      '@dsh-stack/skin-runtime':
+        specifier: workspace:*
+        version: link:../../../src/packages/skin-runtime
+      '@dsh-stack/skin-settings':
+        specifier: workspace:*
+        version: link:../../../src/packages/skin-settings
+      '@dsh-stack/themes':
+        specifier: workspace:*
+        version: link:../../../src/packages/themes
+      '@dsh-stack/tui':
+        specifier: workspace:*
+        version: link:../../../src/packages/tui
+      '@dsh-stack/tweak-drag-drop':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-drag-drop
+      '@dsh-stack/tweak-fork-undo':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-fork-undo
+      '@dsh-stack/tweak-keybinds':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-keybinds
+      '@dsh-stack/tweak-plan-toggle':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-plan-toggle
+      '@dsh-stack/tweak-share-links':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-share-links
+      '@dsh-stack/tweak-slash-commands':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-slash-commands
+      '@dsh-stack/tweak-stats':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-stats
+      '@dsh-stack/tweaks':
+        specifier: workspace:*
+        version: link:../../../src/packages/tweaks
+      '@dsh-stack/voice':
+        specifier: workspace:*
+        version: link:../../../src/packages/voice
+      '@dsh-stack/workspace-files':
+        specifier: workspace:*
+        version: link:../../../src/packages/workspace-files
+      '@dsh-stack/workspace-tabs':
+        specifier: workspace:*
+        version: link:../../../src/packages/workspace-tabs
+
+  publish/packs/vcs:
+    dependencies:
+      '@dsh-stack/repos':
+        specifier: workspace:*
+        version: link:../../../src/packages/repos
+
+  src/packages/agent-actions:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
@@ -521,7 +842,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/agents:
+  src/packages/agents:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
@@ -549,7 +870,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/commands:
+  src/packages/commands:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -558,7 +879,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/composition:
+  src/packages/composition:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
@@ -568,7 +889,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/credential-vault:
+  src/packages/credential-vault:
     dependencies:
       react:
         specifier: ^18.2.0
@@ -596,7 +917,7 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
-  packages/dialects:
+  src/packages/dialects:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -615,7 +936,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/formatters:
+  src/packages/formatters:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -645,7 +966,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/hosts:
+  src/packages/hosts:
     dependencies:
       react:
         specifier: ^18.2.0
@@ -661,7 +982,7 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
-  packages/icon-engine:
+  src/packages/icon-engine:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -670,7 +991,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/loops:
+  src/packages/loops:
     dependencies:
       '@deepseek-ai/dsh-home-paths':
         specifier: 0.1.1-rc.2
@@ -695,7 +1016,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/lsp:
+  src/packages/lsp:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -722,7 +1043,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/personas:
+  src/packages/personas:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -731,7 +1052,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/plugin-kit:
+  src/packages/plugin-kit:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -747,17 +1068,17 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/profile-runtime:
+  src/packages/profile-runtime:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/profile-ui:
+  src/packages/profile-ui:
     dependencies:
       '@dsh-stack/lucide-animated':
         specifier: workspace:*
-        version: link:../../extensions/lucide-animated
+        version: link:../../../publish/extensions/lucide-animated
       '@dsh-stack/profile-runtime':
         specifier: workspace:*
         version: link:../profile-runtime
@@ -793,7 +1114,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/providers:
+  src/packages/providers:
     dependencies:
       '@dsh-stack/credential-vault':
         specifier: workspace:*
@@ -842,7 +1163,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/repos:
+  src/packages/repos:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -866,13 +1187,13 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/sidebar-preferences:
+  src/packages/sidebar-preferences:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/sidebar-settings:
+  src/packages/sidebar-settings:
     dependencies:
       '@deepseek-ai/dsh-client-runtime':
         specifier: ^0.1.1-rc.2
@@ -897,7 +1218,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/sidebar-shell:
+  src/packages/sidebar-shell:
     dependencies:
       '@dsh-stack/sidebar-preferences':
         specifier: workspace:*
@@ -931,7 +1252,7 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1
 
-  packages/skills:
+  src/packages/skills:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -940,17 +1261,17 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/skin-host:
+  src/packages/skin-host:
     dependencies:
       '@dsh-stack/skin-claude':
         specifier: workspace:*
-        version: link:../../extensions/skin-claude
+        version: link:../../../publish/extensions/skin-claude
       '@dsh-stack/skin-codex':
         specifier: workspace:*
-        version: link:../../extensions/skin-codex
+        version: link:../../../publish/extensions/skin-codex
       '@dsh-stack/skin-deepseek':
         specifier: workspace:*
-        version: link:../../extensions/skin-deepseek
+        version: link:../../../publish/extensions/skin-deepseek
       '@dsh-stack/skin-runtime':
         specifier: workspace:*
         version: link:../skin-runtime
@@ -977,13 +1298,13 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/skin-runtime:
+  src/packages/skin-runtime:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/skin-settings:
+  src/packages/skin-settings:
     dependencies:
       '@deepseek-ai/dsh-client-runtime':
         specifier: ^0.1.1-rc.2
@@ -1008,7 +1329,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/themes:
+  src/packages/themes:
     dependencies:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
@@ -1036,7 +1357,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/tools:
+  src/packages/tools:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -1060,7 +1381,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/trading-backtest:
+  src/packages/trading-backtest:
     dependencies:
       '@dsh-stack/trading-research':
         specifier: workspace:*
@@ -1070,7 +1391,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/trading-market-data:
+  src/packages/trading-market-data:
     dependencies:
       '@dsh-stack/trading-research':
         specifier: workspace:*
@@ -1080,7 +1401,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/trading-optimizer:
+  src/packages/trading-optimizer:
     dependencies:
       '@dsh-stack/trading-backtest':
         specifier: workspace:*
@@ -1093,13 +1414,13 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/trading-research:
+  src/packages/trading-research:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/translator:
+  src/packages/translator:
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
@@ -1111,7 +1432,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/tui:
+  src/packages/tui:
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -1120,7 +1441,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/tweaks:
+  src/packages/tweaks:
     dependencies:
       react:
         specifier: ^18.2.0
@@ -1148,7 +1469,7 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/voice:
+  src/packages/voice:
     dependencies:
       react:
         specifier: ^18.2.0
@@ -1173,125 +1494,17 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  packages/workspace-files:
+  src/packages/workspace-files:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/workspace-tabs:
+  src/packages/workspace-tabs:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
-
-  packs/agents:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/ai: {}
-
-  packs/core:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/integrations:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-claude:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-codex:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-deepseek:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-gemini:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-grok:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-groq:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-kimi:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-llamacpp:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-mistral:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-ollama:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-openrouter:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-vllm:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/provider-zen:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/trading:
-    dependencies:
-      '@deepseek-ai/cordis':
-        specifier: ^4.0.1
-        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
-
-  packs/ux: {}
-
-  packs/vcs: {}
 
 packages:
 

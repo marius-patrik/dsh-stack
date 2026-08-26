@@ -53,14 +53,15 @@ export interface SyncReport {
 /**
  * The shipped preset root: `DSH_AGENTS_BASE_DIR` when set, else the
  * `harness/apps/cli/config/agent-presets` tree beside this package's
- * checkout (three levels up from `lib/`). Returns undefined when neither
+ * checkout (four levels up from `lib/`, since packages now live under
+ * `src/`). Returns undefined when neither
  * resolves, which degrades materialization to the bare persona row.
  */
 export function basePresetDir(): string | undefined {
   if (process.env.DSH_AGENTS_BASE_DIR !== undefined && process.env.DSH_AGENTS_BASE_DIR !== "") {
     return process.env.DSH_AGENTS_BASE_DIR;
   }
-  return new URL("../../../harness/apps/cli/config/agent-presets", import.meta.url).pathname;
+  return new URL("../../../../harness/apps/cli/config/agent-presets", import.meta.url).pathname;
 }
 
 /** Read a base preset's composition text, or undefined when unreadable. */

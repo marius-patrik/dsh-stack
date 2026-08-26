@@ -17,9 +17,13 @@
     "id": "stack.pack.ai"
   },
   "scripts": {
-    "build": "node ../../scripts/pack.mjs build",
-    "typecheck": "node ../../scripts/pack.mjs typecheck",
-    "test": "node ../../scripts/pack.mjs test",
-    "verify": "node ../../scripts/pack.mjs verify"
+    "build": "node ../../../src/scripts/pack.mjs build",
+    "typecheck": "node ../../../src/scripts/pack.mjs typecheck",
+    "test": "node ../../../src/scripts/pack.mjs test",
+    "verify": "node ../../../src/scripts/pack.mjs verify"
+  },
+  "dependencies": {
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/providers": "workspace:*"
   }
 }

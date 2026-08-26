@@ -17,12 +17,24 @@
     "id": "stack.pack.agents"
   },
   "scripts": {
-    "build": "node ../../scripts/pack.mjs build",
-    "typecheck": "node ../../scripts/pack.mjs typecheck",
-    "test": "node ../../scripts/pack.mjs test",
-    "verify": "node ../../scripts/pack.mjs verify"
+    "build": "node ../../../src/scripts/pack.mjs build",
+    "typecheck": "node ../../../src/scripts/pack.mjs typecheck",
+    "test": "node ../../../src/scripts/pack.mjs test",
+    "verify": "node ../../../src/scripts/pack.mjs verify"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "dependencies": {
+    "@dsh-stack/agent-actions": "workspace:*",
+    "@dsh-stack/agent-commands": "workspace:*",
+    "@dsh-stack/agent-loops": "workspace:*",
+    "@dsh-stack/agent-personas": "workspace:*",
+    "@dsh-stack/agent-preset-coding": "workspace:*",
+    "@dsh-stack/agent-preset-default": "workspace:*",
+    "@dsh-stack/agent-skills": "workspace:*",
+    "@dsh-stack/agent-tools": "workspace:*",
+    "@dsh-stack/agents": "workspace:*",
+    "@dsh-stack/translator": "workspace:*"
   }
 }

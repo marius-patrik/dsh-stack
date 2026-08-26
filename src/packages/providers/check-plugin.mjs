@@ -36,7 +36,7 @@ const extensions = new Map(
   await Promise.all(
     EXTENSION_IDS.map(async (id) => [
       id,
-      await import(`../../extensions/provider-${id}/lib/index.js`),
+      await import(`../../../publish/extensions/provider-${id}/lib/index.js`),
     ]),
   ),
 );

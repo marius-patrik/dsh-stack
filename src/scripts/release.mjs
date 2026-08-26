@@ -7,10 +7,10 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
-const packagesDir = join(root, "packages");
-const extensionsDir = join(root, "extensions");
-const packsDir = join(root, "packs");
-const pluginsDir = join(root, "plugins");
+const packagesDir = join(root, "src/packages");
+const extensionsDir = join(root, "publish/extensions");
+const packsDir = join(root, "publish/packs");
+const pluginsDir = join(root, "publish/plugins");
 const command = process.argv[2];
 const bumpArg = process.argv[3] ?? "patch";
 const validBumps = new Set(["major", "minor", "patch"]);
