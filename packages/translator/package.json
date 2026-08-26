@@ -16,6 +16,7 @@
     "lib"
   ],
   "scripts": {
+    "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs"
   },
