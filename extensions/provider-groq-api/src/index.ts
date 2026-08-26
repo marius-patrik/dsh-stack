@@ -6,11 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  API_KEY,
-  GROQ_CONTEXT,
-  GROQ_MAX_OUTPUT,
-} from "@dsh-stack/providers";
+import { API_KEY, GROQ_CONTEXT, GROQ_MAX_OUTPUT } from "@dsh-stack/providers";
 
 /** The `groq-api` provider route. */
 export const route: ProviderRoute = {

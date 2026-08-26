@@ -1,4 +1,10 @@
-import { boolean, many, optional, VaultCliError, type ParsedArguments } from "../argument-parsing.js";
+import {
+  boolean,
+  many,
+  optional,
+  VaultCliError,
+  type ParsedArguments,
+} from "../argument-parsing.js";
 import type { VaultCliIo } from "../io.js";
 import { openVault } from "../vault-location.js";
 import { LocalSource } from "../local-credential-source.js";

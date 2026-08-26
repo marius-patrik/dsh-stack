@@ -12,7 +12,12 @@ import type { VaultStore } from "../store.js";
 import type { ReauthSupervisor } from "../supervisor.js";
 import { generateTotp } from "../totp.js";
 import type { MaterialFree } from "./material-free.js";
-import type { VaultDenialReason, VaultToolDenial, VaultToolOperation, VaultToolResult } from "./tool-outcomes.js";
+import type {
+  VaultDenialReason,
+  VaultToolDenial,
+  VaultToolOperation,
+  VaultToolResult,
+} from "./tool-outcomes.js";
 import type { VaultTransport, VaultTransportResponse } from "./transport.js";
 import type { ProcessOutcome, ProcessRunner } from "./process-runner.js";
 import type {
@@ -32,7 +37,13 @@ import type {
 import { allowedHostsFor, hostAllowed, providerIdForPurpose } from "./host-allowlist.js";
 import { authPlacementFor } from "./auth-placement.js";
 import { redact, redactionTokens } from "./redaction.js";
-import { accountOf, applyAuth, auditActionFor, credentialSecret, privateKeyInput } from "./credential-secret.js";
+import {
+  accountOf,
+  applyAuth,
+  auditActionFor,
+  credentialSecret,
+  privateKeyInput,
+} from "./credential-secret.js";
 
 /** Environment variable the git credential helper reads the secret out of. */
 const GIT_SECRET_ENV = "ANDROMEDA_VAULT_SECRET";

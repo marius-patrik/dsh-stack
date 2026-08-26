@@ -62,7 +62,8 @@ export async function assertProviderExtension(id, extension, deps) {
   if (typeof route.displayName !== "string" || route.displayName.length === 0) {
     throw new Error(`provider-${id}: route.displayName must be a non-empty string`);
   }
-  if (!Array.isArray(route.models)) throw new Error(`provider-${id}: route.models must be an array`);
+  if (!Array.isArray(route.models))
+    throw new Error(`provider-${id}: route.models must be an array`);
   console.log(`provider-${id} verification passed:`, route.displayName);
 }
 

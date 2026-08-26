@@ -6,12 +6,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
-import {
-  EFFORTS,
-  GEMINI_CONTEXT,
-  GEMINI_MAX_OUTPUT,
-  TOKEN,
-} from "@dsh-stack/providers";
+import { EFFORTS, GEMINI_CONTEXT, GEMINI_MAX_OUTPUT, TOKEN } from "@dsh-stack/providers";
 
 /** The `gemini-sub` provider route. */
 export const route: ProviderRoute = {

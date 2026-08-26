@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "kind": "pack",
   "description": "OpenCode Zen provider route.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
-  "dependencies": [
-    "stack.ai.provider.zen"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
+  "dependencies": ["stack.ai.provider.zen"],
   "optionalDependencies": []
 }

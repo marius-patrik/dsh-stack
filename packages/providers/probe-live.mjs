@@ -37,9 +37,24 @@ providers.apply(ctx, { mode: "all" });
 // them all so this probe still sees the full catalog it used to get from the
 // static table.
 const EXTENSION_IDS = [
-  "kimi-code", "kimi-sub", "claude-sub", "grok-sub", "gemini-sub", "antigravity-sub",
-  "openai-api", "anthropic-api", "gemini-api", "grok-api", "deepseek-api", "mistral-api",
-  "groq-api", "openrouter-api", "zen", "ollama", "llamacpp", "vllm",
+  "kimi-code",
+  "kimi-sub",
+  "claude-sub",
+  "grok-sub",
+  "gemini-sub",
+  "antigravity-sub",
+  "openai-api",
+  "anthropic-api",
+  "gemini-api",
+  "grok-api",
+  "deepseek-api",
+  "mistral-api",
+  "groq-api",
+  "openrouter-api",
+  "zen",
+  "ollama",
+  "llamacpp",
+  "vllm",
 ];
 for (const id of EXTENSION_IDS) {
   const extension = await import(`../../extensions/provider-${id}/lib/index.js`);

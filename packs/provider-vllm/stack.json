@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "kind": "pack",
   "description": "vLLM local-inference provider route.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
-  "dependencies": [
-    "stack.ai.provider.vllm"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
+  "dependencies": ["stack.ai.provider.vllm"],
   "optionalDependencies": []
 }
