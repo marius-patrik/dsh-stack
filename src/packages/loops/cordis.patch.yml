@@ -1,8 +1,0 @@
-# The agent-loops bundle patch: mounts the loop plugin, whose client half owns
-# the Loops settings section (loop roster, run status, file editor) over the
-# shared settings.section seat.
-
-- insert:
-    - id: loops
-      name: 'agent-loops'
-      config: {}

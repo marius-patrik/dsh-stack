@@ -12,7 +12,8 @@
     "./client": {
       "types": "./lib/client.d.ts",
       "default": "./lib/client.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "dsh": {
     "client": {

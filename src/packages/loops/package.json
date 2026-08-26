@@ -9,12 +9,15 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
-    }
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "lib",
     "client.js",
-    "cordis.patch.yml",
     "package.json",
     "stack.json"
   ],
@@ -44,9 +47,6 @@
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
     "client": {
       "inject": [
         "slots"
