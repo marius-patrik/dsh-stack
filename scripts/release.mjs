@@ -96,10 +96,7 @@ async function discoverComponentDirectories(baseDir, relativePrefix = "") {
 
 /** Read pack/profile membership from the composition catalog. */
 async function catalogMembership() {
-  const source = await fs.readFile(
-    join(packagesDir, "composition", "src", "catalog.ts"),
-    "utf8",
-  );
+  const source = await fs.readFile(join(packagesDir, "composition", "src", "catalog.ts"), "utf8");
   const packs = {};
   const profiles = {};
   let section = null;
@@ -280,23 +277,9 @@ async function version() {
   const packages = await discoverPackages();
   for (const item of packages) {
     const relativeDir = relative(root, item.dir);
-    const changed = await exec("git", [
-      "diff",
-      "--name-only",
-      "HEAD^",
-      "HEAD",
-      "--",
-      relativeDir,
-    ]);
+    const changed = await exec("git", ["diff", "--name-only", "HEAD^", "HEAD", "--", relativeDir]);
     if (!changed) continue;
-    const messages = await exec("git", [
-      "log",
-      "--format=%s%n%b",
-      "-n",
-      "50",
-      "--",
-      relativeDir,
-    ]);
+    const messages = await exec("git", ["log", "--format=%s%n%b", "-n", "50", "--", relativeDir]);
     const bump = /BREAKING CHANGE|^[^\n]*!:/m.test(messages)
       ? "major"
       : /^(feat)(\([^)]*\))?:/m.test(messages)

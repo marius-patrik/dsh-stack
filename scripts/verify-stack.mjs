@@ -160,7 +160,10 @@ async function verifyCanonicalPackage(dir) {
     `${label} optionalDependencies must be an array`,
   );
   if (stack.kind === "plugin" || stack.kind === "extension")
-    assert(await exists(join(dir, "src")), `${label} declares a ${stack.kind} but has no src/ directory`);
+    assert(
+      await exists(join(dir, "src")),
+      `${label} declares a ${stack.kind} but has no src/ directory`,
+    );
   assert(
     packageManifest?.stack?.id === stack.id,
     `${relative(root, packagePath)} stack.id does not match stack.json`,
@@ -247,24 +250,27 @@ async function main() {
   for (const sourceRoot of [packagesDir, extensionsDir]) {
     if (!(await exists(sourceRoot))) continue;
     for await (const file of walk(sourceRoot)) {
-    const rel = relative(root, file).replaceAll("\\", "/");
-    const ext = rel.slice(rel.lastIndexOf("."));
-    if (!codeExts.has(ext)) continue;
-    const text = await fs.readFile(file, "utf8");
-    const lower = text.toLowerCase();
-    for (const marker of ["todo", "fixme", "not implemented", "initialized: true"])
-      assert(!lower.includes(marker), `${rel} contains unfinished or placeholder marker ${marker}`);
-    assert(!/\bas any\b/.test(text), `${rel} contains an unchecked 'as any' cast`);
-    assert(
-      !/(?:from\s+|import\s*\()(['"]).*plugins\//.test(text),
-      `${rel} imports implementation code from plugins/`,
-    );
-    if (text.length < 400) continue;
-    const hash = createHash("sha256").update(text).digest("hex");
-    const previous = sourceHashes.get(hash);
-    if (previous && !/\/fixtures\/|\/snapshots\//.test(rel) && !/\/index\.(js|mjs|ts)$/.test(rel))
-      fail(`duplicate source implementation: ${previous} and ${rel}`);
-    else if (!previous) sourceHashes.set(hash, rel);
+      const rel = relative(root, file).replaceAll("\\", "/");
+      const ext = rel.slice(rel.lastIndexOf("."));
+      if (!codeExts.has(ext)) continue;
+      const text = await fs.readFile(file, "utf8");
+      const lower = text.toLowerCase();
+      for (const marker of ["todo", "fixme", "not implemented", "initialized: true"])
+        assert(
+          !lower.includes(marker),
+          `${rel} contains unfinished or placeholder marker ${marker}`,
+        );
+      assert(!/\bas any\b/.test(text), `${rel} contains an unchecked 'as any' cast`);
+      assert(
+        !/(?:from\s+|import\s*\()(['"]).*plugins\//.test(text),
+        `${rel} imports implementation code from plugins/`,
+      );
+      if (text.length < 400) continue;
+      const hash = createHash("sha256").update(text).digest("hex");
+      const previous = sourceHashes.get(hash);
+      if (previous && !/\/fixtures\/|\/snapshots\//.test(rel) && !/\/index\.(js|mjs|ts)$/.test(rel))
+        fail(`duplicate source implementation: ${previous} and ${rel}`);
+      else if (!previous) sourceHashes.set(hash, rel);
     }
   }
 

@@ -4,14 +4,7 @@
   "version": "0.3.0",
   "kind": "pack",
   "description": "AI protocol and model dialect composition pack.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
-  "dependencies": [
-    "stack.ai.dialects",
-    "stack.ai.providers"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
+  "dependencies": ["stack.ai.dialects", "stack.ai.providers"],
   "optionalDependencies": []
 }

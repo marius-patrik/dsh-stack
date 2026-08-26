@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "kind": "plugin",
   "description": "Multi-node device and cluster manager: discovers local and Tailnet devices, manages access gateways, and enables distributed node deployment",
-  "files": [
-    "lib",
-    "cordis.patch.yml",
-    "client.js",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
+  "files": ["lib", "cordis.patch.yml", "client.js", "README.md", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []
 }

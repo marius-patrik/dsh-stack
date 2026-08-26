@@ -28,7 +28,10 @@ ctx.provide("commands", {
     return () => undefined;
   },
 });
-const commands = { enabled: true, commands: [{ name: "ping", description: "echo", reply: "pong" }] };
+const commands = {
+  enabled: true,
+  commands: [{ name: "ping", description: "echo", reply: "pong" }],
+};
 plugin.apply(ctx, commands);
 await new Promise((resolve) => setTimeout(resolve, 50));
 

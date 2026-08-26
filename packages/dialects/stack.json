@@ -4,12 +4,7 @@
   "version": "0.1.0",
   "kind": "plugin",
   "description": "Provider wire dialects (openai, claude, gemini, code-assist) for DeepSeek Harness LLM adapters.",
-  "files": [
-    "lib",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
+  "files": ["lib", "README.md", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []
 }
