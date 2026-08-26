@@ -13,6 +13,7 @@
     "stack.agent.personas",
     "stack.agent.preset.coding",
     "stack.agent.preset.default",
+    "stack.agent.preset.manager",
     "stack.agent.skills",
     "stack.agent.tools",
     "stack.agent.translator"

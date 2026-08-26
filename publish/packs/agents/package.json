@@ -32,6 +32,7 @@
     "@dsh-stack/agent-personas": "workspace:*",
     "@dsh-stack/agent-preset-coding": "workspace:*",
     "@dsh-stack/agent-preset-default": "workspace:*",
+    "@dsh-stack/agent-preset-manager": "workspace:*",
     "@dsh-stack/agent-skills": "workspace:*",
     "@dsh-stack/agent-tools": "workspace:*",
     "@dsh-stack/agents": "workspace:*",
