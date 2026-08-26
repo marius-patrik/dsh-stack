@@ -52,6 +52,19 @@ function isAnthropic(url: string): boolean {
 /** How long a quota probe may wait before it is reported as unreachable. */
 const PROBE_TIMEOUT_MS = 15_000;
 
+/** Build the rate-limit fields shared by the healthy and rate-limited snapshot branches. */
+function rateLimitFields(
+  remaining: number | undefined,
+  limit: number | undefined,
+  resetsAt: string | undefined,
+): Pick<QuotaSnapshot, "remaining" | "limit" | "resetsAt"> {
+  return {
+    ...(remaining !== undefined ? { remaining } : {}),
+    ...(limit !== undefined ? { limit } : {}),
+    ...(resetsAt !== undefined ? { resetsAt } : {}),
+  };
+}
+
 /** probeEndpoint implementation. */
 async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSnapshot> {
   const probe = route.probe;
@@ -109,9 +122,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
         fetchedAt: now,
         source: "endpoint",
         message: `${route.displayName} healthy`,
-        ...(remaining !== undefined ? { remaining } : {}),
-        ...(limit !== undefined ? { limit } : {}),
-        ...(resetsAt !== undefined ? { resetsAt } : {}),
+        ...rateLimitFields(remaining, limit, resetsAt),
       };
     }
 
@@ -122,9 +133,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
         fetchedAt: now,
         source: "endpoint",
         message: `Rate limited${resetsAt !== undefined ? ` — resets ${new Date(resetsAt).toLocaleTimeString()}` : ""}`,
-        ...(remaining !== undefined ? { remaining } : {}),
-        ...(limit !== undefined ? { limit } : {}),
-        ...(resetsAt !== undefined ? { resetsAt } : {}),
+        ...rateLimitFields(remaining, limit, resetsAt),
       };
     }
 

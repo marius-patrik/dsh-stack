@@ -43,6 +43,13 @@ export function detectFormat(data: unknown): Format | null {
 
 export type TranslateFn = (input: unknown) => unknown;
 
+/** Narrow an unknown value to a dsh document, or throw if it isn't one. */
+function asDshDocument(data: unknown): { events: DshEvent[] } {
+  if (!data || typeof data !== "object" || !("events" in data) || !Array.isArray(data.events))
+    throw new Error("invalid dsh document");
+  return data as { events: DshEvent[] };
+}
+
 export class TranslatorRegistry {
   private readonly converters = new Map<string, TranslateFn>();
 
@@ -89,9 +96,7 @@ function opencodeToDsh(data: unknown): unknown {
 
 /** dshToOpencode implementation. */
 function dshToOpencode(data: unknown): unknown {
-  if (!data || typeof data !== "object" || !("events" in data) || !Array.isArray(data.events))
-    throw new Error("invalid dsh document");
-  const input = data as { events: DshEvent[] };
+  const input = asDshDocument(data);
   return {
     messages: input.events
       .filter((event) => event.type.includes("/message"))
@@ -125,9 +130,7 @@ function claudeToDsh(data: unknown): unknown {
 
 /** dshToClaude implementation. */
 function dshToClaude(data: unknown): unknown {
-  if (!data || typeof data !== "object" || !("events" in data) || !Array.isArray(data.events))
-    throw new Error("invalid dsh document");
-  const input = data as { events: DshEvent[] };
+  const input = asDshDocument(data);
   return {
     entries: input.events
       .filter((event) => event.type.includes("/message"))

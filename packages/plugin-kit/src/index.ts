@@ -10,6 +10,8 @@ export {
   type SettingsNamespace,
 } from "./settings-section.js";
 
+export { sendJsonResponse } from "./json-response.js";
+
 export type DependencyKind = "required" | "optional";
 
 export interface PluginDependency {

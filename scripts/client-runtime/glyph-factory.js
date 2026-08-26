@@ -10,6 +10,17 @@
  * does `var createGlyphComponent = __dshCreateGlyphComponent(h);` once
  * `h` (React.createElement) is in scope.
  */
+
+/** Resolve the per-instance size and className shared by both glyph factories. */
+function __dshGlyphSizeAndClassName(props, defaultSize, classSuffix) {
+  return {
+    size: props && props.size ? props.size : defaultSize,
+    className:
+      (props && props.className ? props.className + " " : "") +
+      ("dsh-icon-animated" + (classSuffix ? " " + classSuffix : "")),
+  };
+}
+
 /**
  * A second glyph factory for the "decorated" icon variant: a fixed inline
  * layout style (flex centering, a decorative `color`), optionally merged
@@ -26,10 +37,7 @@ function __dshCreateDecoratedGlyphComponent(h) {
     renderChildren,
   ) {
     return function (props) {
-      var size = props && props.size ? props.size : defaultSize;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        ("dsh-icon-animated" + (classSuffix ? " " + classSuffix : ""));
+      var sizeAndClass = __dshGlyphSizeAndClassName(props, defaultSize, classSuffix);
       var style = mergeStyle
         ? Object.assign({}, baseStyle, (props && props.style) || {})
         : baseStyle;
@@ -38,9 +46,9 @@ function __dshCreateDecoratedGlyphComponent(h) {
         [
           "svg",
           {
-            width: size,
-            height: size,
-            className: className,
+            width: sizeAndClass.size,
+            height: sizeAndClass.size,
+            className: sizeAndClass.className,
             viewBox: "0 0 24 24",
             fill: "none",
             stroke: "currentColor",
@@ -66,14 +74,11 @@ function __dshCreateGlyphComponent(h) {
     renderChildren,
   ) {
     return function (props) {
-      var size = props && props.size ? props.size : defaultSize;
-      var className =
-        (props && props.className ? props.className + " " : "") +
-        ("dsh-icon-animated" + (classSuffix ? " " + classSuffix : ""));
+      var sizeAndClass = __dshGlyphSizeAndClassName(props, defaultSize, classSuffix);
       var svgProps = {
-        width: size,
-        height: size,
-        className: className,
+        width: sizeAndClass.size,
+        height: sizeAndClass.size,
+        className: sizeAndClass.className,
         viewBox: "0 0 24 24",
         fill: "none",
         stroke: "currentColor",

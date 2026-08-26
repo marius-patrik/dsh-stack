@@ -40,6 +40,15 @@ function sendError(res: ServerResponse, err: unknown, notConfiguredStatus = 400)
 /** The config getter the handlers read per request (settings-reload safe). */
 export type ConfigSource = () => VoiceConfig;
 
+/** Reject a non-POST request with 405; returns whether the caller should stop handling. */
+function rejectNonPost(req: IncomingMessage, res: ServerResponse): boolean {
+  if (req.method !== "POST") {
+    sendJson(res, 405, { error: "method not allowed" });
+    return true;
+  }
+  return false;
+}
+
 /**
  * POST /voice/api/tts — synthesize `{text, voice?, speed?, format?}` through
  * the resolved provider and stream the upstream audio body straight back, so
@@ -51,10 +60,7 @@ export type ConfigSource = () => VoiceConfig;
 export function makeTtsHandler(current: ConfigSource, accounts: AccountsLike | undefined) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     try {
-      if (req.method !== "POST") {
-        sendJson(res, 405, { error: "method not allowed" });
-        return;
-      }
+      if (rejectNonPost(req, res)) return;
       const raw = await readBody(req);
       let payload: { text?: unknown; voice?: unknown; speed?: unknown; format?: unknown };
       try {
@@ -123,10 +129,7 @@ export function makeTtsHandler(current: ConfigSource, accounts: AccountsLike | u
 export function makeSttHandler(current: ConfigSource, accounts: AccountsLike | undefined) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     try {
-      if (req.method !== "POST") {
-        sendJson(res, 405, { error: "method not allowed" });
-        return;
-      }
+      if (rejectNonPost(req, res)) return;
       const audio = await readBody(req);
       if (audio.length === 0) {
         sendJson(res, 400, { error: "empty audio body" });

@@ -8,6 +8,8 @@
  * so they are centralized here instead of hand-copied per package.
  */
 
+import { spawnSync } from "node:child_process";
+
 /**
  * Assert that a loaded harness plugin module has the expected loader shape:
  * a matching `name`, a function `apply`, an array `inject`, and no default
@@ -64,4 +66,35 @@ export function stubSettingsService() {
     },
   };
   return { service, registrations };
+}
+
+/**
+ * Build a stub `ctx.subprocess` that runs real child processes through
+ * `spawnSync` and adapts the result to the harness subprocess collector
+ * shape (`collected.stdout/stderr.readFrom()`), for check-plugin.mjs scripts
+ * that exercise real subprocess-backed tools (git, shell, etc).
+ *
+ * @param {NodeJS.ProcessEnv} [env] - environment passed to the spawned process.
+ * @returns {{ spawn(spec: { argv: string[]; cwd?: string }): object }}
+ */
+export function stubSpawnSyncSubprocess(env) {
+  return {
+    spawn: (spec) => {
+      const res = spawnSync(spec.argv[0], spec.argv.slice(1), {
+        cwd: spec.cwd,
+        encoding: "utf8",
+        ...(env !== undefined ? { env } : {}),
+      });
+      return {
+        pid: res.pid ?? -1,
+        done: Promise.resolve({ exitCode: res.status, signal: null }),
+        collected: {
+          stdout: { readFrom: () => ({ text: res.stdout ?? "", nextOffset: 0, lossy: false }) },
+          stderr: { readFrom: () => ({ text: res.stderr ?? "", nextOffset: 0, lossy: false }) },
+        },
+        terminate: () => {},
+        waitForExit: async () => true,
+      };
+    },
+  };
 }

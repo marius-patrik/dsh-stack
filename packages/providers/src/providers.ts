@@ -162,6 +162,55 @@ const /** HEADER implementation. */
   });
 const /** HEADERS implementation. */ HEADERS = (headers: Record<string, string>) => headers;
 
+/**
+ * Claude Haiku 4.5, advertised identically by every route that reaches the
+ * Anthropic model family (subscription, direct API, and the Zen aggregator).
+ */
+const CLAUDE_HAIKU_MODEL: ProviderCatalogModel = {
+  id: "claude-haiku-4-5",
+  name: "Claude Haiku 4.5",
+  contextWindow: 200_000,
+  maxTokens: 64_000,
+  reasoning: EFFORTS,
+};
+
+/**
+ * The Kimi model catalog entries served identically by both the API-key and
+ * subscription routes (they hit the same endpoint and the same underlying
+ * catalog). Declared once so the two routes don't drift apart on a rename.
+ */
+function kimiCoreModels(): ProviderCatalogModel[] {
+  return [
+    {
+      id: "kimi-k3",
+      name: "Kimi K3",
+      contextWindow: KIMI_K3_CONTEXT,
+      maxTokens: KIMI_MAX_OUTPUT,
+      reasoning: EFFORTS,
+    },
+    {
+      id: "kimi-k2.7-code",
+      name: "Kimi K2.7 Code",
+      contextWindow: KIMI_CONTEXT,
+      maxTokens: KIMI_MAX_OUTPUT,
+      reasoning: EFFORTS,
+    },
+    {
+      id: "kimi-k2.6",
+      name: "Kimi K2.6",
+      contextWindow: KIMI_CONTEXT,
+      maxTokens: KIMI_MAX_OUTPUT,
+      reasoning: EFFORTS,
+    },
+    {
+      id: "kimi-k2.5",
+      name: "Kimi K2.5",
+      contextWindow: KIMI_CONTEXT,
+      maxTokens: KIMI_MAX_OUTPUT,
+    },
+  ];
+}
+
 // Per-model windows, cross-checked against GET https://api.kimi.com/coding/v1/models
 // (2026-08-18): K3 carries the 1M window, every other coding model 256k. The
 // wire ids below are the aliases this route has been serving; the catalog
@@ -210,33 +259,7 @@ export const PROVIDER_ROUTES: readonly ProviderRoute[] = [
     // same catalog, so the two advertise the same models rather than pinning
     // this one to an older generation.
     models: [
-      {
-        id: "kimi-k3",
-        name: "Kimi K3",
-        contextWindow: KIMI_K3_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-        reasoning: EFFORTS,
-      },
-      {
-        id: "kimi-k2.7-code",
-        name: "Kimi K2.7 Code",
-        contextWindow: KIMI_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-        reasoning: EFFORTS,
-      },
-      {
-        id: "kimi-k2.6",
-        name: "Kimi K2.6",
-        contextWindow: KIMI_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-        reasoning: EFFORTS,
-      },
-      {
-        id: "kimi-k2.5",
-        name: "Kimi K2.5",
-        contextWindow: KIMI_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-      },
+      ...kimiCoreModels(),
       {
         id: "kimi-k2.5-thinking",
         name: "Kimi K2.5 Thinking",
@@ -270,35 +293,7 @@ export const PROVIDER_ROUTES: readonly ProviderRoute[] = [
         messages: [{ role: "user", content: "ping" }],
       }),
     },
-    models: [
-      {
-        id: "kimi-k3",
-        name: "Kimi K3",
-        contextWindow: KIMI_K3_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-        reasoning: EFFORTS,
-      },
-      {
-        id: "kimi-k2.7-code",
-        name: "Kimi K2.7 Code",
-        contextWindow: KIMI_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-        reasoning: EFFORTS,
-      },
-      {
-        id: "kimi-k2.6",
-        name: "Kimi K2.6",
-        contextWindow: KIMI_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-        reasoning: EFFORTS,
-      },
-      {
-        id: "kimi-k2.5",
-        name: "Kimi K2.5",
-        contextWindow: KIMI_CONTEXT,
-        maxTokens: KIMI_MAX_OUTPUT,
-      },
-    ],
+    models: kimiCoreModels(),
     defaultMaxTokens: KIMI_MAX_OUTPUT,
     defaultContextWindow: KIMI_CONTEXT,
   },
@@ -342,13 +337,7 @@ export const PROVIDER_ROUTES: readonly ProviderRoute[] = [
         maxTokens: CLAUDE_MAX_OUTPUT,
         reasoning: EFFORTS,
       },
-      {
-        id: "claude-haiku-4-5",
-        name: "Claude Haiku 4.5",
-        contextWindow: 200_000,
-        maxTokens: 64_000,
-        reasoning: EFFORTS,
-      },
+      CLAUDE_HAIKU_MODEL,
     ],
     defaultMaxTokens: CLAUDE_MAX_OUTPUT,
     defaultContextWindow: CLAUDE_CONTEXT,
@@ -568,13 +557,7 @@ export const PROVIDER_ROUTES: readonly ProviderRoute[] = [
         maxTokens: CLAUDE_MAX_OUTPUT,
         reasoning: EFFORTS,
       },
-      {
-        id: "claude-haiku-4-5",
-        name: "Claude Haiku 4.5",
-        contextWindow: 200_000,
-        maxTokens: 64_000,
-        reasoning: EFFORTS,
-      },
+      CLAUDE_HAIKU_MODEL,
     ],
     defaultMaxTokens: CLAUDE_MAX_OUTPUT,
     defaultContextWindow: CLAUDE_CONTEXT,
@@ -841,13 +824,7 @@ export const PROVIDER_ROUTES: readonly ProviderRoute[] = [
         maxTokens: ZEN_CLAUDE_MAX_OUTPUT,
         reasoning: EFFORTS,
       },
-      {
-        id: "claude-haiku-4-5",
-        name: "Claude Haiku 4.5",
-        contextWindow: 200_000,
-        maxTokens: 64_000,
-        reasoning: EFFORTS,
-      },
+      CLAUDE_HAIKU_MODEL,
       // Gemini family
       {
         id: "gemini-3.7-flash",

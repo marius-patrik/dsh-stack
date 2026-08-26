@@ -26,6 +26,16 @@ export interface CommandResult {
   exit?: boolean;
 }
 
+/** Split a command's raw argument string into whitespace-separated tokens. */
+function splitCommandArgs(args: string): string[] {
+  return args.trim().split(/\s+/);
+}
+
+/** The result returned by every per-session command invoked with no active session. */
+const NO_ACTIVE_SESSION_RESULT: CommandResult = {
+  text: "no active session — create one first with /session new",
+};
+
 export interface Command {
   name: string;
   description: string;
@@ -60,7 +70,7 @@ const sessionCommand: Command = {
   description: "List, create, or switch sessions",
   usage: "/session [list|new|switch <id>|info]",
   handler: async (args, ctx) => {
-    const parts = args.trim().split(/\s+/);
+    const parts = splitCommandArgs(args);
     const action = parts[0] ?? "list";
 
     switch (action) {
@@ -116,10 +126,10 @@ const modelCommand: Command = {
   description: "List or switch models",
   usage: "/model [list|switch <id>]",
   handler: async (args, ctx) => {
-    const parts = args.trim().split(/\s+/);
+    const parts = splitCommandArgs(args);
     const action = parts[0] ?? "list";
 
-    if (!ctx.sessionId) return { text: "no active session — create one first with /session new" };
+    if (!ctx.sessionId) return NO_ACTIVE_SESSION_RESULT;
 
     switch (action) {
       case "list": {
@@ -149,10 +159,10 @@ const goalCommand: Command = {
   description: "Manage persistent goals (via dsh harness)",
   usage: "/goal [list|create <title>|pause|resume|clear]",
   handler: async (args, ctx) => {
-    const parts = args.trim().split(/\s+/);
+    const parts = splitCommandArgs(args);
     const action = parts[0] ?? "list";
 
-    if (!ctx.sessionId) return { text: "no active session — create one first with /session new" };
+    if (!ctx.sessionId) return NO_ACTIVE_SESSION_RESULT;
 
     switch (action) {
       case "list": {

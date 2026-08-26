@@ -7,6 +7,7 @@ import * as crypto from "node:crypto";
 import type { Context } from "@deepseek-ai/cordis";
 import type {} from "@deepseek-ai/dsh-host-webserver";
 import type { QuotaRegistry, QuotaSnapshot } from "./index.js";
+import { sendJsonResponse } from "@dsh-stack/plugin-kit";
 
 /** probeBinariesAndUsage implementation. */
 function probeBinariesAndUsage() {
@@ -225,16 +226,6 @@ export function mountQuotaWeb(ctx: Context, registry: QuotaRegistry): unknown {
   );
 }
 
-/** Send a JSON response. */
-function sendJson(res: ServerResponse, status: number, body: unknown): void {
-  const payload = JSON.stringify(body);
-  res.writeHead(status, {
-    "content-type": "application/json; charset=utf-8",
-    "cache-control": "no-store",
-  });
-  res.end(payload);
-}
-
 /** Meter bar: renders a visual usage bar. e.g. [████████░░░░] 67% */
 function meterBar(used: number, limit: number, width = 20): string {
   if (limit <= 0) return `[${"░".repeat(width)}] no limit`;
@@ -275,7 +266,7 @@ function makeQuotaHandler(
     try {
       // GET /quotas/api/integrations — live integration status, contained binaries & real quotas
       if (pathname === `${QUOTAS_PREFIX}/api/integrations` && req.method === "GET") {
-        sendJson(res, 200, probeBinariesAndUsage());
+        sendJsonResponse(res, 200, probeBinariesAndUsage());
         return;
       }
 
@@ -303,9 +294,9 @@ function makeQuotaHandler(
                   };
                 })
             : [];
-          sendJson(res, 200, { sessions });
+          sendJsonResponse(res, 200, { sessions });
         } catch (err) {
-          sendJson(res, 200, { sessions: [], error: (err as Error).message });
+          sendJsonResponse(res, 200, { sessions: [], error: (err as Error).message });
         }
         return;
       }
@@ -323,9 +314,9 @@ function makeQuotaHandler(
           } else {
             execFileSync("tmux", ["new-session", "-d", "-s", name]);
           }
-          sendJson(res, 200, { success: true, name });
+          sendJsonResponse(res, 200, { success: true, name });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -340,12 +331,12 @@ function makeQuotaHandler(
         if (oldName && newName) {
           try {
             execFileSync("tmux", ["rename-session", "-t", oldName, newName]);
-            sendJson(res, 200, { success: true, name: newName });
+            sendJsonResponse(res, 200, { success: true, name: newName });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         } else {
-          sendJson(res, 400, { error: "oldName and newName required" });
+          sendJsonResponse(res, 400, { error: "oldName and newName required" });
         }
         return;
       }
@@ -356,12 +347,12 @@ function makeQuotaHandler(
         if (name) {
           try {
             execSync(`tmux kill-session -t ${name}`, { timeout: 2000 });
-            sendJson(res, 200, { success: true });
+            sendJsonResponse(res, 200, { success: true });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         } else {
-          sendJson(res, 400, { error: "session name required" });
+          sendJsonResponse(res, 400, { error: "session name required" });
         }
         return;
       }
@@ -375,9 +366,9 @@ function makeQuotaHandler(
             encoding: "utf-8",
             timeout: 2000,
           });
-          sendJson(res, 200, { buffer });
+          sendJsonResponse(res, 200, { buffer });
         } catch (err) {
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             buffer: "(unable to capture session output)",
             error: (err as Error).message,
           });
@@ -399,9 +390,9 @@ function makeQuotaHandler(
           } else if (keys) {
             execFileSync("tmux", ["send-keys", "-t", name, keys]);
           }
-          sendJson(res, 200, { success: true });
+          sendJsonResponse(res, 200, { success: true });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -426,9 +417,9 @@ function makeQuotaHandler(
                   };
                 })
             : [];
-          sendJson(res, 200, { windows });
+          sendJsonResponse(res, 200, { windows });
         } catch (err) {
-          sendJson(res, 200, { windows: [], error: (err as Error).message });
+          sendJsonResponse(res, 200, { windows: [], error: (err as Error).message });
         }
         return;
       }
@@ -442,9 +433,9 @@ function makeQuotaHandler(
         const index = String(body["index"] ?? "0").replace(/[^0-9]/g, "");
         try {
           execFileSync("tmux", ["select-window", "-t", `${name}:${index}`]);
-          sendJson(res, 200, { success: true });
+          sendJsonResponse(res, 200, { success: true });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -455,9 +446,9 @@ function makeQuotaHandler(
         const windowName = String(body["windowName"] || "win").replace(/[^a-zA-Z0-9_-]/g, "");
         try {
           execFileSync("tmux", ["new-window", "-t", name, "-n", windowName]);
-          sendJson(res, 200, { success: true });
+          sendJsonResponse(res, 200, { success: true });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -488,9 +479,9 @@ function makeQuotaHandler(
                   };
                 })
             : [];
-          sendJson(res, 200, { containers });
+          sendJsonResponse(res, 200, { containers });
         } catch (err) {
-          sendJson(res, 200, { containers: [], error: (err as Error).message });
+          sendJsonResponse(res, 200, { containers: [], error: (err as Error).message });
         }
         return;
       }
@@ -502,12 +493,12 @@ function makeQuotaHandler(
         if (["start", "stop", "restart", "rm"].includes(action) && id) {
           try {
             execSync(`docker ${action} ${id}`, { timeout: 5000 });
-            sendJson(res, 200, { success: true });
+            sendJsonResponse(res, 200, { success: true });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         } else {
-          sendJson(res, 400, { error: "invalid action or container id" });
+          sendJsonResponse(res, 400, { error: "invalid action or container id" });
         }
         return;
       }
@@ -520,15 +511,15 @@ function makeQuotaHandler(
               encoding: "utf-8",
               timeout: 3000,
             });
-            sendJson(res, 200, { logs });
+            sendJsonResponse(res, 200, { logs });
           } catch (err) {
-            sendJson(res, 200, {
+            sendJsonResponse(res, 200, {
               logs: "(unable to fetch container logs)",
               error: (err as Error).message,
             });
           }
         } else {
-          sendJson(res, 400, { error: "container id required" });
+          sendJsonResponse(res, 400, { error: "container id required" });
         }
         return;
       }
@@ -540,7 +531,7 @@ function makeQuotaHandler(
         try {
           const stat = fs.statSync(targetPath);
           if (!stat.isDirectory()) {
-            sendJson(res, 200, {
+            sendJsonResponse(res, 200, {
               path: targetPath,
               isFile: true,
               size: stat.size,
@@ -590,13 +581,13 @@ function makeQuotaHandler(
             return a.name.localeCompare(b.name);
           });
           const parent = path.dirname(targetPath);
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             path: targetPath,
             parent: parent !== targetPath ? parent : null,
             entries,
           });
         } catch (err) {
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             path: targetPath,
             parent: null,
             entries: [],
@@ -610,14 +601,14 @@ function makeQuotaHandler(
       if (pathname === `${QUOTAS_PREFIX}/api/fs/read` && req.method === "GET") {
         const rawPath = url.searchParams.get("path") || "";
         if (!rawPath) {
-          sendJson(res, 400, { error: "path parameter required" });
+          sendJsonResponse(res, 400, { error: "path parameter required" });
           return;
         }
         const targetPath = path.resolve(rawPath);
         try {
           const stat = fs.statSync(targetPath);
           if (stat.isDirectory()) {
-            sendJson(res, 200, {
+            sendJsonResponse(res, 200, {
               path: targetPath,
               name: path.basename(targetPath),
               isDirectory: true,
@@ -626,7 +617,7 @@ function makeQuotaHandler(
             return;
           }
           if (stat.size > 2 * 1024 * 1024) {
-            sendJson(res, 200, {
+            sendJsonResponse(res, 200, {
               path: targetPath,
               name: path.basename(targetPath),
               size: stat.size,
@@ -636,7 +627,7 @@ function makeQuotaHandler(
             return;
           }
           const content = fs.readFileSync(targetPath, "utf-8");
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             path: targetPath,
             name: path.basename(targetPath),
             size: stat.size,
@@ -644,7 +635,7 @@ function makeQuotaHandler(
             isDirectory: false,
           });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -653,13 +644,13 @@ function makeQuotaHandler(
       if (pathname === `${QUOTAS_PREFIX}/api/fs/icon` && req.method === "GET") {
         const rawPath = url.searchParams.get("path") || "";
         if (!rawPath) {
-          sendJson(res, 400, { error: "path parameter required" });
+          sendJsonResponse(res, 400, { error: "path parameter required" });
           return;
         }
         const targetPath = path.resolve(rawPath);
         try {
           if (!fs.existsSync(targetPath)) {
-            sendJson(res, 404, { error: "File not found" });
+            sendJsonResponse(res, 404, { error: "File not found" });
             return;
           }
           const cacheDir = path.join(os.homedir(), ".agents/cache/app-icons");
@@ -726,9 +717,9 @@ function makeQuotaHandler(
             } catch {}
           }
 
-          sendJson(res, 404, { error: "No icon available for target" });
+          sendJsonResponse(res, 404, { error: "No icon available for target" });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -744,17 +735,17 @@ function makeQuotaHandler(
             const data = JSON.parse(bodyStr || "{}");
             const targetPath = path.resolve(data.path || "");
             if (!targetPath) {
-              sendJson(res, 400, { error: "Invalid path" });
+              sendJsonResponse(res, 400, { error: "Invalid path" });
               return;
             }
             fs.writeFileSync(targetPath, data.content || "", "utf-8");
-            sendJson(res, 200, {
+            sendJsonResponse(res, 200, {
               success: true,
               path: targetPath,
               size: Buffer.byteLength(data.content || "", "utf-8"),
             });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         });
         return;
@@ -765,7 +756,7 @@ function makeQuotaHandler(
         const repoPath = url.searchParams.get("path") || "";
         const subPath = url.searchParams.get("subpath") || "";
         if (!repoPath) {
-          sendJson(res, 400, { error: "path parameter required" });
+          sendJsonResponse(res, 400, { error: "path parameter required" });
           return;
         }
         try {
@@ -986,7 +977,7 @@ function makeQuotaHandler(
             languages.sort((a, b) => b.percent - a.percent);
           } catch {}
 
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             repoPath,
             repoName,
             owner,
@@ -1002,7 +993,7 @@ function makeQuotaHandler(
             languages,
           });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -1012,15 +1003,15 @@ function makeQuotaHandler(
         const repoPath = url.searchParams.get("path") || "";
         const file = url.searchParams.get("file") || "";
         if (!repoPath) {
-          sendJson(res, 400, { error: "path parameter required" });
+          sendJsonResponse(res, 400, { error: "path parameter required" });
           return;
         }
         try {
           const cmd = file ? `git diff HEAD -- "${file}"` : "git diff HEAD";
           const diff = execSync(cmd, { cwd: repoPath, encoding: "utf-8", timeout: 5000 });
-          sendJson(res, 200, { repoPath, file, diff });
+          sendJsonResponse(res, 200, { repoPath, file, diff });
         } catch (err) {
-          sendJson(res, 200, { repoPath, file, diff: "", error: (err as Error).message });
+          sendJsonResponse(res, 200, { repoPath, file, diff: "", error: (err as Error).message });
         }
         return;
       }
@@ -1029,7 +1020,7 @@ function makeQuotaHandler(
       if (pathname === `${QUOTAS_PREFIX}/api/git/status` && req.method === "GET") {
         const repoPath = url.searchParams.get("path") || "";
         if (!repoPath) {
-          sendJson(res, 400, { error: "path parameter required" });
+          sendJsonResponse(res, 400, { error: "path parameter required" });
           return;
         }
         try {
@@ -1064,9 +1055,9 @@ function makeQuotaHandler(
               files.push({ code: line.slice(0, 2), path: fPath, staged, status });
             }
           }
-          sendJson(res, 200, { repoPath, branch, ahead, behind, files });
+          sendJsonResponse(res, 200, { repoPath, branch, ahead, behind, files });
         } catch (err) {
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             repoPath,
             branch: "unknown",
             ahead: 0,
@@ -1099,9 +1090,9 @@ function makeQuotaHandler(
                 };
               })
             : [];
-          sendJson(res, 200, { repoPath, commits });
+          sendJsonResponse(res, 200, { repoPath, commits });
         } catch (err) {
-          sendJson(res, 200, { repoPath, commits: [], error: (err as Error).message });
+          sendJsonResponse(res, 200, { repoPath, commits: [], error: (err as Error).message });
         }
         return;
       }
@@ -1124,9 +1115,9 @@ function makeQuotaHandler(
                 return { name, isCurrent };
               })
             : [];
-          sendJson(res, 200, { repoPath, current, branches });
+          sendJsonResponse(res, 200, { repoPath, current, branches });
         } catch (err) {
-          sendJson(res, 200, {
+          sendJsonResponse(res, 200, {
             repoPath,
             current: "main",
             branches: [],
@@ -1154,9 +1145,9 @@ function makeQuotaHandler(
               encoding: "utf-8",
               timeout: 5000,
             }).trim();
-            sendJson(res, 200, { success: true, output: out });
+            sendJsonResponse(res, 200, { success: true, output: out });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         });
         return;
@@ -1191,9 +1182,9 @@ function makeQuotaHandler(
                 timeout: 5000,
               });
             }
-            sendJson(res, 200, { success: true });
+            sendJsonResponse(res, 200, { success: true });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         });
         return;
@@ -1214,9 +1205,9 @@ function makeQuotaHandler(
               encoding: "utf-8",
               timeout: 5000,
             }).trim();
-            sendJson(res, 200, { success: true, output: out });
+            sendJsonResponse(res, 200, { success: true, output: out });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         });
         return;
@@ -1239,9 +1230,9 @@ function makeQuotaHandler(
               encoding: "utf-8",
               timeout: 5000,
             }).trim();
-            sendJson(res, 200, { success: true, output: out });
+            sendJsonResponse(res, 200, { success: true, output: out });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         });
         return;
@@ -1262,9 +1253,9 @@ function makeQuotaHandler(
               encoding: "utf-8",
               timeout: 15000,
             }).trim();
-            sendJson(res, 200, { success: true, output: out });
+            sendJsonResponse(res, 200, { success: true, output: out });
           } catch (err) {
-            sendJson(res, 500, { error: (err as Error).message });
+            sendJsonResponse(res, 500, { error: (err as Error).message });
           }
         });
         return;
@@ -1323,9 +1314,9 @@ function makeQuotaHandler(
             ws.global.archivedSessionIds = Array.from(archived);
             fs.writeFileSync(wsFile, JSON.stringify(ws, null, 2), "utf8");
           }
-          sendJson(res, 200, { success: true, archivedCount });
+          sendJsonResponse(res, 200, { success: true, archivedCount });
         } catch (err) {
-          sendJson(res, 500, { error: (err as Error).message });
+          sendJsonResponse(res, 500, { error: (err as Error).message });
         }
         return;
       }
@@ -1342,7 +1333,7 @@ function makeQuotaHandler(
 
       // GET /quotas/api/snapshots — all snapshots as JSON
       if (pathname === `${QUOTAS_PREFIX}/api/snapshots` && req.method === "GET") {
-        sendJson(res, 200, { snapshots: registry.all() });
+        sendJsonResponse(res, 200, { snapshots: registry.all() });
         return;
       }
 
@@ -1365,7 +1356,7 @@ function makeQuotaHandler(
             resetsAt: s.resetsAt ?? null,
           })),
         };
-        sendJson(res, 200, summary);
+        sendJsonResponse(res, 200, summary);
         return;
       }
 
@@ -1374,7 +1365,7 @@ function makeQuotaHandler(
       if (pathname.startsWith(refreshPrefix) && req.method === "POST") {
         const provider = decodeURIComponent(pathname.slice(refreshPrefix.length));
         const snapshot = await registry.refresh(provider);
-        sendJson(res, 200, { snapshot });
+        sendJsonResponse(res, 200, { snapshot });
         return;
       }
 
@@ -1389,14 +1380,14 @@ function makeQuotaHandler(
             remaining: refreshed.remaining,
           });
         }
-        sendJson(res, 200, { snapshots });
+        sendJsonResponse(res, 200, { snapshots });
         return;
       }
 
       res.writeHead(404, { "content-type": "application/json; charset=utf-8" });
       res.end(JSON.stringify({ error: "not found" }));
     } catch (err) {
-      sendJson(res, 500, { error: (err as Error).message });
+      sendJsonResponse(res, 500, { error: (err as Error).message });
     }
   };
 }

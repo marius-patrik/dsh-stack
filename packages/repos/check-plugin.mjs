@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSpawnSyncSubprocess } from "../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "repos-"));
 const env = { ...process.env };
@@ -54,25 +54,7 @@ console.log("ownerRepoFromRemote ok");
 const repo = join(root, "repo");
 mkdirSync(repo, { recursive: true });
 const gitCtx = new Context();
-gitCtx.subprocess = {
-  spawn: (spec) => {
-    const res = spawnSync(spec.argv[0], spec.argv.slice(1), {
-      cwd: spec.cwd,
-      encoding: "utf8",
-      env,
-    });
-    return {
-      pid: res.pid ?? -1,
-      done: Promise.resolve({ exitCode: res.status, signal: null }),
-      collected: {
-        stdout: { readFrom: () => ({ text: res.stdout ?? "", nextOffset: 0, lossy: false }) },
-        stderr: { readFrom: () => ({ text: res.stderr ?? "", nextOffset: 0, lossy: false }) },
-      },
-      terminate: () => {},
-      waitForExit: async () => true,
-    };
-  },
-};
+gitCtx.subprocess = stubSpawnSyncSubprocess(env);
 const { stdout: initOut } = await runGit(gitCtx, repo, ["init", "-b", "main"]);
 assert.equal(await currentBranch(gitCtx, repo), "main");
 await runGit(gitCtx, repo, ["config", "user.email", "repos@example.com"]);

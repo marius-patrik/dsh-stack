@@ -38,6 +38,9 @@
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs"
   },
+  "dependencies": {
+    "@dsh-stack/plugin-kit": "workspace:*"
+  },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-settings": "0.1.1-rc.2",

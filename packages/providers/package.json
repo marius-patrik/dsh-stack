@@ -45,7 +45,8 @@
   },
   "dependencies": {
     "@dsh-stack/dialects": "workspace:*",
-    "@dsh-stack/credential-vault": "workspace:*"
+    "@dsh-stack/credential-vault": "workspace:*",
+    "@dsh-stack/plugin-kit": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",

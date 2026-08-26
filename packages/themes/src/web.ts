@@ -21,6 +21,7 @@ import {
 } from "./catalog.js";
 import { installThemeSource, listInstalled } from "./index.js";
 import type { StoredTheme } from "./store.js";
+import { sendJsonResponse } from "@dsh-stack/plugin-kit";
 
 /** The route prefix the browser half POSTs to. */
 export const THEMES_API_PREFIX = "/themes/api";
@@ -56,16 +57,6 @@ export function mountThemeWeb(ctx: Context, deps: ThemeWebDeps): unknown {
       handler: makeThemeHandler(deps),
     }),
   );
-}
-
-/** Send a JSON response. */
-function sendJson(res: ServerResponse, status: number, body: unknown): void {
-  const payload = JSON.stringify(body);
-  res.writeHead(status, {
-    "content-type": "application/json; charset=utf-8",
-    "cache-control": "no-store",
-  });
-  res.end(payload);
 }
 
 /** One malformed-request rejection (HTTP 400). */
@@ -146,7 +137,7 @@ function makeThemeHandler(
 
     try {
       if (req.method !== "POST") {
-        sendJson(res, 405, { error: "method not allowed" });
+        sendJsonResponse(res, 405, { error: "method not allowed" });
         return;
       }
 
@@ -156,7 +147,7 @@ function makeThemeHandler(
         const query = stringField(body, "query");
         const limit = typeof body.limit === "number" ? body.limit : undefined;
         const results = await searchCatalog(deps.catalogUrl, query, limit);
-        sendJson(res, 200, { results });
+        sendJsonResponse(res, 200, { results });
         return;
       }
 
@@ -166,7 +157,7 @@ function makeThemeHandler(
         const namespace = stringField(body, "namespace");
         const name = stringField(body, "name");
         const installed = await installCatalogExtension(deps, namespace, name);
-        sendJson(res, 200, { installed });
+        sendJsonResponse(res, 200, { installed });
         return;
       }
 
@@ -179,7 +170,7 @@ function makeThemeHandler(
         const removed = await removeTheme(storeHandle(deps.home(), deps.root), id);
         if (!removed) throw new BadRequest(`no installed theme "${id}"`);
         if (deps.active() === id) await deps.setActive("");
-        sendJson(res, 200, { removed: id });
+        sendJsonResponse(res, 200, { removed: id });
         return;
       }
 
@@ -195,17 +186,17 @@ function makeThemeHandler(
           }
         }
         await deps.setActive(id);
-        sendJson(res, 200, { active: id });
+        sendJsonResponse(res, 200, { active: id });
         return;
       }
 
-      sendJson(res, 404, { error: "not found" });
+      sendJsonResponse(res, 404, { error: "not found" });
     } catch (error) {
       if (error instanceof BadRequest) {
-        sendJson(res, 400, { error: error.message });
+        sendJsonResponse(res, 400, { error: error.message });
         return;
       }
-      sendJson(res, 500, { error: (error as Error).message });
+      sendJsonResponse(res, 500, { error: (error as Error).message });
     }
   };
 }

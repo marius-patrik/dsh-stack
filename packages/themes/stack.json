@@ -5,6 +5,6 @@
   "kind": "plugin",
   "description": "VS Code/TextMate theme support for the dsh web UI",
   "files": ["lib", "client.js", "cordis.patch.yml", "README.md", "package.json", "stack.json"],
-  "dependencies": [],
+  "dependencies": ["stack.library.plugin-kit"],
   "optionalDependencies": []
 }
