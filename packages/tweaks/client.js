@@ -885,17 +885,8 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** AgentPresetIcon implementation. */
-    var AgentPresetIcon = createGlyphComponent(16, "", false, true, false, function () {
-      return [
-        h("path", { d: "M12 8V4H8" }),
-        h("rect", { width: "16", height: "12", x: "4", y: "8", rx: "2" }),
-        h("path", { d: "M2 14h2" }),
-        h("path", { d: "M20 14h2" }),
-        h("path", { d: "M15 13v2" }),
-        h("path", { d: "M9 13v2" }),
-      ];
-    });
+    /** AgentPresetIcon implementation — same bot-head glyph as RobotHeadNavIcon. */
+    var AgentPresetIcon = RobotHeadNavIcon;
 
     /** EllipsisIcon implementation. */
     var EllipsisIcon = createGlyphComponent(16, "", false, true, false, function () {
@@ -1676,6 +1667,164 @@ window.__ModuleLoader__.load({
       return h(Fragment, null, typeof t === "function" ? t("close") : "Close");
     }
 
+    /**
+     * Injects a custom theme palette as CSS custom properties into a `<style>` tag
+     * (creating it on first use) and applies the corresponding `data-theme` attribute.
+     * Shared by ThemeSettingsSection's live preview and the module's saved-palette
+     * initializer so both write the exact same variable set.
+     */
+    function applyCustomThemePaletteVars(palette, themeType) {
+      if (typeof document === "undefined") return;
+      var styleEl = document.getElementById("dsh-custom-theme-vars");
+      if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = "dsh-custom-theme-vars";
+        document.head.appendChild(styleEl);
+      }
+
+      var css =
+        ":root, [data-theme], body {\n" +
+        "  --dsw-alias-primary: " +
+        palette.primary +
+        " !important;\n" +
+        "  --dsw-alias-brand-primary: " +
+        palette.primary +
+        " !important;\n" +
+        "  --dsw-alias-bg-base: " +
+        palette.bgBase +
+        " !important;\n" +
+        "  --dsw-alias-bg-layer-1: " +
+        palette.surfaceL1 +
+        " !important;\n" +
+        "  --dsw-alias-surface-l1: " +
+        palette.surfaceL1 +
+        " !important;\n" +
+        "  --dsw-alias-bg-layer-2: " +
+        palette.surfaceL2 +
+        " !important;\n" +
+        "  --dsw-alias-surface-l2: " +
+        palette.surfaceL2 +
+        " !important;\n" +
+        "  --dsw-alias-bg-overlay: " +
+        palette.surfaceL2 +
+        " !important;\n" +
+        "  --dsw-alias-border-l1: " +
+        palette.borderL1 +
+        " !important;\n" +
+        "  --dsw-alias-border-l2: " +
+        palette.borderL1 +
+        " !important;\n" +
+        "  --dsw-alias-label-primary: " +
+        palette.textPrimary +
+        " !important;\n" +
+        "  --dsw-alias-label-secondary: " +
+        palette.textSecondary +
+        " !important;\n" +
+        "  --dsw-specific-sidebar-fill: " +
+        palette.sidebar +
+        " !important;\n" +
+        "}\n";
+
+      styleEl.textContent = css;
+      if (themeType === "oled") {
+        document.documentElement.setAttribute("data-theme", "oled");
+      } else if (themeType === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+    }
+
+    /** Style for the outer container of a single settings row (label + control). */
+    var SETTINGS_ROW_CONTAINER_STYLE = {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "14px 16px",
+      borderRadius: "10px",
+      background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
+      border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+    };
+
+    /** Style for the bold title text inside a settings row label. */
+    var SETTINGS_ROW_TITLE_STYLE = {
+      fontSize: "14px",
+      fontWeight: 600,
+      color: "var(--dsw-alias-label-primary)",
+    };
+
+    /** Style for the secondary description text inside a settings row label. */
+    var SETTINGS_ROW_DESC_STYLE = { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" };
+
+    /** Style for a checkbox-style toggle control used as a settings row's control element. */
+    var SETTINGS_ROW_CHECKBOX_STYLE = {
+      width: "18px",
+      height: "18px",
+      cursor: "pointer",
+      accentColor: "var(--dsw-alias-primary, #6366f1)",
+    };
+
+    /**
+     * Renders one settings row: a title/description label on the left paired with an
+     * arbitrary control element (select, checkbox, etc.) on the right. Shared by every
+     * preferences row in GeneralSection to avoid repeating the row/label style objects.
+     */
+    function createSettingsRow(title, description, control) {
+      return h(
+        "div",
+        { style: SETTINGS_ROW_CONTAINER_STYLE },
+        h(
+          "div",
+          { style: { display: "flex", flexDirection: "column", gap: "3px" } },
+          h("div", { style: SETTINGS_ROW_TITLE_STYLE }, title),
+          h("div", { style: SETTINGS_ROW_DESC_STYLE }, description),
+        ),
+        control,
+      );
+    }
+
+    /** Renders a checkbox toggle control for use as a settings row's control element. */
+    function createSettingsToggleCheckbox(checked, onChange) {
+      return h("input", {
+        type: "checkbox",
+        checked: checked,
+        onChange: onChange,
+        style: SETTINGS_ROW_CHECKBOX_STYLE,
+      });
+    }
+
+    /** Style for a <select> control used as a settings row's control element. */
+    var SETTINGS_ROW_SELECT_STYLE = {
+      padding: "6px 12px",
+      borderRadius: "8px",
+      border: "1px solid var(--dsw-alias-border-l1)",
+      background: "var(--dsw-alias-bg-layer-2)",
+      color: "var(--dsw-alias-label-primary)",
+      fontSize: "13px",
+      cursor: "pointer",
+    };
+
+    /** Writes a setting value to localStorage, silently ignoring quota/availability errors. */
+    function persistSettingToLocalStorage(storageKey, value) {
+      try {
+        localStorage.setItem(storageKey, value);
+      } catch (err) {}
+    }
+
+    /**
+     * Renders a <select> control for use as a settings row's control element, from an array
+     * of {value, label} option entries.
+     */
+    function createSettingsSelect(value, onChange, optionEntries) {
+      return h(
+        "select",
+        { value: value, onChange: onChange, style: SETTINGS_ROW_SELECT_STYLE },
+        optionEntries.map(function (opt) {
+          return h("option", { key: opt.value, value: opt.value }, opt.label);
+        }),
+      );
+    }
+
     /** GeneralSection implementation. */
     function GeneralSection(props) {
       var noticeState = React.useState(function () {
@@ -1862,516 +2011,105 @@ window.__ModuleLoader__.load({
           ),
         ),
         // 0. Composer Toolbar Layout Setting
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Composer Toolbar Layout",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Choose between a unified single input line or a split top toolbar",
-            ),
-          ),
-          h(
-            "select",
-            {
-              value: composerLayout,
-              onChange: handleSelectComposerLayout,
-              style: {
-                padding: "6px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1)",
-                background: "var(--dsw-alias-bg-layer-2)",
-                color: "var(--dsw-alias-label-primary)",
-                fontSize: "13px",
-                cursor: "pointer",
-              },
-            },
-            h("option", { value: "unified" }, "Unified Input Bar (Inline)"),
-            h("option", { value: "split" }, "Split Toolbar (Dedicated Bar)"),
-          ),
+        createSettingsRow(
+          "Composer Toolbar Layout",
+          "Choose between a unified single input line or a split top toolbar",
+          createSettingsSelect(composerLayout, handleSelectComposerLayout, [
+            { value: "unified", label: "Unified Input Bar (Inline)" },
+            { value: "split", label: "Split Toolbar (Dedicated Bar)" },
+          ]),
         ),
         // 1. Default Preset Picker
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+        createSettingsRow(
+          "Default Agent Preset",
+          "Preset applied when creating new conversation sessions",
+          createSettingsSelect(
+            defaultMode,
+            function (e) {
+              setDefaultMode(e.target.value);
+              persistSettingToLocalStorage("dsh_default_preset", e.target.value);
             },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Default Agent Preset",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Preset applied when creating new conversation sessions",
-            ),
-          ),
-          h(
-            "select",
-            {
-              value: defaultMode,
-              onChange: function (e) {
-                setDefaultMode(e.target.value);
-                try {
-                  localStorage.setItem("dsh_default_preset", e.target.value);
-                } catch (err) {}
-              },
-              style: {
-                padding: "6px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1)",
-                background: "var(--dsw-alias-bg-layer-2)",
-                color: "var(--dsw-alias-label-primary)",
-                fontSize: "13px",
-                cursor: "pointer",
-              },
-            },
-            h("option", { value: "code" }, "Code (Pair Programmer)"),
-            h("option", { value: "architect" }, "Architect (Design & Plan)"),
-            h("option", { value: "ask" }, "Ask (Quick Q&A)"),
-            h("option", { value: "standard" }, "Standard (Full Harness)"),
+            [
+              { value: "code", label: "Code (Pair Programmer)" },
+              { value: "architect", label: "Architect (Design & Plan)" },
+              { value: "ask", label: "Ask (Quick Q&A)" },
+              { value: "standard", label: "Standard (Full Harness)" },
+            ],
           ),
         ),
         // 2. Permission Preset
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+        createSettingsRow(
+          "Execution Permission Level",
+          "Control tool invocation and shell command execution permissions",
+          createSettingsSelect(
+            permissionPreset,
+            function (e) {
+              setPermissionPreset(e.target.value);
+              persistSettingToLocalStorage("dsh_permission_preset", e.target.value);
             },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Execution Permission Level",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Control tool invocation and shell command execution permissions",
-            ),
-          ),
-          h(
-            "select",
-            {
-              value: permissionPreset,
-              onChange: function (e) {
-                setPermissionPreset(e.target.value);
-                try {
-                  localStorage.setItem("dsh_permission_preset", e.target.value);
-                } catch (err) {}
-              },
-              style: {
-                padding: "6px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1)",
-                background: "var(--dsw-alias-bg-layer-2)",
-                color: "var(--dsw-alias-label-primary)",
-                fontSize: "13px",
-                cursor: "pointer",
-              },
-            },
-            h("option", { value: "danger-full-access" }, "Full Access (Autonomous Execution)"),
-            h("option", { value: "confirm-destructive" }, "Confirm Destructive Actions"),
-            h("option", { value: "read-only" }, "Read-Only (Ask for edits)"),
+            [
+              { value: "danger-full-access", label: "Full Access (Autonomous Execution)" },
+              { value: "confirm-destructive", label: "Confirm Destructive Actions" },
+              { value: "read-only", label: "Read-Only (Ask for edits)" },
+            ],
           ),
         ),
         // 3. Enter Key Behavior
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Send Message on Enter",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "When disabled, Cmd+Enter sends and Enter adds a new line",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: sendOnEnter,
-            onChange: function (e) {
-              setSendOnEnter(e.target.checked);
-              try {
-                localStorage.setItem("dsh_send_on_enter", e.target.checked ? "true" : "false");
-              } catch (err) {}
-            },
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
+        createSettingsRow(
+          "Send Message on Enter",
+          "When disabled, Cmd+Enter sends and Enter adds a new line",
+          createSettingsToggleCheckbox(sendOnEnter, function (e) {
+            setSendOnEnter(e.target.checked);
+            persistSettingToLocalStorage("dsh_send_on_enter", e.target.checked ? "true" : "false");
           }),
         ),
         // 4. Stream Reasoning Trace
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Show Thinking & Reasoning Trace",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Display collapsible model internal thinking trace during agent responses",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: showThinking,
-            onChange: function (e) {
-              setShowThinking(e.target.checked);
-              try {
-                localStorage.setItem(
-                  "dsh_show_reasoning_trace",
-                  e.target.checked ? "true" : "false",
-                );
-              } catch (err) {}
-            },
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
+        createSettingsRow(
+          "Show Thinking & Reasoning Trace",
+          "Display collapsible model internal thinking trace during agent responses",
+          createSettingsToggleCheckbox(showThinking, function (e) {
+            setShowThinking(e.target.checked);
+            persistSettingToLocalStorage(
+              "dsh_show_reasoning_trace",
+              e.target.checked ? "true" : "false",
+            );
           }),
         ),
         // 5. Auto Scroll
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Auto-Scroll During Stream",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Automatically follow new message tokens to bottom of chat",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: autoScroll,
-            onChange: function (e) {
-              setAutoScroll(e.target.checked);
-              try {
-                localStorage.setItem("dsh_auto_scroll_stream", e.target.checked ? "true" : "false");
-              } catch (err) {}
-            },
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
+        createSettingsRow(
+          "Auto-Scroll During Stream",
+          "Automatically follow new message tokens to bottom of chat",
+          createSettingsToggleCheckbox(autoScroll, function (e) {
+            setAutoScroll(e.target.checked);
+            persistSettingToLocalStorage(
+              "dsh_auto_scroll_stream",
+              e.target.checked ? "true" : "false",
+            );
           }),
         ),
         // 6. Hide Inactive Send Button Setting
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Hide Send Button When Inactive",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Hide the submit button when the message input is empty or disabled",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: hideSendButton,
-            onChange: handleToggleHideSend,
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
-          }),
+        createSettingsRow(
+          "Hide Send Button When Inactive",
+          "Hide the submit button when the message input is empty or disabled",
+          createSettingsToggleCheckbox(hideSendButton, handleToggleHideSend),
         ),
         // 7. Sidebar Search
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Sidebar Search Bar",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Display quick search bar at the top of the sidebar explorer",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: searchEnabled,
-            onChange: handleToggleSearch,
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
-          }),
+        createSettingsRow(
+          "Sidebar Search Bar",
+          "Display quick search bar at the top of the sidebar explorer",
+          createSettingsToggleCheckbox(searchEnabled, handleToggleSearch),
         ),
         // 8. Swap Sidebars
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Swap Main & Secondary Sidebars",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Position the Main Sidebar on the right and the Secondary Sidebar dock on the left",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: swapSidebars,
-            onChange: handleToggleSwapSidebars,
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
-          }),
+        createSettingsRow(
+          "Swap Main & Secondary Sidebars",
+          "Position the Main Sidebar on the right and the Secondary Sidebar dock on the left",
+          createSettingsToggleCheckbox(swapSidebars, handleToggleSwapSidebars),
         ),
         // 9. Internal Testing Notice
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "14px 16px",
-              borderRadius: "10px",
-              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.04))",
-              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "3px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-primary)",
-                },
-              },
-              "Internal Testing Notice",
-            ),
-            h(
-              "div",
-              { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-              "Show the internal testing notice modal dialog on startup",
-            ),
-          ),
-          h("input", {
-            type: "checkbox",
-            checked: noticeEnabled,
-            onChange: handleToggleNotice,
-            style: {
-              width: "18px",
-              height: "18px",
-              cursor: "pointer",
-              accentColor: "var(--dsw-alias-primary, #6366f1)",
-            },
-          }),
+        createSettingsRow(
+          "Internal Testing Notice",
+          "Show the internal testing notice modal dialog on startup",
+          createSettingsToggleCheckbox(noticeEnabled, handleToggleNotice),
         ),
       );
     }
@@ -2528,67 +2266,7 @@ window.__ModuleLoader__.load({
         setNewThemeName = newThemeNameState[1];
 
       var /** applyPaletteToPage implementation. */
-        applyPaletteToPage = function (palette, themeType) {
-          if (typeof document === "undefined") return;
-          var styleEl = document.getElementById("dsh-custom-theme-vars");
-          if (!styleEl) {
-            styleEl = document.createElement("style");
-            styleEl.id = "dsh-custom-theme-vars";
-            document.head.appendChild(styleEl);
-          }
-
-          var css =
-            ":root, [data-theme], body {\n" +
-            "  --dsw-alias-primary: " +
-            palette.primary +
-            " !important;\n" +
-            "  --dsw-alias-brand-primary: " +
-            palette.primary +
-            " !important;\n" +
-            "  --dsw-alias-bg-base: " +
-            palette.bgBase +
-            " !important;\n" +
-            "  --dsw-alias-bg-layer-1: " +
-            palette.surfaceL1 +
-            " !important;\n" +
-            "  --dsw-alias-surface-l1: " +
-            palette.surfaceL1 +
-            " !important;\n" +
-            "  --dsw-alias-bg-layer-2: " +
-            palette.surfaceL2 +
-            " !important;\n" +
-            "  --dsw-alias-surface-l2: " +
-            palette.surfaceL2 +
-            " !important;\n" +
-            "  --dsw-alias-bg-overlay: " +
-            palette.surfaceL2 +
-            " !important;\n" +
-            "  --dsw-alias-border-l1: " +
-            palette.borderL1 +
-            " !important;\n" +
-            "  --dsw-alias-border-l2: " +
-            palette.borderL1 +
-            " !important;\n" +
-            "  --dsw-alias-label-primary: " +
-            palette.textPrimary +
-            " !important;\n" +
-            "  --dsw-alias-label-secondary: " +
-            palette.textSecondary +
-            " !important;\n" +
-            "  --dsw-specific-sidebar-fill: " +
-            palette.sidebar +
-            " !important;\n" +
-            "}\n";
-
-          styleEl.textContent = css;
-          if (themeType === "oled") {
-            document.documentElement.setAttribute("data-theme", "oled");
-          } else if (themeType === "light") {
-            document.documentElement.setAttribute("data-theme", "light");
-          } else {
-            document.documentElement.removeAttribute("data-theme");
-          }
-        };
+        applyPaletteToPage = applyCustomThemePaletteVars;
 
       var /** selectPreset implementation. */
         selectPreset = function (preset) {
@@ -6435,60 +6113,7 @@ window.__ModuleLoader__.load({
         if (savedPalette) {
           try {
             var palette = JSON.parse(savedPalette);
-            var styleEl = document.getElementById("dsh-custom-theme-vars");
-            if (!styleEl) {
-              styleEl = document.createElement("style");
-              styleEl.id = "dsh-custom-theme-vars";
-              document.head.appendChild(styleEl);
-            }
-            var css =
-              ":root, [data-theme], body {\n" +
-              "  --dsw-alias-primary: " +
-              palette.primary +
-              " !important;\n" +
-              "  --dsw-alias-brand-primary: " +
-              palette.primary +
-              " !important;\n" +
-              "  --dsw-alias-bg-base: " +
-              palette.bgBase +
-              " !important;\n" +
-              "  --dsw-alias-bg-layer-1: " +
-              palette.surfaceL1 +
-              " !important;\n" +
-              "  --dsw-alias-surface-l1: " +
-              palette.surfaceL1 +
-              " !important;\n" +
-              "  --dsw-alias-bg-layer-2: " +
-              palette.surfaceL2 +
-              " !important;\n" +
-              "  --dsw-alias-surface-l2: " +
-              palette.surfaceL2 +
-              " !important;\n" +
-              "  --dsw-alias-bg-overlay: " +
-              palette.surfaceL2 +
-              " !important;\n" +
-              "  --dsw-alias-border-l1: " +
-              palette.borderL1 +
-              " !important;\n" +
-              "  --dsw-alias-border-l2: " +
-              palette.borderL1 +
-              " !important;\n" +
-              "  --dsw-alias-label-primary: " +
-              palette.textPrimary +
-              " !important;\n" +
-              "  --dsw-alias-label-secondary: " +
-              palette.textSecondary +
-              " !important;\n" +
-              "  --dsw-specific-sidebar-fill: " +
-              palette.sidebar +
-              " !important;\n" +
-              "}\n";
-            styleEl.textContent = css;
-            if (activeTheme === "oled") {
-              document.documentElement.setAttribute("data-theme", "oled");
-            } else if (activeTheme === "light") {
-              document.documentElement.setAttribute("data-theme", "light");
-            }
+            applyCustomThemePaletteVars(palette, activeTheme);
           } catch (e) {}
         }
       })();

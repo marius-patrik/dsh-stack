@@ -186,6 +186,89 @@ window.__ModuleLoader__.load({
       );
     }
 
+    /**
+     * Renders a titled group of selectable choice buttons (theme mode, border style, etc.):
+     * a heading row above a responsive grid of buttons, each showing a label/description
+     * and highlighted when selected. Shared by ThemesSection's mode and border-style pickers
+     * so both use the identical group/button styling.
+     */
+    function createChoiceButtonGroup(title, options, isSelectedFn, onSelectFn) {
+      return h(
+        "div",
+        {
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            paddingBottom: "16px",
+            borderBottom: "1px solid var(--dsw-alias-border-l1)",
+          },
+        },
+        h(
+          "div",
+          { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } },
+          title,
+        ),
+        h(
+          "div",
+          {
+            style: {
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+              gap: "10px",
+            },
+          },
+          options.map(function (option) {
+            var isSelected = isSelectedFn(option);
+            return h(
+              "button",
+              {
+                key: option.id,
+                type: "button",
+                onClick: function () {
+                  onSelectFn(option);
+                },
+                style: {
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  padding: "12px 14px",
+                  borderRadius: "10px",
+                  border: isSelected
+                    ? "1px solid var(--dsw-alias-primary, #6366f1)"
+                    : "1px solid var(--dsw-alias-border-l2)",
+                  background: isSelected
+                    ? "rgba(99, 102, 241, 0.1)"
+                    : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  color: "inherit",
+                },
+              },
+              h(
+                "div",
+                {
+                  style: {
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: isSelected
+                      ? "var(--dsw-alias-primary, #6366f1)"
+                      : "var(--dsw-alias-label-primary)",
+                  },
+                },
+                option.label,
+              ),
+              h(
+                "div",
+                { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
+                option.desc,
+              ),
+            );
+          }),
+        ),
+      );
+    }
+
     /** ThemesSection implementation. */
     function ThemesSection(props) {
       var React = require("react");
@@ -336,182 +419,53 @@ window.__ModuleLoader__.load({
 
       var isOledActive = snapshot && snapshot.active ? snapshot.active.id === "oled" : false;
 
-      var modeButtons = h(
-        "div",
-        {
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            paddingBottom: "16px",
-            borderBottom: "1px solid var(--dsw-alias-border-l1)",
-          },
+      var modeButtons = createChoiceButtonGroup(
+        "Theme Mode",
+        [
+          { id: "system", label: "System", desc: "Sync with OS theme" },
+          { id: "light", label: "Light", desc: "Clean bright contrast" },
+          { id: "dark", label: "Dark", desc: "Standard dark theme" },
+          { id: "oled", label: "OLED Black", desc: "Pure #000000 pitch black input & panels" },
+        ],
+        function (mode) {
+          return mode.id === "oled"
+            ? isOledActive
+            : mode.id === "system"
+              ? false
+              : mode.id === currentScheme && !isOledActive;
         },
-        h(
-          "div",
-          { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } },
-          "Theme Mode",
-        ),
-        h(
-          "div",
-          {
-            style: {
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-              gap: "10px",
-            },
-          },
-          [
-            { id: "system", label: "System", desc: "Sync with OS theme" },
-            { id: "light", label: "Light", desc: "Clean bright contrast" },
-            { id: "dark", label: "Dark", desc: "Standard dark theme" },
-            { id: "oled", label: "OLED Black", desc: "Pure #000000 pitch black input & panels" },
-          ].map(function (mode) {
-            var isSelected =
-              mode.id === "oled"
-                ? isOledActive
-                : mode.id === "system"
-                  ? false
-                  : mode.id === currentScheme && !isOledActive;
-            return h(
-              "button",
-              {
-                key: mode.id,
-                type: "button",
-                onClick: function () {
-                  if (mode.id === "oled") {
-                    applyTheme("oled");
-                    applyOledStyles(true);
-                    return;
-                  }
-                  applyOledStyles(false);
-                  var targetTheme =
-                    mode.id === "light"
-                      ? groups["light"] && groups["light"][0]
-                        ? groups["light"][0].id
-                        : "light"
-                      : groups["dark"] && groups["dark"][0]
-                        ? groups["dark"][0].id
-                        : "dark";
-                  applyTheme(targetTheme);
-                },
-                style: {
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  padding: "12px 14px",
-                  borderRadius: "10px",
-                  border: isSelected
-                    ? "1px solid var(--dsw-alias-primary, #6366f1)"
-                    : "1px solid var(--dsw-alias-border-l2)",
-                  background: isSelected
-                    ? "rgba(99, 102, 241, 0.1)"
-                    : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  color: "inherit",
-                },
-              },
-              h(
-                "div",
-                {
-                  style: {
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: isSelected
-                      ? "var(--dsw-alias-primary, #6366f1)"
-                      : "var(--dsw-alias-label-primary)",
-                  },
-                },
-                mode.label,
-              ),
-              h(
-                "div",
-                { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
-                mode.desc,
-              ),
-            );
-          }),
-        ),
+        function (mode) {
+          if (mode.id === "oled") {
+            applyTheme("oled");
+            applyOledStyles(true);
+            return;
+          }
+          applyOledStyles(false);
+          var targetTheme =
+            mode.id === "light"
+              ? groups["light"] && groups["light"][0]
+                ? groups["light"][0].id
+                : "light"
+              : groups["dark"] && groups["dark"][0]
+                ? groups["dark"][0].id
+                : "dark";
+          applyTheme(targetTheme);
+        },
       );
 
-      var borderButtons = h(
-        "div",
-        {
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            paddingBottom: "16px",
-            borderBottom: "1px solid var(--dsw-alias-border-l1)",
-          },
+      var borderButtons = createChoiceButtonGroup(
+        "Border Style",
+        [
+          { id: "soft", label: "Soft Borders", desc: "Subtle translucent lines (Default)" },
+          { id: "none", label: "No Borders", desc: "Minimalist borderless cards" },
+          { id: "high", label: "High Contrast", desc: "Crisp defined component borders" },
+        ],
+        function (b) {
+          return borderStyle === b.id;
         },
-        h(
-          "div",
-          { style: { fontSize: "13px", fontWeight: 600, color: "var(--dsw-alias-label-primary)" } },
-          "Border Style",
-        ),
-        h(
-          "div",
-          {
-            style: {
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-              gap: "10px",
-            },
-          },
-          [
-            { id: "soft", label: "Soft Borders", desc: "Subtle translucent lines (Default)" },
-            { id: "none", label: "No Borders", desc: "Minimalist borderless cards" },
-            { id: "high", label: "High Contrast", desc: "Crisp defined component borders" },
-          ].map(function (b) {
-            var isSelected = borderStyle === b.id;
-            return h(
-              "button",
-              {
-                key: b.id,
-                type: "button",
-                onClick: function () {
-                  setBorderChoice(b.id);
-                },
-                style: {
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  padding: "12px 14px",
-                  borderRadius: "10px",
-                  border: isSelected
-                    ? "1px solid var(--dsw-alias-primary, #6366f1)"
-                    : "1px solid var(--dsw-alias-border-l2)",
-                  background: isSelected
-                    ? "rgba(99, 102, 241, 0.1)"
-                    : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  color: "inherit",
-                },
-              },
-              h(
-                "div",
-                {
-                  style: {
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: isSelected
-                      ? "var(--dsw-alias-primary, #6366f1)"
-                      : "var(--dsw-alias-label-primary)",
-                  },
-                },
-                b.label,
-              ),
-              h(
-                "div",
-                { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
-                b.desc,
-              ),
-            );
-          }),
-        ),
+        function (b) {
+          setBorderChoice(b.id);
+        },
       );
 
       var bannerSection = h(
