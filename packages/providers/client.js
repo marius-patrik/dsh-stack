@@ -38,6 +38,49 @@ window.__ModuleLoader__.load({
     var VAULT_API = "/vault/api";
     var QUOTAS_API = "/quotas/api";
 
+    // Shared full-screen centering overlay used by the simple credential/model/
+    // OAuth modals (EditValueModal, AddKeyModal, AddModelModal, OAuthFlowModal).
+    var MODAL_OVERLAY_STYLE = {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "rgba(0,0,0,0.6)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 9999,
+    };
+
+    // Shared text-input style for the simple credential/model modals above.
+    var MODAL_INPUT_STYLE = {
+      padding: "8px 12px",
+      borderRadius: "6px",
+      border: "1px solid var(--dsw-alias-border-l2)",
+      background: "var(--dsw-alias-surface-l1)",
+      color: "inherit",
+    };
+
+    // Shared Cancel/primary-action button styles for the same modals.
+    var MODAL_CANCEL_BUTTON_STYLE = {
+      padding: "7px 14px",
+      borderRadius: "6px",
+      border: "1px solid var(--dsw-alias-border-l2)",
+      background: "transparent",
+      color: "inherit",
+      cursor: "pointer",
+    };
+    var MODAL_PRIMARY_BUTTON_STYLE = {
+      padding: "7px 14px",
+      borderRadius: "6px",
+      border: "none",
+      background: "var(--dsw-alias-primary, #6366f1)",
+      color: "#fff",
+      fontWeight: 600,
+      cursor: "pointer",
+    };
+
     var TREE_STYLES = `
 @keyframes dsh-row-in {
   from { opacity: 0; transform: translateY(-2px); }
@@ -11561,13 +11604,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               setName(e.target.value);
             },
             placeholder: "e.g. runner-1, worker-bg",
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h(
             "div",
@@ -11578,14 +11615,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               "button",
               {
                 onClick: onClose,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                },
+                style: MODAL_CANCEL_BUTTON_STYLE,
               },
               "Cancel",
             ),
@@ -11594,15 +11624,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               {
                 onClick: handleCreate,
                 disabled: creating,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: "var(--dsw-alias-primary, #6366f1)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                },
+                style: MODAL_PRIMARY_BUTTON_STYLE,
               },
               creating ? "Creating…" : "Create Session",
             ),
@@ -11650,18 +11672,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return h(
         "div",
         {
-          style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          },
+          style: MODAL_OVERLAY_STYLE,
         },
         h(
           "div",
@@ -11713,14 +11724,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               "button",
               {
                 onClick: onClose,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                },
+                style: MODAL_CANCEL_BUTTON_STYLE,
               },
               "Cancel",
             ),
@@ -11729,15 +11733,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               {
                 onClick: handleSave,
                 disabled: saving,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: "var(--dsw-alias-primary, #6366f1)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                },
+                style: MODAL_PRIMARY_BUTTON_STYLE,
               },
               saving ? "Saving…" : "Save Secret",
             ),
@@ -11792,18 +11788,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return h(
         "div",
         {
-          style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          },
+          style: MODAL_OVERLAY_STYLE,
         },
         h(
           "div",
@@ -11830,13 +11815,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             onChange: function (e) {
               setRef(e.target.value);
             },
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Account Profile:"),
           h("input", {
@@ -11844,13 +11823,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             onChange: function (e) {
               setAccount(e.target.value);
             },
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Secret / Key Value:"),
           h("input", {
@@ -11860,13 +11833,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               setValue(e.target.value);
             },
             placeholder: "Paste key here…",
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h(
             "div",
@@ -11877,14 +11844,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               "button",
               {
                 onClick: onClose,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                },
+                style: MODAL_CANCEL_BUTTON_STYLE,
               },
               "Cancel",
             ),
@@ -11893,15 +11853,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               {
                 onClick: handleSave,
                 disabled: saving || !ref || !value,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: "var(--dsw-alias-primary, #6366f1)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                },
+                style: MODAL_PRIMARY_BUTTON_STYLE,
               },
               saving ? "Adding…" : "Add Key",
             ),
@@ -11936,18 +11888,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return h(
         "div",
         {
-          style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          },
+          style: MODAL_OVERLAY_STYLE,
         },
         h(
           "div",
@@ -11975,13 +11916,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               setId(e.target.value);
             },
             placeholder: "e.g. claude-3-7-sonnet-20250219",
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Display Name:"),
           h("input", {
@@ -11990,13 +11925,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               setName(e.target.value);
             },
             placeholder: "e.g. Claude 3.7 Sonnet (Latest)",
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Context Window:"),
           h("input", {
@@ -12005,13 +11934,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               setContext(e.target.value);
             },
             placeholder: "e.g. 200k, 1M",
-            style: {
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              background: "var(--dsw-alias-surface-l1)",
-              color: "inherit",
-            },
+            style: MODAL_INPUT_STYLE,
           }),
           h(
             "div",
@@ -12022,14 +11945,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               "button",
               {
                 onClick: onClose,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                },
+                style: MODAL_CANCEL_BUTTON_STYLE,
               },
               "Cancel",
             ),
@@ -12038,15 +11954,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               {
                 onClick: handleSave,
                 disabled: !id,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: "var(--dsw-alias-primary, #6366f1)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                },
+                style: MODAL_PRIMARY_BUTTON_STYLE,
               },
               "Add Model",
             ),
@@ -12083,18 +11991,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return h(
         "div",
         {
-          style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          },
+          style: MODAL_OVERLAY_STYLE,
         },
         h(
           "div",
@@ -12180,14 +12077,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               "button",
               {
                 onClick: onClose,
-                style: {
-                  padding: "7px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--dsw-alias-border-l2)",
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                },
+                style: MODAL_CANCEL_BUTTON_STYLE,
               },
               "Done",
             ),

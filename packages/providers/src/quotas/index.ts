@@ -11,14 +11,14 @@ import type { Context } from "@deepseek-ai/cordis";
 import { installSettingsSection } from "@deepseek-ai/dsh-settings";
 import type { AccountsService } from "@dsh-stack/credential-vault";
 import { NS, QuotaSettings, type QuotaSettings as QuotaSettingsValue } from "./settings.js";
-import { mountQuotaWeb } from "./web.js";
+import { mountQuotaWeb } from "./web/index.js";
 import { createBuiltinProviders } from "./providers.js";
 import { createConfiguredProviders } from "./configured.js";
 import type { ConfigurableProviderEntry, SettingsDescriptorView } from "./configured.js";
 
 export { NS, QuotaSettings } from "./settings.js";
 export type { QuotaProviderConfig, QuotaSettings as QuotaSettingsValue } from "./settings.js";
-export { QUOTAS_PREFIX, mountQuotaWeb } from "./web.js";
+export { QUOTAS_PREFIX, mountQuotaWeb } from "./web/index.js";
 export { createBuiltinProviders } from "./providers.js";
 export {
   createConfiguredProviders,
