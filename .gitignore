@@ -18,7 +18,11 @@ extensions/*/lib/
 packs/*/lib/
 
 # state (never commit) — .agents/ in repo is docs + hooks (tracked);
-# ~/.agents is the harness home (state folder, never committed)
+# ~/.agents is the harness home (state folder, never committed).
+# .data/ is an alternate rehomed harness home root (dsh-tweaks.homeRoot
+# pointed at <repo>/.data instead of ~/.agents); its contents are pure
+# runtime state, never committed.
+.data/
 .agents/*
 !.agents/*.md
 !.agents/hooks/
