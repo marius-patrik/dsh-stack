@@ -1,1 +1,15 @@
-null
+{
+  "id": "stack.ui.profile",
+  "name": "@dsh-stack/profile-ui",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/profile-ui",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [],
+  "optionalDependencies": []
+}

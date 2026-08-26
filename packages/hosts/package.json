@@ -1,8 +1,7 @@
 {
-  "name": "hosts",
+  "name": "@dsh-stack/hosts",
   "description": "Multi-node device and cluster manager: discovers local and Tailnet devices, manages access gateways, and enables distributed node deployment",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -44,5 +43,12 @@
     "typescript": "^5.7.0",
     "@types/node": "^22.0.0",
     "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.infra.hosts"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

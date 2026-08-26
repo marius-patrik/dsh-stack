@@ -1,5 +1,5 @@
 import * as providers from "./lib/index.js";
-import * as dialects from "dialects";
+import * as dialects from "@dsh-stack/dialects";
 import { Context } from "@deepseek-ai/cordis";
 import { LlmError } from "@deepseek-ai/dsh-llm";
 import assert from "node:assert";

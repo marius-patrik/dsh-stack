@@ -1,5 +1,5 @@
 {
-  "name": "providers",
+  "name": "@dsh-stack/providers",
   "description": "Subscription and API provider adapters for dsh, wired onto Stack dialects and the harness credential seam",
   "version": "0.1.0",
   "type": "module",
@@ -44,8 +44,8 @@
     "test": "node check-plugin.mjs"
   },
   "dependencies": {
-    "dialects": "workspace:*",
-    "credentials": "workspace:*"
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/credential-vault": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
@@ -56,9 +56,9 @@
     "@deepseek-ai/dsh-anonymous-user-id": "0.1.1-rc.2",
     "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
     "@deepseek-ai/dsh-host-webserver": "0.1.1-rc.2",
-    "dialects": "workspace:*",
-    "credentials": "workspace:*",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/credential-vault": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
@@ -71,8 +71,8 @@
     "@deepseek-ai/dsh-anonymous-user-id": "0.1.1-rc.2",
     "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
     "@deepseek-ai/dsh-host-webserver": "0.1.1-rc.2",
-    "dialects": "workspace:*",
-    "credentials": "workspace:*"
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/credential-vault": "workspace:*"
   },
   "stack": {
     "kind": "plugin",

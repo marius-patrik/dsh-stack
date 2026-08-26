@@ -45,6 +45,8 @@ export type * from "./sync.js";
 export type * from "./catalog.js";
 export type * from "./controller.js";
 export type * from "./types.js";
+export type * from "./presets.js";
+export { materializeAgentPresetPack } from "./presets.js";
 
 export const name = "agents";
 export const inject: string[] = [];

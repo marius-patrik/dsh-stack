@@ -5,7 +5,7 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import * as providers from "./lib/index.js";
-import * as dialects from "dialects";
+import * as dialects from "@dsh-stack/dialects";
 import { Context } from "@deepseek-ai/cordis";
 import { AccountsService } from "../credential-vault/lib/index.js";
 

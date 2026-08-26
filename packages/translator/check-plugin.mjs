@@ -14,7 +14,7 @@ const /** assert implementation. */
   };
 
 const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
-assert(pkg.name === "translator", `name should be translator, got ${pkg.name}`);
+assert(pkg.name === "@dsh-stack/translator", `name should be @dsh-stack/translator, got ${pkg.name}`);
 console.log(`loader shape ok: ${pkg.name} inject= []`);
 
 const src = await import("./lib/index.js");

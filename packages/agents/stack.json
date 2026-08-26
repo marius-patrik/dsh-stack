@@ -1,1 +1,16 @@
-null
+{
+  "id": "stack.agent.agents",
+  "name": "@dsh-stack/agents",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Custom agents as JSON/MD persona files for the dsh harness",
+  "files": [
+    "lib",
+    "bin",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [],
+  "optionalDependencies": []
+}

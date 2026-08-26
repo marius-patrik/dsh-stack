@@ -9,7 +9,7 @@
 
 import type { Context } from "@deepseek-ai/cordis";
 import { installSettingsSection } from "@deepseek-ai/dsh-settings";
-import type { AccountsService } from "credentials";
+import type { AccountsService } from "@dsh-stack/credential-vault";
 import { NS, QuotaSettings, type QuotaSettings as QuotaSettingsValue } from "./settings.js";
 import { mountQuotaWeb } from "./web.js";
 import { createBuiltinProviders, PROBE_ROUTE_IDS } from "./providers.js";

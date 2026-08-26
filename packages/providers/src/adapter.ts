@@ -29,7 +29,7 @@ import type {
 } from "@deepseek-ai/dsh-llm";
 import type { AnonymousUserId } from "@deepseek-ai/dsh-anonymous-user-id";
 import { idleWatchdog, timeoutOf } from "@deepseek-ai/dsh-timeout";
-import type { Dialect, DialectAuth, DialectId } from "dialects";
+import type { Dialect, DialectAuth, DialectId } from "@dsh-stack/dialects";
 import type { ProviderCatalogModel } from "./providers.js";
 import { ModelCatalog, type CatalogSource } from "./catalog.js";
 

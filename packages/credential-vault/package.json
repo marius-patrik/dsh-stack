@@ -1,5 +1,5 @@
 {
-  "name": "credentials",
+  "name": "@dsh-stack/credential-vault",
   "description": "Encrypted credential vault, account manager, OAuth refresh supervisor, importers and local vault web surface.",
   "version": "0.1.0",
   "type": "module",

@@ -10,7 +10,9 @@
     "README.md"
   ],
   "dependencies": [
-    "stack.dev.lsp"
+    "stack.dev.formatters",
+    "stack.dev.lsp",
+    "stack.infra.hosts"
   ],
   "optionalDependencies": []
 }

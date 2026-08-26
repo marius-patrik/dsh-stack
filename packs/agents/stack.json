@@ -11,11 +11,15 @@
   ],
   "dependencies": [
     "stack.agent.actions",
+    "stack.agent.agents",
     "stack.agent.commands",
     "stack.agent.loops",
     "stack.agent.personas",
+    "stack.agent.preset.coding",
+    "stack.agent.preset.default",
     "stack.agent.skills",
-    "stack.agent.tools"
+    "stack.agent.tools",
+    "stack.agent.translator"
   ],
   "optionalDependencies": []
 }

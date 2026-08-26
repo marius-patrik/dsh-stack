@@ -10,6 +10,7 @@
     "README.md"
   ],
   "dependencies": [
+    "stack.ai.dialects",
     "stack.ai.providers"
   ],
   "optionalDependencies": []

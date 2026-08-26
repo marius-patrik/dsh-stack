@@ -1,1 +1,15 @@
-null
+{
+  "id": "stack.ui.sidebar-settings",
+  "name": "@dsh-stack/sidebar-settings",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/sidebar-settings",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "dependencies": [],
+  "optionalDependencies": []
+}

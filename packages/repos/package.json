@@ -1,5 +1,5 @@
 {
-  "name": "repos",
+  "name": "@dsh-stack/repos",
   "description": "Repo workflows (status/branch/commit/push/PR) for the dsh harness, consuming the shared vault GitHub token",
   "version": "0.1.0",
   "type": "module",

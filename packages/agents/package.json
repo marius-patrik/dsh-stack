@@ -1,8 +1,7 @@
 {
-  "name": "agents",
+  "name": "@dsh-stack/agents",
   "description": "Custom agents as JSON/MD persona files for the dsh harness",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -60,5 +59,12 @@
       "platform": "web",
       "immediately": false
     }
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.agent.agents"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

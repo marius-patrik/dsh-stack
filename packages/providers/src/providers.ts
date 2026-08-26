@@ -7,9 +7,9 @@
  * @module providers/providers
  */
 
-import type { DialectId } from "dialects";
+import type { DialectId } from "@dsh-stack/dialects";
 import type { CatalogSource } from "./catalog.js";
-import { ANTIGRAVITY_PROJECT_HEADER } from "dialects";
+import { ANTIGRAVITY_PROJECT_HEADER } from "@dsh-stack/dialects";
 
 /** How a provider authenticates; the launcher filter and account UI group on this. */
 export type AuthKind = "api-key" | "oauth" | "none";

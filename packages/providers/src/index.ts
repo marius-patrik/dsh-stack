@@ -25,7 +25,7 @@ import {
   settingsNamespace,
 } from "@deepseek-ai/dsh-settings";
 import { MAX_TIMER_DELAY_MS } from "@deepseek-ai/dsh-timeout";
-import type { AccountsService } from "credentials";
+import type { AccountsService } from "@dsh-stack/credential-vault";
 import {
   getOrCreateAnonymousUserId,
   type AnonymousUserId,
@@ -35,7 +35,7 @@ import { ModelCatalog, DEFAULT_CATALOG_TTL_MS } from "./catalog.js";
 import type { ProviderConnection, ProviderGate, ProviderRouteAuthSlot } from "./adapter.js";
 import { PROVIDER_IDS, PROVIDER_ROUTES, providerRoute, type ProviderRoute } from "./providers.js";
 import { applyQuotas, type QuotasConfig } from "./quotas/index.js";
-import type { DialectAuth, DialectId } from "dialects";
+import type { DialectAuth, DialectId } from "@dsh-stack/dialects";
 
 export {
   DialectAdapter,
