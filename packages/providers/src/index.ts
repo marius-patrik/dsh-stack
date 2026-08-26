@@ -33,7 +33,8 @@ import {
 import { DialectAdapter, DEFAULT_STREAM_IDLE_TIMEOUT_MS } from "./adapter.js";
 import { ModelCatalog, DEFAULT_CATALOG_TTL_MS } from "./catalog.js";
 import type { ProviderConnection, ProviderGate, ProviderRouteAuthSlot } from "./adapter.js";
-import { PROVIDER_IDS, PROVIDER_ROUTES, providerRoute, type ProviderRoute } from "./providers.js";
+import type { ProviderRoute } from "./providers.js";
+import { ProviderRegistry } from "./registry.js";
 import { applyQuotas, type QuotasConfig } from "./quotas/index.js";
 import type { DialectAuth, DialectId } from "@dsh-stack/dialects";
 
@@ -51,12 +52,45 @@ export {
   parseCatalogResponse,
 } from "./catalog.js";
 export type { CatalogSource, DiscoveredModel } from "./catalog.js";
-export { PROVIDER_IDS, PROVIDER_ROUTES, providerRoute } from "./providers.js";
+export { ProviderRegistry } from "./registry.js";
+export {
+  TOKEN,
+  API_KEY,
+  HEADER,
+  HEADERS,
+  EFFORTS,
+  CLAUDE_HAIKU_MODEL,
+  kimiCoreModels,
+  KIMI_CONTEXT,
+  KIMI_K3_CONTEXT,
+  KIMI_MAX_OUTPUT,
+  CLAUDE_CONTEXT,
+  CLAUDE_MAX_OUTPUT,
+  GEMINI_CONTEXT,
+  GEMINI_MAX_OUTPUT,
+  OPENAI_MAX_OUTPUT,
+  OPENAI_DEFAULT_CONTEXT,
+  XAI_CONTEXT,
+  XAI_MAX_OUTPUT,
+  MISTRAL_CONTEXT,
+  MISTRAL_MAX_OUTPUT,
+  DEEPSEEK_CONTEXT,
+  DEEPSEEK_MAX_OUTPUT,
+  GROQ_CONTEXT,
+  GROQ_MAX_OUTPUT,
+  ZEN_CONTEXT,
+  ZEN_MAX_OUTPUT,
+  ZEN_CLAUDE_CONTEXT,
+  ZEN_CLAUDE_MAX_OUTPUT,
+} from "./providers.js";
 export type {
   AuthKind,
   CredentialSlot,
   ProviderCatalogModel,
   ProviderKind,
+  ProviderProbe,
+  ProviderReasoning,
+  ProviderReasoningEffort,
   ProviderRoute,
 } from "./providers.js";
 
@@ -68,7 +102,6 @@ export {
   mountQuotaWeb,
   NS as QUOTAS_NS,
 } from "./quotas/index.js";
-export { PROBE_ROUTE_IDS } from "./quotas/index.js";
 export {
   createConfiguredProviders,
   probeConfiguredRoute,
@@ -197,6 +230,10 @@ async function refreshOAuthToken(
 
 export const name = "providers";
 export const inject = ["llm", "dialects"];
+// Consumers that contribute or read this instance's routes wait for it too;
+// declaring `providers` in `inject` (rather than a bare `ctx.get`) is what
+// makes cordis run this plugin's `apply` — which creates `ctx.providers` —
+// strictly before any `@dsh-stack/provider-<id>` extension's own `apply`.
 
 const NS = settingsNamespace("providers");
 
@@ -334,6 +371,12 @@ declare module "@deepseek-ai/cordis" {
 
 /** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
+  // The registry: `@dsh-stack/provider-<id>` extensions inject `providers`
+  // and call `ctx.providers.register(route)` from their own `apply`, which
+  // cordis runs after this one (see the `inject` comment above), so the
+  // registry may hold zero routes for the rest of this function's body.
+  new ProviderRegistry(ctx);
+
   let /** current implementation. */ current: () => Config = () => config;
   let lastRaw: Config | undefined;
   let lastGood: ResolvedProvidersOptions | undefined;
@@ -360,7 +403,7 @@ export function apply(ctx: Context, config: Config): void {
 
   const /** connections implementation. */
     connections = (provider: string): ProviderConnection =>
-      toConnection(providerRoute(provider), resolved());
+      toConnection(ctx.providers.get(provider), resolved());
 
   const memory = new Map<string, string>();
 
@@ -487,7 +530,7 @@ export function apply(ctx: Context, config: Config): void {
     const auth: DialectAuth =
       connection.headers !== undefined ? { headers: { ...connection.headers } } : {};
     // Local routes carry no credentials; the wire still wants a bearer shape.
-    if (providerRoute(provider).kind === "local") auth.token = "local";
+    if (ctx.providers.get(provider).kind === "local") auth.token = "local";
     const missing: string[] = [];
     // Whether this route holds stored credential material at all, which is a
     // different question from whether that material still works. A provider
@@ -558,7 +601,7 @@ export function apply(ctx: Context, config: Config): void {
     provider: string,
     connection: ProviderConnection,
   ): Promise<ProviderGate | undefined> => {
-    const route = providerRoute(provider);
+    const route = ctx.providers.get(provider);
     if (resolved().mode === "subscription-only" && route.kind === "api") {
       return {
         visible: false,
@@ -599,7 +642,7 @@ export function apply(ctx: Context, config: Config): void {
   // this plugin does not own is offered as-is, never an error, while the
   // adapter's own gate stays strict for the registered routes it serves.
   const policy = new ProviderPolicy(ctx, async (provider: string) => {
-    if (!PROVIDER_IDS.includes(provider)) return undefined;
+    if (!ctx.providers.has(provider)) return undefined;
     return gate(provider, connections(provider));
   });
 
@@ -615,15 +658,41 @@ export function apply(ctx: Context, config: Config): void {
     resolveUserId,
     catalog: modelCatalog,
   });
-  ctx.llm.registerConfigurableProviders(
-    PROVIDER_ROUTES.map((route) => ({
-      provider: route.id,
-      displayName: route.displayName,
-      settingsNs: NS,
-      settingsPath: [],
-    })),
-  );
-  const registration = ctx.llm.registerAdapter([...PROVIDER_IDS], adapter);
+  // Both `ctx.llm` registrations below throw if handed zero providers, which
+  // this plugin's own registry legitimately holds until at least one
+  // `@dsh-stack/provider-<id>` extension has run its `apply` (see the
+  // `ProviderRegistry` construction above). So neither registers eagerly at
+  // apply time; `syncRegistrations` performs the first (non-empty) register
+  // and every later route-set change through the same handles' `replace`,
+  // driven by `ctx.providers.onChange` — the identical "swap the live route
+  // set without a restart" mechanism `ensureRegistrationFacts` already uses
+  // below for policy and catalog-facts changes.
+  let adapterRegistration: ReturnType<typeof ctx.llm.registerAdapter> | undefined;
+  let directoryRegistration: ReturnType<typeof ctx.llm.registerConfigurableProviders> | undefined;
+  const /** syncRegistrations implementation. */
+    syncRegistrations = (): void => {
+      const ids = [...ctx.providers.ids()];
+      if (ids.length === 0) return;
+      if (adapterRegistration === undefined) {
+        adapterRegistration = ctx.llm.registerAdapter(ids, adapter);
+      } else {
+        adapterRegistration.replace(ids);
+      }
+      const entries = ctx.providers.list().map((route) => ({
+        provider: route.id,
+        displayName: route.displayName,
+        settingsNs: NS,
+        settingsPath: [],
+      }));
+      if (directoryRegistration === undefined) {
+        directoryRegistration = ctx.llm.registerConfigurableProviders(entries);
+      } else {
+        directoryRegistration.replace(entries);
+      }
+    };
+  ctx.providers.onChange(syncRegistrations);
+  syncRegistrations();
+
   let registeredPolicy = resolved().retryPolicy;
   let registeredCatalogFacts = { live: resolved().liveCatalog, ttl: resolved().catalogTtlMs };
   const /** ensureRegistrationFacts implementation. */
@@ -638,7 +707,7 @@ export function apply(ctx: Context, config: Config): void {
       }
       const policy = resolved().retryPolicy;
       if (deepEqualJson(policy, registeredPolicy)) return;
-      registration.replace([...PROVIDER_IDS]);
+      adapterRegistration?.replace([...ctx.providers.ids()]);
       registeredPolicy = policy;
     };
 

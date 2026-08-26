@@ -28,6 +28,45 @@ export function assertLoaderShape(plugin, expectedName) {
 }
 
 /**
+ * Verify one `@dsh-stack/provider-<id>` extension: boots a `Context` with
+ * `dialects` and the `providers` registry applied, applies the extension, and
+ * asserts it registered exactly its own route under its own id with the
+ * expected loader shape. Centralized here because every provider extension's
+ * `verify.mjs` would otherwise be an identical copy differing only in the id
+ * string.
+ *
+ * @param {string} id - the provider route id this extension registers (e.g. `"kimi-code"`).
+ * @param {Record<string, unknown>} extension - the imported extension module.
+ * @param {{ Context: unknown, dialects: Record<string, unknown>, providers: Record<string, unknown> }} deps -
+ *   `@deepseek-ai/cordis`'s `Context`, and the `@dsh-stack/dialects` and
+ *   `@dsh-stack/providers` modules, imported by the caller (not here) so they
+ *   resolve against the calling extension's own dependencies rather than this
+ *   shared script's.
+ */
+export async function assertProviderExtension(id, extension, deps) {
+  const { Context, dialects, providers } = deps;
+
+  assertLoaderShape(extension, `provider-${id}`);
+  if (!Array.isArray(extension.inject) || extension.inject[0] !== "providers") {
+    throw new Error(`provider-${id}: expected inject to include "providers"`);
+  }
+
+  const ctx = new Context();
+  dialects.apply(ctx, {});
+  new providers.ProviderRegistry(ctx);
+  extension.apply(ctx);
+
+  if (!ctx.providers.has(id)) throw new Error(`provider-${id}: route was not registered`);
+  const route = ctx.providers.get(id);
+  if (route.id !== id) throw new Error(`provider-${id}: route.id mismatch`);
+  if (typeof route.displayName !== "string" || route.displayName.length === 0) {
+    throw new Error(`provider-${id}: route.displayName must be a non-empty string`);
+  }
+  if (!Array.isArray(route.models)) throw new Error(`provider-${id}: route.models must be an array`);
+  console.log(`provider-${id} verification passed:`, route.displayName);
+}
+
+/**
  * Load a hand-authored browser client bundle (`client.js`), register a stub
  * `__ModuleLoader__.load` on `globalThis.window`, import the bundle, and
  * return the registered loader spec so callers can assert its id/inject and

@@ -1,7 +1,7 @@
 /**
  * Quota probes for providers this plugin does not own.
  *
- * The built-in probes cover the routes in `PROVIDER_ROUTES`. Everything else a
+ * The built-in probes cover the routes registered in `ctx.providers`. Everything else a
  * host registers — most importantly the custom OpenAI-compatible routes users
  * add through model settings, served by `llm-pi-ai` — had no probe at all, so
  * those rows carried no status light while every shipped route had one.

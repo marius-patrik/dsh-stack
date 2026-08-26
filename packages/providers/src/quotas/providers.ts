@@ -3,17 +3,18 @@
  *
  * Each provider makes a lightweight probe request against the real endpoint
  * and reports the HTTP status as quota availability. Probe routes derive from
- * the single PROVIDER_ROUTES table in providers: a route's probe endpoint
- * is the per-route `probe` extension field, its fixed headers and display
- * name come from the route itself, and its token reference is the route's
- * first credential slot. Probe tokens resolve through the account seam
- * (credentials) with the credential environment variable as fallback —
- * the probes never read vault files directly.
+ * whatever `@dsh-stack/provider-<id>` extensions have registered into the
+ * `providers` registry at the moment {@link createBuiltinProviders} runs: a
+ * route's probe endpoint is the per-route `probe` extension field, its fixed
+ * headers and display name come from the route itself, and its token
+ * reference is the route's first credential slot. Probe tokens resolve
+ * through the account seam (credentials) with the credential environment
+ * variable as fallback — the probes never read vault files directly.
  *
  * @module providers/quotas/providers
  */
 
-import { PROVIDER_ROUTES, type ProviderRoute } from "../providers.js";
+import type { ProviderRoute } from "../providers.js";
 import type { QuotaProvider, QuotaSnapshot } from "./index.js";
 
 /** Resolve one credential reference to its secret value, or undefined. */
@@ -22,13 +23,10 @@ export type ProbeTokenReader = (ref: string) => Promise<string | undefined>;
 /** One probeable route: a provider route with a probe extension. */
 type ProbeRoute = ProviderRoute & { probe: NonNullable<ProviderRoute["probe"]> };
 
-/** Every provider route that declares a quota probe, in declaration order. */
-const PROBE_ROUTES: readonly ProbeRoute[] = PROVIDER_ROUTES.filter(
-  (route): route is ProbeRoute => route.probe !== undefined,
-);
-
-/** The probed provider ids, in declaration order. */
-export const PROBE_ROUTE_IDS: readonly string[] = PROBE_ROUTES.map((route) => route.id);
+/** Every provider route that declares a quota probe, in registration order. */
+function probeRoutes(routes: readonly ProviderRoute[]): readonly ProbeRoute[] {
+  return routes.filter((route): route is ProbeRoute => route.probe !== undefined);
+}
 
 /** The credential reference a probe authenticates with: the route's first slot. */
 function probeTokenRef(route: ProbeRoute): string | undefined {
@@ -215,12 +213,17 @@ function parseRateLimitReset(res: Response): string | undefined {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Create one quota provider per probeable provider route. `read` resolves a
- * credential reference to its token (the account seam with env fallback in
- * the wired plugin); tests pass a stub.
+ * Create one quota provider per probeable provider route currently in
+ * `routes`. `read` resolves a credential reference to its token (the account
+ * seam with env fallback in the wired plugin); tests pass a stub. Called
+ * again whenever the registry gains routes, so a provider extension that
+ * registers after the initial call still gets probed.
  */
-export function createBuiltinProviders(read: ProbeTokenReader): QuotaProvider[] {
-  return PROBE_ROUTES.map((route) => {
+export function createBuiltinProviders(
+  read: ProbeTokenReader,
+  routes: readonly ProviderRoute[],
+): QuotaProvider[] {
+  return probeRoutes(routes).map((route) => {
     const tokenRef = probeTokenRef(route);
     return {
       id: route.id,

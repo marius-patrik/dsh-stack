@@ -12,15 +12,14 @@ import { installSettingsSection } from "@deepseek-ai/dsh-settings";
 import type { AccountsService } from "@dsh-stack/credential-vault";
 import { NS, QuotaSettings, type QuotaSettings as QuotaSettingsValue } from "./settings.js";
 import { mountQuotaWeb } from "./web.js";
-import { createBuiltinProviders, PROBE_ROUTE_IDS } from "./providers.js";
-import { PROVIDER_IDS } from "../providers.js";
+import { createBuiltinProviders } from "./providers.js";
 import { createConfiguredProviders } from "./configured.js";
 import type { ConfigurableProviderEntry, SettingsDescriptorView } from "./configured.js";
 
 export { NS, QuotaSettings } from "./settings.js";
 export type { QuotaProviderConfig, QuotaSettings as QuotaSettingsValue } from "./settings.js";
 export { QUOTAS_PREFIX, mountQuotaWeb } from "./web.js";
-export { createBuiltinProviders, PROBE_ROUTE_IDS } from "./providers.js";
+export { createBuiltinProviders } from "./providers.js";
 export {
   createConfiguredProviders,
   probeConfiguredRoute,
@@ -166,11 +165,27 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   const read =
     config.resolveToken ??
     ((ref: string): Promise<string | undefined> => resolveProbeToken(ctx, ref));
-  const builtinProviders = createBuiltinProviders(read);
   const disposers: Array<() => void> = [];
-  for (const provider of builtinProviders) {
-    disposers.push(registry.register(provider));
-  }
+
+  // Built-in providers derive from whatever routes `@dsh-stack/provider-<id>`
+  // extensions have registered into `ctx.providers` — possibly none yet at
+  // this call (this runs from the `providers` plugin's own `apply`, before
+  // its extensions' `apply` has run). `syncBuiltinProviders` re-derives the
+  // set each time it is called and only ever adds a route it has not already
+  // registered, so a route that registers after this plugin mounted still
+  // gets probed without needing a restart.
+  const builtinIds = new Set<string>();
+  const /** syncBuiltinProviders implementation. */
+    syncBuiltinProviders = (): void => {
+      const routes = ctx.providers.list();
+      for (const provider of createBuiltinProviders(read, routes)) {
+        if (builtinIds.has(provider.id)) continue;
+        disposers.push(registry.register(provider));
+        builtinIds.add(provider.id);
+      }
+    };
+  syncBuiltinProviders();
+  ctx.providers.onChange(syncBuiltinProviders);
 
   // Providers this plugin does not own — above all the custom
   // OpenAI-compatible routes added through model settings — get a probe too, so
@@ -182,7 +197,9 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   // generic prober, which would read the plugin's own settings section, find no
   // baseURL there, and report "no endpoint configured" about a route whose
   // endpoint is declared in code.
-  const covered = new Set([...PROBE_ROUTE_IDS, ...PROVIDER_IDS]);
+  /** covered implementation. */
+  const covered = (candidate: string): boolean =>
+    builtinIds.has(candidate) || ctx.providers.has(candidate);
   const configuredIds = new Set<string>();
   const /** syncConfiguredProviders implementation. */
     syncConfiguredProviders = (): void => {
@@ -206,7 +223,7 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
         // and this read never leaves the process.
         describeSettings: () => describe(),
         readToken: read,
-        covered: (candidate) => covered.has(candidate),
+        covered,
       })) {
         disposers.push(registry.register(provider));
         configuredIds.add(provider.id);
@@ -216,8 +233,9 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
 
   /** Every provider the registry should refresh on a cycle. */
   const probeIds = (): string[] => {
+    syncBuiltinProviders();
     syncConfiguredProviders();
-    return [...builtinProviders.map((provider) => provider.id), ...configuredIds];
+    return [...builtinIds, ...configuredIds];
   };
 
   // Initial refresh (staggered by 500ms each to avoid thundering herd)

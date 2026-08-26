@@ -33,12 +33,24 @@ ctx.provide("settings", {
   register: (_ns, _s, opts) => ({ get: () => opts.base, watch: () => undefined }),
 });
 providers.apply(ctx, { mode: "all" });
+// Every route now lives in its own @dsh-stack/provider-<id> extension; load
+// them all so this probe still sees the full catalog it used to get from the
+// static table.
+const EXTENSION_IDS = [
+  "kimi-code", "kimi-sub", "claude-sub", "grok-sub", "gemini-sub", "antigravity-sub",
+  "openai-api", "anthropic-api", "gemini-api", "grok-api", "deepseek-api", "mistral-api",
+  "groq-api", "openrouter-api", "zen", "ollama", "llamacpp", "vllm",
+];
+for (const id of EXTENSION_IDS) {
+  const extension = await import(`../../extensions/provider-${id}/lib/index.js`);
+  extension.apply(ctx);
+}
 // sanity: accounts service read path
 const probe = await accounts.resolve("KIMI_SUB_OAUTH_TOKEN");
 console.log("accounts sanity: KIMI_SUB_OAUTH_TOKEN " + (probe ? "PRESENT" : "MISSING"));
 
 const only = process.argv.slice(2);
-const ids = providers.PROVIDER_IDS.filter((id) => only.length === 0 || only.includes(id));
+const ids = [...ctx.providers.ids()].filter((id) => only.length === 0 || only.includes(id));
 // explicit model override: --model=provider:model
 const modelArg = process.argv.slice(2).find((a) => a.startsWith("--model="));
 const modelOverride = modelArg
@@ -50,7 +62,7 @@ const modelOverride = modelArg
   : null;
 const /** firstModel implementation. */
   firstModel = async (id) => {
-    const route = providers.providerRoute(id);
+    const route = ctx.providers.get(id);
     try {
       const models = await llm.adapter.listModels(id);
       if (models.length > 0) return { model: models[0].id, via: "discovery" };
@@ -79,7 +91,7 @@ for (const id of ids) {
     const gate = await ctx.dshProviders.gate(id);
     if (gate?.reason) row.gate = gate.reason.code;
     let text = "";
-    const isLocal = providers.providerRoute(id)?.kind === "local";
+    const isLocal = ctx.providers.has(id) && ctx.providers.get(id).kind === "local";
     const timeoutMs = isLocal ? 180_000 : 45_000;
     const timeout = new Promise((_, rej) =>
       setTimeout(() => rej(new Error("probe timeout " + timeoutMs / 1000 + "s")), timeoutMs),

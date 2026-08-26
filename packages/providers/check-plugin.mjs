@@ -5,8 +5,13 @@ import { LlmError } from "@deepseek-ai/dsh-llm";
 import assert from "node:assert";
 import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
-assertLoaderShape(providers, "providers");
-assert.deepEqual(providers.PROVIDER_IDS, [
+// Every route now lives in its own `@dsh-stack/provider-<id>` extension (see
+// extensions/provider-<id>); this package only owns the registry and dispatch
+// mechanics. Loaded here by relative path (not a package.json dependency —
+// that would invert the real ownership direction, the plugin does not depend
+// on its extensions) purely so this contract test can exercise the same 18
+// routes real deployments assemble, the way the split shipped them.
+const EXTENSION_IDS = [
   "kimi-code",
   "kimi-sub",
   "claude-sub",
@@ -25,28 +30,25 @@ assert.deepEqual(providers.PROVIDER_IDS, [
   "ollama",
   "llamacpp",
   "vllm",
-]);
+];
+const extensions = new Map(
+  await Promise.all(
+    EXTENSION_IDS.map(async (id) => [
+      id,
+      await import(`../../extensions/provider-${id}/lib/index.js`),
+    ]),
+  ),
+);
 
-// The Antigravity route is the subscription pool; gemini-sub is the free Code
-// Assist tier. Same host and token, different product — so they must differ in
-// dialect and method, or one silently bills the other's quota.
-{
-  const antigravity = providers.providerRoute("antigravity-sub");
-  const geminiSub = providers.providerRoute("gemini-sub");
-  assert.equal(antigravity.dialect, "antigravity");
-  assert.equal(geminiSub.dialect, "code-assist");
-  assert.equal(antigravity.displayName, "Antigravity (Subscription)");
-  // The three Gemini-family routes are named for the quota each one bills.
-  assert.equal(geminiSub.displayName, "Gemini Code Assist (Free tier)");
-  assert.equal(providers.providerRoute("gemini-api").displayName, "Gemini (API)");
-  // It carries the project as a header slot, which is credential material the
-  // dialect cannot fetch for itself.
-  const header = antigravity.authSlots.find((slot) => slot.slot === "header");
-  assert.equal(header?.ref, "ANTIGRAVITY_PROJECT");
-  assert.equal(header?.headerName, "x-antigravity-project");
-  // Both routes authenticate with the same subscription token.
-  assert.ok(antigravity.authSlots.some((slot) => slot.ref === "GEMINI_SUB_OAUTH_TOKEN"));
+
+/** Apply the providers plugin, then every provider extension's route registration. */
+function applyProviders(ctx, config) {
+  providers.apply(ctx, config);
+  for (const extension of extensions.values()) extension.apply(ctx);
 }
+
+assertLoaderShape(providers, "providers");
+
 console.log("loader shape ok:", providers.name, "inject=", JSON.stringify(providers.inject));
 
 const ctx = new Context();
@@ -58,13 +60,27 @@ const llm = {
   registeredProviders: undefined,
   /** registerConfigurableProviders implementation. */
   registerConfigurableProviders(entries) {
-    this.configurable.push(...entries);
+    this.configurable = [...entries];
+    const self = this;
+    /** handle implementation. */
+    const handle = () => {};
+    handle.replace = (next) => {
+      self.configurable = [...next];
+    };
+    return handle;
   },
   /** registerAdapter implementation. */
   registerAdapter(registered, adapter) {
     this.adapter = adapter;
     this.registeredProviders = [...registered];
-    return { replace: () => {}, dispose: () => {} };
+    const self = this;
+    /** handle implementation. */
+    const handle = () => {};
+    handle.replace = (next) => {
+      self.registeredProviders = [...next];
+    };
+    handle.dispose = () => {};
+    return handle;
   },
 };
 ctx.provide("llm", llm);
@@ -85,12 +101,12 @@ const credentialsMin = {
 };
 ctx.provide("credentials", credentialsMin);
 
-providers.apply(ctx, { liveCatalog: false });
+applyProviders(ctx, { liveCatalog: false });
 assert.deepEqual(
   llm.configurable.map((p) => p.provider),
-  providers.PROVIDER_IDS,
+  EXTENSION_IDS,
 );
-assert.deepEqual(llm.registeredProviders, providers.PROVIDER_IDS);
+assert.deepEqual(llm.registeredProviders, EXTENSION_IDS);
 console.log(
   "registration ok:",
   llm.configurable.map((p) => `${p.provider}=${p.displayName}`).join(", "),
@@ -143,10 +159,7 @@ await assert.rejects(() => adapter.resolveModel("grok-sub", "grok-4.6"), {
 });
 const models = await adapter.listModels("claude-sub");
 assert.ok(models.some((m) => m.id === "claude-sonnet-5"));
-assert.ok(
-  !providers.PROVIDER_ROUTES.some((r) => r.id === "cursor-sub"),
-  "cursor-sub must be dropped",
-);
+assert.ok(!ctx.providers.has("cursor-sub"), "cursor-sub must be dropped");
 const resolved = await adapter.resolveModel("claude-sub", "claude-sonnet-5");
 assert.equal(resolved.defaultMaxTokens, 128_000);
 console.log(
@@ -163,13 +176,27 @@ const llmAll = {
   registeredProviders: undefined,
   /** registerConfigurableProviders implementation. */
   registerConfigurableProviders(entries) {
-    this.configurable.push(...entries);
+    this.configurable = [...entries];
+    const self = this;
+    /** handle implementation. */
+    const handle = () => {};
+    handle.replace = (next) => {
+      self.configurable = [...next];
+    };
+    return handle;
   },
   /** registerAdapter implementation. */
   registerAdapter(registered, adapter) {
     this.adapter = adapter;
     this.registeredProviders = [...registered];
-    return { replace: () => {}, dispose: () => {} };
+    const self = this;
+    /** handle implementation. */
+    const handle = () => {};
+    handle.replace = (next) => {
+      self.registeredProviders = [...next];
+    };
+    handle.dispose = () => {};
+    return handle;
   },
 };
 ctxAll.provide("llm", llmAll);
@@ -186,7 +213,7 @@ const credentialsFull = {
   },
 };
 ctxAll.provide("credentials", credentialsFull);
-providers.apply(ctxAll, { mode: "all", liveCatalog: false });
+applyProviders(ctxAll, { mode: "all", liveCatalog: false });
 // mode "all" lifts the pay-as-you-go block for a credentialed route.
 assert.equal(await ctxAll.dshProviders.gate("kimi-code"), undefined);
 const openAdapter = llmAll.adapter;
@@ -522,7 +549,11 @@ console.log("403 quota classification ok");
     /** registerAdapter implementation. */
     registerAdapter(registered, adapter) {
       this.adapter = adapter;
-      return { replace: () => {}, dispose: () => {} };
+      /** handle implementation. */
+      const handle = () => {};
+      handle.replace = () => {};
+      handle.dispose = () => {};
+      return handle;
     },
   };
   ctxBare.provide("llm", llmBare);
@@ -534,7 +565,7 @@ console.log("403 quota classification ok");
       return undefined;
     },
   });
-  providers.apply(ctxBare, { mode: "all", liveCatalog: false });
+  applyProviders(ctxBare, { mode: "all", liveCatalog: false });
 
   // Nothing configured: every route leaves the selector silently. The host
   // hides a provider whose gate is invisible, so no "failed to load" row is
@@ -565,7 +596,11 @@ console.log("403 quota classification ok");
     /** registerAdapter implementation. */
     registerAdapter(registered, adapter) {
       this.adapter = adapter;
-      return { replace: () => {}, dispose: () => {} };
+      /** handle implementation. */
+      const handle = () => {};
+      handle.replace = () => {};
+      handle.dispose = () => {};
+      return handle;
     },
   };
   ctxStale.provide("llm", llmStale);
@@ -588,7 +623,7 @@ console.log("403 quota classification ok");
       return [];
     },
   });
-  providers.apply(ctxStale, { mode: "all", liveCatalog: false });
+  applyProviders(ctxStale, { mode: "all", liveCatalog: false });
 
   // 400 on a refresh grant is invalid_grant: permanent, so the stored access
   // token stops resolving while the record itself stays on disk.
@@ -776,13 +811,11 @@ console.log("403 quota classification ok");
 
 // ---- status lights for providers this plugin does not own ----
 {
-  const {
-    createConfiguredProviders,
-    probeConfiguredRoute,
-    readConfiguredProfile,
-    modelsEndpoint,
-    PROBE_ROUTE_IDS,
-  } = providers;
+  const { createConfiguredProviders, probeConfiguredRoute, readConfiguredProfile, modelsEndpoint } =
+    providers;
+  const PROBE_ROUTE_IDS = [...ctx.providers.list()]
+    .filter((route) => route.probe !== undefined)
+    .map((route) => route.id);
 
   assert.equal(modelsEndpoint("https://gw.test/v1"), "https://gw.test/v1/models");
   assert.equal(modelsEndpoint("https://gw.test/v1/"), "https://gw.test/v1/models");
@@ -905,13 +938,13 @@ console.log("403 quota classification ok");
   );
 
   // Routes this plugin owns never fall through to the generic prober.
-  for (const owned of providers.PROVIDER_IDS) {
+  for (const owned of EXTENSION_IDS) {
     assert.deepEqual(
       createConfiguredProviders({
         listConfigurable: () => [{ ...entry, provider: owned }],
         describeSettings: () => descriptors,
         readToken: async () => "secret",
-        covered: (candidate) => providers.PROVIDER_IDS.includes(candidate),
+        covered: (candidate) => EXTENSION_IDS.includes(candidate),
         fetch: async () => new Response("", { status: 200 }),
       }).map((p) => p.id),
       [],
