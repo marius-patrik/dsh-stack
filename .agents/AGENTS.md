@@ -62,6 +62,11 @@ CI automation is intended to run on a real DSH node managed through `dsh-hosts`,
 - Before a pull request merges, everything it touched must be scoped in attached issue(s): deferred work, follow-ups, or scope discovered mid-PR that isn't fully resolved in the PR gets its own linked GitHub issue, not an implicit or undocumented gap.
 - A pull request's description must precisely describe everything the PR actually did — an accurate, complete account of the changes, not a vague or partial summary.
 
+## File and naming granularity
+
+- Avoid monolith files: a source file should generally implement one function (one cohesive unit of behavior), not a grab-bag of unrelated helpers.
+- Avoid generic file/module names like `utils`, `helpers`, or `misc`. A name must capture the specific nuance of what the file does, not a catch-all category.
+
 ## Release model
 
 The Stack version increments on every merge to `main`. Releases contain the complete plugin and pack catalog, with exact versions, dependencies, integrity data, and distributable artifacts for every included package.
