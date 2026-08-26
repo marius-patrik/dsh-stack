@@ -27,7 +27,7 @@ export const sidebarSections: readonly SidebarSectionDefinition[] = [
 ];
 
 export interface SidebarFilesystemContextMenuItem {
-// jscpd:ignore-end
+  // jscpd:ignore-end
   readonly id: "open" | "open-new-tab" | "reveal" | "copy-path" | "rename" | "duplicate" | "delete";
   readonly destructive?: boolean;
 }

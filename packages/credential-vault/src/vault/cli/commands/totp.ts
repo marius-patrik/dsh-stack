@@ -11,7 +11,7 @@ export async function totpCommand(args: ParsedArguments, io: VaultCliIo): Promis
   const record_ = await store.get(id);
   if (!record_) throw new VaultCliError(`no such record: ${id}`);
   if (record_.material.type !== "totp_seed")
-// jscpd:ignore-end
+    // jscpd:ignore-end
     throw new VaultCliError(`${id} is a ${record_.type}, not a totp_seed`);
   const code = generateTotp(record_.material.parameters, io.now());
   if (boolean(args, "json")) {

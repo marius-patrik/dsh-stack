@@ -99,7 +99,7 @@ export function apply(ctx: Context, config: ToolsConfigType): void {
     ctx,
     NS,
     ToolSettings,
-// jscpd:ignore-start -- small settings-wiring block mirrored in formatters/src/index.ts for a different domain
+    // jscpd:ignore-start -- small settings-wiring block mirrored in formatters/src/index.ts for a different domain
     { tools: {} },
     {
       setSource: () => {},
@@ -110,7 +110,7 @@ export function apply(ctx: Context, config: ToolsConfigType): void {
   ctx.inject(["settings"], (sctx) => {
     const /** settings implementation. */
       settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
-// jscpd:ignore-end
+    // jscpd:ignore-end
 
     for (const [name, tool] of Object.entries(toolsFor(settings(), config))) {
       ctx.tools.register(

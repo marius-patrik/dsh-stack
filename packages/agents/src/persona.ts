@@ -85,7 +85,7 @@ export function parsePersona(filePath: string, content: string): Persona {
   }
 
   const trimmed = prompt.trim();
-// jscpd:ignore-start -- persona id-sanitizing logic mirrors agent-actions/src/action.ts's sanitizeId for a different authoring domain; kept independent so the two domains can diverge
+  // jscpd:ignore-start -- persona id-sanitizing logic mirrors agent-actions/src/action.ts's sanitizeId for a different authoring domain; kept independent so the two domains can diverge
   if (trimmed === "") throw new Error(`${filePath}: persona prompt must not be empty`);
 
   return {
@@ -93,7 +93,7 @@ export function parsePersona(filePath: string, content: string): Persona {
     ...(fields.name !== undefined ? { name: fields.name } : {}),
     ...(fields.description !== undefined ? { description: fields.description } : {}),
     ...(fields.base !== undefined ? { base: fields.base } : {}),
-// jscpd:ignore-end
+    // jscpd:ignore-end
     prompt: trimmed,
   };
 }

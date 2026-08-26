@@ -124,7 +124,7 @@ const sessionCommand: Command = {
 const modelCommand: Command = {
   name: "/model",
   description: "List or switch models",
-// jscpd:ignore-start -- internal near-duplicate command-parsing blocks for two distinct commands
+  // jscpd:ignore-start -- internal near-duplicate command-parsing blocks for two distinct commands
   usage: "/model [list|switch <id>]",
   handler: async (args, ctx) => {
     const parts = splitCommandArgs(args);
@@ -135,7 +135,7 @@ const modelCommand: Command = {
     switch (action) {
       case "list": {
         const result = await ctx.client.call<{
-// jscpd:ignore-end
+          // jscpd:ignore-end
           models: Array<{ id: string; name: string; provider: string }>;
         }>("session.models", { sessionId: ctx.sessionId });
         const models = result.models ?? [];
@@ -159,7 +159,7 @@ const modelCommand: Command = {
 const goalCommand: Command = {
   name: "/goal",
   description: "Manage persistent goals (via dsh harness)",
-// jscpd:ignore-start -- internal near-duplicate command-parsing blocks for two distinct commands
+  // jscpd:ignore-start -- internal near-duplicate command-parsing blocks for two distinct commands
   usage: "/goal [list|create <title>|pause|resume|clear]",
   handler: async (args, ctx) => {
     const parts = splitCommandArgs(args);
@@ -171,7 +171,7 @@ const goalCommand: Command = {
       case "list": {
         // Goals are per-session; read via history or a dedicated endpoint
         const result = await ctx.client.call<{
-// jscpd:ignore-end
+          // jscpd:ignore-end
           goals?: Array<{ id: string; title: string; status: string }>;
         }>("goal.list", { sessionId: ctx.sessionId });
         const goals = result.goals ?? [];

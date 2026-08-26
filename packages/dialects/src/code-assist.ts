@@ -37,7 +37,7 @@ export interface WireCodeAssistRequestBody {
     maxOutputTokens?: number;
     stopSequences?: string[];
   };
-// jscpd:ignore-end
+  // jscpd:ignore-end
   session_id?: string;
 }
 
@@ -91,7 +91,7 @@ export const codeAssistDialect: Dialect = {
       );
     }
     for (const message of options.messages) assertTextOnly(message.content);
-// jscpd:ignore-start -- structurally similar to gemini.ts's block but encodes Code Assist's distinct wire semantics; forcing a shared helper would blur real per-dialect differences
+    // jscpd:ignore-start -- structurally similar to gemini.ts's block but encodes Code Assist's distinct wire semantics; forcing a shared helper would blur real per-dialect differences
     const request: WireCodeAssistRequestBody = {
       contents: serializeContents(options.messages),
       ...(options.system !== undefined
@@ -115,7 +115,7 @@ export const codeAssistDialect: Dialect = {
         ...(options.temperature !== undefined ? { temperature: options.temperature } : {}),
         ...(options.stop !== undefined ? { stopSequences: options.stop } : {}),
       },
-// jscpd:ignore-end
+      // jscpd:ignore-end
       session_id: randomUUID(),
     };
     const wrapper: WireCodeAssistWrapper = {

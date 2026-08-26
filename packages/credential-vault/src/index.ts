@@ -163,14 +163,14 @@ export class AccountsService extends Service {
       if (value !== null) return { value, origin: "vault" };
     }
     // Only fall through to ambient credentials for the default (unscoped) case
-// jscpd:ignore-start -- internal near-duplicate route-registration blocks for distinct HTTP routes
+    // jscpd:ignore-start -- internal near-duplicate route-registration blocks for distinct HTTP routes
     if (account === undefined) {
       const credentials = this.ctx.get("credentials") as CredentialProvider | undefined;
       if (credentials !== undefined) {
         const hit = await credentials.resolve(credentialRef(ref));
         if (hit !== undefined && hit.value.length > 0)
           return { value: hit.value, origin: "credentials" };
-// jscpd:ignore-end
+        // jscpd:ignore-end
       }
     }
     return undefined;
@@ -207,13 +207,13 @@ export class AccountsService extends Service {
     }
     // Include ambient credential for the default case if no vault record found for default
     const hasDefault = out.some((e) => e.account === null);
-// jscpd:ignore-start -- internal near-duplicate route-registration blocks for distinct HTTP routes
+    // jscpd:ignore-start -- internal near-duplicate route-registration blocks for distinct HTTP routes
     if (!hasDefault) {
       const credentials = this.ctx.get("credentials") as CredentialProvider | undefined;
       if (credentials !== undefined) {
         const hit = await credentials.resolve(credentialRef(ref));
         if (hit !== undefined && hit.value.length > 0) {
-// jscpd:ignore-end
+          // jscpd:ignore-end
           out.push({ ref, account: null, value: hit.value, origin: "credentials" });
         }
       }

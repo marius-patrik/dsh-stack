@@ -58,7 +58,7 @@ export const defaultFileSections: readonly FileSection[] = [
 
 /** createFileRow implementation. */
 export function createFileRow(node: FileNode, expanded = false): FileRowModel {
-// jscpd:ignore-end
+  // jscpd:ignore-end
   const extension = extensionOf(node.name);
   const folder =
     node.kind === "directory" || node.kind === "workspace" || node.kind === "repository"

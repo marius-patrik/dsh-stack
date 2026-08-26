@@ -20,7 +20,7 @@ export async function getCommand(args: ParsedArguments, io: VaultCliIo): Promise
   const record_ = await store.get(id);
   if (!record_) throw new VaultCliError(`no such record: ${id}`);
   const out = optional(args, "out");
-// jscpd:ignore-end
+  // jscpd:ignore-end
   if (!boolean(args, "reveal")) {
     io.err(
       `refusing to reveal ${id}: pass --reveal to confirm.\n` +
