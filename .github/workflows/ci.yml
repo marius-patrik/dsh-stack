@@ -3,10 +3,13 @@ name: CI
 on:
   pull_request:
   push:
-    branches: ['**']
+    branches: [main]
 
 concurrency:
-  group: ci2-${{ github.workflow }}-${{ github.ref }}
+  # One active run per branch: pull_request and push events for the same
+  # branch share a group so a superseding push cancels the stale run instead
+  # of doubling the runner queue.
+  group: ci2-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:

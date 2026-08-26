@@ -5,6 +5,12 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
 
+concurrency:
+  # A synchronize supersedes the previous polling run; cancel it instead of
+  # letting it hold a runner for its full polling budget.
+  group: merge-enforcement-${{ github.head_ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: read
