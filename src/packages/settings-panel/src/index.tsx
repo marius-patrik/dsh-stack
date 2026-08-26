@@ -101,9 +101,7 @@ export function SettingsSection({
         {description === undefined ? null : <p style={descriptionStyle}>{description}</p>}
       </header>
       <div style={optionGridStyle}>{children}</div>
-      {onClose === undefined ? null : (
-        <SettingsCloseButton label={closeLabel} onClose={onClose} />
-      )}
+      {onClose === undefined ? null : <SettingsCloseButton label={closeLabel} onClose={onClose} />}
     </section>
   );
 }

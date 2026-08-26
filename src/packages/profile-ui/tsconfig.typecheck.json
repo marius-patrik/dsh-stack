@@ -6,16 +6,10 @@
       "@dsh-stack/lucide-animated/client": [
         "../../../publish/extensions/lucide-animated/src/client.tsx"
       ],
-      "@dsh-stack/profile-runtime": [
-        "../profile-runtime/src/index.ts"
-      ],
-      "@dsh-stack/settings-panel": [
-        "../settings-panel/src/index.tsx"
-      ]
+      "@dsh-stack/profile-runtime": ["../profile-runtime/src/index.ts"],
+      "@dsh-stack/settings-panel": ["../settings-panel/src/index.tsx"]
     },
     "rootDir": "../../.."
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
