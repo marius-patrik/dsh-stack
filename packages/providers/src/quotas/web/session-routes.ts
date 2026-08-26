@@ -12,7 +12,11 @@ import { QUOTAS_PREFIX } from "./quotas-prefix.js";
 import { isRoute, type RouteContext } from "./route-context.js";
 
 const PREFIX = `${QUOTAS_PREFIX}/api/sessions`;
-const SESSION_SUBDIRS = ["--Users-user--", "--Users-user-Projects-dsh-stack--", "--Users-user-agents--"];
+const SESSION_SUBDIRS = [
+  "--Users-user--",
+  "--Users-user-Projects-dsh-stack--",
+  "--Users-user-agents--",
+];
 
 /** Whether a session's transcript, once decompressed, has no content beyond ping/pong. */
 function isPingPongOnlySession(sessionsRoot: string, id: string): boolean {

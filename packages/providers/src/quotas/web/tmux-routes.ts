@@ -162,7 +162,9 @@ export async function handleTmuxRoute(ctx: RouteContext): Promise<boolean> {
     const body = await readJsonBody(req);
     const name = sanitizeIdentifier(body["name"], "0");
     const index = sanitizeDigits(body["index"], "0");
-    await respondToAction(res, () => execFileSync("tmux", ["select-window", "-t", `${name}:${index}`]));
+    await respondToAction(res, () =>
+      execFileSync("tmux", ["select-window", "-t", `${name}:${index}`]),
+    );
     return true;
   }
 
@@ -170,7 +172,9 @@ export async function handleTmuxRoute(ctx: RouteContext): Promise<boolean> {
     const body = await readJsonBody(req);
     const name = sanitizeIdentifier(body["name"], "0");
     const windowName = sanitizeIdentifier(body["windowName"], "win");
-    await respondToAction(res, () => execFileSync("tmux", ["new-window", "-t", name, "-n", windowName]));
+    await respondToAction(res, () =>
+      execFileSync("tmux", ["new-window", "-t", name, "-n", windowName]),
+    );
     return true;
   }
 

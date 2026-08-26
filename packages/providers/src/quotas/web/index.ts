@@ -41,7 +41,13 @@ function makeQuotaHandler(
 ): (req: IncomingMessage, res: ServerResponse) => void {
   return async (req, res) => {
     const url = new URL(req.url ?? "/", "http://quotas.local");
-    const ctx: RouteContext = { req, res, url, pathname: url.pathname, method: req.method ?? "GET" };
+    const ctx: RouteContext = {
+      req,
+      res,
+      url,
+      pathname: url.pathname,
+      method: req.method ?? "GET",
+    };
 
     try {
       if (await handleQuotaRoute(ctx, registry)) return;

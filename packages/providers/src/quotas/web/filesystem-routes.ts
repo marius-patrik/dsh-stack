@@ -21,7 +21,13 @@ const ALWAYS_VISIBLE_DOTFILES = new Set([".cursor", ".agents"]);
 /** List a directory's entries, filtering out vendor dirs and hidden dotfiles (except the always-visible ones). */
 function listDirectory(targetPath: string) {
   const rawEntries = fs.readdirSync(targetPath, { withFileTypes: true });
-  const entries: Array<{ name: string; path: string; isDirectory: boolean; isFile: boolean; isRepo: boolean }> = [];
+  const entries: Array<{
+    name: string;
+    path: string;
+    isDirectory: boolean;
+    isFile: boolean;
+    isRepo: boolean;
+  }> = [];
   for (const dirent of rawEntries) {
     if (dirent.name.startsWith(".") && !ALWAYS_VISIBLE_DOTFILES.has(dirent.name)) continue;
     try {
@@ -37,7 +43,13 @@ function listDirectory(targetPath: string) {
             fs.existsSync(path.join(full, ".gitmodules"));
         } catch {}
       }
-      entries.push({ name: dirent.name, path: full, isDirectory: isDir, isFile: dirent.isFile(), isRepo });
+      entries.push({
+        name: dirent.name,
+        path: full,
+        isDirectory: isDir,
+        isFile: dirent.isFile(),
+        isRepo,
+      });
     } catch {}
   }
   entries.sort((a, b) => {
@@ -176,7 +188,10 @@ export async function handleFilesystemRoute(ctx: RouteContext): Promise<boolean>
       const cachePng = path.join(cacheDir, `${hash}.png`);
 
       if (fs.existsSync(cachePng)) {
-        res.writeHead(200, { "content-type": "image/png", "cache-control": "public, max-age=86400" });
+        res.writeHead(200, {
+          "content-type": "image/png",
+          "cache-control": "public, max-age=86400",
+        });
         fs.createReadStream(cachePng).pipe(res);
         return true;
       }
@@ -184,11 +199,18 @@ export async function handleFilesystemRoute(ctx: RouteContext): Promise<boolean>
       const icnsPath = resolveIcnsPath(targetPath);
       if (icnsPath && fs.existsSync(icnsPath)) {
         try {
-          execFileSync("sips", ["-s", "format", "png", "-z", "32", "32", icnsPath, "--out", cachePng], {
-            timeout: 3000,
-          });
+          execFileSync(
+            "sips",
+            ["-s", "format", "png", "-z", "32", "32", icnsPath, "--out", cachePng],
+            {
+              timeout: 3000,
+            },
+          );
           if (fs.existsSync(cachePng)) {
-            res.writeHead(200, { "content-type": "image/png", "cache-control": "public, max-age=86400" });
+            res.writeHead(200, {
+              "content-type": "image/png",
+              "cache-control": "public, max-age=86400",
+            });
             fs.createReadStream(cachePng).pipe(res);
             return true;
           }

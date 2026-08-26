@@ -49,7 +49,8 @@ export function readClaudeStats(home: string): ClaudeStats | null {
     const cacheWriteTokens = usage.cacheCreationInputTokens || 0;
 
     const dailyTokens = data.dailyModelTokens || [];
-    const todayTokens = dailyTokens.length > 0 ? sumTokensByModel(dailyTokens[dailyTokens.length - 1]) : 0;
+    const todayTokens =
+      dailyTokens.length > 0 ? sumTokensByModel(dailyTokens[dailyTokens.length - 1]) : 0;
     const yesterdayTokens =
       dailyTokens.length > 1 ? sumTokensByModel(dailyTokens[dailyTokens.length - 2]) : 0;
 

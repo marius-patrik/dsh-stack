@@ -17,7 +17,13 @@ import { isRoute, type RouteContext } from "./route-context.js";
 const PREFIX = `${QUOTAS_PREFIX}/api/git`;
 
 /** Run a git command in `cwd`, returning `fallback` (instead of throwing) on failure. */
-function runGit<T>(cwd: string, args: string[], timeout: number, parse: (out: string) => T, fallback: T): T {
+function runGit<T>(
+  cwd: string,
+  args: string[],
+  timeout: number,
+  parse: (out: string) => T,
+  fallback: T,
+): T {
   try {
     const out = execFileSync("git", args, { cwd, encoding: "utf-8", timeout }).trim();
     return parse(out);
@@ -113,7 +119,14 @@ function readFileTree(repoPath: string, subPath: string): TreeEntry[] {
           },
           { lastCommitMsg: "", lastCommitDate: "" },
         );
-        tree.push({ name, type, path: itemFullPath, relPath: itemRelPath, lastCommitMsg, lastCommitDate });
+        tree.push({
+          name,
+          type,
+          path: itemFullPath,
+          relPath: itemRelPath,
+          lastCommitMsg,
+          lastCommitDate,
+        });
       }
     }
   } catch {}
@@ -161,7 +174,11 @@ const EXT_MAP: Record<string, { name: string; color: string }> = {
 function readLanguages(repoPath: string): Array<{ name: string; percent: number; color: string }> {
   const languages: Array<{ name: string; percent: number; color: string }> = [];
   try {
-    const filesRaw = execSync("git ls-files", { cwd: repoPath, encoding: "utf-8", timeout: 3000 }).trim();
+    const filesRaw = execSync("git ls-files", {
+      cwd: repoPath,
+      encoding: "utf-8",
+      timeout: 3000,
+    }).trim();
     const extCounts: Record<string, number> = {};
     let totalExt = 0;
     if (filesRaw) {
@@ -200,9 +217,21 @@ function handleOverview(ctx: RouteContext): boolean {
   try {
     const { remoteUrl, repoName, owner } = readRemoteAndName(repoPath);
     const branch = runGit(repoPath, ["branch", "--show-current"], 3000, (s) => s || "main", "main");
-    const totalCommits = runGit(repoPath, ["rev-list", "--count", "HEAD"], 3000, (s) => parseInt(s, 10) || 0, 0);
+    const totalCommits = runGit(
+      repoPath,
+      ["rev-list", "--count", "HEAD"],
+      3000,
+      (s) => parseInt(s, 10) || 0,
+      0,
+    );
     const tagsCount = runGit(repoPath, ["tag"], 3000, (s) => (s ? s.split("\n").length : 0), 0);
-    const branchesCount = runGit(repoPath, ["branch", "-a"], 3000, (s) => (s ? s.split("\n").length : 1), 1);
+    const branchesCount = runGit(
+      repoPath,
+      ["branch", "-a"],
+      3000,
+      (s) => (s ? s.split("\n").length : 1),
+      1,
+    );
     const latestCommit = readLatestCommit(repoPath);
     const tree = readFileTree(repoPath, subPath);
     const readme = readReadme(repoPath);
@@ -334,7 +363,11 @@ export async function handleGitRoute(ctx: RouteContext): Promise<boolean> {
   if (isRoute(ctx, `${PREFIX}/branches`, "GET")) {
     const repoPath = url.searchParams.get("path") || "";
     try {
-      const raw = execSync("git branch -a", { cwd: repoPath, encoding: "utf-8", timeout: 5000 }).trim();
+      const raw = execSync("git branch -a", {
+        cwd: repoPath,
+        encoding: "utf-8",
+        timeout: 5000,
+      }).trim();
       let current = "main";
       const branches = raw
         ? raw.split("\n").map((b) => {
@@ -346,7 +379,12 @@ export async function handleGitRoute(ctx: RouteContext): Promise<boolean> {
         : [];
       sendJsonResponse(res, 200, { repoPath, current, branches });
     } catch (err) {
-      sendJsonResponse(res, 200, { repoPath, current: "main", branches: [], error: (err as Error).message });
+      sendJsonResponse(res, 200, {
+        repoPath,
+        current: "main",
+        branches: [],
+        error: (err as Error).message,
+      });
     }
     return true;
   }
@@ -367,9 +405,17 @@ export async function handleGitRoute(ctx: RouteContext): Promise<boolean> {
     const file = body["file"] ? String(body["file"]) : "";
     await respondToAction(res, () => {
       if (file) {
-        execFileSync("git", ["checkout", "--", file], { cwd: repoPath, encoding: "utf-8", timeout: 5000 });
+        execFileSync("git", ["checkout", "--", file], {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 5000,
+        });
       } else {
-        execFileSync("git", ["checkout", "--", "."], { cwd: repoPath, encoding: "utf-8", timeout: 5000 });
+        execFileSync("git", ["checkout", "--", "."], {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 5000,
+        });
         execFileSync("git", ["clean", "-fd"], { cwd: repoPath, encoding: "utf-8", timeout: 5000 });
       }
     });

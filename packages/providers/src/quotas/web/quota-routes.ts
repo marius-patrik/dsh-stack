@@ -13,7 +13,10 @@ import { QUOTAS_PREFIX } from "./quotas-prefix.js";
 import { isRoute, type RouteContext } from "./route-context.js";
 
 /** Handle one core quota request (dashboard, integrations, snapshots, summary, refresh). */
-export async function handleQuotaRoute(ctx: RouteContext, registry: QuotaRegistry): Promise<boolean> {
+export async function handleQuotaRoute(
+  ctx: RouteContext,
+  registry: QuotaRegistry,
+): Promise<boolean> {
   const { res, pathname, method } = ctx;
 
   if (isRoute(ctx, `${QUOTAS_PREFIX}/api/integrations`, "GET")) {
@@ -67,7 +70,11 @@ export async function handleQuotaRoute(ctx: RouteContext, registry: QuotaRegistr
     const snapshots: Array<{ provider: string; status: string; remaining?: number }> = [];
     for (const snap of registry.all()) {
       const refreshed = await registry.refresh(snap.provider);
-      snapshots.push({ provider: refreshed.provider, status: refreshed.status, remaining: refreshed.remaining });
+      snapshots.push({
+        provider: refreshed.provider,
+        status: refreshed.status,
+        remaining: refreshed.remaining,
+      });
     }
     sendJsonResponse(res, 200, { snapshots });
     return true;
