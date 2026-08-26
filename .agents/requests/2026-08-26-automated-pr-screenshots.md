@@ -15,3 +15,9 @@ status: scoped
 - Motivation observed live this session: PR #63 passed typecheck/verify/HTTP-level checks while the browser showed "Failed to load plugins" and an empty sidebar — only real browser verification caught it.
 - Becomes the enforcement arm of the standing rule: every implemented function fully exposed via UI, browser-verified via workflow before merge (`.agents/rules/results-verified-in-live-ui.md`).
 - Depends on #63 (bootable full-stack profile) and shares headless-boot infrastructure with the #79 routing epic.
+
+---
+
+> if a runs commit has been superseded it should be cleared from quee
+
+- Implemented directly in PR #84: ci.yml push trigger narrowed to main, per-branch concurrency groups with cancel-in-progress on ci/format/merge-enforcement; superseded runs are cancelled instead of queued.
