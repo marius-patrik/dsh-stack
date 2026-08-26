@@ -7,13 +7,8 @@
  * Usage: dsh sessions [--cwd <path>]
  */
 
-import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
-import { resolveHome } from "../lib/home.js";
+import { resolveHome } from "@dsh-stack/tweaks/home";
 import { listAllSessions, formatJson } from "../lib/stats.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-void __dirname;
 
 const args = process.argv.slice(2);
 const cwdIndex = args.indexOf("--cwd");

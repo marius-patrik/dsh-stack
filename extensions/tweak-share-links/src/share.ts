@@ -6,7 +6,7 @@
  * requires `?token=<random>` in the URL, checked against the value the
  * `dsh share` verb wrote to the section. Read-only is the default: without a
  * token the page is a pure snapshot with no interactive controls.
- * @module tweaks/share
+ * @module tweak-share-links/share
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";

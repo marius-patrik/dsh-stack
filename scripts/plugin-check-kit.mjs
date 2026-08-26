@@ -46,3 +46,22 @@ export async function loadClientLoaderSpec(clientUrl) {
   await import(clientUrl);
   return loader;
 }
+
+/**
+ * Create a stub `settings` service for boot-style checks: records registered
+ * namespaces and answers `get`/`watch` from the install-time base value.
+ *
+ * @returns {{ service: object, registrations: unknown[] }} the stub service
+ *   and the list of namespaces registered through it.
+ */
+export function stubSettingsService() {
+  const registrations = [];
+  const service = {
+    /** register implementation. */
+    register(ns, _schema, opts) {
+      registrations.push(ns);
+      return { get: () => opts.base, watch: () => undefined };
+    },
+  };
+  return { service, registrations };
+}

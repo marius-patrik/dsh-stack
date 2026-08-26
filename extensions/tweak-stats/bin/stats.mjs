@@ -8,13 +8,8 @@
  * Usage: dsh stats [--format table|json|csv] [--cwd <path>] [--json]
  */
 
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-import { resolveHome } from "../lib/home.js";
+import { resolveHome } from "@dsh-stack/tweaks/home";
 import { listAllSessions, formatTable, formatCsv, formatJson } from "../lib/stats.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-void __dirname;
 
 const args = process.argv.slice(2);
 const formatIndex = args.indexOf("--format");

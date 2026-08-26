@@ -4,7 +4,7 @@
  * power the `dsh stats` and `dsh sessions` verbs. The cache is a durable
  * fold shortcut (never an authority), so the verbs report what the harness
  * last checkpointed — the same numbers the web UI shows.
- * @module tweaks/stats
+ * @module tweak-stats/stats
  */
 
 import { join } from "node:path";

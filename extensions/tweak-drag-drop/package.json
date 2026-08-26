@@ -1,7 +1,7 @@
 {
-  "name": "@dsh-stack/plugin-kit",
+  "name": "@dsh-stack/tweak-drag-drop",
   "version": "0.1.0",
-  "description": "Reusable Stack plugin metadata, validation and composition support primitives.",
+  "description": "Image drag-drop settings surface: the tweaks-drag-drop section (enable + max image bytes) consumed by the client attachment seam.",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -14,26 +14,32 @@
   },
   "files": [
     "lib",
+    "README.md",
     "package.json",
-    "README.md"
+    "stack.json"
   ],
   "publishConfig": {
     "access": "public"
   },
   "stack": {
-    "kind": "library",
-    "id": "stack.library.plugin-kit"
+    "kind": "extension",
+    "id": "stack.tweaks.drag-drop"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test",
-    "verify": "node verify.mjs"
-  },
-  "devDependencies": {
-    "typescript": "^6.0.3"
+    "test": "node check-plugin.mjs"
   },
   "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/schemastery": "*",
+    "@deepseek-ai/dsh-settings": "0.1.1-rc.2"
+  },
+  "dependencies": {
+    "@dsh-stack/plugin-kit": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/schemastery": "*",
     "@deepseek-ai/dsh-settings": "0.1.1-rc.2"

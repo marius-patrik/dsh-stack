@@ -5,6 +5,11 @@ export {
   splitAuthoringMarkdown,
 } from "./authoring-file.js";
 
+export {
+  installLiveSettingsSection,
+  type SettingsNamespace,
+} from "./settings-section.js";
+
 export type DependencyKind = "required" | "optional";
 
 export interface PluginDependency {

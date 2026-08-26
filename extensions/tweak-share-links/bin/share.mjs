@@ -7,13 +7,8 @@
  * Usage: dsh share <sessionId> [--interactive] [--advertised-host <host>]
  */
 
-import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
-import { resolveHome } from "../lib/home.js";
+import { resolveHome } from "@dsh-stack/tweaks/home";
 import { generateToken, writeShareToken } from "../lib/share.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-void __dirname;
 
 const args = process.argv.slice(2);
 const sessionId = args.find((arg) => !arg.startsWith("--"));
