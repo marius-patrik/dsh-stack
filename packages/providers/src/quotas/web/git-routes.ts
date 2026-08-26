@@ -40,6 +40,7 @@ async function respondToGitCommand(
   );
 }
 
+/** Resolve the origin remote URL and the owner/repo name it implies. */
 function readRemoteAndName(repoPath: string) {
   const remoteUrl = runGit(repoPath, ["remote", "get-url", "origin"], 3000, (s) => s, "");
   let repoName = path.basename(repoPath);
@@ -54,6 +55,7 @@ function readRemoteAndName(repoPath: string) {
   return { remoteUrl, repoName, owner };
 }
 
+/** Read HEAD's commit hash, author, relative date, and message. */
 function readLatestCommit(repoPath: string) {
   return runGit(
     repoPath,
@@ -83,6 +85,7 @@ interface TreeEntry {
   lastCommitDate: string;
 }
 
+/** List one directory's tree entries at `subPath`, each with its last commit message/date. */
 function readFileTree(repoPath: string, subPath: string): TreeEntry[] {
   const tree: TreeEntry[] = [];
   try {
@@ -121,6 +124,7 @@ function readFileTree(repoPath: string, subPath: string): TreeEntry[] {
   return tree;
 }
 
+/** Read the first matching README file (case/extension variants) at the repo root, if any. */
 function readReadme(repoPath: string): { name: string; content: string } | null {
   const candidates = ["README.md", "readme.md", "README.txt", "README"];
   for (const cand of candidates) {
@@ -153,6 +157,7 @@ const EXT_MAP: Record<string, { name: string; color: string }> = {
   ".yml": { name: "YAML", color: "#cb171e" },
 };
 
+/** Compute the tracked-file language breakdown (name, percent, color) by extension. */
 function readLanguages(repoPath: string): Array<{ name: string; percent: number; color: string }> {
   const languages: Array<{ name: string; percent: number; color: string }> = [];
   try {
@@ -184,6 +189,7 @@ function readLanguages(repoPath: string): Array<{ name: string; percent: number;
   return languages;
 }
 
+/** Handle `/quotas/api/git/overview`: remote, branch, stats, file tree, README, languages. */
 function handleOverview(ctx: RouteContext): boolean {
   const repoPath = ctx.url.searchParams.get("path") || "";
   const subPath = ctx.url.searchParams.get("subpath") || "";

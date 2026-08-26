@@ -1,6 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreUnresolved": ["^\\./lib/index\\.js$"],
   "ignoreBinaries": ["script", "dns-sd", "sips"],
   "rules": {
     "duplicates": "warn"
@@ -31,14 +30,8 @@
       "ignoreDependencies": ["@types/react"]
     },
     "extensions/*": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "src/client.{ts,tsx}",
-        "client.js",
-        "*.mjs",
-        "bin/*.mjs"
-      ],
-      "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
+      "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "bin/*.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "bin/*.mjs"]
     },
     "packs/*": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "*.mjs"],
@@ -49,9 +42,5 @@
       "project": ["src/**/*.{ts,mjs}"]
     }
   },
-  "ignoreDependencies": [
-    "@biomejs/biome",
-    "@deepseek-ai/cordis",
-    "@deepseek-ai/dsh-client-ui-slots"
-  ]
+  "ignoreDependencies": ["@biomejs/biome", "@deepseek-ai/dsh-client-ui-slots"]
 }

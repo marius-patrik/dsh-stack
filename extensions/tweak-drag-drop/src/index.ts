@@ -14,14 +14,14 @@ import { installLiveSettingsSection } from "@dsh-stack/plugin-kit";
 export const NS_DRAG_DROP = settingsNamespace("tweaks-drag-drop");
 
 /** Drag-drop knobs. */
-export interface DragDropConfig {
+interface DragDropConfig {
   /** Whether image drag-drop is enabled (wires the attachment seam). */
   enabled: boolean;
   /** Max image bytes accepted from drag-drop (mirrors the attachment seam). */
   maxImageBytes: number;
 }
 
-export const DragDropConfig: z<DragDropConfig> = z.object({
+const DragDropSchema: z<DragDropConfig> = z.object({
   enabled: z.boolean().default(true),
   maxImageBytes: z
     .natural()
@@ -35,7 +35,7 @@ export const inject: string[] = [];
 /** The drag-drop extension config: the drag-drop section itself. */
 export type Config = DragDropConfig;
 
-export const Config: z<Config> = DragDropConfig;
+export const Config: z<Config> = DragDropSchema;
 
 /** apply implementation. */
 export function apply(ctx: Context, config: Config): void {
@@ -43,5 +43,5 @@ export function apply(ctx: Context, config: Config): void {
     enabled: config?.enabled ?? true,
     maxImageBytes: config?.maxImageBytes ?? 8 * 1024 * 1024,
   };
-  installLiveSettingsSection(ctx, NS_DRAG_DROP, DragDropConfig, dragDrop, undefined, () => {});
+  installLiveSettingsSection(ctx, NS_DRAG_DROP, DragDropSchema, dragDrop, undefined, () => {});
 }

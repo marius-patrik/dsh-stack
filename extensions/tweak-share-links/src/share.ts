@@ -19,7 +19,7 @@ import type {} from "@deepseek-ai/dsh-host-webserver";
 import type { ShareConfig } from "./settings.js";
 
 /** Length of the interactive token, in bytes. */
-export const TOKEN_BYTES = 24;
+const TOKEN_BYTES = 24;
 
 /** One rendered transcript line from a session event. */
 export interface TranscriptLine {
@@ -29,7 +29,7 @@ export interface TranscriptLine {
 }
 
 /** The session-log folder name under the home. */
-export const SESSIONS_DIR = "sessions";
+const SESSIONS_DIR = "sessions";
 
 /** Map a workspace-cwd segment to the session folder prefix the harness uses. */
 function workspaceSegment(cwd: string): string {
@@ -83,7 +83,7 @@ export async function resolveSessionLogPath(
 }
 
 /** Extract role/text from one parsed JSONL event line. */
-export function eventToLine(event: Record<string, unknown>): TranscriptLine | undefined {
+function eventToLine(event: Record<string, unknown>): TranscriptLine | undefined {
   const type = event["type"];
   const data = event["data"] as Record<string, unknown> | undefined;
   if (type === "user/message") {
@@ -143,7 +143,7 @@ export function parseLog(text: string): TranscriptLine[] {
 }
 
 /** Escape a string for safe HTML text emission. */
-export function escapeHtml(value: string): string {
+function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -234,7 +234,7 @@ export async function listSessionIds(home: string, cwd = ""): Promise<string[]> 
 }
 
 /** Read a session log, transparently decompressing a `.zstd` frame. */
-export async function readSessionLog(logPath: string): Promise<string> {
+async function readSessionLog(logPath: string): Promise<string> {
   const raw = await readFile(logPath);
   if (logPath.endsWith(".zstd")) {
     return zstdDecompressSync(raw).toString("utf8");

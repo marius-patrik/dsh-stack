@@ -18,6 +18,7 @@ const PREFIX = `${QUOTAS_PREFIX}/api/fs`;
 const VENDOR_DIR_NAMES = new Set(["node_modules", "dist", "lib", ".git"]);
 const ALWAYS_VISIBLE_DOTFILES = new Set([".cursor", ".agents"]);
 
+/** List a directory's entries, filtering out vendor dirs and hidden dotfiles (except the always-visible ones). */
 function listDirectory(targetPath: string) {
   const rawEntries = fs.readdirSync(targetPath, { withFileTypes: true });
   const entries: Array<{ name: string; path: string; isDirectory: boolean; isFile: boolean; isRepo: boolean }> = [];
