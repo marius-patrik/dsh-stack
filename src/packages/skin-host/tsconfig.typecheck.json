@@ -10,7 +10,7 @@
         "../../../publish/extensions/skin-deepseek/src/client.tsx"
       ]
     },
-    "rootDir": "../.."
+    "rootDir": "../../.."
   },
   "include": ["src"]
 }

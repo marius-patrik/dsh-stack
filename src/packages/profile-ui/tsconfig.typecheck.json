@@ -8,7 +8,7 @@
       ],
       "@dsh-stack/profile-runtime": ["../profile-runtime/src/index.ts"]
     },
-    "rootDir": "../.."
+    "rootDir": "../../.."
   },
   "include": ["src"]
 }

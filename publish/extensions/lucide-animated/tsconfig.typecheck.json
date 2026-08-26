@@ -4,7 +4,7 @@
     "paths": {
       "@dsh-stack/icon-engine": ["../../../src/packages/icon-engine/src/index.ts"]
     },
-    "rootDir": "../.."
+    "rootDir": "../../.."
   },
   "include": ["src"]
 }
