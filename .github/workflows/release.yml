@@ -20,10 +20,16 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
+      # Isolate the pnpm install per runner: pnpm/action-setup defaults to
+      # ~/setup-pnpm, which every self-hosted runner on this machine shares.
+      # Two jobs installing pnpm concurrently raced on that directory and
+      # failed with ENOTEMPTY / "Cannot find module .../pnpm/dist/worker.js".
+      # Keying on runner.name also lets the pool grow without new collisions.
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 11.7.0
+          dest: ~/setup-pnpm-${{ runner.name }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v5

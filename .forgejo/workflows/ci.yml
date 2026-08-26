@@ -1,8 +1,16 @@
 name: CI (Forgejo)
 
+# Dispatch-only. This surface exists as a fallback for when GitHub Actions is
+# degraded, not as a second opinion on every push. It runs on the same machine
+# as the GitHub self-hosted runners, in an unthrottled container, and running
+# the full Canonical Stack workspace suite on both surfaces at once saturated
+# the host: an observed FORGEJO-ACTIONS-TASK container held 764% CPU (of 8
+# cores) while the GitHub runners and the live harness starved alongside it.
+#
+# Trigger it when you need it:
+#   POST /api/v1/repos/<owner>/<repo>/actions/workflows/<id>/dispatches
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   verify:
