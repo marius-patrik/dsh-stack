@@ -54,14 +54,15 @@ async function main() {
   );
   const expectedExtensions = await discoverComponents(extensionsDir);
   const expectedPacks = await discoverComponents(packsDir);
+  const versionSuffix = /-\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.zip$/;
   const pluginZips = inventory.plugins
-    .map((name) => name.replace(/^plugin-/, "").replace(/\.zip$/, ""))
+    .map((name) => name.replace(/^plugin-/, "").replace(versionSuffix, ""))
     .sort();
   const extensionZips = inventory.extensions
-    .map((name) => name.replace(/^extension-/, "").replace(/\.zip$/, ""))
+    .map((name) => name.replace(/^extension-/, "").replace(versionSuffix, ""))
     .sort();
   const packZips = inventory.packs
-    .map((name) => name.replace(/^pack-/, "").replace(/\.zip$/, ""))
+    .map((name) => name.replace(/^pack-/, "").replace(versionSuffix, ""))
     .sort();
   if (JSON.stringify(pluginZips) !== JSON.stringify(expectedPlugins)) {
     throw new Error(
