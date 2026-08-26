@@ -49,10 +49,10 @@ function bumpVersion(version, kind) {
   return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
 }
 
-/** Discover package implementations from the canonical packages and extensions directories. */
+/** Discover package implementations from the canonical packages, extensions, and packs directories. */
 async function discoverPackages() {
   const packages = [];
-  for (const catalogDir of [packagesDir, extensionsDir]) {
+  for (const catalogDir of [packagesDir, extensionsDir, packsDir]) {
     let entries;
     try {
       entries = await fs.readdir(catalogDir, { withFileTypes: true });
@@ -187,10 +187,31 @@ async function manifest() {
   console.log(output);
 }
 
+/**
+ * A plugin wrapper's own package.json has no version (it's a thin, private
+ * composition shim); its real version is the canonical package/extension it
+ * wraps, resolved by matching directory name.
+ */
+async function resolveComponentVersion(component, kind) {
+  if (kind !== "plugin" || (component.pkg?.version ?? undefined) !== undefined) {
+    return component.pkg?.version ?? "0.0.0";
+  }
+  for (const canonicalDir of [packagesDir, extensionsDir]) {
+    try {
+      const canonicalPkg = await readJson(
+        join(canonicalDir, component.relativePath, "package.json"),
+      );
+      if (typeof canonicalPkg.version === "string") return canonicalPkg.version;
+    } catch {}
+  }
+  return "0.0.0";
+}
+
 /** Create a ZIP archive containing one component with symlinks fully dereferenced. */
 async function zipComponent(component, outputDir, kind, stageDir) {
   const slug = component.relativePath.replaceAll("/", "-");
-  const archive = join(outputDir, `${kind}-${slug}.zip`);
+  const version = await resolveComponentVersion(component, kind);
+  const archive = join(outputDir, `${kind}-${slug}-${version}.zip`);
   const staged = join(stageDir, kind, slug);
   await fs.mkdir(join(stageDir, kind), { recursive: true });
   await fs.cp(component.dir, staged, {
