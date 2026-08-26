@@ -13,6 +13,8 @@ status: scoped
 
 > also /rules folder with file every longstanding rules /automations for automations - new plugin, add acompanying skills and hooks as well - the repo can have /loops /graphs for the actual repo specific implementation - it should rely fully on the selfhosted ci runner (implemented as an extension and in ui) running dsh in containers
 
+> also master and tracking issues should be separate - master issue should bundle together request prd and implementation - tracking should be roadmap issues for large work
+
 ### Semantic decomposition
 
 - Every user input should either file a new "request" issue or amend an existing one — no user message should go un-tracked.
@@ -20,7 +22,7 @@ status: scoped
   1. **request** — verbatim user ask, comments carry the GitHub agent's scoping conversation.
   2. **prd** — the GitHub agent's scoped output; opening a PRD issue also opens a branch and pushes a doc update (into `.agents/notes/`).
   3. **implementation-plan** — derived from the PRD issue once accepted; this is where a concrete build plan lives.
-  4. **master/tracking** — aggregates child issues (already partly established this session via `epic`-labeled issues #45/#56; this generalizes the pattern and gives it its own label distinct from ad hoc epics).
+  4. **master** and **tracking** are two distinct types, not one: **master** bundles one unit of work's own request + PRD + implementation-plan trio together; **tracking** is a roadmap issue aggregating many separate units of work (large epics — the existing `epic`-labeled #45/#56/#59 are `type:tracking`, not `type:master`).
 - A custom, fully autonomous **GitHub agent** (in spirit inspired by/extracted from the "DarkFactory" reference project already absorbed into `profile-coding`) is the thing that:
   - Reads a request issue and its comment thread.
   - Scopes it into a PRD issue (opens a branch, writes/updates a `.agents/notes/` doc as that branch's commit).
