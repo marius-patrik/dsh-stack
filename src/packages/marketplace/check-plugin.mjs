@@ -29,6 +29,7 @@ const entryA = {
 };
 const dispose = ctx.marketplace.register({
   id: "test-source",
+  /** List the single fixture entry. */
   async listEntries() {
     return [entryA];
   },
@@ -45,6 +46,7 @@ assert.strictEqual(entries[0].sourceId, "test-source");
 assert.throws(() => {
   ctx.marketplace.register({
     id: "test-source",
+    /** List no entries; only the duplicate-id rejection matters here. */
     async listEntries() {
       return [];
     },
@@ -62,6 +64,7 @@ assert.deepStrictEqual(await ctx.marketplace.listEntries(), []);
 const entryB = { ...entryA, id: "stack.example.bar", name: "@dsh-stack/bar" };
 ctx.marketplace.register({
   id: "another-source",
+  /** List the second fixture entry. */
   async listEntries() {
     return [entryB];
   },

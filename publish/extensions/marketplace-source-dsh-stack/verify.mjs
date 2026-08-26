@@ -82,6 +82,7 @@ assert.deepStrictEqual(sourceEntry.dependencies, [
 
 // A release with no manifest asset is a hard failure, not a silently empty catalog.
 const noManifest = { tag_name: "v0.1.0", html_url: "https://example.invalid", assets: [] };
+/** Fake fetch transport: serves a release that has no manifest asset. */
 const brokenFetch = (url) =>
   String(url) === "https://api.github.com/repos/marius-patrik/dsh-stack/releases/latest"
     ? Promise.resolve({ ok: true, status: 200, json: async () => noManifest })
