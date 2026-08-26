@@ -4,15 +4,7 @@
   "version": "0.3.0",
   "kind": "pack",
   "description": "External integrations, providers, LSP, tooling, host and sandbox composition pack.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
-  "dependencies": [
-    "stack.dev.formatters",
-    "stack.dev.lsp",
-    "stack.infra.hosts"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
+  "dependencies": ["stack.dev.formatters", "stack.dev.lsp", "stack.infra.hosts"],
   "optionalDependencies": []
 }

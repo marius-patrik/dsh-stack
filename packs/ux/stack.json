@@ -4,11 +4,7 @@
   "version": "0.3.0",
   "kind": "pack",
   "description": "Presentation, editor, terminal, themes and media composition pack.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
   "dependencies": [
     "stack.media.voice",
     "stack.tweaks",

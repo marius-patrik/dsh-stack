@@ -1,25 +1,14 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreUnresolved": [
-    "^\\./lib/index\\.js$"
-  ],
-  "ignoreBinaries": [
-    "script",
-    "dns-sd",
-    "sips"
-  ],
+  "ignoreUnresolved": ["^\\./lib/index\\.js$"],
+  "ignoreBinaries": ["script", "dns-sd", "sips"],
   "rules": {
     "duplicates": "warn"
   },
   "workspaces": {
     ".": {
-      "entry": [
-        "scripts/*.mjs",
-        "scripts/client-runtime/*.js"
-      ],
-      "project": [
-        "scripts/**/*.{mjs,js}"
-      ]
+      "entry": ["scripts/*.mjs", "scripts/client-runtime/*.js"],
+      "project": ["scripts/**/*.{mjs,js}"]
     },
     "packages/*": {
       "entry": [
@@ -29,39 +18,17 @@
         "*.mjs",
         "bin/*.mjs"
       ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs",
-        "bin/*.mjs"
-      ]
+      "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
     },
     "extensions/skin-claude": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "src/client.{ts,tsx}",
-        "*.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs"
-      ],
-      "ignoreDependencies": [
-        "@types/react"
-      ]
+      "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs"],
+      "ignoreDependencies": ["@types/react"]
     },
     "extensions/skin-codex": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "src/client.{ts,tsx}",
-        "*.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs"
-      ],
-      "ignoreDependencies": [
-        "@types/react"
-      ]
+      "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs"],
+      "ignoreDependencies": ["@types/react"]
     },
     "extensions/*": {
       "entry": [
@@ -71,30 +38,15 @@
         "*.mjs",
         "bin/*.mjs"
       ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs",
-        "bin/*.mjs"
-      ]
+      "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
     },
     "packs/*": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "*.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs"
-      ]
+      "entry": ["src/index.{ts,tsx,mjs,js}", "*.mjs"],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs"]
     },
     "plugins/**": {
-      "entry": [
-        "src/index.{mjs,ts}",
-        "check-plugin.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,mjs}"
-      ]
+      "entry": ["src/index.{mjs,ts}", "check-plugin.mjs"],
+      "project": ["src/**/*.{ts,mjs}"]
     }
   },
   "ignoreDependencies": [

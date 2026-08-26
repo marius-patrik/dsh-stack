@@ -12,7 +12,12 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
   "publishConfig": {
     "access": "public"
   },
