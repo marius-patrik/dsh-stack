@@ -1,0 +1,26 @@
+name: Linux probe
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths: [".github/workflows/linux-probe.yml"]
+
+jobs:
+  probe:
+    name: Probe the workspace on a GitHub-hosted Linux runner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.19.0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm verify
+      - run: pnpm test
