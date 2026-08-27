@@ -9,9 +9,18 @@ const occupiedSlots = (state) =>
 /** Three tabs open in the main pane, then split so `pane-side` exists as a move target. */
 const withTwoPanes = () => {
   let state = createWorkspaceTabs();
-  state = reduceWorkspaceTabs(state, { type: "open", tab: { id: "a", kind: "file", title: "a.ts" } });
-  state = reduceWorkspaceTabs(state, { type: "open", tab: { id: "b", kind: "file", title: "b.ts" } });
-  state = reduceWorkspaceTabs(state, { type: "open", tab: { id: "c", kind: "file", title: "c.ts" } });
+  state = reduceWorkspaceTabs(state, {
+    type: "open",
+    tab: { id: "a", kind: "file", title: "a.ts" },
+  });
+  state = reduceWorkspaceTabs(state, {
+    type: "open",
+    tab: { id: "b", kind: "file", title: "b.ts" },
+  });
+  state = reduceWorkspaceTabs(state, {
+    type: "open",
+    tab: { id: "c", kind: "file", title: "c.ts" },
+  });
   return reduceWorkspaceTabs(
     state,
     { type: "split", sourcePaneId: state.mainPaneId, orientation: "vertical" },
