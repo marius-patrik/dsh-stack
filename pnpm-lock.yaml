@@ -1356,6 +1356,10 @@ importers:
         version: 6.0.3
 
   src/packages/sidebar-preferences:
+    dependencies:
+      '@dsh-stack/plugin-kit':
+        specifier: workspace:*
+        version: link:../plugin-kit
     devDependencies:
       typescript:
         specifier: ^6.0.3
@@ -1470,6 +1474,10 @@ importers:
         version: 6.0.3
 
   src/packages/skin-runtime:
+    dependencies:
+      '@dsh-stack/plugin-kit':
+        specifier: workspace:*
+        version: link:../plugin-kit
     devDependencies:
       typescript:
         specifier: ^6.0.3

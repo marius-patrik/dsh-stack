@@ -1,4 +1,4 @@
-import { publishCrossBundle, subscribeCrossBundle } from "./cross-bundle-channel.js";
+import { publishCrossBundle, subscribeCrossBundle } from "@dsh-stack/plugin-kit";
 
 export type SkinId = "deepseek" | "claude" | "codex";
 
@@ -12,7 +12,7 @@ const STORAGE_KEY = "dsh-stack.ui.skin";
 /**
  * Cross-bundle change channel. This module is inlined into both
  * `@dsh-stack/skin-settings` and `@dsh-stack/skin-host`, so a module-local
- * listener set never crosses between them -- see ./cross-bundle-channel.ts.
+ * listener set never crosses between them -- see plugin-kit's cross-bundle-channel.
  */
 const CHANGE_CHANNEL = "dsh-stack.ui.skin:changed";
 

@@ -1,4 +1,4 @@
-import { publishCrossBundle, subscribeCrossBundle } from "./cross-bundle-channel.js";
+import { publishCrossBundle, subscribeCrossBundle } from "@dsh-stack/plugin-kit";
 
 export interface SidebarPreferences {
   readonly showBrandLogo: boolean;
@@ -17,7 +17,7 @@ const STORAGE_KEY = "dsh-stack.sidebar.preferences";
 /**
  * Cross-bundle change channel. This module is inlined into every consuming
  * client bundle, so a module-local listener set would only ever notify the copy
- * that was mutated -- see ./cross-bundle-channel.ts.
+ * that was mutated -- see plugin-kit's cross-bundle-channel.
  */
 const CHANGE_CHANNEL = "dsh-stack.sidebar.preferences:changed";
 

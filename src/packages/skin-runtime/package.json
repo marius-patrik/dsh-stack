@@ -28,5 +28,8 @@
   "files": [
     "lib",
     "README.md"
-  ]
+  ],
+  "dependencies": {
+    "@dsh-stack/plugin-kit": "workspace:*"
+  }
 }
