@@ -33,7 +33,12 @@ const PACKAGE_ROOTS = ["src/packages", "publish/extensions"];
 /**
  * Source roots searched for imports of one package by another.
  */
-const IMPORT_SEARCH_ROOTS = ["src/packages", "publish/extensions", "publish/plugins", "src/scripts"];
+const IMPORT_SEARCH_ROOTS = [
+  "src/packages",
+  "publish/extensions",
+  "publish/plugins",
+  "src/scripts",
+];
 
 /**
  * Roots whose `package.json` dependency lists compose extensions into packs.
@@ -106,10 +111,7 @@ const ALLOWED_UNREACHABLE = new Map([
   ["@dsh-stack/automations", "orphaned plugin scaffold, tracked by #60 and #123"],
   ["@dsh-stack/trading-market-data", "pre-existing dead plugin, tracked by #123"],
   ["@dsh-stack/trading-optimizer", "pre-existing dead plugin, tracked by #123"],
-  [
-    "@dsh-stack/marketplace-source-dsh-stack",
-    "extension composed into no pack, tracked by #123",
-  ],
+  ["@dsh-stack/marketplace-source-dsh-stack", "extension composed into no pack, tracked by #123"],
 ]);
 
 /** Reads and parses one JSON file, returning null when it does not exist. */
