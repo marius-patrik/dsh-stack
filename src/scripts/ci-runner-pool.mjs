@@ -159,7 +159,9 @@ async function runOneJob(dir, index) {
   }
   const result = await run("./run.sh", ["--jitconfig", config], { cwd: dir });
   if (result.code !== 0 && result.stderr.trim()) {
-    console.error(`slot ${index}: runner exited ${result.code}: ${result.stderr.trim().slice(-400)}`);
+    console.error(
+      `slot ${index}: runner exited ${result.code}: ${result.stderr.trim().slice(-400)}`,
+    );
   }
   return true;
 }
