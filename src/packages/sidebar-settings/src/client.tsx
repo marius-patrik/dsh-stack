@@ -1,36 +1,12 @@
 import { useEffect, useState } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
+import { SettingsSection, SettingsToggleRow } from "@dsh-stack/settings-panel";
 import { sidebarPreferences, type SidebarPreferences } from "@dsh-stack/sidebar-preferences";
 import type { SidebarPreferenceKey } from "@dsh-stack/sidebar-preferences";
 
-/** Renders one persisted sidebar preference as a settings row. */
-function PreferenceRow({
-  id,
-  label,
-  description,
-  checked,
-  onChange,
-}: {
-  readonly id: string;
-  readonly label: string;
-  readonly description: string;
-  readonly checked: boolean;
-  readonly onChange: (value: boolean) => void;
-}) {
-  return (
-    <label htmlFor={id}>
-      <span>{label}</span>
-      <span>{description}</span>
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-    </label>
-  );
-}
+/** Cordis client services this plugin's `apply` reaches for; activation waits on them. */
+export const inject = ["slots"];
 
 /** Renders the sidebar settings section. */
 export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
@@ -39,33 +15,36 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
   const /** change implementation. */
     change = (key: SidebarPreferenceKey, value: boolean) => sidebarPreferences.set(key, value);
   return (
-    <section aria-label="Sidebar">
-      <h2>Sidebar</h2>
-      <PreferenceRow
+    <SettingsSection
+      label="Sidebar"
+      title="Sidebar"
+      description="Choose which elements the DSH Stack sidebar shell renders."
+      onClose={close}
+    >
+      <SettingsToggleRow
         id="sidebar-show-brand-logo"
         label="Show brand logo"
         description="Show the active skin's logo."
         checked={state.showBrandLogo}
         onChange={(value) => change("showBrandLogo", value)}
       />
-      <PreferenceRow
+      <SettingsToggleRow
         id="sidebar-show-new-conversation"
         label="Show New Conversation"
         description="Show the New Conversation action."
         checked={state.showNewConversation}
         onChange={(value) => change("showNewConversation", value)}
       />
-      <button type="button" onClick={close}>
-        Close
-      </button>
-    </section>
+    </SettingsSection>
   );
 }
 
 /** Registers the sidebar settings section with the settings slot registry. */
 export function apply(ctx: ClientContext): void {
-  ctx.slots.register(
-    { name: "settings.section", id: "sidebar", order: 30, label: "Sidebar" },
-    SidebarSettings,
+  ctx.slots.inject("settings.section", () =>
+    ctx.slots.register(
+      { name: "settings.section", id: "sidebar", order: 30, label: "Sidebar", inject: () => ({}) },
+      SidebarSettings,
+    ),
   );
 }

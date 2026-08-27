@@ -1,6 +1,6 @@
 // jscpd:ignore-start -- hand-authored UI bundle; tracked for full one-concern-per-file decomposition in issue #40
 window.__ModuleLoader__.load({
-  id: "hosts",
+  id: "@dsh-stack/hosts",
   factory: function (require) {
     var module = { exports: {} };
     var exports = module.exports;
