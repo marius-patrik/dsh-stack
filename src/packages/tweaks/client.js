@@ -947,16 +947,23 @@ window.__ModuleLoader__.load({
     }
 
     // Glyph seat: a registrant's glyph wins; an id with no glyph falls back to
-    // the static map so every nav cell keeps a mark.
+    // the static map so every nav cell keeps a mark. The fallback rides the
+    // renderer's own `fallback` option -- a list slot filtered by `only` down
+    // to zero rows still returns a (non-null) empty fragment, so testing the
+    // return value for null/undefined never fired and glyph-less sections
+    // rendered a blank cell instead of the shell mark.
     /** navGlyph implementation. */
     function navGlyph(renderSlot, row) {
+      if (typeof renderSlot !== "function") return navIcon(row.id);
       try {
-        if (typeof renderSlot === "function") {
-          var content = renderSlot("settings.section.icon", {}, { only: row.id });
-          if (content !== null && content !== undefined) return content;
-        }
-      } catch (err) {}
-      return navIcon(row.id);
+        return renderSlot(
+          "settings.section.icon",
+          {},
+          { only: row.id, fallback: navIcon(row.id) },
+        );
+      } catch (err) {
+        return navIcon(row.id);
+      }
     }
 
     /** NotepadPencilGlyph implementation. */
@@ -3728,7 +3735,6 @@ window.__ModuleLoader__.load({
 
       for (var rIdx = 0; rIdx < rows.length; rIdx++) {
         var r = rows[rIdx];
-        if (r.id === "themes") r = Object.assign({}, r, { label: "Appearance" });
         if (r.id === "icons") r = Object.assign({}, r, { label: "Icons" });
         if (r.id === "providers") r = Object.assign({}, r, { label: "Providers" });
         if (r.id === "agent-presets") r = Object.assign({}, r, { label: "Modes" });
@@ -4643,7 +4649,7 @@ window.__ModuleLoader__.load({
           return ctx.slots.register(
             {
               name: "settings.section",
-              id: "themes",
+              id: "appearance",
               priority: -10,
               order: 5,
               label: function () {
@@ -4656,7 +4662,7 @@ window.__ModuleLoader__.load({
             ThemeSettingsSection,
           );
         },
-        "tweaks: themes section",
+        "tweaks: appearance section",
       );
 
       ctx.slots.inject(
@@ -4775,11 +4781,6 @@ window.__ModuleLoader__.load({
         "settings.section.icon",
         harnessGlyph("general", GeneralGlyph),
         "tweaks: general nav glyph",
-      );
-      ctx.slots.inject(
-        "settings.section.icon",
-        harnessGlyph("themes", ThemesGlyph),
-        "tweaks: themes nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
