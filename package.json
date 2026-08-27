@@ -28,6 +28,7 @@
     "@deepseek-ai/cordis": "*",
     "@deepseek-ai/schemastery": "*",
     "@types/node": "^22.15.0",
+    "tsdown": "^0.22.14",
     "typescript": "^6.0.3"
   }
 }
