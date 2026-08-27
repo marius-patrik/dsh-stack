@@ -3,7 +3,7 @@
   "name": "@dsh-stack/workspace-tabs",
   "version": "0.1.0",
   "kind": "plugin",
-  "description": "@dsh-stack/workspace-tabs",
+  "description": "Shared workspace tab model, tab strip and surface host used by every Stack tab area",
   "files": ["lib", "README.md", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []

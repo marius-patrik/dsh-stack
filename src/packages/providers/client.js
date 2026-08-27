@@ -3443,1547 +3443,172 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    // 6. DOCKED BOTTOM TERMINAL PANEL WITH TABS
-    /** BottomTerminalPanel implementation. */
-    function BottomTerminalPanel(props) {
-      ensureTreeStyles();
-      var onClose = props.onClose;
-      var initialSession = props.initialSession || "0";
-      var initialContainerId = props.initialContainerId || null;
-      var state = React.useState({ sessions: [], loading: true, error: null });
-      var data = state[0],
-        setData = state[1];
-      var selectedSessionState = React.useState(initialContainerId ? null : initialSession);
-      var selectedSession = selectedSessionState[0],
-        setSelectedSession = selectedSessionState[1];
-
+    // 6. TERMINAL TAB BODY -- the `terminal` extension of the shared tab host.
+    // It contributes tmux session controls plus the live buffer; the tab strip,
+    // menus and docking around it belong to @dsh-stack/workspace-tabs.
+    /** TerminalTabBody implementation. */
+    function TerminalTabBody(props) {
+      var sessionName = props.sessionName || "0";
       var windowsState = React.useState([]);
       var windows = windowsState[0],
         setWindows = windowsState[1];
 
-      var bufferState = React.useState("Connecting to tmux interactive runner…");
-      var buffer = bufferState[0],
-        setBuffer = bufferState[1];
-
-      var cmdState = React.useState("");
-      var cmd = cmdState[0],
-        setCmd = cmdState[1];
-
-      var isFocusedState = React.useState(true);
-      var isFocused = isFocusedState[0],
-        setIsFocused = isFocusedState[1];
-
-      var newModalState = React.useState(false);
-      var newModal = newModalState[0],
-        setNewModal = newModalState[1];
-
-      var heightState = React.useState(290);
-      var height = heightState[0],
-        setHeight = heightState[1];
-      var isMaximizedState = React.useState(false);
-      var isMaximized = isMaximizedState[0],
-        setIsMaximized = isMaximizedState[1];
-
-      // Container state
-      var containersState = React.useState([]);
-      var containers = containersState[0],
-        setContainers = containersState[1];
-      var selectedContainerState = React.useState(initialContainerId);
-      var selectedContainer = selectedContainerState[0],
-        setSelectedContainer = selectedContainerState[1];
-      var containerLogsState = React.useState("Loading container logs…");
-      var containerLogs = containerLogsState[0],
-        setContainerLogs = containerLogsState[1];
-      // activeView: "chat" | "terminal" | "container"
-      var activeViewState = React.useState(
-        props.initialView ||
-          (initialContainerId ? "container" : initialSession ? "terminal" : "terminal"),
-      );
-      var activeView = activeViewState[0],
-        setActiveView = activeViewState[1];
-      var panelPlusMenuState = React.useState(false);
-      var panelPlusMenuOpen = panelPlusMenuState[0],
-        setPanelPlusMenuOpen = panelPlusMenuState[1];
-      var isCollapsedState = React.useState(false);
-      var isCollapsed = isCollapsedState[0],
-        setIsCollapsed = isCollapsedState[1];
-      var tabActionsBtnRef = React.useRef(null);
-      var tabActionsOpenState = React.useState(false);
-      var tabActionsOpen = tabActionsOpenState[0],
-        setTabActionsOpen = tabActionsOpenState[1];
-
-      var terminalContainerRef = React.useRef(null);
-      var terminalPreRef = React.useRef(null);
-
-      // Drag to resize handler
-      var /** handleResizeStart implementation. */
-        handleResizeStart = function (e) {
-          e.preventDefault();
-          var startY = e.clientY;
-          var startHeight = height;
-          var /** handleMove implementation. */
-            handleMove = function (moveEvent) {
-              var delta = startY - moveEvent.clientY;
-              var newHeight = Math.max(
-                160,
-                Math.min(window.innerHeight * 0.88, startHeight + delta),
-              );
-              setHeight(newHeight);
-              setIsMaximized(false);
-            };
-          var /** handleUp implementation. */
-            handleUp = function () {
-              document.removeEventListener("pointermove", handleMove);
-              document.removeEventListener("pointerup", handleUp);
-            };
-          document.addEventListener("pointermove", handleMove);
-          document.addEventListener("pointerup", handleUp);
-        };
-
-      var loadSessions = React.useCallback(
+      var loadWindows = React.useCallback(
         function () {
-          fetch(QUOTAS_API + "/tmux/sessions")
+          fetch(QUOTAS_API + "/tmux/sessions/windows?name=" + encodeURIComponent(sessionName))
             .then(function (r) {
               return r.json();
             })
             .then(function (res) {
-              var list = res.sessions || [];
-              if (list.length === 0) {
-                fetch(QUOTAS_API + "/tmux/sessions/new", {
-                  method: "POST",
-                  headers: { "content-type": "application/json" },
-                  body: JSON.stringify({ name: selectedSession || "0" }),
-                }).then(function () {
-                  fetch(QUOTAS_API + "/tmux/sessions")
-                    .then(function (r2) {
-                      return r2.json();
-                    })
-                    .then(function (res2) {
-                      var l2 = res2.sessions || [];
-                      setData({ sessions: l2, loading: false, error: null });
-                      if (l2.length > 0) setSelectedSession(l2[0].name);
-                    });
-                });
-                return;
-              }
-              setData({ sessions: list, loading: false, error: null });
-              if (
-                !list.some(function (s) {
-                  return s.name === selectedSession;
-                })
-              ) {
-                setSelectedSession(list[0].name);
-              }
+              setWindows(res.windows || []);
+            })
+            .catch(function () {
+              setWindows([]);
             });
         },
-        [selectedSession],
+        [sessionName],
       );
-
-      var loadWindows = React.useCallback(function (sessName) {
-        if (!sessName) return;
-        fetch(QUOTAS_API + "/tmux/sessions/windows?name=" + encodeURIComponent(sessName))
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (res) {
-            setWindows(res.windows || []);
-          });
-      }, []);
-
-      var loadBuffer = React.useCallback(function (sessName) {
-        if (!sessName) return;
-        fetch(QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessName))
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (res) {
-            setBuffer(res.buffer || "(empty session)");
-          });
-      }, []);
 
       React.useEffect(
         function () {
-          loadSessions();
-        },
-        [loadSessions],
-      );
-      React.useEffect(
-        function () {
-          loadWindows(selectedSession);
-          loadBuffer(selectedSession);
-        },
-        [selectedSession, loadWindows, loadBuffer],
-      );
-
-      // High-frequency live buffer streaming (every 600ms)
-      React.useEffect(
-        function () {
-          var interval = setInterval(function () {
-            loadBuffer(selectedSession);
-          }, 600);
+          loadWindows();
+          var timer = setInterval(loadWindows, 2000);
           return function () {
-            clearInterval(interval);
+            clearInterval(timer);
           };
         },
-        [selectedSession, loadBuffer],
+        [loadWindows],
       );
 
-      // Auto-scroll to bottom on buffer update
-      React.useEffect(
-        function () {
-          if (terminalPreRef.current) {
-            terminalPreRef.current.scrollTop = terminalPreRef.current.scrollHeight;
-          }
-        },
-        [buffer, containerLogs],
-      );
-
-      // Container data loading
-      var loadContainers = React.useCallback(function () {
-        fetch(QUOTAS_API + "/docker/containers")
-          .then(function (r) {
-            return r.json();
+      var /** postToSession implementation. */
+        postToSession = function (path, body, describe) {
+          return fetch(QUOTAS_API + path, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(body),
           })
-          .then(function (res) {
-            setContainers(res.containers || []);
-          })
-          .catch(function () {});
-      }, []);
-
-      var loadContainerLogs = React.useCallback(function (cId) {
-        if (!cId) return;
-        fetch(QUOTAS_API + "/docker/containers/logs?id=" + encodeURIComponent(cId))
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (res) {
-            setContainerLogs(res.logs || "(no logs)");
-          });
-      }, []);
-
-      React.useEffect(
-        function () {
-          var /** onOpenTerm implementation. */
-            onOpenTerm = function (e) {
-              var sess = e && e.detail && e.detail.session ? e.detail.session : "0";
-              setActiveView("terminal");
-              setSelectedSession(sess);
-              setSelectedContainer(null);
-              setIsCollapsed(false);
-              loadBuffer(sess);
-              loadWindows(sess);
-            };
-          var /** onOpenCont implementation. */
-            onOpenCont = function (e) {
-              var id = e && e.detail && e.detail.id ? e.detail.id : null;
-              setActiveView("container");
-              setSelectedContainer(id);
-              setSelectedSession(null);
-              setIsCollapsed(false);
-              if (id) loadContainerLogs(id);
-            };
-          window.addEventListener("dsh:open-terminal", onOpenTerm);
-          window.addEventListener("dsh:open-container", onOpenCont);
-          return function () {
-            window.removeEventListener("dsh:open-terminal", onOpenTerm);
-            window.removeEventListener("dsh:open-container", onOpenCont);
-          };
-        },
-        [loadBuffer, loadWindows, loadContainerLogs],
-      );
-
-      React.useEffect(
-        function () {
-          loadContainers();
-          var t = setInterval(loadContainers, 5000);
-          return function () {
-            clearInterval(t);
-          };
-        },
-        [loadContainers],
-      );
-      React.useEffect(
-        function () {
-          if (activeView === "container" && selectedContainer) loadContainerLogs(selectedContainer);
-        },
-        [activeView, selectedContainer, loadContainerLogs],
-      );
-      // Live container log streaming (every 2s)
-      React.useEffect(
-        function () {
-          if (activeView !== "container" || !selectedContainer) return;
-          var interval = setInterval(function () {
-            loadContainerLogs(selectedContainer);
-          }, 2000);
-          return function () {
-            clearInterval(interval);
-          };
-        },
-        [activeView, selectedContainer, loadContainerLogs],
-      );
-
-      var /** handleContainerAction implementation. */
-        handleContainerAction = function (cId, action) {
-          fetch(QUOTAS_API + "/docker/containers/action", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ id: cId, action: action }),
-          }).then(function () {
-            loadContainers();
-          });
+            .then(function (response) {
+              if (!response.ok) throw new Error("server responded " + response.status);
+              return response;
+            })
+            .catch(function (error) {
+              alert("tmux session " + sessionName + ": " + describe + " failed — " + error.message);
+              throw error;
+            });
         };
 
-      var /** selectTerminalTab implementation. */
-        selectTerminalTab = function (name) {
-          setActiveView("terminal");
-          setSelectedSession(name);
-          setSelectedContainer(null);
-          setIsCollapsed(false);
+      var /** selectWindow implementation. */
+        selectWindow = function (index) {
+          postToSession(
+            "/tmux/sessions/select-window",
+            { name: sessionName, index: index },
+            "switching window",
+          ).then(loadWindows, function () {});
         };
 
-      var /** selectContainerTab implementation. */
-        selectContainerTab = function (c) {
-          setActiveView("container");
-          setSelectedContainer(c.id);
-          setSelectedSession(null);
-          setIsCollapsed(false);
+      var /** addWindow implementation. */
+        addWindow = function () {
+          var windowName = prompt("New Window Name:", "sh");
+          if (!windowName) return;
+          postToSession(
+            "/tmux/sessions/new-window",
+            { name: sessionName, windowName: windowName },
+            "creating a window",
+          ).then(loadWindows, function () {});
         };
 
-      // Send key actions
-      var /** sendKey implementation. */
-        sendKey = function (key) {
-          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: selectedSession, keys: key, isLiteral: false }),
-          }).then(function () {
-            setTimeout(function () {
-              loadBuffer(selectedSession);
-            }, 40);
-          });
+      var /** killSession implementation. */
+        killSession = function () {
+          if (!confirm("Kill tmux session '" + sessionName + "'?")) return;
+          postToSession("/tmux/sessions/kill", { name: sessionName }, "killing the session").then(
+            function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:close-terminal-tab", {
+                  detail: { id: sessionName, session: sessionName },
+                }),
+              );
+            },
+            function () {},
+          );
         };
 
-      var /** sendLiteral implementation. */
-        sendLiteral = function (text, pressEnter) {
-          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              name: selectedSession,
-              keys: text,
-              isLiteral: true,
-              pressEnter: Boolean(pressEnter),
-            }),
-          }).then(function () {
-            setTimeout(function () {
-              loadBuffer(selectedSession);
-            }, 60);
-          });
-        };
-
-      var /** handleExecuteCommand implementation. */
-        handleExecuteCommand = function (e) {
-          if (e) e.preventDefault();
-          if (!cmd.trim()) return;
-          sendLiteral(cmd, true);
-          setCmd("");
-        };
-
-      var /** handleKeyDown implementation. */
-        handleKeyDown = function (e) {
-          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
-
-          if (e.key === "Enter") {
-            sendKey("Enter");
-            e.preventDefault();
-          } else if (e.key === "Backspace") {
-            sendKey("BSpace");
-            e.preventDefault();
-          } else if (e.key === "Tab") {
-            sendKey("Tab");
-            e.preventDefault();
-          } else if (e.key === "ArrowUp") {
-            sendKey("Up");
-            e.preventDefault();
-          } else if (e.key === "ArrowDown") {
-            sendKey("Down");
-            e.preventDefault();
-          } else if (e.key === "ArrowLeft") {
-            sendKey("Left");
-            e.preventDefault();
-          } else if (e.key === "ArrowRight") {
-            sendKey("Right");
-            e.preventDefault();
-          } else if (e.key === "Escape") {
-            sendKey("Escape");
-            e.preventDefault();
-          } else if (e.ctrlKey) {
-            if (e.key === "c" || e.key === "C") {
-              sendKey("C-c");
-              e.preventDefault();
-            } else if (e.key === "d" || e.key === "D") {
-              sendKey("C-d");
-              e.preventDefault();
-            } else if (e.key === "l" || e.key === "L") {
-              sendKey("C-l");
-              e.preventDefault();
-            } else if (e.key === "z" || e.key === "Z") {
-              sendKey("C-z");
-              e.preventDefault();
-            }
-          } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
-            sendLiteral(e.key, false);
-            e.preventDefault();
-          }
-        };
-
-      var /** handleSelectWindow implementation. */
-        handleSelectWindow = function (idx) {
-          fetch(QUOTAS_API + "/tmux/sessions/select-window", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: selectedSession, index: idx }),
-          }).then(function () {
-            loadWindows(selectedSession);
-            loadBuffer(selectedSession);
-          });
-        };
-
-      var /** handleNewWindow implementation. */
-        handleNewWindow = function () {
-          var winName = prompt("New Window Name:", "sh");
-          if (!winName) return;
-          fetch(QUOTAS_API + "/tmux/sessions/new-window", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: selectedSession, windowName: winName }),
-          }).then(function () {
-            loadWindows(selectedSession);
-            loadBuffer(selectedSession);
-          });
-        };
-
-      var /** handleKill implementation. */
-        handleKill = function (name) {
-          if (!confirm("Kill tmux session '" + name + "'?")) return;
-          fetch(QUOTAS_API + "/tmux/sessions/kill", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: name }),
-          }).then(function () {
-            loadSessions();
-          });
-        };
-
-      var sidebarRightState = React.useState(260);
-      var sidebarRight = sidebarRightState[0],
-        setSidebarRight = sidebarRightState[1];
-      var detailsWidthState = React.useState(0);
-      var detailsWidth = detailsWidthState[0],
-        setDetailsWidth = detailsWidthState[1];
-
-      React.useEffect(function () {
-        var /** updateOffsets implementation. */
-          updateOffsets = function () {
-            var centerEl = document.querySelector('[class*="centerCol"]');
-            if (centerEl) {
-              var cRect = centerEl.getBoundingClientRect();
-              if (cRect.width > 0) {
-                setSidebarRight(cRect.left);
-                setDetailsWidth(window.innerWidth - cRect.right);
-                return;
-              }
-            }
-            var sidebarEl = document.querySelector('[class*="sidebarCol"]');
-            if (sidebarEl) {
-              var sRect = sidebarEl.getBoundingClientRect();
-              if (sRect.right > 0) setSidebarRight(sRect.right);
-            }
-            var detailsEl = document.querySelector('[class*="detailsCol"]');
-            if (detailsEl) {
-              var dRect = detailsEl.getBoundingClientRect();
-              var dWidth = window.innerWidth - dRect.left;
-              if (dWidth >= 0 && dRect.width > 0) setDetailsWidth(dWidth);
-              else setDetailsWidth(0);
-            }
-          };
-
-        updateOffsets();
-        var timer = setInterval(updateOffsets, 200);
-        window.addEventListener("resize", updateOffsets);
-        return function () {
-          clearInterval(timer);
-          window.removeEventListener("resize", updateOffsets);
-        };
-      }, []);
-
-      var currentHeight = isCollapsed ? "38px" : isMaximized ? "84vh" : height + "px";
-
-      // Broadcast panel geometry for top view occupants
-      React.useEffect(
-        function () {
-          if (typeof window !== "undefined") {
-            window.__dsh_panel_collapsed__ = isCollapsed;
-            window.__dsh_panel_height__ = currentHeight;
-            window.dispatchEvent(
-              new CustomEvent("dsh:panel-geometry-changed", {
-                detail: { collapsed: isCollapsed, height: currentHeight },
-              }),
-            );
-          }
-        },
-        [isCollapsed, currentHeight],
-      );
-
-      // Push chat messages up without expanding centerCol layout bounds
-      React.useEffect(
-        function () {
-          var centerCol = document.querySelector('[class*="centerCol"]');
-          if (centerCol) {
-            centerCol.style.paddingBottom = isCollapsed ? "38px" : currentHeight;
-            centerCol.style.marginBottom = "0px";
-            centerCol.style.transition = "padding-bottom 120ms ease";
-          }
-          return function () {
-            var col = document.querySelector('[class*="centerCol"]');
-            if (col) {
-              col.style.paddingBottom = "0px";
-              col.style.marginBottom = "0px";
-            }
-          };
-        },
-        [currentHeight, isCollapsed],
-      );
+      var actionButtonStyle = {
+        padding: "2px 6px",
+        borderRadius: "4px",
+        border: "1px solid var(--dsw-alias-border-l2, rgba(255,255,255,0.15))",
+        background: "transparent",
+        color: "var(--dsw-alias-label-secondary)",
+        fontSize: "11px",
+        cursor: "pointer",
+      };
 
       return h(
-        "div",
-        {
-          ref: terminalContainerRef,
-          tabIndex: 0,
-          onKeyDown: handleKeyDown,
-          onFocus: function () {
-            setIsFocused(true);
-          },
-          onBlur: function () {
-            setIsFocused(false);
-          },
-          style: {
-            position: "fixed",
-            bottom: 0,
-            left: sidebarRight + "px",
-            right: detailsWidth + "px",
-            height: currentHeight,
-            zIndex: 9000,
-            background: "var(--dsw-alias-bg-layer-0, #000000)",
-            borderTop: "1px solid var(--dsw-alias-border-l2, rgba(255,255,255,0.15))",
-            borderLeft: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-            display: "flex",
-            flexDirection: "column",
-            boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.4)",
-            outline: "none",
-            transition: isMaximized ? "height 150ms cubic-bezier(0.4, 0, 0.2, 1)" : "none",
-            fontFamily:
-              "var(--ds-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)",
-          },
-        },
-        // Top Resize Drag Handle (visible when expanded)
-        !isCollapsed && activeView !== "chat"
-          ? h(
-              "div",
-              {
-                onPointerDown: handleResizeStart,
-                style: {
-                  position: "absolute",
-                  top: "-4px",
-                  left: 0,
-                  right: 0,
-                  height: "8px",
-                  cursor: "row-resize",
-                  zIndex: 100000,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                },
-              },
-              h("div", {
-                style: {
-                  width: "36px",
-                  height: "3px",
-                  borderRadius: "2px",
-                  background: "var(--dsw-alias-border-l2, rgba(255,255,255,0.2))",
-                  opacity: 0.7,
-                  transition: "background 150ms, opacity 150ms",
-                },
-              }),
-            )
-          : null,
-        // Header Tab Bar
+        React.Fragment,
+        null,
         h(
           "div",
           {
+            className: "dsh-terminal-session-bar",
             style: {
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
-              height: "38px",
-              background: "var(--dsw-alias-bg-layer-0, #000000)",
-              borderBottom:
-                activeView === "chat" || isCollapsed
-                  ? "none"
-                  : "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-              padding: "0 8px 0 10px",
-              userSelect: "none",
+              gap: "4px",
+              padding: "4px 8px",
+              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              flex: "0 0 auto",
             },
           },
-          // Unified Tabs Container (matching TopConversationTabBar)
-          h(
-            "div",
-            {
-              className: "dsh-top-tab-bar",
-              style: {
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
-                padding: "2px 4px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-                userSelect: "none",
-                maxWidth: "calc(100% - 90px)",
-                overflowX: "auto",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              },
-              onDragOver: function (e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-              },
-              onDrop: function (e) {
-                e.preventDefault();
-                setIsCollapsed(false);
-                try {
-                  var raw = e.dataTransfer.getData("text/dsh-tab");
-                  if (raw) {
-                    var tabData = JSON.parse(raw);
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-bottom", { detail: tabData }),
-                    );
-                    if (tabData.type === "terminal") selectTerminalTab(tabData.id);
-                    else if (tabData.type === "container") {
-                      setSelectedContainer(tabData.id);
-                      setActiveView("container");
-                      setIsCollapsed(false);
-                    } else if (tabData.type === "chat") {
-                      setActiveView("chat");
-                      setSelectedSession(null);
-                      setSelectedContainer(null);
-                      setIsCollapsed(false);
-                    }
-                  }
-                } catch (err) {}
-              },
-            },
-            // 0. Conversation Tab (rendered ONLY IF explicitly moved to bottom panel)
-            (function () {
-              if (activeView !== "chat") return null;
-              return h(
-                "div",
-                {
-                  key: "tab-conversation",
-                  draggable: true,
-                  onDragStart: function (e) {
-                    e.dataTransfer.setData(
-                      "text/dsh-tab",
-                      JSON.stringify({
-                        id: "chat-main",
-                        type: "chat",
-                        title: "Conversation",
-                        from: "bottom",
-                      }),
-                    );
-                  },
-                  onClick: function () {
-                    setActiveView("chat");
-                    setSelectedSession(null);
-                    setSelectedContainer(null);
-                    setIsCollapsed(false);
-                  },
-                  onContextMenu: function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-top", {
-                        detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                      }),
-                    );
-                  },
-                  style: {
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    padding: "3px 8px",
-                    borderRadius: "5px",
-                    background: "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))",
-                    border: "1px solid var(--dsw-alias-primary, #6366f1)",
-                    color: "var(--dsw-alias-label-primary, #fff)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 120ms ease",
-                    whiteSpace: "nowrap",
-                  },
-                },
-                h(ChatGlyph, { size: 12 }),
-                h("span", null, "Conversation"),
-                h(
-                  "button",
-                  {
-                    type: "button",
-                    title: "Restore to Top Tab Bar",
-                    onClick: function (e) {
-                      e.stopPropagation();
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                        }),
-                      );
-                    },
-                    style: {
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "14px",
-                      height: "14px",
-                      marginLeft: "2px",
-                      border: "none",
-                      borderRadius: "3px",
-                      background: "transparent",
-                      color: "inherit",
-                      opacity: 0.6,
-                      cursor: "pointer",
-                      fontSize: "12px",
-                    },
-                  },
-                  "×",
-                ),
-              );
-            })(),
-            // 1. Terminal Tabs (filtered against Top Tab Bar for deduplication)
-            (function () {
-              var topMap =
-                typeof window !== "undefined" && window.__dsh_top_tab_ids__
-                  ? window.__dsh_top_tab_ids__
-                  : {};
-              var visibleSessions = data.sessions.filter(function (s) {
-                return !topMap[s.name] && !topMap["term-" + s.name];
-              });
-              return visibleSessions.map(function (s) {
-                var isSel = activeView === "terminal" && s.name === selectedSession;
-                return h(
-                  "div",
-                  {
-                    key: "term-" + s.name,
-                    draggable: true,
-                    onDragStart: function (e) {
-                      e.dataTransfer.setData(
-                        "text/dsh-tab",
-                        JSON.stringify({
-                          id: s.name,
-                          type: "terminal",
-                          title: s.name,
-                          session: s.name,
-                          from: "bottom",
-                        }),
-                      );
-                    },
-                    onClick: function () {
-                      selectTerminalTab(s.name);
-                    },
-                    onContextMenu: function (e) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setTabActionsOpen(true);
-                    },
-                    style: {
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "5px",
-                      padding: "3px 8px",
-                      borderRadius: "5px",
-                      background: isSel
-                        ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))"
-                        : "transparent",
-                      border: isSel
-                        ? "1px solid var(--dsw-alias-primary, #6366f1)"
-                        : "1px solid transparent",
-                      color: isSel
-                        ? "var(--dsw-alias-label-primary, #fff)"
-                        : "var(--dsw-alias-label-secondary, #8b949e)",
-                      fontSize: "12px",
-                      fontWeight: isSel ? 600 : 400,
-                      cursor: "pointer",
-                      transition: "all 120ms ease",
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                  h(TerminalsGlyph, { size: 12 }),
-                  h("span", null, s.name),
-                  h(
-                    "span",
-                    { style: { fontSize: "10px", opacity: 0.5, marginLeft: "1px" } },
-                    s.windows + "w",
-                  ),
-                  h(
-                    "button",
-                    {
-                      type: "button",
-                      title: "Kill Session",
-                      onClick: function (e) {
-                        e.stopPropagation();
-                        handleKill(s.name);
-                      },
-                      style: {
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "14px",
-                        height: "14px",
-                        marginLeft: "2px",
-                        padding: 0,
-                        border: "none",
-                        borderRadius: "3px",
-                        background: "transparent",
-                        color: "inherit",
-                        opacity: 0.6,
-                        cursor: "pointer",
-                        fontSize: "12px",
-                      },
-                      onMouseEnter: function (e) {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.color = "#f85149";
-                      },
-                      onMouseLeave: function (e) {
-                        e.currentTarget.style.opacity = "0.6";
-                        e.currentTarget.style.color = "inherit";
-                      },
-                    },
-                    "×",
-                  ),
-                );
-              });
-            })(),
-            // 2. Container Tabs (filtered against Top Tab Bar for deduplication)
-            (function () {
-              var topMap =
-                typeof window !== "undefined" && window.__dsh_top_tab_ids__
-                  ? window.__dsh_top_tab_ids__
-                  : {};
-              var visibleContainers = containers.filter(function (c) {
-                return !topMap[c.id] && !topMap["container-sandboxes"];
-              });
-              return visibleContainers.map(function (c) {
-                var isSel = activeView === "container" && selectedContainer === c.id;
-                return h(
-                  "div",
-                  {
-                    key: "cont-" + c.id,
-                    draggable: true,
-                    onDragStart: function (e) {
-                      e.dataTransfer.setData(
-                        "text/dsh-tab",
-                        JSON.stringify({
-                          id: c.id,
-                          type: "container",
-                          title: c.name || c.id.substring(0, 12),
-                          from: "bottom",
-                        }),
-                      );
-                    },
-                    onClick: function () {
-                      selectContainerTab(c);
-                    },
-                    style: {
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "5px",
-                      padding: "3px 8px",
-                      borderRadius: "5px",
-                      background: isSel
-                        ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))"
-                        : "transparent",
-                      border: isSel
-                        ? "1px solid var(--dsw-alias-primary, #6366f1)"
-                        : "1px solid transparent",
-                      color: isSel
-                        ? "var(--dsw-alias-label-primary, #fff)"
-                        : "var(--dsw-alias-label-secondary, #8b949e)",
-                      fontSize: "12px",
-                      fontWeight: isSel ? 600 : 400,
-                      cursor: "pointer",
-                      transition: "all 120ms ease",
-                      whiteSpace: "nowrap",
-                    },
-                  },
-                  h(ContainersGlyph, { size: 12 }),
-                  h("span", null, c.name || c.id.substring(0, 12)),
-                  h("span", {
-                    style: {
-                      width: "6px",
-                      height: "6px",
-                      borderRadius: "50%",
-                      background: c.isRunning ? "#3fb950" : "#888",
-                      marginLeft: "2px",
-                    },
-                  }),
-                  h(
-                    "button",
-                    {
-                      type: "button",
-                      title: "Close Container View",
-                      onClick: function (e) {
-                        e.stopPropagation();
-                        setContainers(function (prev) {
-                          return prev.filter(function (x) {
-                            return x.id !== c.id;
-                          });
-                        });
-                        if (selectedContainer === c.id) {
-                          setActiveView("terminal");
-                        }
-                      },
-                      style: {
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "14px",
-                        height: "14px",
-                        marginLeft: "2px",
-                        padding: 0,
-                        border: "none",
-                        borderRadius: "3px",
-                        background: "transparent",
-                        color: "inherit",
-                        opacity: 0.6,
-                        cursor: "pointer",
-                        fontSize: "12px",
-                      },
-                      onMouseEnter: function (e) {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.color = "#f85149";
-                      },
-                      onMouseLeave: function (e) {
-                        e.currentTarget.style.opacity = "0.6";
-                        e.currentTarget.style.color = "inherit";
-                      },
-                    },
-                    "×",
-                  ),
-                );
-              });
-            })(),
-            // 3. Plus Button with Dropdown Context Menu
-            (function () {
-              var panelPlusBtnRef = React.useRef(null);
-              return h(
-                "div",
-                { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-                h(
-                  "button",
-                  {
-                    ref: panelPlusBtnRef,
-                    type: "button",
-                    title: "New Session / Terminal / Container",
-                    onClick: function (e) {
-                      e.stopPropagation();
-                      setPanelPlusMenuOpen(function (v) {
-                        return !v;
-                      });
-                    },
-                    style: {
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "22px",
-                      height: "22px",
-                      borderRadius: "4px",
-                      border: "none",
-                      background: "transparent",
-                      color: "var(--dsw-alias-label-secondary)",
-                      cursor: "pointer",
-                    },
-                    onMouseEnter: function (e) {
-                      e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)";
-                    },
-                    onMouseLeave: function (e) {
-                      e.currentTarget.style.background = "transparent";
-                    },
-                  },
-                  h(PlusGlyph, { size: 13 }),
-                ),
-                h(SelectDropdownMenu, {
-                  open: panelPlusMenuOpen,
-                  anchorRef: panelPlusBtnRef,
-                  onClose: function () {
-                    setPanelPlusMenuOpen(false);
-                  },
-                  items: [
-                    { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
-                    { id: "terminal", label: "Terminal", icon: h(TerminalsGlyph, { size: 13 }) },
-                    { id: "container", label: "Container", icon: h(ContainersGlyph, { size: 13 }) },
-                  ],
-                  onSelect: function (actionId) {
-                    setPanelPlusMenuOpen(false);
-                    setIsCollapsed(false);
-                    if (actionId === "chat") {
-                      setActiveView("chat");
-                      var startBtn = document.querySelector(
-                        '[class*="brand"], [class*="newSession"]',
-                      );
-                      if (startBtn) startBtn.click();
-                      window.dispatchEvent(new CustomEvent("dsh:new-session"));
-                    } else if (actionId === "terminal") {
-                      setNewModal(true);
-                    } else if (actionId === "container") {
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:open-container", { detail: { id: null } }),
-                      );
-                    }
-                  },
-                }),
-              );
-            })(),
-          ),
-          // Right Controls Bar (3-dots specialized actions + collapse/expand toggle)
-          h(
-            "div",
-            { style: { display: "flex", alignItems: "center", gap: "4px" } },
-            windows.length > 1
-              ? h(
-                  "div",
-                  {
-                    className: "dsh-term-tabs",
-                    style: {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "3px",
-                      marginRight: "6px",
-                      overflowX: "auto",
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    },
-                  },
-                  windows.map(function (w) {
-                    return h(
-                      "button",
-                      {
-                        key: w.index,
-                        onClick: function () {
-                          handleSelectWindow(w.index);
-                        },
-                        style: {
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          border: "none",
-                          background: w.active
-                            ? "var(--dsw-alias-interactive-bg-active, #238636)"
-                            : "rgba(255,255,255,0.05)",
-                          color: "#fff",
-                          fontSize: "11px",
-                          cursor: "pointer",
-                        },
-                      },
-                      w.index + ":" + w.name,
-                    );
-                  }),
-                  h(
-                    "button",
-                    {
-                      onClick: handleNewWindow,
-                      title: "New window in this session",
-                      style: {
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                        border: "1px dashed var(--dsw-alias-border-l2)",
-                        background: "transparent",
-                        color: "var(--dsw-alias-label-secondary)",
-                        fontSize: "11px",
-                        cursor: "pointer",
-                      },
-                    },
-                    "+",
-                  ),
-                )
-              : null,
-            // Specialized 3-dots actions menu
-            h(
-              "div",
-              { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-              h(
-                "button",
-                {
-                  ref: tabActionsBtnRef,
-                  type: "button",
-                  title: "Actions (…)",
-                  onClick: function (e) {
-                    e.stopPropagation();
-                    setTabActionsOpen(function (v) {
-                      return !v;
-                    });
-                  },
-                  style: {
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "26px",
-                    height: "26px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--dsw-alias-label-secondary)",
-                    cursor: "pointer",
-                  },
-                  onMouseEnter: function (e) {
-                    e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)";
-                  },
-                  onMouseLeave: function (e) {
-                    e.currentTarget.style.background = "transparent";
-                  },
-                },
-                h(EllipsisGlyph, { size: 14 }),
-              ),
-              h(SelectDropdownMenu, {
-                open: tabActionsOpen,
-                anchorRef: tabActionsBtnRef,
-                onClose: function () {
-                  setTabActionsOpen(false);
-                },
-                items: [
-                  { id: "move-top", label: "Move to Main Area", icon: h(EyeGlyph, { size: 13 }) },
-                  {
-                    id: "move-right",
-                    label: "Move to Secondary Sidebar",
-                    icon: h(DockToggleGlyph, { size: 13 }),
-                  },
-                  activeView === "terminal"
-                    ? {
-                        id: "refresh",
-                        label: "Refresh Buffer",
-                        icon: h(RefreshGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeView === "terminal"
-                    ? {
-                        id: "clear",
-                        label: "Clear Buffer (Ctrl+L)",
-                        icon: h(TrashGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeView === "terminal"
-                    ? {
-                        id: "new-window",
-                        label: "New Window in Session",
-                        icon: h(PlusGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeView === "terminal"
-                    ? {
-                        id: "new-session",
-                        label: "New Terminal Session",
-                        icon: h(TerminalsGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeView === "terminal"
-                    ? {
-                        id: "kill",
-                        label: "Kill Current Session",
-                        icon: h(TrashGlyph, { size: 13 }),
-                        danger: true,
-                      }
-                    : null,
-                  activeView === "container" && selectedContainer
-                    ? {
-                        id: "stop-container",
-                        label: "Stop Container",
-                        icon: h(TrashGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeView === "container" && selectedContainer
-                    ? {
-                        id: "start-container",
-                        label: "Start Container",
-                        icon: h(PlusGlyph, { size: 13 }),
-                      }
-                    : null,
-                ].filter(Boolean),
-                onSelect: function (actionId) {
-                  setTabActionsOpen(false);
-                  if (actionId === "move-top") {
-                    if (activeView === "terminal" && selectedSession) {
-                      var targetSess = selectedSession;
-                      setSessions(function (prev) {
-                        return prev.filter(function (s) {
-                          return s.name !== targetSess;
-                        });
-                      });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: {
-                            id: targetSess,
-                            type: "terminal",
-                            title: targetSess,
-                            session: targetSess,
-                          },
-                        }),
-                      );
-                    } else if (activeView === "container" && selectedContainer) {
-                      var targetCont = selectedContainer;
-                      setContainers(function (prev) {
-                        return prev.filter(function (c) {
-                          return c.id !== targetCont;
-                        });
-                      });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: { id: targetCont, type: "container", title: targetCont },
-                        }),
-                      );
-                    } else if (activeView === "chat") {
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                        }),
-                      );
-                    }
-                  } else if (actionId === "move-right") {
-                    if (activeView === "terminal" && selectedSession) {
-                      var targetS = selectedSession;
-                      setSessions(function (prev) {
-                        return prev.filter(function (s) {
-                          return s.name !== targetS;
-                        });
-                      });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-right", {
-                          detail: {
-                            id: targetS,
-                            type: "terminal",
-                            title: targetS,
-                            session: targetS,
-                          },
-                        }),
-                      );
-                    } else if (activeView === "container" && selectedContainer) {
-                      var targetC = selectedContainer;
-                      setContainers(function (prev) {
-                        return prev.filter(function (c) {
-                          return c.id !== targetC;
-                        });
-                      });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-right", {
-                          detail: { id: targetC, type: "container", title: targetC },
-                        }),
-                      );
-                    }
-                  } else if (actionId === "stop-container" && selectedContainer) {
-                    fetch(QUOTAS_API + "/docker/containers/action", {
-                      method: "POST",
-                      headers: { "content-type": "application/json" },
-                      body: JSON.stringify({ id: selectedContainer, action: "stop" }),
-                    });
-                  } else if (actionId === "start-container" && selectedContainer) {
-                    fetch(QUOTAS_API + "/docker/containers/action", {
-                      method: "POST",
-                      headers: { "content-type": "application/json" },
-                      body: JSON.stringify({ id: selectedContainer, action: "start" }),
-                    });
-                  } else if (actionId === "refresh") {
-                    loadBuffer(selectedSession);
-                  } else if (actionId === "clear") {
-                    sendKey("C-l");
-                  } else if (actionId === "new-window") {
-                    handleNewWindow();
-                  } else if (actionId === "new-session") {
-                    setNewModal(true);
-                  } else if (actionId === "kill") {
-                    if (selectedSession) handleKill(selectedSession);
-                  }
-                },
-              }),
-            ),
-            // Collapse / Expand toggle button (Panel Dock Icon)
-            h(
+          windows.map(function (w) {
+            return h(
               "button",
               {
+                key: w.index,
                 type: "button",
                 onClick: function () {
-                  setIsCollapsed(function (v) {
-                    return !v;
-                  });
+                  selectWindow(w.index);
                 },
-                title: isCollapsed ? "Expand Bottom Dock" : "Collapse Bottom Dock",
-                style: {
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "26px",
-                  height: "26px",
-                  borderRadius: "6px",
+                style: Object.assign({}, actionButtonStyle, {
                   border: "none",
-                  background: "transparent",
-                  color: "var(--dsw-alias-label-secondary)",
-                  cursor: "pointer",
-                  padding: "4px",
-                },
-                onMouseEnter: function (e) {
-                  e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)";
-                },
-                onMouseLeave: function (e) {
-                  e.currentTarget.style.background = "transparent";
-                },
+                  color: "#fff",
+                  background: w.active
+                    ? "var(--dsw-alias-interactive-bg-active, #238636)"
+                    : "rgba(255,255,255,0.05)",
+                }),
               },
-              h(DockToggleGlyph, {
-                size: 14,
-                style: {
-                  transform: isCollapsed ? "rotate(-90deg)" : "rotate(90deg)",
-                  transition: "transform 150ms ease",
-                },
-              }),
-            ),
+              w.index + ":" + w.name,
+            );
+          }),
+          h(
+            "button",
+            {
+              type: "button",
+              title: "New window in this session",
+              onClick: addWindow,
+              style: actionButtonStyle,
+            },
+            "+",
+          ),
+          h("div", { style: { flex: 1 } }),
+          h(
+            "button",
+            {
+              type: "button",
+              title: "Kill this tmux session",
+              onClick: killSession,
+              style: Object.assign({}, actionButtonStyle, { color: "#f85149" }),
+            },
+            h(TrashGlyph, { size: 12 }),
           ),
         ),
-        // Body content: terminal or container view (rendered when not collapsed)
-        !isCollapsed && activeView === "terminal"
-          ? h(
-              // Terminal Buffer Output
-              "pre",
-              {
-                ref: terminalPreRef,
-                style: {
-                  flex: 1,
-                  margin: 0,
-                  padding: "12px 16px",
-                  color: "var(--dsw-alias-label-primary, #c9d1d9)",
-                  fontFamily:
-                    "var(--ds-font-mono, 'JetBrains Mono', 'Fira Code', 'Menlo', 'Consolas', monospace)",
-                  fontSize: "12.5px",
-                  lineHeight: "1.48",
-                  overflowY: "auto",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-all",
-                  cursor: "text",
-                  background: "var(--dsw-alias-bg-layer-1, #0d1117)",
-                },
-                dangerouslySetInnerHTML: {
-                  __html:
-                    ansiToHtml(buffer) +
-                    '<span style="display:inline-block;width:7px;height:14px;background:#7ee787;margin-left:2px;vertical-align:middle;animation:blink 1s step-start infinite;"></span>',
-                },
-              },
-            )
-          : activeView === "container"
-            ? h(
-                React.Fragment,
-                null,
-                // Container info bar
-                (function () {
-                  var selCont = containers.find(function (c) {
-                    return c.id === selectedContainer;
-                  });
-                  if (!selCont)
-                    return h(
-                      "div",
-                      {
-                        style: {
-                          flex: 1,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "var(--dsw-alias-label-tertiary)",
-                          fontSize: "13px",
-                        },
-                      },
-                      "No container selected",
-                    );
-                  return h(
-                    React.Fragment,
-                    null,
-                    // Container action bar
-                    h(
-                      "div",
-                      {
-                        style: {
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          padding: "8px 16px",
-                          background: "var(--dsw-alias-bg-layer-2, #161b22)",
-                          borderBottom:
-                            "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-                        },
-                      },
-                      h(
-                        "div",
-                        { style: { display: "flex", gap: "10px", alignItems: "center" } },
-                        h(
-                          "strong",
-                          { style: { color: "var(--dsw-alias-label-primary)", fontSize: "13px" } },
-                          selCont.name || selCont.id.substring(0, 12),
-                        ),
-                        h(
-                          "code",
-                          {
-                            style: {
-                              fontSize: "11px",
-                              color: "var(--dsw-alias-label-secondary)",
-                              background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.06))",
-                              padding: "1px 6px",
-                              borderRadius: "4px",
-                            },
-                          },
-                          selCont.image,
-                        ),
-                        h(
-                          "span",
-                          {
-                            style: {
-                              padding: "1px 6px",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              fontWeight: 600,
-                              background: selCont.isRunning
-                                ? "rgba(63, 185, 80, 0.15)"
-                                : "rgba(128,128,128,0.1)",
-                              color: selCont.isRunning
-                                ? "#3fb950"
-                                : "var(--dsw-alias-label-tertiary)",
-                            },
-                          },
-                          selCont.isRunning ? "RUNNING" : "STOPPED",
-                        ),
-                      ),
-                      h(
-                        "div",
-                        { style: { display: "flex", gap: "6px" } },
-                        selCont.isRunning
-                          ? h(
-                              "button",
-                              {
-                                onClick: function () {
-                                  handleContainerAction(selCont.id, "stop");
-                                },
-                                style: {
-                                  padding: "4px 10px",
-                                  borderRadius: "5px",
-                                  border: "1px solid rgba(248, 81, 73, 0.3)",
-                                  background: "rgba(248, 81, 73, 0.08)",
-                                  color: "#f85149",
-                                  fontSize: "11px",
-                                  fontWeight: 500,
-                                  cursor: "pointer",
-                                },
-                              },
-                              "Stop",
-                            )
-                          : h(
-                              "button",
-                              {
-                                onClick: function () {
-                                  handleContainerAction(selCont.id, "start");
-                                },
-                                style: {
-                                  padding: "4px 10px",
-                                  borderRadius: "5px",
-                                  border: "none",
-                                  background: "var(--dsw-alias-primary, #6366f1)",
-                                  color: "#fff",
-                                  fontSize: "11px",
-                                  fontWeight: 500,
-                                  cursor: "pointer",
-                                },
-                              },
-                              "Start",
-                            ),
-                        h(
-                          "button",
-                          {
-                            onClick: function () {
-                              handleContainerAction(selCont.id, "restart");
-                            },
-                            style: {
-                              padding: "4px 10px",
-                              borderRadius: "5px",
-                              border: "1px solid var(--dsw-alias-border-l1)",
-                              background: "transparent",
-                              color: "var(--dsw-alias-label-secondary)",
-                              fontSize: "11px",
-                              cursor: "pointer",
-                            },
-                          },
-                          "Restart",
-                        ),
-                        h(
-                          "button",
-                          {
-                            onClick: function () {
-                              loadContainerLogs(selCont.id);
-                            },
-                            style: {
-                              padding: "4px 10px",
-                              borderRadius: "5px",
-                              border: "1px solid var(--dsw-alias-border-l1)",
-                              background: "transparent",
-                              color: "var(--dsw-alias-label-secondary)",
-                              fontSize: "11px",
-                              cursor: "pointer",
-                            },
-                          },
-                          h(RefreshGlyph, { size: 12 }),
-                        ),
-                      ),
-                    ),
-                    // Container logs
-                    h(
-                      "pre",
-                      {
-                        ref: terminalPreRef,
-                        style: {
-                          flex: 1,
-                          margin: 0,
-                          padding: "12px 16px",
-                          color: "var(--dsw-alias-label-primary, #c9d1d9)",
-                          fontFamily:
-                            "var(--ds-font-mono, 'JetBrains Mono', 'Fira Code', 'Menlo', 'Consolas', monospace)",
-                          fontSize: "12.5px",
-                          lineHeight: "1.48",
-                          overflowY: "auto",
-                          whiteSpace: "pre-wrap",
-                          wordBreak: "break-all",
-                          background: "var(--dsw-alias-bg-layer-1, #0d1117)",
-                        },
-                      },
-                      containerLogs,
-                    ),
-                  );
-                })(),
-              )
-            : null,
-        newModal
-          ? h(NewSessionModal, {
-              onClose: function () {
-                setNewModal(false);
-              },
-              onCreated: loadSessions,
-            })
-          : null,
+        h(InteractiveTmuxTerminal, { sessionName: sessionName, onClose: props.onClose }),
       );
     }
-    var FullPageTerminalsWorkspace = BottomTerminalPanel;
 
     // 7. DOCKABLE CONTAINERS WORKSPACE
     /** FullPageContainersWorkspace implementation. */
     function FullPageContainersWorkspace(props) {
-      var onClose = props.onClose;
       var initialContainerId = props.initialContainerId;
       var state = React.useState({ containers: [], loading: true, error: null });
       var data = state[0],
@@ -5650,529 +4275,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    // Empty Area New Tab Fallback Picker
-    /** EmptyAreaNewTabPicker implementation. */
-    function EmptyAreaNewTabPicker(props) {
-      var areaName = props.areaName || "Area";
-      return h(
-        "div",
-        {
-          style: {
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "16px",
-            padding: "32px",
-            background: "var(--dsw-alias-bg-layer-0, #000000)",
-            color: "var(--dsw-alias-label-primary, #fff)",
-            fontFamily: "var(--ds-font-family, sans-serif)",
-          },
-        },
-        h(
-          "div",
-          { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" } },
-          h("div", { style: { fontSize: "16px", fontWeight: 600 } }, "Empty " + areaName),
-          h(
-            "div",
-            { style: { fontSize: "12.5px", color: "var(--dsw-alias-label-secondary, #888)" } },
-            "Open a new tab or drag an existing tab here",
-          ),
-        ),
-        h(
-          "div",
-          { style: { display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" } },
-          h(
-            "button",
-            {
-              type: "button",
-              onClick: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:tab-moved-to-top", {
-                    detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                  }),
-                );
-              },
-              style: {
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
-                color: "inherit",
-                fontSize: "12.5px",
-                fontWeight: 500,
-                cursor: "pointer",
-              },
-            },
-            h(ChatGlyph, { size: 14 }),
-            "+ New Conversation",
-          ),
-          h(
-            "button",
-            {
-              type: "button",
-              onClick: function () {
-                var termId = "term-" + Date.now().toString(36);
-                window.dispatchEvent(
-                  new CustomEvent("dsh:tab-moved-to-top", {
-                    detail: { id: termId, type: "terminal", title: termId, session: "0" },
-                  }),
-                );
-              },
-              style: {
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
-                color: "inherit",
-                fontSize: "12.5px",
-                fontWeight: 500,
-                cursor: "pointer",
-              },
-            },
-            h(TerminalsGlyph, { size: 14 }),
-            "+ New Terminal",
-          ),
-          h(
-            "button",
-            {
-              type: "button",
-              onClick: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:tab-moved-to-top", {
-                    detail: { id: "container-sandboxes", type: "container", title: "Containers" },
-                  }),
-                );
-              },
-              style: {
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
-                color: "inherit",
-                fontSize: "12.5px",
-                fontWeight: 500,
-                cursor: "pointer",
-              },
-            },
-            h(ContainersGlyph, { size: 14 }),
-            "+ New Container",
-          ),
-        ),
-      );
-    }
-
-    // Secondary Sidebar Dock Component
-    /** RightSidebarDock implementation. */
-    function RightSidebarDock(props) {
-      var isOpenState = React.useState(false);
-      var isOpen = isOpenState[0],
-        setIsOpen = isOpenState[1];
-      var widthState = React.useState(300);
-      var width = widthState[0],
-        setWidth = widthState[1];
-      var tabsState = React.useState([]);
-      var tabs = tabsState[0],
-        setTabs = tabsState[1];
-      var activeTabState = React.useState(null);
-      var activeTab = activeTabState[0],
-        setActiveTab = activeTabState[1];
-      var isResizingState = React.useState(false);
-      var isResizing = isResizingState[0],
-        setIsResizing = isResizingState[1];
-      var menuOpenState = React.useState(false);
-      var isMenuOpen = menuOpenState[0],
-        setMenuOpen = menuOpenState[1];
-      var menuBtnRef = React.useRef(null);
-
-      // Broadcast secondary sidebar width and adjust layout bounds
-      React.useEffect(
-        function () {
-          var currentRightWidth = isOpen && tabs.length > 0 ? width : 0;
-          if (typeof window !== "undefined") {
-            window.__dsh_right_sidebar_width__ = currentRightWidth;
-            if (typeof document !== "undefined") {
-              document.documentElement.style.setProperty(
-                "--dsh-secondary-sidebar-width",
-                currentRightWidth + "px",
-              );
-            }
-            window.dispatchEvent(
-              new CustomEvent("dsh:right-sidebar-changed", {
-                detail: { open: isOpen && tabs.length > 0, width: currentRightWidth },
-              }),
-            );
-          }
-        },
-        [isOpen, width, tabs.length, isResizing],
-      );
-
-      React.useEffect(function () {
-        var /** onToggle implementation. */
-          onToggle = function () {
-            setIsOpen(function (v) {
-              return !v;
-            });
-          };
-        var /** onMoveToRight implementation. */
-          onMoveToRight = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-            setIsOpen(true);
-          };
-        var /** onMoveToTop implementation. */
-          onMoveToTop = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              return prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
-            });
-          };
-        var /** onMoveToBottom implementation. */
-          onMoveToBottom = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              return prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
-            });
-          };
-        window.addEventListener("dsh:toggle-right-sidebar", onToggle);
-        window.addEventListener("dsh:toggle-secondary-sidebar", onToggle);
-        window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
-        window.addEventListener("dsh:tab-moved-to-top", onMoveToTop);
-        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
-        return function () {
-          window.removeEventListener("dsh:toggle-right-sidebar", onToggle);
-          window.removeEventListener("dsh:toggle-secondary-sidebar", onToggle);
-          window.removeEventListener("dsh:tab-moved-to-right", onMoveToRight);
-          window.removeEventListener("dsh:tab-moved-to-top", onMoveToTop);
-          window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
-        };
-      }, []);
-
-      var /** handleResizeStart implementation. */
-        handleResizeStart = function (e) {
-          e.preventDefault();
-          setIsResizing(true);
-          var startX = e.clientX;
-          var startW = width;
-          var isSwapped =
-            typeof document !== "undefined" &&
-            document.body.classList.contains("dsh-sidebars-swapped");
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
-              var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;
-              var nextW = Math.max(180, Math.min(600, startW + delta));
-              setWidth(nextW);
-            };
-          var /** onUp implementation. */
-            onUp = function () {
-              setIsResizing(false);
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
-        };
-
-      if (!isOpen || tabs.length === 0) return null;
-
-      var activeTabObj = tabs.find(function (t) {
-        return t.id === activeTab;
-      });
-
-      return h(
-        "div",
-        {
-          className: "dsh-right-sidebar-dock",
-          style: {
-            position: "fixed",
-            top: "48px",
-            right: 0,
-            bottom: 0,
-            width: isOpen ? width + "px" : "36px",
-            background: "var(--dsw-alias-bg-layer-0, #000000)",
-            borderLeft: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-            zIndex: 85,
-            display: "flex",
-            flexDirection: "column",
-            transition: isResizing ? "none" : "width 150ms ease",
-          },
-          onDragOver: function (e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "move";
-          },
-          onDrop: function (e) {
-            e.preventDefault();
-            try {
-              var raw = e.dataTransfer.getData("text/dsh-tab");
-              if (raw) {
-                var tabData = JSON.parse(raw);
-                window.dispatchEvent(
-                  new CustomEvent("dsh:tab-moved-to-right", { detail: tabData }),
-                );
-              }
-            } catch (err) {}
-          },
-        },
-        // Resize handle on edge
-        isOpen
-          ? h("div", {
-              onPointerDown: handleResizeStart,
-              style: {
-                position: "absolute",
-                top: 0,
-                bottom: 0,
-                left: "-4px",
-                width: "8px",
-                cursor: "col-resize",
-                zIndex: 10,
-              },
-            })
-          : null,
-        // Header Tab Strip
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              height: "38px",
-              padding: "0 6px",
-              background: "var(--dsw-alias-bg-layer-0, #000000)",
-              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
-            },
-          },
-          isOpen
-            ? h(
-                "div",
-                {
-                  className: "dsh-top-tab-bar",
-                  style: {
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    overflowX: "auto",
-                    scrollbarWidth: "none",
-                  },
-                },
-                tabs.map(function (t) {
-                  var isSel = activeTab === t.id;
-                  var icon =
-                    t.type === "terminal"
-                      ? h(TerminalsGlyph, { size: 12 })
-                      : t.type === "container"
-                        ? h(ContainersGlyph, { size: 12 })
-                        : h(ChatGlyph, { size: 12 });
-                  return h(
-                    "div",
-                    {
-                      key: t.id,
-                      draggable: true,
-                      onClick: function () {
-                        setActiveTab(t.id);
-                      },
-                      style: {
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        padding: "3px 8px",
-                        borderRadius: "6px",
-                        background: isSel
-                          ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.2))"
-                          : "transparent",
-                        border: isSel
-                          ? "1px solid var(--dsw-alias-primary, #6366f1)"
-                          : "1px solid transparent",
-                        color: isSel ? "#fff" : "var(--dsw-alias-label-secondary, #888)",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                      },
-                    },
-                    icon,
-                    h("span", null, t.title || t.id),
-                    h(
-                      "button",
-                      {
-                        type: "button",
-                        onClick: function (e) {
-                          e.stopPropagation();
-                          setTabs(function (prev) {
-                            return prev.filter(function (x) {
-                              return x.id !== t.id;
-                            });
-                          });
-                        },
-                        style: {
-                          border: "none",
-                          background: "transparent",
-                          color: "inherit",
-                          cursor: "pointer",
-                          padding: "0 2px",
-                        },
-                      },
-                      "×",
-                    ),
-                  );
-                }),
-              )
-            : null,
-          h(
-            "div",
-            { style: { display: "flex", alignItems: "center", gap: "2px" } },
-            isOpen
-              ? h(
-                  "div",
-                  { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-                  h(
-                    "button",
-                    {
-                      ref: menuBtnRef,
-                      type: "button",
-                      onClick: function () {
-                        setMenuOpen(!isMenuOpen);
-                      },
-                      title: "Secondary Sidebar Actions (…)",
-                      style: {
-                        border: "none",
-                        background: "transparent",
-                        color: "var(--dsw-alias-label-secondary)",
-                        cursor: "pointer",
-                        padding: "4px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                      },
-                    },
-                    h(EllipsisGlyph, { size: 14 }),
-                  ),
-                  h(SelectDropdownMenu, {
-                    open: isMenuOpen,
-                    anchorRef: menuBtnRef,
-                    onClose: function () {
-                      setMenuOpen(false);
-                    },
-                    items: [
-                      activeTabObj
-                        ? {
-                            id: "move-top",
-                            label: "Move Tab to Main Area",
-                            icon: h(EyeGlyph, { size: 13 }),
-                          }
-                        : null,
-                      activeTabObj
-                        ? {
-                            id: "move-bottom",
-                            label: "Move Tab to Bottom Panel",
-                            icon: h(DockToggleGlyph, { size: 13 }),
-                          }
-                        : null,
-                      activeTabObj
-                        ? {
-                            id: "close-tab",
-                            label: "Close Active Tab",
-                            icon: h(TrashGlyph, { size: 13 }),
-                          }
-                        : null,
-                      {
-                        id: "collapse",
-                        label: "Collapse Secondary Sidebar",
-                        icon: h(DockToggleGlyph, { size: 13 }),
-                      },
-                    ].filter(Boolean),
-                    onSelect: function (act) {
-                      setMenuOpen(false);
-                      if (act === "move-top" && activeTabObj) {
-                        var tab = activeTabObj;
-                        setTabs(function (prev) {
-                          return prev.filter(function (t) {
-                            return t.id !== tab.id;
-                          });
-                        });
-                        window.dispatchEvent(
-                          new CustomEvent("dsh:tab-moved-to-top", { detail: tab }),
-                        );
-                      } else if (act === "move-bottom" && activeTabObj) {
-                        var tabB = activeTabObj;
-                        setTabs(function (prev) {
-                          return prev.filter(function (t) {
-                            return t.id !== tabB.id;
-                          });
-                        });
-                        window.dispatchEvent(
-                          new CustomEvent("dsh:tab-moved-to-bottom", { detail: tabB }),
-                        );
-                      } else if (act === "close-tab" && activeTabObj) {
-                        setTabs(function (prev) {
-                          return prev.filter(function (t) {
-                            return t.id !== activeTabObj.id;
-                          });
-                        });
-                      } else if (act === "collapse") {
-                        setIsOpen(false);
-                      }
-                    },
-                  }),
-                )
-              : null,
-            h(
-              "button",
-              {
-                type: "button",
-                onClick: function () {
-                  setIsOpen(!isOpen);
-                },
-                title: isOpen ? "Collapse Secondary Sidebar" : "Expand Secondary Sidebar",
-                style: {
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--dsw-alias-label-secondary)",
-                  cursor: "pointer",
-                  padding: "4px",
-                },
-              },
-              h(DockToggleGlyph, {
-                size: 14,
-                style: { transform: isOpen ? "rotate(180deg)" : "none" },
-              }),
-            ),
-          ),
-        ),
-        // Body Content
-        isOpen
-          ? activeTabObj && activeTabObj.type === "terminal"
-            ? h(InteractiveTmuxTerminal, { sessionName: activeTabObj.session || activeTabObj.id })
-            : activeTabObj && activeTabObj.type === "container"
-              ? h(FullPageContainersWorkspace, {})
-              : h(EmptyAreaNewTabPicker, { areaName: "Secondary Sidebar" })
-          : null,
-      );
-    }
-
     /** getCenterBounds implementation. */
     function getCenterBounds() {
       if (typeof document === "undefined") return { left: 240, right: 0, top: 0 };
@@ -6252,105 +4354,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return bounds;
     }
 
-    /** MainViewTerminalOccupant implementation. */
-    function MainViewTerminalOccupant(props) {
-      var sessionName = props.sessionName || "0";
-      var bounds = useCenterBounds();
-      var panelHeightState = React.useState(function () {
-        if (typeof window !== "undefined" && window.__dsh_panel_height__) {
-          return window.__dsh_panel_height__;
-        }
-        return "38px";
-      });
-      var panelHeight = panelHeightState[0],
-        setPanelHeight = panelHeightState[1];
-
-      React.useEffect(function () {
-        var /** onGeom implementation. */
-          onGeom = function (e) {
-            if (e && e.detail && e.detail.height) {
-              setPanelHeight(e.detail.height);
-            }
-          };
-        window.addEventListener("dsh:panel-geometry-changed", onGeom);
-        return function () {
-          window.removeEventListener("dsh:panel-geometry-changed", onGeom);
-        };
-      }, []);
-
-      return h(
-        "div",
-        {
-          className: "dsh-mainview-terminal",
-          style: {
-            position: "fixed",
-            top: bounds.top + 38 + "px",
-            left: bounds.left + "px",
-            right: bounds.right + "px",
-            bottom: panelHeight,
-            background: "var(--dsw-alias-bg-layer-0, #000000)",
-            zIndex: 50,
-            display: "flex",
-            flexDirection: "column",
-            fontFamily: "var(--ds-font-mono, monospace)",
-          },
-        },
-        h(InteractiveTmuxTerminal, { sessionName: sessionName }),
-      );
-    }
-
-    /** MainViewContainerOccupant implementation. */
-    function MainViewContainerOccupant(props) {
-      var bounds = useCenterBounds();
-      var panelHeightState = React.useState(function () {
-        if (typeof window !== "undefined" && window.__dsh_panel_height__) {
-          return window.__dsh_panel_height__;
-        }
-        return "38px";
-      });
-      var panelHeight = panelHeightState[0],
-        setPanelHeight = panelHeightState[1];
-
-      React.useEffect(function () {
-        var /** onGeom implementation. */
-          onGeom = function (e) {
-            if (e && e.detail && e.detail.height) {
-              setPanelHeight(e.detail.height);
-            }
-          };
-        window.addEventListener("dsh:panel-geometry-changed", onGeom);
-        return function () {
-          window.removeEventListener("dsh:panel-geometry-changed", onGeom);
-        };
-      }, []);
-
-      return h(
-        "div",
-        {
-          className: "dsh-mainview-container",
-          style: {
-            position: "fixed",
-            top: bounds.top + 36 + "px",
-            left: bounds.left + "px",
-            right: bounds.right + "px",
-            bottom: panelHeight,
-            background: "var(--dsw-alias-bg-layer-0, #000000)",
-            zIndex: 50,
-            display: "flex",
-            flexDirection: "column",
-          },
-        },
-        h(FullPageContainersWorkspace, { onClose: props.onClose }),
-      );
-    }
-
-    /** MainViewFileEditorOccupant implementation. */
-    function MainViewFileEditorOccupant(props) {
+    // The `file` extension of the shared tab host: the editor body only. Its
+    // frame, tab strip and docking come from @dsh-stack/workspace-tabs.
+    /** FileEditorTabBody implementation. */
+    function FileEditorTabBody(props) {
       var filePath = props.filePath || "";
       var fileName = props.fileName || (filePath ? filePath.split("/").pop() : "File");
       var onClose = props.onClose;
-      var bounds = useCenterBounds();
-
       var contentState = React.useState("");
       var content = contentState[0],
         setContent = contentState[1];
@@ -6456,18 +4466,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       return h(
         "div",
         {
-          className: "dsh-mainview-monaco",
+          className: "dsh-file-editor-body",
           style: {
-            position: "fixed",
-            top: bounds.top + 36 + "px",
-            left: bounds.left + "px",
-            right: bounds.right + "px",
-            bottom:
-              typeof window !== "undefined" && window.__dsh_panel_height__
-                ? window.__dsh_panel_height__
-                : "38px",
+            flex: 1,
+            minHeight: 0,
             background: "var(--dsw-alias-surface-l0, #13141f)",
-            zIndex: 50,
             display: "flex",
             flexDirection: "column",
             fontFamily: "var(--ds-font-sans, system-ui, sans-serif)",
@@ -6683,8 +4686,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    /** MainViewRepoOccupant implementation. */
-    function MainViewRepoOccupant(props) {
+    // The `repo` extension of the shared tab host: the repository body only.
+    /** RepositoryTabBody implementation. */
+    function RepositoryTabBody(props) {
       var repoPath = props.repoPath || "";
       var repoName = props.repoName || (repoPath ? repoPath.split("/").pop() : "Repository");
       var onClose = props.onClose;
@@ -6968,23 +4972,15 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         overview && overview.owner && overview.repoName
           ? overview.owner + " / " + overview.repoName
           : repoName;
-      var bounds = useCenterBounds();
 
       return h(
         "div",
         {
-          className: "dsh-mainview-repo",
+          className: "dsh-repository-body",
           style: {
-            position: "fixed",
-            top: bounds.top + 36 + "px",
-            left: bounds.left + "px",
-            right: bounds.right + "px",
-            bottom:
-              typeof window !== "undefined" && window.__dsh_panel_height__
-                ? window.__dsh_panel_height__
-                : "38px",
+            flex: 1,
+            minHeight: 0,
             background: "var(--dsw-alias-surface-l0, #13141f)",
-            zIndex: 50,
             display: "flex",
             flexDirection: "column",
             fontFamily: "var(--ds-font-sans, system-ui, -apple-system, sans-serif)",
@@ -8770,800 +6766,279 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    /** TopConversationTabBar implementation. */
-    function TopConversationTabBar(props) {
-      var topPlusBtnRef = React.useRef(null);
-      var plusOpenState = React.useState(false);
-      var plusOpen = plusOpenState[0],
-        setPlusOpen = plusOpenState[1];
-
-      var topEllipsisBtnRef = React.useRef(null);
-      var topMenuOpenState = React.useState(false);
-      var isTopMenuOpen = topMenuOpenState[0],
-        setTopMenuOpen = topMenuOpenState[1];
-
-      var tabsState = React.useState([
-        {
-          id: "chat-main",
-          type: "chat",
-          title:
-            typeof window !== "undefined" && window.__dsh_current_session_title__
-              ? window.__dsh_current_session_title__
-              : "Conversation",
-        },
-      ]);
-      var tabs = tabsState[0],
-        setTabs = tabsState[1];
-      var activeTabState = React.useState("chat-main");
-      var activeTab = activeTabState[0],
-        setActiveTab = activeTabState[1];
-
-      var contextMenuState = React.useState(null); // { tabId, anchorEl }
-      var contextMenu = contextMenuState[0],
-        setContextMenu = contextMenuState[1];
-
-      // Sync active top tab IDs to window global for cross-panel deduplication
-      React.useEffect(
-        function () {
-          if (typeof window !== "undefined") {
-            var map = {};
-            tabs.forEach(function (t) {
-              map[t.id] = true;
-              if (t.session) map[t.session] = true;
-            });
-            window.__dsh_top_tab_ids__ = map;
-            window.dispatchEvent(new CustomEvent("dsh:tabs-changed"));
-          }
-        },
-        [tabs],
+    // 8. WORKSPACE TAB SURFACES
+    //
+    // The main area, the bottom panel and the secondary sidebar are the same
+    // components from @dsh-stack/workspace-tabs, differing only in placement.
+    // That package's browser build is concatenated ahead of this bundle by this
+    // package's build script, the same way the shared glyph factory is, and
+    // publishes itself as the top-level __dshWorkspaceTabs binding.
+    var WorkspaceTabsRuntimeModule =
+      typeof __dshWorkspaceTabs !== "undefined" && __dshWorkspaceTabs ? __dshWorkspaceTabs : null;
+    if (!WorkspaceTabsRuntimeModule) {
+      throw new Error(
+        "@dsh-stack/workspace-tabs runtime is missing from the @dsh-stack/providers client bundle",
       );
+    }
 
-      // Sync live chat title from active session or document
-      React.useEffect(function () {
-        var /** updateTitle implementation. */
-          updateTitle = function () {
-            var title =
-              typeof window !== "undefined" && window.__dsh_current_session_title__
-                ? window.__dsh_current_session_title__
-                : null;
-            if (!title && typeof document !== "undefined") {
-              var activeSessionRow = document.querySelector(
-                ".dsh-tree-sessionRowActive .dsh-tree-sessionTitle, .dsh-tree-sessionRowActive .dsh-tree-title",
-              );
-              if (activeSessionRow && activeSessionRow.textContent) {
-                title = activeSessionRow.textContent.trim();
-              }
-            }
-            if (title) {
-              setTabs(function (prev) {
-                return prev.map(function (t) {
-                  if (t.id === "chat-main" || t.type === "chat") {
-                    if (t.title !== title) return Object.assign({}, t, { title: title });
-                  }
-                  return t;
-                });
-              });
-            }
-          };
-        updateTitle();
-        var timer = setInterval(updateTitle, 500);
-        return function () {
-          clearInterval(timer);
-        };
-      }, []);
+    /** tabGlyphFor implementation. */
+    function tabGlyphFor(kind, size) {
+      if (kind === "terminal") return h(TerminalsGlyph, { size: size });
+      if (kind === "container") return h(ContainersGlyph, { size: size });
+      if (kind === "repo") return h(RepoGlyph, { size: size });
+      if (kind === "file" || kind === "diff") return h(FileGlyph, { size: size });
+      return h(ChatGlyph, { size: size });
+    }
 
-      React.useEffect(function () {
-        var /** onTabMovedToTop implementation. */
-          onTabMovedToTop = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-          };
-        var /** onTabMovedToBottom implementation. */
-          onTabMovedToBottom = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              var remaining = prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
-              return remaining;
-            });
-            setActiveTab(function (curr) {
-              if (curr === tab.id) return null;
-              return curr;
-            });
-          };
-        var /** onTabMovedToRight implementation. */
-          onTabMovedToRight = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              return prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
-            });
-            setActiveTab(function (curr) {
-              if (curr === tab.id) return null;
-              return curr;
-            });
-          };
-        var /** onOpenFileTab implementation. */
-          onOpenFileTab = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-          };
-        var /** onOpenRepoTab implementation. */
-          onOpenRepoTab = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-          };
-
-        var /** onOpenTerminal implementation. */
-          onOpenTerminal = function (e) {
-            var target = (e && e.detail && e.detail.target) || "bottom";
-            if (target === "top") {
-              var sess = (e && e.detail && e.detail.session) || "0";
-              var termTab = {
-                id: sess,
-                type: "terminal",
-                title: "Terminal: " + sess,
-                session: sess,
-              };
-              setTabs(function (prev) {
-                if (
-                  prev.some(function (t) {
-                    return t.id === termTab.id;
-                  })
-                )
-                  return prev;
-                return prev.concat([termTab]);
-              });
-              setActiveTab(termTab.id);
-            }
-          };
-
-        var /** onOpenContainer implementation. */
-          onOpenContainer = function (e) {
-            var target = (e && e.detail && e.detail.target) || "bottom";
-            if (target === "top") {
-              var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
-              var contTab = {
-                id: cId,
-                type: "container",
-                title:
-                  (e && e.detail && e.detail.title) ||
-                  (cId === "container-sandboxes"
-                    ? "Docker Sandboxes"
-                    : "Container: " + cId.slice(0, 8)),
-              };
-              setTabs(function (prev) {
-                if (
-                  prev.some(function (t) {
-                    return t.id === contTab.id;
-                  })
-                )
-                  return prev;
-                return prev.concat([contTab]);
-              });
-              setActiveTab(contTab.id);
-            }
-          };
-
-        var /** onFocusChat implementation. */
-          onFocusChat = function (e) {
-            var tTitle =
-              (e && e.detail && e.detail.title) ||
-              (typeof window !== "undefined" && window.__dsh_current_session_title__) ||
-              "Conversation";
-            var chatTab = { id: "chat-main", type: "chat", title: tTitle };
-            setTabs(function (prev) {
-              var exists = prev.find(function (t) {
-                return t.id === "chat-main" || t.type === "chat";
-              });
-              if (exists) {
-                return prev.map(function (t) {
-                  if (t.id === "chat-main" || t.type === "chat") {
-                    return Object.assign({}, t, { title: tTitle });
-                  }
-                  return t;
-                });
-              }
-              return [chatTab].concat(prev);
-            });
-            setActiveTab("chat-main");
-          };
-
-        var /** onCloseTerminalTab implementation. */
-          onCloseTerminalTab = function (e) {
-            var sess = e && e.detail ? e.detail.session || e.detail.id : null;
-            if (!sess) return;
-            setTabs(function (prev) {
-              var tabToRemove = prev.find(function (t) {
-                return t.type === "terminal" && (t.session === sess || t.id === sess);
-              });
-              if (tabToRemove) {
-                var idx = prev.findIndex(function (t) {
-                  return t.id === tabToRemove.id;
-                });
-                var remaining = prev.filter(function (t) {
-                  return t.id !== tabToRemove.id;
-                });
-                setActiveTab(function (cur) {
-                  if (cur === tabToRemove.id) {
-                    return remaining.length > 0
-                      ? remaining[Math.min(idx, remaining.length - 1)].id
-                      : "chat-main";
-                  }
-                  return cur;
-                });
-                return remaining;
-              }
-              return prev;
-            });
-          };
-
-        window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
-        window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
-        window.addEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
-        window.addEventListener("dsh:open-file-tab", onOpenFileTab);
-        window.addEventListener("dsh:open-repo-tab", onOpenRepoTab);
-        window.addEventListener("dsh:open-terminal", onOpenTerminal);
-        window.addEventListener("dsh:open-container", onOpenContainer);
-        window.addEventListener("dsh:focus-chat", onFocusChat);
-        window.addEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
-        return function () {
-          window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
-          window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
-          window.removeEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
-          window.removeEventListener("dsh:open-file-tab", onOpenFileTab);
-          window.removeEventListener("dsh:open-repo-tab", onOpenRepoTab);
-          window.removeEventListener("dsh:open-terminal", onOpenTerminal);
-          window.removeEventListener("dsh:open-container", onOpenContainer);
-          window.removeEventListener("dsh:focus-chat", onFocusChat);
-          window.removeEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
-        };
-      }, []);
-
-      var /** handleDropOnTop implementation. */
-        handleDropOnTop = function (e) {
-          e.preventDefault();
-          try {
-            var raw = e.dataTransfer.getData("text/dsh-tab");
-            if (raw) {
-              var tabData = JSON.parse(raw);
-              window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tabData }));
-            }
-          } catch (err) {}
-        };
-
-      var /** removeTab implementation. */
-        removeTab = function (tabId, e) {
-          if (e) e.stopPropagation();
-          setTabs(function (prev) {
-            var idx = prev.findIndex(function (t) {
-              return t.id === tabId;
-            });
-            var remaining = prev.filter(function (t) {
-              return t.id !== tabId;
-            });
-            if (activeTab === tabId) {
-              if (remaining.length > 0) {
-                var nextIdx = Math.min(idx, remaining.length - 1);
-                setActiveTab(remaining[nextIdx].id);
-              } else {
-                setActiveTab(null);
-              }
-            }
-            return remaining;
-          });
-        };
-
-      var /** checkIsTrajectory implementation. */
-        checkIsTrajectory = function () {
-          var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
-          if (activeTabEl) {
-            var txt = (activeTabEl.textContent || "").trim().toLowerCase();
-            return (
-              txt === "trajectory" ||
-              txt.includes("trajectory") ||
-              txt === "轨迹" ||
-              txt.includes("轨迹")
-            );
-          }
-          return Boolean(
-            document.querySelector(
-              '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
-            ),
-          );
-        };
-
-      var /** handleToggleView implementation. */
-        handleToggleView = function () {
-          var onTrajectoryNow = checkIsTrajectory();
-          var targetName = onTrajectoryNow ? "chat" : "trajectory";
-          var allTabs = Array.from(
-            document.querySelectorAll('[role="tab"], [role="tablist"] button'),
-          );
-          var targetBtn = allTabs.find(function (b) {
-            var t = (b.textContent || "").trim().toLowerCase();
-            return (
-              (targetName === "chat" &&
-                (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
-              (targetName === "trajectory" &&
-                (t === "trajectory" ||
-                  t.includes("trajectory") ||
-                  t === "轨迹" ||
-                  t.includes("轨迹")))
-            );
-          });
-          if (targetBtn) {
-            targetBtn.click();
-          } else {
-            var inactiveBtn = allTabs.find(function (b) {
-              return b.getAttribute("aria-selected") !== "true";
-            });
-            if (inactiveBtn) inactiveBtn.click();
-          }
-        };
-
-      var /** handleDownloadSessionLog implementation. */
-        handleDownloadSessionLog = function () {
-          try {
-            var activeSessId =
-              typeof window !== "undefined" && window.__dsh_current_session_id__
-                ? window.__dsh_current_session_id__
-                : "";
-            var exportUrl = "/api/session.export?id=" + encodeURIComponent(activeSessId || "");
-            var a = document.createElement("a");
-            a.href = exportUrl;
-            a.download = (activeSessId || "session") + ".jsonl";
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function () {
-              if (a.parentNode) a.parentNode.removeChild(a);
-            }, 1000);
-          } catch (e) {}
-        };
-
-      var bounds = useCenterBounds();
-      var activeTabObj = tabs.find(function (t) {
-        return t.id === activeTab;
+    /** menuGlyphFor implementation. */
+    function menuGlyphFor(name, size) {
+      if (name === "main") return h(EyeGlyph, { size: size });
+      if (name === "bottom") return h(PanelBottomGlyph, { size: size });
+      if (name === "secondary") return h(PanelRightGlyph, { size: size });
+      if (name === "close") return h(TrashGlyph, { size: size });
+      if (name === "plus") return h(PlusGlyph, { size: size });
+      if (name === "overflow") return h(EllipsisGlyph, { size: size });
+      return h(DockToggleGlyph, {
+        size: size,
+        style: { transform: name === "expand" ? "rotate(-90deg)" : "rotate(90deg)" },
       });
-      var isMainTermActive = activeTabObj && activeTabObj.type === "terminal";
-      var isMainContActive = activeTabObj && activeTabObj.type === "container";
-      var isMainFileActive = activeTabObj && activeTabObj.type === "file";
-      var isMainRepoActive = activeTabObj && activeTabObj.type === "repo";
-      var isMainEmpty = tabs.length === 0;
+    }
 
+    /** currentConversationTitle implementation. */
+    function currentConversationTitle() {
+      if (typeof window !== "undefined" && window.__dsh_current_session_title__) {
+        return window.__dsh_current_session_title__;
+      }
+      if (typeof document !== "undefined") {
+        var activeRow = document.querySelector(
+          ".dsh-tree-sessionRowActive .dsh-tree-sessionTitle, .dsh-tree-sessionRowActive .dsh-tree-title",
+        );
+        if (activeRow && activeRow.textContent) return activeRow.textContent.trim();
+      }
+      return "Conversation";
+    }
+
+    var CONVERSATION_TAB_ID = "chat-main";
+
+    var workspaceTabs = WorkspaceTabsRuntimeModule.createWorkspaceTabsRuntime({
+      react: React,
+      chrome: {
+        tabGlyph: tabGlyphFor,
+        menuGlyph: menuGlyphFor,
+        DropdownMenu: SelectDropdownMenu,
+      },
+    });
+
+    /** AnchoredConversationBody implementation. */
+    function AnchoredConversationBody(props) {
+      var tab = props.tab;
       return h(
-        React.Fragment,
-        null,
+        "div",
+        {
+          className: "dsh-anchored-conversation",
+          style: {
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            padding: "24px",
+            textAlign: "center",
+            color: "var(--dsw-alias-label-primary, #fff)",
+          },
+        },
+        h(ChatGlyph, { size: 20 }),
+        h("div", { style: { fontSize: "14px", fontWeight: 600 } }, tab.title),
         h(
           "div",
           {
-            className: "dsh-top-conversation-header",
             style: {
-              position: "fixed",
-              top: bounds.top + "px",
-              left: bounds.left + "px",
-              right: bounds.right + "px",
-              height: "36px",
-              background: "var(--dsw-alias-surface-l0, #13141f)",
-              borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
-              zIndex: 100,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0 8px 0 12px",
-              userSelect: "none",
+              fontSize: "12.5px",
+              maxWidth: "40ch",
+              color: "var(--dsw-alias-label-secondary, #8b949e)",
             },
-            onDragOver: function (e) {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = "move";
-            },
-            onDrop: handleDropOnTop,
           },
-          // Left Tabs List
-          h(
-            "div",
-            {
-              className: "dsh-top-tab-list",
-              style: {
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                overflowX: "auto",
-                scrollbarWidth: "none",
-                maxWidth: "calc(100% - 130px)",
-              },
-            },
-            tabs.map(function (t) {
-              var isSel = activeTab === t.id;
-              var icon =
-                t.type === "terminal"
-                  ? h(TerminalsGlyph, { size: 12 })
-                  : t.type === "container"
-                    ? h(ContainersGlyph, { size: 12 })
-                    : t.type === "file"
-                      ? h(FileGlyph, { size: 12 })
-                      : t.type === "repo"
-                        ? h(RepoGlyph, { size: 12 })
-                        : h(ChatGlyph, { size: 12 });
-
-              return h(
-                "div",
-                {
-                  key: t.id,
-                  draggable: true,
-                  role: "tab",
-                  "aria-selected": isSel,
-                  onClick: function () {
-                    setActiveTab(t.id);
-                  },
-                  onDragStart: function (e) {
-                    e.dataTransfer.setData("text/dsh-tab", JSON.stringify(t));
-                  },
-                  onContextMenu: function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setContextMenu({ tab: t, pos: { x: e.clientX, y: e.clientY } });
-                  },
-                  style: {
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    padding: "3px 8px",
-                    borderRadius: "5px",
-                    background: isSel
-                      ? "var(--dsw-alias-interactive-bg-active, rgba(99, 102, 241, 0.18))"
-                      : "transparent",
-                    border: isSel
-                      ? "1px solid var(--dsw-alias-primary, #6366f1)"
-                      : "1px solid transparent",
-                    color: isSel
-                      ? "var(--dsw-alias-label-primary, #fff)"
-                      : "var(--dsw-alias-label-secondary, #8b949e)",
-                    fontSize: "12px",
-                    fontWeight: isSel ? 600 : 400,
-                    cursor: "pointer",
-                    transition: "all 120ms ease",
-                    maxWidth: "200px",
-                  },
-                },
-                icon,
-                h(
-                  "span",
-                  { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } },
-                  t.title || "Tab",
-                ),
-                t.type !== "chat" && t.id !== "chat-main"
-                  ? h(
-                      "button",
-                      {
-                        type: "button",
-                        title: "Close Tab",
-                        onClick: function (e) {
-                          removeTab(t.id, e);
-                        },
-                        style: {
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "14px",
-                          height: "14px",
-                          marginLeft: "2px",
-                          border: "none",
-                          borderRadius: "3px",
-                          background: "transparent",
-                          color: "inherit",
-                          opacity: 0.6,
-                          cursor: "pointer",
-                          fontSize: "12px",
-                        },
-                        onMouseEnter: function (e) {
-                          e.currentTarget.style.opacity = "1";
-                          e.currentTarget.style.color = "#f85149";
-                        },
-                        onMouseLeave: function (e) {
-                          e.currentTarget.style.opacity = "0.6";
-                          e.currentTarget.style.color = "inherit";
-                        },
-                      },
-                      "×",
-                    )
-                  : null,
-              );
-            }),
-          ),
-          // Right Controls: Bottom Panel Toggle, Secondary Sidebar Toggle, 3-dots Menu
-          h(
-            "div",
-            { style: { display: "flex", alignItems: "center", gap: "3px" } },
-            // 1. Bottom Panel Toggle
-            h(
-              "button",
-              {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "Toggle Bottom Panel (Cmd+J / Ctrl+J)",
-                "aria-label": "Toggle Bottom Panel",
-                onClick: function () {
-                  window.dispatchEvent(new CustomEvent("dsh:toggle-bottom-panel"));
-                },
-                style: {
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "26px",
-                  height: "26px",
-                  borderRadius: "5px",
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--dsw-alias-label-secondary)",
-                  cursor: "pointer",
-                },
-              },
-              h(PanelBottomGlyph, { size: 15 }),
-            ),
-            // 2. Secondary Sidebar Toggle
-            h(
-              "button",
-              {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "Toggle Secondary Sidebar (Cmd+Opt+B / Ctrl+Alt+B)",
-                "aria-label": "Toggle Secondary Sidebar",
-                onClick: function () {
-                  window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
-                },
-                style: {
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "26px",
-                  height: "26px",
-                  borderRadius: "5px",
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--dsw-alias-label-secondary)",
-                  cursor: "pointer",
-                },
-              },
-              h(PanelRightGlyph, { size: 15 }),
-            ),
-            // 3. Three-Dots Menu
-            h(
-              "div",
-              { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-              h(
-                "button",
-                {
-                  ref: topEllipsisBtnRef,
-                  type: "button",
-                  title: "Main Area Options (…)",
-                  onClick: function (e) {
-                    e.stopPropagation();
-                    setTopMenuOpen(!isTopMenuOpen);
-                  },
-                  style: {
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "26px",
-                    height: "26px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--dsw-alias-label-secondary)",
-                    cursor: "pointer",
-                  },
-                  onMouseEnter: function (e) {
-                    e.currentTarget.style.background = "var(--dsw-alias-interactive-bg-hover)";
-                  },
-                  onMouseLeave: function (e) {
-                    e.currentTarget.style.background = "transparent";
-                  },
-                },
-                h(EllipsisGlyph, { size: 14 }),
-              ),
-              h(SelectDropdownMenu, {
-                open: isTopMenuOpen,
-                anchorRef: topEllipsisBtnRef,
-                onClose: function () {
-                  setTopMenuOpen(false);
-                },
-                items: [
-                  {
-                    id: "toggle-view",
-                    label: checkIsTrajectory()
-                      ? "Switch to Chat View"
-                      : "Switch to Trajectory View",
-                    icon: h(ChatGlyph, { size: 13 }),
-                  },
-                  {
-                    id: "download-log",
-                    label: "Download Session Log",
-                    icon: h(FolderOpenGlyph, { size: 13 }),
-                  },
-                  activeTabObj
-                    ? {
-                        id: "move-bottom",
-                        label: "Move Tab to Bottom Panel",
-                        icon: h(PanelBottomGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeTabObj
-                    ? {
-                        id: "move-right",
-                        label: "Move Tab to Secondary Sidebar",
-                        icon: h(PanelRightGlyph, { size: 13 }),
-                      }
-                    : null,
-                  activeTabObj && activeTabObj.type !== "chat"
-                    ? {
-                        id: "close-tab",
-                        label: "Close Active Tab",
-                        icon: h(TrashGlyph, { size: 13 }),
-                        danger: true,
-                      }
-                    : null,
-                ].filter(Boolean),
-                onSelect: function (act) {
-                  setTopMenuOpen(false);
-                  if (act === "toggle-view") {
-                    handleToggleView();
-                  } else if (act === "download-log") {
-                    handleDownloadSessionLog();
-                  } else if (act === "move-bottom" && activeTabObj) {
-                    var tab = activeTabObj;
-                    removeTab(tab.id);
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-bottom", { detail: tab }),
-                    );
-                  } else if (act === "move-right" && activeTabObj) {
-                    var tabR = activeTabObj;
-                    removeTab(tabR.id);
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-right", { detail: tabR }),
-                    );
-                  } else if (act === "close-tab" && activeTabObj) {
-                    removeTab(activeTabObj.id);
-                  }
-                },
-              }),
-            ),
-          ),
-          contextMenu
-            ? h(SelectDropdownMenu, {
-                open: true,
-                position: contextMenu.pos,
-                onClose: function () {
-                  setContextMenu(null);
-                },
-                items: [
-                  {
-                    id: "move-bottom",
-                    label: "Move to Bottom Panel",
-                    icon: h(PanelBottomGlyph, { size: 13 }),
-                  },
-                  {
-                    id: "move-right",
-                    label: "Move to Secondary Sidebar",
-                    icon: h(PanelRightGlyph, { size: 13 }),
-                  },
-                  contextMenu.tab && contextMenu.tab.type !== "chat"
-                    ? {
-                        id: "close",
-                        label: "Close Tab",
-                        icon: h(TrashGlyph, { size: 13 }),
-                        danger: true,
-                      }
-                    : null,
-                ].filter(Boolean),
-                onSelect: function (act) {
-                  var tab = contextMenu.tab;
-                  setContextMenu(null);
-                  if (act === "move-bottom") {
-                    removeTab(tab.id);
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-bottom", { detail: tab }),
-                    );
-                  } else if (act === "move-right") {
-                    removeTab(tab.id);
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-right", { detail: tab }),
-                    );
-                  } else if (act === "close") {
-                    removeTab(tab.id);
-                  }
-                },
-              })
-            : null,
+          "The live conversation view is anchored to the main area. This tab still owns the conversation — move it back to see it.",
         ),
-        isMainEmpty
-          ? h(
-              "div",
-              {
-                style: {
-                  position: "fixed",
-                  top: bounds.top + 36 + "px",
-                  left: bounds.left + "px",
-                  right: bounds.right + "px",
-                  bottom:
-                    typeof window !== "undefined" && window.__dsh_panel_height__
-                      ? window.__dsh_panel_height__
-                      : "38px",
-                  zIndex: 40,
-                  display: "flex",
-                },
-              },
-              h(EmptyAreaNewTabPicker, { areaName: "Main Area" }),
-            )
-          : null,
-        isMainTermActive
-          ? h(MainViewTerminalOccupant, {
-              sessionName: activeTabObj.session || activeTabObj.id,
-              onClose: function () {
-                removeTab(activeTabObj.id);
-              },
-            })
-          : null,
-        isMainContActive
-          ? h(MainViewContainerOccupant, {
-              onClose: function () {
-                removeTab(activeTabObj.id);
-              },
-            })
-          : null,
-        isMainFileActive
-          ? h(MainViewFileEditorOccupant, {
-              filePath: activeTabObj.path,
-              fileName: activeTabObj.title,
-              onClose: function () {
-                removeTab(activeTabObj.id);
-              },
-            })
-          : null,
-        isMainRepoActive
-          ? h(MainViewRepoOccupant, {
-              repoPath: activeTabObj.path,
-              repoName: activeTabObj.title,
-              onClose: function () {
-                removeTab(activeTabObj.id);
-              },
-            })
-          : null,
+        h(
+          "button",
+          {
+            type: "button",
+            onClick: function () {
+              workspaceTabs.store.dispatch({ type: "move", tabId: tab.id, surface: "main" });
+            },
+            style: {
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 12px",
+              borderRadius: "8px",
+              border: "1px solid var(--dsw-alias-border-l1, rgba(255,255,255,0.12))",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.04))",
+              color: "inherit",
+              fontSize: "12.5px",
+              cursor: "pointer",
+            },
+          },
+          h(EyeGlyph, { size: 13 }),
+          "Move to Main Area",
+        ),
       );
+    }
+
+    workspaceTabs.registry.register({
+      kind: "chat",
+      label: "Conversation",
+      render: function (tab, surface) {
+        // In the main area the harness renders the live conversation underneath,
+        // so the tab draws no body of its own and the surface shrinks to its strip.
+        return surface === "main" ? null : h(AnchoredConversationBody, { tab: tab });
+      },
+      create: function () {
+        // Start a fresh harness session the same way the sidebar's "+" does:
+        // click the shell's own control when it is present, and announce it
+        // either way for anything else listening.
+        var startButton = document.querySelector('[class*="brand"], [class*="newSession"]');
+        if (startButton) startButton.click();
+        window.dispatchEvent(new CustomEvent("dsh:new-session"));
+        return {
+          id: CONVERSATION_TAB_ID,
+          kind: "chat",
+          title: currentConversationTitle(),
+          closable: false,
+        };
+      },
+    });
+
+    workspaceTabs.registry.register({
+      kind: "terminal",
+      label: "Terminal",
+      render: function (tab) {
+        return h(TerminalTabBody, {
+          sessionName: tab.session || tab.id,
+          onClose: function () {
+            workspaceTabs.store.dispatch({ type: "close", tabId: tab.id });
+          },
+        });
+      },
+      create: function () {
+        var name = "dsh-" + Date.now().toString(36);
+        fetch(QUOTAS_API + "/tmux/sessions/new", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: name }),
+        })
+          .then(function (response) {
+            if (!response.ok) throw new Error("server responded " + response.status);
+          })
+          .catch(function (error) {
+            alert("Could not create tmux session " + name + " — " + error.message);
+          });
+        return { id: name, kind: "terminal", title: name, session: name };
+      },
+    });
+
+    workspaceTabs.registry.register({
+      kind: "container",
+      label: "Container",
+      render: function (tab) {
+        return h(FullPageContainersWorkspace, {
+          initialContainerId: tab.id === "container-sandboxes" ? null : tab.id,
+        });
+      },
+      create: function () {
+        return { id: "container-sandboxes", kind: "container", title: "Containers" };
+      },
+    });
+
+    workspaceTabs.registry.register({
+      kind: "file",
+      label: "File",
+      render: function (tab) {
+        return h(FileEditorTabBody, {
+          filePath: tab.path,
+          fileName: tab.title,
+          onClose: function () {
+            workspaceTabs.store.dispatch({ type: "close", tabId: tab.id });
+          },
+        });
+      },
+    });
+
+    workspaceTabs.registry.register({
+      kind: "repo",
+      label: "Repository",
+      render: function (tab) {
+        return h(RepositoryTabBody, {
+          repoPath: tab.path,
+          repoName: tab.title,
+          onClose: function () {
+            workspaceTabs.store.dispatch({ type: "close", tabId: tab.id });
+          },
+        });
+      },
+    });
+
+    workspaceTabs.store.dispatch({
+      type: "open",
+      surface: "main",
+      tab: {
+        id: CONVERSATION_TAB_ID,
+        kind: "chat",
+        title: currentConversationTitle(),
+        closable: false,
+      },
+    });
+
+    /** isTrajectoryViewActive implementation. */
+    function isTrajectoryViewActive() {
+      var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
+      if (activeTabEl) {
+        var txt = (activeTabEl.textContent || "").trim().toLowerCase();
+        return txt.indexOf("trajectory") !== -1 || txt.indexOf("轨迹") !== -1;
+      }
+      return Boolean(
+        document.querySelector(
+          '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
+        ),
+      );
+    }
+
+    /** toggleTrajectoryView implementation. */
+    function toggleTrajectoryView() {
+      var wantChat = isTrajectoryViewActive();
+      var allTabs = Array.from(document.querySelectorAll('[role="tab"], [role="tablist"] button'));
+      var targetBtn = allTabs.find(function (b) {
+        var t = (b.textContent || "").trim().toLowerCase();
+        var isChat = t.indexOf("chat") !== -1 || t.indexOf("对话") !== -1;
+        var isTrajectory = t.indexOf("trajectory") !== -1 || t.indexOf("轨迹") !== -1;
+        return wantChat ? isChat : isTrajectory;
+      });
+      if (targetBtn) {
+        targetBtn.click();
+        return;
+      }
+      var inactiveBtn = allTabs.find(function (b) {
+        return b.getAttribute("aria-selected") !== "true";
+      });
+      if (inactiveBtn) inactiveBtn.click();
+    }
+
+    /** downloadSessionLog implementation. */
+    function downloadSessionLog() {
+      var activeSessId =
+        typeof window !== "undefined" && window.__dsh_current_session_id__
+          ? window.__dsh_current_session_id__
+          : "";
+      var link = document.createElement("a");
+      link.href = "/api/session.export?id=" + encodeURIComponent(activeSessId);
+      link.download = (activeSessId || "session") + ".jsonl";
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(function () {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      }, 1000);
     }
 
     /** RenameTerminalModal implementation. */
@@ -11535,105 +9010,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // Helper Modals
-    /** NewSessionModal implementation. */
-    function NewSessionModal(props) {
-      var onClose = props.onClose,
-        onCreated = props.onCreated;
-      var nameState = React.useState("");
-      var name = nameState[0],
-        setName = nameState[1];
-      var creatingState = React.useState(false);
-      var creating = creatingState[0],
-        setCreating = creatingState[1];
-
-      var /** handleCreate implementation. */
-        handleCreate = function () {
-          setCreating(true);
-          fetch(QUOTAS_API + "/tmux/sessions/new", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: name }),
-          })
-            .then(function () {
-              onCreated();
-              onClose();
-            })
-            .finally(function () {
-              setCreating(false);
-            });
-        };
-
-      return h(
-        "div",
-        {
-          style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 999999,
-          },
-        },
-        h(
-          "div",
-          {
-            style: {
-              width: "440px",
-              padding: "24px",
-              borderRadius: "12px",
-              background: "var(--dsw-alias-surface-l0, #1e1e2e)",
-              border: "1px solid var(--dsw-alias-border-l2)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            },
-          },
-          h(
-            "h3",
-            { style: { margin: 0, fontSize: "16px", fontWeight: 600 } },
-            "Create New Terminal Session",
-          ),
-          h("label", { style: { fontSize: "12px", fontWeight: 500 } }, "Session Name:"),
-          h("input", {
-            value: name,
-            onChange: function (e) {
-              setName(e.target.value);
-            },
-            placeholder: "e.g. runner-1, worker-bg",
-            style: MODAL_INPUT_STYLE,
-          }),
-          h(
-            "div",
-            {
-              style: { display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" },
-            },
-            h(
-              "button",
-              {
-                onClick: onClose,
-                style: MODAL_CANCEL_BUTTON_STYLE,
-              },
-              "Cancel",
-            ),
-            h(
-              "button",
-              {
-                onClick: handleCreate,
-                disabled: creating,
-                style: MODAL_PRIMARY_BUTTON_STYLE,
-              },
-              creating ? "Creating…" : "Create Session",
-            ),
-          ),
-        ),
-      );
-    }
-
     /** EditValueModal implementation. */
     function EditValueModal(props) {
       var target = props.target,
@@ -14682,118 +12058,322 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
-    /** GlobalTerminalAndContainerManager implementation. */
-    function GlobalTerminalAndContainerManager() {
-      var isBottomOpenState = React.useState(false);
-      var isBottomOpen = isBottomOpenState[0],
-        setBottomOpen = isBottomOpenState[1];
-      var panelState = React.useState(null); // { type: "terminal", session: "..." } | { type: "container", id: "..." }
-      var panel = panelState[0],
-        setPanel = panelState[1];
+    // The shell composer: it renders the one shared surface host once per
+    // placement and owns only the shell-level concerns -- which surfaces are
+    // docked open, the geometry the harness layout must reserve for them, the
+    // global shortcuts, and translating the harness's "open this thing" events
+    // into tab-store dispatches.
+    /** WorkspaceTabSurfaces implementation. */
+    function WorkspaceTabSurfaces() {
+      var bounds = useCenterBounds();
+      var bottomOpenState = React.useState(false);
+      var bottomOpen = bottomOpenState[0],
+        setBottomOpen = bottomOpenState[1];
+      var secondaryOpenState = React.useState(false);
+      var secondaryOpen = secondaryOpenState[0],
+        setSecondaryOpen = secondaryOpenState[1];
+      var bottomExtentState = React.useState("0px");
+      var bottomExtent = bottomExtentState[0],
+        setBottomExtent = bottomExtentState[1];
 
       React.useEffect(function () {
+        var store = workspaceTabs.store;
+
+        var /** revealTab implementation. */
+          revealTab = function (tab, surface) {
+            var host = WorkspaceTabsRuntimeModule.surfaceHolding(store.getState(), tab.id);
+            if (host) {
+              store.dispatch({ type: "activate", tabId: tab.id });
+            } else {
+              store.dispatch({ type: "open", tab: tab, surface: surface });
+              host = surface;
+            }
+            if (host === "bottom") setBottomOpen(true);
+            if (host === "secondary") setSecondaryOpen(true);
+          };
+
+        var /** onOpenTerminal implementation. */
+          onOpenTerminal = function (e) {
+            var detail = (e && e.detail) || {};
+            var session = detail.session || "0";
+            revealTab(
+              {
+                id: session,
+                kind: "terminal",
+                title: "Terminal: " + session,
+                session: session,
+              },
+              detail.target === "top" ? "main" : "bottom",
+            );
+          };
+
+        var /** onOpenContainer implementation. */
+          onOpenContainer = function (e) {
+            var detail = (e && e.detail) || {};
+            var id = detail.id || "container-sandboxes";
+            revealTab(
+              {
+                id: id,
+                kind: "container",
+                title:
+                  detail.title ||
+                  (id === "container-sandboxes" ? "Containers" : "Container: " + id.slice(0, 8)),
+              },
+              detail.target === "top" ? "main" : "bottom",
+            );
+          };
+
+        var /** onOpenFileTab implementation. */
+          onOpenFileTab = function (e) {
+            var detail = e && e.detail;
+            if (!detail || !detail.id) return;
+            revealTab(
+              {
+                id: detail.id,
+                kind: "file",
+                title: detail.title || detail.path,
+                path: detail.path,
+              },
+              "main",
+            );
+          };
+
+        var /** onOpenRepoTab implementation. */
+          onOpenRepoTab = function (e) {
+            var detail = e && e.detail;
+            if (!detail || !detail.id) return;
+            revealTab(
+              {
+                id: detail.id,
+                kind: "repo",
+                title: detail.title || detail.path,
+                path: detail.path,
+              },
+              "main",
+            );
+          };
+
+        var /** onFocusChat implementation. */
+          onFocusChat = function (e) {
+            var title = (e && e.detail && e.detail.title) || currentConversationTitle();
+            revealTab(
+              { id: CONVERSATION_TAB_ID, kind: "chat", title: title, closable: false },
+              "main",
+            );
+            store.dispatch({ type: "retitle", tabId: CONVERSATION_TAB_ID, title: title });
+          };
+
+        var /** onCloseTerminalTab implementation. */
+          onCloseTerminalTab = function (e) {
+            var detail = (e && e.detail) || {};
+            var id = detail.session || detail.id;
+            if (id) store.dispatch({ type: "close", tabId: id });
+          };
+
         var /** onToggleBottom implementation. */
           onToggleBottom = function () {
             setBottomOpen(function (v) {
               return !v;
             });
           };
-        var /** onMoveToBottom implementation. */
-          onMoveToBottom = function (e) {
-            var tab = e.detail;
-            if (tab) {
-              setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
-              setBottomOpen(true);
-            }
-          };
-        var /** onOpenTerm implementation. */
-          onOpenTerm = function (e) {
-            var sess = (e && e.detail && e.detail.session) || "0";
-            setPanel({ type: "terminal", session: sess, id: sess });
-            setBottomOpen(true);
-          };
-        var /** onOpenCont implementation. */
-          onOpenCont = function (e) {
-            var id = (e && e.detail && e.detail.id) || null;
-            setPanel({ type: "container", session: null, id: id });
-            setBottomOpen(true);
+
+        var /** onToggleSecondary implementation. */
+          onToggleSecondary = function () {
+            setSecondaryOpen(function (v) {
+              return !v;
+            });
           };
 
-        window.addEventListener("dsh:toggle-bottom-panel", onToggleBottom);
-        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
-        window.addEventListener("dsh:open-terminal", onOpenTerm);
-        window.addEventListener("dsh:open-container", onOpenCont);
-
-        // Global Keyboard Shortcuts
         var /** onGlobalKeyDown implementation. */
           onGlobalKeyDown = function (e) {
             var isMac =
               typeof navigator !== "undefined" &&
               /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
             var cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
-            var altOrOpt = e.altKey;
-
-            // 1. Cmd+J / Ctrl+J -> Toggle Bottom Panel
-            if (
-              cmdOrCtrl &&
-              !altOrOpt &&
-              !e.shiftKey &&
-              (e.key === "j" || e.key === "J" || e.code === "KeyJ")
-            ) {
+            if (!cmdOrCtrl) return;
+            if (!e.altKey && !e.shiftKey && (e.key === "j" || e.key === "J" || e.code === "KeyJ")) {
               e.preventDefault();
               e.stopPropagation();
               onToggleBottom();
-              return;
-            }
-
-            // 2. Cmd+Opt+B / Ctrl+Alt+B -> Toggle Secondary Sidebar
-            if (
-              cmdOrCtrl &&
-              altOrOpt &&
+            } else if (
+              e.altKey &&
               !e.shiftKey &&
               (e.key === "b" || e.key === "B" || e.code === "KeyB")
             ) {
               e.preventDefault();
               e.stopPropagation();
-              window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
-              return;
-            }
-
-            // 3. Cmd+Shift+P / Ctrl+Shift+P -> Trigger Sidebar Search
-            if (cmdOrCtrl && e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
+              onToggleSecondary();
+            } else if (e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
               e.preventDefault();
               e.stopPropagation();
               window.dispatchEvent(new CustomEvent("dsh:trigger-sidebar-search"));
-              return;
             }
           };
 
+        window.addEventListener("dsh:open-terminal", onOpenTerminal);
+        window.addEventListener("dsh:open-container", onOpenContainer);
+        window.addEventListener("dsh:open-file-tab", onOpenFileTab);
+        window.addEventListener("dsh:open-repo-tab", onOpenRepoTab);
+        window.addEventListener("dsh:focus-chat", onFocusChat);
+        window.addEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
+        window.addEventListener("dsh:toggle-bottom-panel", onToggleBottom);
+        window.addEventListener("dsh:toggle-right-sidebar", onToggleSecondary);
+        window.addEventListener("dsh:toggle-secondary-sidebar", onToggleSecondary);
         window.addEventListener("keydown", onGlobalKeyDown, { capture: true });
 
         return function () {
+          window.removeEventListener("dsh:open-terminal", onOpenTerminal);
+          window.removeEventListener("dsh:open-container", onOpenContainer);
+          window.removeEventListener("dsh:open-file-tab", onOpenFileTab);
+          window.removeEventListener("dsh:open-repo-tab", onOpenRepoTab);
+          window.removeEventListener("dsh:focus-chat", onFocusChat);
+          window.removeEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
           window.removeEventListener("dsh:toggle-bottom-panel", onToggleBottom);
-          window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
-          window.removeEventListener("dsh:open-terminal", onOpenTerm);
-          window.removeEventListener("dsh:open-container", onOpenCont);
+          window.removeEventListener("dsh:toggle-right-sidebar", onToggleSecondary);
+          window.removeEventListener("dsh:toggle-secondary-sidebar", onToggleSecondary);
           window.removeEventListener("keydown", onGlobalKeyDown, { capture: true });
         };
       }, []);
 
+      React.useEffect(function () {
+        var timer = setInterval(function () {
+          var title = currentConversationTitle();
+          var tab = workspaceTabs.store.getState().tabs[CONVERSATION_TAB_ID];
+          if (tab && title && tab.title !== title) {
+            workspaceTabs.store.dispatch({
+              type: "retitle",
+              tabId: CONVERSATION_TAB_ID,
+              title: title,
+            });
+          }
+        }, 500);
+        return function () {
+          clearInterval(timer);
+        };
+      }, []);
+
+      var /** publishBottomGeometry implementation. */
+        publishBottomGeometry = function (geometry) {
+          var extent = geometry.open ? geometry.extent : "0px";
+          setBottomExtent(extent);
+          window.__dsh_panel_collapsed__ = geometry.collapsed;
+          window.__dsh_panel_height__ = extent;
+          window.dispatchEvent(
+            new CustomEvent("dsh:panel-geometry-changed", {
+              detail: { collapsed: geometry.collapsed, height: extent },
+            }),
+          );
+          var centerCol = document.querySelector('[class*="centerCol"]');
+          if (centerCol) {
+            centerCol.style.paddingBottom = extent;
+            centerCol.style.marginBottom = "0px";
+            centerCol.style.transition = "padding-bottom 120ms ease";
+          }
+        };
+
+      var /** publishSecondaryGeometry implementation. */
+        publishSecondaryGeometry = function (geometry) {
+          var width = geometry.open ? geometry.size : 0;
+          window.__dsh_right_sidebar_width__ = width;
+          document.documentElement.style.setProperty("--dsh-secondary-sidebar-width", width + "px");
+          window.dispatchEvent(
+            new CustomEvent("dsh:right-sidebar-changed", {
+              detail: { open: geometry.open, width: width },
+            }),
+          );
+        };
+
+      var /** shellToggleButton implementation. */
+        shellToggleButton = function (key, label, glyph, eventName) {
+          return h(
+            "button",
+            {
+              key: key,
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: label,
+              "aria-label": label,
+              onClick: function () {
+                window.dispatchEvent(new CustomEvent(eventName));
+              },
+              style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                borderRadius: "5px",
+                border: "none",
+                background: "transparent",
+                color: "var(--dsw-alias-label-secondary)",
+                cursor: "pointer",
+              },
+            },
+            glyph,
+          );
+        };
+
       return h(
         React.Fragment,
         null,
-        h(TopConversationTabBar, {}),
-        h(RightSidebarDock, {}),
-        isBottomOpen || panel
-          ? h(BottomTerminalPanel, {
-              initialSession: panel && panel.type === "terminal" ? panel.session : undefined,
-              initialContainerId: panel && panel.type === "container" ? panel.id : undefined,
-              onClose: function () {
-                setBottomOpen(false);
-                setPanel(null);
-              },
-            })
-          : null,
+        h(workspaceTabs.TabSurface, {
+          surface: "main",
+          bounds: {
+            left: bounds.left,
+            right: bounds.right,
+            top: bounds.top,
+            bottomInset: bottomExtent,
+          },
+          // The main area is never docked away, so it never changes open state.
+          open: true,
+          onOpenChange: function () {},
+          trailingControls: h(
+            React.Fragment,
+            null,
+            shellToggleButton(
+              "bottom",
+              "Toggle Bottom Panel (Cmd+J / Ctrl+J)",
+              h(PanelBottomGlyph, { size: 15 }),
+              "dsh:toggle-bottom-panel",
+            ),
+            shellToggleButton(
+              "secondary",
+              "Toggle Secondary Sidebar (Cmd+Opt+B / Ctrl+Alt+B)",
+              h(PanelRightGlyph, { size: 15 }),
+              "dsh:toggle-secondary-sidebar",
+            ),
+          ),
+          extraMenuItems: [
+            {
+              id: "toggle-view",
+              label: isTrajectoryViewActive() ? "Switch to Chat View" : "Switch to Trajectory View",
+              icon: h(ChatGlyph, { size: 13 }),
+            },
+            {
+              id: "download-log",
+              label: "Download Session Log",
+              icon: h(FolderOpenGlyph, { size: 13 }),
+            },
+          ],
+          onExtraMenuSelect: function (actionId) {
+            if (actionId === "toggle-view") toggleTrajectoryView();
+            else if (actionId === "download-log") downloadSessionLog();
+          },
+        }),
+        h(workspaceTabs.TabSurface, {
+          surface: "bottom",
+          bounds: { left: bounds.left, right: bounds.right, top: 0, bottomInset: "0px" },
+          open: bottomOpen,
+          onOpenChange: setBottomOpen,
+          onGeometryChange: publishBottomGeometry,
+        }),
+        h(workspaceTabs.TabSurface, {
+          surface: "secondary",
+          bounds: { left: 0, right: 0, top: 48, bottomInset: "0px" },
+          open: secondaryOpen,
+          onOpenChange: setSecondaryOpen,
+          onGeometryChange: publishSecondaryGeometry,
+        }),
       );
     }
 
@@ -14860,7 +12440,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         "providers: dynamic filesystem and workspaces browser",
       );
 
-      // 0b. Global Terminals & Containers Manager + Top Tab Bar
+      // 0b. Workspace tab surfaces: main area, bottom panel, secondary sidebar
       ctx.slots.inject(
         "sidebar.footer.action",
         function () {
@@ -14870,10 +12450,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               id: "dsh-terminals-manager",
               order: 999,
             },
-            GlobalTerminalAndContainerManager,
+            WorkspaceTabSurfaces,
           );
         },
-        "providers: global terminals manager and top tab bar",
+        "providers: workspace tab surfaces",
       );
 
       // 1. Accounts Settings Section (Order 8)

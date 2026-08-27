@@ -1343,6 +1343,9 @@ importers:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
         version: link:../plugin-kit
+      '@dsh-stack/workspace-tabs':
+        specifier: workspace:*
+        version: link:../workspace-tabs
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -1746,6 +1749,9 @@ importers:
 
   src/packages/workspace-tabs:
     devDependencies:
+      tsdown:
+        specifier: ^0.22.14
+        version: 0.22.14(oxc-resolver@11.24.2)(typescript@6.0.3)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

@@ -1,9 +1,11 @@
 // jscpd:ignore-start -- per-provider-route verification scaffolding repeated per route within this single check-plugin.mjs
 import * as providers from "./lib/index.js";
 import * as dialects from "@dsh-stack/dialects";
+import * as workspaceTabs from "@dsh-stack/workspace-tabs";
 import { Context } from "@deepseek-ai/cordis";
 import { LlmError } from "@deepseek-ai/dsh-llm";
 import assert from "node:assert";
+import { readFile } from "node:fs/promises";
 import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
 // Every route now lives in its own `@dsh-stack/provider-<id>` extension (see
@@ -956,6 +958,30 @@ console.log("403 quota classification ok");
 
   console.log("configured-route status lights ok");
 }
+
+// The client bundle calls exactly these two module-level entry points of
+// @dsh-stack/workspace-tabs; assert the contract it compiles against.
+for (const entryPoint of ["createWorkspaceTabsRuntime", "surfaceHolding"]) {
+  assert.equal(
+    typeof workspaceTabs[entryPoint],
+    "function",
+    `@dsh-stack/providers client bundle relies on workspace-tabs ${entryPoint}`,
+  );
+}
+
+// The tab surfaces this bundle mounts are @dsh-stack/workspace-tabs, whose
+// browser build is concatenated into lib/client.js by this package's build
+// script. Assert it actually landed: a missing runtime would only surface as a
+// blank shell in a browser.
+const clientBundle = await readFile(new URL("lib/client.js", import.meta.url), "utf8");
+assert.ok(
+  clientBundle.includes("var __dshWorkspaceTabs ="),
+  "@dsh-stack/providers client bundle must carry the @dsh-stack/workspace-tabs browser runtime",
+);
+assert.ok(
+  clientBundle.includes("createWorkspaceTabsRuntime"),
+  "@dsh-stack/providers client bundle must wire the shared workspace tab runtime",
+);
 
 console.log("plugin check passed");
 

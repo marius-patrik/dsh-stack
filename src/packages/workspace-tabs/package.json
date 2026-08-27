@@ -11,12 +11,14 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsdown",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "verify": "node verify.mjs"
+    "verify": "node verify.mjs",
+    "test": "node verify.mjs"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "tsdown": "^0.22.14"
   },
   "stack": {
     "kind": "plugin",

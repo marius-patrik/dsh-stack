@@ -106,7 +106,6 @@ const ALLOWED_UNREACHABLE = new Map([
   // switched off: nothing NEW may become unreachable. Delete an entry by fixing
   // the package, never to quiet the gate.
   ["@dsh-stack/composition", "pre-existing dead plugin, tracked by #123"],
-  ["@dsh-stack/workspace-tabs", "pre-existing dead plugin, tracked by #123"],
   ["@dsh-stack/workspace-files", "pre-existing dead plugin, tracked by #123"],
   ["@dsh-stack/automations", "orphaned plugin scaffold, tracked by #60 and #123"],
   ["@dsh-stack/trading-market-data", "pre-existing dead plugin, tracked by #123"],
