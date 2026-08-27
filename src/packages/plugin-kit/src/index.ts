@@ -12,6 +12,8 @@ export {
 
 export { sendJsonResponse } from "./json-response.js";
 
+export { publishCrossBundle, subscribeCrossBundle } from "./cross-bundle-channel.js";
+
 export type DependencyKind = "required" | "optional";
 
 export interface PluginDependency {

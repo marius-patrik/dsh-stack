@@ -23,7 +23,7 @@
 })();
 
 window.__ModuleLoader__.load({
-  id: "providers",
+  id: "@dsh-stack/providers",
   factory: function (require) {
     var module = { exports: {} };
     var exports = module.exports;

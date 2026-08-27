@@ -496,7 +496,7 @@ assert.ok(
   readFileSync(new URL("./client.js", import.meta.url), "utf8").includes("__ModuleLoader__.load"),
 );
 const loader = await loadClientLoaderSpec(clientPath);
-assert.equal(loader.spec.id, "agents");
+assert.equal(loader.spec.id, "@dsh-stack/agents");
 const stubRoster = [
   { id: "reviewer", name: "PR Reviewer", description: "Reviews PRs" },
   { id: "tester", description: "Runs tests" },

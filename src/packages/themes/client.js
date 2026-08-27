@@ -1,6 +1,6 @@
 // jscpd:ignore-start -- hand-authored UI bundle sharing panel patterns with sibling client.js bundles
 window.__ModuleLoader__.load({
-  id: "themes",
+  id: "@dsh-stack/themes",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
