@@ -10,6 +10,8 @@
  *   dsh restart      Gracefully restart the dsh web server and show health
  *   dsh status       Show process status, URLs (Local + Tailscale), and plugin health
  *   dsh logs [-f] [-n lines]   View or tail the web server logs
+ *   dsh attach [-n lines] [-i seconds]  Live attached view: streamed log plus
+ *                                       a refreshing plugin-metrics line
  *   dsh accounts|theme|lsp|formatter|agents [args]   Owning package CLIs
  *   dsh [args...]    Fall through to the harness CLI
  */
@@ -19,7 +21,9 @@ import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  attachToServer,
   findHarnessDir,
+  findListenerPid,
   followLog,
   harnessCli,
   migrateHome,
@@ -115,6 +119,22 @@ async function execute(plan, ctx) {
     }
     const tail = readLogTail(logFile, plan.lines);
     process.stdout.write(tail ?? `dsh: no log file found at ${logFile}\n`);
+    return;
+  }
+  if (plan.kind === "attach") {
+    const port = resolvePort(home, profile, logFile);
+    if (findListenerPid(port) === null) {
+      process.stderr.write(`dsh: web server is not running (port ${port} is free)\n`);
+      process.exitCode = 1;
+      return;
+    }
+    await attachToServer({
+      port,
+      logFile,
+      lines: plan.lines,
+      intervalMs: plan.intervalMs,
+      out: (text) => process.stdout.write(text),
+    });
     return;
   }
   if (plan.kind === "verb") {

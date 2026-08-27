@@ -2,6 +2,7 @@
 export type RoutePlan =
   | { kind: "lifecycle"; action: "start" | "stop" | "restart" | "status" }
   | { kind: "logs"; follow: boolean; lines: number }
+  | { kind: "attach"; lines: number; intervalMs: number }
   | { kind: "verb"; verb: string; args: string[] }
   | { kind: "passthrough"; args: string[] };
 
@@ -14,8 +15,8 @@ export interface RouteOptions {
 }
 
 /**
- * Route an argv to a plan. Lifecycle verbs (start/stop/restart/status/logs)
- * are owned here; package verbs (accounts/theme/lsp/formatter/agents) are
+ * Route an argv to a plan. Lifecycle verbs
+ * (start/stop/restart/status/logs/attach) are owned here; package verbs (accounts/theme/lsp/formatter/agents) are
  * handed to their owning package CLIs; everything else passes through to the
  * harness CLI, exactly like the bash launcher.
  */
@@ -38,6 +39,8 @@ export function route(argv: string[], opts: RouteOptions): RoutePlan {
     case "logs":
     case "log":
       return { kind: "logs", ...parseLogsArgs(rest) };
+    case "attach":
+      return { kind: "attach", ...parseAttachArgs(rest) };
     case "accounts":
     case "theme":
     case "lsp":
@@ -69,4 +72,22 @@ export function parseLogsArgs(args: string[]): { follow: boolean; lines: number 
     }
   }
   return { follow, lines };
+}
+
+/**
+ * Parse `dsh attach` arguments: `-n <lines>` for the backlog size, shared with
+ * `dsh logs` (the attached view always streams, so `-f` is implied and
+ * ignored), and `-i`/`--interval <seconds>` for the metrics poll cadence (five
+ * seconds by default). Unknown flags are ignored, matching `dsh logs`.
+ */
+export function parseAttachArgs(args: string[]): { lines: number; intervalMs: number } {
+  const { lines } = parseLogsArgs(args);
+  let intervalMs = 5000;
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg !== "-i" && arg !== "--interval") continue;
+    const seconds = Number(args[i + 1]);
+    if (Number.isFinite(seconds) && seconds > 0) intervalMs = Math.round(seconds * 1000);
+  }
+  return { lines, intervalMs };
 }
