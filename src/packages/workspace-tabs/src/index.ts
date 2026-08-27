@@ -1,42 +1,23 @@
-export type WorkspaceTabKind = "chat" | "file" | "repo" | "diff" | "terminal" | "container";
-export type SplitOrientation = "horizontal" | "vertical";
+import { clonePanes } from "./clone-panes.js";
+import { moveTab } from "./move-tab.js";
+import type {
+  SplitOrientation,
+  WorkspacePane,
+  WorkspaceTab,
+  WorkspaceTabsAction,
+  WorkspaceTabsOptions,
+  WorkspaceTabsState,
+} from "./workspace-tabs-model.js";
 
-export interface WorkspaceTab {
-  readonly id: string;
-  readonly kind: WorkspaceTabKind;
-  readonly title: string;
-  readonly path?: string;
-  readonly pinned?: boolean;
-}
-
-export interface WorkspacePane {
-  readonly id: string;
-  readonly orientation: SplitOrientation;
-  readonly tabs: readonly string[];
-  readonly activeTabId: string | null;
-}
-
-export interface WorkspaceTabsState {
-  readonly tabs: Readonly<Record<string, WorkspaceTab>>;
-  readonly panes: Readonly<Record<string, WorkspacePane>>;
-  readonly mainPaneId: string;
-  readonly bottomDockOpen: boolean;
-  readonly bottomDockHeight: number;
-}
-
-export interface WorkspaceTabsOptions {
-  readonly bottomDockHeight?: number;
-  readonly idFactory?: () => string;
-}
-
-export type WorkspaceTabsAction =
-  | { type: "open"; tab: WorkspaceTab; paneId?: string }
-  | { type: "close"; tabId: string }
-  | { type: "close-others"; tabId: string }
-  | { type: "activate"; tabId: string }
-  | { type: "split"; sourcePaneId: string; orientation: SplitOrientation; tabId?: string }
-  | { type: "bottom-dock"; open?: boolean }
-  | { type: "bottom-dock-height"; height: number };
+export type {
+  SplitOrientation,
+  WorkspacePane,
+  WorkspaceTab,
+  WorkspaceTabKind,
+  WorkspaceTabsAction,
+  WorkspaceTabsOptions,
+  WorkspaceTabsState,
+} from "./workspace-tabs-model.js";
 
 const DEFAULT_MAIN_PANE = "pane-main";
 const DEFAULT_DOCK_HEIGHT = 280;
@@ -68,13 +49,15 @@ export function reduceWorkspaceTabs(
 ): WorkspaceTabsState {
   switch (action.type) {
     case "open":
-      return openTab(state, action.tab, action.paneId ?? state.mainPaneId);
+      return openTab(state, action.tab, action.paneId);
     case "close":
       return closeTab(state, action.tabId);
     case "close-others":
       return closeOtherTabs(state, action.tabId);
     case "activate":
       return activateTab(state, action.tabId);
+    case "move":
+      return moveTab(state, action.tabId, action.targetPaneId, action.index);
     case "split":
       return splitPane(
         state,
@@ -90,13 +73,27 @@ export function reduceWorkspaceTabs(
   }
 }
 
-/** openTab implementation. */
-function openTab(state: WorkspaceTabsState, tab: WorkspaceTab, paneId: string): WorkspaceTabsState {
-  const pane = state.panes[paneId] ?? state.panes[state.mainPaneId]!;
-  const nextTabs = pane.tabs.includes(tab.id) ? [...pane.tabs] : [...pane.tabs, tab.id];
-  const panes = clonePanes(state.panes);
-  panes[pane.id] = { ...pane, tabs: nextTabs, activeTabId: tab.id };
+/**
+ * Register a tab and reveal it. A tab that is already open is never listed a
+ * second time: an explicit target pane relocates it through the move path, and
+ * anything else simply activates it where it already lives.
+ */
+function openTab(
+  state: WorkspaceTabsState,
+  tab: WorkspaceTab,
+  requestedPaneId: string | undefined,
+): WorkspaceTabsState {
   const tabs = { ...state.tabs, [tab.id]: tab };
+  const holder = Object.values(state.panes).find((pane) => pane.tabs.includes(tab.id));
+  if (holder) {
+    if (requestedPaneId && requestedPaneId !== holder.id && state.panes[requestedPaneId]) {
+      return moveTab({ ...state, tabs }, tab.id, requestedPaneId);
+    }
+    return activateTab({ ...state, tabs }, tab.id);
+  }
+  const pane = state.panes[requestedPaneId ?? state.mainPaneId] ?? state.panes[state.mainPaneId]!;
+  const panes = clonePanes(state.panes);
+  panes[pane.id] = { ...pane, tabs: [...pane.tabs, tab.id], activeTabId: tab.id };
   return { ...state, tabs, panes };
 }
 
@@ -171,13 +168,6 @@ function splitPane(
   }
 
   return { ...state, panes };
-}
-
-/** clonePanes implementation. */
-function clonePanes(panes: Readonly<Record<string, WorkspacePane>>): Record<string, WorkspacePane> {
-  return Object.fromEntries(
-    Object.entries(panes).map(([id, pane]) => [id, { ...pane, tabs: [...pane.tabs] }]),
-  );
 }
 
 /** clampDockHeight implementation. */
