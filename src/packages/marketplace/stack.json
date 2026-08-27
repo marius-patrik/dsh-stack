@@ -1,0 +1,10 @@
+{
+  "id": "stack.core.marketplace",
+  "name": "@dsh-stack/marketplace",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Marketplace-source registry abstraction: installable Stack plugin/extension/pack catalog aggregation.",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}
