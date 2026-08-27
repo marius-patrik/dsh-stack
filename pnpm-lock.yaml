@@ -1407,6 +1407,9 @@ importers:
 
   src/packages/settings-panel:
     devDependencies:
+      '@deepseek-ai/dsh-client-ui-slots':
+        specifier: ^0.1.1-rc.2
+        version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))
       '@types/react':
         specifier: ~18.3.1
         version: 18.3.31
@@ -1438,6 +1441,9 @@ importers:
       '@deepseek-ai/dsh-client-ui-slots':
         specifier: ^0.1.1-rc.2
         version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))
+      '@dsh-stack/lucide-animated':
+        specifier: workspace:*
+        version: link:../../../publish/extensions/lucide-animated
       '@dsh-stack/settings-panel':
         specifier: workspace:*
         version: link:../settings-panel
@@ -1556,6 +1562,9 @@ importers:
       '@deepseek-ai/dsh-client-ui-slots':
         specifier: ^0.1.1-rc.2
         version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))
+      '@dsh-stack/lucide-animated':
+        specifier: workspace:*
+        version: link:../../../publish/extensions/lucide-animated
       '@dsh-stack/settings-panel':
         specifier: workspace:*
         version: link:../settings-panel
