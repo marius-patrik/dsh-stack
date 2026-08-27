@@ -956,11 +956,7 @@ window.__ModuleLoader__.load({
     function navGlyph(renderSlot, row) {
       if (typeof renderSlot !== "function") return navIcon(row.id);
       try {
-        return renderSlot(
-          "settings.section.icon",
-          {},
-          { only: row.id, fallback: navIcon(row.id) },
-        );
+        return renderSlot("settings.section.icon", {}, { only: row.id, fallback: navIcon(row.id) });
       } catch (err) {
         return navIcon(row.id);
       }

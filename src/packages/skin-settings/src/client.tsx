@@ -55,6 +55,9 @@ export function apply(ctx: ClientContext): void {
     ),
   );
   ctx.slots.inject(SETTINGS_SECTION_ICON_SLOT, () =>
-    ctx.slots.register({ name: SETTINGS_SECTION_ICON_SLOT, id: "skins", order: 0 }, SkinSettingsIcon),
+    ctx.slots.register(
+      { name: SETTINGS_SECTION_ICON_SLOT, id: "skins", order: 0 },
+      SkinSettingsIcon,
+    ),
   );
 }
