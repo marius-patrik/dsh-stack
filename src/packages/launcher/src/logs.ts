@@ -15,19 +15,25 @@ export function readLogTail(logFile: string, lines: number): string | null {
 }
 
 /**
- * Print the tail of the log, then stream appended content until the process
- * is interrupted. Replaces the bash launcher's `tail -f` with fs.watch so
- * following works without a platform `tail` binary.
+ * Print the tail of the log, then stream appended content until the returned
+ * stop function is called (or the process is interrupted). Replaces the bash
+ * launcher's `tail -f` with fs.watch so following works without a platform
+ * `tail` binary. Returns null when the log file does not exist yet — nothing
+ * is being followed, so there is nothing to stop.
  */
-export function followLog(logFile: string, lines: number, out: (text: string) => void): void {
+export function followLog(
+  logFile: string,
+  lines: number,
+  out: (text: string) => void,
+): (() => void) | null {
   const tail = readLogTail(logFile, lines);
   if (tail === null) {
     out(`dsh: no log file found at ${logFile}\n`);
-    return;
+    return null;
   }
   out(tail);
   let offset = statSync(logFile).size;
-  watch(logFile, () => {
+  const watcher = watch(logFile, () => {
     const size = statSync(logFile).size;
     if (size < offset) offset = 0; // log rotated/truncated: start over
     if (size === offset) return;
@@ -37,4 +43,5 @@ export function followLog(logFile: string, lines: number, out: (text: string) =>
       offset = size;
     });
   });
+  return () => watcher.close();
 }

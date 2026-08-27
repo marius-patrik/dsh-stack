@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { findListenerPid } from "./processes.js";
+import { fetchPluginInventory } from "./plugin-inventory.js";
+import { summarizePluginMetrics } from "./plugin-metrics.js";
 
 /** Tailscale addresses for the status URL, when the tailscale CLI exists. */
 interface TailscaleInfo {
@@ -26,46 +28,22 @@ function tailscaleInfo(): TailscaleInfo {
   return { ip, dns };
 }
 
-/** Shape of the pluginInventory/list RPC response this reads. */
-interface PluginInventoryEntry {
-  entryId: string;
-  moduleName: string;
-  fiberPhase: string;
-}
-
 /**
- * Query the running server's plugin inventory over its Typert HTTP RPC.
- * Returns a summary line plus one line per failed plugin (up to five), or an
- * empty list when the server doesn't answer within three seconds.
+ * Query the running server's plugin inventory and render it as status lines:
+ * a summary line plus one line per failed plugin (up to five). Returns an
+ * empty list when the server doesn't answer.
  */
 async function pluginHealth(port: number): Promise<string[]> {
-  try {
-    const res = await fetch(`http://127.0.0.1:${port}/api/pluginInventory/list`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "client-request",
-        rpcId: "status",
-        method: "pluginInventory/list",
-        payload: { args: {} },
-      }),
-      signal: AbortSignal.timeout(3000),
-    });
-    const body: unknown = await res.json();
-    if (typeof body !== "object" || body === null || !("result" in body)) return [];
-    const result = (body as { result?: { ok?: boolean; value?: { entries?: unknown } } }).result;
-    if (result?.ok !== true || !Array.isArray(result.value?.entries)) return [];
-    const entries = result.value.entries as PluginInventoryEntry[];
-    const active = entries.filter((e) => e.fiberPhase === "active").length;
-    const failed = entries.filter((e) => e.fiberPhase === "failed");
-    const lines = [`  Plugins:       ${active}/${entries.length} active (${failed.length} failed)`];
-    for (const f of failed.slice(0, 5)) {
-      lines.push(`    ✗ Failed: ${f.entryId} (${f.moduleName})`);
-    }
-    return lines;
-  } catch {
-    return [];
+  const entries = await fetchPluginInventory(port);
+  if (entries === null) return [];
+  const metrics = summarizePluginMetrics(entries);
+  const lines = [
+    `  Plugins:       ${metrics.active}/${metrics.total} active (${metrics.failed.length} failed)`,
+  ];
+  for (const failed of metrics.failed.slice(0, 5)) {
+    lines.push(`    ✗ Failed: ${failed.entryId} (${failed.moduleName})`);
   }
+  return lines;
 }
 
 /**

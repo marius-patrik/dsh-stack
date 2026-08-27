@@ -12,6 +12,8 @@ dsh stop         Stop the running dsh web server
 dsh restart      Gracefully restart the dsh web server and show health
 dsh status       Show process status, URLs (Local + Tailscale), and plugin health
 dsh logs [-f]    View or tail the web server logs (-n <lines> to change tail size)
+dsh attach       Live attached view: streamed log plus a refreshing plugin-metrics
+                 line (-n <lines> backlog, -i <seconds> poll interval)
 dsh accounts|theme|lsp|formatter|agents [args]   Route to the owning package CLI
 dsh [args...]    Fall through to the harness CLI
 ```
@@ -36,6 +38,15 @@ dsh [args...]    Fall through to the harness CLI
   startup log line (`dsh web: http://<host>:<port>`) to learn the actually
   bound port. `status`/`stop` resolve the port from the profile patch first,
   then the last bound port in the log, then the 3080 default.
+- **Attach**: `dsh attach` resolves the port exactly like `status`/`stop`
+  (profile patch, then last bound port in the log, then the default — never a
+  hardcoded port), refuses to attach when nothing is listening there, prints
+  the log backlog and then streams appended log content, and every `-i`
+  seconds (5 by default) polls the running server's
+  `pluginInventory/list` RPC and prints a metrics line with total/active/failed
+  plugin counts. A server that stops answering the RPC is reported in that
+  line rather than ending the session. Ctrl-C detaches: the log watcher and
+  the poll timer are torn down and `dsh` exits 0, leaving the server running.
 - **Harness discovery**: `DSH_HARNESS` env var, else the `harness/` submodule
   of the enclosing dsh-stack checkout (`../../../harness` relative to this
   package). Server logs go to `<os-tmpdir>/dsh-web.log`.
