@@ -1,0 +1,10 @@
+{
+  "id": "stack.launcher",
+  "name": "@dsh-stack/launcher",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "The `dsh` command: homeRoot/command-aware launcher and service manager for the DeepSeek Harness web server",
+  "files": ["lib", "bin", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

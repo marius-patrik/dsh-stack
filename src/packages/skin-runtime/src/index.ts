@@ -1,3 +1,5 @@
+import { publishCrossBundle, subscribeCrossBundle } from "@dsh-stack/plugin-kit";
+
 export type SkinId = "deepseek" | "claude" | "codex";
 
 export interface SkinOption {
@@ -6,6 +8,20 @@ export interface SkinOption {
 }
 
 const STORAGE_KEY = "dsh-stack.ui.skin";
+
+/**
+ * In-memory mirror used when `localStorage` is unavailable (Node/SSR) or
+ * blocked. Storage stays the cross-bundle source of truth; this only covers
+ * hosts with no storage at all.
+ */
+let memorySkin: SkinId | undefined;
+
+/**
+ * Cross-bundle change channel. This module is inlined into both
+ * `@dsh-stack/skin-settings` and `@dsh-stack/skin-host`, so a module-local
+ * listener set never crosses between them -- see plugin-kit's cross-bundle-channel.
+ */
+const CHANGE_CHANNEL = "dsh-stack.ui.skin:changed";
 
 export const defaultSkins: readonly SkinOption[] = [
   { id: "deepseek", label: "DeepSeek" },
@@ -26,36 +42,38 @@ export function createSkinRuntime(
 ): SkinRuntime {
   if (options.length === 0) throw new Error("At least one skin is required");
   const allowed = new Set(options.map((skin) => skin.id));
-  const listeners = new Set<() => void>();
-  let active = readStoredSkin(allowed) ?? options[0]!.id;
+  const fallback = options[0]!.id;
 
   return {
-    getActive: () => active,
+    // Deliberately re-read rather than memoised: storage is the single source
+    // of truth shared by every bundled copy of this module.
+    getActive: () => readStoredSkin(allowed) ?? fallback,
     setActive: (id) => {
       if (!allowed.has(id)) throw new Error(`Unknown skin: ${id}`);
-      if (id === active) return;
-      active = id;
+      if (id === (readStoredSkin(allowed) ?? fallback)) return;
+      memorySkin = id;
       try {
-        localStorage.setItem(STORAGE_KEY, id);
+        if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, id);
       } catch {
-        // In-memory selection still applies for this process.
+        // Storage is unavailable; the broadcast below still updates live
+        // subscribers for this page's lifetime.
       }
-      for (const listener of listeners) listener();
+      publishCrossBundle(CHANGE_CHANNEL);
       reload();
     },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
+    subscribe: (listener) => subscribeCrossBundle(CHANGE_CHANNEL, listener),
   };
 }
 
 /** readStoredSkin implementation. */
 function readStoredSkin(allowed: ReadonlySet<SkinId>): SkinId | undefined {
   try {
-    const value = localStorage.getItem(STORAGE_KEY) as SkinId | null;
-    return value && allowed.has(value) ? value : undefined;
+    if (typeof localStorage !== "undefined") {
+      const value = localStorage.getItem(STORAGE_KEY) as SkinId | null;
+      if (value && allowed.has(value)) return value;
+    }
   } catch {
-    return undefined;
+    // Storage blocked (private mode etc.); fall through to the memory mirror.
   }
+  return memorySkin;
 }

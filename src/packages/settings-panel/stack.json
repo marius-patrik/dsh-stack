@@ -1,0 +1,10 @@
+{
+  "id": "stack.ui.settings-panel",
+  "name": "@dsh-stack/settings-panel",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "@dsh-stack/settings-panel",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

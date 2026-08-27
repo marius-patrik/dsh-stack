@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "..",
     "paths": {
-      "@dsh-stack/skin-runtime": ["../skin-runtime/src/index.ts"]
+      "@dsh-stack/skin-runtime": ["../skin-runtime/src/index.ts"],
+      "@dsh-stack/settings-panel": ["../settings-panel/src/index.tsx"]
     }
   },
   "include": ["src"]
