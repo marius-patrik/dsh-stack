@@ -7,6 +7,7 @@ import {
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { SidebarRootComponentProps } from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import { sidebarPreferences } from "@dsh-stack/sidebar-preferences";
+import { SidebarOptionsMenu } from "./SidebarOptionsMenu.js";
 
 const railWidth = 56;
 const transition = "width 180ms ease, opacity 150ms ease";
@@ -85,26 +86,35 @@ export function SidebarRoot({
           </span>
         )}
 
-        <Tooltip label={collapsed ? "Expand sidebar" : "Collapse sidebar"} delayMs={500}>
-          <button
-            type="button"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={toggleSidebar}
-            style={{
-              width: 34,
-              height: 34,
-              display: "grid",
-              placeItems: "center",
-              border: 0,
-              borderRadius: 8,
-              background: "transparent",
-              color: "inherit",
-              cursor: "pointer",
-            }}
-          >
-            <IconPanelLeftOutline16 size={wide ? 16 : 18} />
-          </button>
-        </Tooltip>
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {wide ? (
+            <SidebarOptionsMenu
+              showFiles={preferences.showFiles}
+              onShowFilesChange={(value) => sidebarPreferences.set("showFiles", value)}
+            />
+          ) : null}
+
+          <Tooltip label={collapsed ? "Expand sidebar" : "Collapse sidebar"} delayMs={500}>
+            <button
+              type="button"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              onClick={toggleSidebar}
+              style={{
+                width: 34,
+                height: 34,
+                display: "grid",
+                placeItems: "center",
+                border: 0,
+                borderRadius: 8,
+                background: "transparent",
+                color: "inherit",
+                cursor: "pointer",
+              }}
+            >
+              <IconPanelLeftOutline16 size={wide ? 16 : 18} />
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
       {preferences.showNewConversation ? (
@@ -138,12 +148,14 @@ export function SidebarRoot({
       ) : null}
 
       <div style={{ minHeight: 0, flex: 1, overflow: "hidden" }}>
-        {renderSlot("sidebar.workspaces", {
-          wide,
-          expandSidebar: () => {
-            if (collapsed) toggleSidebar();
-          },
-        })}
+        {preferences.showFiles
+          ? renderSlot("sidebar.workspaces", {
+              wide,
+              expandSidebar: () => {
+                if (collapsed) toggleSidebar();
+              },
+            })
+          : null}
       </div>
 
       <div style={{ flexShrink: 0, padding: wide ? "8px 10px 10px" : "8px 6px 10px" }}>
