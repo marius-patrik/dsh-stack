@@ -1004,6 +1004,15 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  src/packages/launcher:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.1
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
   src/packages/loops:
     dependencies:
       '@deepseek-ai/dsh-home-paths':
