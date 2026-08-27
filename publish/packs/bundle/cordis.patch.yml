@@ -37,6 +37,8 @@
       name: '@dsh-stack/providers'
     - id: repos
       name: '@dsh-stack/repos'
+    - id: sidebar-preferences
+      name: '@dsh-stack/sidebar-preferences'
     - id: sidebar-settings
       name: '@dsh-stack/sidebar-settings'
     - id: sidebar-shell

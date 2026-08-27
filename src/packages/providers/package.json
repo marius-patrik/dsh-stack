@@ -35,11 +35,12 @@
     "lib",
     "cordis.patch.yml",
     "presets",
+    "client",
     "client.js",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client.js > lib/client.js",
+    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client/sidebar-tree/*.js client.js > lib/client.js",
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
     "test": "node check-plugin.mjs"
   },

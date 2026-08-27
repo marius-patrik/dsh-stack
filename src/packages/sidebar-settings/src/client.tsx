@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
-import { SettingsSection, SettingsToggleRow } from "@dsh-stack/settings-panel";
+import { SettingsOptionRow, SettingsSection, SettingsToggleRow } from "@dsh-stack/settings-panel";
 import { sidebarPreferences, type SidebarPreferences } from "@dsh-stack/sidebar-preferences";
-import type { SidebarPreferenceKey } from "@dsh-stack/sidebar-preferences";
+import type { SidebarTreeLayout } from "@dsh-stack/sidebar-preferences";
 
 /** Cordis client services this plugin's `apply` reaches for; activation waits on them. */
 export const inject = ["slots"];
+
+/** The two sidebar tree arrangements a user picks between, with their copy. */
+const TREE_LAYOUT_CHOICES: readonly { readonly id: SidebarTreeLayout; readonly label: string }[] = [
+  { id: "sections", label: "Split sections — each group in its own block" },
+  { id: "unified", label: "Unified tree — every group under one root" },
+];
 
 /** Renders the sidebar settings section. */
 export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
   const [state, setState] = useState<SidebarPreferences>(sidebarPreferences.get());
   useEffect(() => sidebarPreferences.subscribe(() => setState(sidebarPreferences.get())), []);
-  const /** change implementation. */
-    change = (key: SidebarPreferenceKey, value: boolean) => sidebarPreferences.set(key, value);
   return (
     <SettingsSection
       label="Sidebar"
@@ -26,15 +30,23 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
         label="Show brand logo"
         description="Show the active skin's logo."
         checked={state.showBrandLogo}
-        onChange={(value) => change("showBrandLogo", value)}
+        onChange={(value) => sidebarPreferences.set("showBrandLogo", value)}
       />
       <SettingsToggleRow
         id="sidebar-show-new-conversation"
         label="Show New Conversation"
         description="Show the New Conversation action."
         checked={state.showNewConversation}
-        onChange={(value) => change("showNewConversation", value)}
+        onChange={(value) => sidebarPreferences.set("showNewConversation", value)}
       />
+      {TREE_LAYOUT_CHOICES.map((choice) => (
+        <SettingsOptionRow
+          key={choice.id}
+          label={choice.label}
+          selected={state.treeLayout === choice.id}
+          onSelect={() => sidebarPreferences.set("treeLayout", choice.id)}
+        />
+      ))}
     </SettingsSection>
   );
 }
