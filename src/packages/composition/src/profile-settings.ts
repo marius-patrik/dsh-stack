@@ -17,7 +17,14 @@ export const profilesSettingsTab: ProfileSettingsTab = {
   description: "Choose and configure the active Stack profile.",
 };
 
-/** createProfileSelectorState implementation. */
+/**
+ * Creates a ProfileSelectorState with the active profile and available profiles.
+ *
+ * @param activeProfileId - The ID of the currently active profile.
+ * @param profiles - An array of ProfileDefinition objects representing available profiles.
+ * @returns A ProfileSelectorState object containing the active profile ID and available profiles.
+ * @throws Will throw an error if the active profile ID is not found in the available profiles.
+ */
 export function createProfileSelectorState(
   activeProfileId: string,
   profiles: readonly ProfileDefinition[],
