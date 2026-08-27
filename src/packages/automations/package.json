@@ -1,0 +1,43 @@
+{
+  "name": "@dsh-stack/automations",
+  "description": "Abstraction plugin for repository automations: the registry concrete automation extensions plug into",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "README.md",
+    "package.json",
+    "stack.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.repo.automations"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node check-plugin.mjs",
+    "verify": "node check-plugin.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "@types/node": "^22.0.0",
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}

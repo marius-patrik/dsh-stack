@@ -1,0 +1,10 @@
+{
+  "id": "stack.repo.automations",
+  "name": "@dsh-stack/automations",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Abstraction plugin for repository automations: the registry concrete automation extensions plug into",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": [],
+  "optionalDependencies": []
+}

@@ -1,5 +1,15 @@
 # AGENTS.md
 
+## Canonical rule files
+
+Each standing rule below also exists as its own individually addressable file
+under `.agents/rules/`, one file per rule. Reference a single rule by its file
+(e.g. `.agents/rules/branch-and-merge-policy.md`) instead of quoting a slice of
+this document. This file still carries the full text of every rule; the split
+into `.agents/rules/` is the canonical per-rule addressing layer, and whether
+this document later becomes a generated index over those files is a separate,
+still-open decision (#60).
+
 ## Repository mission
 
 `dsh-stack` is a distributable extension stack for DeepSeek Harness. The upstream `harness/` submodule is pinned and pristine. Stack owns the complete implementation catalog in `src/packages/` and the composed plugin tree in `publish/plugins/`.
