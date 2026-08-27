@@ -1,0 +1,40 @@
+{
+  "name": "@dsh-stack/launcher",
+  "description": "The `dsh` command: homeRoot/command-aware launcher and service manager for the DeepSeek Harness web server",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "dsh": "./bin/dsh.mjs"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node check-plugin.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^22.0.0"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.launcher"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
