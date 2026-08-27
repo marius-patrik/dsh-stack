@@ -47,6 +47,16 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  publish/extensions/agent-preset-manager:
+    dependencies:
+      '@dsh-stack/agents':
+        specifier: workspace:*
+        version: link:../../../src/packages/agents
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   publish/extensions/lucide-animated:
     dependencies:
       '@dsh-stack/icon-engine':
@@ -541,6 +551,9 @@ importers:
       '@dsh-stack/agent-preset-default':
         specifier: workspace:*
         version: link:../../extensions/agent-preset-default
+      '@dsh-stack/agent-preset-manager':
+        specifier: workspace:*
+        version: link:../../extensions/agent-preset-manager
       '@dsh-stack/agent-skills':
         specifier: workspace:*
         version: link:../../../src/packages/skills
