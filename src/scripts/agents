@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# agents — alias for the dsh launcher.
+# agents — alias for the dsh launcher (@dsh-stack/launcher).
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec "$here/dsh" "$@"
+exec node "$here/../packages/launcher/bin/dsh.mjs" "$@"
