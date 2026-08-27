@@ -5,6 +5,7 @@ import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-setti
 import type { SidebarFooterActionOwnerProps } from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
+import { SettingsSection, SettingsOptionRow } from "@dsh-stack/settings-panel";
 import { CheckIcon, SettingsIcon } from "@dsh-stack/lucide-animated/client";
 import { createProfileRuntime } from "@dsh-stack/profile-runtime";
 import { profileOptions } from "../index.js";
@@ -70,62 +71,31 @@ function ProfileSelector({ wide }: SidebarFooterActionOwnerProps) {
 function ProfileSettings({ close }: SettingsSectionOwnerProps) {
   const [active, setActive] = useState(runtime.getActive());
   return (
-    <section aria-label="Profiles" style={{ display: "grid", gap: 12 }}>
-      <div>
-        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Profiles</h2>
-        <p style={{ margin: "6px 0 0", opacity: 0.72, lineHeight: 1.45 }}>
-          Switch the active Stack composition. The new profile is applied after the interface
-          reloads.
-        </p>
-      </div>
-      <div style={{ display: "grid", gap: 8 }}>
-        {profileOptions.map((option) => {
-          const selected = option.id === active;
-          return (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => {
-                setActive(option.id);
-                runtime.setActive(option.id);
-              }}
-              aria-pressed={selected}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                minHeight: 44,
-                padding: "0 12px",
-                borderRadius: 8,
-                border: "1px solid var(--ds-border, rgba(127,127,127,.22))",
-                background: selected
-                  ? "var(--ds-surface-secondary, rgba(127,127,127,.12))"
-                  : "transparent",
-                color: "inherit",
-                cursor: "pointer",
-                font: "inherit",
-                textAlign: "left",
-              }}
-            >
-              <span>{option.label}</span>
-              // jscpd:ignore-start -- small panel shape mirrored in skin-settings/src/client.tsx
-              for a different settings surface
-              {selected ? <CheckIcon aria-hidden="true" size={18} /> : null}
-            </button>
-          );
-        })}
-      </div>
-      <button type="button" onClick={close} style={{ justifySelf: "start" }}>
-        Close
-      </button>
-    </section>
+    <SettingsSection
+      label="Profiles"
+      title="Profiles"
+      description="Switch the active Stack composition. The new profile is applied after the interface reloads."
+      onClose={close}
+    >
+      {profileOptions.map((option) => (
+        <SettingsOptionRow
+          key={option.id}
+          label={option.label}
+          selected={option.id === active}
+          onSelect={() => {
+            setActive(option.id);
+            runtime.setActive(option.id);
+          }}
+          selectedMark={<CheckIcon aria-hidden="true" size={18} />}
+        />
+      ))}
+    </SettingsSection>
   );
 }
 
 /** Mount the profile selector and settings section into the client slot registry. */
 export function apply(ctx: ClientContext): void {
   ctx.slots.inject("sidebar.footer.action", () =>
-    // jscpd:ignore-end
     ctx.slots.register({ name: "sidebar.footer.action", id: "profiles" }, ProfileSelector),
   );
   ctx.slots.inject("settings.section", () =>

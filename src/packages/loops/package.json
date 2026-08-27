@@ -9,12 +9,15 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
-    }
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "lib",
     "client.js",
-    "cordis.patch.yml",
     "package.json",
     "stack.json"
   ],
@@ -26,7 +29,7 @@
     "id": "stack.agent.loops"
   },
   "scripts": {
-    "build": "tsc && cp client.js lib/client.js",
+    "build": "tsc && tsdown",
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs",
     "verify": "node check-plugin.mjs"
@@ -44,9 +47,6 @@
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
     "client": {
       "inject": [
         "slots"

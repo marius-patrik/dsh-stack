@@ -225,7 +225,7 @@ globalThis.window = {
   },
 };
 await import(new URL("./lib/client.js", import.meta.url));
-assert.equal(loader.spec.id, "themes");
+assert.equal(loader.spec.id, "@dsh-stack/themes");
 const clientExports = loader.spec.factory((spec) => {
   if (spec === "react") return {};
   throw new Error("unexpected require: " + spec);
