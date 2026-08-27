@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
-import { SettingsSection, SettingsToggleRow } from "@dsh-stack/settings-panel";
+import {
+  SETTINGS_SECTION_ICON_SLOT,
+  SettingsSection,
+  SettingsToggleRow,
+} from "@dsh-stack/settings-panel";
+import { PanelLeftIcon } from "@dsh-stack/lucide-animated/client";
 import { sidebarPreferences, type SidebarPreferences } from "@dsh-stack/sidebar-preferences";
 import type { SidebarPreferenceKey } from "@dsh-stack/sidebar-preferences";
 
@@ -46,12 +51,23 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
   );
 }
 
+/** Renders the Sidebar section's nav glyph from the canonical animated icon set. */
+export function SidebarSettingsIcon() {
+  return <PanelLeftIcon aria-hidden="true" size={16} />;
+}
+
 /** Registers the sidebar settings section with the settings slot registry. */
 export function apply(ctx: ClientContext): void {
   ctx.slots.inject("settings.section", () =>
     ctx.slots.register(
       { name: "settings.section", id: "sidebar", order: 30, label: "Sidebar", inject: () => ({}) },
       SidebarSettings,
+    ),
+  );
+  ctx.slots.inject(SETTINGS_SECTION_ICON_SLOT, () =>
+    ctx.slots.register(
+      { name: SETTINGS_SECTION_ICON_SLOT, id: "sidebar", order: 0 },
+      SidebarSettingsIcon,
     ),
   );
 }

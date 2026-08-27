@@ -30,11 +30,14 @@ import {
   GitBranch,
   House,
   Info,
+  Layers,
   Lock,
   LockKeyhole,
   Menu,
   Minus,
   Package,
+  Palette,
+  PanelLeft,
   Pause,
   Pencil,
   Play,
@@ -148,6 +151,9 @@ export const GitBranchIcon = makeAnimatedIcon(GitBranch, "nudge");
 export const ContainerIcon = makeAnimatedIcon(Container, "bounce");
 export const PackageIcon = makeAnimatedIcon(Package, "bounce");
 export const LockKeyholeIcon = makeAnimatedIcon(LockKeyhole, "bounce");
+export const PanelLeftIcon = makeAnimatedIcon(PanelLeft, "nudge");
+export const PaletteIcon = makeAnimatedIcon(Palette, "pulse");
+export const LayersIcon = makeAnimatedIcon(Layers, "bounce");
 
 export const iconComponents: Readonly<Record<string, ComponentType<LucideProps>>> = {
   PlusIcon,
@@ -199,4 +205,7 @@ export const iconComponents: Readonly<Record<string, ComponentType<LucideProps>>
   ContainerIcon,
   PackageIcon,
   LockKeyholeIcon,
+  PanelLeftIcon,
+  PaletteIcon,
+  LayersIcon,
 };

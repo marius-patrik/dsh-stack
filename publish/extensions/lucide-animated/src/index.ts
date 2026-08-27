@@ -42,6 +42,9 @@ const semanticIcons: Readonly<Record<string, string>> = {
   "ui:down": "ChevronDownIcon",
   "ui:up": "ChevronUpIcon",
   "ui:remove": "MinusIcon",
+  "ui:sidebar": "PanelLeftIcon",
+  "ui:palette": "PaletteIcon",
+  "ui:layers": "LayersIcon",
 };
 
 const extensionIcons: Readonly<Record<string, string>> = {
