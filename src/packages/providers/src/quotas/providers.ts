@@ -109,9 +109,19 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
     const res = await fetch(probeURL, init);
     const status = res.status;
 
-    const remaining = parseHeader(res, "x-ratelimit-remaining");
-    const limit = parseHeader(res, "x-ratelimit-limit");
-    const resetsAt = parseRateLimitReset(res);
+    // Anthropic's messages endpoint reports the 5-hour usage window under its
+    // own header family instead of the generic `x-ratelimit-*` names; a
+    // probe against it must read those to surface a nearing-limit state
+    // rather than only ever seeing "healthy" until the token is rejected.
+    const remaining =
+      parseHeader(res, "x-ratelimit-remaining") ??
+      parseHeader(res, "anthropic-ratelimit-tokens-remaining") ??
+      parseHeader(res, "anthropic-ratelimit-requests-remaining");
+    const limit =
+      parseHeader(res, "x-ratelimit-limit") ??
+      parseHeader(res, "anthropic-ratelimit-tokens-limit") ??
+      parseHeader(res, "anthropic-ratelimit-requests-limit");
+    const resetsAt = parseRateLimitReset(res) ?? parseAnthropicReset(res);
 
     if (status === 200) {
       return {
@@ -191,6 +201,16 @@ function parseHeader(res: Response, name: string): number | undefined {
   if (!val) return undefined;
   const n = Number(val);
   return Number.isFinite(n) ? n : undefined;
+}
+
+/** Read Anthropic's own reset-timestamp header (`anthropic-ratelimit-tokens-reset`), an ISO string. */
+function parseAnthropicReset(res: Response): string | undefined {
+  const reset =
+    res.headers.get("anthropic-ratelimit-tokens-reset") ??
+    res.headers.get("anthropic-ratelimit-requests-reset");
+  if (!reset) return undefined;
+  const parsed = new Date(reset);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
 /** parseRateLimitReset implementation. */
