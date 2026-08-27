@@ -40,6 +40,13 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
         checked={state.showNewConversation}
         onChange={(value) => change("showNewConversation", value)}
       />
+      <SettingsToggleRow
+        id="sidebar-show-files"
+        label="Show files"
+        description="Show the file/workspace tree region."
+        checked={state.showFiles}
+        onChange={(value) => change("showFiles", value)}
+      />
     </SettingsSection>
   );
 }
