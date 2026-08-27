@@ -48,6 +48,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # TypeScript incremental state, restored so tsc can skip unchanged
+      # projects instead of recompiling all 73 packages. A fresh checkout has no
+      # lib/ or .tsbuildinfo, so without this the incremental flag buys nothing
+      # in CI. The key is per-commit with progressively looser restore-keys, so
+      # a run warm-starts from the most recent build and tsc itself decides what
+      # is actually stale -- the cache is a warm start, not a correctness claim.
+      - name: Restore TypeScript build state
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/packages/*/lib
+            publish/plugins/*/lib
+            publish/extensions/*/lib
+            publish/packs/*/lib
+            **/*.tsbuildinfo
+          key: ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            ts-build-${{ runner.os }}-
+
       - name: Build Stack workspace
         run: pnpm build
 
@@ -87,6 +107,26 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # TypeScript incremental state, restored so tsc can skip unchanged
+      # projects instead of recompiling all 73 packages. A fresh checkout has no
+      # lib/ or .tsbuildinfo, so without this the incremental flag buys nothing
+      # in CI. The key is per-commit with progressively looser restore-keys, so
+      # a run warm-starts from the most recent build and tsc itself decides what
+      # is actually stale -- the cache is a warm start, not a correctness claim.
+      - name: Restore TypeScript build state
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/packages/*/lib
+            publish/plugins/*/lib
+            publish/extensions/*/lib
+            publish/packs/*/lib
+            **/*.tsbuildinfo
+          key: ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            ts-build-${{ runner.os }}-
 
       - name: Build Stack workspace
         run: pnpm build
