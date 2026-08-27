@@ -88,6 +88,8 @@ CI automation is intended to run on a real DSH node managed through `dsh-hosts`,
 
 `.agents/notes/PRD.md` is the canonical product requirements document. Keep current architectural decisions in `.agents/notes/` and do not create a second documentation root.
 
+New architecture-decision docs and PRD sections for a capability must land in the same pull request as the code that introduces that capability. Documentation describes what shipped, not what is planned.
+
 ## Branch and merge policy
 
 - `main` is the only release branch.
