@@ -3,6 +3,8 @@ import { publishCrossBundle, subscribeCrossBundle } from "@dsh-stack/plugin-kit"
 export interface SidebarPreferences {
   readonly showBrandLogo: boolean;
   readonly showNewConversation: boolean;
+  /** Whether the sidebar renders the file/workspace tree region. */
+  readonly showFiles: boolean;
 }
 
 export type SidebarPreferenceKey = keyof SidebarPreferences;
@@ -10,6 +12,7 @@ export type SidebarPreferenceKey = keyof SidebarPreferences;
 export const defaultSidebarPreferences: SidebarPreferences = {
   showBrandLogo: true,
   showNewConversation: true,
+  showFiles: true,
 };
 
 const STORAGE_KEY = "dsh-stack.sidebar.preferences";
@@ -38,6 +41,7 @@ function read(): SidebarPreferences {
     showBrandLogo: parsed.showBrandLogo ?? defaultSidebarPreferences.showBrandLogo,
     showNewConversation:
       parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
+    showFiles: parsed.showFiles ?? defaultSidebarPreferences.showFiles,
   };
 }
 
@@ -70,10 +74,12 @@ export const sidebarPreferences = {
     const next = {
       showBrandLogo: patch.showBrandLogo ?? current.showBrandLogo,
       showNewConversation: patch.showNewConversation ?? current.showNewConversation,
+      showFiles: patch.showFiles ?? current.showFiles,
     };
     if (
       next.showBrandLogo === current.showBrandLogo &&
-      next.showNewConversation === current.showNewConversation
+      next.showNewConversation === current.showNewConversation &&
+      next.showFiles === current.showFiles
     )
       return;
     write(next);
