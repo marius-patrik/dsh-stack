@@ -52,6 +52,32 @@ Each slot gets its own `PNPM_HOME` and pnpm store. Concurrent installs sharing
 one store race and fail with `ENOTEMPTY`, which is why the statically installed
 runners already key their store on the runner name.
 
+## Running it on another machine
+
+CI contends for the same cores as the harness, MLX inference, and interactive
+work. On a single eight-core host running all of them, load average reached 250
+and every CI job slowed down proportionally. CI is the part with somewhere else
+to go.
+
+On the machine taking over CI:
+
+```bash
+gh auth login                      # needs runner-registration permission
+./src/scripts/setup-ci-runner-host.sh
+```
+
+It downloads the runner binaries for the platform, sizes the pool to the host's
+core count, and starts the pool in the foreground. Nothing is registered
+permanently: every runner is a single-use JIT registration, so stopping the
+script leaves no runners behind and no cleanup to do.
+
+The repository does not need to be checked out first -- each job checks itself
+out. Only `gh`, `node` and network access are required.
+
+To retire the original host's runners afterwards, stop their services
+(`./svc.sh stop` in each `~/actions-runner*`); the queue simply drains to
+whichever runners are online.
+
 ## Bound, not a target
 
 `CI_RUNNER_POOL_MAX` exists to keep the pool from exhausting the host: each
