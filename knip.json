@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["script", "dns-sd", "sips"],
+  "ignoreBinaries": ["script", "dns-sd", "sips", "tailscale"],
   "rules": {
     "duplicates": "warn"
   },

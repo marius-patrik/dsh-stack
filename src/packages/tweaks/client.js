@@ -2955,10 +2955,10 @@ window.__ModuleLoader__.load({
 
       var scriptsList = [
         {
-          id: "scripts/dsh",
+          id: "packages/launcher",
           name: "DSH Launcher",
           desc: "HomeRoot/command-aware launcher, applies tweaks settings, and routes plugin verbs.",
-          path: "scripts/dsh",
+          path: "packages/launcher/bin/dsh.mjs",
           executable: true,
         },
         {
