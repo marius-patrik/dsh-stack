@@ -5651,9 +5651,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // Empty Area New Tab Fallback Picker
-    /** EmptyAreaNewTabPicker implementation. */
-    function EmptyAreaNewTabPicker(props) {
-      var areaName = props.areaName || "Area";
+    /**
+     * Placeholder shown in a tab area holding no tabs. It deliberately does not
+     * name the area: the surrounding chrome already tells the user where they
+     * are, and naming it produced copy like "Empty Main Area" -- internal layout
+     * vocabulary rather than a message. The copy prompts the next action, and the
+     * buttons below carry it out.
+     */
+    function EmptyAreaNewTabPicker() {
       return h(
         "div",
         {
@@ -5673,7 +5678,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         h(
           "div",
           { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" } },
-          h("div", { style: { fontSize: "16px", fontWeight: 600 } }, "Empty " + areaName),
+          h("div", { style: { fontSize: "16px", fontWeight: 600 } }, "Nothing open here"),
           h(
             "div",
             { style: { fontSize: "12.5px", color: "var(--dsw-alias-label-secondary, #888)" } },
@@ -6168,7 +6173,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             ? h(InteractiveTmuxTerminal, { sessionName: activeTabObj.session || activeTabObj.id })
             : activeTabObj && activeTabObj.type === "container"
               ? h(FullPageContainersWorkspace, {})
-              : h(EmptyAreaNewTabPicker, { areaName: "Secondary Sidebar" })
+              : h(EmptyAreaNewTabPicker, null)
           : null,
       );
     }
@@ -9527,7 +9532,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   display: "flex",
                 },
               },
-              h(EmptyAreaNewTabPicker, { areaName: "Main Area" }),
+              h(EmptyAreaNewTabPicker, null),
             )
           : null,
         isMainTermActive
@@ -14534,7 +14539,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 size: 11,
               }),
             ),
-            h("span", { className: "dsh-tree-title" }, "Ungrouped"),
+            h("span", { className: "dsh-tree-title" }, "Global"),
             h(
               "span",
               {
