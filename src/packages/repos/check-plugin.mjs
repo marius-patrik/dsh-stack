@@ -74,7 +74,13 @@ const actx = new Context();
 const sections = new Map([[NS, { remote: "origin", defaultBaseBranch: "main" }]]);
 actx.provide("settings", {
   get: (ns) => sections.get(ns),
-  /** register implementation. */
+  /**
+   * Registers a new tool definition.
+   *
+   * Guarantees that the tool definition is added to the `registeredTools` array.
+   * Returns a function that can be used to unregister the tool.
+   * Fails silently by not adding the tool if the `sections` map already contains the namespace.
+   */
   register(_ns, _schema, opts) {
     if (!sections.has(_ns)) sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };

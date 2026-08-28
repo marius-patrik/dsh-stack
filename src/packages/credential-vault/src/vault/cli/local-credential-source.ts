@@ -51,7 +51,12 @@ export class LocalSource implements CredentialSource {
     }
   }
 
-  /** listDirectory implementation. */
+  /**
+   * List the files within a specified directory.
+   *
+   * Returns an array of file names from the directory.
+   * If an error occurs during directory listing, returns an empty array.
+   */
   async listDirectory(directory: string): Promise<string[]> {
     try {
       const entries = await readdir(directory, { withFileTypes: true });

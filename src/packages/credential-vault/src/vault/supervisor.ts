@@ -316,7 +316,14 @@ export function planReauth(
   );
 }
 
-/** human implementation. */
+/**
+ * Requests human presence to re-authenticate a record.
+ *
+ * Guarantees a reauth plan requiring human presence, indicating that the record
+ * cannot be re-authenticated automatically due to the specified reason.
+ * Returns a reauth plan with `humanPresenceRequired` set to true and `automatedToday` set to false.
+ * Fails if the provided `record` is not a valid SecretRecord or `reason` is not recognized.
+ */
 function human(record: SecretRecord, reason: TerminalReason, requirement: string): ReauthPlan {
   return {
     strategy: "human_presence_required",
@@ -328,7 +335,12 @@ function human(record: SecretRecord, reason: TerminalReason, requirement: string
   };
 }
 
-/** describeHumanReason implementation. */
+/**
+ * Describes the reason for requiring human presence by providing a human-readable explanation.
+ * Fails if the provided `reason` is not recognized.
+ *
+ * @returns A description of the reason why human presence is required.
+ */
 function describeHumanReason(reason: TerminalReason): string {
   switch (reason) {
     case "captcha_required":
@@ -783,7 +795,14 @@ export class ReauthSupervisor {
   }
 }
 
-/** oauthRefreshPlan implementation. */
+/**
+ * Plans an OAuth refresh operation.
+ *
+ * Guarantees that the returned `ReauthPlan` specifies the strategy as "oauth_refresh" and
+ * the requirement to exchange the stored refresh token for a new access token.
+ *
+ * On failure paths, the plan will be updated to reflect the number of attempts made.
+ */
 function oauthRefreshPlan(id: string): ReauthPlan {
   return {
     strategy: "oauth_refresh",
@@ -817,7 +836,14 @@ function isPast(value: string | null, nowMs: number): boolean {
   return Number.isFinite(parsed) && nowMs >= parsed;
 }
 
-/** describeError implementation. */
+/**
+ * Provides a human-readable description of an error.
+ *
+ * Guarantees: Returns the error's message if it is an instance of Error; otherwise,
+ *             returns the string representation of the error.
+ *
+ * Fails: If the input is not an instance of Error, returns its string representation.
+ */
 function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }

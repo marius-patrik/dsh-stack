@@ -120,7 +120,13 @@ export class HostsService extends Service implements IHostsService {
     );
   }
 
-  /** getAccessConfig implementation. */
+  /**
+   * Returns the access configuration for the service.
+   *
+   * Guarantees a configuration object with mode, gatewayPort, backendPort, activeUrl,
+   * permanentUrl, tailnetDns, lanIp, and clusterDomain populated based on the current
+   * configuration and network settings.
+   */
   getAccessConfig(): AccessConfig {
     const gatewayPort = this.config?.gatewayPort ?? 3080;
     const backendPort = this.config?.backendPort ?? 3081;
@@ -140,20 +146,38 @@ export class HostsService extends Service implements IHostsService {
     };
   }
 
-  /** listNodes implementation. */
+  /**
+   * Returns the current list of nodes in the cluster.
+   *
+   * Guarantees: Returns the nodes array from the cluster status.
+   *
+   * On failure: Rescans the topology and returns the updated status.
+   */
   async listNodes(): Promise<NetworkNode[]> {
     const status = await this.getClusterStatus();
     return status.nodes;
   }
 
-  /** getClusterStatus implementation. */
+  /**
+   * Retrieves the current status of the cluster.
+   *
+   * Guarantees: Returns the cluster status object containing nodes and other status information.
+   *
+   * On failure: Rescans the cluster topology and returns the updated status.
+   */
   async getClusterStatus(): Promise<ClusterStatus> {
     const now = Date.now();
     if (this.cachedStatus && now - this.lastScan < 10000) return this.cachedStatus;
     return this.rescanTopology();
   }
 
-  /** rescanTopology implementation. */
+  /**
+   * Rescans the cluster topology to update the status.
+   *
+   * Guarantees: Returns the updated cluster status object containing nodes and other status information.
+   *
+   * On failure: Rescans the topology and returns the updated status.
+   */
   async rescanTopology(): Promise<ClusterStatus> {
     const ts = await scanTailscaleTopology();
     const access = this.getAccessConfig();
@@ -182,7 +206,16 @@ export class HostsService extends Service implements IHostsService {
     return this.cachedStatus;
   }
 
-  /** deployWorker implementation. */
+  /**
+   * Updates the cached status by scanning the Tailscale topology, determining active URLs for nodes,
+   * and building a manifest of tracked files. Returns the status including nodes, online nodes count,
+   * and synchronization status.
+   *
+   * Guarantees: Returns an object with coordinator, nodes, total nodes count, online nodes count,
+   *             access configuration, and sync status.
+   *
+   * On failure: Logs the error internally without affecting the returned status.
+   */
   async deployWorker(nodeId: string): Promise<{ ok: boolean; message: string; command?: string }> {
     const status = await this.getClusterStatus();
     const node = status.nodes.find((candidate) => candidate.id === nodeId);
@@ -196,7 +229,14 @@ export class HostsService extends Service implements IHostsService {
   }
 }
 
-/** apply implementation. */
+/**
+ * Deploys a worker on the specified node.
+ *
+ * Guarantees: Returns an object indicating whether the deployment was successful, a message describing the result,
+ *             and optionally the command used for deployment.
+ *
+ * On failure: Logs the error internally and returns a failure message without affecting the deployment status.
+ */
 export function apply(ctx: Context, config?: Partial<AccessConfig>): void {
   ctx.plugin(HostsService, config);
 }

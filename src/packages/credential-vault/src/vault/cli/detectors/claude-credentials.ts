@@ -69,7 +69,15 @@ function claudeOauthFinding(
 export const claudeCredentialsFile: Detector = {
   name: "claude-credentials-file",
   provider: "anthropic",
-  /** detect implementation. */
+  /**
+   * Detects the presence of a specific credential file or keychain items for the
+   * Anthropic provider. Returns an array containing the credential finding if
+   * detected, or an empty array if nothing is found.
+   *
+   * @param source - The source providing the home directory or keychain access.
+   * @param context - Additional context for the detection process.
+   * @returns An array of credential findings or an empty array.
+   */
   async detect(source, context) {
     const file = joinSource(source.home, ".claude/.credentials.json");
     const document = parseJson(await source.readFile(file));
@@ -89,7 +97,15 @@ export const claudeKeychain: Detector = {
   name: "claude-keychain",
   // jscpd:ignore-start -- mirrors detectors/github-keychain.ts's small detector shape for a different credential source
   provider: "anthropic",
-  /** detect implementation. */
+  /**
+   * Detects whether the user has logged into the "Claude Code" app using macOS Keychain.
+   *
+   * @param source - The source providing keychain access.
+   * @param context - The context for the detection process.
+   * @returns An array of findings indicating the presence or absence of "Claude Code" login items.
+   * If the platform is not macOS, returns an empty array.
+   * If a login item is withheld, it is not included in the findings.
+   */
   async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const services = (await source.keychainItems())

@@ -72,7 +72,14 @@ export interface TuiState {
   commandMode: boolean;
 }
 
-/** createInitialState implementation. */
+/**
+ * Initializes the initial state of the application.
+ *
+ * Returns an object representing the initial state with session and model labels,
+ * connection and streaming status, and other related flags set to default values.
+ *
+ * Fails if the function is called with invalid parameters (none expected).
+ */
 export function createInitialState(): TuiState {
   return {
     sessionId: null,

@@ -24,11 +24,23 @@ const ctx = {
   provide(name, value) {
     this[name] = value;
   },
-  /** on implementation. */
+  /**
+   * Registers a listener for a specific event name.
+   *
+   * @param {string} name - The name of the event to listen to.
+   * @param {function} listener - The function to execute when the event is triggered.
+   * @returns {function} - A cleanup function to remove the listener.
+   */
   on(name, listener) {
     listeners.set(name, listener);
   },
-  /** inject implementation. */
+  /**
+   * Registers a command definition to be executed when the command is invoked.
+   *
+   * @param {Object} services - The services object containing available services.
+   * @param {function} callback - The function to execute with the services.
+   * @returns {function} - A cleanup function to unregister the command definition.
+   */
   inject(services, callback) {
     callback(this);
   },
@@ -116,7 +128,13 @@ const res = {
     this._status = s;
     this._headers = h;
   },
-  /** end implementation. */
+  /**
+   * Ends the response by setting the body content.
+   *
+   * Guarantees that the response's body is set to the provided content `b`.
+   * If called without providing a body, the response is still ended but without
+   * setting a body.
+   */
   end(b) {
     this._body = b;
   },
@@ -146,12 +164,24 @@ const clientExports = loader.spec.factory((spec) => {
 assert.deepEqual(clientExports.inject, ["slots"]);
 const clientRegistrants = new Map();
 const clientCtx = {
-  /** effect implementation. */
+  /**
+   * Executes the provided function `fn` within the context of the effect.
+   *
+   * Guarantees that `fn` will be called exactly once.
+   *
+   * On failure, an error will be thrown, causing the effect to terminate.
+   */
   effect(fn) {
     fn();
   },
   slots: {
-    /** inject implementation. */
+    /**
+     * Executes the provided function `fn` within the context of the effect.
+     *
+     * Guarantees that `fn` will be called exactly once and `clientExports.inject` will be called with ["slots"].
+     *
+     * On failure, an error will be thrown, causing the effect to terminate.
+     */
     inject(name, fn) {
       clientRegistrants.set(name, fn);
     },

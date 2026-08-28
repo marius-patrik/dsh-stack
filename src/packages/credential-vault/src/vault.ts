@@ -42,7 +42,10 @@ function emptyVault(): StoredVault {
   return { version: VAULT_VERSION, entries: {} };
 }
 
-/** readKeyChain implementation. */
+/**
+ * Attempts to read a key from the macOS keychain.
+ * Returns the key as a Buffer if found, or undefined if not found or an error occurs.
+ */
 async function readKeyChain(): Promise<Buffer | undefined> {
   try {
     const { stdout } = await execFileAsync("security", [
@@ -73,7 +76,14 @@ async function writeKeyChain(key: Buffer): Promise<void> {
   ]);
 }
 
-/** readKeyFile implementation. */
+/**
+ * Attempts to read the key from the specified file.
+ * If the file exists and contains a valid hexadecimal string, returns the key as a Buffer.
+ * If the file does not exist or contains invalid data, returns undefined.
+ *
+ * @param keyFile - The path to the file containing the key.
+ * @returns The key as a Buffer or undefined if the file is invalid or missing.
+ */
 async function readKeyFile(keyFile: string): Promise<Buffer | undefined> {
   try {
     const hex = (await fs.readFile(keyFile, "utf8")).trim();
@@ -158,7 +168,10 @@ export class Vault {
     return emptyVault();
   }
 
-  /** save implementation. */
+  /**
+   * Saves the provided StoredVault to the file path, creating necessary directories and handling errors by not saving anything.
+   * @param stored - The StoredVault instance to save.
+   */
   private async save(stored: StoredVault): Promise<void> {
     const serialized = JSON.stringify(stored);
     await fs.mkdir(dirname(this.filePath), { recursive: true });
@@ -167,7 +180,12 @@ export class Vault {
     await fs.rename(temp, this.filePath);
   }
 
-  /** get implementation. */
+  /**
+   * Retrieves the decrypted entry for the given reference from the stored vault.
+   * @param ref - The reference string of the entry to retrieve.
+   * @returns The decrypted entry string if found, otherwise undefined.
+   * If the entry is not found or decryption fails, returns undefined.
+   */
   async get(ref: string): Promise<string | undefined> {
     const entry = (await this.load()).entries[ref];
     if (entry === undefined) return undefined;
@@ -191,7 +209,13 @@ export class Vault {
     await this.save(stored);
   }
 
-  /** unset implementation. */
+  /**
+   * Sets the encrypted value for the given reference in the stored vault.
+   * @param ref - The reference string of the entry to set.
+   * @param value - The string value to encrypt and store.
+   * @returns Resolves when the value is successfully stored, rejects if the value is empty or encryption fails.
+   * If the value is empty or encryption fails, throws an error.
+   */
   async unset(ref: string): Promise<void> {
     const stored = await this.load();
     if (!(ref in stored.entries)) return;

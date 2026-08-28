@@ -33,7 +33,13 @@ export function provenanceTags(finding: Finding, importedAt: string): string[] {
   ];
 }
 
-/** importFindings implementation. */
+/**
+ * Imports findings into the vault.
+ *
+ * Guarantees that findings are redacted and checked for material.
+ * Returns an array of ImportOutcome indicating the result of each import attempt.
+ * Skips findings without readable material or if they already exist in the vault.
+ */
 export async function importFindings(
   vault: VaultStore,
   findings: readonly Finding[],

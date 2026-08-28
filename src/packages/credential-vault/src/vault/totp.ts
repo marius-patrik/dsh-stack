@@ -312,7 +312,15 @@ function isTotpAlgorithm(value: string): value is TotpAlgorithm {
   return (TOTP_ALGORITHMS as readonly string[]).includes(value);
 }
 
-/** numericParameter implementation. */
+/**
+ * Returns a numeric value parsed from `raw` or uses `fallback` if `raw` is null or empty.
+ *
+ * @param raw - The string to parse into a number or null.
+ * @param fallback - The number to return if `raw` is null or cannot be parsed.
+ * @param field - The field name for error messages.
+ * @returns The parsed integer or `fallback`.
+ * @throws Throws an error if `raw` is not a valid integer.
+ */
 function numericParameter(raw: string | null, fallback: number, field: string): number {
   if (raw === null || raw.trim() === "") return fallback;
   const parsed = Number(raw);
@@ -353,7 +361,14 @@ export function encodeTotpParameters(parameters: TotpParameters): TotpParameters
   };
 }
 
-/** decodeTotpParameters implementation. */
+/**
+ * Decodes a TOTP parameters payload into a TOTPParameters object.
+ *
+ * @param value - The payload to decode, expected to be an object containing TOTP parameters.
+ * @param id - The identifier for the stored secret.
+ * @returns A TOTPParameters object if decoding is successful.
+ * @throws Will throw an error if the payload is malformed or missing required fields.
+ */
 export function decodeTotpParameters(value: unknown, id: string): TotpParameters {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`stored secret ${id} has malformed totp parameters`);

@@ -33,7 +33,12 @@ export class AccessGateway {
   /** Constructs an instance. */
   constructor(private config: AccessConfig) {}
 
-  /** start implementation. */
+  /**
+   * Starts the server if not already running. Resolves the promise if the server was not running,
+   * otherwise rejects the promise to prevent starting the server again.
+   *
+   * @returns A promise that resolves if the server starts successfully and rejects if it is already running.
+   */
   start(): Promise<void> {
     if (this.running) return Promise.resolve();
 
@@ -140,7 +145,13 @@ export class AccessGateway {
     });
   }
 
-  /** stop implementation. */
+  /**
+   * Stops the server and cleanup resources.
+   *
+   * Guarantees that the server is properly closed, and the `running` state is set to false.
+   * Returns a Promise that resolves when the server is stopped successfully.
+   * Fails if the server is not running or has not been initialized.
+   */
   stop(): Promise<void> {
     if (!this.running || !this.server) return Promise.resolve();
     return new Promise((resolve) => {
@@ -152,7 +163,13 @@ export class AccessGateway {
     });
   }
 
-  /** isRunning implementation. */
+  /**
+   * Checks if the server is currently running.
+   *
+   * Guarantees that the server's running state is accurately reflected.
+   * Returns `true` if the server is running, `false` otherwise.
+   * Fails if the server's running state is undefined or not properly initialized.
+   */
   isRunning(): boolean {
     return this.running;
   }

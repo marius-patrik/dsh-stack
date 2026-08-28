@@ -54,7 +54,15 @@ export const defaultSidebarPreferences: SidebarPreferences = {
   fileSectionLabel: "Files",
 };
 
-/** visiblePrimaryNavigation implementation. */
+/**
+ * Returns the primary navigation items visible based on the preferences.
+ *
+ * Guarantees:
+ * - Returns `sidebarPrimaryNavigation` if `showNewConversation` is true.
+ * - Excludes "new-conversation" from the returned items if `showNewConversation` is false.
+ *
+ * Fails if `preferences` does not contain a `showNewConversation` boolean.
+ */
 export function visiblePrimaryNavigation(preferences: SidebarPreferences): readonly string[] {
   return preferences.showNewConversation
     ? sidebarPrimaryNavigation

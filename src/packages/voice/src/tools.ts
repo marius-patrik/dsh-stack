@@ -81,7 +81,12 @@ export function registerVoiceTools(
           },
         ],
       },
-      /** execute implementation. */
+      /**
+       * Executes text-to-speech synthesis using the provided configuration and arguments.
+       *
+       * Throws an error if TTS is disabled or if a required credential is missing.
+       * Returns the path to the saved audio file and its byte size.
+       */
       async execute(args) {
         const config = current();
         if (!config.tts.enabled) throw new Error("TTS is disabled (voice.tts.enabled)");

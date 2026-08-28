@@ -34,7 +34,11 @@ export class PersonasService extends Service {
     return this.roster.get(id);
   }
 
-  /** list implementation. */
+  /**
+   * Returns a list of all agent personas currently in the roster.
+   *
+   * @returns An array of AgentPersona objects representing the personas.
+   */
   list(): AgentPersona[] {
     return Array.from(this.roster.values());
   }
