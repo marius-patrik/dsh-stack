@@ -12,8 +12,16 @@ import type { SessionEvent } from "@deepseek-ai/dsh-session";
 export function installForkUndo(ctx: Context): unknown {
   return ctx.inject(["commands", "sessions"], (commandCtx) => {
     const disposers: (() => void)[] = [];
-    const /** make implementation. */
-      make = (name: string, description: string, direction: -1 | 1): void => {
+    /**
+     * Registers commands to fork sessions in either direction (-1 for undo, 1 for redo).
+     *
+     * @param name - The name of the command.
+     * @param description - A description of the command's purpose.
+     * @param direction - Direction to fork the session (-1 for undo, 1 for redo).
+     *
+     * @returns Nothing on success, disposes of command registration on failure.
+     */
+    const make = (name: string, description: string, direction: -1 | 1): void => {
         disposers.push(
           commandCtx.commands.register({
             name,
