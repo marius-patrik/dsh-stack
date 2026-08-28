@@ -3484,6 +3484,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var isMaximized = isMaximizedState[0],
         setIsMaximized = isMaximizedState[1];
 
+      // Tabs closed from this panel: hidden from the strip, process/container
+      // keeps running. Filtered at render time only, so a poll that re-fetches
+      // the live list never resurrects a dismissed one, and destroying the
+      // underlying session/container remains the separate, explicit
+      // "Kill"/"Stop" action -- see .agents/rules/destructive-actions-are-explicit-and-audited.md.
+      var dismissedSessionIdsState = React.useState(function () {
+        return new Set();
+      });
+      var dismissedSessionIds = dismissedSessionIdsState[0],
+        setDismissedSessionIds = dismissedSessionIdsState[1];
+      var dismissedContainerIdsState = React.useState(function () {
+        return new Set();
+      });
+      var dismissedContainerIds = dismissedContainerIdsState[0],
+        setDismissedContainerIds = dismissedContainerIdsState[1];
+
       // Container state
       var containersState = React.useState([]);
       var containers = containersState[0],
@@ -4175,7 +4191,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   ? window.__dsh_top_tab_ids__
                   : {};
               var visibleSessions = data.sessions.filter(function (s) {
-                return !topMap[s.name] && !topMap["term-" + s.name];
+                return (
+                  !topMap[s.name] && !topMap["term-" + s.name] && !dismissedSessionIds.has(s.name)
+                );
               });
               return visibleSessions.map(function (s) {
                 var isSel = activeView === "terminal" && s.name === selectedSession;
@@ -4237,10 +4255,21 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                     "button",
                     {
                       type: "button",
-                      title: "Kill Session",
+                      title:
+                        "Close (session keeps running -- use Kill in the tab's context menu to end it)",
                       onClick: function (e) {
                         e.stopPropagation();
-                        handleKill(s.name);
+                        setDismissedSessionIds(function (prev) {
+                          var next = new Set(prev);
+                          next.add(s.name);
+                          return next;
+                        });
+                        if (selectedSession === s.name) {
+                          var remaining = data.sessions.filter(function (x) {
+                            return x.name !== s.name && !dismissedSessionIds.has(x.name);
+                          });
+                          setSelectedSession(remaining.length > 0 ? remaining[0].name : null);
+                        }
                       },
                       style: {
                         display: "inline-flex",
@@ -4279,7 +4308,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   ? window.__dsh_top_tab_ids__
                   : {};
               var visibleContainers = containers.filter(function (c) {
-                return !topMap[c.id] && !topMap["container-sandboxes"];
+                return (
+                  !topMap[c.id] &&
+                  !topMap["container-sandboxes"] &&
+                  !dismissedContainerIds.has(c.id)
+                );
               });
               return visibleContainers.map(function (c) {
                 var isSel = activeView === "container" && selectedContainer === c.id;
@@ -4339,13 +4372,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                     "button",
                     {
                       type: "button",
-                      title: "Close Container View",
+                      title:
+                        "Close (container keeps running -- use Stop in the container menu to end it)",
                       onClick: function (e) {
                         e.stopPropagation();
-                        setContainers(function (prev) {
-                          return prev.filter(function (x) {
-                            return x.id !== c.id;
-                          });
+                        setDismissedContainerIds(function (prev) {
+                          var next = new Set(prev);
+                          next.add(c.id);
+                          return next;
                         });
                         if (selectedContainer === c.id) {
                           setActiveView("terminal");
