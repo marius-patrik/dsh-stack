@@ -25,14 +25,15 @@ import { join, relative } from "node:path";
 import { completeLocally, LOCAL_MODEL, listLocalModels } from "./local-model-client.mjs";
 import { resolveRepoRoot } from "./lib/resolve-repo-root.mjs";
 import { walkSourceTree } from "./lib/walk-source-tree.mjs";
+import { extractFunctionContext } from "./lib/extract-function-context.mjs";
+import { isAcceptableDoc } from "./lib/is-acceptable-doc.mjs";
+
+export { isAcceptableDoc };
 
 const root = resolveRepoRoot(import.meta.url);
 
 /** Matches the generated filler form, capturing the name it restates. */
 const FILLER = /\/\*\* ([A-Za-z0-9_$]+) implementation\. \*\//g;
-
-/** Lines of context handed to the model on each side of the declaration. */
-const CONTEXT_LINES = 24;
 
 /** Instruction fixed for every call: the transformation and the output shape. */
 const SYSTEM = [
@@ -41,70 +42,12 @@ const SYSTEM = [
   "what the caller must guarantee, what it returns or guarantees back, and what it does on the failure path.",
   "Rules:",
   "- Output ONLY the comment block, starting with /** and ending with */. No code, no prose around it.",
+  "- The FIRST line inside the comment must be exactly `@function <name>` naming the function you were asked to document.",
   "- Never restate the function name as the description. 'clonePanes clones panes' is worthless.",
   "- Describe observable behaviour, not implementation steps.",
   "- Keep it under 4 lines unless parameters genuinely need documenting.",
   "- Do not invent parameters or behaviour that the code does not show.",
 ].join("\n");
-
-/**
- * Decide whether a reply is safe to write.
- *
- * The bar is deliberately mechanical: a local model will occasionally answer
- * with code, with prose, with several comments, or by restating the name it was
- * asked not to restate. Each of those is detectable without judgement, and
- * rejecting is always safe because the original comment stays.
- *
- * @param text - the model's reply.
- * @param name - the identifier the filler comment restated.
- * @returns the normalised comment, or null when it must not be used.
- */
-export function isAcceptableDoc(text, name, context = "", isTypeScript = false, seen = null) {
-  if (!text) return null;
-  const start = text.indexOf("/**");
-  const end = text.indexOf("*/", start + 3);
-  if (start === -1 || end === -1) return null;
-  const block = text.slice(start, end + 2);
-  // More than one comment means the model answered with a file, not a comment.
-  if (block.slice(3).includes("/**")) return null;
-  const body = block
-    .slice(3, -2)
-    .split("\n")
-    .map((line) => line.replace(/^\s*\*?\s?/, "").trim())
-    .filter(Boolean);
-  if (body.length === 0) return null;
-  const prose = body.filter((line) => !line.startsWith("@")).join(" ");
-  // Empty of description, or the same restatement we are trying to remove.
-  if (prose.length < 20) return null;
-  if (new RegExp(`^${name}\\b.{0,30}implementation`, "i").test(prose)) return null;
-  if (/\bimplementation\.?$/i.test(prose.trim())) return null;
-  // Guard the placeholder markers verify-stack.mjs rejects outright.
-  if (/\b(todo|fixme|not implemented)\b/i.test(block)) return null;
-
-  // Fabricated failure modes, all observed from a 7B on this exact task and all
-  // mechanically detectable. Rejecting is always safe: the filler comment stays,
-  // and an empty-but-honest comment beats a confident lie.
-
-  // 1. A documented throw where the code never throws. The model reliably
-  //    invents "@throws if the id is invalid" for functions that clamp or
-  //    return unchanged.
-  if (/@throws/.test(block) && !/\bthrow\b/.test(context)) return null;
-
-  // 2. JSDoc type annotations in TypeScript, where the signature already
-  //    carries the types and the comment's copy can silently contradict it.
-  if (isTypeScript && /@(param|returns?)\s*\{/.test(block)) return null;
-
-  // 3. The same description handed back for a different function. Observed
-  //    verbatim: closeOtherTabs documented as "Closes the specified tab",
-  //    which is the neighbouring function's contract, not its own.
-  if (seen) {
-    const key = prose.toLowerCase().replace(/\s+/g, " ").slice(0, 120);
-    if (seen.has(key)) return null;
-    seen.add(key);
-  }
-
-  return block;
-}
 
 /** Re-indents a comment block so every line sits at `indent`. */
 function reindent(block, indent) {
@@ -191,17 +134,23 @@ for await (const file of walkSourceTree(searchRoot, { extensions: ["ts", "tsx", 
     if (examined >= limit) break;
     examined += 1;
     const [full, name] = match;
-    const lines = text.split("\n");
     const lineIndex = text.slice(0, match.index).split("\n").length - 1;
-    const context = lines.slice(Math.max(0, lineIndex - 2), lineIndex + CONTEXT_LINES).join("\n");
-    const indent = (lines[lineIndex].match(/^\s*/) ?? [""])[0];
+
+    const target = extractFunctionContext(text, match.index, full.length, file);
+    if (!target) {
+      rejected += 1;
+      console.log(
+        `  reject ${relative(root, file)}:${lineIndex + 1} ${name} (could not extract function context)`,
+      );
+      continue;
+    }
 
     const reply = await completeLocally(
       SYSTEM,
-      `Write the JSDoc for \`${name}\`.\n\n\`\`\`\n${context}\n\`\`\``,
+      `Write the JSDoc for \`${target.name}\`.\n\n\`\`\`\n${target.code}\n\`\`\``,
       { maxTokens: 220 },
     );
-    const block = isAcceptableDoc(reply, name, context, /\.tsx?$/.test(file), seenDescriptions);
+    const block = isAcceptableDoc(reply, target, /\.tsx?$/.test(file), seenDescriptions);
     if (!block) {
       rejected += 1;
       console.log(`  reject ${relative(root, file)}:${lineIndex + 1} ${name}`);

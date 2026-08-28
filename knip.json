@@ -1,12 +1,17 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreBinaries": ["script", "dns-sd", "sips", "tailscale"],
+  "ignore": ["harness/**"],
   "rules": {
     "duplicates": "warn"
   },
   "workspaces": {
     ".": {
-      "entry": ["src/scripts/*.mjs", "src/scripts/client-runtime/*.js"],
+      "entry": [
+        "src/scripts/*.mjs",
+        "src/scripts/**/*.test.mjs",
+        "src/scripts/client-runtime/*.js"
+      ],
       "project": ["src/scripts/**/*.{mjs,js}"]
     },
     "src/packages/*": {
