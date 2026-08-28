@@ -165,7 +165,12 @@ export const HEADER = (headerName: string, ref: string): CredentialSlot => ({
   headerName,
   ref,
 });
-/** HEADERS implementation. */
+/**
+ * Returns the headers as-is.
+ *
+ * @param headers - A record of header key-value pairs.
+ * @returns The same record of header key-value pairs.
+ */
 export const HEADERS = (headers: Record<string, string>) => headers;
 
 /**

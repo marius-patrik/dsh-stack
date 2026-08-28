@@ -16,7 +16,13 @@ export interface VaultCliIo {
   now(): number;
 }
 
-/** defaultVaultCliIo implementation. */
+/**
+ * Provides CLI input/output operations for the vault.
+ *
+ * Returns an object with methods to write to stdout/stderr, read from stdin,
+ * check if the output is a terminal, access environment variables, and get the current time.
+ * Throws an error if secret material is typed into a terminal.
+ */
 export function defaultVaultCliIo(): VaultCliIo {
   return {
     out: (text) => process.stdout.write(text),

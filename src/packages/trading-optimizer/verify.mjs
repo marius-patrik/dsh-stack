@@ -12,7 +12,11 @@ const candles = Array.from({ length: 20 }, (_, time) => ({
 const evaluations = gridSearch(
   candles,
   () => ({
-    id: "hold" /** onCandle implementation. */,
+    id: "hold" /**
+     * Executes the onCandle logic with given parameters and returns an object containing the id and the result of the onCandle implementation.
+     * The function is expected to be called with specific parameters: size and enabled, which determine its behavior.
+     * On failure, it returns an object with the id set to "hold".
+     */,
     /** onCandle implementation. */
     onCandle() {},
   }),

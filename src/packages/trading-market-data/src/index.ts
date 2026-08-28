@@ -16,19 +16,34 @@ export interface MarketDataProvider {
 export class MarketDataRegistry {
   private readonly providers = new Map<string, MarketDataProvider>();
 
-  /** register implementation. */
+  /**
+   * Registers a new market data provider.
+   *
+   * @param provider - The MarketDataProvider to register.
+   * @throws Will throw an error if a provider with the same ID is already registered.
+   * @returns Nothing.
+   */
   register(provider: MarketDataProvider): void {
     if (this.providers.has(provider.id))
       throw new Error(`Market-data provider already registered: ${provider.id}`);
     this.providers.set(provider.id, provider);
   }
 
-  /** get implementation. */
+  /**
+   * Retrieves the market data provider associated with the given ID.
+   * @param id - The ID of the market data provider to retrieve.
+   * @returns The MarketDataProvider associated with the ID, or undefined if not found.
+   * @throws Will throw an error if the ID is not found.
+   */
   get(id: string): MarketDataProvider | undefined {
     return this.providers.get(id);
   }
 
-  /** list implementation. */
+  /**
+   * Lists all registered market data providers.
+   * @returns An array of MarketDataProvider instances, representing all registered providers.
+   * @throws Will throw an error if there are no providers registered.
+   */
   list(): readonly MarketDataProvider[] {
     return [...this.providers.values()];
   }
@@ -54,7 +69,11 @@ export class MemoryMarketDataProvider implements MarketDataProvider {
     return [...this.symbols.keys()].sort();
   }
 
-  /** getCandles implementation. */
+  /**
+   * Returns a sorted list of symbols for which candle data is available.
+   * @returns A sorted array of symbol names.
+   * @throws Will throw an error if no symbols have been seeded with candle data.
+   */
   async getCandles(query: MarketDataQuery): Promise<readonly Candle[]> {
     const data = this.symbols.get(query.symbol) ?? [];
     const filtered = data.filter((candle) => {

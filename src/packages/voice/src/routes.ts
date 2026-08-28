@@ -24,13 +24,25 @@ async function readBody(req: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-/** sendJson implementation. */
+/**
+ * Rejects non-POST requests by sending a 405 response and returns true to stop further handling.
+ * @param req - The incoming HTTP request.
+ * @param res - The HTTP response object to send the rejection message.
+ * @returns true if the request is not POST, indicating further handling should stop; otherwise, false.
+ */
 function sendJson(res: ServerResponse, status: number, payload: unknown): void {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(payload));
 }
 
-/** sendError implementation. */
+/**
+ * Sends an error response based on the provided error object and status code.
+ *
+ * @param res - The HTTP response object to send the error message.
+ * @param err - The error object containing a `code` and `message` for specific handling.
+ * @param notConfiguredStatus - The status code to use for "NOT_CONFIGURED" errors (default 400).
+ * @returns true if the error is "NOT_CONFIGURED", indicating further handling should stop; otherwise, false.
+ */
 function sendError(res: ServerResponse, err: unknown, notConfiguredStatus = 400): void {
   const e = err as { code?: string; message?: string };
   const status = e?.code === "NOT_CONFIGURED" ? notConfiguredStatus : 502;

@@ -17,7 +17,18 @@ export interface OptimizationOptions {
   readonly limit?: number;
 }
 
-/** gridSearch implementation. */
+/**
+ * Conducts a grid search to evaluate trading strategies.
+ *
+ * @param candles - The historical candle data used for training and testing.
+ * @param createStrategy - A function to create a strategy given parameters.
+ * @param trainSplit - The proportion of candles to use for training (between 0 and 1).
+ * @param grid - A parameter grid defining the range of parameters to test.
+ * @param options - Additional optimization options, including the objective function and minimum train trades.
+ * @param testCandles - Optional additional candle data for testing.
+ * @returns An array of evaluations, each containing the parameters, train result, and test result.
+ * @throws Throws an error if trainSplit is not between 0 and 1.
+ */
 export function gridSearch(
   candles: readonly Candle[],
   createStrategy: (parameters: Readonly<Record<string, ParameterValue>>) => Strategy,
@@ -51,10 +62,26 @@ export function gridSearch(
     : evaluations.slice(0, Math.max(0, options.limit));
 }
 
-/** combinations implementation. */
+/**
+ * Generates all possible combinations of parameters from the given grid.
+ *
+ * Guarantees that each combination is evaluated based on the provided objective function,
+ * and only combinations with at least `minimumTrainTrades` trades are considered.
+ *
+ * Returns a generator of parameter combinations that are sorted by the evaluation score.
+ * On failure paths, combinations with fewer trades than `minimumTrainTrades` are skipped.
+ */
 function* combinations(grid: ParameterGrid): Generator<Record<string, ParameterValue>> {
   const entries = Object.entries(grid);
-  /** walk implementation. */
+  /**
+   * Generates and evaluates all possible combinations of parameters from the given grid.
+   *
+   * Guarantees that each combination is evaluated based on the provided objective function,
+   * and only returns combinations with at least `minimumTrainTrades` trades.
+   *
+   * Returns a sorted array of parameter combinations based on their evaluation score.
+   * On failure paths, combinations with fewer trades than `minimumTrainTrades` are skipped.
+   */
   function* walk(
     index: number,
     current: Record<string, ParameterValue>,

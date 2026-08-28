@@ -16,7 +16,13 @@ export function fingerprint(field: string, value: string): Fingerprint {
   return { field, prefix: value.slice(0, 4), length: value.length };
 }
 
-/** formatFingerprint implementation. */
+/**
+ * Formats a fingerprint into a readable string.
+ *
+ * Returns a string in the format "field=prefix…(length)".
+ *
+ * @param print - The fingerprint object containing field, prefix, and length.
+ */
 export function formatFingerprint(print: Fingerprint): string {
   return `${print.field}=${print.prefix}…(${print.length})`;
 }

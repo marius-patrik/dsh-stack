@@ -12,7 +12,14 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { FileSecretProvider } from "./types.js";
 
-/** home implementation. */
+/**
+ * Detects whether the given path belongs to the primary credential file for
+ * Claude Code. Returns true if the path matches the default path for the
+ * credentials file, otherwise returns false.
+ *
+ * @param path - The path to check.
+ * @returns A boolean indicating whether the path matches the default credentials file path.
+ */
 function home(): string {
   return homedir();
 }
@@ -34,7 +41,12 @@ export const claudeFileProvider: FileSecretProvider = {
     "Imports the primary API key and subscription OAuth token from Claude Code's credential file.",
   defaultPaths: [join(home(), ".claude", ".credentials.json")],
 
-  /** detect implementation. */
+  /**
+   * Detects whether the provided path points to a valid `~/.claude/.credentials.json` file.
+   *
+   * Guarantees: Returns `true` if the file is a valid JSON object containing string values.
+   *             Returns `false` if the file is not a valid JSON object or if an error occurs.
+   */
   async detect(path: string): Promise<boolean> {
     try {
       const parsed = await readJson(path);
@@ -44,7 +56,12 @@ export const claudeFileProvider: FileSecretProvider = {
     }
   },
 
-  /** read implementation. */
+  /**
+   * Reads the credentials from the specified path.
+   *
+   * Guarantees: Returns an object containing string values if the file is a valid JSON object.
+   *             Throws an error if the file is not a valid JSON object or an error occurs.
+   */
   async read(path: string): Promise<Record<string, string>> {
     const parsed = await readJson(path);
     if (typeof parsed !== "object" || parsed === null) {
@@ -91,7 +108,14 @@ export const cursorFileProvider: FileSecretProvider = {
     ),
   ],
 
-  /** detect implementation. */
+  /**
+   * Detects whether the provided path points to a GitHub CLI `hosts.yml` file
+   * containing an `oauth_token`. If the file exists and matches the expected
+   * pattern, returns true. Otherwise, returns false or throws an error.
+   *
+   * @param path - The path to the `hosts.yml` file.
+   * @returns `true` if the file contains an `oauth_token`, `false` otherwise.
+   */
   async detect(path: string): Promise<boolean> {
     try {
       const db = new DatabaseSync(path, { readOnly: true });
@@ -108,7 +132,13 @@ export const cursorFileProvider: FileSecretProvider = {
     }
   },
 
-  /** read implementation. */
+  /**
+   * Reads the GitHub CLI's `hosts.yml` file to extract the OAuth token and user
+   * information for `github.com` or an enterprise host.
+   *
+   * Guarantees the return of the OAuth token and user information if successful.
+   * Throws an error if the file cannot be read or the token is missing.
+   */
   async read(path: string): Promise<Record<string, string>> {
     const db = new DatabaseSync(path, { readOnly: true });
     try {

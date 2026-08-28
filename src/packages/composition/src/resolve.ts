@@ -12,7 +12,14 @@ export interface ResolvedComposition {
   readonly plugins: readonly PluginDefinition[];
 }
 
-/** resolveProfile implementation. */
+/**
+ * Resolves a profile from the catalog, ensuring all referenced packs and plugins are included.
+ *
+ * @param catalog - The CompositionCatalog containing profiles, packs, and plugins.
+ * @param profileId - The ID of the profile to resolve.
+ * @returns The ResolvedComposition containing the profile, packs, and resolved plugins.
+ * @throws Will throw an error if the profile or any referenced pack is unknown.
+ */
 export function resolveProfile(
   catalog: CompositionCatalog,
   profileId: string,
@@ -35,7 +42,16 @@ export function resolveProfile(
   return { profile, packs, plugins };
 }
 
-/** resolvePluginClosure implementation. */
+/**
+ * Resolves the plugin closure for the given set of selected plugin IDs.
+ *
+ * Guarantees that it returns an array of PluginDefinition objects representing
+ * the resolved plugin closure, ensuring no dependency cycles are present.
+ * Throws an error if a dependency cycle is detected or an unknown plugin ID is encountered.
+ *
+ * @param registry - A map of plugin definitions.
+ * @param selected - A set of selected plugin IDs to resolve.
+ */
 function resolvePluginClosure(
   registry: ReadonlyMap<string, PluginDefinition>,
   selected: ReadonlySet<string>,
@@ -43,22 +59,28 @@ function resolvePluginClosure(
   const resolved = new Map<string, PluginDefinition>();
   const visiting = new Set<string>();
 
-  const /** visit implementation. */
-    visit = (pluginId: string): void => {
-      if (resolved.has(pluginId)) return;
-      if (visiting.has(pluginId))
-        throw new Error(`Plugin dependency cycle detected at ${pluginId}`);
+  /**
+   * Visits a plugin ID to resolve its dependencies.
+   *
+   * Guarantees that it adds the plugin definition to the resolved set if no cycles are detected.
+   * Throws an error if a dependency cycle is detected or an unknown plugin ID is encountered.
+   *
+   * @param pluginId - The ID of the plugin to visit.
+   */
+  const visit = (pluginId: string): void => {
+    if (resolved.has(pluginId)) return;
+    if (visiting.has(pluginId)) throw new Error(`Plugin dependency cycle detected at ${pluginId}`);
 
-      const plugin = registry.get(pluginId);
-      if (!plugin) throw new Error(`Composition references unknown plugin ${pluginId}`);
+    const plugin = registry.get(pluginId);
+    if (!plugin) throw new Error(`Composition references unknown plugin ${pluginId}`);
 
-      visiting.add(pluginId);
-      for (const dependency of plugin.dependencies ?? []) {
-        if (dependency.kind === "required") visit(dependency.plugin);
-      }
-      visiting.delete(pluginId);
-      resolved.set(pluginId, plugin);
-    };
+    visiting.add(pluginId);
+    for (const dependency of plugin.dependencies ?? []) {
+      if (dependency.kind === "required") visit(dependency.plugin);
+    }
+    visiting.delete(pluginId);
+    resolved.set(pluginId, plugin);
+  };
 
   for (const pluginId of selected) visit(pluginId);
 

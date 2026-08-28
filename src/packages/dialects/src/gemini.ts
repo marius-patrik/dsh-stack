@@ -134,7 +134,15 @@ export function serializeContents(messages: Message[]): WireContent[] {
   return contents;
 }
 
-/** buildUrl implementation. */
+/**
+ * Builds a URL with SSE query parameter if necessary.
+ *
+ * Guarantees the returned URL includes `?alt=sse` if the base URL does not
+ * already contain a query string or end with `:streamGenerateContent`.
+ *
+ * @param base - The base URL to build.
+ * @returns The URL with `?alt=sse` appended if needed.
+ */
 function buildUrl(base: string): string {
   if (base.includes("?")) return base;
   if (base.endsWith(":streamGenerateContent")) return `${base}?alt=sse`;
@@ -150,7 +158,16 @@ function buildUrl(base: string): string {
 export const geminiDialect: Dialect = {
   id: "gemini",
 
-  /** serialize implementation. */
+  /**
+   * Serializes the request options into a wire-compatible request for the Gemini dialect.
+   *
+   * @param options - The generation options containing messages and system instruction.
+   * @param auth - The authentication details required for the request.
+   * @param baseURL - The base URL for the request, including the endpoint and query parameters.
+   * @param defaults - Default settings for the dialect.
+   * @returns A `WireRequest` object representing the serialized request.
+   * @throws Throws an `LlmError` if no authentication credentials (cookies or API key) are provided.
+   */
   serialize(
     options: GenerateOptions,
     auth: DialectAuth,

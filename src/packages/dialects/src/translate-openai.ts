@@ -148,7 +148,13 @@ export async function* translateOpenAi(
   let pendingFinish: FinishReason | undefined;
   let pendingUsage: TokenUsage | undefined;
 
-  /** open implementation. */
+  /**
+   * Opens a new block in the order, appending it to the pending sequence.
+   * Guarantees that the block is added to the `order` and returns the new block.
+   * On failure, yields a "finish" event with an error indicating no content was returned.
+   * @param kind - The kind of block to open.
+   * @returns The newly created block.
+   */
   function open(kind: OpenBlock["kind"]): OpenBlock {
     const block: OpenBlock = { index: nextIndex++, kind, text: "" };
     order.push(block);

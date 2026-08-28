@@ -19,7 +19,17 @@ import {
 export const agentOsSecrets: Detector = {
   name: "agent-os-secrets",
   provider: "andromeda",
-  /** detect implementation. */
+  /**
+   * Detects secrets in the specified source directory.
+   *
+   * Guarantees:
+   * - Returns an array of `Finding` objects representing detected secrets.
+   * - Ignores files named "registry.json" and those starting with a dot.
+   * - Logs an error and skips processing for files without a valid JSON content.
+   *
+   * On failure:
+   * - Skips processing for files that do not contain an `access_token` or `refresh_token`.
+   */
   async detect(source, context) {
     const directory = joinSource(source.home, ".agents/secrets");
     const names = await source.listDirectory(directory);

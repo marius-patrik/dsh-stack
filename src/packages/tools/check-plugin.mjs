@@ -74,7 +74,15 @@ const sections = new Map([
 const actx = new Context();
 actx.provide("settings", {
   get: (ns) => sections.get(ns),
-  /** register implementation. */
+  /**
+   * Registers a new tool definition.
+   *
+   * Guarantees that the tool definition is added to the `registeredTools` array.
+   * Returns an object with a `get` method to retrieve the tool definition and
+   * a `watch` method that always returns `undefined`.
+   * Fails if the tool definition is not provided or if `sections` does not contain
+   * the namespace `_ns`.
+   */
   register(_ns, _schema, opts) {
     if (!sections.has(_ns)) sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };

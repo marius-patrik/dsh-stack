@@ -59,7 +59,13 @@ function assertTextOnly(blocks: readonly ContentBlock[]): void {
   }
 }
 
-/** buildUrl implementation. */
+/**
+ * Builds a URL for streaming content with SSE (Server-Sent Events).
+ *
+ * Guarantees: Adds `:streamGenerateContent?alt=sse` to the base URL if not already present.
+ * Returns: The constructed URL for streaming content.
+ * Fails: If the base URL contains `:streamGenerateContent` but does not include `?alt=sse`, appends it.
+ */
 function buildUrl(base: string): string {
   if (base.includes(":streamGenerateContent")) {
     return base.includes("?") ? base : `${base}?alt=sse`;
@@ -77,7 +83,16 @@ function buildUrl(base: string): string {
 export const codeAssistDialect: Dialect = {
   id: "code-assist",
 
-  /** serialize implementation. */
+  /**
+   * Serializes the request options into a wire request for the code-assist dialect.
+   *
+   * @param options - The generation options containing messages to be serialized.
+   * @param auth - Authentication credentials required for the request.
+   * @param baseURL - The base URL for the service endpoint.
+   * @param defaults - Default settings for the dialect.
+   * @returns A `WireRequest` object representing the serialized request.
+   * @throws Throws an `LlmError` if no OAuth bearer token is provided.
+   */
   serialize(
     options: GenerateOptions,
     auth: DialectAuth,
