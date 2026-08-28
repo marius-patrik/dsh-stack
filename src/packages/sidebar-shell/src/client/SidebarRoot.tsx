@@ -47,8 +47,10 @@ export function SidebarRoot({
       <div
         style={{
           display: "flex",
+          flexDirection: wide ? "row" : "column",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: wide ? "space-between" : "center",
+          gap: wide ? 0 : 4,
           minHeight: 48,
           padding: wide ? "8px 10px 4px" : "8px 6px 4px",
         }}
@@ -78,13 +80,11 @@ export function SidebarRoot({
               { fallback: <span style={{ fontWeight: 600 }}>DSH</span> },
             )}
           </button>
-        ) : (
+        ) : showBrand ? (
           <span aria-hidden="true" style={{ width: 32, height: 32 }}>
-            {showBrand
-              ? renderSlot("sidebar.brand.mark", { size: 24 }, { fallback: <FishLogo size={24} /> })
-              : null}
+            {renderSlot("sidebar.brand.mark", { size: 24 }, { fallback: <FishLogo size={24} /> })}
           </span>
-        )}
+        ) : null}
 
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           {wide ? (
