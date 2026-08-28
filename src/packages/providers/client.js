@@ -4255,7 +4255,8 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                     "button",
                     {
                       type: "button",
-                      title: "Close (session keeps running -- use Kill in the tab's context menu to end it)",
+                      title:
+                        "Close (session keeps running -- use Kill in the tab's context menu to end it)",
                       onClick: function (e) {
                         e.stopPropagation();
                         setDismissedSessionIds(function (prev) {
@@ -4308,7 +4309,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   : {};
               var visibleContainers = containers.filter(function (c) {
                 return (
-                  !topMap[c.id] && !topMap["container-sandboxes"] && !dismissedContainerIds.has(c.id)
+                  !topMap[c.id] &&
+                  !topMap["container-sandboxes"] &&
+                  !dismissedContainerIds.has(c.id)
                 );
               });
               return visibleContainers.map(function (c) {
