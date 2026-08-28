@@ -124,7 +124,6 @@ async function readJsonOrNull(path) {
   }
 }
 
-
 /**
  * Every package name mounted by the generated bundle patch. Absent patch file
  * means nothing is known to be mounted, which the caller reports rather than
