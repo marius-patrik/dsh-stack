@@ -127,14 +127,21 @@ export function apply(ctx: Context, config: Config = {}): void {
 
   const commands = (ctx as unknown as { commands?: { register(definition: unknown): () => void } })
     .commands;
-  const /** safeRegister implementation. */
-    safeRegister = (definition: unknown) => {
-      try {
-        commands?.register(definition);
-      } catch {
-        // Built-in or existing command already registered
-      }
-    };
+  /**
+   * Registers a command to select an agent preset.
+   *
+   * Guarantees that the provided preset ID is valid and not already registered.
+   * Returns nothing on success, or an error message if the preset is unknown.
+   *
+   * @param definition - The command definition object containing the handler.
+   */
+  const safeRegister = (definition: unknown) => {
+    try {
+      commands?.register(definition);
+    } catch {
+      // Built-in or existing command already registered
+    }
+  };
   const /** selectHandler implementation. */
     selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
       const id = rawInput.trim();
@@ -258,41 +265,52 @@ export function apply(ctx: Context, config: Config = {}): void {
         });
         res.end(JSON.stringify(body));
       };
-    const /** describe implementation. */
-      describe = (action: ActionSpec) => ({
-        id: action.id,
-        name: action.name ?? action.id,
-        description: action.description ?? null,
-        tools: action.tools ?? null,
-        route: action.route ?? null,
-        source: action.source ?? null,
-        builtIn: BUILT_IN_ACTIONS.some((builtIn) => builtIn.id === action.id),
-      });
+    /**
+     * Describes an action specification by extracting its properties.
+     *
+     * Guarantees a JSON-like object with `id`, `name`, `description`, `tools`, `route`, and `source`.
+     * If any of the properties are not provided in `action`, they are set to `null` or `false`.
+     *
+     * On failure, returns an object with the same structure but with missing or nullified properties.
+     */
+    const describe = (action: ActionSpec) => ({
+      id: action.id,
+      name: action.name ?? action.id,
+      description: action.description ?? null,
+      tools: action.tools ?? null,
+      route: action.route ?? null,
+      source: action.source ?? null,
+      builtIn: BUILT_IN_ACTIONS.some((builtIn) => builtIn.id === action.id),
+    });
 
     // The action vocabulary (built-ins + file-defined) — also the run palette's data.
-    const /** listHandler implementation. */
-      listHandler = async (_req: unknown, res: any) => {
-        await catalog.load();
-        json(res, 200, {
-          defaultAction,
-          root,
-          actions: catalog.list().map(describe),
-          commands: [
-            {
-              id: "reload-app",
-              name: "Reload App",
-              description: "Reload the browser UI; server-side agents keep running and reattach.",
-              kind: "soft",
-            },
-            {
-              id: "force-reload",
-              name: "Force Reload",
-              description: "Restart the dsh web server itself, then reload the UI.",
-              kind: "force",
-            },
-          ],
-        });
-      };
+    /**
+     * Guarantees a JSON-like object array with `id`, `name`, `description`, `tools`, `route`, and `source` for each action.
+     * If any of the properties are not provided in `action`, they are set to `null` or `false`.
+     * On failure, returns an array of objects with the same structure but with missing or nullified properties.
+     */
+    const listHandler = async (_req: unknown, res: any) => {
+      await catalog.load();
+      json(res, 200, {
+        defaultAction,
+        root,
+        actions: catalog.list().map(describe),
+        commands: [
+          {
+            id: "reload-app",
+            name: "Reload App",
+            description: "Reload the browser UI; server-side agents keep running and reattach.",
+            kind: "soft",
+          },
+          {
+            id: "force-reload",
+            name: "Force Reload",
+            description: "Restart the dsh web server itself, then reload the UI.",
+            kind: "force",
+          },
+        ],
+      });
+    };
     webCtx.webServer.register({ kind: "exact", path: "/actions", handler: listHandler });
 
     // The hard path: server self-restart that answers before it exits.

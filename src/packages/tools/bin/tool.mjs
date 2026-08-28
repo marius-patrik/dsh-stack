@@ -20,7 +20,14 @@ const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 const NS = "agent-tools";
 
-/** readSection implementation. */
+/**
+ * Yields key-value pairs from the specified section in the given text.
+ *
+ * The caller must provide a text containing sections separated by headers
+ * and the section name to read. It returns key-value pairs for lines within
+ * the section. If the section is not found or the text is malformed, it yields
+ * nothing.
+ */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -37,7 +44,15 @@ function* readSection(text, section) {
   }
 }
 
-/** parseJsonValue implementation. */
+/**
+ * Parses a JSON value from a string.
+ *
+ * Guarantees returning the parsed JSON value if valid, or `null` if the input is an empty string or "null".
+ * Falls through without erroring if the input is an invalid JSON string, boolean, or null.
+ *
+ * @param raw - The string to parse as JSON.
+ * @returns The parsed JSON value or `null` if the input is invalid.
+ */
 function parseJsonValue(raw) {
   if (raw === "" || raw === "null") return null;
   if (raw[0] === "{" || raw[0] === "[") {
@@ -54,7 +69,14 @@ function parseJsonValue(raw) {
   return raw;
 }
 
-/** readSectionData implementation. */
+/**
+ * Reads and parses JSON data from a section.
+ *
+ * Guarantees returning the parsed JSON data if valid, or `null` if the input is an empty string or "null".
+ * Falls through without erroring if the input is an invalid JSON string, boolean, or null.
+ *
+ * @returns The parsed JSON data or `null` if the input is invalid.
+ */
 async function readSectionData() {
   try {
     const text = await readFile(settingsPath, "utf8");
@@ -97,7 +119,13 @@ verbs:
 `);
 }
 
-/** main implementation. */
+/**
+ * Updates the section data in the settings file.
+ * Ensures the file exists and contains the updated section.
+ * If the file does not exist, it creates a new one with the section data.
+ * Throws an error if reading or writing the file fails.
+ * @param {Object} section - The section data to write.
+ */
 async function main() {
   const verb = process.argv[2];
   const argv = process.argv.slice(3);

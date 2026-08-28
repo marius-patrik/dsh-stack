@@ -20,12 +20,24 @@ export interface GitHubRunnerStatus {
   runnerName: string;
 }
 
-/** defaultDir implementation. */
+/**
+ * Returns the directory path for the GitHub Actions runner.
+ *
+ * Guarantees: Returns a string representing the directory path.
+ *             If `config.runnerDir` is not provided, defaults to `DSH_HOME/github-runner`.
+ *             Fallbacks to `~/.agents/github-runner` if `DSH_HOME` is not set.
+ *
+ * Throws: Error if `config.owner`, `config.repository`, or `config.registrationToken` is missing.
+ */
 function defaultDir(): string {
   return join(process.env.DSH_HOME ?? join(homedir(), ".agents"), "github-runner");
 }
 
-/** runnerArchive implementation. */
+/**
+ * Guarantees: Returns a string representing the runner's archive name.
+ *             Includes the operating system and CPU architecture.
+ * Throws: Error if `config.owner`, `config.repository`, or `config.registrationToken` is missing.
+ */
 function runnerArchive(): string {
   const os = platform() === "darwin" ? "osx" : platform();
   const cpu = arch() === "arm64" ? "arm64" : "x64";
@@ -43,17 +55,34 @@ export class GitHubActionsRunnerManager {
     this.config = { ...config, runnerDir: config.runnerDir ?? defaultDir() };
   }
 
-  /** runnerDir implementation. */
+  /**
+   * Returns the directory for the GitHub Actions runner.
+   *
+   * Guarantees: Returns the `runnerDir` from the configuration if provided; otherwise, returns the default directory.
+   * Throws: Error if `config.owner`, `config.repository`, or `config.registrationToken` is missing.
+   */
   get runnerDir(): string {
     return this.config.runnerDir ?? defaultDir();
   }
 
-  /** runnerName implementation. */
+  /**
+   * Constructs an instance of GitHubActionsRunnerManager.
+   *
+   * Guarantees: Sets up the configuration with `owner`, `repository`, and `registrationToken`.
+   * Throws: Error if `owner`, `repository`, or `registrationToken` is missing from the configuration.
+   * Returns: An instance of GitHubActionsRunnerManager.
+   */
   get runnerName(): string {
     return this.config.runnerName ?? `dsh-${platform()}-${arch()}`;
   }
 
-  /** status implementation. */
+  /**
+   * Initializes a GitHubActionsRunnerManager instance.
+   *
+   * Guarantees: Sets up the configuration with `owner`, `repository`, and `registrationToken`.
+   * Throws: Error if `owner`, `repository`, or `registrationToken` is missing from the configuration.
+   * Returns: An instance of GitHubActionsRunnerManager.
+   */
   status(): GitHubRunnerStatus {
     return {
       installed: false,
@@ -109,7 +138,13 @@ fi
 `;
   }
 
-  /** writeInstallScript implementation. */
+  /**
+   * Generates a Unix installation script for the GitHub Runner.
+   * The script sets up environment variables for the runner's directory, name, URL, registration token, and labels.
+   * The generated script is not executed immediately; it must be sourced or run manually.
+   *
+   * @returns A string representing the installation script content.
+   */
   async writeInstallScript(): Promise<string> {
     await mkdir(this.runnerDir, { recursive: true });
     const path = join(this.runnerDir, "install.sh");

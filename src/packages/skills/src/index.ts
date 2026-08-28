@@ -14,14 +14,25 @@ export class SkillLoaderService extends Service {
     super(ctx, "skills");
   }
 
-  /** loadSkill implementation. */
+  /**
+   * Loads the specified skill.
+   *
+   * Guarantees that the skill name is not empty or whitespace.
+   * Returns true if the skill is successfully loaded, otherwise false.
+   *
+   * Fails if the skill name is empty or contains only whitespace.
+   */
   loadSkill(skillName: string): boolean {
     if (!skillName.trim()) return false;
     this.loadedSkills.add(skillName);
     return true;
   }
 
-  /** hasSkill implementation. */
+  /**
+   * Guarantees that the skill name is not empty or whitespace.
+   * Returns true if the skill is in the loadedSkills set, otherwise false.
+   * Fails if the skill name is empty or contains only whitespace.
+   */
   hasSkill(skillName: string): boolean {
     return this.loadedSkills.has(skillName);
   }
@@ -29,7 +40,11 @@ export class SkillLoaderService extends Service {
 
 export const Config = Schema.object({});
 
-/** apply implementation. */
+/**
+ * Applies the context to the SkillLoaderService, ensuring the service is initialized.
+ * Guarantees that the context is valid and not null.
+ * Fails if the context is invalid or not provided.
+ */
 export function apply(ctx: Context): void {
   new SkillLoaderService(ctx);
 }

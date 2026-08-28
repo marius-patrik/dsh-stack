@@ -19,7 +19,16 @@ const ENV_DENYLIST = new Set([
 export const environmentVariables: Detector = {
   name: "environment-variables",
   provider: "environment",
-  /** detect implementation. */
+  /**
+   * Detects environment variables that are API keys and not on the denylist.
+   *
+   * Guarantees:
+   * - Returns an array of `Finding` objects representing detected API keys.
+   * - Each finding includes details like detector name, provider, type, suggested ID, label, purpose, plan, and origin.
+   *
+   * Fails when:
+   * - The environment source does not provide environment variables or when the environment variables do not match the criteria.
+   */
   async detect(source, context) {
     const environment = await source.environment();
     const findings: Finding[] = [];
@@ -52,7 +61,13 @@ export const environmentVariables: Detector = {
   },
 };
 
-/** providerFromEnvName implementation. */
+/**
+ * Converts an environment variable name to a provider type identifier.
+ *
+ * Guarantees a lowercase identifier based on the input name, removing trailing
+ * "_API_KEY" or "_TOKEN" and ensuring a non-empty result. Returns "environment"
+ * if the input name is empty or does not match the expected pattern.
+ */
 function providerFromEnvName(name: string): string {
   const head = name.replace(/_(API_KEY|TOKEN)$/, "").toLowerCase();
   return head || "environment";

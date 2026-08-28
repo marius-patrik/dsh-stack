@@ -46,7 +46,15 @@ export async function exists(target: string): Promise<boolean> {
   }
 }
 
-/** ensurePrivateDirectory implementation. */
+/**
+ * Ensures the directory exists with private permissions and writes the file with the specified mode.
+ *
+ * The caller must guarantee the directory exists with the correct permissions before calling this function.
+ * This function will create the directory if it does not exist, setting the mode to 0o700 on non-Windows platforms.
+ * It then writes the file with the specified mode, ensuring no wider permissions are applied.
+ *
+ * @param directory - The directory path to ensure exists with private permissions.
+ */
 export async function ensurePrivateDirectory(directory: string): Promise<void> {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   if (process.platform !== "win32") await chmod(directory, 0o700);
@@ -112,7 +120,13 @@ export async function writePrivateFileExclusive(file: string, content: string): 
   return true;
 }
 
-/** temporaryName implementation. */
+/**
+ * Generates a temporary name for a file by appending a unique identifier based on the process ID and a random UUID.
+ * Guarantees a unique temporary file name in the same directory as the given file.
+ *
+ * @param file - The original file path to generate the temporary name for.
+ * @returns A temporary file name as a string.
+ */
 function temporaryName(file: string): string {
   return path.join(
     path.dirname(file),

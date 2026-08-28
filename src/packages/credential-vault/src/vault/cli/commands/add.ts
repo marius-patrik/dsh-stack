@@ -12,7 +12,14 @@ import type { VaultCliIo } from "../io.js";
 import { openVault } from "../vault-location.js";
 import { isSecretType, readMaterialInput, scopeFrom, warnEmptyScope } from "./shared.js";
 
-/** addCommand implementation. */
+/**
+ * Adds a new command to the vault.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param io - The input/output interface for the CLI.
+ * @returns A promise that resolves with the command ID or error code.
+ * @throws If the secret type is unknown or the scope is empty.
+ */
 export async function addCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store } = await openVault(io);
   const id = required(args, "id");

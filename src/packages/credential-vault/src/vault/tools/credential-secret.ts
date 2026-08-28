@@ -23,7 +23,15 @@ export function credentialSecret(record: SecretRecord): SecretValue | null {
   }
 }
 
-/** accountOf implementation. */
+/**
+ * Extracts the account identifier from a secret record.
+ *
+ * Guarantees a string representing the account identifier if found in the tags
+ * or material, or null if no account identifier is present.
+ *
+ * @param record - The secret record to extract the account identifier from.
+ * @returns The account identifier as a string or null if not found.
+ */
 export function accountOf(record: SecretRecord): string | null {
   const tag = record.tags.find((entry) => entry.startsWith(ACCOUNT_TAG));
   if (tag) return tag.slice(ACCOUNT_TAG.length) || null;
@@ -78,7 +86,13 @@ export function privateKeyInput(
   return { key: Buffer.from(value, "base64"), format: "der", type: "pkcs8" };
 }
 
-/** auditActionFor implementation. */
+/**
+ * Determines the audit action type based on the provided VaultToolOperation.
+ *
+ * Guarantees: Returns one of "tool_fetch", "tool_totp", "tool_process", "tool_sign", or "tool_describe".
+ * Must receive a `VaultToolOperation` as input.
+ * Fails if the operation is not recognized, returning undefined.
+ */
 export function auditActionFor(
   operation: VaultToolOperation,
 ): "tool_fetch" | "tool_totp" | "tool_process" | "tool_sign" | "tool_describe" {

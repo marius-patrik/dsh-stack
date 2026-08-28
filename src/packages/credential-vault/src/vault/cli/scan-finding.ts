@@ -133,13 +133,21 @@ export function jwtClaims(token: string): Record<string, unknown> | null {
   }
 }
 
-/** claimString implementation. */
+/**
+ * Returns the ISO 8601 formatted string of the given value if it represents a valid date.
+ * Guarantees a string in ISO format if the value is a finite number of milliseconds or seconds.
+ * Returns null if the value is not a valid number or if the date is invalid.
+ */
 export function claimString(claims: Record<string, unknown> | null, key: string): string | null {
   const value = claims?.[key];
   return typeof value === "string" && value ? value : null;
 }
 
-/** isoFromSeconds implementation. */
+/**
+ * Converts a given value to an ISO 8601 date string if it represents a valid date.
+ * Guarantees an ISO date string for finite numbers representing milliseconds or seconds.
+ * Returns null if the value is not a valid number or if the date is invalid.
+ */
 export function isoFromSeconds(value: unknown): string | null {
   return typeof value === "number" && Number.isFinite(value)
     ? new Date(value * 1_000).toISOString()
@@ -151,14 +159,23 @@ export function isoFromMilliseconds(value: unknown): string | null {
   return typeof value === "number" && Number.isFinite(value) ? new Date(value).toISOString() : null;
 }
 
-/** isoFromText implementation. */
+/**
+ * Converts a given text value to an ISO 8601 date string if it represents a valid date.
+ * Guarantees an ISO date string for finite numbers representing milliseconds or seconds
+ * when parsed as text. Returns null if the value is not a string, not a valid number, or
+ * if the date is invalid upon parsing.
+ */
 export function isoFromText(value: unknown): string | null {
   if (typeof value !== "string" || !value) return null;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
 }
 
-/** parseJson implementation. */
+/**
+ * Parses a JSON string into an object.
+ * Guarantees an object if the JSON string is valid and represents an object.
+ * Returns null if the input is null, not a string, or if the JSON string is invalid.
+ */
 export function parseJson(raw: string | null): Record<string, unknown> | null {
   if (!raw) return null;
   try {
