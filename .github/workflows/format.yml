@@ -16,7 +16,7 @@ permissions:
 jobs:
   format:
     name: Format repository
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout PR head
         uses: actions/checkout@v5
