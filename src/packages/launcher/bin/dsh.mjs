@@ -37,6 +37,7 @@ import {
   startServer,
   statusReport,
   stopServer,
+  tsxAvailable,
   verbBin,
 } from "../lib/index.js";
 
@@ -155,6 +156,15 @@ async function execute(plan, ctx) {
   const cli = harnessCli(harnessDir);
   if (cli === null) {
     process.stderr.write(`dsh: harness CLI not found under ${harnessDir}\n`);
+    process.exitCode = 1;
+    return;
+  }
+  if (cli.tsx && !tsxAvailable(pkgDir)) {
+    process.stderr.write(
+      "dsh: no built harness CLI found, and the dev fallback needs 'tsx' from this " +
+        "checkout's node_modules, which isn't resolvable right now (mid-reinstall?). " +
+        "Run `pnpm install` in the checkout and try again.\n",
+    );
     process.exitCode = 1;
     return;
   }
