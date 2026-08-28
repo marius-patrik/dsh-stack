@@ -17,7 +17,13 @@ async function readJson(path) {
   return JSON.parse(await fs.readFile(path, "utf8"));
 }
 
-/** discoverStackPackages implementation. */
+/**
+ * Discovers available stack packages from specified directories.
+ *
+ * Guarantees a Map of package IDs to their directories and manifests.
+ * Returns `Map<string, { dir: string, manifest: object }>`.
+ * Fails silently by skipping directories without a valid `stack.json`.
+ */
 async function discoverStackPackages() {
   const byId = new Map();
   for (const catalogRoot of ["src/packages", "publish/extensions", "publish/packs"]) {
@@ -51,8 +57,18 @@ const dependencies = dependencyIds.map((id) => {
 
 dependencies.sort((a, b) => a.id.localeCompare(b.id));
 
-const /** run implementation. */
-  run = (child) =>
+/**
+ * Runs a specified command in the context of a child directory.
+ *
+ * Guarantees the command will be executed in the child's directory with its
+ * standard input/output inherited. Returns a promise that resolves on successful
+ * execution or rejects with an error if the command fails or is terminated.
+ *
+ * @param {Object} child - An object containing the directory path and ID of the
+ *                        child process to execute the command in.
+ * @throws Will throw an error if the specified command fails or is terminated.
+ */
+const run = (child) =>
     new Promise((resolvePromise, reject) => {
       const childProcess = spawn("pnpm", ["run", "--if-present", command], {
         cwd: child.dir,

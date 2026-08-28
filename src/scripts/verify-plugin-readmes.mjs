@@ -9,7 +9,13 @@ const roots = [
 ];
 const missing = [];
 
-/** walk implementation. */
+/**
+ * Inspects directories for the presence of a `package.json` and optionally a `README` file.
+ *
+ * Guarantees: Logs directories missing a `README` file if a `package.json` is found.
+ * Returns: Undefined.
+ * Fails: Ignores directories without a `package.json` or containing `node_modules` or `packs`.
+ */
 async function walk(dir) {
   let entries;
   try {
