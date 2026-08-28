@@ -27,7 +27,15 @@ export type Config = ForkUndoConfigType;
 
 export const Config: z<Config> = ForkUndoConfig;
 
-/** apply implementation. */
+/**
+ * Applies the configuration to enable or disable fork undo functionality.
+ *
+ * Guarantees that fork undo is installed if `config.enabled` is true, and
+ * ensures that no changes are made if `config.enabled` is false.
+ *
+ * @param ctx - The context in which to apply the configuration.
+ * @param config - The configuration object determining if fork undo is enabled.
+ */
 export function apply(ctx: Context, config: Config): void {
   const session: ForkUndoConfigType = { enabled: config?.enabled ?? true };
   installLiveSettingsSection(ctx, NS_FORK_UNDO, ForkUndoConfig, session, undefined, () => {});

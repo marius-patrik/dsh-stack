@@ -66,7 +66,11 @@ export const route: ProviderRoute = {
 export const name = "provider-antigravity-sub";
 export const inject = ["providers"];
 
-/** apply implementation. */
+/**
+ * Registers the route with the given context's providers.
+ *
+ * @param ctx - The context containing providers to register the route with.
+ */
 export function apply(ctx: Context): void {
   ctx.providers.register(route);
 }

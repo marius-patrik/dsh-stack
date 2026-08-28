@@ -18,7 +18,12 @@ export function DeepSeekBrandMark({ size = 24 }: SkinBrandProps): JSX.Element {
   );
 }
 
-/** DeepSeekBrandName implementation. */
+/**
+ * Returns a styled span element displaying the brand name "DeepSeek".
+ * The text is rendered in bold with a specific letter spacing.
+ *
+ * @returns A JSX element representing the brand name.
+ */
 export function DeepSeekBrandName(): JSX.Element {
   return <span style={{ fontWeight: 650, letterSpacing: "-0.01em" }}>DeepSeek</span>;
 }

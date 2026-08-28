@@ -16,6 +16,7 @@
  * Usage:
  *   node src/scripts/rewrite-filler-jsdoc.mjs --dry-run
  *   node src/scripts/rewrite-filler-jsdoc.mjs --package providers --limit 20
+ *   node src/scripts/rewrite-filler-jsdoc.mjs --root publish/extensions
  *
  * @module @dsh-stack/scripts/rewrite-filler-jsdoc
  */
@@ -149,10 +150,17 @@ export function applyDoc(text, filler, block) {
   return `${text.slice(0, at)}${reindent(block, indent).trimStart()}${text.slice(at + filler.length)}`;
 }
 
+/** Reads the value following `flag` in `args`, or undefined when `flag` is absent. */
+function flagValue(args, flag) {
+  const index = args.indexOf(flag);
+  return index === -1 ? undefined : args[index + 1];
+}
+
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const pkgArg = args[args.indexOf("--package") + 1];
-const limitArg = Number(args[args.indexOf("--limit") + 1]);
+const pkgArg = flagValue(args, "--package");
+const rootArg = flagValue(args, "--root");
+const limitArg = Number(flagValue(args, "--limit"));
 const limit = Number.isFinite(limitArg) && limitArg > 0 ? limitArg : Infinity;
 
 const served = await listLocalModels();
@@ -165,7 +173,9 @@ if (served === null) {
 }
 console.log(`local server: ${served.length} model(s); using ${LOCAL_MODEL}`);
 
-const searchRoot = pkgArg ? join(root, "src", "packages", pkgArg) : join(root, "src", "packages");
+const searchRoot = pkgArg
+  ? join(root, "src", "packages", pkgArg)
+  : join(root, rootArg ?? join("src", "packages"));
 /** Descriptions already accepted, so one function's contract is not reused for another. */
 const seenDescriptions = new Set();
 let examined = 0;

@@ -105,7 +105,11 @@ export function createDshStackMarketplaceSource(
   const fetchImpl = options.fetchImpl ?? fetch;
   return {
     id: SOURCE_ID,
-    /** listEntries implementation. */
+    /**
+     * Fetches and returns a list of marketplace entries.
+     * Guarantees a successful promise resolution with an array of MarketplaceEntry objects.
+     * On failure, rejects the promise with an error.
+     */
     async listEntries(): Promise<MarketplaceEntry[]> {
       const release = await fetchLatestRelease(repo, fetchImpl);
       const manifest = await fetchManifest(release, fetchImpl);

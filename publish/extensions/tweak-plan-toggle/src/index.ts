@@ -27,7 +27,15 @@ export type Config = PlanToggleConfigType;
 
 export const Config: z<Config> = PlanToggleConfig;
 
-/** apply implementation. */
+/**
+ * Applies the plan toggle configuration to the context.
+ *
+ * Guarantees that the live settings section for plan toggle is installed if enabled.
+ * Fails silently if the configuration is not enabled.
+ *
+ * @param ctx - The context in which to apply the configuration.
+ * @param config - The plan toggle configuration.
+ */
 export function apply(ctx: Context, config: Config): void {
   const session: PlanToggleConfigType = { enabled: config?.enabled ?? true };
   installLiveSettingsSection(ctx, NS_PLAN_TOGGLE, PlanToggleConfig, session, undefined, () => {});
