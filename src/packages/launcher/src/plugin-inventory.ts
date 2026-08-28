@@ -1,8 +1,15 @@
-/** Shape of one plugin entry in a `pluginInventory/list` RPC response. */
+/**
+ * Shape of one plugin entry in a `pluginInventory/list` RPC response.
+ * `fiberPhase` is genuinely `null` on the wire for entries the harness has
+ * not instantiated yet (e.g. tool/skill entries not yet invoked) -- not a
+ * failure state, and distinct from `"pending"` (a fiber stuck waiting on an
+ * injected service that never arrived, which the harness docs call out as a
+ * real silent failure).
+ */
 export interface PluginInventoryEntry {
   entryId: string;
   moduleName: string;
-  fiberPhase: string;
+  fiberPhase: string | null;
 }
 
 /**

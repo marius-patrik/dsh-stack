@@ -38,7 +38,8 @@ async function pluginHealth(port: number): Promise<string[]> {
   if (entries === null) return [];
   const metrics = summarizePluginMetrics(entries);
   const lines = [
-    `  Plugins:       ${metrics.active}/${metrics.total} active (${metrics.failed.length} failed)`,
+    `  Plugins:       ${metrics.active} active · ${metrics.pending.length} pending · ` +
+      `${metrics.notMounted} not mounted · ${metrics.failed.length} failed`,
   ];
   for (const failed of metrics.failed.slice(0, 5)) {
     lines.push(`    ✗ Failed: ${failed.entryId} (${failed.moduleName})`);
