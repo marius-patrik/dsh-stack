@@ -41,8 +41,6 @@ export interface WireRequestBody {
     temperature?: number;
     maxOutputTokens?: number;
     stopSequences?: string[];
-    // jscpd:ignore-start -- structurally similar to claude.ts's request-shaping block but encodes Gemini-specific wire semantics; forcing a shared helper would blur real per-dialect differences
-    // jscpd:ignore-end
   };
 }
 
