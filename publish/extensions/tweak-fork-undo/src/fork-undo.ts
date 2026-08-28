@@ -22,14 +22,14 @@ export function installForkUndo(ctx: Context): unknown {
      * @returns Nothing on success, disposes of command registration on failure.
      */
     const make = (name: string, description: string, direction: -1 | 1): void => {
-        disposers.push(
-          commandCtx.commands.register({
-            name,
-            description,
-            handler: (invocation) => forkSession(commandCtx.sessions, invocation.agent, direction),
-          }),
-        );
-      };
+      disposers.push(
+        commandCtx.commands.register({
+          name,
+          description,
+          handler: (invocation) => forkSession(commandCtx.sessions, invocation.agent, direction),
+        }),
+      );
+    };
     make("undo", "Fork this session from the previous message boundary", -1);
     make("redo", "Fork this session from the latest message boundary", 1);
     return () => {

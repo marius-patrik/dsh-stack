@@ -158,7 +158,8 @@ export function formatTable(rows: SessionStatsRow[]): string {
    *
    * Fails if the `cells` array does not match the expected column width.
    */
-  const line = (cells: string[]): string => cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
+  const line = (cells: string[]): string =>
+    cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
   return [line(header), body.map(line).join("\n")].join("\n");
 }
 

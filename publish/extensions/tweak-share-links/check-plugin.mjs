@@ -109,33 +109,33 @@ const handler = share.makeShareHandler(home, "/share", true);
  * On failure, returns a response with `_status` indicating the error and an empty `_body`.
  */
 const respond = async (url) => {
-    const res = {
-      _status: 0,
-      _body: "",
-      /**
-       * Sets the response status and begins writing the response body.
-       *
-       * @param {number} s - The status code to set for the response.
-       * @returns {object} The response object with updated `_status` and an empty `_body`.
-       * On failure, returns a response with `_status` indicating the error and an empty `_body`.
-       */
-      writeHead(s) {
-        this._status = s;
-      },
-      /**
-       * Ends the response by setting the response body and finalizes the response object.
-       *
-       * @param {string} b - The body content to set for the response.
-       * @returns {object} The response object with updated `_status` and `_body`.
-       * On failure, returns a response with `_status` indicating the error and an empty `_body`.
-       */
-      end(b) {
-        this._body = b;
-      },
-    };
-    await handler({ url }, res);
-    return res;
+  const res = {
+    _status: 0,
+    _body: "",
+    /**
+     * Sets the response status and begins writing the response body.
+     *
+     * @param {number} s - The status code to set for the response.
+     * @returns {object} The response object with updated `_status` and an empty `_body`.
+     * On failure, returns a response with `_status` indicating the error and an empty `_body`.
+     */
+    writeHead(s) {
+      this._status = s;
+    },
+    /**
+     * Ends the response by setting the response body and finalizes the response object.
+     *
+     * @param {string} b - The body content to set for the response.
+     * @returns {object} The response object with updated `_status` and `_body`.
+     * On failure, returns a response with `_status` indicating the error and an empty `_body`.
+     */
+    end(b) {
+      this._body = b;
+    },
   };
+  await handler({ url }, res);
+  return res;
+};
 const plain = await respond(`/share/abc`);
 assert.equal(plain._status, 200);
 assert.ok(!plain._body.includes("#live"));
