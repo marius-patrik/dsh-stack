@@ -69,19 +69,19 @@ dependencies.sort((a, b) => a.id.localeCompare(b.id));
  * @throws Will throw an error if the specified command fails or is terminated.
  */
 const run = (child) =>
-    new Promise((resolvePromise, reject) => {
-      const childProcess = spawn("pnpm", ["run", "--if-present", command], {
-        cwd: child.dir,
-        stdio: "inherit",
-        shell: process.platform === "win32",
-      });
-      childProcess.on("error", reject);
-      childProcess.on("exit", (code, signal) => {
-        if (signal) reject(new Error(`${child.id} ${command} terminated by ${signal}`));
-        else if (code === 0) resolvePromise();
-        else reject(new Error(`${child.id} ${command} exited with ${code}`));
-      });
+  new Promise((resolvePromise, reject) => {
+    const childProcess = spawn("pnpm", ["run", "--if-present", command], {
+      cwd: child.dir,
+      stdio: "inherit",
+      shell: process.platform === "win32",
     });
+    childProcess.on("error", reject);
+    childProcess.on("exit", (code, signal) => {
+      if (signal) reject(new Error(`${child.id} ${command} terminated by ${signal}`));
+      else if (code === 0) resolvePromise();
+      else reject(new Error(`${child.id} ${command} exited with ${code}`));
+    });
+  });
 
 for (const dependency of dependencies) await run(dependency);
 console.log(`${command}: ${dependencies.length} Stack dependencies`);
