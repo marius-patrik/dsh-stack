@@ -20,11 +20,12 @@
  * @module @dsh-stack/scripts/rewrite-filler-jsdoc
  */
 import { promises as fs } from "node:fs";
-import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, relative } from "node:path";
 import { completeLocally, LOCAL_MODEL, listLocalModels } from "./local-model-client.mjs";
+import { resolveRepoRoot } from "./lib/resolve-repo-root.mjs";
+import { walkSourceTree } from "./lib/walk-source-tree.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const root = resolveRepoRoot(import.meta.url);
 
 /** Matches the generated filler form, capturing the name it restates. */
 const FILLER = /\/\*\* ([A-Za-z0-9_$]+) implementation\. \*\//g;
@@ -44,22 +45,6 @@ const SYSTEM = [
   "- Keep it under 4 lines unless parameters genuinely need documenting.",
   "- Do not invent parameters or behaviour that the code does not show.",
 ].join("\n");
-
-/** Yields every source file under a package root. */
-async function* walk(dir) {
-  let entries;
-  try {
-    entries = await fs.readdir(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    if (entry.name === "node_modules" || entry.name === "lib" || entry.name === ".git") continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) yield* walk(full);
-    else if (/\.(ts|tsx|mjs|js)$/.test(entry.name)) yield full;
-  }
-}
 
 /**
  * Decide whether a reply is safe to write.
@@ -187,7 +172,7 @@ let examined = 0;
 let rewritten = 0;
 let rejected = 0;
 
-for await (const file of walk(searchRoot)) {
+for await (const file of walkSourceTree(searchRoot, { extensions: ["ts", "tsx", "mjs", "js"] })) {
   let text = await fs.readFile(file, "utf8");
   const matches = [...text.matchAll(FILLER)];
   if (matches.length === 0) continue;
