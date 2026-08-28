@@ -78,12 +78,29 @@ export function mirrorTweaks(
   ).then(() => undefined);
 }
 
-/** apply implementation. */
+/**
+ * Applies the configuration to the current context, ensuring settings are
+ * initialized and changes are mirrored to the active configuration source.
+ *
+ * Guarantees that the settings are initialized and the active configuration
+ * source is updated if changes are detected.
+ *
+ * Fails silently if the settings provider is not mounted, but initializes
+ * the document for the next launch.
+ */
 export function apply(ctx: Context, config: Config): void {
   const currentHome = resolveHome();
   let /** current implementation. */ current: () => Config = () => config;
-  const /** mirror implementation. */
-    mirror = (): void => {
+  /**
+   * Mirrors the current configuration settings to the active configuration source.
+   *
+   * Guarantees that the settings are initialized and the active configuration
+   * source is updated if changes are detected.
+   *
+   * Fails silently if the settings provider is not mounted, but initializes
+   * the document for the next launch.
+   */
+  const mirror = (): void => {
       void mirrorTweaks(currentHome, current, ctx.logger);
     };
   // The launcher reads settings.yaml before this process exists, so the first

@@ -4,7 +4,13 @@ import type { VaultCliIo } from "../io.js";
 import { openVault } from "../vault-location.js";
 import { table } from "../scan-report.js";
 
-/** statusCommand implementation. */
+/**
+ * Checks the health of the vault and outputs the status.
+ *
+ * Returns 0 if the vault is healthy or if there are no records.
+ * Outputs JSON or a summary of vault health and returns 0 otherwise.
+ * Returns a non-zero code if an error occurs during health check.
+ */
 export async function statusCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store, directory, config } = await openVault(io);
   const supervisor = new ReauthSupervisor({ vault: store, now: io.now });

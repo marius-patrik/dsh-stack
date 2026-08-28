@@ -102,7 +102,13 @@ Object.assign(_z.prototype, {
   nullable(this: Schema): Schema {
     return _z.union([this, _z.const(null)]) as Schema;
   },
-  /** readonly implementation. */
+  /**
+   * Ensures the schema is read-only, preventing modifications.
+   *
+   * Returns the same schema object, indicating it is now read-only.
+   *
+   * @returns The same schema object, signifying it cannot be modified.
+   */
   readonly(this: Schema): Schema {
     return this;
   },

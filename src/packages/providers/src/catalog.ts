@@ -46,12 +46,20 @@ const CATALOG_TIMEOUT_MS = 15_000;
 /** How long a failed discovery is remembered, so a broken endpoint is not hammered. */
 const FAILURE_TTL_MS = 60_000;
 
-/** positiveInteger implementation. */
+/**
+ * Parses a catalog entry to extract a discovered model.
+ * @param entry - An object representing a catalog entry, typically with an `id`.
+ * @returns The discovered model object if the entry contains a valid `id`, otherwise undefined.
+ */
 function positiveInteger(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
-/** nonEmptyString implementation. */
+/**
+ * Extracts a non-empty string from a given value.
+ * @param value - The value to check.
+ * @returns The non-empty string if the value is a string and not empty, otherwise undefined.
+ */
 function nonEmptyString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }

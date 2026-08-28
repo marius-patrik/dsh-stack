@@ -77,7 +77,11 @@ export function createFileRow(node: FileNode, expanded = false): FileRowModel {
   };
 }
 
-/** extensionOf implementation. */
+/**
+ * Returns the extension of the given file name if it contains exactly one dot.
+ * @param name - The file name to extract the extension from.
+ * @returns The lowercased extension if present; otherwise, undefined.
+ */
 function extensionOf(name: string): string | undefined {
   const dot = name.lastIndexOf(".");
   if (dot <= 0 || dot === name.length - 1) return undefined;

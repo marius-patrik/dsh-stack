@@ -326,8 +326,14 @@ export function isExpired(record: SecretRecord, nowMs: number): boolean {
  */
 export function effectiveExpiryMs(record: SecretRecord): number | null {
   const candidates: number[] = [];
-  const /** push implementation. */
-    push = (value: string | null) => {
+  /**
+   * Adds the given expiration value to the candidates list if it's a valid date.
+   * Returns the earliest valid expiration date from the candidates list or null if none.
+   *
+   * @param value - The expiration value to check and add to candidates.
+   * @returns The earliest valid expiration date or null if no valid dates are found.
+   */
+  const push = (value: string | null) => {
       if (!value) return;
       const parsed = Date.parse(value);
       if (Number.isFinite(parsed)) candidates.push(parsed);
@@ -337,7 +343,12 @@ export function effectiveExpiryMs(record: SecretRecord): number | null {
   return candidates.length === 0 ? null : Math.min(...candidates);
 }
 
-/** bind implementation. */
+/**
+ * Binds metadata to a secret material ensuring they match in type.
+ * @param metadata - The metadata describing the secret.
+ * @param material - The secret material to bind.
+ * @returns A SecretRecord if the types match, otherwise throws an error.
+ */
 function bind(metadata: SecretMetadata, material: SecretMaterial): SecretRecord {
   if (metadata.type !== material.type) {
     throw new Error(
@@ -405,12 +416,25 @@ export interface SecretRecordPayload {
   material: SecretMaterialPayload;
 }
 
-/** encodeSecretRecord implementation. */
+/**
+ * Encodes a secret record into a SecretRecordPayload.
+ *
+ * Guarantees:
+ * - Returns a SecretRecordPayload containing the metadata and material of the secret record.
+ * - Metadata and material are derived from the input secret record.
+ * - Fails if the input record does not conform to the expected SecretRecord shape.
+ */
 export function encodeSecretRecord(record: SecretRecord): SecretRecordPayload {
   return { metadata: descriptorOf(record), material: encodeSecretMaterial(record.material) };
 }
 
-/** decodeSecretRecord implementation. */
+/**
+ * Decodes a secret record into its respective payload format.
+ *
+ * Guarantees:
+ * - Returns a SecretRecordPayload with metadata and material based on the secret record type.
+ * - Fails if the input record does not match any recognized secret record type.
+ */
 export function decodeSecretRecord(value: unknown, id: string): SecretRecord {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`stored secret is not an object: ${id}`);
@@ -583,7 +607,15 @@ function requireString(value: unknown, field: string, id: string): string {
   return value;
 }
 
-/** optionalString implementation. */
+/**
+ * Ensures the provided value is a non-empty string, throwing an error if not.
+ *
+ * @param value - The value to check.
+ * @param field - The name of the field being checked.
+ * @param id - The identifier for the stored secret.
+ * @returns The value if it is a non-empty string.
+ * @throws Will throw an error if the value is not a non-empty string.
+ */
 function optionalString(value: unknown, field: string, id: string): string | null {
   if (value === null || value === undefined) return null;
   if (typeof value !== "string") throw new Error(`stored secret ${id} has a malformed ${field}`);

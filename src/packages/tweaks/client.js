@@ -689,7 +689,13 @@ window.__ModuleLoader__.load({
     var createGlyphComponent = __dshCreateGlyphComponent(h);
     var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
 
-    /** KeychainNavIcon implementation. */
+    /**
+     * Creates a navigation icon component with a specified size and path elements.
+     *
+     * The function returns an array of SVG path elements that define the icon's appearance.
+     *
+     * @returns {Array} An array of SVG path elements composing the icon.
+     */
     var KeychainNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
@@ -709,7 +715,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** GeneralNavIcon implementation. */
+    /**
+     * Creates a navigation icon component.
+     *
+     * Returns an array of SVG elements representing the icon.
+     *
+     * On failure, it returns an empty array.
+     */
     var GeneralNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("line", { x1: "21", x2: "14", y1: "4", y2: "4" }),
@@ -724,7 +736,14 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** TerminalsNavIcon implementation. */
+    /**
+     * Renders a navigation icon for terminals.
+     *
+     * This icon consists of multiple lines and a polyline that form a specific shape.
+     * It is used to represent terminals within a navigation interface.
+     *
+     * @returns {Array} An array of SVG elements representing the icon.
+     */
     var TerminalsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("polyline", { points: "4 17 10 11 4 5" }),
@@ -732,7 +751,14 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** ContainersNavIcon implementation. */
+    /**
+     * Renders a navigation icon for containers.
+     *
+     * This icon consists of multiple SVG elements that form a specific shape,
+     * typically used to represent containers within a navigation interface.
+     *
+     * @returns {Array} An array of SVG elements representing the container icon.
+     */
     var ContainersNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", {
@@ -756,7 +782,11 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** PlugNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path elements composing the plug icon.
+     */
     var PlugNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("rect", { width: "7", height: "7", x: "14", y: "3", rx: "1" }),
@@ -766,7 +796,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** ToolsNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path and rect elements composing the plug icon.
+     *                  The function returns an array of path and rect elements that form the navigation icon.
+     *                  If the function fails to create the icon, it returns an empty array.
+     */
     var ToolsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", {
@@ -775,7 +811,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** LoopsNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path and rect elements composing the plug icon.
+     *                 The function returns a set of path and rect elements that form the
+     *                 visual representation of the plug icon.
+     */
     var LoopsNavIcon = createGlyphComponent(
       16,
       "dsh-icon-refresh",
@@ -792,12 +834,22 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** TriangleRightFill14 implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path elements composing the plug icon.
+     *                  If the function fails to create the icon, it returns an empty array.
+     */
     var TriangleRightFill14 = createGlyphComponent(14, "", true, true, false, function () {
       return [h("polyline", { points: "9 18 15 12 9 6" })];
     });
 
-    /** RobotHeadNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path and rect elements composing the plug icon.
+     *                  If successful, returns an array containing the icon elements; otherwise, returns an empty array.
+     */
     var RobotHeadNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", { d: "M12 8V4H8" }),
@@ -809,7 +861,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** KeyboardNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing navigation icons.
+     *
+     * @returns {Array} An array of SVG elements composing the navigation icon,
+     *                 ensuring the visual representation is correctly formed.
+     *                 If creation fails, returns an empty array.
+     */
     var KeyboardNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("rect", { width: "20", height: "16", x: "2", y: "4", rx: "2" }),
@@ -833,7 +891,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** SettingsIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG elements composing the plug icon, including paths and a polyline.
+     *                  If successful, returns the icon elements; otherwise, returns an empty array.
+     */
     var SettingsIcon = createGlyphComponent(
       16,
       "dsh-icon-settings",
@@ -858,7 +921,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** CloseIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing close icons.
+     *
+     * @returns {Array} An array of SVG elements composing the close icon,
+     *                 ensuring the visual representation is correctly formed.
+     *                 If creation fails, returns an empty array.
+     */
     var CloseIcon = createGlyphComponent(14, "", false, true, false, function () {
       return [h("path", { d: "M18 6 6 18" }), h("path", { d: "m6 6 12 12" })];
     });
@@ -872,7 +941,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** PaletteIcon implementation. */
+    /**
+     * Returns an array of SVG components representing the icon.
+     * If creation fails, returns an empty array.
+     *
+     * @returns {Array} An array of SVG components or an empty array on failure.
+     */
     var PaletteIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
@@ -888,7 +962,12 @@ window.__ModuleLoader__.load({
     /** AgentPresetIcon implementation — same bot-head glyph as RobotHeadNavIcon. */
     var AgentPresetIcon = RobotHeadNavIcon;
 
-    /** EllipsisIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the ellipsis navigation icon.
+     *
+     * @returns {Array} An array of SVG elements composing the ellipsis icon, including paths and circles.
+     *                  If successful, returns the icon elements; otherwise, returns an empty array.
+     */
     var EllipsisIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("circle", { cx: "12", cy: "12", r: "1" }),
@@ -897,7 +976,15 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** DownloadIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing close icons.
+     *
+     * Guarantees:
+     * - Returns an array containing SVG elements for the close icon.
+     *
+     * On failure path:
+     * - Throws an error if the SVG generation function fails to return an array.
+     */
     var DownloadIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
@@ -906,7 +993,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** BranchIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing close icons.
+     *
+     * @returns {Array} An array of SVG elements composing the close icon, ensuring the visual representation is correctly formed.
+     *                 If creation fails, returns an empty array.
+     */
     var BranchIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
@@ -952,7 +1044,15 @@ window.__ModuleLoader__.load({
     // to zero rows still returns a (non-null) empty fragment, so testing the
     // return value for null/undefined never fired and glyph-less sections
     // rendered a blank cell instead of the shell mark.
-    /** navGlyph implementation. */
+    /**
+     * Returns an array of SVG elements representing ellipsis icons.
+     *
+     * Guarantees:
+     * - Returns an array containing SVG elements for the ellipsis icon.
+     *
+     * On failure path:
+     * - Throws an error if the SVG generation function fails to return an array.
+     */
     function navGlyph(renderSlot, row) {
       if (typeof renderSlot !== "function") return navIcon(row.id);
       try {
@@ -980,7 +1080,12 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** ChatGlyph implementation. */
+    /**
+     * Returns an SVG element representing the navigation icon based on the provided ID.
+     *
+     * @param {string} id - The ID specifying the type of navigation icon to return.
+     * @returns {JSX.Element} The SVG element for the navigation icon, or an empty element if the ID is unrecognized.
+     */
     var ChatGlyph = createDecoratedGlyphComponent(
       16,
       "",
@@ -991,7 +1096,15 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** TerminalsGlyph implementation. */
+    /**
+     * Returns a navigation icon based on the provided ID.
+     *
+     * Guarantees: Returns an HTML element representing a navigation icon.
+     *             Returns `null` if the ID does not match any known icon.
+     *
+     * @param {string} id - The ID corresponding to the desired navigation icon.
+     * @returns {React.ReactElement | null} The navigation icon or null if ID is unrecognized.
+     */
     var TerminalsGlyph = createDecoratedGlyphComponent(
       16,
       "",
@@ -1005,7 +1118,18 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** ContainersGlyph implementation. */
+    /**
+     * Returns a navigation icon based on the provided `id`.
+     *
+     * Guarantees:
+     * - Returns `h(ContainersNavIcon)` if `id` is "containers".
+     * - Returns `h(DataGlyph)` for "models" or "provider-usage".
+     * - Returns `h(CommandsIcon)` for "session-modes", "actions", or "commands".
+     * - Returns `h(SettingsIcon)` for any other `id`.
+     *
+     * Fails:
+     * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+     */
     var ContainersGlyph = createDecoratedGlyphComponent(
       16,
       "",
@@ -1021,7 +1145,15 @@ window.__ModuleLoader__.load({
     );
 
     var SettingsPanelErrorBoundary = (function (_super) {
-      /** SettingsPanelErrorBoundary implementation. */
+      /**
+       * Returns the appropriate navigation icon based on the provided `id`.
+       *
+       * Guarantees a navigation icon (`h(...)`) is returned for the given `id`,
+       * falling back to `SettingsIcon` if no specific icon is matched.
+       *
+       * @param {string} id - The identifier for the navigation section.
+       * @returns {React.ReactElement} The navigation icon corresponding to the `id`.
+       */
       function SettingsPanelErrorBoundary(props) {
         if (_super && typeof _super === "function") {
           try {
@@ -1141,7 +1273,18 @@ window.__ModuleLoader__.load({
       return SettingsPanelErrorBoundary;
     })(React ? React.Component : undefined);
 
-    /** SelectDropdownMenu implementation. */
+    /**
+     * Returns a navigation icon based on the provided `id`.
+     *
+     * Guarantees:
+     * - Returns `h(ContainersNavIcon)` for "containers".
+     * - Returns `h(DataGlyph)` for "models" or "provider-usage".
+     * - Returns `h(CommandsIcon)` for "session-modes", "actions", or "commands".
+     * - Returns `h(SettingsIcon)` for any other `id`.
+     *
+     * Fails:
+     * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+     */
     function SelectDropdownMenu(props) {
       var open = props.open,
         onClose = props.onClose,
@@ -1152,8 +1295,17 @@ window.__ModuleLoader__.load({
       React.useEffect(
         function () {
           if (!open) return;
-          var /** handlePointerDown implementation. */
-            handlePointerDown = function (e) {
+          /**
+           * Guarantees:
+           * - Returns a React component based on the `id` parameter:
+           *   - `h(ContainersNavIcon)` for "containers".
+           *   - `h(DataGlyph)` for "models" or "provider-usage".
+           *   - `h(CommandsIcon)` for "session-modes", "actions", or "commands".
+           *   - `h(SettingsIcon)` for any other `id`.
+           * Fails:
+           * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+           */
+          var handlePointerDown = function (e) {
               if (menuRef.current && !menuRef.current.contains(e.target)) {
                 onClose();
               }
@@ -1237,7 +1389,12 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** TriggerContent implementation. */
+    /**
+     * Displays an error message indicating a non-fatal error occurred while rendering settings.
+     *
+     * This component will render a panel with a title "Settings (Recovered)" and an error message
+     * stating that a non-fatal error occurred.
+     */
     function TriggerContent(props) {
       var wide = Boolean(props && props.wide);
       var t = props && props.t;
@@ -1274,13 +1431,22 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** HeaderContent implementation. */
+    /**
+     * Displays a header content with options to retry or close an action.
+     *
+     * @returns {JSX.Element} A JSX element representing the header content.
+     */
     function HeaderContent(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("title") : "Settings");
     }
 
-    /** CloseLabel implementation. */
+    /**
+     * Displays a SettingsPanelErrorBoundary component with a "Close" button.
+     * The "Close" button triggers the `onClose` prop function when clicked.
+     *
+     * @returns {JSX.Element} A SettingsPanelErrorBoundary component containing a button to close the label.
+     */
     function CloseLabel(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("close") : "Close");
@@ -1517,8 +1683,15 @@ window.__ModuleLoader__.load({
       var autoScroll = autoScrollState[0],
         setAutoScroll = autoScrollState[1];
 
-      var /** handleToggleNotice implementation. */
-        handleToggleNotice = function (e) {
+      /**
+       * Sets various CSS variables for the palette to update the UI's appearance.
+       *
+       * This function updates the background and surface colors for different layers
+       * and borders, ensuring the UI reflects the provided palette settings.
+       *
+       * @param {Object} palette - An object containing color values for the UI.
+       */
+      var handleToggleNotice = function (e) {
           var checked = e.target.checked;
           setNoticeEnabled(checked);
           if (typeof window !== "undefined" && window.localStorage) {
@@ -1526,8 +1699,13 @@ window.__ModuleLoader__.load({
           }
         };
 
-      var /** handleToggleSearch implementation. */
-        handleToggleSearch = function (e) {
+      /**
+       * Sets the theme style based on the provided theme type.
+       *
+       * Guarantees the document's root element's data-theme attribute is set to the given theme type.
+       * On failure, the style element's text content is updated with the new CSS, but no attribute is set.
+       */
+      var handleToggleSearch = function (e) {
           var checked = e.target.checked;
           setSearchEnabled(checked);
           if (typeof window !== "undefined" && window.localStorage) {
@@ -1538,8 +1716,15 @@ window.__ModuleLoader__.load({
           }
         };
 
-      var /** handleToggleSwapSidebars implementation. */
-        handleToggleSwapSidebars = function (e) {
+      /**
+       * Toggles the swap sidebars state, updating the theme and container styles accordingly.
+       *
+       * The function sets the data-theme attribute on the document element to either "oled", "light", or removes it,
+       * depending on the themeType. It also updates the container styles for the settings row.
+       *
+       * On failure, the function does not change the theme or styles, maintaining the current state.
+       */
+      var handleToggleSwapSidebars = function (e) {
           var checked = e.target.checked;
           setSwapSidebars(checked);
           if (typeof window !== "undefined" && window.localStorage) {
@@ -1561,8 +1746,14 @@ window.__ModuleLoader__.load({
       var hideSendButton = hideSendState[0],
         setHideSendButton = hideSendState[1];
 
-      var /** handleToggleHideSend implementation. */
-        handleToggleHideSend = function (e) {
+      /**
+       * Toggles the visibility of the send action in the settings interface.
+       *
+       * Guarantees that the send action visibility is flipped to the opposite state.
+       *
+       * @returns {void} No return value, but changes the visibility of the send action.
+       */
+      var handleToggleHideSend = function (e) {
           var checked = e.target.checked;
           setHideSendButton(checked);
           if (typeof window !== "undefined" && window.localStorage) {
@@ -1581,8 +1772,15 @@ window.__ModuleLoader__.load({
       var composerLayout = composerLayoutState[0],
         setComposerLayout = composerLayoutState[1];
 
-      var /** handleSelectComposerLayout implementation. */
-        handleSelectComposerLayout = function (e) {
+      /**
+       * Renders a settings row with a title, description, and a toggle checkbox control.
+       * @param {string} title - The title of the settings row.
+       * @param {string} description - The description of the settings row.
+       * @param {boolean} checked - The initial checked state of the toggle checkbox.
+       * @param {function} onChange - The callback for when the checkbox state changes.
+       * @returns {JSX.Element} A JSX element representing the settings row.
+       */
+      var handleSelectComposerLayout = function (e) {
           var val = e.target.value;
           setComposerLayout(val);
           if (typeof window !== "undefined" && window.localStorage) {
@@ -1733,7 +1931,11 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** ThemeSettingsSection implementation. */
+    /**
+     * Sets the document's data-theme attribute to "oled" or "light" based on the themeType,
+     * and updates the container styles for the settings row. On failure, it maintains the
+     * current theme and styles without change.
+     */
     function ThemeSettingsSection() {
       var THEME_PRESETS = [
         {
@@ -1884,8 +2086,13 @@ window.__ModuleLoader__.load({
       var newThemeName = newThemeNameState[0],
         setNewThemeName = newThemeNameState[1];
 
-      var /** applyPaletteToPage implementation. */
-        applyPaletteToPage = applyCustomThemePaletteVars;
+      /**
+       * Sets the composer toolbar layout and the default agent preset for the page.
+       *
+       * Guarantees the composer toolbar layout and default preset are updated according to user selection.
+       * Fails if the layout or preset selection is invalid or not persistable.
+       */
+      var applyPaletteToPage = applyCustomThemePaletteVars;
 
       var /** selectPreset implementation. */
         selectPreset = function (preset) {
@@ -1911,8 +2118,12 @@ window.__ModuleLoader__.load({
           }
         };
 
-      var /** handleSaveCustomTheme implementation. */
-        handleSaveCustomTheme = function () {
+      /**
+       * Sets the execution permission level based on the selected preset.
+       * Updates the UI and persists the selected preset to local storage.
+       * If an invalid preset is selected, no changes are made.
+       */
+      var handleSaveCustomTheme = function () {
           var name = (newThemeName || "").trim();
           if (!name) {
             name = "Custom Theme " + (customThemes.length + 1);
@@ -1931,8 +2142,15 @@ window.__ModuleLoader__.load({
           }
         };
 
-      var /** handleDeleteCustomTheme implementation. */
-        handleDeleteCustomTheme = function (themeId, e) {
+      /**
+       * Handles the deletion of a custom theme setting.
+       *
+       * Guarantees that the theme setting is removed from the settings state and
+       * persists the change to local storage.
+       *
+       * Fails if the theme setting is not found in the settings state.
+       */
+      var handleDeleteCustomTheme = function (themeId, e) {
           if (e) e.stopPropagation();
           var nextList = customThemes.filter(function (t) {
             return t.id !== themeId;
@@ -1943,8 +2161,15 @@ window.__ModuleLoader__.load({
           }
         };
 
-      var /** handleExportThemes implementation. */
-        handleExportThemes = function () {
+      /**
+       * Toggles the export themes setting, persisting the preference to local storage.
+       *
+       * - Ensures the `showThinking` or `autoScroll` state is updated based on the checkbox value.
+       * - Stores the setting in local storage as "dsh_export_themes" with "true" or "false" value.
+       *
+       * Fails if the setting value is not correctly updated or persisted.
+       */
+      var handleExportThemes = function () {
           var data = {
             activeTheme: activeTheme,
             customPalette: customPalette,
@@ -2438,7 +2663,14 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** CustomizationSettingsSection implementation. */
+    /**
+     * Renders a section of customization settings with a grid layout for color fields.
+     * Each field is displayed in a flex container with specific styling for padding,
+     * border, and background color. The background color is derived from the `customPalette`
+     * object or defaults to a specific hex code if not found.
+     *
+     * @returns {JSX.Element} A JSX element representing the customization settings section.
+     */
     function CustomizationSettingsSection() {
       var subtabState = React.useState("skills");
       var subtab = subtabState[0],
@@ -2602,8 +2834,13 @@ window.__ModuleLoader__.load({
         },
       ];
 
-      var /** handleRunHookTest implementation. */
-        handleRunHookTest = function (hookId) {
+      /**
+       * Triggers a test execution for a run hook. Ensures that the test environment is set up correctly and returns
+       * a result indicating success or failure of the test.
+       *
+       * @returns {boolean} - `true` if the test hook runs successfully, `false` otherwise.
+       */
+      var handleRunHookTest = function (hookId) {
           setHookRunning(hookId);
           setHookOutput("Running validation for " + hookId + "...\n");
           setTimeout(function () {
@@ -2987,7 +3224,11 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** PluginsSettingsSection implementation. */
+    /**
+     * Displays a search input field for filtering skills by name, keyword, or domain.
+     *
+     * @returns {JSX.Element} A JSX element representing the search input section.
+     */
     function PluginsSettingsSection() {
       var pluginList = [
         {
@@ -3092,8 +3333,13 @@ window.__ModuleLoader__.load({
       var reloadingId = reloadingState[0],
         setReloadingId = reloadingState[1];
 
-      var /** handleReloadPlugin implementation. */
-        handleReloadPlugin = function (pId) {
+      /**
+       * Handles the reload of a plugin.
+       *
+       * This function updates the UI to reflect the reloaded plugin state by rendering the new path.
+       * It returns null if the subtab is not "hooks".
+       */
+      var handleReloadPlugin = function (pId) {
           setReloadingId(pId);
           setTimeout(function () {
             setReloadingId(null);
@@ -3285,7 +3531,13 @@ window.__ModuleLoader__.load({
       };
     }
 
-    /** messageOf implementation. */
+    /**
+     * Generates a message composed of styled components including name, description, and path.
+     *
+     * Returns a JSX element representing the message structure.
+     *
+     * Fails if `sc` is not an object containing `name`, `desc`, and `path` properties.
+     */
     function messageOf(error) {
       return error instanceof Error ? error.message : String(error);
     }
@@ -3294,7 +3546,12 @@ window.__ModuleLoader__.load({
     // snapshot-store engine (dsh-client-runtime/client) is not a platform seed
     // word, so the state rides a hand-rolled observable bound through the
     // framework-made bindSnapshotSelector.
-    /** SettingsDocumentStore implementation. */
+    /**
+     * Renders a document store element with styled span and code elements,
+     * including a description and path, and marks it as executable.
+     *
+     * @returns {JSX.Element} A JSX element representing the styled document store.
+     */
     function SettingsDocumentStore(api) {
       this.api = api;
       this.observable = createObservable({ status: "idle", opening: false, error: null });
@@ -3363,13 +3620,24 @@ window.__ModuleLoader__.load({
         });
     };
 
-    /** refreshDocumentIfLoaded implementation. */
+    /**
+     * Refreshes the document if it is already loaded in the editor.
+     *
+     * Guarantees that the document will be reloaded with the latest state if it is currently loaded.
+     * Fails if the document is not loaded, in which case no action is taken.
+     */
     function refreshDocumentIfLoaded(controller) {
       if (controller === undefined || controller.observable.getSnapshot().status === "idle") return;
       controller.load();
     }
 
-    /** SettingsDocumentAction implementation. */
+    /**
+     * Adds, updates, or removes a settings document action.
+     *
+     * Guarantees that the action's `id`, `name`, `desc`, and `version` are provided.
+     * Returns the updated settings document with the action included or modified.
+     * Fails if any required field is missing or if the action already exists with a different `id`.
+     */
     function SettingsDocumentAction(props) {
       var controller = props.controller,
         useSnapshot = props.useSnapshot,
@@ -3405,7 +3673,13 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** KeybindsSettingsSection implementation. */
+    /**
+     * Reloads a plugin specified by its ID.
+     *
+     * Guarantees that the plugin ID is valid and exists in the configuration.
+     * Sets the `reloadingId` state to the ID of the plugin being reloaded.
+     * Fails if the plugin ID is invalid or does not exist.
+     */
     function KeybindsSettingsSection() {
       var isMac =
         typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -3476,8 +3750,13 @@ window.__ModuleLoader__.load({
         [isRecording, handleRecordKey],
       );
 
-      var /** handleReset implementation. */
-        handleReset = function () {
+      /**
+       * Handles the reset action, clearing or reloading the plugin list.
+       * Resets the display grid to its initial state and updates the plugin list.
+       * Guarantees that the plugin list is re-rendered with updated styles and states.
+       * Fails if `reloadingId` does not match any plugin ID, leaving the list unchanged.
+       */
+      var handleReset = function () {
           try {
             localStorage.removeItem("dsh_keybind_toggle_sidebar");
             localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
@@ -3656,7 +3935,11 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** SettingsPanel implementation. */
+    /**
+     * Opens the settings document if it is in the "ready" status and not currently opening.
+     * Guarantees that the document status is updated to "opening" and an error is logged if opening fails.
+     * Returns a promise that resolves when the document is successfully opened or rejects on failure.
+     */
     function SettingsPanel(props) {
       var rows = props.rows,
         renderSlot = props.renderSlot,
@@ -3678,8 +3961,13 @@ window.__ModuleLoader__.load({
 
       React.useEffect(
         function () {
-          var /** onKeyDown implementation. */
-            onKeyDown = function (e) {
+          /**
+           * Attempts to open a document in the editor.
+           *
+           * Guarantees that the document opening status is updated and any errors are logged.
+           * Throws an error if the document cannot be opened, and updates the status and error message accordingly.
+           */
+          var onKeyDown = function (e) {
               if (e.key === "Escape") onClose();
             };
           document.addEventListener("keydown", onKeyDown);
@@ -3794,23 +4082,37 @@ window.__ModuleLoader__.load({
         setDialogPos = dialogPosState[1];
 
       // Drag modal window handler
-      var /** handleHeaderPointerDown implementation. */
-        handleHeaderPointerDown = function (e) {
+      /**
+       * Handles the pointer down event on the header to start recording keybindings.
+       *
+       * Guarantees that keybinding data is stored in localStorage and updates the sidebar label.
+       * Fails silently if localStorage operations are not possible.
+       */
+      var handleHeaderPointerDown = function (e) {
           if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
             return;
           e.preventDefault();
           var startX = e.clientX - dialogPos.x;
           var startY = e.clientY - dialogPos.y;
 
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
+          /**
+           * Handles the reset action by clearing or reloading the plugin list.
+           * Resets the display grid to its initial state and updates the plugin list.
+           * Guarantees that the plugin list is re-rendered with updated styles and states.
+           * Fails silently without any error handling if the reset action cannot be performed.
+           */
+          var onMove = function (moveEv) {
               setDialogPos({
                 x: moveEv.clientX - startX,
                 y: moveEv.clientY - startY,
               });
             };
-          var /** onUp implementation. */
-            onUp = function () {
+          /**
+           * Sets up or removes a keydown event listener for recording.
+           * Guarantees that the event listener is properly set up or removed.
+           * Fails silently if the event listener cannot be added or removed.
+           */
+          var onUp = function () {
               document.removeEventListener("pointermove", onMove);
               document.removeEventListener("pointerup", onUp);
             };
@@ -3819,8 +4121,12 @@ window.__ModuleLoader__.load({
         };
 
       // Resize settings window handler (direction: 'se', 'e', 's')
-      var /** handleWindowResizePointerDown implementation. */
-        handleWindowResizePointerDown = function (e, direction) {
+      /**
+       * Handles the window resize event when the pointer is down, adjusting the layout accordingly.
+       * Adjusts the layout to fit the new window size and updates the display grid.
+       * Fails if the layout adjustment cannot be applied, leaving the layout unchanged.
+       */
+      var handleWindowResizePointerDown = function (e, direction) {
           e.preventDefault();
           e.stopPropagation();
           setIsWindowResizing(true);
@@ -3829,8 +4135,12 @@ window.__ModuleLoader__.load({
           var startW = windowSize.w;
           var startH = windowSize.h;
 
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
+          /**
+           * Sets up keyboard shortcuts for various actions.
+           * Ensures that sidebar key labels are updated and recording state is reset.
+           * Fallbacks gracefully if localStorage operations fail.
+           */
+          var onMove = function (moveEv) {
               var deltaX = moveEv.clientX - startX;
               var deltaY = moveEv.clientY - startY;
               var nextW = startW;
@@ -3850,8 +4160,14 @@ window.__ModuleLoader__.load({
               }
             };
 
-          var /** onUp implementation. */
-            onUp = function () {
+          /**
+           * Opens the settings modal or toggles the terminal overlay based on the selected key.
+           *
+           * This function expects the caller to provide a valid key event that matches one of the predefined shortcuts.
+           * On success, it returns the updated UI state or modal visibility.
+           * On failure, it does nothing and remains in the current state.
+           */
+          var onUp = function () {
               setIsWindowResizing(false);
               document.removeEventListener("pointermove", onMove);
               document.removeEventListener("pointerup", onUp);
@@ -3861,16 +4177,27 @@ window.__ModuleLoader__.load({
         };
 
       // Resize nav width handler
-      var /** handleResizePointerDown implementation. */
-        handleResizePointerDown = function (e) {
+      /**
+       * Initiates the resize operation when the pointer is down.
+       *
+       * The caller must guarantee that the pointer is down on a resizable element.
+       * This function returns nothing but may resize the element if the pointer is
+       * released within the resizable area.
+       */
+      var handleResizePointerDown = function (e) {
           e.preventDefault();
           e.stopPropagation();
           setIsResizing(true);
           var startX = e.clientX;
           var startW = isNavCollapsed ? 56 : navWidth;
 
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
+          /**
+           * Displays keyboard shortcuts for configuring workspace navigation hotkeys and global panel triggers.
+           *
+           * This component renders a list of shortcuts with their descriptions and styling.
+           * It guarantees the display of a column of divs with each shortcut and its description.
+           */
+          var onMove = function (moveEv) {
               var delta = moveEv.clientX - startX;
               var nextW = Math.max(130, Math.min(380, startW + delta));
               setNavWidth(nextW);
@@ -3884,8 +4211,12 @@ window.__ModuleLoader__.load({
                 window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
               }
             };
-          var /** onUp implementation. */
-            onUp = function () {
+          /**
+           * Displays a styled container with a title and optional gap between elements.
+           *
+           * @returns {JSX.Element} A JSX element representing the styled container.
+           */
+          var onUp = function () {
               setIsResizing(false);
               document.removeEventListener("pointermove", onMove);
               document.removeEventListener("pointerup", onUp);
@@ -3894,8 +4225,15 @@ window.__ModuleLoader__.load({
           document.addEventListener("pointerup", onUp);
         };
 
-      var /** toggleNavCollapse implementation. */
-        toggleNavCollapse = function (e) {
+      /**
+       * Toggles the collapse state of the navigation.
+       *
+       * This function will change the collapse state of the navigation element.
+       * It returns `true` if the navigation is now collapsed and `false` if it is expanded.
+       *
+       * If the navigation cannot be toggled (e.g., due to an invalid state), it returns `null`.
+       */
+      var toggleNavCollapse = function (e) {
           e.stopPropagation();
           setIsNavCollapsed(function (prev) {
             var next = !prev;
@@ -3910,7 +4248,14 @@ window.__ModuleLoader__.load({
       var collapsedGroups = collapsedGroupsState[0],
         setCollapsedGroups = collapsedGroupsState[1];
 
-      /** toggleGroup implementation. */
+      /**
+       * Toggles the recording state.
+       *
+       * This function changes the `isRecording` state when the button is clicked.
+       * It updates the button's border, background color, and `isRecording` flag.
+       *
+       * On failure, the function does not return anything but updates the UI state.
+       */
       function toggleGroup(groupName) {
         setCollapsedGroups(function (s) {
           var n = Object.assign({}, s);
@@ -3919,7 +4264,13 @@ window.__ModuleLoader__.load({
         });
       }
 
-      /** renderNavRow implementation. */
+      /**
+       * Renders a navigation row button that toggles the `isRecording` state.
+       *
+       * The caller must ensure `isRecording` is a boolean.
+       *
+       * On click, the button toggles `isRecording` and updates the UI accordingly.
+       */
       function renderNavRow(row) {
         return h(
           "button",
@@ -3938,7 +4289,13 @@ window.__ModuleLoader__.load({
         );
       }
 
-      /** renderGroupHeader implementation. */
+      /**
+       * Renders a group header with styles based on recording status.
+       *
+       * Returns a React component representing the group header.
+       *
+       * Fails if the `isRecording` value is not boolean or `h` is not defined.
+       */
       function renderGroupHeader(label, count) {
         if (isNavCollapsed) return null;
         var isCollapsed = Boolean(collapsedGroups[label]);
@@ -4227,8 +4584,12 @@ window.__ModuleLoader__.load({
       }, []);
 
       React.useEffect(function () {
-        var /** onOpenSettings implementation. */
-          onOpenSettings = function (e) {
+        /**
+         * Opens the settings modal or toggles the terminal overlay based on the selected key.
+         * Ensures that sidebar key labels are updated and recording state is reset.
+         * Fallbacks gracefully if localStorage operations fail.
+         */
+        var onOpenSettings = function (e) {
             var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
             if (sec) setActiveId(sec);
             setOpen(true);
@@ -4443,7 +4804,14 @@ window.__ModuleLoader__.load({
     // Ledger -> nav-row / coordinator projections as observable sources (uSES
     // contract: getSnapshot returns the cached rows until the ledger or the
     // locale revision moves). Ported from ui-settings-general's apply.
-    /** makeShellInjected implementation. */
+    /**
+     * Sets up a shell with injected styles and event handlers for hover effects.
+     *
+     * On mouse enter, the text color changes to the primary label color.
+     * On mouse leave, the text color reverts to the tertiary label color.
+     *
+     * No return value.
+     */
     function makeShellInjected(ctx) {
       var rowsVersion = -1;
       var rowsRevision = -1;
@@ -4520,7 +4888,13 @@ window.__ModuleLoader__.load({
       };
     }
 
-    /** apply implementation. */
+    /**
+     * Adjusts the layout of navigation rows based on the presence and visibility of different groups.
+     *
+     * Returns: JSX elements representing the navigation layout.
+     *
+     * Fails if any required group rows are missing or if the `collapsedGroups` state is inconsistent.
+     */
     function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register("sidebar", { zh: SIDEBAR_ZH, en: SIDEBAR_EN });
@@ -4548,8 +4922,14 @@ window.__ModuleLoader__.load({
         });
       }, "tweaks: metadata invalidations");
 
-      var /** startSession implementation. */
-        startSession = function (workspaceId) {
+      /**
+       * Opens a session with the provided options and renders actions and options.
+       *
+       * Guarantees that the session is initialized and the close button is clickable.
+       * Returns null if the renderSlot function is not provided.
+       * Fails if `onClose` or `onSectionOpen` are not defined or not functions.
+       */
+      var startSession = function (workspaceId) {
           ctx.workspaces.startSession(workspaceId);
         };
       ctx.slots.inject(
@@ -4731,35 +5111,83 @@ window.__ModuleLoader__.load({
       // (the harness checkout is kept pristine), so tweaks owns the three
       // mark seats — models, plugins, agent-presets — under the shared
       // settings.section.icon seat keyed by section id.
-      /** GeneralGlyph implementation. */
+      /**
+       * Sets the active section and opens the settings panel.
+       *
+       * Guarantees that the active section is set to the provided section if it exists.
+       * Returns a cleanup function to remove the event listener.
+       * Fails silently if the event detail section is not provided.
+       */
       function GeneralGlyph() {
         return navIcon("general");
       }
-      /** ThemesGlyph implementation. */
+      /**
+       * Sets the theme glyph open state and listens for settings open events.
+       *
+       * Guarantees that the theme glyph open state is toggled when the event is triggered.
+       * Returns a cleanup function to remove the event listener.
+       * Fails gracefully by doing nothing if the event listener cannot be added.
+       */
       function ThemesGlyph() {
         return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      /** CustomizationGlyph implementation. */
+      /**
+       * Provides a configuration section for customizing various aspects of the application.
+       *
+       * Returns an array of configuration sections, each with an 'id', 'label', and 'order'.
+       * Falls back to a predefined set of sections if no custom sections are provided.
+       */
       function CustomizationGlyph() {
         return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      /** ModelsGlyph implementation. */
+      /**
+       * Sets the rows for the sections based on the provided props or defaults to a predefined list of sections.
+       *
+       * Guarantees that the returned `rawRows` will be an array of section objects or the default sections if `props.sections` is not provided or empty.
+       *
+       * On failure (if `props` is undefined or `props.sections` is not an array), returns the default list of sections.
+       */
       function ModelsGlyph() {
         return navIcon("models");
       }
-      /** PluginsGlyph implementation. */
+      /**
+       * Sets up the initial configuration for the plugin sections.
+       *
+       * Ensures that `rawRows` is an array of section objects or defaults to a predefined set of sections.
+       *
+       * @param {Object} props - The configuration object that may contain `sections`.
+       * @returns {Array} The `rawRows` array of section objects.
+       */
       function PluginsGlyph() {
         return navIcon("plugins");
       }
-      /** AgentPresetsGlyph implementation. */
+      /**
+       * Sets up the initial list of agent presets rows, ensuring no suppressed sections are included.
+       *
+       * Guarantees a default set of rows if `rawRows` is empty or undefined, excluding suppressed sections.
+       *
+       * @returns {Array} An array of preset rows, each with an `id`, `label`, and `order`.
+       */
       function AgentPresetsGlyph() {
         return navIcon("agent-presets");
       }
-      /** KeybindsGlyph implementation. */
+      /**
+       * Iterates over a list of sections to filter out suppressed sections and collect unique, visible rows.
+       *
+       * Guarantees: Returns an array of rows that are not suppressed and have unique IDs.
+       *
+       * On failure: Ignores suppressed sections and duplicates, ensuring only visible, unique rows are included.
+       */
       function KeybindsGlyph() {
         return navIcon("keybinds");
       }
-      /** harnessGlyph implementation. */
+      /**
+       * Filters the rawRows array to exclude suppressed sections and duplicates.
+       *
+       * Guarantees that only unique, non-suppressed rows are included in the result.
+       *
+       * @returns {Array} An array of objects representing rows, excluding suppressed sections and duplicates.
+       */
       function harnessGlyph(id, component) {
         return function () {
           return ctx.slots.register(
@@ -4805,7 +5233,11 @@ window.__ModuleLoader__.load({
       );
 
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
-      /** SessionHeaderUtilities implementation. */
+      /**
+       * Ensures that the session is in the "ready" phase and either has no current pane or the current pane is blank.
+       * Sets the `completedOnboarding` state to a new Set if onboarding is not active.
+       * Fails silently if the session is not in the "ready" phase or if the current pane is not blank.
+       */
       function SessionHeaderUtilities(props) {
         var sessionId = props.sessionId;
         var menuState = React.useState(false);
@@ -4818,8 +5250,14 @@ window.__ModuleLoader__.load({
         var isTrajectory = trajState[0],
           setIsTrajectory = trajState[1];
 
-        var /** checkIsTrajectory implementation. */
-          checkIsTrajectory = function () {
+        /**
+         * Ensures that the onboarding step is marked as completed.
+         *
+         * Guarantees that the onboarding step ID is added to the set of completed steps.
+         * Returns the updated set of completed steps.
+         * Fails if the step ID is already marked as completed.
+         */
+        var checkIsTrajectory = function () {
             var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
             if (activeTab) {
               var txt = (activeTab.textContent || "").trim().toLowerCase();
@@ -4838,8 +5276,14 @@ window.__ModuleLoader__.load({
           };
 
         React.useEffect(function () {
-          var /** update implementation. */
-            update = function () {
+          /**
+           * Opens the settings menu when clicked.
+           *
+           * This function sets the `open` state to true, preventing default event behavior and stopping propagation.
+           *
+           * @returns {void}
+           */
+          var update = function () {
               setIsTrajectory(checkIsTrajectory());
             };
           update();
@@ -4849,8 +5293,13 @@ window.__ModuleLoader__.load({
           };
         }, []);
 
-        var /** handleToggleView implementation. */
-          handleToggleView = function () {
+        /**
+         * Toggles the view mode, showing a tooltip with a settings trigger when not open,
+         * and opening the settings dialog when triggered.
+         *
+         * On failure, the function returns the original view without any changes.
+         */
+        var handleToggleView = function () {
             setMenuOpen(false);
             var onTrajectoryNow = checkIsTrajectory();
             var targetName = onTrajectoryNow ? "chat" : "trajectory";
@@ -4885,8 +5334,13 @@ window.__ModuleLoader__.load({
             }, 80);
           };
 
-        var /** handleDownloadLog implementation. */
-          handleDownloadLog = function () {
+        /**
+         * Displays a SettingsPanel overlay with a mask and error boundary.
+         * Ensures the document is defined and ReactDOM.createPortal is available.
+         * Returns the rendered SettingsPanel component.
+         * Fallback to rendering the SettingsPanel directly if portals are not supported.
+         */
+        var handleDownloadLog = function () {
             setMenuOpen(false);
             setBusy(true);
             try {
@@ -5054,8 +5508,14 @@ window.__ModuleLoader__.load({
         if (completedCount > 0) progressParts.push(completedCount + " completed");
         var progressStr = progressParts.join(" · ") || childList.length + " subagents";
 
-        var /** getRoleBadgeStyle implementation. */
-          getRoleBadgeStyle = function (role) {
+        /**
+         * Sets the badge style for a role based on the provided settings.
+         *
+         * Guarantees that the role badge style is returned according to the settings.
+         * Returns null if no settings are provided.
+         * Fails if the settings are not valid or do not contain the necessary role information.
+         */
+        var getRoleBadgeStyle = function (role) {
             if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
               return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
             } else if (role.indexOf("exec") !== -1) {
@@ -5343,18 +5803,32 @@ window.__ModuleLoader__.load({
         menuContainer.style.display = "none";
         document.body.appendChild(menuContainer);
 
-        var /** closeMenu implementation. */
-          closeMenu = function () {
+        /**
+         * Closes the menu by removing all injected navigation glyphs.
+         *
+         * This function guarantees that the menu will be closed, and all navigation
+         * glyphs will be removed from the slots.
+         */
+        var closeMenu = function () {
             menuContainer.style.display = "none";
             menuContainer.innerHTML = "";
           };
 
-        var /** onKeyDown implementation. */
-          onKeyDown = function (e) {
+        /**
+         * Ensures the session is in the "ready" phase and either has no current pane or the current pane is blank.
+         * Sets the `completedOnboarding` state to a new Set if onboarding is not active.
+         * Fails silently if the session is not in the "ready" phase or if the current pane is not blank.
+         */
+        var onKeyDown = function (e) {
             if (e.key === "Escape") closeMenu();
           };
-        var /** onContextMenu implementation. */
-          onContextMenu = function (e) {
+        /**
+         * Displays context menu options for session management.
+         * Ensures the session is in the "ready" phase and the current pane is blank.
+         * Sets up context menu slots for keybinds, plugins, and agent presets.
+         * Fails silently if the session is not in the "ready" phase or the current pane is not blank.
+         */
+        var onContextMenu = function (e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -5696,7 +6170,12 @@ window.__ModuleLoader__.load({
       })();
 
       // Universal Lucide Animated Icons DOM Decorator
-      /** ensureUniversalLucideIcons implementation. */
+      /**
+       * Sets the style for a badge based on the sub object's state.
+       *
+       * Returns a React element representing the badge with styled properties.
+       * Fails if the sub object does not contain valid properties for styling.
+       */
       function ensureUniversalLucideIcons() {
         if (typeof document === "undefined" || !document.body) return;
         var svgs = document.querySelectorAll("svg");

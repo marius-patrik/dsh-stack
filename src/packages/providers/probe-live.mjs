@@ -75,8 +75,16 @@ const modelOverride = modelArg
       return [s.slice(0, i), s.slice(i + 1)];
     })()
   : null;
-const /** firstModel implementation. */
-  firstModel = async (id) => {
+/**
+ * Attempts to retrieve a model ID for the given ID.
+ *
+ * Guarantees returning an object with `model` and `via` properties.
+ * On failure, returns `model: undefined, via: "none"`.
+ *
+ * @param {string} id - The ID used to fetch the model.
+ * @returns {Promise<{ model: string | undefined, via: string }>} - The model ID and source of discovery.
+ */
+const firstModel = async (id) => {
     const route = ctx.providers.get(id);
     try {
       const models = await llm.adapter.listModels(id);

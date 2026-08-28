@@ -27,15 +27,23 @@ function assistantText(text) {
   };
 }
 
-/** collect implementation. */
+/**
+ * Collects elements from an asynchronous generator `gen` into an array `out`.
+ * Guarantees that the returned array contains all elements yielded by `gen`.
+ * On failure, throws an error, preventing the caller from proceeding with an invalid result.
+ */
 async function collect(gen) {
   const out = [];
   for await (const c of gen) out.push(c);
   return out;
 }
 
-const /** ok implementation. */
-  ok = (name) => {
+/**
+ * Logs "ok -" followed by the provided name to the console.
+ * Guarantees that the message is logged for the given name.
+ * On failure, throws an error, preventing the caller from proceeding with an invalid result.
+ */
+const ok = (name) => {
     console.log("ok -", name);
   };
 
@@ -277,7 +285,13 @@ assert.equal(creq.framing, "sse");
     { markdown: "king", usageMetadata: { candidatesTokenCount: "2", totalTokenCount: "10" } },
   ]);
   const stream = new ReadableStream({
-    /** start implementation. */
+    /**
+     * Starts the stream by enqueuing an empty JSON array and closing the stream.
+     *
+     * Emits an error if the stream is started without any content, indicating an unexpected finish.
+     *
+     * @param {WritableStreamDefaultWriter<Uint8Array>} c - The writer to which the stream writes.
+     */
     start(c) {
       c.enqueue(new TextEncoder().encode(wire));
       c.close();

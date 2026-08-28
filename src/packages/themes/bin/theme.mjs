@@ -42,7 +42,12 @@ function* readSection(text, section) {
   }
 }
 
-/** readThemesConfig implementation. */
+/**
+ * Reads the themes configuration from the settings file.
+ *
+ * Guarantees the return of a configuration object with `root` and `catalogUrl` properties.
+ * Fallbacks to default values if the configuration is missing.
+ */
 async function readThemesConfig() {
   let root = "themes";
   let catalogUrl = "https://open-vsx.org";
@@ -57,7 +62,11 @@ async function readThemesConfig() {
   return { root, catalogUrl };
 }
 
-/** readActive implementation. */
+/**
+ * Reads the active theme ID from the settings file.
+ * Guarantees returning the active theme ID if found; otherwise, returns an empty string.
+ * Fails silently by catching errors and returning an empty string if the document is missing or malformed.
+ */
 async function readActive() {
   try {
     for (const [key, value] of readSection(await readFile(settingsPath, "utf8"), "themes")) {
@@ -69,7 +78,12 @@ async function readActive() {
   return "";
 }
 
-/** writeActive implementation. */
+/**
+ * Sets the active theme ID in the settings file.
+ * Guarantees updating the active theme ID if the settings file is found and valid.
+ * Fails silently by catching errors and returning without changes if the file is missing or malformed.
+ * @param {string} id - The ID of the active theme to set.
+ */
 async function writeActive(id) {
   let text = "";
   try {
@@ -85,7 +99,11 @@ async function writeActive(id) {
   await writeFile(settingsPath, text, "utf8");
 }
 
-/** printHelp implementation. */
+/**
+ * Prints the help message for the theme command.
+ * Guarantees displaying the usage and available commands for the theme verb.
+ * Fails silently by writing the help message to the standard output.
+ */
 function printHelp() {
   process.stdout.write(`usage: dsh theme <verb> [args]
 
@@ -98,7 +116,11 @@ function printHelp() {
 `);
 }
 
-/** main implementation. */
+/**
+ * Processes the command for managing themes.
+ * Guarantees updating the configuration file with the active theme settings.
+ * Fails silently by writing the updated configuration to the specified settings path.
+ */
 async function main(argv) {
   const verb = argv[0];
   if (verb === undefined || verb === "--help" || verb === "-h") {
@@ -234,7 +256,13 @@ async function main(argv) {
   process.exitCode = 1;
 }
 
-/** rmQuiet implementation. */
+/**
+ * Removes the specified theme if it exists.
+ *
+ * Guarantees that the theme with the given ID is removed from the active list.
+ * Writes a success message to stdout if the theme is successfully removed.
+ * Writes an error message to stderr and exits with code 1 if the theme is not found.
+ */
 async function rmQuiet(path) {
   const { rm } = await import("node:fs/promises");
   try {

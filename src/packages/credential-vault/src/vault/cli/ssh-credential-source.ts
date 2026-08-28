@@ -71,7 +71,12 @@ export class SshSource implements CredentialSource {
     return [];
   }
 
-  /** keychainSecret implementation. */
+  /**
+   * Retrieves environment variables as a key-value pair object.
+   *
+   * Returns an object containing environment variable names as keys and their values as strings.
+   * Returns null if the platform-specific command fails or no environment variables are found.
+   */
   async keychainSecret(): Promise<string | null> {
     return null;
   }

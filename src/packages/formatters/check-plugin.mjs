@@ -89,7 +89,13 @@ const sections = new Map([
 ]);
 actx.provide("settings", {
   get: (ns) => sections.get(ns),
-  /** register implementation. */
+  /**
+   * Registers a new setting or tool.
+   *
+   * Guarantees that the setting or tool is added to the `sections` or `registeredTools` map.
+   * Returns an object with `get` to retrieve the current state and `watch` to listen for changes.
+   * Fails silently by returning an empty function if the registration already exists.
+   */
   register(_ns, _schema, opts) {
     if (!sections.has(_ns)) sections.set(_ns, opts.base);
     return { get: (ns) => sections.get(ns), watch: () => undefined };

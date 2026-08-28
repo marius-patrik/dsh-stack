@@ -17,7 +17,14 @@ export interface ProfileRuntime {
 
 const DEFAULT_KEY = "dsh-stack.profile";
 
-/** createProfileRuntime implementation. */
+/**
+ * Creates a ProfileRuntime instance based on the provided options and runtime options.
+ *
+ * @param options - An array of ProfileOption objects defining the profiles.
+ * @param runtimeOptions - Runtime options including the storage key.
+ * @returns A ProfileRuntime instance representing the active profile.
+ * @throws Throws an error if no profiles are provided.
+ */
 export function createProfileRuntime(
   options: readonly ProfileOption[],
   runtimeOptions: ProfileRuntimeOptions = {},

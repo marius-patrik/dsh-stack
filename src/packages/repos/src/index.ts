@@ -79,8 +79,14 @@ export function apply(ctx: Context, config: RepoConfigType): void {
   );
 
   ctx.inject(["settings"], (sctx) => {
-    const /** settings implementation. */
-      settings = () => sctx.settings.get(NS) as RepoSettingsType | undefined;
+    /**
+     * Provides access to repository settings.
+     *
+     * Returns the repository settings if available; otherwise, returns undefined.
+     *
+     * @returns RepoSettingsType | undefined
+     */
+    const settings = () => sctx.settings.get(NS) as RepoSettingsType | undefined;
     // jscpd:ignore-end
 
     ctx.tools.register(
@@ -116,7 +122,17 @@ export function apply(ctx: Context, config: RepoConfigType): void {
             },
           ],
         },
-        /** execute implementation. */
+        /**
+         * Executes the specified Git repository action based on the provided arguments.
+         *
+         * Guarantees:
+         * - Returns the branches of the repository if the action is "list".
+         * - Throws an error if the action is "create", "switch", or "delete" without specifying a branch name.
+         * - Updates the repository branch based on the action: creates, switches, or deletes the specified branch.
+         *
+         * @param args - The action and branch name for the Git operation.
+         * @param exec - The execution context for running Git commands.
+         */
         async execute(args, exec) {
           const path = workDir(args.path);
           const branch = await currentBranch(ctx, path, exec.signal);

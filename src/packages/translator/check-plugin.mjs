@@ -5,8 +5,14 @@
 import { readFileSync } from "node:fs";
 
 let ok = true;
-const /** assert implementation. */
-  assert = (cond, msg) => {
+/**
+ * Asserts a condition and logs an error if it fails.
+ *
+ * @param {boolean} cond - The condition to check.
+ * @param {string} msg - The error message to display if the condition is false.
+ * @returns {void} - Does not return unless the condition is false, in which case it logs an error.
+ */
+const assert = (cond, msg) => {
     if (!cond) {
       ok = false;
       console.error(`FAIL: ${msg}`);

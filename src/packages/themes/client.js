@@ -23,7 +23,16 @@ window.__ModuleLoader__.load({
      * the section + glyph re-register through the slot ledger.
      */
     var THEMES_ROUTE = "/themes.json";
-    /** createThemeObservable implementation. */
+    /**
+     * Creates an observable that tracks theme changes.
+     *
+     * - Emits the current theme snapshot when created.
+     * - Notifies all subscribed listeners on theme changes.
+     * - Disposes of the observer when the dispose function is called.
+     *
+     * @param {Context} ctx - The context providing the theme and change event.
+     * @returns {Observable} An observable that provides the current theme snapshot and allows subscribing to theme changes.
+     */
     function createThemeObservable(ctx) {
       var listeners = new Set();
       var snapshot = ctx.theme.getTheme();
@@ -46,7 +55,14 @@ window.__ModuleLoader__.load({
         dispose: off,
       };
     }
-    /** applyBorderStyle implementation. */
+    /**
+     * Applies the provided border style to the document if the document is defined.
+     *
+     * Guarantees the border style is set on the element with id 'dsh-border-style-override'.
+     * If the document is not defined, no action is taken.
+     *
+     * @param {string} style - The border style to apply.
+     */
     function applyBorderStyle(style) {
       if (typeof document === "undefined") return;
       var id = "dsh-border-style-override";
@@ -88,7 +104,14 @@ window.__ModuleLoader__.load({
       }
     }
 
-    /** applyOledStyles implementation. */
+    /**
+     * Applies OLED-specific styles to the document based on the provided style type.
+     *
+     * Guarantees the document's root element or specific classes receive the appropriate
+     * border styles and text content changes for OLED compatibility.
+     *
+     * @param {boolean} isOled - If true, applies styles for OLED display; otherwise, clears styles.
+     */
     function applyOledStyles(isOled) {
       if (typeof document === "undefined") return;
       var id = "dsh-oled-style-override";
@@ -160,7 +183,12 @@ window.__ModuleLoader__.load({
       }
     }
 
-    /** ThemesGlyph implementation. */
+    /**
+     * Themes the specified element to have a dark background and transparent or no shadows.
+     *
+     * Guarantees a dark background and transparent border for user content and certain UI elements.
+     * Fails by clearing the text content of the element if the conditions are not met.
+     */
     function ThemesGlyph(props) {
       var React = require("react");
       var size = (props && props.size) || 16;
@@ -270,7 +298,12 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** ThemesSection implementation. */
+    /**
+     * Displays a theme section with a style that changes based on the `isSelected` state.
+     * The section is clickable, changing its border and background when selected.
+     *
+     * @param {boolean} isSelected - Indicates whether the theme section is selected.
+     */
     function ThemesSection(props) {
       var React = require("react");
       var h = React.createElement;
@@ -304,8 +337,14 @@ window.__ModuleLoader__.load({
       var showHeroBanner = heroBannerState[0],
         setShowHeroBanner = heroBannerState[1];
 
-      var /** setBorderChoice implementation. */
-        setBorderChoice = function (style) {
+      /**
+       * Displays a theme section that changes its border and background style based on the `isSelected` state.
+       * The section is clickable, and its appearance updates to reflect the selection status.
+       *
+       * @param {boolean} isSelected - Indicates whether the theme section is selected, affecting its border and background style.
+       * @returns {JSX.Element} - Returns a theme section element with styled borders and backgrounds.
+       */
+      var setBorderChoice = function (style) {
           setBorderStyle(style);
           try {
             if (typeof window !== "undefined" && window.localStorage) {
@@ -317,8 +356,14 @@ window.__ModuleLoader__.load({
             window.dispatchEvent(new CustomEvent("dsh:settings-change"));
         };
 
-      var /** toggleHeroBanner implementation. */
-        toggleHeroBanner = function () {
+      /**
+       * Toggles the visibility of the hero banner based on user preferences.
+       *
+       * Guarantees: Sets the hero banner visibility to the opposite of its current state.
+       * Returns: The new state of the hero banner.
+       * Fails: If localStorage is unavailable, the banner state remains unchanged.
+       */
+      var toggleHeroBanner = function () {
           var next = !showHeroBanner;
           setShowHeroBanner(next);
           try {
@@ -385,8 +430,15 @@ window.__ModuleLoader__.load({
               : null,
           );
         };
-      var /** schemeGroup implementation. */
-        schemeGroup = function (scheme) {
+      /**
+       * Sets the hero banner visibility state for the current theme group.
+       *
+       * Guarantees that the hero banner visibility is stored in localStorage and
+       * dispatches events to notify of the change.
+       *
+       * Fails silently if localStorage operations are not supported or fail.
+       */
+      var schemeGroup = function (scheme) {
           var list = groups[scheme];
           if (!list || list.length === 0) return null;
           return h(
@@ -587,8 +639,13 @@ window.__ModuleLoader__.load({
     /** apply implementation. */
     function apply(ctx) {
       var themeObservable;
-      var /** getSavedTheme implementation. */
-        getSavedTheme = function () {
+      /**
+       * Returns the currently saved theme configuration.
+       *
+       * Returns an object containing theme styles and settings.
+       * Throws an error if no theme is saved or invalid data is encountered.
+       */
+      var getSavedTheme = function () {
           try {
             if (typeof window !== "undefined" && window.localStorage) {
               return window.localStorage.getItem("dsh_active_theme");
@@ -596,8 +653,14 @@ window.__ModuleLoader__.load({
           } catch (e) {}
           return null;
         };
-      var /** saveActiveTheme implementation. */
-        saveActiveTheme = function (id) {
+      /**
+       * Saves the current active theme settings.
+       *
+       * Guarantees the theme settings are applied to the application.
+       * Returns nothing.
+       * Fails silently if the theme settings cannot be saved.
+       */
+      var saveActiveTheme = function (id) {
           try {
             if (typeof window !== "undefined" && window.localStorage) {
               window.localStorage.setItem("dsh_active_theme", id);

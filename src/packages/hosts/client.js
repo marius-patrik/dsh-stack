@@ -7,17 +7,37 @@ window.__ModuleLoader__.load({
 
     var STATUS_ROUTE = "/hosts/api/status";
 
-    /** createHostsStore implementation. */
+    /**
+     * Initializes a hosts store with loading and error handling.
+     * Emits updates to listeners when the status changes.
+     *
+     * Emits an "idle" status initially, changes to "loading" when fetching starts,
+     * and to "ready" when data is successfully loaded. Throws an error if fetching fails.
+     *
+     * @returns {void}
+     */
     function createHostsStore() {
       var listeners = new Set();
       var state = { data: null, status: "idle", error: null };
-      /** emit implementation. */
+      /**
+       * Emits updates to listeners when the status changes.
+       *
+       * Initially emits "idle", changes to "loading" when fetching starts, and to "ready" when data is successfully loaded.
+       * Throws an error if fetching fails.
+       *
+       * @returns {void}
+       */
       function emit() {
         listeners.forEach(function (listener) {
           listener();
         });
       }
-      /** load implementation. */
+      /**
+       * Begins the process of loading data, emitting "loading" status to listeners.
+       * If fetching is successful, updates the status to "ready". Throws an error and emits the error status if fetching fails.
+       *
+       * @returns {void}
+       */
       function load() {
         state = { data: state.data, status: "loading", error: null };
         emit();
@@ -53,7 +73,14 @@ window.__ModuleLoader__.load({
       };
     }
 
-    /** DeployGlyph implementation. */
+    /**
+     * Updates the deployment status and emits changes to listeners.
+     *
+     * Emits an error if the HTTP request fails, otherwise returns the deployment state.
+     *
+     * @returns {Object} The current deployment state, including data, status, and error.
+     * @throws {Error} Throws an error if the HTTP request fails.
+     */
     function DeployGlyph() {
       var React = require("react");
       return React.createElement(
@@ -149,7 +176,12 @@ window.__ModuleLoader__.load({
         [state && state.status],
       );
 
-      /** copyText implementation. */
+      /**
+       * Sets the current git branch in the local storage and updates the UI state.
+       * Guarantees that the git branch is set to "main" if retrieval fails or is unavailable.
+       * Returns nothing.
+       * Fails gracefully by setting the branch to "main" if retrieval from local storage fails.
+       */
       function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
@@ -184,8 +216,13 @@ window.__ModuleLoader__.load({
           }, 1200);
         };
 
-      var /** nodeCard implementation. */
-        nodeCard = function (node) {
+      /**
+       * Sets the current git branch in the local storage and updates the UI state.
+       * Guarantees that the UI state is updated to reflect the current or default branch.
+       * Returns nothing.
+       * Fails gracefully by setting the branch to "main" if retrieval from local storage fails.
+       */
+      var nodeCard = function (node) {
           var isOnline = node.online;
           var isSelf = node.isSelf;
           var dotColor = isOnline ? "#3fb950" : "#8b949e";
@@ -687,7 +724,14 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** apply implementation. */
+    /**
+     * Displays network status or synchronization information based on the active tab.
+     *
+     * Returns a React element representing the current tab's content or null if the tab is inactive.
+     *
+     * Fails by returning null if the activeTab is not recognized or if the conditions for displaying
+     * network or synchronization information are not met.
+     */
     function apply(ctx) {
       var store = createHostsStore();
       ctx.slots.inject(

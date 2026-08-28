@@ -12,7 +12,14 @@ import { formatFingerprint } from "../fingerprint.js";
 import type { VaultCliIo } from "../io.js";
 import { openVault } from "../vault-location.js";
 
-/** getCommand implementation. */
+/**
+ * Attempts to reveal a secret record identified by `id`.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param io - The input/output interface for the command.
+ * @returns 0 if the secret is successfully revealed; 2 if the user is asked to confirm.
+ * @throws {VaultCliError} If the record does not exist.
+ */
 // jscpd:ignore-start -- mirrors vault/cli/commands/totp.ts's small option-parsing shape for a different subcommand
 export async function getCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const id = required(args, "id");

@@ -7,8 +7,15 @@ export const inject = ["slots", "layout", "workspaces", "locale"];
 
 /** Register the stack sidebar shell into the layout sidebar slot. */
 export function apply(ctx: ClientContext): void {
-  const /** injectProps implementation. */
-    injectProps = (): SidebarRootInjected => ({
+  /**
+   * Registers the stack sidebar shell into the layout sidebar slot.
+   *
+   * Guarantees that the sidebar is registered with the specified slots and injects
+   * the `injectProps` function to provide session management and sidebar toggling.
+   *
+   * @param ctx - The client context providing workspace and layout operations.
+   */
+  const injectProps = (): SidebarRootInjected => ({
       startSession: (workspaceId) => ctx.workspaces.startSession(workspaceId),
       toggleSidebar: () => ctx.layout.toggleSidebar(),
     });

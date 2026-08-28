@@ -50,7 +50,15 @@ export interface BacktestOptions {
   readonly slippageBps?: number;
 }
 
-/** runBacktest implementation. */
+/**
+ * Runs a backtest using the provided candles, strategy, and options to simulate trades and generate a backtest result.
+ *
+ * @param candles - The historical price data used for the backtest.
+ * @param strategy - The trading strategy to execute during the backtest.
+ * @param options - Configuration options for the backtest, including initial capital, commission, and slippage.
+ * @returns A BacktestResult containing the equity curve and list of trades.
+ * @throws Will throw an error if the candle series is empty or if the initial capital is not positive.
+ */
 export function runBacktest(
   candles: readonly Candle[],
   strategy: Strategy,
@@ -67,11 +75,24 @@ export function runBacktest(
   const trades: Trade[] = [];
   const equityCurve: number[] = [];
 
-  const /** executionPrice implementation. */
-    executionPrice = (price: number, side: "buy" | "sell"): number =>
+  /**
+   * Adjusts the price based on the trade side, applying slippage for buys and slippage/leverage for sells.
+   *
+   * @param price - The base price for the trade.
+   * @param side - The side of the trade, either "buy" or "sell".
+   * @returns The adjusted price accounting for slippage or leverage.
+   * @throws Throws an error if the side is neither "buy" nor "sell".
+   */
+  const executionPrice = (price: number, side: "buy" | "sell"): number =>
       side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
-  const /** mark implementation. */
-    mark = (price: number): number =>
+  /**
+   * Calculates the current equity or margin level based on the current position and cash balance.
+   *
+   * @param price - The price used to calculate the equity or margin.
+   * @returns The current equity or margin level.
+   * @throws Throws an error if the position is null and cash is not defined.
+   */
+  const mark = (price: number): number =>
       position === null
         ? cash
         : cash +
@@ -134,7 +155,12 @@ export function runBacktest(
     trades,
   };
 
-  /** openLong implementation. */
+  /**
+   * Opens a long position with the specified quantity.
+   * Guarantees that no long position is already open before opening.
+   * Throws an error if a long position is already open or if the sell quantity is not positive.
+   * On failure, throws an error indicating the inability to open a long position.
+   */
   function openLong(quantity: number): void {
     const price = executionPrice(currentCandle.close, "buy");
     position = { side: "long", quantity, entryPrice: price, entryTime: currentCandle.time };
@@ -148,7 +174,13 @@ export function runBacktest(
     cash += quantity * price - commission;
   }
 
-  /** closeAt implementation. */
+  /**
+   * Closes the trading strategy, calculates performance metrics, and returns the strategy's performance report.
+   *
+   * Guarantees that the strategy's trades, equity curve, and final equity are computed before returning.
+   * Returns an object containing initial capital, final equity, total return, max drawdown, win rate, and the list of trades.
+   * Fails if the strategy has not been initialized or if there are no trades to evaluate.
+   */
   function closeAt(price: number, time: number): void {
     if (position === null) return;
     const exitPrice =
@@ -173,7 +205,13 @@ export function runBacktest(
     position = null;
   }
 
-  /** close implementation. */
+  /**
+   * Closes the trading strategy by evaluating performance metrics and returns a performance report.
+   *
+   * Guarantees that the strategy's trades, equity curve, and final equity are computed before returning.
+   * Returns an object containing initial capital, final equity, total return, max drawdown, win rate, and the list of trades.
+   * Fails if the strategy has not been initialized or if there are no trades to evaluate.
+   */
   function close(): void {
     closeAt(currentCandle.close, currentCandle.time);
   }

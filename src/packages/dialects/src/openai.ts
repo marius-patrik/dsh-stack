@@ -144,7 +144,16 @@ function stripTrailingSlash(base: string): string {
 export const openaiDialect: Dialect = {
   id: "openai",
 
-  /** serialize implementation. */
+  /**
+   * Serializes the request options into a wire-compatible request.
+   *
+   * @param options - The generation options for the request.
+   * @param auth - The authentication details for the request.
+   * @param baseURL - The base URL for the request.
+   * @param defaults - Default settings for the request.
+   * @returns A `WireRequest` object representing the serialized request.
+   * @throws Throws a `LlmError` if no API key or bearer token is provided.
+   */
   serialize(
     options: GenerateOptions,
     auth: DialectAuth,

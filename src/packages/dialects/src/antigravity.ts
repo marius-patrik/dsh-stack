@@ -54,13 +54,26 @@ interface WireChatChunk {
   };
 }
 
-/** textOf implementation. */
+/**
+ * Extracts the text content from a message or a collection of message parts.
+ *
+ * Guarantees that the input is either a string or an array of message parts.
+ * Returns a string containing the text content if the input is an array of parts,
+ * or the input string itself if it is a string. Returns an empty string if the
+ * input is an array but contains no text parts.
+ */
 function textOf(content: GenerateOptions["messages"][number]["content"]): string {
   if (typeof content === "string") return content;
   return content.map((part) => (part.type === "text" ? part.text : "")).join("");
 }
 
-/** count implementation. */
+/**
+ * Counts the numeric value if provided, returning the number or undefined if
+ * the value is undefined, not a number, or infinite. Returns undefined for
+ * non-numeric strings or invalid numbers.
+ * @param value - The value to count, which can be a string, number, or undefined.
+ * @returns The counted number or undefined if the value is invalid.
+ */
 function count(value: string | number | undefined): number | undefined {
   if (value === undefined) return undefined;
   const parsed = typeof value === "number" ? value : Number(value);
@@ -170,7 +183,13 @@ export const antigravityDialect: Dialect = {
     };
   },
 
-  /** parse implementation. */
+  /**
+   * Parses a stream of chat chunks into an AsyncGenerator of `StreamChunk`.
+   *
+   * The caller must provide a readable stream of buffer sources.
+   * On success, it yields `StreamChunk` instances from the parsed stream.
+   * On failure, it throws an error.
+   */
   async *parse(body: ReadableStream<BufferSource>): AsyncGenerator<StreamChunk> {
     const raw = await readAll(body);
     let chunks: WireChatChunk[];

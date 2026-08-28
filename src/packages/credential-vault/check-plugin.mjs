@@ -712,8 +712,14 @@ rmSync(legacyHome, { recursive: true, force: true });
   });
   await vault.put(oauth);
   const calls = [];
-  const /** transport implementation. */
-    transport = async (request) => {
+  /**
+   * Initiates an OAuth authentication request and returns an access token.
+   *
+   * Guarantees a successful response with status 200 and a valid OAuth token.
+   *
+   * @returns An object containing OAuth token details including access_token, refresh_token, expires_in, and token_type.
+   */
+  const transport = async (request) => {
       calls.push(request.url);
       return {
         status: 200,
@@ -725,8 +731,11 @@ rmSync(legacyHome, { recursive: true, force: true });
         },
       };
     };
-  const /** authFor implementation. */
-    authFor = async () => ({
+  /**
+   * @returns An object containing OAuth configuration details including method, authorizeUrl, tokenUrl, clientId, scopes, and redirect.
+   * If the request fails, it returns an object with the same configuration details.
+   */
+  const authFor = async () => ({
       method: "oauth_pkce",
       authorizeUrl: "https://auth.example/authorize",
       tokenUrl: "https://token.example/token",
@@ -1060,7 +1069,14 @@ function firstSecret(material) {
   }
 }
 
-/** materialEquals implementation. */
+/**
+ * Compares two material objects to determine if they are equal by revealing and comparing their sensitive data.
+ *
+ * @param a - The first material object to compare.
+ * @param b - The second material object to compare.
+ * @returns `true` if both objects are of the same type and their sensitive data reveals to equal values; `false` otherwise.
+ * @returns `false` if the types do not match or if the sensitive data does not reveal to equal values.
+ */
 function materialEquals(a, b) {
   if (a.type !== b.type) return false;
   const /** reveal implementation. */ reveal = (value) => value?.reveal?.();
@@ -1181,17 +1197,45 @@ assert.deepEqual(clientExports.inject, ["slots", "locale"]);
 const registrants = new Map();
 const registrations = [];
 const clientCtx = {
-  /** effect implementation. */
+  /**
+   * Loads the client module and registers its factory function.
+   *
+   * Guarantees that the `registered.spec.factory` function is called with the provided spec.
+   * Returns the result of the factory function.
+   * Fails if the module does not export a factory function or if the spec is not correctly registered.
+   */
   effect(fn) {
     fn();
   },
   locale: {
-    /** register implementation. */
-    /** register implementation. */
+    /**
+     * Registers a module factory with a specified ID and exports.
+     *
+     * Guarantees that the registered factory will be available under the specified ID.
+     *
+     * @param spec - The specification for the module being registered.
+     * @throws Will throw an error if an unexpected require is detected.
+     */
+    /**
+     * Registers a module factory for a specific client specification.
+     *
+     * Guarantees the factory function to be called with the given specification,
+     * returning an object with `inject` properties. Throws an error for unexpected
+     * specifications.
+     *
+     * @param {string} spec - The specification for which the factory is registered.
+     * @returns {Object} An object containing the `inject` properties.
+     */
     register() {},
   },
   slots: {
-    /** inject implementation. */
+    /**
+     * Registers the client module's factory function and injects specified slots and locale.
+     *
+     * @param {string} spec - The module specification to load, which must be either "react" or "@deepseek-ai/dsh-client-ui-primitives".
+     * @returns {Object} - An object containing the injected slots and locale.
+     * @throws {Error} - Throws an error if the spec is not "react" or "@deepseek-ai/dsh-client-ui-primitives".
+     */
     inject(name, fn) {
       registrants.set(name, fn);
     },

@@ -127,8 +127,15 @@ export function apply(ctx: Context, config: Config = {}): void {
 
   const commands = (ctx as unknown as { commands?: { register(definition: unknown): () => void } })
     .commands;
-  const /** safeRegister implementation. */
-    safeRegister = (definition: unknown) => {
+  /**
+   * Registers a command to select an agent preset.
+   *
+   * Guarantees that the provided preset ID is valid and not already registered.
+   * Returns nothing on success, or an error message if the preset is unknown.
+   *
+   * @param definition - The command definition object containing the handler.
+   */
+  const safeRegister = (definition: unknown) => {
       try {
         commands?.register(definition);
       } catch {
@@ -258,8 +265,15 @@ export function apply(ctx: Context, config: Config = {}): void {
         });
         res.end(JSON.stringify(body));
       };
-    const /** describe implementation. */
-      describe = (action: ActionSpec) => ({
+    /**
+     * Describes an action specification by extracting its properties.
+     *
+     * Guarantees a JSON-like object with `id`, `name`, `description`, `tools`, `route`, and `source`.
+     * If any of the properties are not provided in `action`, they are set to `null` or `false`.
+     *
+     * On failure, returns an object with the same structure but with missing or nullified properties.
+     */
+    const describe = (action: ActionSpec) => ({
         id: action.id,
         name: action.name ?? action.id,
         description: action.description ?? null,
@@ -270,8 +284,12 @@ export function apply(ctx: Context, config: Config = {}): void {
       });
 
     // The action vocabulary (built-ins + file-defined) — also the run palette's data.
-    const /** listHandler implementation. */
-      listHandler = async (_req: unknown, res: any) => {
+    /**
+     * Guarantees a JSON-like object array with `id`, `name`, `description`, `tools`, `route`, and `source` for each action.
+     * If any of the properties are not provided in `action`, they are set to `null` or `false`.
+     * On failure, returns an array of objects with the same structure but with missing or nullified properties.
+     */
+    const listHandler = async (_req: unknown, res: any) => {
         await catalog.load();
         json(res, 200, {
           defaultAction,

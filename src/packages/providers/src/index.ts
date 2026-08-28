@@ -369,7 +369,16 @@ declare module "@deepseek-ai/cordis" {
   }
 }
 
-/** apply implementation. */
+/**
+ * Applies the configuration to the context by resolving provider options.
+ *
+ * Ensures that the resolved provider options are up-to-date and logs any errors
+ * encountered during resolution.
+ *
+ * @param ctx - The context containing the logger and providers.
+ * @param config - The configuration to be applied and resolved.
+ * @throws Will throw an error if resolving the providers fails.
+ */
 export function apply(ctx: Context, config: Config): void {
   // The registry: `@dsh-stack/provider-<id>` extensions inject `providers`
   // and call `ctx.providers.register(route)` from their own `apply`, which
@@ -380,8 +389,14 @@ export function apply(ctx: Context, config: Config): void {
   let /** current implementation. */ current: () => Config = () => config;
   let lastRaw: Config | undefined;
   let lastGood: ResolvedProvidersOptions | undefined;
-  const /** resolved implementation. */
-    resolved = (): ResolvedProvidersOptions => {
+  /**
+   * Returns the current resolved configuration of providers options.
+   * Guarantees the configuration is valid and up-to-date.
+   * If the configuration is invalid, keeps the last good configuration
+   * and logs the error.
+   * @returns The resolved providers options or the last good configuration.
+   */
+  const resolved = (): ResolvedProvidersOptions => {
       const raw = current();
       if (raw === lastRaw && lastGood !== undefined) return lastGood;
       try {
@@ -407,8 +422,13 @@ export function apply(ctx: Context, config: Config): void {
 
   const memory = new Map<string, string>();
 
-  const /** read implementation. */
-    read = async (ref: string): Promise<string | undefined> => {
+  /**
+   * Reads a configuration value for the given reference.
+   * Guarantees returning the last good configuration if the current one is invalid.
+   * Throws an error if the configuration is invalid and no last good configuration exists.
+   * Logs an error and returns the last good configuration if the configuration is invalid.
+   */
+  const read = async (ref: string): Promise<string | undefined> => {
       const mem = memory.get(ref);
       if (mem !== undefined) return mem;
       const accounts = ctx.get("accounts") as AccountsService | undefined;
@@ -418,8 +438,13 @@ export function apply(ctx: Context, config: Config): void {
       return undefined;
     };
 
-  const /** write implementation. */
-    write = async (ref: string, value: string): Promise<void> => {
+  /**
+   * Writes a configuration value for the given reference.
+   * Guarantees that the configuration is updated if the current value is valid.
+   * Logs an error and returns without updating if the current value is invalid and no last good configuration exists.
+   * Throws an error if the current value is invalid and no last good configuration exists.
+   */
+  const write = async (ref: string, value: string): Promise<void> => {
       const accounts = ctx.get("accounts") as AccountsService | undefined;
       if (accounts !== undefined) {
         await accounts.set(ref, value);
@@ -475,8 +500,13 @@ export function apply(ctx: Context, config: Config): void {
         : { ...refresher, clientId };
     const inflight = refreshInflight.get(provider);
     if (inflight !== undefined) return inflight;
-    const /** attempt implementation. */
-      attempt = () =>
+    /**
+     * Attempts to refresh an access token if the current one is expired or not available.
+     * Returns the current access token if it is valid, otherwise returns the value.
+     *
+     * @returns The access token if refresh is successful or the current value if refresh fails.
+     */
+    const attempt = () =>
         refreshOAuthToken(spec, refreshToken).then(async (token) => {
           // Write order matters for single-use rotating refresh tokens: persist
           // the NEW refresh token first. If the process dies after the provider
@@ -580,8 +610,16 @@ export function apply(ctx: Context, config: Config): void {
       "MISSING_CREDENTIAL",
     );
 
-  const /** resolveAuth implementation. */
-    resolveAuth = async (
+  /**
+   * Attempts to resolve authentication credentials for a given provider.
+   *
+   * Returns an object containing the resolved authentication details, any missing credentials,
+   * and a flag indicating if the credentials were found in storage.
+   *
+   * If no credentials are found and cannot be resolved, returns an error indicating the missing
+   * credentials and the actions required to obtain them.
+   */
+  const resolveAuth = async (
       provider: string,
       connection: ProviderConnection,
     ): Promise<DialectAuth> => {
@@ -634,8 +672,15 @@ export function apply(ctx: Context, config: Config): void {
   };
 
   let userId: AnonymousUserId | undefined;
-  const /** resolveUserId implementation. */
-    resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
+  /**
+   * Determines the visibility of a provider based on the current mode and its credentials.
+   *
+   * @param provider - The identifier of the provider to check.
+   * @param connection - The connection details for the provider.
+   * @returns A ProviderGate indicating whether the provider is visible or not, or undefined if not gated.
+   *         If gated, provides a reason for its invisibility.
+   */
+  const resolveUserId = (): AnonymousUserId => (userId ??= getOrCreateAnonymousUserId());
 
   // The service gate is a boundary for callers that see arbitrary providers
   // (the agent-scoped remap row reads every request's provider): a provider

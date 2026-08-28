@@ -18,7 +18,16 @@ import { formatFingerprint } from "../fingerprint.js";
 import { renderScanReport, table } from "../scan-report.js";
 import { scopeFrom, warnEmptyScope } from "./shared.js";
 
-/** sourceFromArguments implementation. */
+/**
+ * Returns a `CredentialSource` based on the provided arguments.
+ *
+ * Guarantees a `LocalSource` if `ssh` is not provided. Throws a `VaultCliError` if `ssh` is provided
+ * but `remote-home` is missing or `--remote-platform` is not one of `win32`, `linux`, or `darwin`.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param io - The input/output configuration.
+ * @returns A `CredentialSource` instance.
+ */
 function sourceFromArguments(args: ParsedArguments, io: VaultCliIo): CredentialSource {
   const host = optional(args, "ssh");
   if (!host) {
@@ -47,7 +56,16 @@ function sourceFromArguments(args: ParsedArguments, io: VaultCliIo): CredentialS
   });
 }
 
-/** scanCommand implementation. */
+/**
+ * Scans the command arguments to determine the source configuration for SSH access.
+ *
+ * Guarantees:
+ * - Returns a `SshSource` instance configured with host, home directory, platform, and machine.
+ * - Throws `VaultCliError` if the platform is not recognized or if `--remote-home` is missing.
+ *
+ * Failure Path:
+ * - Throws `VaultCliError` for unrecognized platforms or missing required arguments.
+ */
 export async function scanCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const source = sourceFromArguments(args, io);
   // The one place a human can consent to being prompted. It is a flag rather than

@@ -31,7 +31,16 @@ import { findCommand } from "./commands.js";
 /* CLI arg parsing                                                              */
 /* -------------------------------------------------------------------------- */
 
-/** parseArgs implementation. */
+/**
+ * Parses command-line arguments to set the URL.
+ *
+ * Guarantees the return of an object containing the URL.
+ * If the `--url` argument is provided, it updates the URL to the specified value.
+ * On failure, returns the default URL: "http://127.0.0.1:3080".
+ *
+ * @param argv - An array of command-line arguments.
+ * @returns An object with the URL.
+ */
 function parseArgs(argv: string[]): { url: string } {
   let url = "http://127.0.0.1:3080";
   for (let i = 2; i < argv.length; i++) {
@@ -85,7 +94,17 @@ function handleMuxFrame(frame: MuxFrame, state: TuiState, sessionId: string | nu
   }
 }
 
-/** handleSessionEvent implementation. */
+/**
+ * Handles different session events and updates the state accordingly.
+ *
+ * Guarantees:
+ * - Sets `state.streaming` to true on "turn/start" event.
+ * - Appends `event.content.text` to `state.streamBuffer` on "assistant/chunk" event.
+ * - Sets `state.streaming` to false and logs an error on "stream/error" event.
+ *
+ * Fails:
+ * - Logs an unknown error message if `event.content.text` is undefined on "assistant/chunk" event.
+ */
 function handleSessionEvent(event: SessionEvent, state: TuiState): void {
   switch (event.type) {
     case "turn/start": {
@@ -141,7 +160,14 @@ function handleSessionEvent(event: SessionEvent, state: TuiState): void {
 /* Main REPL loop                                                               */
 /* -------------------------------------------------------------------------- */
 
-/** main implementation. */
+/**
+ * Enters the main REPL loop, processing different event types to manage
+ * streaming state and tool execution. Guarantees that the `state.streaming`
+ * flag is set to false upon completion of any event type.
+ *
+ * On failure or reaching the end of the event processing, the function
+ * exits the loop and resets the `state.streaming` flag.
+ */
 export async function main(): Promise<void> {
   const { url } = parseArgs(process.argv);
 
@@ -192,8 +218,13 @@ export async function main(): Promise<void> {
 
   // Subscribe to mux stream
   let unsubscribe: (() => void) | null = null;
-  const /** subscribeMux implementation. */
-    subscribeMux = () => {
+  /**
+   * Attempts to connect to the specified URL and subscribe to sessions.
+   *
+   * Guarantees connection to the specified URL and subscription to sessions if successful.
+   * Fails and exits the process if the connection cannot be established.
+   */
+  const subscribeMux = () => {
       unsubscribe = client.subscribeMux(
         (frame) => handleMuxFrame(frame, state, state.sessionId),
         (err) => {
