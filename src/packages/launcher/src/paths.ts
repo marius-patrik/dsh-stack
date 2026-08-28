@@ -21,16 +21,31 @@ export function findHarnessDir(env: NodeJS.ProcessEnv, pkgDir: string): string |
 }
 
 /**
- * Pick the harness CLI entrypoint: the TypeScript source run through tsx when
- * present (dev checkout), else the built lib/bin.js. Returns null when the
+ * Pick the harness CLI entrypoint: the built lib/bin.js when it exists, else
+ * the TypeScript source run through tsx (dev fallback). Returns null when the
  * harness checkout has neither.
+ *
+ * The built entrypoint is preferred (#146) because the tsx route resolves
+ * `tsx` from this repository's own node_modules -- coupling the global `dsh`
+ * command's availability to this checkout's dev dependencies being intact,
+ * so it breaks with a raw ERR_MODULE_NOT_FOUND during any reinstall.
  */
 export function harnessCli(harnessDir: string): { bin: string; tsx: boolean } | null {
-  const tsBin = join(harnessDir, "apps", "cli", "src", "bin.ts");
-  if (existsSync(tsBin)) return { bin: tsBin, tsx: true };
   const jsBin = join(harnessDir, "apps", "cli", "lib", "bin.js");
   if (existsSync(jsBin)) return { bin: jsBin, tsx: false };
+  const tsBin = join(harnessDir, "apps", "cli", "src", "bin.ts");
+  if (existsSync(tsBin)) return { bin: tsBin, tsx: true };
   return null;
+}
+
+/**
+ * Whether the `tsx` package this checkout's node_modules would need to run
+ * the dev-fallback CLI entrypoint is actually resolvable right now. Used to
+ * fail with an actionable message (#146) instead of a raw module-resolution
+ * stack trace when node_modules is mid-reinstall.
+ */
+export function tsxAvailable(pkgDir: string): boolean {
+  return existsSync(join(pkgDir, "..", "..", "..", "node_modules", "tsx"));
 }
 
 /**
