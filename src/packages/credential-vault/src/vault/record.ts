@@ -334,10 +334,10 @@ export function effectiveExpiryMs(record: SecretRecord): number | null {
    * @returns The earliest valid expiration date or null if no valid dates are found.
    */
   const push = (value: string | null) => {
-      if (!value) return;
-      const parsed = Date.parse(value);
-      if (Number.isFinite(parsed)) candidates.push(parsed);
-    };
+    if (!value) return;
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) candidates.push(parsed);
+  };
   push(record.expiresAt);
   if (record.material.type === "cookie_jar") push(record.material.sessionExpiresAt);
   return candidates.length === 0 ? null : Math.min(...candidates);

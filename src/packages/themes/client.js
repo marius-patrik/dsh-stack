@@ -345,16 +345,16 @@ window.__ModuleLoader__.load({
        * @returns {JSX.Element} - Returns a theme section element with styled borders and backgrounds.
        */
       var setBorderChoice = function (style) {
-          setBorderStyle(style);
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_border_style", style);
-            }
-          } catch (e) {}
-          applyBorderStyle(style);
-          if (typeof window !== "undefined")
-            window.dispatchEvent(new CustomEvent("dsh:settings-change"));
-        };
+        setBorderStyle(style);
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_border_style", style);
+          }
+        } catch (e) {}
+        applyBorderStyle(style);
+        if (typeof window !== "undefined")
+          window.dispatchEvent(new CustomEvent("dsh:settings-change"));
+      };
 
       /**
        * Toggles the visibility of the hero banner based on user preferences.
@@ -364,18 +364,18 @@ window.__ModuleLoader__.load({
        * Fails: If localStorage is unavailable, the banner state remains unchanged.
        */
       var toggleHeroBanner = function () {
-          var next = !showHeroBanner;
-          setShowHeroBanner(next);
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_show_hero_banner", next ? "true" : "false");
-            }
-          } catch (e) {}
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("dsh:settings-change"));
-            window.dispatchEvent(new Event("storage"));
+        var next = !showHeroBanner;
+        setShowHeroBanner(next);
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_show_hero_banner", next ? "true" : "false");
           }
-        };
+        } catch (e) {}
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("dsh:settings-change"));
+          window.dispatchEvent(new Event("storage"));
+        }
+      };
 
       var groups = {};
       for (var i = 0; i < themes.length; i++) {
@@ -439,35 +439,35 @@ window.__ModuleLoader__.load({
        * Fails silently if localStorage operations are not supported or fail.
        */
       var schemeGroup = function (scheme) {
-          var list = groups[scheme];
-          if (!list || list.length === 0) return null;
-          return h(
+        var list = groups[scheme];
+        if (!list || list.length === 0) return null;
+        return h(
+          "div",
+          { key: scheme, style: { display: "grid", gap: "8px" } },
+          h(
             "div",
-            { key: scheme, style: { display: "grid", gap: "8px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-secondary)",
-                },
+            {
+              style: {
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "var(--dsw-alias-label-secondary)",
               },
-              scheme === "light" ? "Light Palettes" : "Dark Palettes",
-            ),
-            h(
-              "div",
-              {
-                style: {
-                  display: "grid",
-                  gap: "8px",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                },
+            },
+            scheme === "light" ? "Light Palettes" : "Dark Palettes",
+          ),
+          h(
+            "div",
+            {
+              style: {
+                display: "grid",
+                gap: "8px",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
               },
-              list.map(themeButton),
-            ),
-          );
-        };
+            },
+            list.map(themeButton),
+          ),
+        );
+      };
       var currentScheme = snapshot && snapshot.active ? snapshot.active.colorScheme : "dark";
 
       var isOledActive = snapshot && snapshot.active ? snapshot.active.id === "oled" : false;
@@ -646,13 +646,13 @@ window.__ModuleLoader__.load({
        * Throws an error if no theme is saved or invalid data is encountered.
        */
       var getSavedTheme = function () {
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              return window.localStorage.getItem("dsh_active_theme");
-            }
-          } catch (e) {}
-          return null;
-        };
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            return window.localStorage.getItem("dsh_active_theme");
+          }
+        } catch (e) {}
+        return null;
+      };
       /**
        * Saves the current active theme settings.
        *
@@ -661,12 +661,12 @@ window.__ModuleLoader__.load({
        * Fails silently if the theme settings cannot be saved.
        */
       var saveActiveTheme = function (id) {
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_active_theme", id);
-            }
-          } catch (e) {}
-        };
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_active_theme", id);
+          }
+        } catch (e) {}
+      };
 
       // Initialize border styles and OLED styles on boot
       try {

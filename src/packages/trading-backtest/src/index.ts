@@ -84,7 +84,7 @@ export function runBacktest(
    * @throws Throws an error if the side is neither "buy" nor "sell".
    */
   const executionPrice = (price: number, side: "buy" | "sell"): number =>
-      side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
+    side === "buy" ? price * (1 + slippage) : price * (1 - slippage);
   /**
    * Calculates the current equity or margin level based on the current position and cash balance.
    *
@@ -93,10 +93,9 @@ export function runBacktest(
    * @throws Throws an error if the position is null and cash is not defined.
    */
   const mark = (price: number): number =>
-      position === null
-        ? cash
-        : cash +
-          (position.side === "long" ? position.quantity * price : -position.quantity * price);
+    position === null
+      ? cash
+      : cash + (position.side === "long" ? position.quantity * price : -position.quantity * price);
 
   for (const candle of candles) {
     currentCandle = candle;

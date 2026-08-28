@@ -225,21 +225,21 @@ export async function main(): Promise<void> {
    * Fails and exits the process if the connection cannot be established.
    */
   const subscribeMux = () => {
-      unsubscribe = client.subscribeMux(
-        (frame) => handleMuxFrame(frame, state, state.sessionId),
-        (err) => {
-          println(`${ansi.fg.red}mux stream error: ${err.message}${ansi.reset}`);
-          state.connected = false;
-          // Attempt reconnect after 3 seconds
-          setTimeout(() => {
-            if (!state.connected) {
-              println(`${ansi.dim}reconnecting...${ansi.reset}`);
-              subscribeMux();
-            }
-          }, 3_000);
-        },
-      );
-    };
+    unsubscribe = client.subscribeMux(
+      (frame) => handleMuxFrame(frame, state, state.sessionId),
+      (err) => {
+        println(`${ansi.fg.red}mux stream error: ${err.message}${ansi.reset}`);
+        state.connected = false;
+        // Attempt reconnect after 3 seconds
+        setTimeout(() => {
+          if (!state.connected) {
+            println(`${ansi.dim}reconnecting...${ansi.reset}`);
+            subscribeMux();
+          }
+        }, 3_000);
+      },
+    );
+  };
   subscribeMux();
 
   // Show initial render

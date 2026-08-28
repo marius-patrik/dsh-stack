@@ -13,11 +13,11 @@ let ok = true;
  * @returns {void} - Does not return unless the condition is false, in which case it logs an error.
  */
 const assert = (cond, msg) => {
-    if (!cond) {
-      ok = false;
-      console.error(`FAIL: ${msg}`);
-    }
-  };
+  if (!cond) {
+    ok = false;
+    console.error(`FAIL: ${msg}`);
+  }
+};
 
 const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
 assert(

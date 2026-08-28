@@ -503,13 +503,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure (e.g., due to an error during retrieval or storage), returns an empty array.
        */
       var getFavoriteModels = function () {
-          try {
-            var raw = window.localStorage.getItem("dsh_favorite_models");
-            return raw ? JSON.parse(raw) : [];
-          } catch (e) {
-            return [];
-          }
-        };
+        try {
+          var raw = window.localStorage.getItem("dsh_favorite_models");
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      };
 
       /**
        * Guarantees that the favorite models are updated in local storage if provided with a new list,
@@ -518,10 +518,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure (e.g., due to an error during storage or retrieval), returns an empty array.
        */
       var setFavoriteModels = function (favs) {
-          try {
-            window.localStorage.setItem("dsh_favorite_models", JSON.stringify(favs));
-          } catch (e) {}
-        };
+        try {
+          window.localStorage.setItem("dsh_favorite_models", JSON.stringify(favs));
+        } catch (e) {}
+      };
 
       var STAR_GRAY_SVG =
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
@@ -537,9 +537,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * does not return anything, but the update will still be attempted.
        */
       var scheduleUpdate = function () {
-          if (updateTimer) clearTimeout(updateTimer);
-          updateTimer = setTimeout(updateModelDecorations, 100);
-        };
+        if (updateTimer) clearTimeout(updateTimer);
+        updateTimer = setTimeout(updateModelDecorations, 100);
+      };
 
       /**
        * Updates the model decorations with the latest favorite models.
@@ -549,240 +549,236 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * does not return anything, but the update will still be attempted.
        */
       var updateModelDecorations = function () {
-          // 1. Remove old inline brand icons if any
-          var oldBrandIcons = document.querySelectorAll(".dsh-prov-brand-icon");
-          oldBrandIcons.forEach(function (icon) {
-            icon.remove();
-          });
+        // 1. Remove old inline brand icons if any
+        var oldBrandIcons = document.querySelectorAll(".dsh-prov-brand-icon");
+        oldBrandIcons.forEach(function (icon) {
+          icon.remove();
+        });
 
-          // 2. Decorate model dropdown options with Star/Favorite buttons and build Favorites group at top
-          var modelMenus = document.querySelectorAll(
-            '[role="menu"][id*="menu"], [class*="ModelSelect_menu"]',
+        // 2. Decorate model dropdown options with Star/Favorite buttons and build Favorites group at top
+        var modelMenus = document.querySelectorAll(
+          '[role="menu"][id*="menu"], [class*="ModelSelect_menu"]',
+        );
+        modelMenus.forEach(function (menu) {
+          var options = menu.querySelectorAll(
+            'button[role="menuitemradio"], button[class*="option"]',
           );
-          modelMenus.forEach(function (menu) {
-            var options = menu.querySelectorAll(
-              'button[role="menuitemradio"], button[class*="option"]',
-            );
-            if (options.length === 0) return;
+          if (options.length === 0) return;
 
-            var favs = getFavoriteModels();
-            var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
-            var favOptionsMap = {};
+          var favs = getFavoriteModels();
+          var groupsContainer = menu.querySelector('[class*="groups"]') || menu;
+          var favOptionsMap = {};
 
-            /**
-             * Stops all ongoing updates to the model decorations.
-             * Guarantees that any previous updates are cleared.
-             * On failure (e.g., due to an error during the update process), the function
-             * does not return anything, but the update will still be attempted.
-             */
-            var stopAll = function (e) {
-                if (e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (typeof e.stopImmediatePropagation === "function")
-                    e.stopImmediatePropagation();
-                }
+          /**
+           * Stops all ongoing updates to the model decorations.
+           * Guarantees that any previous updates are cleared.
+           * On failure (e.g., due to an error during the update process), the function
+           * does not return anything, but the update will still be attempted.
+           */
+          var stopAll = function (e) {
+            if (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+            }
+          };
+
+          options.forEach(function (opt) {
+            if (opt.closest(".dsh-favorites-group")) return;
+
+            var modelNameEl = opt.querySelector('[class*="modelName"]') || opt;
+            var modelKey = (opt.getAttribute("title") || modelNameEl.textContent || "").trim();
+            if (!modelKey) return;
+
+            var isFav = favs.indexOf(modelKey) !== -1;
+            if (isFav) {
+              favOptionsMap[modelKey] = opt;
+            }
+
+            var starBtn = opt.querySelector(".dsh-model-star-btn");
+            if (!starBtn) {
+              starBtn = document.createElement("span");
+              starBtn.setAttribute("role", "button");
+              starBtn.setAttribute("tabindex", "0");
+              starBtn.className = "dsh-model-star-btn";
+              starBtn.style.border = "none";
+              starBtn.style.background = "transparent";
+              starBtn.style.padding = "0";
+              starBtn.style.width = "20px";
+              starBtn.style.height = "20px";
+              starBtn.style.cursor = "pointer";
+              starBtn.style.display = "inline-flex";
+              starBtn.style.alignItems = "center";
+              starBtn.style.justifyContent = "center";
+              starBtn.style.flex = "0 0 20px";
+              starBtn.style.flexShrink = "0";
+              starBtn.style.marginLeft = "auto";
+              starBtn.style.zIndex = "10";
+
+              /**
+               * Toggles the favorite status of a model.
+               * Guarantees that the model's favorite status is updated.
+               * On failure (e.g., due to an error during the update process), the function
+               * does not return anything, but the update will still be attempted.
+               */
+              var toggleFav = function (e) {
+                stopAll(e);
+                var currentFavs = getFavoriteModels();
+                var idx = currentFavs.indexOf(modelKey);
+                if (idx === -1) currentFavs.push(modelKey);
+                else currentFavs.splice(idx, 1);
+                setFavoriteModels(currentFavs);
+                scheduleUpdate();
               };
 
-            options.forEach(function (opt) {
-              if (opt.closest(".dsh-favorites-group")) return;
+              starBtn.addEventListener("pointerdown", function (e) {
+                stopAll(e);
+                toggleFav(e);
+              });
+              starBtn.addEventListener("mousedown", function (e) {
+                stopAll(e);
+              });
+              starBtn.addEventListener("pointerup", function (e) {
+                stopAll(e);
+              });
+              starBtn.addEventListener("mouseup", function (e) {
+                stopAll(e);
+              });
+              starBtn.addEventListener("click", function (e) {
+                stopAll(e);
+              });
 
-              var modelNameEl = opt.querySelector('[class*="modelName"]') || opt;
-              var modelKey = (opt.getAttribute("title") || modelNameEl.textContent || "").trim();
-              if (!modelKey) return;
-
-              var isFav = favs.indexOf(modelKey) !== -1;
-              if (isFav) {
-                favOptionsMap[modelKey] = opt;
-              }
-
-              var starBtn = opt.querySelector(".dsh-model-star-btn");
-              if (!starBtn) {
-                starBtn = document.createElement("span");
-                starBtn.setAttribute("role", "button");
-                starBtn.setAttribute("tabindex", "0");
-                starBtn.className = "dsh-model-star-btn";
-                starBtn.style.border = "none";
-                starBtn.style.background = "transparent";
-                starBtn.style.padding = "0";
-                starBtn.style.width = "20px";
-                starBtn.style.height = "20px";
-                starBtn.style.cursor = "pointer";
-                starBtn.style.display = "inline-flex";
-                starBtn.style.alignItems = "center";
-                starBtn.style.justifyContent = "center";
-                starBtn.style.flex = "0 0 20px";
-                starBtn.style.flexShrink = "0";
-                starBtn.style.marginLeft = "auto";
-                starBtn.style.zIndex = "10";
-
-                /**
-                 * Toggles the favorite status of a model.
-                 * Guarantees that the model's favorite status is updated.
-                 * On failure (e.g., due to an error during the update process), the function
-                 * does not return anything, but the update will still be attempted.
-                 */
-                var toggleFav = function (e) {
-                    stopAll(e);
-                    var currentFavs = getFavoriteModels();
-                    var idx = currentFavs.indexOf(modelKey);
-                    if (idx === -1) currentFavs.push(modelKey);
-                    else currentFavs.splice(idx, 1);
-                    setFavoriteModels(currentFavs);
-                    scheduleUpdate();
-                  };
-
-                starBtn.addEventListener("pointerdown", function (e) {
-                  stopAll(e);
-                  toggleFav(e);
-                });
-                starBtn.addEventListener("mousedown", function (e) {
-                  stopAll(e);
-                });
-                starBtn.addEventListener("pointerup", function (e) {
-                  stopAll(e);
-                });
-                starBtn.addEventListener("mouseup", function (e) {
-                  stopAll(e);
-                });
-                starBtn.addEventListener("click", function (e) {
-                  stopAll(e);
-                });
-
-                var copyEl = opt.querySelector('[class*="optionCopy"]');
-                var checkEl = opt.querySelector('[class*="check"]');
-                if (checkEl) {
-                  opt.insertBefore(starBtn, checkEl);
-                  if (!checkEl.querySelector("svg") && !checkEl.textContent.trim()) {
-                    checkEl.style.display = "none";
-                  } else {
-                    checkEl.style.display = "grid";
-                  }
-                } else if (copyEl && copyEl.nextSibling) {
-                  opt.insertBefore(starBtn, copyEl.nextSibling);
+              var copyEl = opt.querySelector('[class*="optionCopy"]');
+              var checkEl = opt.querySelector('[class*="check"]');
+              if (checkEl) {
+                opt.insertBefore(starBtn, checkEl);
+                if (!checkEl.querySelector("svg") && !checkEl.textContent.trim()) {
+                  checkEl.style.display = "none";
                 } else {
-                  opt.appendChild(starBtn);
+                  checkEl.style.display = "grid";
                 }
+              } else if (copyEl && copyEl.nextSibling) {
+                opt.insertBefore(starBtn, copyEl.nextSibling);
               } else {
-                var checkElExisting = opt.querySelector('[class*="check"]');
-                if (checkElExisting) {
-                  if (
-                    !checkElExisting.querySelector("svg") &&
-                    !checkElExisting.textContent.trim()
-                  ) {
-                    checkElExisting.style.display = "none";
-                  } else {
-                    checkElExisting.style.display = "grid";
-                  }
+                opt.appendChild(starBtn);
+              }
+            } else {
+              var checkElExisting = opt.querySelector('[class*="check"]');
+              if (checkElExisting) {
+                if (!checkElExisting.querySelector("svg") && !checkElExisting.textContent.trim()) {
+                  checkElExisting.style.display = "none";
+                } else {
+                  checkElExisting.style.display = "grid";
                 }
               }
+            }
 
-              starBtn.title = isFav ? "Remove from Favorites" : "Add to Favorites";
-              starBtn.style.color = isFav ? "#eab308" : "var(--dsw-alias-label-tertiary, #888)";
-              starBtn.innerHTML = isFav ? STAR_GOLD_SVG : STAR_GRAY_SVG;
+            starBtn.title = isFav ? "Remove from Favorites" : "Add to Favorites";
+            starBtn.style.color = isFav ? "#eab308" : "var(--dsw-alias-label-tertiary, #888)";
+            starBtn.innerHTML = isFav ? STAR_GOLD_SVG : STAR_GRAY_SVG;
+          });
+
+          // Build or update Favorites section at top of menu
+          var existingFavGroup = groupsContainer.querySelector(".dsh-favorites-group");
+          var favKeys = Object.keys(favOptionsMap);
+
+          if (favKeys.length === 0) {
+            if (existingFavGroup) existingFavGroup.remove();
+          } else {
+            if (!existingFavGroup) {
+              existingFavGroup = document.createElement("section");
+              existingFavGroup.className = "dsh-favorites-group";
+              existingFavGroup.setAttribute("role", "group");
+              existingFavGroup.style.display = "flex";
+              existingFavGroup.style.flexDirection = "column";
+              existingFavGroup.style.marginBottom = "6px";
+              existingFavGroup.style.paddingBottom = "4px";
+              existingFavGroup.style.borderBottom =
+                "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
+
+              var titleDiv = document.createElement("div");
+              titleDiv.className = "dsh-favorites-title";
+              titleDiv.style.padding = "4px 10px 2px";
+              titleDiv.style.fontSize = "10.5px";
+              titleDiv.style.fontWeight = "700";
+              titleDiv.style.color = "#eab308";
+              titleDiv.style.textTransform = "uppercase";
+              titleDiv.style.letterSpacing = "0.5px";
+              titleDiv.style.display = "flex";
+              titleDiv.style.alignItems = "center";
+              titleDiv.style.gap = "4px";
+              titleDiv.innerHTML = "<span>★ Favorites</span>";
+              existingFavGroup.appendChild(titleDiv);
+
+              groupsContainer.insertBefore(existingFavGroup, groupsContainer.firstChild);
+            }
+
+            var oldClones = existingFavGroup.querySelectorAll(".dsh-fav-cloned-option");
+            oldClones.forEach(function (c) {
+              c.remove();
             });
 
-            // Build or update Favorites section at top of menu
-            var existingFavGroup = groupsContainer.querySelector(".dsh-favorites-group");
-            var favKeys = Object.keys(favOptionsMap);
+            favKeys.forEach(function (key) {
+              var origOpt = favOptionsMap[key];
+              if (!origOpt) return;
+              var clone = origOpt.cloneNode(true);
+              clone.className = origOpt.className + " dsh-fav-cloned-option";
+              clone.addEventListener("click", function (e) {
+                if (e.target.closest(".dsh-model-star-btn")) return;
+                origOpt.click();
+              });
 
-            if (favKeys.length === 0) {
-              if (existingFavGroup) existingFavGroup.remove();
-            } else {
-              if (!existingFavGroup) {
-                existingFavGroup = document.createElement("section");
-                existingFavGroup.className = "dsh-favorites-group";
-                existingFavGroup.setAttribute("role", "group");
-                existingFavGroup.style.display = "flex";
-                existingFavGroup.style.flexDirection = "column";
-                existingFavGroup.style.marginBottom = "6px";
-                existingFavGroup.style.paddingBottom = "4px";
-                existingFavGroup.style.borderBottom =
-                  "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
-
-                var titleDiv = document.createElement("div");
-                titleDiv.className = "dsh-favorites-title";
-                titleDiv.style.padding = "4px 10px 2px";
-                titleDiv.style.fontSize = "10.5px";
-                titleDiv.style.fontWeight = "700";
-                titleDiv.style.color = "#eab308";
-                titleDiv.style.textTransform = "uppercase";
-                titleDiv.style.letterSpacing = "0.5px";
-                titleDiv.style.display = "flex";
-                titleDiv.style.alignItems = "center";
-                titleDiv.style.gap = "4px";
-                titleDiv.innerHTML = "<span>★ Favorites</span>";
-                existingFavGroup.appendChild(titleDiv);
-
-                groupsContainer.insertBefore(existingFavGroup, groupsContainer.firstChild);
+              var cloneStar = clone.querySelector(".dsh-model-star-btn");
+              if (cloneStar) {
+                /**
+                 * Toggles the visibility of a favorites group in the document.
+                 *
+                 * This function creates a new favorites group if one does not exist and appends it to the document.
+                 * It returns the existing or newly created favorites group.
+                 *
+                 * If the favorites group does not exist, it is created and appended to the document with a title.
+                 */
+                var handleCloneToggle = function (e) {
+                  stopAll(e);
+                  var currentFavs = getFavoriteModels();
+                  var idx = currentFavs.indexOf(key);
+                  if (idx !== -1) {
+                    currentFavs.splice(idx, 1);
+                    setFavoriteModels(currentFavs);
+                    scheduleUpdate();
+                  }
+                };
+                cloneStar.addEventListener("pointerdown", function (e) {
+                  stopAll(e);
+                  handleCloneToggle(e);
+                });
+                cloneStar.addEventListener("mousedown", function (e) {
+                  stopAll(e);
+                });
+                cloneStar.addEventListener("pointerup", function (e) {
+                  stopAll(e);
+                });
+                cloneStar.addEventListener("mouseup", function (e) {
+                  stopAll(e);
+                });
+                cloneStar.addEventListener("click", function (e) {
+                  stopAll(e);
+                });
               }
 
-              var oldClones = existingFavGroup.querySelectorAll(".dsh-fav-cloned-option");
-              oldClones.forEach(function (c) {
-                c.remove();
-              });
-
-              favKeys.forEach(function (key) {
-                var origOpt = favOptionsMap[key];
-                if (!origOpt) return;
-                var clone = origOpt.cloneNode(true);
-                clone.className = origOpt.className + " dsh-fav-cloned-option";
-                clone.addEventListener("click", function (e) {
-                  if (e.target.closest(".dsh-model-star-btn")) return;
-                  origOpt.click();
-                });
-
-                var cloneStar = clone.querySelector(".dsh-model-star-btn");
-                if (cloneStar) {
-                  /**
-                   * Toggles the visibility of a favorites group in the document.
-                   *
-                   * This function creates a new favorites group if one does not exist and appends it to the document.
-                   * It returns the existing or newly created favorites group.
-                   *
-                   * If the favorites group does not exist, it is created and appended to the document with a title.
-                   */
-                  var handleCloneToggle = function (e) {
-                      stopAll(e);
-                      var currentFavs = getFavoriteModels();
-                      var idx = currentFavs.indexOf(key);
-                      if (idx !== -1) {
-                        currentFavs.splice(idx, 1);
-                        setFavoriteModels(currentFavs);
-                        scheduleUpdate();
-                      }
-                    };
-                  cloneStar.addEventListener("pointerdown", function (e) {
-                    stopAll(e);
-                    handleCloneToggle(e);
-                  });
-                  cloneStar.addEventListener("mousedown", function (e) {
-                    stopAll(e);
-                  });
-                  cloneStar.addEventListener("pointerup", function (e) {
-                    stopAll(e);
-                  });
-                  cloneStar.addEventListener("mouseup", function (e) {
-                    stopAll(e);
-                  });
-                  cloneStar.addEventListener("click", function (e) {
-                    stopAll(e);
-                  });
+              var cloneCheck = clone.querySelector('[class*="check"]');
+              if (cloneCheck) {
+                if (!cloneCheck.querySelector("svg") && !cloneCheck.textContent.trim()) {
+                  cloneCheck.style.display = "none";
+                } else {
+                  cloneCheck.style.display = "grid";
                 }
-
-                var cloneCheck = clone.querySelector('[class*="check"]');
-                if (cloneCheck) {
-                  if (!cloneCheck.querySelector("svg") && !cloneCheck.textContent.trim()) {
-                    cloneCheck.style.display = "none";
-                  } else {
-                    cloneCheck.style.display = "grid";
-                  }
-                }
-                existingFavGroup.appendChild(clone);
-              });
-            }
-          });
-        };
+              }
+              existingFavGroup.appendChild(clone);
+            });
+          }
+        });
+      };
 
       var observer = new MutationObserver(scheduleUpdate);
       if (document.body) {
@@ -1775,23 +1771,23 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the path data is malformed or the function is called incorrectly.
        */
       var handleProbe = function (providerId) {
-          setProbing(function (s) {
-            var n = Object.assign({}, s);
-            n[providerId] = true;
-            return n;
-          });
-          fetch(QUOTAS_API + "/refresh/" + encodeURIComponent(providerId), { method: "POST" })
-            .then(function () {
-              load();
-            })
-            .finally(function () {
-              setProbing(function (s) {
-                var n = Object.assign({}, s);
-                n[providerId] = false;
-                return n;
-              });
+        setProbing(function (s) {
+          var n = Object.assign({}, s);
+          n[providerId] = true;
+          return n;
+        });
+        fetch(QUOTAS_API + "/refresh/" + encodeURIComponent(providerId), { method: "POST" })
+          .then(function () {
+            load();
+          })
+          .finally(function () {
+            setProbing(function (s) {
+              var n = Object.assign({}, s);
+              n[providerId] = false;
+              return n;
             });
-        };
+          });
+      };
 
       var /** handleProbeAll implementation. */
         handleProbeAll = function () {
@@ -1826,35 +1822,35 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Returns true if the reveal state is successfully toggled; otherwise, returns false.
        */
       var toggleReveal = function (keyId) {
-          if (revealed[keyId]) {
+        if (revealed[keyId]) {
+          setRevealed(function (s) {
+            var n = Object.assign({}, s);
+            delete n[keyId];
+            return n;
+          });
+          return;
+        }
+        var parts = keyId.split("::");
+        var ref = parts[0],
+          account = parts[1];
+        fetch(
+          VAULT_API +
+            "/accounts/" +
+            encodeURIComponent(ref) +
+            "?account=" +
+            encodeURIComponent(account),
+        )
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (res) {
             setRevealed(function (s) {
               var n = Object.assign({}, s);
-              delete n[keyId];
+              n[keyId] = res.value || "(empty)";
               return n;
             });
-            return;
-          }
-          var parts = keyId.split("::");
-          var ref = parts[0],
-            account = parts[1];
-          fetch(
-            VAULT_API +
-              "/accounts/" +
-              encodeURIComponent(ref) +
-              "?account=" +
-              encodeURIComponent(account),
-          )
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (res) {
-              setRevealed(function (s) {
-                var n = Object.assign({}, s);
-                n[keyId] = res.value || "(empty)";
-                return n;
-              });
-            });
-        };
+          });
+      };
 
       return h(
         "div",
@@ -3130,11 +3126,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * It does not return anything but sets up the UI for the specified section.
        */
       var handleSave = function () {
-          setSaved(true);
-          setTimeout(function () {
-            setSaved(false);
-          }, 2500);
-        };
+        setSaved(true);
+        setTimeout(function () {
+          setSaved(false);
+        }, 2500);
+      };
 
       return renderSettingsSectionShell(
         "Tmux Engine Configuration",
@@ -3236,11 +3232,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {string} A message indicating whether the save was successful or not.
        */
       var handleSave = function () {
-          setSaved(true);
-          setTimeout(function () {
-            setSaved(false);
-          }, 2500);
-        };
+        setSaved(true);
+        setTimeout(function () {
+          setSaved(false);
+        }, 2500);
+      };
 
       return renderSettingsSectionShell(
         "Docker Sandbox Configuration",
@@ -3779,36 +3775,33 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, the function does not return anything and the resize operation is not initiated.
        */
       var handleResizeStart = function (e) {
-          e.preventDefault();
-          var startY = e.clientY;
-          var startHeight = height;
-          /**
-           * Displays a section header for tools and MCP capabilities, followed by a description of the features.
-           *
-           * This section header is used to guide the user to inspect built-in agent coding tools, registered MCP servers,
-           * and execution approval policies.
-           */
-          var handleMove = function (moveEvent) {
-              var delta = startY - moveEvent.clientY;
-              var newHeight = Math.max(
-                160,
-                Math.min(window.innerHeight * 0.88, startHeight + delta),
-              );
-              setHeight(newHeight);
-              setIsMaximized(false);
-            };
-          /**
-           * Handles the "Up" action, moving the selected tool up in the list.
-           * Moves the selected tool to the position immediately above the current one.
-           * Throws an error if no tool is selected or if the tool is already at the top.
-           */
-          var handleUp = function () {
-              document.removeEventListener("pointermove", handleMove);
-              document.removeEventListener("pointerup", handleUp);
-            };
-          document.addEventListener("pointermove", handleMove);
-          document.addEventListener("pointerup", handleUp);
+        e.preventDefault();
+        var startY = e.clientY;
+        var startHeight = height;
+        /**
+         * Displays a section header for tools and MCP capabilities, followed by a description of the features.
+         *
+         * This section header is used to guide the user to inspect built-in agent coding tools, registered MCP servers,
+         * and execution approval policies.
+         */
+        var handleMove = function (moveEvent) {
+          var delta = startY - moveEvent.clientY;
+          var newHeight = Math.max(160, Math.min(window.innerHeight * 0.88, startHeight + delta));
+          setHeight(newHeight);
+          setIsMaximized(false);
         };
+        /**
+         * Handles the "Up" action, moving the selected tool up in the list.
+         * Moves the selected tool to the position immediately above the current one.
+         * Throws an error if no tool is selected or if the tool is already at the top.
+         */
+        var handleUp = function () {
+          document.removeEventListener("pointermove", handleMove);
+          document.removeEventListener("pointerup", handleUp);
+        };
+        document.addEventListener("pointermove", handleMove);
+        document.addEventListener("pointerup", handleUp);
+      };
 
       var loadSessions = React.useCallback(
         function () {
@@ -3939,27 +3932,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
            * On failure, an alert is shown with instructions on how to add new autonomous loops.
            */
           var onOpenTerm = function (e) {
-              var sess = e && e.detail && e.detail.session ? e.detail.session : "0";
-              setActiveView("terminal");
-              setSelectedSession(sess);
-              setSelectedContainer(null);
-              setIsCollapsed(false);
-              loadBuffer(sess);
-              loadWindows(sess);
-            };
+            var sess = e && e.detail && e.detail.session ? e.detail.session : "0";
+            setActiveView("terminal");
+            setSelectedSession(sess);
+            setSelectedContainer(null);
+            setIsCollapsed(false);
+            loadBuffer(sess);
+            loadWindows(sess);
+          };
           /**
            * Displays a button to alert users about scheduling loops and opens an alert with instructions.
            *
            * On failure or no action, the alert is shown with instructions on how to add new autonomous loops.
            */
           var onOpenCont = function (e) {
-              var id = e && e.detail && e.detail.id ? e.detail.id : null;
-              setActiveView("container");
-              setSelectedContainer(id);
-              setSelectedSession(null);
-              setIsCollapsed(false);
-              if (id) loadContainerLogs(id);
-            };
+            var id = e && e.detail && e.detail.id ? e.detail.id : null;
+            setActiveView("container");
+            setSelectedContainer(id);
+            setSelectedSession(null);
+            setIsCollapsed(false);
+            if (id) loadContainerLogs(id);
+          };
           window.addEventListener("dsh:open-terminal", onOpenTerm);
           window.addEventListener("dsh:open-container", onOpenCont);
           return function () {
@@ -4019,11 +4012,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the `loop` object does not contain `status`, `desc`, or `interval`.
        */
       var selectTerminalTab = function (name) {
-          setActiveView("terminal");
-          setSelectedSession(name);
-          setSelectedContainer(null);
-          setIsCollapsed(false);
-        };
+        setActiveView("terminal");
+        setSelectedSession(name);
+        setSelectedContainer(null);
+        setIsCollapsed(false);
+      };
 
       /**
        * Displays the interval and provides a button to trigger the action immediately.
@@ -4033,11 +4026,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Failing to provide valid JSX properties will result in incorrect rendering.
        */
       var selectContainerTab = function (c) {
-          setActiveView("container");
-          setSelectedContainer(c.id);
-          setSelectedSession(null);
-          setIsCollapsed(false);
-        };
+        setActiveView("container");
+        setSelectedContainer(c.id);
+        setSelectedSession(null);
+        setIsCollapsed(false);
+      };
 
       // Send key actions
       /**
@@ -4047,16 +4040,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails silently if the width conditions are not met or if the ResizeObserver is disconnected.
        */
       var sendKey = function (key) {
-          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: selectedSession, keys: key, isLiteral: false }),
-          }).then(function () {
-            setTimeout(function () {
-              loadBuffer(selectedSession);
-            }, 40);
-          });
-        };
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: selectedSession, keys: key, isLiteral: false }),
+        }).then(function () {
+          setTimeout(function () {
+            loadBuffer(selectedSession);
+          }, 40);
+        });
+      };
 
       /**
        * Sends a literal event to the terminal panel.
@@ -4066,21 +4059,21 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @param {string} text - The text to send to the terminal panel.
        */
       var sendLiteral = function (text, pressEnter) {
-          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              name: selectedSession,
-              keys: text,
-              isLiteral: true,
-              pressEnter: Boolean(pressEnter),
-            }),
-          }).then(function () {
-            setTimeout(function () {
-              loadBuffer(selectedSession);
-            }, 60);
-          });
-        };
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: selectedSession,
+            keys: text,
+            isLiteral: true,
+            pressEnter: Boolean(pressEnter),
+          }),
+        }).then(function () {
+          setTimeout(function () {
+            loadBuffer(selectedSession);
+          }, 60);
+        });
+      };
 
       /**
        * Handles the execution of a command in the terminal panel.
@@ -4093,11 +4086,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {void}
        */
       var handleExecuteCommand = function (e) {
-          if (e) e.preventDefault();
-          if (!cmd.trim()) return;
-          sendLiteral(cmd, true);
-          setCmd("");
-        };
+        if (e) e.preventDefault();
+        if (!cmd.trim()) return;
+        sendLiteral(cmd, true);
+        setCmd("");
+      };
 
       /**
        * Handles keydown events to manage session and window focus.
@@ -4107,51 +4100,51 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails: Sets `isFocused` to false if the event is not handled.
        */
       var handleKeyDown = function (e) {
-          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
 
-          if (e.key === "Enter") {
-            sendKey("Enter");
+        if (e.key === "Enter") {
+          sendKey("Enter");
+          e.preventDefault();
+        } else if (e.key === "Backspace") {
+          sendKey("BSpace");
+          e.preventDefault();
+        } else if (e.key === "Tab") {
+          sendKey("Tab");
+          e.preventDefault();
+        } else if (e.key === "ArrowUp") {
+          sendKey("Up");
+          e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          sendKey("Down");
+          e.preventDefault();
+        } else if (e.key === "ArrowLeft") {
+          sendKey("Left");
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          sendKey("Right");
+          e.preventDefault();
+        } else if (e.key === "Escape") {
+          sendKey("Escape");
+          e.preventDefault();
+        } else if (e.ctrlKey) {
+          if (e.key === "c" || e.key === "C") {
+            sendKey("C-c");
             e.preventDefault();
-          } else if (e.key === "Backspace") {
-            sendKey("BSpace");
+          } else if (e.key === "d" || e.key === "D") {
+            sendKey("C-d");
             e.preventDefault();
-          } else if (e.key === "Tab") {
-            sendKey("Tab");
+          } else if (e.key === "l" || e.key === "L") {
+            sendKey("C-l");
             e.preventDefault();
-          } else if (e.key === "ArrowUp") {
-            sendKey("Up");
-            e.preventDefault();
-          } else if (e.key === "ArrowDown") {
-            sendKey("Down");
-            e.preventDefault();
-          } else if (e.key === "ArrowLeft") {
-            sendKey("Left");
-            e.preventDefault();
-          } else if (e.key === "ArrowRight") {
-            sendKey("Right");
-            e.preventDefault();
-          } else if (e.key === "Escape") {
-            sendKey("Escape");
-            e.preventDefault();
-          } else if (e.ctrlKey) {
-            if (e.key === "c" || e.key === "C") {
-              sendKey("C-c");
-              e.preventDefault();
-            } else if (e.key === "d" || e.key === "D") {
-              sendKey("C-d");
-              e.preventDefault();
-            } else if (e.key === "l" || e.key === "L") {
-              sendKey("C-l");
-              e.preventDefault();
-            } else if (e.key === "z" || e.key === "Z") {
-              sendKey("C-z");
-              e.preventDefault();
-            }
-          } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
-            sendLiteral(e.key, false);
+          } else if (e.key === "z" || e.key === "Z") {
+            sendKey("C-z");
             e.preventDefault();
           }
-        };
+        } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
+          sendLiteral(e.key, false);
+          e.preventDefault();
+        }
+      };
 
       /**
        * Handles the selection of a window, updating the active view state accordingly.
@@ -4161,15 +4154,15 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails: If the selected window type is not recognized, the state remains unchanged.
        */
       var handleSelectWindow = function (idx) {
-          fetch(QUOTAS_API + "/tmux/sessions/select-window", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: selectedSession, index: idx }),
-          }).then(function () {
-            loadWindows(selectedSession);
-            loadBuffer(selectedSession);
-          });
-        };
+        fetch(QUOTAS_API + "/tmux/sessions/select-window", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: selectedSession, index: idx }),
+        }).then(function () {
+          loadWindows(selectedSession);
+          loadBuffer(selectedSession);
+        });
+      };
 
       var /** handleNewWindow implementation. */
         handleNewWindow = function () {
@@ -4211,28 +4204,28 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Throws an error if the move event results in an invalid height.
          */
         var updateOffsets = function () {
-            var centerEl = document.querySelector('[class*="centerCol"]');
-            if (centerEl) {
-              var cRect = centerEl.getBoundingClientRect();
-              if (cRect.width > 0) {
-                setSidebarRight(cRect.left);
-                setDetailsWidth(window.innerWidth - cRect.right);
-                return;
-              }
+          var centerEl = document.querySelector('[class*="centerCol"]');
+          if (centerEl) {
+            var cRect = centerEl.getBoundingClientRect();
+            if (cRect.width > 0) {
+              setSidebarRight(cRect.left);
+              setDetailsWidth(window.innerWidth - cRect.right);
+              return;
             }
-            var sidebarEl = document.querySelector('[class*="sidebarCol"]');
-            if (sidebarEl) {
-              var sRect = sidebarEl.getBoundingClientRect();
-              if (sRect.right > 0) setSidebarRight(sRect.right);
-            }
-            var detailsEl = document.querySelector('[class*="detailsCol"]');
-            if (detailsEl) {
-              var dRect = detailsEl.getBoundingClientRect();
-              var dWidth = window.innerWidth - dRect.left;
-              if (dWidth >= 0 && dRect.width > 0) setDetailsWidth(dWidth);
-              else setDetailsWidth(0);
-            }
-          };
+          }
+          var sidebarEl = document.querySelector('[class*="sidebarCol"]');
+          if (sidebarEl) {
+            var sRect = sidebarEl.getBoundingClientRect();
+            if (sRect.right > 0) setSidebarRight(sRect.right);
+          }
+          var detailsEl = document.querySelector('[class*="detailsCol"]');
+          if (detailsEl) {
+            var dRect = detailsEl.getBoundingClientRect();
+            var dWidth = window.innerWidth - dRect.left;
+            if (dWidth >= 0 && dRect.width > 0) setDetailsWidth(dWidth);
+            else setDetailsWidth(0);
+          }
+        };
 
         updateOffsets();
         var timer = setInterval(updateOffsets, 200);
@@ -5361,10 +5354,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails silently if the conditions for moving are not met.
          */
         var checkWidth = function () {
-            if (containerRef.current) {
-              setIsNarrow(containerRef.current.clientWidth < 420);
-            }
-          };
+          if (containerRef.current) {
+            setIsNarrow(containerRef.current.clientWidth < 420);
+          }
+        };
         checkWidth();
         var obs = new ResizeObserver(checkWidth);
         obs.observe(containerRef.current);
@@ -5435,27 +5428,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails by either refreshing the buffer, sending a key command, setting the collapse state, or handling session killing.
        */
       var handleAction = function (id, action) {
-          setActionMap(function (s) {
-            var n = Object.assign({}, s);
-            n[id] = action;
-            return n;
-          });
-          fetch(QUOTAS_API + "/docker/containers/action", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ id: id, action: action }),
+        setActionMap(function (s) {
+          var n = Object.assign({}, s);
+          n[id] = action;
+          return n;
+        });
+        fetch(QUOTAS_API + "/docker/containers/action", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: id, action: action }),
+        })
+          .then(function () {
+            loadContainers();
           })
-            .then(function () {
-              loadContainers();
-            })
-            .finally(function () {
-              setActionMap(function (s) {
-                var n = Object.assign({}, s);
-                delete n[id];
-                return n;
-              });
+          .finally(function () {
+            setActionMap(function (s) {
+              var n = Object.assign({}, s);
+              delete n[id];
+              return n;
             });
-        };
+          });
+      };
 
       return h(
         "div",
@@ -5708,16 +5701,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
            * On failure, it does nothing and returns undefined.
            */
           var handlePointerDown = function (e) {
-              if (menuRef.current && !menuRef.current.contains(e.target)) {
-                if (anchorRef && anchorRef.current && anchorRef.current.contains(e.target)) return;
-                if (
-                  menuRef.current.parentElement &&
-                  menuRef.current.parentElement.contains(e.target)
-                )
-                  return;
-                onClose();
-              }
-            };
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+              if (anchorRef && anchorRef.current && anchorRef.current.contains(e.target)) return;
+              if (menuRef.current.parentElement && menuRef.current.parentElement.contains(e.target))
+                return;
+              onClose();
+            }
+          };
           var timer = setTimeout(function () {
             document.addEventListener("pointerdown", handlePointerDown);
           }, 30);
@@ -5844,22 +5834,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, no containers are loaded and the loading state remains unchanged.
        */
       var sendLiteral = function (text) {
-          fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: sessionName, keys: text, isLiteral: true }),
-          }).then(function () {
-            fetch(
-              QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
-            )
-              .then(function (r) {
-                return r.json();
-              })
-              .then(function (res) {
-                if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
-              });
-          });
-        };
+        fetch(QUOTAS_API + "/tmux/sessions/send-keys", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: sessionName, keys: text, isLiteral: true }),
+        }).then(function () {
+          fetch(
+            QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
+            });
+        });
+      };
 
       /**
        * Handles key down events to update the selected container or fetch logs.
@@ -5868,50 +5858,50 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails by setting the error state if fetching logs fails.
        */
       var handleKeyDown = function (e) {
-          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
-          if (e.key === "Enter") {
-            sendKey("Enter");
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        if (e.key === "Enter") {
+          sendKey("Enter");
+          e.preventDefault();
+        } else if (e.key === "Backspace") {
+          sendKey("BSpace");
+          e.preventDefault();
+        } else if (e.key === "Tab") {
+          sendKey("Tab");
+          e.preventDefault();
+        } else if (e.key === "ArrowUp") {
+          sendKey("Up");
+          e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          sendKey("Down");
+          e.preventDefault();
+        } else if (e.key === "ArrowLeft") {
+          sendKey("Left");
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          sendKey("Right");
+          e.preventDefault();
+        } else if (e.key === "Escape") {
+          sendKey("Escape");
+          e.preventDefault();
+        } else if (e.ctrlKey) {
+          if (e.key === "c" || e.key === "C") {
+            sendKey("C-c");
             e.preventDefault();
-          } else if (e.key === "Backspace") {
-            sendKey("BSpace");
+          } else if (e.key === "d" || e.key === "D") {
+            sendKey("C-d");
             e.preventDefault();
-          } else if (e.key === "Tab") {
-            sendKey("Tab");
+          } else if (e.key === "l" || e.key === "L") {
+            sendKey("C-l");
             e.preventDefault();
-          } else if (e.key === "ArrowUp") {
-            sendKey("Up");
-            e.preventDefault();
-          } else if (e.key === "ArrowDown") {
-            sendKey("Down");
-            e.preventDefault();
-          } else if (e.key === "ArrowLeft") {
-            sendKey("Left");
-            e.preventDefault();
-          } else if (e.key === "ArrowRight") {
-            sendKey("Right");
-            e.preventDefault();
-          } else if (e.key === "Escape") {
-            sendKey("Escape");
-            e.preventDefault();
-          } else if (e.ctrlKey) {
-            if (e.key === "c" || e.key === "C") {
-              sendKey("C-c");
-              e.preventDefault();
-            } else if (e.key === "d" || e.key === "D") {
-              sendKey("C-d");
-              e.preventDefault();
-            } else if (e.key === "l" || e.key === "L") {
-              sendKey("C-l");
-              e.preventDefault();
-            } else if (e.key === "z" || e.key === "Z") {
-              sendKey("C-z");
-              e.preventDefault();
-            }
-          } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
-            sendLiteral(e.key);
+          } else if (e.key === "z" || e.key === "Z") {
+            sendKey("C-z");
             e.preventDefault();
           }
-        };
+        } else if (e.key.length === 1 && !e.metaKey && !e.altKey) {
+          sendLiteral(e.key);
+          e.preventDefault();
+        }
+      };
 
       /**
        * Handles session exit by refreshing the buffer, sending a key command, setting the collapse state, or handling session killing.
@@ -5919,15 +5909,15 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Guarantees that the action map is updated to reflect the new state.
        */
       var handleSessionExited = function () {
-          if (props.onClose) {
-            props.onClose();
-          }
-          window.dispatchEvent(
-            new CustomEvent("dsh:close-terminal-tab", {
-              detail: { id: sessionName, session: sessionName },
-            }),
-          );
-        };
+        if (props.onClose) {
+          props.onClose();
+        }
+        window.dispatchEvent(
+          new CustomEvent("dsh:close-terminal-tab", {
+            detail: { id: sessionName, session: sessionName },
+          }),
+        );
+      };
 
       React.useEffect(
         function () {
@@ -5938,43 +5928,41 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
            * Fails gracefully by removing the specified container from the action map.
            */
           var load = function () {
-              fetch(
-                QUOTAS_API +
-                  "/tmux/sessions/capture?ansi=1&name=" +
-                  encodeURIComponent(sessionName),
-              )
-                .then(function (r) {
-                  if (r.status === 404 || r.status === 410) {
-                    handleSessionExited();
-                    return null;
-                  }
-                  return r.json();
-                })
-                .then(function (res) {
-                  if (!res) return;
-                  if (
-                    res.error &&
-                    (res.error.indexOf("not found") !== -1 ||
-                      res.error.indexOf("failed") !== -1 ||
-                      res.error.indexOf("no server") !== -1 ||
-                      res.error.indexOf("exited") !== -1)
-                  ) {
-                    consecutiveErrors++;
-                    if (consecutiveErrors >= 2) {
-                      handleSessionExited();
-                    }
-                    return;
-                  }
-                  consecutiveErrors = 0;
-                  if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
-                })
-                .catch(function () {
+            fetch(
+              QUOTAS_API + "/tmux/sessions/capture?ansi=1&name=" + encodeURIComponent(sessionName),
+            )
+              .then(function (r) {
+                if (r.status === 404 || r.status === 410) {
+                  handleSessionExited();
+                  return null;
+                }
+                return r.json();
+              })
+              .then(function (res) {
+                if (!res) return;
+                if (
+                  res.error &&
+                  (res.error.indexOf("not found") !== -1 ||
+                    res.error.indexOf("failed") !== -1 ||
+                    res.error.indexOf("no server") !== -1 ||
+                    res.error.indexOf("exited") !== -1)
+                ) {
                   consecutiveErrors++;
-                  if (consecutiveErrors >= 3) {
+                  if (consecutiveErrors >= 2) {
                     handleSessionExited();
                   }
-                });
-            };
+                  return;
+                }
+                consecutiveErrors = 0;
+                if (res && res.buffer !== undefined) setBuffer(res.buffer || "(empty)");
+              })
+              .catch(function () {
+                consecutiveErrors++;
+                if (consecutiveErrors >= 3) {
+                  handleSessionExited();
+                }
+              });
+          };
           load();
           var timer = setInterval(load, 500);
           return function () {
@@ -6226,10 +6214,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the menu is not open, in which case it returns null.
          */
         var onToggle = function () {
-            setIsOpen(function (v) {
-              return !v;
-            });
-          };
+          setIsOpen(function (v) {
+            return !v;
+          });
+        };
         /**
          * Closes the menu by clearing the timer and removing the pointerdown event listener.
          * This function is called when the menu is no longer open, ensuring it cleans up.
@@ -6237,20 +6225,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * @returns {void} No value is returned, but it ensures the menu is properly cleaned up.
          */
         var onMoveToRight = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-            setIsOpen(true);
-          };
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (
+              prev.some(function (t) {
+                return t.id === tab.id;
+              })
+            )
+              return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+          setIsOpen(true);
+        };
         /**
          * Stops the propagation of the click event and does not guarantee any specific
          * behavior on failure since no explicit error handling is provided.
@@ -6258,28 +6246,28 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * @param {MouseEvent} e - The mouse event being handled.
          */
         var onMoveToTop = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              return prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            return prev.filter(function (t) {
+              return t.id !== tab.id;
             });
-          };
+          });
+        };
         /**
          * Stops the propagation of the event and toggles the danger style on the button.
          * The caller must ensure the `e` parameter is an event object. On failure, the event
          * propagation is stopped, and the button's style changes based on the `item.danger` value.
          */
         var onMoveToBottom = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              return prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            return prev.filter(function (t) {
+              return t.id !== tab.id;
             });
-          };
+          });
+        };
         window.addEventListener("dsh:toggle-right-sidebar", onToggle);
         window.addEventListener("dsh:toggle-secondary-sidebar", onToggle);
         window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
@@ -6310,10 +6298,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
            * Fails silently if the width conditions are not met.
            */
           var onMove = function (moveEv) {
-              var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;
-              var nextW = Math.max(180, Math.min(600, startW + delta));
-              setWidth(nextW);
-            };
+            var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;
+            var nextW = Math.max(180, Math.min(600, startW + delta));
+            setWidth(nextW);
+          };
           var /** onUp implementation. */
             onUp = function () {
               setIsResizing(false);
@@ -6670,14 +6658,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the custom event cannot be dispatched.
          */
         var update = function () {
-            var next = getCenterBounds();
-            setBounds(function (prev) {
-              if (prev.left !== next.left || prev.right !== next.right || prev.top !== next.top) {
-                return next;
-              }
-              return prev;
-            });
-          };
+          var next = getCenterBounds();
+          setBounds(function (prev) {
+            if (prev.left !== next.left || prev.right !== next.right || prev.top !== next.top) {
+              return next;
+            }
+            return prev;
+          });
+        };
         window.addEventListener("dsh:right-sidebar-changed", update);
         window.addEventListener("resize", update);
         window.addEventListener("pointermove", update);
@@ -6720,10 +6708,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails silently if the window or document is not defined.
          */
         var onGeom = function (e) {
-            if (e && e.detail && e.detail.height) {
-              setPanelHeight(e.detail.height);
-            }
-          };
+          if (e && e.detail && e.detail.height) {
+            setPanelHeight(e.detail.height);
+          }
+        };
         window.addEventListener("dsh:panel-geometry-changed", onGeom);
         return function () {
           window.removeEventListener("dsh:panel-geometry-changed", onGeom);
@@ -6776,10 +6764,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the menu is not open, in which case it returns null.
          */
         var onGeom = function (e) {
-            if (e && e.detail && e.detail.height) {
-              setPanelHeight(e.detail.height);
-            }
-          };
+          if (e && e.detail && e.detail.height) {
+            setPanelHeight(e.detail.height);
+          }
+        };
         window.addEventListener("dsh:panel-geometry-changed", onGeom);
         return function () {
           window.removeEventListener("dsh:panel-geometry-changed", onGeom);
@@ -6874,35 +6862,35 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails silently if the width conditions do not meet the criteria for moving a tab to the right.
        */
       var handleSave = function () {
-          if (saving) return;
-          setSaving(true);
-          setStatusMsg("Saving…");
-          fetch(QUOTAS_API + "/fs/write", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ path: filePath, content: content }),
+        if (saving) return;
+        setSaving(true);
+        setStatusMsg("Saving…");
+        fetch(QUOTAS_API + "/fs/write", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: filePath, content: content }),
+        })
+          .then(function (r) {
+            return r.json();
           })
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (res) {
-              if (res.error) {
-                setStatusMsg("Error: " + res.error);
-              } else {
-                setOriginalContent(content);
-                setStatusMsg("Saved!");
-                setTimeout(function () {
-                  setStatusMsg("");
-                }, 2000);
-              }
-            })
-            .catch(function (err) {
-              setStatusMsg("Save failed: " + err.message);
-            })
-            .finally(function () {
-              setSaving(false);
-            });
-        };
+          .then(function (res) {
+            if (res.error) {
+              setStatusMsg("Error: " + res.error);
+            } else {
+              setOriginalContent(content);
+              setStatusMsg("Saved!");
+              setTimeout(function () {
+                setStatusMsg("");
+              }, 2000);
+            }
+          })
+          .catch(function (err) {
+            setStatusMsg("Save failed: " + err.message);
+          })
+          .finally(function () {
+            setSaving(false);
+          });
+      };
 
       React.useEffect(
         function () {
@@ -7328,9 +7316,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails to update if no changes occur between events.
        */
       var handleNavigateSubPath = function (newSp) {
-          setSubPath(newSp);
-          fetchOverview(newSp);
-        };
+        setSubPath(newSp);
+        fetchOverview(newSp);
+      };
 
       var /** handleCommitAndPush implementation. */
         handleCommitAndPush = function () {
@@ -7380,29 +7368,29 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Returns a cleanup function to remove the event listener.
        */
       var handleDiscardChanges = function (file) {
-          if (
-            !confirm(
-              file
-                ? "Discard all changes in " + file + "?"
-                : "Discard all unstaged changes and untracked files?",
-            )
+        if (
+          !confirm(
+            file
+              ? "Discard all changes in " + file + "?"
+              : "Discard all unstaged changes and untracked files?",
           )
-            return;
-          setActionStatus("Discarding changes…");
-          fetch(QUOTAS_API + "/git/discard", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ path: repoPath, file: file }),
-          }).then(function () {
-            fetchRepoData();
-            fetchDiff(null);
-            setSelectedDiffFile(null);
-            setActionStatus("Changes discarded.");
-            setTimeout(function () {
-              setActionStatus("");
-            }, 2500);
-          });
-        };
+        )
+          return;
+        setActionStatus("Discarding changes…");
+        fetch(QUOTAS_API + "/git/discard", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ path: repoPath, file: file }),
+        }).then(function () {
+          fetchRepoData();
+          fetchDiff(null);
+          setSelectedDiffFile(null);
+          setActionStatus("Changes discarded.");
+          setTimeout(function () {
+            setActionStatus("");
+          }, 2500);
+        });
+      };
 
       var /** handleStashChanges implementation. */
         handleStashChanges = function () {
@@ -7452,11 +7440,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, no action is taken as the function does not handle errors.
        */
       var handleCreateNewBranch = function () {
-          var name = prompt("New branch name:");
-          if (name && name.trim()) {
-            handleSwitchBranch(name.trim(), true);
-          }
-        };
+        var name = prompt("New branch name:");
+        if (name && name.trim()) {
+          handleSwitchBranch(name.trim(), true);
+        }
+      };
 
       var curBranch = (overview && overview.branch) || status.branch || "main";
       var remoteUrl = (overview && overview.remoteUrl) || "";
@@ -9361,38 +9349,38 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * changes without further confirmation.
          */
         var onTabMovedToTop = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-          };
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (
+              prev.some(function (t) {
+                return t.id === tab.id;
+              })
+            )
+              return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        };
         /**
          * Triggers the discard of all changes when the button is clicked.
          *
          * On failure, the `handleDiscardChanges` function is called to discard the changes.
          */
         var onTabMovedToBottom = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              var remaining = prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
-              return remaining;
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            var remaining = prev.filter(function (t) {
+              return t.id !== tab.id;
             });
-            setActiveTab(function (curr) {
-              if (curr === tab.id) return null;
-              return curr;
-            });
-          };
+            return remaining;
+          });
+          setActiveTab(function (curr) {
+            if (curr === tab.id) return null;
+            return curr;
+          });
+        };
         /**
          * Displays a warning dialog prompting the user to confirm discarding all changes.
          *
@@ -9400,18 +9388,18 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the user chooses not to discard all changes.
          */
         var onTabMovedToRight = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              return prev.filter(function (t) {
-                return t.id !== tab.id;
-              });
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            return prev.filter(function (t) {
+              return t.id !== tab.id;
             });
-            setActiveTab(function (curr) {
-              if (curr === tab.id) return null;
-              return curr;
-            });
-          };
+          });
+          setActiveTab(function (curr) {
+            if (curr === tab.id) return null;
+            return curr;
+          });
+        };
         /**
          * Displays the header for the changed files section and indicates the status of the working tree.
          *
@@ -9419,19 +9407,19 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * If no files are changed, it displays a message indicating the working tree is clean.
          */
         var onOpenFileTab = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-          };
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (
+              prev.some(function (t) {
+                return t.id === tab.id;
+              })
+            )
+              return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        };
         /**
          * Displays a message or a list of files based on the repository status.
          * If the working tree is clean, it shows a message indicating no unstaged changes.
@@ -9439,19 +9427,19 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Failing to provide a valid status object results in no action taken.
          */
         var onOpenRepoTab = function (e) {
-            var tab = e.detail;
-            if (!tab) return;
-            setTabs(function (prev) {
-              if (
-                prev.some(function (t) {
-                  return t.id === tab.id;
-                })
-              )
-                return prev;
-              return prev.concat([tab]);
-            });
-            setActiveTab(tab.id);
-          };
+          var tab = e.detail;
+          if (!tab) return;
+          setTabs(function (prev) {
+            if (
+              prev.some(function (t) {
+                return t.id === tab.id;
+              })
+            )
+              return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        };
 
         /**
          * Handles the opening of a terminal.
@@ -9461,27 +9449,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails by updating the UI to deselect the current file or select the first file if none is selected.
          */
         var onOpenTerminal = function (e) {
-            var target = (e && e.detail && e.detail.target) || "bottom";
-            if (target === "top") {
-              var sess = (e && e.detail && e.detail.session) || "0";
-              var termTab = {
-                id: sess,
-                type: "terminal",
-                title: "Terminal: " + sess,
-                session: sess,
-              };
-              setTabs(function (prev) {
-                if (
-                  prev.some(function (t) {
-                    return t.id === termTab.id;
-                  })
-                )
-                  return prev;
-                return prev.concat([termTab]);
-              });
-              setActiveTab(termTab.id);
-            }
-          };
+          var target = (e && e.detail && e.detail.target) || "bottom";
+          if (target === "top") {
+            var sess = (e && e.detail && e.detail.session) || "0";
+            var termTab = {
+              id: sess,
+              type: "terminal",
+              title: "Terminal: " + sess,
+              session: sess,
+            };
+            setTabs(function (prev) {
+              if (
+                prev.some(function (t) {
+                  return t.id === termTab.id;
+                })
+              )
+                return prev;
+              return prev.concat([termTab]);
+            });
+            setActiveTab(termTab.id);
+          }
+        };
 
         /**
          * Sets the style and appearance of a container when it is opened.
@@ -9492,30 +9480,30 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * On failure, the container's style remains unchanged.
          */
         var onOpenContainer = function (e) {
-            var target = (e && e.detail && e.detail.target) || "bottom";
-            if (target === "top") {
-              var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
-              var contTab = {
-                id: cId,
-                type: "container",
-                title:
-                  (e && e.detail && e.detail.title) ||
-                  (cId === "container-sandboxes"
-                    ? "Docker Sandboxes"
-                    : "Container: " + cId.slice(0, 8)),
-              };
-              setTabs(function (prev) {
-                if (
-                  prev.some(function (t) {
-                    return t.id === contTab.id;
-                  })
-                )
-                  return prev;
-                return prev.concat([contTab]);
-              });
-              setActiveTab(contTab.id);
-            }
-          };
+          var target = (e && e.detail && e.detail.target) || "bottom";
+          if (target === "top") {
+            var cId = (e && e.detail && e.detail.id) || "container-sandboxes";
+            var contTab = {
+              id: cId,
+              type: "container",
+              title:
+                (e && e.detail && e.detail.title) ||
+                (cId === "container-sandboxes"
+                  ? "Docker Sandboxes"
+                  : "Container: " + cId.slice(0, 8)),
+            };
+            setTabs(function (prev) {
+              if (
+                prev.some(function (t) {
+                  return t.id === contTab.id;
+                })
+              )
+                return prev;
+              return prev.concat([contTab]);
+            });
+            setActiveTab(contTab.id);
+          }
+        };
 
         /**
          * Sets the focus to the chat component.
@@ -9526,27 +9514,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * On failure, the UI remains unchanged.
          */
         var onFocusChat = function (e) {
-            var tTitle =
-              (e && e.detail && e.detail.title) ||
-              (typeof window !== "undefined" && window.__dsh_current_session_title__) ||
-              "Conversation";
-            var chatTab = { id: "chat-main", type: "chat", title: tTitle };
-            setTabs(function (prev) {
-              var exists = prev.find(function (t) {
-                return t.id === "chat-main" || t.type === "chat";
-              });
-              if (exists) {
-                return prev.map(function (t) {
-                  if (t.id === "chat-main" || t.type === "chat") {
-                    return Object.assign({}, t, { title: tTitle });
-                  }
-                  return t;
-                });
-              }
-              return [chatTab].concat(prev);
+          var tTitle =
+            (e && e.detail && e.detail.title) ||
+            (typeof window !== "undefined" && window.__dsh_current_session_title__) ||
+            "Conversation";
+          var chatTab = { id: "chat-main", type: "chat", title: tTitle };
+          setTabs(function (prev) {
+            var exists = prev.find(function (t) {
+              return t.id === "chat-main" || t.type === "chat";
             });
-            setActiveTab("chat-main");
-          };
+            if (exists) {
+              return prev.map(function (t) {
+                if (t.id === "chat-main" || t.type === "chat") {
+                  return Object.assign({}, t, { title: tTitle });
+                }
+                return t;
+              });
+            }
+            return [chatTab].concat(prev);
+          });
+          setActiveTab("chat-main");
+        };
 
         /**
          * Updates the terminal tab state when closed. Ensures the terminal tab is properly
@@ -9554,32 +9542,32 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * an error if the tab closure fails or is not properly managed.
          */
         var onCloseTerminalTab = function (e) {
-            var sess = e && e.detail ? e.detail.session || e.detail.id : null;
-            if (!sess) return;
-            setTabs(function (prev) {
-              var tabToRemove = prev.find(function (t) {
-                return t.type === "terminal" && (t.session === sess || t.id === sess);
-              });
-              if (tabToRemove) {
-                var idx = prev.findIndex(function (t) {
-                  return t.id === tabToRemove.id;
-                });
-                var remaining = prev.filter(function (t) {
-                  return t.id !== tabToRemove.id;
-                });
-                setActiveTab(function (cur) {
-                  if (cur === tabToRemove.id) {
-                    return remaining.length > 0
-                      ? remaining[Math.min(idx, remaining.length - 1)].id
-                      : "chat-main";
-                  }
-                  return cur;
-                });
-                return remaining;
-              }
-              return prev;
+          var sess = e && e.detail ? e.detail.session || e.detail.id : null;
+          if (!sess) return;
+          setTabs(function (prev) {
+            var tabToRemove = prev.find(function (t) {
+              return t.type === "terminal" && (t.session === sess || t.id === sess);
             });
-          };
+            if (tabToRemove) {
+              var idx = prev.findIndex(function (t) {
+                return t.id === tabToRemove.id;
+              });
+              var remaining = prev.filter(function (t) {
+                return t.id !== tabToRemove.id;
+              });
+              setActiveTab(function (cur) {
+                if (cur === tabToRemove.id) {
+                  return remaining.length > 0
+                    ? remaining[Math.min(idx, remaining.length - 1)].id
+                    : "chat-main";
+                }
+                return cur;
+              });
+              return remaining;
+            }
+            return prev;
+          });
+        };
 
         window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
         window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
@@ -9608,15 +9596,15 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Returns `null` if the user chooses not to show all diffs, otherwise renders a dialog.
        */
       var handleDropOnTop = function (e) {
-          e.preventDefault();
-          try {
-            var raw = e.dataTransfer.getData("text/dsh-tab");
-            if (raw) {
-              var tabData = JSON.parse(raw);
-              window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tabData }));
-            }
-          } catch (err) {}
-        };
+        e.preventDefault();
+        try {
+          var raw = e.dataTransfer.getData("text/dsh-tab");
+          if (raw) {
+            var tabData = JSON.parse(raw);
+            window.dispatchEvent(new CustomEvent("dsh:tab-moved-to-top", { detail: tabData }));
+          }
+        } catch (err) {}
+      };
 
       /**
        * Removes the specified tab from the tab interface.
@@ -9625,25 +9613,25 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * The function returns `true` if the tab was successfully removed, and `false` if it did not exist.
        */
       var removeTab = function (tabId, e) {
-          if (e) e.stopPropagation();
-          setTabs(function (prev) {
-            var idx = prev.findIndex(function (t) {
-              return t.id === tabId;
-            });
-            var remaining = prev.filter(function (t) {
-              return t.id !== tabId;
-            });
-            if (activeTab === tabId) {
-              if (remaining.length > 0) {
-                var nextIdx = Math.min(idx, remaining.length - 1);
-                setActiveTab(remaining[nextIdx].id);
-              } else {
-                setActiveTab(null);
-              }
-            }
-            return remaining;
+        if (e) e.stopPropagation();
+        setTabs(function (prev) {
+          var idx = prev.findIndex(function (t) {
+            return t.id === tabId;
           });
-        };
+          var remaining = prev.filter(function (t) {
+            return t.id !== tabId;
+          });
+          if (activeTab === tabId) {
+            if (remaining.length > 0) {
+              var nextIdx = Math.min(idx, remaining.length - 1);
+              setActiveTab(remaining[nextIdx].id);
+            } else {
+              setActiveTab(null);
+            }
+          }
+          return remaining;
+        });
+      };
 
       /**
        * Checks if the provided trajectory text contains any changes.
@@ -9654,22 +9642,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {boolean} - true if there are changes, false otherwise.
        */
       var checkIsTrajectory = function () {
-          var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
-          if (activeTabEl) {
-            var txt = (activeTabEl.textContent || "").trim().toLowerCase();
-            return (
-              txt === "trajectory" ||
-              txt.includes("trajectory") ||
-              txt === "轨迹" ||
-              txt.includes("轨迹")
-            );
-          }
-          return Boolean(
-            document.querySelector(
-              '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
-            ),
+        var activeTabEl = document.querySelector('[role="tab"][aria-selected="true"]');
+        if (activeTabEl) {
+          var txt = (activeTabEl.textContent || "").trim().toLowerCase();
+          return (
+            txt === "trajectory" ||
+            txt.includes("trajectory") ||
+            txt === "轨迹" ||
+            txt.includes("轨迹")
           );
-        };
+        }
+        return Boolean(
+          document.querySelector(
+            '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
+          ),
+        );
+      };
 
       /**
        * Sets the view mode based on the active tab.
@@ -9679,32 +9667,32 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails silently if the active tab is not recognized.
        */
       var handleToggleView = function () {
-          var onTrajectoryNow = checkIsTrajectory();
-          var targetName = onTrajectoryNow ? "chat" : "trajectory";
-          var allTabs = Array.from(
-            document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+        var onTrajectoryNow = checkIsTrajectory();
+        var targetName = onTrajectoryNow ? "chat" : "trajectory";
+        var allTabs = Array.from(
+          document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+        );
+        var targetBtn = allTabs.find(function (b) {
+          var t = (b.textContent || "").trim().toLowerCase();
+          return (
+            (targetName === "chat" &&
+              (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
+            (targetName === "trajectory" &&
+              (t === "trajectory" ||
+                t.includes("trajectory") ||
+                t === "轨迹" ||
+                t.includes("轨迹")))
           );
-          var targetBtn = allTabs.find(function (b) {
-            var t = (b.textContent || "").trim().toLowerCase();
-            return (
-              (targetName === "chat" &&
-                (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
-              (targetName === "trajectory" &&
-                (t === "trajectory" ||
-                  t.includes("trajectory") ||
-                  t === "轨迹" ||
-                  t.includes("轨迹")))
-            );
+        });
+        if (targetBtn) {
+          targetBtn.click();
+        } else {
+          var inactiveBtn = allTabs.find(function (b) {
+            return b.getAttribute("aria-selected") !== "true";
           });
-          if (targetBtn) {
-            targetBtn.click();
-          } else {
-            var inactiveBtn = allTabs.find(function (b) {
-              return b.getAttribute("aria-selected") !== "true";
-            });
-            if (inactiveBtn) inactiveBtn.click();
-          }
-        };
+          if (inactiveBtn) inactiveBtn.click();
+        }
+      };
 
       /**
        * Displays the commit history log in a styled div element.
@@ -9714,22 +9702,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {JSX.Element} A styled div element containing the commit history and branch information.
        */
       var handleDownloadSessionLog = function () {
-          try {
-            var activeSessId =
-              typeof window !== "undefined" && window.__dsh_current_session_id__
-                ? window.__dsh_current_session_id__
-                : "";
-            var exportUrl = "/api/session.export?id=" + encodeURIComponent(activeSessId || "");
-            var a = document.createElement("a");
-            a.href = exportUrl;
-            a.download = (activeSessId || "session") + ".jsonl";
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function () {
-              if (a.parentNode) a.parentNode.removeChild(a);
-            }, 1000);
-          } catch (e) {}
-        };
+        try {
+          var activeSessId =
+            typeof window !== "undefined" && window.__dsh_current_session_id__
+              ? window.__dsh_current_session_id__
+              : "";
+          var exportUrl = "/api/session.export?id=" + encodeURIComponent(activeSessId || "");
+          var a = document.createElement("a");
+          a.href = exportUrl;
+          a.download = (activeSessId || "session") + ".jsonl";
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () {
+            if (a.parentNode) a.parentNode.removeChild(a);
+          }, 1000);
+        } catch (e) {}
+      };
 
       var bounds = useCenterBounds();
       var activeTabObj = tabs.find(function (t) {
@@ -10162,28 +10150,28 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails by reverting the tab name to its previous value and updating the UI to reflect the unchanged state.
        */
       var handleRename = function () {
-          if (!name.trim()) return;
-          setSaving(true);
-          fetch(QUOTAS_API + "/tmux/sessions/rename", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ oldName: oldName, newName: name.trim() }),
+        if (!name.trim()) return;
+        setSaving(true);
+        fetch(QUOTAS_API + "/tmux/sessions/rename", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ oldName: oldName, newName: name.trim() }),
+        })
+          .then(function (r) {
+            return r.json();
           })
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (res) {
-              if (res.ok) onRenamed();
-              else alert("Failed to rename session: " + (res.error || "Unknown error"));
-            })
-            .catch(function (e) {
-              alert("Error: " + e.message);
-            })
-            .finally(function () {
-              setSaving(false);
-              onClose();
-            });
-        };
+          .then(function (res) {
+            if (res.ok) onRenamed();
+            else alert("Failed to rename session: " + (res.error || "Unknown error"));
+          })
+          .catch(function (e) {
+            alert("Error: " + e.message);
+          })
+          .finally(function () {
+            setSaving(false);
+            onClose();
+          });
+      };
 
       return h(
         "div",
@@ -11641,14 +11629,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @param {DragEvent} e - The drag event containing the dropped item.
        */
       var handleAddMapping = function () {
-          if (!newTarget.trim()) return;
-          var next = JSON.parse(JSON.stringify(mappings));
-          if (!next[activeMappingCategory]) next[activeMappingCategory] = {};
-          next[activeMappingCategory][newTarget.trim()] = newIcon;
-          setMappings(next);
-          saveCustomIconMappings(next);
-          setNewTarget("");
-        };
+        if (!newTarget.trim()) return;
+        var next = JSON.parse(JSON.stringify(mappings));
+        if (!next[activeMappingCategory]) next[activeMappingCategory] = {};
+        next[activeMappingCategory][newTarget.trim()] = newIcon;
+        setMappings(next);
+        saveCustomIconMappings(next);
+        setNewTarget("");
+      };
 
       var /** handleRemoveMapping implementation. */
         handleRemoveMapping = function (key) {
@@ -11669,14 +11657,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {Array} An array containing SVG line and path elements forming the pin icon.
        */
       var handleResetCategory = function () {
-          var next = JSON.parse(JSON.stringify(mappings));
-          next[activeMappingCategory] = Object.assign(
-            {},
-            DEFAULT_ICON_MAPPINGS[activeMappingCategory],
-          );
-          setMappings(next);
-          saveCustomIconMappings(next);
-        };
+        var next = JSON.parse(JSON.stringify(mappings));
+        next[activeMappingCategory] = Object.assign(
+          {},
+          DEFAULT_ICON_MAPPINGS[activeMappingCategory],
+        );
+        setMappings(next);
+        saveCustomIconMappings(next);
+      };
 
       /**
        * Handles the reset action for all components, updating their visual state.
@@ -11686,10 +11674,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, no changes are made to the components' visual state.
        */
       var handleResetAll = function () {
-          var next = JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
-          setMappings(next);
-          saveCustomIconMappings(next);
-        };
+        var next = JSON.parse(JSON.stringify(DEFAULT_ICON_MAPPINGS));
+        setMappings(next);
+        saveCustomIconMappings(next);
+      };
 
       var currentCategoryMappings = (mappings && mappings[activeMappingCategory]) || {};
       var mappingKeys = Object.keys(currentCategoryMappings);
@@ -12278,20 +12266,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the provided state or context is invalid, returning null.
        */
       var handleCreate = function () {
-          setCreating(true);
-          fetch(QUOTAS_API + "/tmux/sessions/new", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: name }),
+        setCreating(true);
+        fetch(QUOTAS_API + "/tmux/sessions/new", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: name }),
+        })
+          .then(function () {
+            onCreated();
+            onClose();
           })
-            .then(function () {
-              onCreated();
-              onClose();
-            })
-            .finally(function () {
-              setCreating(false);
-            });
-        };
+          .finally(function () {
+            setCreating(false);
+          });
+      };
 
       return h(
         "div",
@@ -12389,27 +12377,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if `s` or `c` are undefined or not of the expected types.
        */
       var handleSave = function () {
-          setSaving(true);
-          fetch(
-            VAULT_API +
-              "/accounts/" +
-              encodeURIComponent(target.ref) +
-              "?account=" +
-              encodeURIComponent(target.account),
-            {
-              method: "PUT",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({ value: value }),
-            },
-          )
-            .then(function () {
-              onSaved();
-              onClose();
-            })
-            .finally(function () {
-              setSaving(false);
-            });
-        };
+        setSaving(true);
+        fetch(
+          VAULT_API +
+            "/accounts/" +
+            encodeURIComponent(target.ref) +
+            "?account=" +
+            encodeURIComponent(target.account),
+          {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ value: value }),
+          },
+        )
+          .then(function () {
+            onSaved();
+            onClose();
+          })
+          .finally(function () {
+            setSaving(false);
+          });
+      };
 
       return h(
         "div",
@@ -12516,27 +12504,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails by selecting the first inactive tab if no matching target is found.
        */
       var handleSave = function () {
-          setSaving(true);
-          fetch(
-            VAULT_API +
-              "/accounts/" +
-              encodeURIComponent(ref) +
-              "?account=" +
-              encodeURIComponent(account),
-            {
-              method: "PUT",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({ value: value }),
-            },
-          )
-            .then(function () {
-              onSaved();
-              onClose();
-            })
-            .finally(function () {
-              setSaving(false);
-            });
-        };
+        setSaving(true);
+        fetch(
+          VAULT_API +
+            "/accounts/" +
+            encodeURIComponent(ref) +
+            "?account=" +
+            encodeURIComponent(account),
+          {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ value: value }),
+          },
+        )
+          .then(function () {
+            onSaved();
+            onClose();
+          })
+          .finally(function () {
+            setSaving(false);
+          });
+      };
 
       return h(
         "div",
@@ -13158,10 +13146,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * On failure, the function does nothing and maintains the current icon state.
          */
         var onToggle = function (e) {
-            if (e && e.detail && e.detail.enabled !== undefined) {
-              setShowSearch(e.detail.enabled);
-            }
-          };
+          if (e && e.detail && e.detail.enabled !== undefined) {
+            setShowSearch(e.detail.enabled);
+          }
+        };
         window.addEventListener("dsh:sidebar-search-toggle", onToggle);
         return function () {
           window.removeEventListener("dsh:sidebar-search-toggle", onToggle);
@@ -13215,12 +13203,12 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * @returns {void} - Updates the UI to reflect the new search visibility state.
          */
         var onSearchToggle = function (e) {
-            var enabled =
-              e && e.detail && e.detail.enabled !== undefined
-                ? e.detail.enabled
-                : localStorage.getItem("dsh_show_sidebar_search") !== "false";
-            setShowSearchButton(enabled);
-          };
+          var enabled =
+            e && e.detail && e.detail.enabled !== undefined
+              ? e.detail.enabled
+              : localStorage.getItem("dsh_show_sidebar_search") !== "false";
+          setShowSearchButton(enabled);
+        };
         window.addEventListener("dsh:sidebar-search-toggle", onSearchToggle);
         return function () {
           window.removeEventListener("dsh:sidebar-search-toggle", onSearchToggle);
@@ -13258,17 +13246,17 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails gracefully by showing a centered message when no mappings are configured.
          */
         var onTriggerSearch = function () {
-            setSearchExpanded(true);
-            window.dispatchEvent(new CustomEvent("dsh:expand-sidebar"));
-            setTimeout(function () {
-              if (searchInputRef.current) {
-                searchInputRef.current.focus();
-                if (typeof searchInputRef.current.select === "function") {
-                  searchInputRef.current.select();
-                }
+          setSearchExpanded(true);
+          window.dispatchEvent(new CustomEvent("dsh:expand-sidebar"));
+          setTimeout(function () {
+            if (searchInputRef.current) {
+              searchInputRef.current.focus();
+              if (typeof searchInputRef.current.select === "function") {
+                searchInputRef.current.select();
               }
-            }, 80);
-          };
+            }
+          }, 80);
+        };
         window.addEventListener("dsh:trigger-sidebar-search", onTriggerSearch);
         return function () {
           window.removeEventListener("dsh:trigger-sidebar-search", onTriggerSearch);
@@ -13282,13 +13270,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * It returns `true` if the subagent was successfully toggled and `false` otherwise.
        */
       var toggleSubagentExpand = function (sessionId) {
-          setExpandedSubagents(function (prev) {
-            var n = Object.assign({}, prev);
-            if (n[sessionId]) delete n[sessionId];
-            else n[sessionId] = true;
-            return n;
-          });
-        };
+        setExpandedSubagents(function (prev) {
+          var n = Object.assign({}, prev);
+          if (n[sessionId]) delete n[sessionId];
+          else n[sessionId] = true;
+          return n;
+        });
+      };
 
       var fetchDir = React.useCallback(function (dirPath) {
         if (!dirPath) return;
@@ -13373,9 +13361,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @param {string} parentId - The ID of the parent element to set.
        */
       var getParentId = function (s) {
-          if (!s) return null;
-          return s.parentId || s.parentSessionId || s.parentSession || s.parent || null;
-        };
+        if (!s) return null;
+        return s.parentId || s.parentSessionId || s.parentSession || s.parent || null;
+      };
 
       /**
        * Returns true if the given agent is a child of the current agent.
@@ -13385,9 +13373,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {boolean} True if the agent is a child of the current agent, false otherwise.
        */
       var isSubagentChild = function (s) {
-          var pId = getParentId(s);
-          return Boolean(pId && (sessionsById[pId] || sessionIds.indexOf(pId) !== -1));
-        };
+        var pId = getParentId(s);
+        return Boolean(pId && (sessionsById[pId] || sessionIds.indexOf(pId) !== -1));
+      };
 
       /**
        * Configures a button to reset all mappings to factory defaults.
@@ -13397,18 +13385,18 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Failing to provide a valid `onClick` handler may result in no action being taken on button click.
        */
       var getSubagents = function (parentId) {
-          if (!parentId) return [];
-          return sessionIds
-            .map(function (id) {
-              return sessionsById[id];
-            })
-            .filter(function (s) {
-              return s && getParentId(s) === parentId;
-            })
-            .sort(function (a, b) {
-              return (b.updatedAt || 0) - (a.updatedAt || 0);
-            });
-        };
+        if (!parentId) return [];
+        return sessionIds
+          .map(function (id) {
+            return sessionsById[id];
+          })
+          .filter(function (s) {
+            return s && getParentId(s) === parentId;
+          })
+          .sort(function (a, b) {
+            return (b.updatedAt || 0) - (a.updatedAt || 0);
+          });
+      };
 
       var archivedSet = new Set();
       if (workspaceList && workspaceList.archivedSessionIds) {
@@ -13436,12 +13424,12 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the session data is invalid or unavailable, returning false.
        */
       var isArchivedSession = function (s, sId) {
-          if (!s && !sId) return false;
-          var id = sId || (s && s.id);
-          if (id && archivedSet.has(id)) return true;
-          if (s && (s.isArchived || s.archived || s.status === "archived")) return true;
-          return false;
-        };
+        if (!s && !sId) return false;
+        var id = sId || (s && s.id);
+        if (id && archivedSet.has(id)) return true;
+        if (s && (s.isArchived || s.archived || s.status === "archived")) return true;
+        return false;
+      };
 
       var pinnedSet = new Set();
       try {
@@ -13456,12 +13444,12 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the session state is invalid, returning false.
        */
       var isPinnedSession = function (s, sId) {
-          if (!s && !sId) return false;
-          var id = sId || (s && s.id);
-          if (id && pinnedSet.has(id)) return true;
-          if (s && (s.isPinned || s.pinned || s.favorite)) return true;
-          return false;
-        };
+        if (!s && !sId) return false;
+        var id = sId || (s && s.id);
+        if (id && pinnedSet.has(id)) return true;
+        if (s && (s.isPinned || s.pinned || s.favorite)) return true;
+        return false;
+      };
 
       /**
        * Toggles the pin session state.
@@ -13471,16 +13459,16 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * success or failure of the operation.
        */
       var togglePinSession = function (sessionId) {
-          if (pinnedSet.has(sessionId)) {
-            pinnedSet.delete(sessionId);
-          } else {
-            pinnedSet.add(sessionId);
-          }
-          try {
-            localStorage.setItem("dsh_pinned_sessions", JSON.stringify(Array.from(pinnedSet)));
-          } catch (e) {}
-          loadAll();
-        };
+        if (pinnedSet.has(sessionId)) {
+          pinnedSet.delete(sessionId);
+        } else {
+          pinnedSet.add(sessionId);
+        }
+        try {
+          localStorage.setItem("dsh_pinned_sessions", JSON.stringify(Array.from(pinnedSet)));
+        } catch (e) {}
+        loadAll();
+      };
 
       var pinnedSessions = sessionIds
         .map(function (sId) {
@@ -13599,13 +13587,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, logs an error message and prevents the update.
        */
       var handleArchiveChat = function (sessionId) {
-          if (archiveSession) archiveSession(sessionId);
-          archivedSet.add(sessionId);
-          try {
-            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-          } catch (e) {}
-          loadAll();
-        };
+        if (archiveSession) archiveSession(sessionId);
+        archivedSet.add(sessionId);
+        try {
+          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        loadAll();
+      };
 
       /**
        * Unarchives a session, making it active again.
@@ -13616,17 +13604,17 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {void}
        */
       var unarchiveSession = function (sessionId) {
-          archivedSet.delete(sessionId);
-          try {
-            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-          } catch (e) {}
-          fetch(QUOTAS_API + "/sessions/unarchive", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ id: sessionId }),
-          }).catch(function () {});
-          loadAll();
-        };
+        archivedSet.delete(sessionId);
+        try {
+          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        fetch(QUOTAS_API + "/sessions/unarchive", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: sessionId }),
+        }).catch(function () {});
+        loadAll();
+      };
 
       /**
        * Opens the chat modal and handles user interaction to save changes.
@@ -13635,27 +13623,27 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, the modal remains open, and the user is prompted to try again.
        */
       var handleOpenChat = function (sessionId, sessionTitle) {
-          if (!sessionId) return;
-          if (typeof window !== "undefined") {
-            window.__dsh_current_session_id__ = sessionId;
-            if (sessionTitle) window.__dsh_current_session_title__ = sessionTitle;
-          }
-          if (openSession) {
-            try {
-              openSession(sessionId);
-            } catch (e) {}
-          }
-          if (typeof window !== "undefined" && window.__dsh_ctx__ && window.__dsh_ctx__.sessions) {
-            try {
-              window.__dsh_ctx__.sessions.open(sessionId);
-            } catch (e) {}
-          }
-          window.dispatchEvent(
-            new CustomEvent("dsh:focus-chat", {
-              detail: { id: sessionId, title: sessionTitle || "Conversation" },
-            }),
-          );
-        };
+        if (!sessionId) return;
+        if (typeof window !== "undefined") {
+          window.__dsh_current_session_id__ = sessionId;
+          if (sessionTitle) window.__dsh_current_session_title__ = sessionTitle;
+        }
+        if (openSession) {
+          try {
+            openSession(sessionId);
+          } catch (e) {}
+        }
+        if (typeof window !== "undefined" && window.__dsh_ctx__ && window.__dsh_ctx__.sessions) {
+          try {
+            window.__dsh_ctx__.sessions.open(sessionId);
+          } catch (e) {}
+        }
+        window.dispatchEvent(
+          new CustomEvent("dsh:focus-chat", {
+            detail: { id: sessionId, title: sessionTitle || "Conversation" },
+          }),
+        );
+      };
 
       /**
        * Deletes a permanent session from the system.
@@ -13665,17 +13653,17 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the session deletion is not confirmed by the user.
        */
       var deletePermanentSession = function (sessionId) {
-          archivedSet.delete(sessionId);
-          try {
-            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-          } catch (e) {}
-          fetch(QUOTAS_API + "/sessions/delete", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ id: sessionId }),
-          }).catch(function () {});
-          loadAll();
-        };
+        archivedSet.delete(sessionId);
+        try {
+          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        fetch(QUOTAS_API + "/sessions/delete", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: sessionId }),
+        }).catch(function () {});
+        loadAll();
+      };
 
       /**
        * Handles the response for archived pong sessions.
@@ -13684,29 +13672,29 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails by setting the saving state to false if the fetch operation fails.
        */
       var handleArchivePongSessions = function () {
-          sessionIds.forEach(function (id) {
-            var s = sessionsById[id];
-            var title = (s && (s.displayTitle || s.title || s.name || "")) || "";
-            if (title.trim().toLowerCase() === "pong" || title.trim().toLowerCase() === "ping") {
-              archivedSet.add(id);
-              if (archiveSession) archiveSession(id);
-            }
+        sessionIds.forEach(function (id) {
+          var s = sessionsById[id];
+          var title = (s && (s.displayTitle || s.title || s.name || "")) || "";
+          if (title.trim().toLowerCase() === "pong" || title.trim().toLowerCase() === "ping") {
+            archivedSet.add(id);
+            if (archiveSession) archiveSession(id);
+          }
+        });
+        try {
+          localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
+        } catch (e) {}
+        fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (res) {
+            alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
+            loadAll();
+          })
+          .catch(function () {
+            loadAll();
           });
-          try {
-            localStorage.setItem("dsh_archived_sessions", JSON.stringify(Array.from(archivedSet)));
-          } catch (e) {}
-          fetch(QUOTAS_API + "/sessions/archive-pong", { method: "POST" })
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (res) {
-              alert("Archived " + (res.archivedCount || 0) + " empty / pong sessions.");
-              loadAll();
-            })
-            .catch(function () {
-              loadAll();
-            });
-        };
+      };
 
       /**
        * Toggles the expand state of the current item.
@@ -13716,19 +13704,19 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Failing the operation will set `setSaving` to false.
        */
       var toggleExpand = function (dirPath) {
-          setExpandedPaths(function (prev) {
-            var n = Object.assign({}, prev);
-            if (n[dirPath]) {
-              delete n[dirPath];
-            } else {
-              n[dirPath] = true;
-              if (!dirCache[dirPath]) {
-                fetchDir(dirPath);
-              }
+        setExpandedPaths(function (prev) {
+          var n = Object.assign({}, prev);
+          if (n[dirPath]) {
+            delete n[dirPath];
+          } else {
+            n[dirPath] = true;
+            if (!dirCache[dirPath]) {
+              fetchDir(dirPath);
             }
-            return n;
-          });
-        };
+          }
+          return n;
+        });
+      };
 
       /**
        * Opens a modal to add a key for a given provider, allowing the user to set a credential reference and account profile.
@@ -13736,23 +13724,21 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * On failure, displays an error message to the user.
        */
       var handleNewTerminalInDir = function (dirPath) {
-          var baseName = dirPath.split("/").pop() || "term";
-          var name = prompt(
-            "Terminal session name:",
-            baseName + "-" + Math.floor(Math.random() * 1000),
-          );
-          if (!name) return;
-          fetch(QUOTAS_API + "/tmux/sessions/new", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ name: name, cwd: dirPath }),
-          }).then(function () {
-            loadAll();
-            window.dispatchEvent(
-              new CustomEvent("dsh:open-terminal", { detail: { session: name } }),
-            );
-          });
-        };
+        var baseName = dirPath.split("/").pop() || "term";
+        var name = prompt(
+          "Terminal session name:",
+          baseName + "-" + Math.floor(Math.random() * 1000),
+        );
+        if (!name) return;
+        fetch(QUOTAS_API + "/tmux/sessions/new", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: name, cwd: dirPath }),
+        }).then(function () {
+          loadAll();
+          window.dispatchEvent(new CustomEvent("dsh:open-terminal", { detail: { session: name } }));
+        });
+      };
 
       /**
        * Displays a modal input form for setting an account profile and secret/key value.
@@ -13762,23 +13748,23 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if the input values are not provided or are invalid.
        */
       var handleStartSessionInDir = function (dirPath) {
-          var existing = workspaces.find(function (w) {
-            return w.path === dirPath;
-          });
-          if (existing) {
-            if (startSession) startSession(existing.workspaceId);
-          } else if (createWorkspace) {
-            createWorkspace({ path: dirPath })
-              .then(function (newW) {
-                if (startSession) startSession(newW ? newW.workspaceId : undefined);
-              })
-              .catch(function () {
-                if (startSession) startSession();
-              });
-          } else if (startSession) {
-            startSession();
-          }
-        };
+        var existing = workspaces.find(function (w) {
+          return w.path === dirPath;
+        });
+        if (existing) {
+          if (startSession) startSession(existing.workspaceId);
+        } else if (createWorkspace) {
+          createWorkspace({ path: dirPath })
+            .then(function (newW) {
+              if (startSession) startSession(newW ? newW.workspaceId : undefined);
+            })
+            .catch(function () {
+              if (startSession) startSession();
+            });
+        } else if (startSession) {
+          startSession();
+        }
+      };
 
       if (!wide) {
         var isRailPlusOpen = Boolean(plusMenu === "rail" || (plusMenu && plusMenu.key === "rail"));
@@ -13801,21 +13787,21 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * On failure: Does not modify the UI if saving fails or if no action is needed.
          */
         var handleExpand = function (e) {
-            if (e) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-            if (typeof expandSidebar === "function") {
-              expandSidebar();
-            } else if (props && typeof props.expandSidebar === "function") {
-              props.expandSidebar();
-            } else {
-              var toggleBtn = document.querySelector(
-                'button[class*="toggle"], button[aria-label*="sidebar"], button[aria-label*="Sidebar"]',
-              );
-              if (toggleBtn) toggleBtn.click();
-            }
-          };
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          if (typeof expandSidebar === "function") {
+            expandSidebar();
+          } else if (props && typeof props.expandSidebar === "function") {
+            props.expandSidebar();
+          } else {
+            var toggleBtn = document.querySelector(
+              'button[class*="toggle"], button[aria-label*="sidebar"], button[aria-label*="Sidebar"]',
+            );
+            if (toggleBtn) toggleBtn.click();
+          }
+        };
 
         return h(
           "div",
@@ -14048,111 +14034,111 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * @returns {JSX.Element} The rendered unified plus button element.
        */
       var renderUnifiedPlusButton = function (targetDir, anchorKey) {
-          var isMenuOpen = Boolean(
-            plusMenu && (plusMenu === anchorKey || plusMenu.key === anchorKey),
-          );
-          var path = targetDir || currentRoot || "/Users/user/Projects";
+        var isMenuOpen = Boolean(
+          plusMenu && (plusMenu === anchorKey || plusMenu.key === anchorKey),
+        );
+        var path = targetDir || currentRoot || "/Users/user/Projects";
 
-          return h(
-            "div",
-            { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
-            h(
-              "button",
-              {
-                type: "button",
-                className: "dsh-tree-actionBtn",
-                title: "New Item (+)",
-                "aria-label": "New Item",
-                onClick: function (e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  var rect = e.currentTarget.getBoundingClientRect();
-                  var posX = Math.max(10, Math.min(window.innerWidth - 200, rect.right - 190));
-                  var posY = rect.bottom + 4;
-                  setPlusMenu(isMenuOpen ? null : { key: anchorKey, pos: { x: posX, y: posY } });
-                },
+        return h(
+          "div",
+          { style: { position: "relative", display: "inline-flex", alignItems: "center" } },
+          h(
+            "button",
+            {
+              type: "button",
+              className: "dsh-tree-actionBtn",
+              title: "New Item (+)",
+              "aria-label": "New Item",
+              onClick: function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var rect = e.currentTarget.getBoundingClientRect();
+                var posX = Math.max(10, Math.min(window.innerWidth - 200, rect.right - 190));
+                var posY = rect.bottom + 4;
+                setPlusMenu(isMenuOpen ? null : { key: anchorKey, pos: { x: posX, y: posY } });
               },
-              h(PlusGlyph, { size: 13 }),
-            ),
-            isMenuOpen
-              ? h(SelectDropdownMenu, {
-                  open: true,
-                  position: plusMenu && plusMenu.pos ? plusMenu.pos : null,
-                  onClose: function () {
-                    setPlusMenu(null);
+            },
+            h(PlusGlyph, { size: 13 }),
+          ),
+          isMenuOpen
+            ? h(SelectDropdownMenu, {
+                open: true,
+                position: plusMenu && plusMenu.pos ? plusMenu.pos : null,
+                onClose: function () {
+                  setPlusMenu(null);
+                },
+                items: [
+                  { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
+                  {
+                    id: "terminal",
+                    label: "Terminal Session",
+                    icon: h(TerminalsGlyph, { size: 13 }),
                   },
-                  items: [
-                    { id: "chat", label: "Conversation", icon: h(ChatGlyph, { size: 13 }) },
-                    {
-                      id: "terminal",
-                      label: "Terminal Session",
-                      icon: h(TerminalsGlyph, { size: 13 }),
-                    },
-                    {
-                      id: "container",
-                      label: "Sandbox Container",
-                      icon: h(ContainersGlyph, { size: 13 }),
-                    },
-                    {
-                      id: "new-folder",
-                      label: "New Directory…",
-                      icon: h(FolderPlusGlyph, { size: 13 }),
-                    },
-                    {
-                      id: "open-workspace",
-                      label: "Open Folder as Workspace…",
-                      icon: h(BlueFolderGlyph, { size: 13 }),
-                    },
-                    {
-                      id: "archive-empty",
-                      label: "Archive Empty Chats",
-                      icon: h(TrashGlyph, { size: 13 }),
-                      danger: true,
-                    },
-                  ],
-                  onSelect: function (actionId) {
-                    setPlusMenu(null);
-                    if (actionId === "chat") {
-                      handleStartSessionInDir(path);
-                    } else if (actionId === "terminal") {
-                      handleNewTerminalInDir(path);
-                    } else if (actionId === "container") {
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:open-container", { detail: { cwd: path } }),
-                      );
-                    } else if (actionId === "new-folder") {
-                      var dirName = prompt("New directory name in " + path + ":");
-                      if (dirName && dirName.trim()) {
-                        fetch(QUOTAS_API + "/fs/mkdir", {
-                          method: "POST",
-                          headers: { "content-type": "application/json" },
-                          body: JSON.stringify({ path: path + "/" + dirName.trim() }),
-                        }).then(function () {
+                  {
+                    id: "container",
+                    label: "Sandbox Container",
+                    icon: h(ContainersGlyph, { size: 13 }),
+                  },
+                  {
+                    id: "new-folder",
+                    label: "New Directory…",
+                    icon: h(FolderPlusGlyph, { size: 13 }),
+                  },
+                  {
+                    id: "open-workspace",
+                    label: "Open Folder as Workspace…",
+                    icon: h(BlueFolderGlyph, { size: 13 }),
+                  },
+                  {
+                    id: "archive-empty",
+                    label: "Archive Empty Chats",
+                    icon: h(TrashGlyph, { size: 13 }),
+                    danger: true,
+                  },
+                ],
+                onSelect: function (actionId) {
+                  setPlusMenu(null);
+                  if (actionId === "chat") {
+                    handleStartSessionInDir(path);
+                  } else if (actionId === "terminal") {
+                    handleNewTerminalInDir(path);
+                  } else if (actionId === "container") {
+                    window.dispatchEvent(
+                      new CustomEvent("dsh:open-container", { detail: { cwd: path } }),
+                    );
+                  } else if (actionId === "new-folder") {
+                    var dirName = prompt("New directory name in " + path + ":");
+                    if (dirName && dirName.trim()) {
+                      fetch(QUOTAS_API + "/fs/mkdir", {
+                        method: "POST",
+                        headers: { "content-type": "application/json" },
+                        body: JSON.stringify({ path: path + "/" + dirName.trim() }),
+                      }).then(function () {
+                        loadAll();
+                      });
+                    }
+                  } else if (actionId === "open-workspace") {
+                    var defaultPath = path || "/Users/user/Projects";
+                    var p = prompt("Enter directory path for new Workspace:", defaultPath);
+                    if (p && p.trim()) {
+                      var cleanP = p.trim();
+                      if (createWorkspace) {
+                        createWorkspace({ path: cleanP }).then(function (w) {
+                          if (startSession) startSession(w ? w.workspaceId : undefined);
                           loadAll();
                         });
+                      } else {
+                        handleStartSessionInDir(cleanP);
                       }
-                    } else if (actionId === "open-workspace") {
-                      var defaultPath = path || "/Users/user/Projects";
-                      var p = prompt("Enter directory path for new Workspace:", defaultPath);
-                      if (p && p.trim()) {
-                        var cleanP = p.trim();
-                        if (createWorkspace) {
-                          createWorkspace({ path: cleanP }).then(function (w) {
-                            if (startSession) startSession(w ? w.workspaceId : undefined);
-                            loadAll();
-                          });
-                        } else {
-                          handleStartSessionInDir(cleanP);
-                        }
-                      }
-                    } else if (actionId === "archive-empty") {
-                      handleArchivePongSessions();
                     }
-                  },
-                })
-              : null,
-          );
-        };
+                  } else if (actionId === "archive-empty") {
+                    handleArchivePongSessions();
+                  }
+                },
+              })
+            : null,
+        );
+      };
 
       /**
        * Converts a given timestamp to a human-readable time format.
@@ -14162,313 +14148,34 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * it returns "now". On failure or if the timestamp is invalid, it returns the formatted time.
        */
       var renderChatRow = function (chat, padLeft) {
-          var isChatActive = chat.id === currentSessionId;
-          var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "chat::" + chat.id);
-          var subagents = getSubagents(chat.id);
-          var hasSubagents = subagents.length > 0;
-          var isSubExp = Boolean(expandedSubagents[chat.id]);
+        var isChatActive = chat.id === currentSessionId;
+        var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "chat::" + chat.id);
+        var subagents = getSubagents(chat.id);
+        var hasSubagents = subagents.length > 0;
+        var isSubExp = Boolean(expandedSubagents[chat.id]);
 
-          return h(
+        return h(
+          "div",
+          {
+            key: "chat-wrapper::" + chat.id,
+            style: { display: "flex", flexDirection: "column", width: "100%" },
+          },
+          h(
             "div",
             {
-              key: "chat-wrapper::" + chat.id,
-              style: { display: "flex", flexDirection: "column", width: "100%" },
-            },
-            h(
-              "div",
-              {
-                key: "chat::" + chat.id,
-                className:
-                  "dsh-tree-sessionRow" +
-                  (hasSubagents ? " dsh-has-children" : "") +
-                  (isChatActive ? " dsh-tree-sessionRowActive" : ""),
-                role: "treeitem",
-                "data-session-id": chat.id,
-                "aria-expanded": hasSubagents ? isSubExp : undefined,
-                style: {
-                  paddingLeft: padLeft + "px",
-                  height: "30px",
-                  color: isChatActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
-                  fontWeight: isChatActive ? 600 : 400,
-                  cursor: "pointer",
-                  position: "relative",
-                },
-                onClick: function () {
-                  handleOpenChat(chat.id, chat.title);
-                },
-                onContextMenu: function (e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setEllipsisOpen({ id: "chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
-                },
-              },
-              (function () {
-                var isPinned = isPinnedSession(chat, chat.id);
-                if (isPinned) {
-                  return h(
-                    "span",
-                    {
-                      className: "dsh-tree-slot dsh-tree-icon",
-                      style: { color: "var(--dsw-alias-primary, #6366f1)" },
-                    },
-                    h(PinGlyph, { size: 13 }),
-                  );
-                }
-                return h(
-                  "span",
-                  { className: "dsh-tree-slot dsh-tree-icon" },
-                  h(ChatGlyph, { size: 14 }),
-                );
-              })(),
-              hasSubagents
-                ? h(
-                    "span",
-                    {
-                      className: "dsh-tree-slot dsh-tree-chevron",
-                      title: isSubExp ? "Collapse subagents" : "Expand subagents",
-                      onClick: function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleSubagentExpand(chat.id);
-                      },
-                    },
-                    h(TriangleRightFill14, {
-                      className: "dsh-tree-arrow" + (isSubExp ? " dsh-tree-arrowOpen" : ""),
-                      size: 11,
-                    }),
-                  )
-                : null,
-              h(
-                "span",
-                {
-                  className: "dsh-tree-title",
-                  title: chat.title || "Chat Session",
-                },
-                chat.title || "Untitled Chat",
-              ),
-              hasSubagents
-                ? h(
-                    "span",
-                    {
-                      style: {
-                        padding: "1px 5px",
-                        borderRadius: "8px",
-                        fontSize: "9.5px",
-                        background: "rgba(99, 102, 241, 0.15)",
-                        color: "var(--dsw-alias-primary, #6366f1)",
-                        fontWeight: 700,
-                        marginLeft: "4px",
-                        cursor: "pointer",
-                      },
-                      title: subagents.length + " subagents (click to toggle)",
-                      onClick: function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleSubagentExpand(chat.id);
-                      },
-                    },
-                    subagents.length,
-                  )
-                : null,
-              h(
-                "span",
-                {
-                  style: {
-                    fontSize: "10.5px",
-                    color: "var(--dsw-alias-label-tertiary)",
-                    marginLeft: "auto",
-                    marginRight: "4px",
-                    flexShrink: 0,
-                  },
-                },
-                formatTimeAgo(chat.updatedAt),
-              ),
-              h(
-                "span",
-                { className: "dsh-tree-actions" },
-                h(
-                  "button",
-                  {
-                    type: "button",
-                    className: "dsh-tree-actionBtn",
-                    title: "Chat Actions (…)",
-                    onClick: function (e) {
-                      e.stopPropagation();
-                      setEllipsisOpen(isMenuOpen ? null : { id: "chat::" + chat.id });
-                    },
-                  },
-                  h(EllipsisGlyph, { size: 13 }),
-                ),
-                h(SelectDropdownMenu, {
-                  open: isMenuOpen,
-                  position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
-                  onClose: function () {
-                    setEllipsisOpen(null);
-                  },
-                  items: [
-                    {
-                      id: isPinnedSession(chat, chat.id) ? "unpin" : "pin",
-                      label: isPinnedSession(chat, chat.id) ? "Unpin Chat" : "Pin Chat",
-                      icon: h(PinGlyph, { size: 13 }),
-                    },
-                    { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
-                    { id: "fork", label: "Fork Chat", icon: h(BranchGlyph, { size: 13 }) },
-                    {
-                      id: "archive",
-                      label: "Archive Chat",
-                      icon: h(TrashGlyph, { size: 13 }),
-                      danger: true,
-                    },
-                  ],
-                  onSelect: function (actionId) {
-                    if (actionId === "pin" || actionId === "unpin") {
-                      togglePinSession(chat.id);
-                    } else if (actionId === "rename") {
-                      var newTitle = prompt("Rename chat:", chat.title || "");
-                      if (newTitle && renameSession) renameSession(chat.id, newTitle);
-                    } else if (actionId === "fork") {
-                      if (forkSession) forkSession(chat.id);
-                    } else if (actionId === "archive") {
-                      handleArchiveChat(chat.id);
-                    }
-                  },
-                }),
-              ),
-            ),
-            hasSubagents && isSubExp
-              ? h(
-                  "div",
-                  { style: { display: "flex", flexDirection: "column", width: "100%" } },
-                  subagents.map(function (sub) {
-                    var isSubActive = sub.id === currentSessionId;
-                    var isSubMenuOpen = Boolean(
-                      ellipsisOpen && ellipsisOpen.id === "chat::" + sub.id,
-                    );
-                    return h(
-                      "div",
-                      {
-                        key: "sub::" + sub.id,
-                        className:
-                          "dsh-tree-sessionRow dsh-tree-subagentRow" +
-                          (isSubActive ? " dsh-tree-sessionRowActive" : ""),
-                        role: "treeitem",
-                        "data-session-id": sub.id,
-                        style: {
-                          paddingLeft: padLeft + 16 + "px",
-                          height: "28px",
-                          color: isSubActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
-                          cursor: "pointer",
-                        },
-                        onClick: function () {
-                          handleOpenChat(sub.id, sub.title);
-                        },
-                        onContextMenu: function (e) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setEllipsisOpen({
-                            id: "chat::" + sub.id,
-                            pos: { x: e.clientX, y: e.clientY },
-                          });
-                        },
-                      },
-                      h(
-                        "span",
-                        { className: "dsh-tree-slot dsh-tree-icon" },
-                        h(SubagentGlyph, { size: 12 }),
-                      ),
-                      h(
-                        "span",
-                        {
-                          className: "dsh-tree-title",
-                          style: { fontSize: "11.5px" },
-                          title: sub.title || "Subagent Session",
-                        },
-                        sub.title || "Subagent",
-                      ),
-                      h(
-                        "span",
-                        {
-                          style: {
-                            fontSize: "10px",
-                            color: "var(--dsw-alias-label-tertiary)",
-                            marginLeft: "auto",
-                            marginRight: "4px",
-                            flexShrink: 0,
-                          },
-                        },
-                        formatTimeAgo(sub.updatedAt),
-                      ),
-                      h(
-                        "span",
-                        { className: "dsh-tree-actions" },
-                        h(
-                          "button",
-                          {
-                            type: "button",
-                            className: "dsh-tree-actionBtn",
-                            title: "Subagent Actions",
-                            onClick: function (e) {
-                              e.stopPropagation();
-                              setEllipsisOpen(isSubMenuOpen ? null : { id: "chat::" + sub.id });
-                            },
-                          },
-                          h(EllipsisGlyph, { size: 12 }),
-                        ),
-                        h(SelectDropdownMenu, {
-                          open: isSubMenuOpen,
-                          position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
-                          onClose: function () {
-                            setEllipsisOpen(null);
-                          },
-                          items: [
-                            {
-                              id: "rename",
-                              label: "Rename Subagent",
-                              icon: h(EditGlyph, { size: 13 }),
-                            },
-                            {
-                              id: "archive",
-                              label: "Archive Subagent",
-                              icon: h(TrashGlyph, { size: 13 }),
-                              danger: true,
-                            },
-                          ],
-                          onSelect: function (actionId) {
-                            if (actionId === "rename") {
-                              var newTitle = prompt("Rename subagent:", sub.title || "");
-                              if (newTitle && renameSession) renameSession(sub.id, newTitle);
-                            } else if (actionId === "archive") {
-                              handleArchiveChat(sub.id);
-                            }
-                          },
-                        }),
-                      ),
-                    );
-                  }),
-                )
-              : null,
-          );
-        };
-
-      /**
-       * Configures a button to reset all mappings to factory defaults.
-       *
-       * Guarantees: Resets mappings to factory defaults, ensuring all configurations are returned to their initial state.
-       */
-      var renderArchivedChatRow = function (chat, padLeft) {
-          var isChatActive = chat.id === currentSessionId;
-          var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "archived-chat::" + chat.id);
-          return h(
-            "div",
-            {
-              key: "archived-chat::" + chat.id,
-              className: "dsh-tree-sessionRow" + (isChatActive ? " dsh-tree-sessionRowActive" : ""),
+              key: "chat::" + chat.id,
+              className:
+                "dsh-tree-sessionRow" +
+                (hasSubagents ? " dsh-has-children" : "") +
+                (isChatActive ? " dsh-tree-sessionRowActive" : ""),
               role: "treeitem",
               "data-session-id": chat.id,
+              "aria-expanded": hasSubagents ? isSubExp : undefined,
               style: {
                 paddingLeft: padLeft + "px",
-                height: "28px",
-                opacity: 0.75,
+                height: "30px",
+                color: isChatActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
+                fontWeight: isChatActive ? 600 : 400,
                 cursor: "pointer",
                 position: "relative",
               },
@@ -14478,33 +14185,82 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               onContextMenu: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                setEllipsisOpen({
-                  id: "archived-chat::" + chat.id,
-                  pos: { x: e.clientX, y: e.clientY },
-                });
+                setEllipsisOpen({ id: "chat::" + chat.id, pos: { x: e.clientX, y: e.clientY } });
               },
             },
-            h(
-              "span",
-              {
-                className: "dsh-tree-slot dsh-tree-icon",
-                style: { color: "var(--dsw-alias-label-tertiary)" },
-              },
-              h(ChatGlyph, { size: 14 }),
-            ),
+            (function () {
+              var isPinned = isPinnedSession(chat, chat.id);
+              if (isPinned) {
+                return h(
+                  "span",
+                  {
+                    className: "dsh-tree-slot dsh-tree-icon",
+                    style: { color: "var(--dsw-alias-primary, #6366f1)" },
+                  },
+                  h(PinGlyph, { size: 13 }),
+                );
+              }
+              return h(
+                "span",
+                { className: "dsh-tree-slot dsh-tree-icon" },
+                h(ChatGlyph, { size: 14 }),
+              );
+            })(),
+            hasSubagents
+              ? h(
+                  "span",
+                  {
+                    className: "dsh-tree-slot dsh-tree-chevron",
+                    title: isSubExp ? "Collapse subagents" : "Expand subagents",
+                    onClick: function (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleSubagentExpand(chat.id);
+                    },
+                  },
+                  h(TriangleRightFill14, {
+                    className: "dsh-tree-arrow" + (isSubExp ? " dsh-tree-arrowOpen" : ""),
+                    size: 11,
+                  }),
+                )
+              : null,
             h(
               "span",
               {
                 className: "dsh-tree-title",
-                title: chat.title || "Archived Chat",
+                title: chat.title || "Chat Session",
               },
               chat.title || "Untitled Chat",
             ),
+            hasSubagents
+              ? h(
+                  "span",
+                  {
+                    style: {
+                      padding: "1px 5px",
+                      borderRadius: "8px",
+                      fontSize: "9.5px",
+                      background: "rgba(99, 102, 241, 0.15)",
+                      color: "var(--dsw-alias-primary, #6366f1)",
+                      fontWeight: 700,
+                      marginLeft: "4px",
+                      cursor: "pointer",
+                    },
+                    title: subagents.length + " subagents (click to toggle)",
+                    onClick: function (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleSubagentExpand(chat.id);
+                    },
+                  },
+                  subagents.length,
+                )
+              : null,
             h(
               "span",
               {
                 style: {
-                  fontSize: "10px",
+                  fontSize: "10.5px",
                   color: "var(--dsw-alias-label-tertiary)",
                   marginLeft: "auto",
                   marginRight: "4px",
@@ -14521,23 +14277,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 {
                   type: "button",
                   className: "dsh-tree-actionBtn",
-                  title: "Restore / Unarchive",
+                  title: "Chat Actions (…)",
                   onClick: function (e) {
                     e.stopPropagation();
-                    unarchiveSession(chat.id);
-                  },
-                },
-                h(RestoreGlyph, { size: 13 }),
-              ),
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "dsh-tree-actionBtn",
-                  title: "Archived Actions (…)",
-                  onClick: function (e) {
-                    e.stopPropagation();
-                    setEllipsisOpen(isMenuOpen ? null : { id: "archived-chat::" + chat.id });
+                    setEllipsisOpen(isMenuOpen ? null : { id: "chat::" + chat.id });
                   },
                 },
                 h(EllipsisGlyph, { size: 13 }),
@@ -14550,34 +14293,277 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 },
                 items: [
                   {
-                    id: "restore",
-                    label: "Restore to Active",
-                    icon: h(RestoreGlyph, { size: 13 }),
+                    id: isPinnedSession(chat, chat.id) ? "unpin" : "pin",
+                    label: isPinnedSession(chat, chat.id) ? "Unpin Chat" : "Pin Chat",
+                    icon: h(PinGlyph, { size: 13 }),
                   },
                   { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
+                  { id: "fork", label: "Fork Chat", icon: h(BranchGlyph, { size: 13 }) },
                   {
-                    id: "delete",
-                    label: "Delete Permanently",
+                    id: "archive",
+                    label: "Archive Chat",
                     icon: h(TrashGlyph, { size: 13 }),
                     danger: true,
                   },
                 ],
                 onSelect: function (actionId) {
-                  if (actionId === "restore") {
-                    unarchiveSession(chat.id);
+                  if (actionId === "pin" || actionId === "unpin") {
+                    togglePinSession(chat.id);
                   } else if (actionId === "rename") {
                     var newTitle = prompt("Rename chat:", chat.title || "");
                     if (newTitle && renameSession) renameSession(chat.id, newTitle);
-                  } else if (actionId === "delete") {
-                    if (confirm("Permanently delete this archived session?")) {
-                      deletePermanentSession(chat.id);
-                    }
+                  } else if (actionId === "fork") {
+                    if (forkSession) forkSession(chat.id);
+                  } else if (actionId === "archive") {
+                    handleArchiveChat(chat.id);
                   }
                 },
               }),
             ),
-          );
-        };
+          ),
+          hasSubagents && isSubExp
+            ? h(
+                "div",
+                { style: { display: "flex", flexDirection: "column", width: "100%" } },
+                subagents.map(function (sub) {
+                  var isSubActive = sub.id === currentSessionId;
+                  var isSubMenuOpen = Boolean(
+                    ellipsisOpen && ellipsisOpen.id === "chat::" + sub.id,
+                  );
+                  return h(
+                    "div",
+                    {
+                      key: "sub::" + sub.id,
+                      className:
+                        "dsh-tree-sessionRow dsh-tree-subagentRow" +
+                        (isSubActive ? " dsh-tree-sessionRowActive" : ""),
+                      role: "treeitem",
+                      "data-session-id": sub.id,
+                      style: {
+                        paddingLeft: padLeft + 16 + "px",
+                        height: "28px",
+                        color: isSubActive ? "var(--dsw-alias-primary, #6366f1)" : "inherit",
+                        cursor: "pointer",
+                      },
+                      onClick: function () {
+                        handleOpenChat(sub.id, sub.title);
+                      },
+                      onContextMenu: function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEllipsisOpen({
+                          id: "chat::" + sub.id,
+                          pos: { x: e.clientX, y: e.clientY },
+                        });
+                      },
+                    },
+                    h(
+                      "span",
+                      { className: "dsh-tree-slot dsh-tree-icon" },
+                      h(SubagentGlyph, { size: 12 }),
+                    ),
+                    h(
+                      "span",
+                      {
+                        className: "dsh-tree-title",
+                        style: { fontSize: "11.5px" },
+                        title: sub.title || "Subagent Session",
+                      },
+                      sub.title || "Subagent",
+                    ),
+                    h(
+                      "span",
+                      {
+                        style: {
+                          fontSize: "10px",
+                          color: "var(--dsw-alias-label-tertiary)",
+                          marginLeft: "auto",
+                          marginRight: "4px",
+                          flexShrink: 0,
+                        },
+                      },
+                      formatTimeAgo(sub.updatedAt),
+                    ),
+                    h(
+                      "span",
+                      { className: "dsh-tree-actions" },
+                      h(
+                        "button",
+                        {
+                          type: "button",
+                          className: "dsh-tree-actionBtn",
+                          title: "Subagent Actions",
+                          onClick: function (e) {
+                            e.stopPropagation();
+                            setEllipsisOpen(isSubMenuOpen ? null : { id: "chat::" + sub.id });
+                          },
+                        },
+                        h(EllipsisGlyph, { size: 12 }),
+                      ),
+                      h(SelectDropdownMenu, {
+                        open: isSubMenuOpen,
+                        position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
+                        onClose: function () {
+                          setEllipsisOpen(null);
+                        },
+                        items: [
+                          {
+                            id: "rename",
+                            label: "Rename Subagent",
+                            icon: h(EditGlyph, { size: 13 }),
+                          },
+                          {
+                            id: "archive",
+                            label: "Archive Subagent",
+                            icon: h(TrashGlyph, { size: 13 }),
+                            danger: true,
+                          },
+                        ],
+                        onSelect: function (actionId) {
+                          if (actionId === "rename") {
+                            var newTitle = prompt("Rename subagent:", sub.title || "");
+                            if (newTitle && renameSession) renameSession(sub.id, newTitle);
+                          } else if (actionId === "archive") {
+                            handleArchiveChat(sub.id);
+                          }
+                        },
+                      }),
+                    ),
+                  );
+                }),
+              )
+            : null,
+        );
+      };
+
+      /**
+       * Configures a button to reset all mappings to factory defaults.
+       *
+       * Guarantees: Resets mappings to factory defaults, ensuring all configurations are returned to their initial state.
+       */
+      var renderArchivedChatRow = function (chat, padLeft) {
+        var isChatActive = chat.id === currentSessionId;
+        var isMenuOpen = Boolean(ellipsisOpen && ellipsisOpen.id === "archived-chat::" + chat.id);
+        return h(
+          "div",
+          {
+            key: "archived-chat::" + chat.id,
+            className: "dsh-tree-sessionRow" + (isChatActive ? " dsh-tree-sessionRowActive" : ""),
+            role: "treeitem",
+            "data-session-id": chat.id,
+            style: {
+              paddingLeft: padLeft + "px",
+              height: "28px",
+              opacity: 0.75,
+              cursor: "pointer",
+              position: "relative",
+            },
+            onClick: function () {
+              handleOpenChat(chat.id, chat.title);
+            },
+            onContextMenu: function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              setEllipsisOpen({
+                id: "archived-chat::" + chat.id,
+                pos: { x: e.clientX, y: e.clientY },
+              });
+            },
+          },
+          h(
+            "span",
+            {
+              className: "dsh-tree-slot dsh-tree-icon",
+              style: { color: "var(--dsw-alias-label-tertiary)" },
+            },
+            h(ChatGlyph, { size: 14 }),
+          ),
+          h(
+            "span",
+            {
+              className: "dsh-tree-title",
+              title: chat.title || "Archived Chat",
+            },
+            chat.title || "Untitled Chat",
+          ),
+          h(
+            "span",
+            {
+              style: {
+                fontSize: "10px",
+                color: "var(--dsw-alias-label-tertiary)",
+                marginLeft: "auto",
+                marginRight: "4px",
+                flexShrink: 0,
+              },
+            },
+            formatTimeAgo(chat.updatedAt),
+          ),
+          h(
+            "span",
+            { className: "dsh-tree-actions" },
+            h(
+              "button",
+              {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "Restore / Unarchive",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  unarchiveSession(chat.id);
+                },
+              },
+              h(RestoreGlyph, { size: 13 }),
+            ),
+            h(
+              "button",
+              {
+                type: "button",
+                className: "dsh-tree-actionBtn",
+                title: "Archived Actions (…)",
+                onClick: function (e) {
+                  e.stopPropagation();
+                  setEllipsisOpen(isMenuOpen ? null : { id: "archived-chat::" + chat.id });
+                },
+              },
+              h(EllipsisGlyph, { size: 13 }),
+            ),
+            h(SelectDropdownMenu, {
+              open: isMenuOpen,
+              position: ellipsisOpen && ellipsisOpen.pos ? ellipsisOpen.pos : null,
+              onClose: function () {
+                setEllipsisOpen(null);
+              },
+              items: [
+                {
+                  id: "restore",
+                  label: "Restore to Active",
+                  icon: h(RestoreGlyph, { size: 13 }),
+                },
+                { id: "rename", label: "Rename Chat", icon: h(EditGlyph, { size: 13 }) },
+                {
+                  id: "delete",
+                  label: "Delete Permanently",
+                  icon: h(TrashGlyph, { size: 13 }),
+                  danger: true,
+                },
+              ],
+              onSelect: function (actionId) {
+                if (actionId === "restore") {
+                  unarchiveSession(chat.id);
+                } else if (actionId === "rename") {
+                  var newTitle = prompt("Rename chat:", chat.title || "");
+                  if (newTitle && renameSession) renameSession(chat.id, newTitle);
+                } else if (actionId === "delete") {
+                  if (confirm("Permanently delete this archived session?")) {
+                    deletePermanentSession(chat.id);
+                  }
+                }
+              },
+            }),
+          ),
+        );
+      };
 
       /**
        * Renders directory entries based on session and container states.
@@ -14586,260 +14572,258 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails if session or container states are invalid or not found.
        */
       var renderDirEntries = function (dirPath, depth) {
-          var entries = dirCache[dirPath];
-          var itemLeftPad = 8 + depth * 16;
+        var entries = dirCache[dirPath];
+        var itemLeftPad = 8 + depth * 16;
 
-          if (loadingPaths[dirPath]) {
-            return h(
-              "div",
-              {
-                key: "loading-" + dirPath,
-                style: {
-                  padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
-                  fontSize: "11px",
-                  color: "var(--dsw-alias-label-tertiary)",
-                },
+        if (loadingPaths[dirPath]) {
+          return h(
+            "div",
+            {
+              key: "loading-" + dirPath,
+              style: {
+                padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
+                fontSize: "11px",
+                color: "var(--dsw-alias-label-tertiary)",
               },
-              "Loading…",
-            );
-          }
-          if (!entries || entries.length === 0) {
-            return h(
-              "div",
-              {
-                key: "empty-" + dirPath,
-                style: {
-                  padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
-                  fontSize: "11px",
-                  color: "var(--dsw-alias-label-tertiary)",
-                },
+            },
+            "Loading…",
+          );
+        }
+        if (!entries || entries.length === 0) {
+          return h(
+            "div",
+            {
+              key: "empty-" + dirPath,
+              style: {
+                padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
+                fontSize: "11px",
+                color: "var(--dsw-alias-label-tertiary)",
               },
-              "(empty)",
+            },
+            "(empty)",
+          );
+        }
+
+        var visibleEntries = entries.filter(function (entry) {
+          if (!searchQuery || !searchQuery.trim()) return true;
+          var q = searchQuery.trim().toLowerCase();
+          return (entry.name || "").toLowerCase().indexOf(q) !== -1;
+        });
+
+        if (visibleEntries.length === 0 && searchQuery && searchQuery.trim()) {
+          return null;
+        }
+
+        return visibleEntries.map(function (entry) {
+          var isDir = Boolean(entry.isDirectory);
+          var isExp = Boolean(expandedPaths[entry.path]);
+          var isPlusOpen = plusMenu === entry.path;
+
+          if (isDir) {
+            var chatsInDir = folderSessions[entry.path] || [];
+            var isFolderEllipsisOpen = Boolean(
+              ellipsisOpen && ellipsisOpen.id === "folder::" + entry.path,
             );
-          }
-
-          var visibleEntries = entries.filter(function (entry) {
-            if (!searchQuery || !searchQuery.trim()) return true;
-            var q = searchQuery.trim().toLowerCase();
-            return (entry.name || "").toLowerCase().indexOf(q) !== -1;
-          });
-
-          if (visibleEntries.length === 0 && searchQuery && searchQuery.trim()) {
-            return null;
-          }
-
-          return visibleEntries.map(function (entry) {
-            var isDir = Boolean(entry.isDirectory);
-            var isExp = Boolean(expandedPaths[entry.path]);
-            var isPlusOpen = plusMenu === entry.path;
-
-            if (isDir) {
-              var chatsInDir = folderSessions[entry.path] || [];
-              var isFolderEllipsisOpen = Boolean(
-                ellipsisOpen && ellipsisOpen.id === "folder::" + entry.path,
+            var isAppBundle = Boolean(
+              entry.name &&
+                (entry.name.endsWith(".app") ||
+                  entry.name.endsWith(".dmg") ||
+                  entry.name.endsWith(".pkg")),
+            );
+            var isApplications = entry.name === "Applications";
+            var isLibrary = entry.name === "Library";
+            var isSystem = entry.name === "System" || entry.name.toLowerCase() === "system";
+            var isUsers = entry.name === "Users" || entry.name.toLowerCase() === "users";
+            var isVendorOrInternal = Boolean(
+              isApplications ||
+                isLibrary ||
+                isSystem ||
+                isUsers ||
+                entry.name === "node_modules" ||
+                entry.name === ".git" ||
+                entry.name === "dist" ||
+                entry.name === "lib" ||
+                entry.name === ".turbo",
+            );
+            var isWorkspace =
+              !isVendorOrInternal &&
+              Boolean(
+                workspaces &&
+                  workspaces.some(function (w) {
+                    var wPath = w.path || w.cwd;
+                    if (!wPath) return false;
+                    if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
+                    var ePath = entry.path;
+                    if (ePath && ePath.length > 1 && ePath.endsWith("/"))
+                      ePath = ePath.slice(0, -1);
+                    return wPath === ePath && ePath !== "/Users/user";
+                  }),
               );
-              var isAppBundle = Boolean(
-                entry.name &&
-                  (entry.name.endsWith(".app") ||
-                    entry.name.endsWith(".dmg") ||
-                    entry.name.endsWith(".pkg")),
-              );
-              var isApplications = entry.name === "Applications";
-              var isLibrary = entry.name === "Library";
-              var isSystem = entry.name === "System" || entry.name.toLowerCase() === "system";
-              var isUsers = entry.name === "Users" || entry.name.toLowerCase() === "users";
-              var isVendorOrInternal = Boolean(
-                isApplications ||
-                  isLibrary ||
-                  isSystem ||
-                  isUsers ||
-                  entry.name === "node_modules" ||
-                  entry.name === ".git" ||
-                  entry.name === "dist" ||
-                  entry.name === "lib" ||
-                  entry.name === ".turbo",
-              );
-              var isWorkspace =
-                !isVendorOrInternal &&
-                Boolean(
-                  workspaces &&
-                    workspaces.some(function (w) {
-                      var wPath = w.path || w.cwd;
-                      if (!wPath) return false;
-                      if (wPath.length > 1 && wPath.endsWith("/")) wPath = wPath.slice(0, -1);
-                      var ePath = entry.path;
-                      if (ePath && ePath.length > 1 && ePath.endsWith("/"))
-                        ePath = ePath.slice(0, -1);
-                      return wPath === ePath && ePath !== "/Users/user";
-                    }),
-                );
-              var isRepo =
-                !isVendorOrInternal &&
-                Boolean(entry.isRepo || entry.name === "dsh-stack" || isWorkspace);
+            var isRepo =
+              !isVendorOrInternal &&
+              Boolean(entry.isRepo || entry.name === "dsh-stack" || isWorkspace);
 
-              return h(
-                "div",
-                {
-                  key: entry.path,
-                  style: { display: "flex", flexDirection: "column", width: "100%" },
-                },
-                h(
-                  "div",
-                  {
-                    className: "dsh-tree-projectRow",
-                    role: "treeitem",
-                    style: {
-                      position: "relative",
-                      paddingLeft: itemLeftPad + "px",
-                      height: "28px",
-                    },
-                    "aria-expanded": isExp,
-                    onClick: function () {
-                      toggleExpand(entry.path);
-                    },
-                    onDoubleClick: isRepo
-                      ? function (e) {
-                          e.stopPropagation();
-                          window.dispatchEvent(
-                            new CustomEvent("dsh:open-repo-tab", {
-                              detail: {
-                                id: "repo::" + entry.path,
-                                type: "repo",
-                                title: entry.name,
-                                path: entry.path,
-                              },
-                            }),
-                          );
-                        }
-                      : undefined,
-                    onContextMenu: function (e) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setEllipsisOpen({
-                        id: "folder::" + entry.path,
-                        pos: { x: e.clientX, y: e.clientY },
-                      });
-                    },
-                  },
-                  h(
-                    "span",
-                    { className: "dsh-tree-slot dsh-tree-icon" },
-                    isAppBundle
-                      ? renderAppIcon(entry.name, 16, entry.path)
-                      : isApplications
-                        ? h(AppGlyph, { size: 15 })
-                        : isLibrary
-                          ? h(LibraryGlyph, { size: 15 })
-                          : isSystem
-                            ? h(SystemGlyph, { size: 15 })
-                            : isUsers
-                              ? h(UsersGlyph, { size: 15 })
-                              : isRepo
-                                ? h(RepoGlyph, { size: 15 })
-                                : isWorkspace
-                                  ? h(WorkspaceGlyph, { size: 15 })
-                                  : isExp
-                                    ? h(FolderOpenGlyph, { size: 15 })
-                                    : h(FolderOpenGlyph, { size: 15 }),
-                  ),
-                  h(
-                    "span",
-                    { className: "dsh-tree-slot dsh-tree-chevron" },
-                    h(TriangleRightFill14, {
-                      className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""),
-                      size: 11,
-                    }),
-                  ),
-                  h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
-                  chatsInDir.length > 0
-                    ? h(
-                        "span",
-                        {
-                          style: {
-                            padding: "1px 5px",
-                            borderRadius: "8px",
-                            fontSize: "9.5px",
-                            background: "rgba(99, 102, 241, 0.15)",
-                            color: "var(--dsw-alias-primary, #6366f1)",
-                            fontWeight: 700,
-                            marginLeft: "4px",
-                          },
-                        },
-                        chatsInDir.length,
-                      )
-                    : null,
-                  h(
-                    "span",
-                    { className: "dsh-tree-actions" },
-                    renderUnifiedPlusButton(entry.path, "folder-plus::" + entry.path),
-                  ),
-                ),
-                isExp
-                  ? h(
-                      "div",
-                      { style: { display: "flex", flexDirection: "column", width: "100%" } },
-                      // Render chat sessions under this folder (aligned at depth + 1)
-                      chatsInDir.map(function (c) {
-                        return renderChatRow(c, 8 + (depth + 1) * 16);
-                      }),
-                      // Render subdirectories and files (aligned at depth + 1)
-                      renderDirEntries(entry.path, depth + 1),
-                    )
-                  : null,
-              );
-            }
-
-            // File Row (aligned at itemLeftPad)
-            var isAppFile =
-              entry.name.endsWith(".app") ||
-              entry.name.endsWith(".exe") ||
-              entry.name.endsWith(".dmg") ||
-              entry.name.endsWith(".pkg");
             return h(
               "div",
               {
                 key: entry.path,
-                className: "dsh-tree-sessionRow",
-                role: "treeitem",
-                style: { paddingLeft: itemLeftPad + "px", height: "28px" },
-                onClick: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:open-file-tab", {
-                      detail: {
-                        id: "file::" + entry.path,
-                        type: "file",
-                        title: entry.name,
-                        path: entry.path,
-                      },
-                    }),
-                  );
-                },
+                style: { display: "flex", flexDirection: "column", width: "100%" },
               },
               h(
-                "span",
+                "div",
                 {
-                  className: "dsh-tree-slot",
+                  className: "dsh-tree-projectRow",
+                  role: "treeitem",
                   style: {
-                    width: "16px",
-                    color: isAppFile
-                      ? "var(--dsw-alias-primary)"
-                      : "var(--dsw-alias-label-tertiary)",
+                    position: "relative",
+                    paddingLeft: itemLeftPad + "px",
+                    height: "28px",
+                  },
+                  "aria-expanded": isExp,
+                  onClick: function () {
+                    toggleExpand(entry.path);
+                  },
+                  onDoubleClick: isRepo
+                    ? function (e) {
+                        e.stopPropagation();
+                        window.dispatchEvent(
+                          new CustomEvent("dsh:open-repo-tab", {
+                            detail: {
+                              id: "repo::" + entry.path,
+                              type: "repo",
+                              title: entry.name,
+                              path: entry.path,
+                            },
+                          }),
+                        );
+                      }
+                    : undefined,
+                  onContextMenu: function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEllipsisOpen({
+                      id: "folder::" + entry.path,
+                      pos: { x: e.clientX, y: e.clientY },
+                    });
                   },
                 },
-                isAppFile ? renderAppIcon(entry.name, 15, entry.path) : h(FileGlyph, { size: 13 }),
+                h(
+                  "span",
+                  { className: "dsh-tree-slot dsh-tree-icon" },
+                  isAppBundle
+                    ? renderAppIcon(entry.name, 16, entry.path)
+                    : isApplications
+                      ? h(AppGlyph, { size: 15 })
+                      : isLibrary
+                        ? h(LibraryGlyph, { size: 15 })
+                        : isSystem
+                          ? h(SystemGlyph, { size: 15 })
+                          : isUsers
+                            ? h(UsersGlyph, { size: 15 })
+                            : isRepo
+                              ? h(RepoGlyph, { size: 15 })
+                              : isWorkspace
+                                ? h(WorkspaceGlyph, { size: 15 })
+                                : isExp
+                                  ? h(FolderOpenGlyph, { size: 15 })
+                                  : h(FolderOpenGlyph, { size: 15 }),
+                ),
+                h(
+                  "span",
+                  { className: "dsh-tree-slot dsh-tree-chevron" },
+                  h(TriangleRightFill14, {
+                    className: "dsh-tree-arrow" + (isExp ? " dsh-tree-arrowOpen" : ""),
+                    size: 11,
+                  }),
+                ),
+                h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
+                chatsInDir.length > 0
+                  ? h(
+                      "span",
+                      {
+                        style: {
+                          padding: "1px 5px",
+                          borderRadius: "8px",
+                          fontSize: "9.5px",
+                          background: "rgba(99, 102, 241, 0.15)",
+                          color: "var(--dsw-alias-primary, #6366f1)",
+                          fontWeight: 700,
+                          marginLeft: "4px",
+                        },
+                      },
+                      chatsInDir.length,
+                    )
+                  : null,
+                h(
+                  "span",
+                  { className: "dsh-tree-actions" },
+                  renderUnifiedPlusButton(entry.path, "folder-plus::" + entry.path),
+                ),
               ),
-              h(
-                "span",
-                {
-                  className: "dsh-tree-sessionTitle",
-                  style: { fontSize: "12px", marginLeft: "4px" },
-                  title: entry.path,
-                },
-                entry.name,
-              ),
+              isExp
+                ? h(
+                    "div",
+                    { style: { display: "flex", flexDirection: "column", width: "100%" } },
+                    // Render chat sessions under this folder (aligned at depth + 1)
+                    chatsInDir.map(function (c) {
+                      return renderChatRow(c, 8 + (depth + 1) * 16);
+                    }),
+                    // Render subdirectories and files (aligned at depth + 1)
+                    renderDirEntries(entry.path, depth + 1),
+                  )
+                : null,
             );
-          });
-        };
+          }
+
+          // File Row (aligned at itemLeftPad)
+          var isAppFile =
+            entry.name.endsWith(".app") ||
+            entry.name.endsWith(".exe") ||
+            entry.name.endsWith(".dmg") ||
+            entry.name.endsWith(".pkg");
+          return h(
+            "div",
+            {
+              key: entry.path,
+              className: "dsh-tree-sessionRow",
+              role: "treeitem",
+              style: { paddingLeft: itemLeftPad + "px", height: "28px" },
+              onClick: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:open-file-tab", {
+                    detail: {
+                      id: "file::" + entry.path,
+                      type: "file",
+                      title: entry.name,
+                      path: entry.path,
+                    },
+                  }),
+                );
+              },
+            },
+            h(
+              "span",
+              {
+                className: "dsh-tree-slot",
+                style: {
+                  width: "16px",
+                  color: isAppFile ? "var(--dsw-alias-primary)" : "var(--dsw-alias-label-tertiary)",
+                },
+              },
+              isAppFile ? renderAppIcon(entry.name, 15, entry.path) : h(FileGlyph, { size: 13 }),
+            ),
+            h(
+              "span",
+              {
+                className: "dsh-tree-sessionTitle",
+                style: { fontSize: "12px", marginLeft: "4px" },
+                title: entry.path,
+              },
+              entry.name,
+            ),
+          );
+        });
+      };
 
       /**
        * Expands an element in the modal based on the current context and state.
@@ -14848,10 +14832,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Updates the UI to reflect the expanded state.
        */
       var filterBySearch = function (chat) {
-          if (!searchQuery || !searchQuery.trim()) return true;
-          var q = searchQuery.trim().toLowerCase();
-          return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
-        };
+        if (!searchQuery || !searchQuery.trim()) return true;
+        var q = searchQuery.trim().toLowerCase();
+        return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(q) !== -1;
+      };
 
       var filteredPinnedSessions = pinnedSessions.filter(filterBySearch);
       var filteredActiveChatSessions = activeChatSessions.filter(filterBySearch);
@@ -15615,22 +15599,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * On failure, the context menu is set to open at the cursor's position.
          */
         var onToggleBottom = function () {
-            setBottomOpen(function (v) {
-              return !v;
-            });
-          };
+          setBottomOpen(function (v) {
+            return !v;
+          });
+        };
         /**
          * Opens the chat in the bottom panel when the item is clicked.
          *
          * This function does nothing on failure since it's just an event handler.
          */
         var onMoveToBottom = function (e) {
-            var tab = e.detail;
-            if (tab) {
-              setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
-              setBottomOpen(true);
-            }
-          };
+          var tab = e.detail;
+          if (tab) {
+            setPanel({ type: tab.type, session: tab.session || tab.id, id: tab.id });
+            setBottomOpen(true);
+          }
+        };
         /**
          * Opens the terminal for the specified chat.
          *
@@ -15639,10 +15623,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the chat ID is invalid or not found.
          */
         var onOpenTerm = function (e) {
-            var sess = (e && e.detail && e.detail.session) || "0";
-            setPanel({ type: "terminal", session: sess, id: sess });
-            setBottomOpen(true);
-          };
+          var sess = (e && e.detail && e.detail.session) || "0";
+          setPanel({ type: "terminal", session: sess, id: sess });
+          setBottomOpen(true);
+        };
         /**
          * Displays the chat title and time updated, providing a title tooltip and formatted time.
          *
@@ -15651,10 +15635,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the `chat` object is missing `title` or `updatedAt` properties.
          */
         var onOpenCont = function (e) {
-            var id = (e && e.detail && e.detail.id) || null;
-            setPanel({ type: "container", session: null, id: id });
-            setBottomOpen(true);
-          };
+          var id = (e && e.detail && e.detail.id) || null;
+          setPanel({ type: "container", session: null, id: id });
+          setBottomOpen(true);
+        };
 
         window.addEventListener("dsh:toggle-bottom-panel", onToggleBottom);
         window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
@@ -15669,46 +15653,46 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          * Fails if the keydown event does not match any predefined actions.
          */
         var onGlobalKeyDown = function (e) {
-            var isMac =
-              typeof navigator !== "undefined" &&
-              /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
-            var cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
-            var altOrOpt = e.altKey;
+          var isMac =
+            typeof navigator !== "undefined" &&
+            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
+          var cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+          var altOrOpt = e.altKey;
 
-            // 1. Cmd+J / Ctrl+J -> Toggle Bottom Panel
-            if (
-              cmdOrCtrl &&
-              !altOrOpt &&
-              !e.shiftKey &&
-              (e.key === "j" || e.key === "J" || e.code === "KeyJ")
-            ) {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleBottom();
-              return;
-            }
+          // 1. Cmd+J / Ctrl+J -> Toggle Bottom Panel
+          if (
+            cmdOrCtrl &&
+            !altOrOpt &&
+            !e.shiftKey &&
+            (e.key === "j" || e.key === "J" || e.code === "KeyJ")
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleBottom();
+            return;
+          }
 
-            // 2. Cmd+Opt+B / Ctrl+Alt+B -> Toggle Secondary Sidebar
-            if (
-              cmdOrCtrl &&
-              altOrOpt &&
-              !e.shiftKey &&
-              (e.key === "b" || e.key === "B" || e.code === "KeyB")
-            ) {
-              e.preventDefault();
-              e.stopPropagation();
-              window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
-              return;
-            }
+          // 2. Cmd+Opt+B / Ctrl+Alt+B -> Toggle Secondary Sidebar
+          if (
+            cmdOrCtrl &&
+            altOrOpt &&
+            !e.shiftKey &&
+            (e.key === "b" || e.key === "B" || e.code === "KeyB")
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("dsh:toggle-secondary-sidebar"));
+            return;
+          }
 
-            // 3. Cmd+Shift+P / Ctrl+Shift+P -> Trigger Sidebar Search
-            if (cmdOrCtrl && e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
-              e.preventDefault();
-              e.stopPropagation();
-              window.dispatchEvent(new CustomEvent("dsh:trigger-sidebar-search"));
-              return;
-            }
-          };
+          // 3. Cmd+Shift+P / Ctrl+Shift+P -> Trigger Sidebar Search
+          if (cmdOrCtrl && e.shiftKey && (e.key === "p" || e.key === "P" || e.code === "KeyP")) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("dsh:trigger-sidebar-search"));
+            return;
+          }
+        };
 
         window.addEventListener("keydown", onGlobalKeyDown, { capture: true });
 
@@ -15763,36 +15747,36 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
        * Fails gracefully by rendering an empty message if no entries are available.
        */
       var browserInjected = function () {
-          return {
-            startSession: function (workspaceId) {
-              ctx.workspaces && ctx.workspaces.startSession(workspaceId);
-            },
-            open: function (sessionId) {
-              ctx.sessions && ctx.sessions.open(sessionId);
-            },
-            createWorkspace: function (input) {
-              return ctx.workspaces && ctx.workspaces.create
-                ? ctx.workspaces.create(input)
-                : Promise.resolve();
-            },
-            renameSession: function (sessionId, title) {
-              var session = ctx.sessions && ctx.sessions.binding(sessionId)?.session;
-              return session ? session.rename(title) : Promise.resolve();
-            },
-            archiveSession: function (sessionId) {
-              return ctx.workspaces ? ctx.workspaces.archiveSession(sessionId) : Promise.resolve();
-            },
-            forkSession: function (sessionId) {
-              if (ctx.sessions && ctx.sessions.fork) {
-                ctx.sessions
-                  .fork({ sessionId: sessionId, increaseTitle: true })
-                  .then(function (childId) {
-                    ctx.sessions.open(childId);
-                  });
-              }
-            },
-          };
+        return {
+          startSession: function (workspaceId) {
+            ctx.workspaces && ctx.workspaces.startSession(workspaceId);
+          },
+          open: function (sessionId) {
+            ctx.sessions && ctx.sessions.open(sessionId);
+          },
+          createWorkspace: function (input) {
+            return ctx.workspaces && ctx.workspaces.create
+              ? ctx.workspaces.create(input)
+              : Promise.resolve();
+          },
+          renameSession: function (sessionId, title) {
+            var session = ctx.sessions && ctx.sessions.binding(sessionId)?.session;
+            return session ? session.rename(title) : Promise.resolve();
+          },
+          archiveSession: function (sessionId) {
+            return ctx.workspaces ? ctx.workspaces.archiveSession(sessionId) : Promise.resolve();
+          },
+          forkSession: function (sessionId) {
+            if (ctx.sessions && ctx.sessions.fork) {
+              ctx.sessions
+                .fork({ sessionId: sessionId, increaseTitle: true })
+                .then(function (childId) {
+                  ctx.sessions.open(childId);
+                });
+            }
+          },
         };
+      };
 
       // 0. Dynamic Filesystem & Workspaces Browser
       ctx.slots.inject(

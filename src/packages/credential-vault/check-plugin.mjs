@@ -720,29 +720,29 @@ rmSync(legacyHome, { recursive: true, force: true });
    * @returns An object containing OAuth token details including access_token, refresh_token, expires_in, and token_type.
    */
   const transport = async (request) => {
-      calls.push(request.url);
-      return {
-        status: 200,
-        body: {
-          access_token: "fresh-access",
-          refresh_token: "fresh-refresh",
-          expires_in: 3600,
-          token_type: "Bearer",
-        },
-      };
+    calls.push(request.url);
+    return {
+      status: 200,
+      body: {
+        access_token: "fresh-access",
+        refresh_token: "fresh-refresh",
+        expires_in: 3600,
+        token_type: "Bearer",
+      },
     };
+  };
   /**
    * @returns An object containing OAuth configuration details including method, authorizeUrl, tokenUrl, clientId, scopes, and redirect.
    * If the request fails, it returns an object with the same configuration details.
    */
   const authFor = async () => ({
-      method: "oauth_pkce",
-      authorizeUrl: "https://auth.example/authorize",
-      tokenUrl: "https://token.example/token",
-      clientId: "client-1",
-      scopes: ["openid"],
-      redirect: "loopback",
-    });
+    method: "oauth_pkce",
+    authorizeUrl: "https://auth.example/authorize",
+    tokenUrl: "https://token.example/token",
+    clientId: "client-1",
+    scopes: ["openid"],
+    redirect: "loopback",
+  });
   const supervisor = new ReauthSupervisor({
     vault,
     now: () => now,

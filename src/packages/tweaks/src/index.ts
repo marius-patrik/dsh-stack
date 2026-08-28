@@ -101,8 +101,8 @@ export function apply(ctx: Context, config: Config): void {
    * the document for the next launch.
    */
   const mirror = (): void => {
-      void mirrorTweaks(currentHome, current, ctx.logger);
-    };
+    void mirrorTweaks(currentHome, current, ctx.logger);
+  };
   // The launcher reads settings.yaml before this process exists, so the first
   // mirror must run even when no settings provider is mounted: it bootstrap
   // the document for the next launch.

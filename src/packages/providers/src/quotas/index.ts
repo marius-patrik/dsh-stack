@@ -191,13 +191,13 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
    * updates the `disposers` and `builtinIds` as side effects.
    */
   const syncBuiltinProviders = (): void => {
-      const routes = ctx.providers.list();
-      for (const provider of createBuiltinProviders(read, routes)) {
-        if (builtinIds.has(provider.id)) continue;
-        disposers.push(registry.register(provider));
-        builtinIds.add(provider.id);
-      }
-    };
+    const routes = ctx.providers.list();
+    for (const provider of createBuiltinProviders(read, routes)) {
+      if (builtinIds.has(provider.id)) continue;
+      disposers.push(registry.register(provider));
+      builtinIds.add(provider.id);
+    }
+  };
   syncBuiltinProviders();
   ctx.providers.onChange(syncBuiltinProviders);
 
@@ -237,32 +237,32 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
    *   context states.
    */
   const syncConfiguredProviders = (): void => {
-      const llm = ctx.get("llm") as
-        | {
-            listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
-          }
-        | undefined;
-      const settingsProvider = ctx.get("settings") as
-        | {
-            describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
-          }
-        | undefined;
-      if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
-        return;
-      const listConfigurable = llm.listConfigurableProviders.bind(llm);
-      const describe = settingsProvider.describe.bind(settingsProvider);
-      for (const provider of createConfiguredProviders({
-        listConfigurable,
-        // Verbatim, not redacted: the probe needs the real credential reference,
-        // and this read never leaves the process.
-        describeSettings: () => describe(),
-        readToken: read,
-        covered,
-      })) {
-        disposers.push(registry.register(provider));
-        configuredIds.add(provider.id);
-      }
-    };
+    const llm = ctx.get("llm") as
+      | {
+          listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
+        }
+      | undefined;
+    const settingsProvider = ctx.get("settings") as
+      | {
+          describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
+        }
+      | undefined;
+    if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
+      return;
+    const listConfigurable = llm.listConfigurableProviders.bind(llm);
+    const describe = settingsProvider.describe.bind(settingsProvider);
+    for (const provider of createConfiguredProviders({
+      listConfigurable,
+      // Verbatim, not redacted: the probe needs the real credential reference,
+      // and this read never leaves the process.
+      describeSettings: () => describe(),
+      readToken: read,
+      covered,
+    })) {
+      disposers.push(registry.register(provider));
+      configuredIds.add(provider.id);
+    }
+  };
   syncConfiguredProviders();
 
   /** Every provider the registry should refresh on a cycle. */

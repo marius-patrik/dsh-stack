@@ -44,8 +44,8 @@ async function collect(gen) {
  * On failure, throws an error, preventing the caller from proceeding with an invalid result.
  */
 const ok = (name) => {
-    console.log("ok -", name);
-  };
+  console.log("ok -", name);
+};
 
 // ---- openai: serialize shape ----
 const req = openaiDialect.serialize(

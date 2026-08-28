@@ -136,12 +136,12 @@ export function apply(ctx: Context, config: Config = {}): void {
    * @param definition - The command definition object containing the handler.
    */
   const safeRegister = (definition: unknown) => {
-      try {
-        commands?.register(definition);
-      } catch {
-        // Built-in or existing command already registered
-      }
-    };
+    try {
+      commands?.register(definition);
+    } catch {
+      // Built-in or existing command already registered
+    }
+  };
   const /** selectHandler implementation. */
     selectHandler = ({ agent, rawInput }: { agent: object; rawInput: string }) => {
       const id = rawInput.trim();
@@ -274,14 +274,14 @@ export function apply(ctx: Context, config: Config = {}): void {
      * On failure, returns an object with the same structure but with missing or nullified properties.
      */
     const describe = (action: ActionSpec) => ({
-        id: action.id,
-        name: action.name ?? action.id,
-        description: action.description ?? null,
-        tools: action.tools ?? null,
-        route: action.route ?? null,
-        source: action.source ?? null,
-        builtIn: BUILT_IN_ACTIONS.some((builtIn) => builtIn.id === action.id),
-      });
+      id: action.id,
+      name: action.name ?? action.id,
+      description: action.description ?? null,
+      tools: action.tools ?? null,
+      route: action.route ?? null,
+      source: action.source ?? null,
+      builtIn: BUILT_IN_ACTIONS.some((builtIn) => builtIn.id === action.id),
+    });
 
     // The action vocabulary (built-ins + file-defined) — also the run palette's data.
     /**
@@ -290,27 +290,27 @@ export function apply(ctx: Context, config: Config = {}): void {
      * On failure, returns an array of objects with the same structure but with missing or nullified properties.
      */
     const listHandler = async (_req: unknown, res: any) => {
-        await catalog.load();
-        json(res, 200, {
-          defaultAction,
-          root,
-          actions: catalog.list().map(describe),
-          commands: [
-            {
-              id: "reload-app",
-              name: "Reload App",
-              description: "Reload the browser UI; server-side agents keep running and reattach.",
-              kind: "soft",
-            },
-            {
-              id: "force-reload",
-              name: "Force Reload",
-              description: "Restart the dsh web server itself, then reload the UI.",
-              kind: "force",
-            },
-          ],
-        });
-      };
+      await catalog.load();
+      json(res, 200, {
+        defaultAction,
+        root,
+        actions: catalog.list().map(describe),
+        commands: [
+          {
+            id: "reload-app",
+            name: "Reload App",
+            description: "Reload the browser UI; server-side agents keep running and reattach.",
+            kind: "soft",
+          },
+          {
+            id: "force-reload",
+            name: "Force Reload",
+            description: "Restart the dsh web server itself, then reload the UI.",
+            kind: "force",
+          },
+        ],
+      });
+    };
     webCtx.webServer.register({ kind: "exact", path: "/actions", handler: listHandler });
 
     // The hard path: server self-restart that answers before it exits.

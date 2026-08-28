@@ -288,7 +288,7 @@ clientModule.apply(ctxStub);
  * Throws an error if the locale is not registered or if the connection is not loopback.
  */
 const assertRegistered = (name, reason) =>
-    assert.ok(records.has(name), `${reason}: ${name} not registered`);
+  assert.ok(records.has(name), `${reason}: ${name} not registered`);
 // @dsh-stack/sidebar-shell is the canonical declarer of the `sidebar` slot and
 // its children. Two entries may not declare the same child slot, so tweaks must
 // not register a `sidebar` root of its own -- doing so made the client loader

@@ -38,10 +38,10 @@ export function allowedHostsFor(record: SecretRecord): string[] {
    * On failure: No URLs are added to the set if any of the URLs are invalid or undefined.
    */
   const addUrl = (value: string | null | undefined): void => {
-      if (!value) return;
-      const host = hostOf(value);
-      if (host) hosts.add(host);
-    };
+    if (!value) return;
+    const host = hostOf(value);
+    if (host) hosts.add(host);
+  };
 
   const descriptor = findProviderDescriptor(providerIdForPurpose(record.purpose));
   if (descriptor) {

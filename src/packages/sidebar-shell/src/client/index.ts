@@ -16,9 +16,9 @@ export function apply(ctx: ClientContext): void {
    * @param ctx - The client context providing workspace and layout operations.
    */
   const injectProps = (): SidebarRootInjected => ({
-      startSession: (workspaceId) => ctx.workspaces.startSession(workspaceId),
-      toggleSidebar: () => ctx.layout.toggleSidebar(),
-    });
+    startSession: (workspaceId) => ctx.workspaces.startSession(workspaceId),
+    toggleSidebar: () => ctx.layout.toggleSidebar(),
+  });
 
   ctx.effect(
     () =>

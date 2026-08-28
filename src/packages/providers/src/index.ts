@@ -397,23 +397,23 @@ export function apply(ctx: Context, config: Config): void {
    * @returns The resolved providers options or the last good configuration.
    */
   const resolved = (): ResolvedProvidersOptions => {
-      const raw = current();
-      if (raw === lastRaw && lastGood !== undefined) return lastGood;
-      try {
-        const next = resolveProvidersOptions(raw);
-        lastRaw = raw;
-        lastGood = next;
-        return next;
-      } catch (error) {
-        if (lastGood === undefined) throw error;
-        lastRaw = raw;
-        ctx.logger.error(
-          "providers: keeping the last good configuration after an invalid settings section",
-        );
-        ctx.logger.error(error);
-        return lastGood;
-      }
-    };
+    const raw = current();
+    if (raw === lastRaw && lastGood !== undefined) return lastGood;
+    try {
+      const next = resolveProvidersOptions(raw);
+      lastRaw = raw;
+      lastGood = next;
+      return next;
+    } catch (error) {
+      if (lastGood === undefined) throw error;
+      lastRaw = raw;
+      ctx.logger.error(
+        "providers: keeping the last good configuration after an invalid settings section",
+      );
+      ctx.logger.error(error);
+      return lastGood;
+    }
+  };
   resolved();
 
   const /** connections implementation. */
@@ -429,14 +429,14 @@ export function apply(ctx: Context, config: Config): void {
    * Logs an error and returns the last good configuration if the configuration is invalid.
    */
   const read = async (ref: string): Promise<string | undefined> => {
-      const mem = memory.get(ref);
-      if (mem !== undefined) return mem;
-      const accounts = ctx.get("accounts") as AccountsService | undefined;
-      const credentials = ctx.get("credentials") as CredentialProvider | undefined;
-      if (accounts !== undefined) return (await accounts.resolve(ref))?.value;
-      if (credentials !== undefined) return (await credentials.resolve(credentialRef(ref)))?.value;
-      return undefined;
-    };
+    const mem = memory.get(ref);
+    if (mem !== undefined) return mem;
+    const accounts = ctx.get("accounts") as AccountsService | undefined;
+    const credentials = ctx.get("credentials") as CredentialProvider | undefined;
+    if (accounts !== undefined) return (await accounts.resolve(ref))?.value;
+    if (credentials !== undefined) return (await credentials.resolve(credentialRef(ref)))?.value;
+    return undefined;
+  };
 
   /**
    * Writes a configuration value for the given reference.
@@ -445,13 +445,13 @@ export function apply(ctx: Context, config: Config): void {
    * Throws an error if the current value is invalid and no last good configuration exists.
    */
   const write = async (ref: string, value: string): Promise<void> => {
-      const accounts = ctx.get("accounts") as AccountsService | undefined;
-      if (accounts !== undefined) {
-        await accounts.set(ref, value);
-        return;
-      }
-      memory.set(ref, value);
-    };
+    const accounts = ctx.get("accounts") as AccountsService | undefined;
+    if (accounts !== undefined) {
+      await accounts.set(ref, value);
+      return;
+    }
+    memory.set(ref, value);
+  };
 
   const refreshInflight = new Map<string, Promise<string | undefined>>();
   const refreshed = new Map<string, { access: string; expires: number }>();
@@ -507,17 +507,17 @@ export function apply(ctx: Context, config: Config): void {
      * @returns The access token if refresh is successful or the current value if refresh fails.
      */
     const attempt = () =>
-        refreshOAuthToken(spec, refreshToken).then(async (token) => {
-          // Write order matters for single-use rotating refresh tokens: persist
-          // the NEW refresh token first. If the process dies after the provider
-          // consumed the old token, the vault must hold the valid rotation, not
-          // a fresh access token paired with a dead refresh token.
-          if (token.refresh !== undefined) await write(refresher.refreshRef, token.refresh);
-          await write(refresher.tokenRef, token.access);
-          await write(refresher.expiresRef, String(token.expires));
-          refreshed.set(provider, { access: token.access, expires: token.expires });
-          return token.access;
-        });
+      refreshOAuthToken(spec, refreshToken).then(async (token) => {
+        // Write order matters for single-use rotating refresh tokens: persist
+        // the NEW refresh token first. If the process dies after the provider
+        // consumed the old token, the vault must hold the valid rotation, not
+        // a fresh access token paired with a dead refresh token.
+        if (token.refresh !== undefined) await write(refresher.refreshRef, token.refresh);
+        await write(refresher.tokenRef, token.access);
+        await write(refresher.expiresRef, String(token.expires));
+        refreshed.set(provider, { access: token.access, expires: token.expires });
+        return token.access;
+      });
     const run = attempt().catch((err: unknown) => {
       if ((err as { permanent?: boolean }).permanent === true) throw err;
       // one retry for transient failures (network blip, token-endpoint 5xx/429)
@@ -620,13 +620,13 @@ export function apply(ctx: Context, config: Config): void {
    * credentials and the actions required to obtain them.
    */
   const resolveAuth = async (
-      provider: string,
-      connection: ProviderConnection,
-    ): Promise<DialectAuth> => {
-      const { auth, missing } = await credentialsFor(provider, connection);
-      if (missing.length > 0) throw missingCredential(provider, missing);
-      return auth;
-    };
+    provider: string,
+    connection: ProviderConnection,
+  ): Promise<DialectAuth> => {
+    const { auth, missing } = await credentialsFor(provider, connection);
+    if (missing.length > 0) throw missingCredential(provider, missing);
+    return auth;
+  };
 
   /**
    * The filter gate: whether one provider may be offered under the current

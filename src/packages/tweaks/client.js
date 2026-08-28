@@ -1306,10 +1306,10 @@ window.__ModuleLoader__.load({
            * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
            */
           var handlePointerDown = function (e) {
-              if (menuRef.current && !menuRef.current.contains(e.target)) {
-                onClose();
-              }
-            };
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+              onClose();
+            }
+          };
           document.addEventListener("pointerdown", handlePointerDown);
           return function () {
             document.removeEventListener("pointerdown", handlePointerDown);
@@ -1692,12 +1692,12 @@ window.__ModuleLoader__.load({
        * @param {Object} palette - An object containing color values for the UI.
        */
       var handleToggleNotice = function (e) {
-          var checked = e.target.checked;
-          setNoticeEnabled(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_suppress_welcome_notice", checked ? "false" : "true");
-          }
-        };
+        var checked = e.target.checked;
+        setNoticeEnabled(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_suppress_welcome_notice", checked ? "false" : "true");
+        }
+      };
 
       /**
        * Sets the theme style based on the provided theme type.
@@ -1706,15 +1706,15 @@ window.__ModuleLoader__.load({
        * On failure, the style element's text content is updated with the new CSS, but no attribute is set.
        */
       var handleToggleSearch = function (e) {
-          var checked = e.target.checked;
-          setSearchEnabled(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_show_sidebar_search", checked ? "true" : "false");
-            window.dispatchEvent(
-              new CustomEvent("dsh:sidebar-search-toggle", { detail: { enabled: checked } }),
-            );
-          }
-        };
+        var checked = e.target.checked;
+        setSearchEnabled(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_show_sidebar_search", checked ? "true" : "false");
+          window.dispatchEvent(
+            new CustomEvent("dsh:sidebar-search-toggle", { detail: { enabled: checked } }),
+          );
+        }
+      };
 
       /**
        * Toggles the swap sidebars state, updating the theme and container styles accordingly.
@@ -1725,19 +1725,19 @@ window.__ModuleLoader__.load({
        * On failure, the function does not change the theme or styles, maintaining the current state.
        */
       var handleToggleSwapSidebars = function (e) {
-          var checked = e.target.checked;
-          setSwapSidebars(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
-            window.dispatchEvent(
-              new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
-            );
-            if (document.body) {
-              if (checked) document.body.classList.add("dsh-sidebars-swapped");
-              else document.body.classList.remove("dsh-sidebars-swapped");
-            }
+        var checked = e.target.checked;
+        setSwapSidebars(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
+          window.dispatchEvent(
+            new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
+          );
+          if (document.body) {
+            if (checked) document.body.classList.add("dsh-sidebars-swapped");
+            else document.body.classList.remove("dsh-sidebars-swapped");
           }
-        };
+        }
+      };
 
       var hideSendState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return false;
@@ -1754,16 +1754,16 @@ window.__ModuleLoader__.load({
        * @returns {void} No return value, but changes the visibility of the send action.
        */
       var handleToggleHideSend = function (e) {
-          var checked = e.target.checked;
-          setHideSendButton(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_hide_send_button", checked ? "true" : "false");
-            if (document.body) {
-              if (checked) document.body.classList.add("dsh-hide-inactive-send");
-              else document.body.classList.remove("dsh-hide-inactive-send");
-            }
+        var checked = e.target.checked;
+        setHideSendButton(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_hide_send_button", checked ? "true" : "false");
+          if (document.body) {
+            if (checked) document.body.classList.add("dsh-hide-inactive-send");
+            else document.body.classList.remove("dsh-hide-inactive-send");
           }
-        };
+        }
+      };
 
       var composerLayoutState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return "unified";
@@ -1781,24 +1781,24 @@ window.__ModuleLoader__.load({
        * @returns {JSX.Element} A JSX element representing the settings row.
        */
       var handleSelectComposerLayout = function (e) {
-          var val = e.target.value;
-          setComposerLayout(val);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_composer_toolbar_layout", val);
-            window.dispatchEvent(
-              new CustomEvent("dsh:composer-layout-changed", { detail: { layout: val } }),
-            );
-            if (document.body) {
-              if (val === "split") {
-                document.body.classList.add("dsh-composer-split");
-                document.body.classList.remove("dsh-composer-unified");
-              } else {
-                document.body.classList.add("dsh-composer-unified");
-                document.body.classList.remove("dsh-composer-split");
-              }
+        var val = e.target.value;
+        setComposerLayout(val);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_composer_toolbar_layout", val);
+          window.dispatchEvent(
+            new CustomEvent("dsh:composer-layout-changed", { detail: { layout: val } }),
+          );
+          if (document.body) {
+            if (val === "split") {
+              document.body.classList.add("dsh-composer-split");
+              document.body.classList.remove("dsh-composer-unified");
+            } else {
+              document.body.classList.add("dsh-composer-unified");
+              document.body.classList.remove("dsh-composer-split");
             }
           }
-        };
+        }
+      };
 
       return h(
         "div",
@@ -2124,23 +2124,23 @@ window.__ModuleLoader__.load({
        * If an invalid preset is selected, no changes are made.
        */
       var handleSaveCustomTheme = function () {
-          var name = (newThemeName || "").trim();
-          if (!name) {
-            name = "Custom Theme " + (customThemes.length + 1);
-          }
-          var newTheme = {
-            id: "custom-" + Date.now(),
-            name: name,
-            type: "custom",
-            colors: Object.assign({}, customPalette),
-          };
-          var nextList = customThemes.concat([newTheme]);
-          setCustomThemes(nextList);
-          setNewThemeName("");
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
-          }
+        var name = (newThemeName || "").trim();
+        if (!name) {
+          name = "Custom Theme " + (customThemes.length + 1);
+        }
+        var newTheme = {
+          id: "custom-" + Date.now(),
+          name: name,
+          type: "custom",
+          colors: Object.assign({}, customPalette),
         };
+        var nextList = customThemes.concat([newTheme]);
+        setCustomThemes(nextList);
+        setNewThemeName("");
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
+        }
+      };
 
       /**
        * Handles the deletion of a custom theme setting.
@@ -2151,15 +2151,15 @@ window.__ModuleLoader__.load({
        * Fails if the theme setting is not found in the settings state.
        */
       var handleDeleteCustomTheme = function (themeId, e) {
-          if (e) e.stopPropagation();
-          var nextList = customThemes.filter(function (t) {
-            return t.id !== themeId;
-          });
-          setCustomThemes(nextList);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
-          }
-        };
+        if (e) e.stopPropagation();
+        var nextList = customThemes.filter(function (t) {
+          return t.id !== themeId;
+        });
+        setCustomThemes(nextList);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
+        }
+      };
 
       /**
        * Toggles the export themes setting, persisting the preference to local storage.
@@ -2170,23 +2170,23 @@ window.__ModuleLoader__.load({
        * Fails if the setting value is not correctly updated or persisted.
        */
       var handleExportThemes = function () {
-          var data = {
-            activeTheme: activeTheme,
-            customPalette: customPalette,
-            customThemes: customThemes,
-          };
-          var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = url;
-          a.download = "themes.json";
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function () {
-            if (a.parentNode) a.parentNode.removeChild(a);
-            URL.revokeObjectURL(url);
-          }, 1000);
+        var data = {
+          activeTheme: activeTheme,
+          customPalette: customPalette,
+          customThemes: customThemes,
         };
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "themes.json";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+          if (a.parentNode) a.parentNode.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1000);
+      };
 
       var COLOR_FIELDS = [
         { key: "primary", label: "Primary Accent (Blurple)" },
@@ -2841,17 +2841,17 @@ window.__ModuleLoader__.load({
        * @returns {boolean} - `true` if the test hook runs successfully, `false` otherwise.
        */
       var handleRunHookTest = function (hookId) {
-          setHookRunning(hookId);
-          setHookOutput("Running validation for " + hookId + "...\n");
-          setTimeout(function () {
-            setHookRunning(null);
-            setHookOutput(
-              "✓ Hook check passed for " +
-                hookId +
-                ":\n- All 80 package check-plugin suites verified: OK\n- Doc files synced: OK\n- No dirty submodule trees: OK\n- Superproject coherence: 100% PASS",
-            );
-          }, 800);
-        };
+        setHookRunning(hookId);
+        setHookOutput("Running validation for " + hookId + "...\n");
+        setTimeout(function () {
+          setHookRunning(null);
+          setHookOutput(
+            "✓ Hook check passed for " +
+              hookId +
+              ":\n- All 80 package check-plugin suites verified: OK\n- Doc files synced: OK\n- No dirty submodule trees: OK\n- Superproject coherence: 100% PASS",
+          );
+        }, 800);
+      };
 
       var filteredSkills = skillsList.filter(function (s) {
         if (!skillSearch) return true;
@@ -3340,11 +3340,11 @@ window.__ModuleLoader__.load({
        * It returns null if the subtab is not "hooks".
        */
       var handleReloadPlugin = function (pId) {
-          setReloadingId(pId);
-          setTimeout(function () {
-            setReloadingId(null);
-          }, 600);
-        };
+        setReloadingId(pId);
+        setTimeout(function () {
+          setReloadingId(null);
+        }, 600);
+      };
 
       return h(
         "div",
@@ -3757,13 +3757,13 @@ window.__ModuleLoader__.load({
        * Fails if `reloadingId` does not match any plugin ID, leaving the list unchanged.
        */
       var handleReset = function () {
-          try {
-            localStorage.removeItem("dsh_keybind_toggle_sidebar");
-            localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
-          } catch (e) {}
-          setSidebarKeyLabel(defaultSidebarKey);
-          setIsRecording(false);
-        };
+        try {
+          localStorage.removeItem("dsh_keybind_toggle_sidebar");
+          localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
+        } catch (e) {}
+        setSidebarKeyLabel(defaultSidebarKey);
+        setIsRecording(false);
+      };
 
       var shortcuts = [
         {
@@ -3968,8 +3968,8 @@ window.__ModuleLoader__.load({
            * Throws an error if the document cannot be opened, and updates the status and error message accordingly.
            */
           var onKeyDown = function (e) {
-              if (e.key === "Escape") onClose();
-            };
+            if (e.key === "Escape") onClose();
+          };
           document.addEventListener("keydown", onKeyDown);
           return function () {
             document.removeEventListener("keydown", onKeyDown);
@@ -4089,36 +4089,36 @@ window.__ModuleLoader__.load({
        * Fails silently if localStorage operations are not possible.
        */
       var handleHeaderPointerDown = function (e) {
-          if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
-            return;
-          e.preventDefault();
-          var startX = e.clientX - dialogPos.x;
-          var startY = e.clientY - dialogPos.y;
+        if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
+          return;
+        e.preventDefault();
+        var startX = e.clientX - dialogPos.x;
+        var startY = e.clientY - dialogPos.y;
 
-          /**
-           * Handles the reset action by clearing or reloading the plugin list.
-           * Resets the display grid to its initial state and updates the plugin list.
-           * Guarantees that the plugin list is re-rendered with updated styles and states.
-           * Fails silently without any error handling if the reset action cannot be performed.
-           */
-          var onMove = function (moveEv) {
-              setDialogPos({
-                x: moveEv.clientX - startX,
-                y: moveEv.clientY - startY,
-              });
-            };
-          /**
-           * Sets up or removes a keydown event listener for recording.
-           * Guarantees that the event listener is properly set up or removed.
-           * Fails silently if the event listener cannot be added or removed.
-           */
-          var onUp = function () {
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
+        /**
+         * Handles the reset action by clearing or reloading the plugin list.
+         * Resets the display grid to its initial state and updates the plugin list.
+         * Guarantees that the plugin list is re-rendered with updated styles and states.
+         * Fails silently without any error handling if the reset action cannot be performed.
+         */
+        var onMove = function (moveEv) {
+          setDialogPos({
+            x: moveEv.clientX - startX,
+            y: moveEv.clientY - startY,
+          });
         };
+        /**
+         * Sets up or removes a keydown event listener for recording.
+         * Guarantees that the event listener is properly set up or removed.
+         * Fails silently if the event listener cannot be added or removed.
+         */
+        var onUp = function () {
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
 
       // Resize settings window handler (direction: 'se', 'e', 's')
       /**
@@ -4127,54 +4127,54 @@ window.__ModuleLoader__.load({
        * Fails if the layout adjustment cannot be applied, leaving the layout unchanged.
        */
       var handleWindowResizePointerDown = function (e, direction) {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsWindowResizing(true);
-          var startX = e.clientX;
-          var startY = e.clientY;
-          var startW = windowSize.w;
-          var startH = windowSize.h;
+        e.preventDefault();
+        e.stopPropagation();
+        setIsWindowResizing(true);
+        var startX = e.clientX;
+        var startY = e.clientY;
+        var startW = windowSize.w;
+        var startH = windowSize.h;
 
-          /**
-           * Sets up keyboard shortcuts for various actions.
-           * Ensures that sidebar key labels are updated and recording state is reset.
-           * Fallbacks gracefully if localStorage operations fail.
-           */
-          var onMove = function (moveEv) {
-              var deltaX = moveEv.clientX - startX;
-              var deltaY = moveEv.clientY - startY;
-              var nextW = startW;
-              var nextH = startH;
+        /**
+         * Sets up keyboard shortcuts for various actions.
+         * Ensures that sidebar key labels are updated and recording state is reset.
+         * Fallbacks gracefully if localStorage operations fail.
+         */
+        var onMove = function (moveEv) {
+          var deltaX = moveEv.clientX - startX;
+          var deltaY = moveEv.clientY - startY;
+          var nextW = startW;
+          var nextH = startH;
 
-              if (direction.indexOf("e") !== -1) {
-                nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
-              }
-              if (direction.indexOf("s") !== -1) {
-                nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
-              }
+          if (direction.indexOf("e") !== -1) {
+            nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
+          }
+          if (direction.indexOf("s") !== -1) {
+            nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
+          }
 
-              setWindowSize({ w: nextW, h: nextH });
-              if (typeof window !== "undefined" && window.localStorage) {
-                window.localStorage.setItem("dsh_settings_window_width", String(nextW));
-                window.localStorage.setItem("dsh_settings_window_height", String(nextH));
-              }
-            };
-
-          /**
-           * Opens the settings modal or toggles the terminal overlay based on the selected key.
-           *
-           * This function expects the caller to provide a valid key event that matches one of the predefined shortcuts.
-           * On success, it returns the updated UI state or modal visibility.
-           * On failure, it does nothing and remains in the current state.
-           */
-          var onUp = function () {
-              setIsWindowResizing(false);
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
+          setWindowSize({ w: nextW, h: nextH });
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_settings_window_width", String(nextW));
+            window.localStorage.setItem("dsh_settings_window_height", String(nextH));
+          }
         };
+
+        /**
+         * Opens the settings modal or toggles the terminal overlay based on the selected key.
+         *
+         * This function expects the caller to provide a valid key event that matches one of the predefined shortcuts.
+         * On success, it returns the updated UI state or modal visibility.
+         * On failure, it does nothing and remains in the current state.
+         */
+        var onUp = function () {
+          setIsWindowResizing(false);
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
 
       // Resize nav width handler
       /**
@@ -4185,45 +4185,45 @@ window.__ModuleLoader__.load({
        * released within the resizable area.
        */
       var handleResizePointerDown = function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsResizing(true);
-          var startX = e.clientX;
-          var startW = isNavCollapsed ? 56 : navWidth;
+        e.preventDefault();
+        e.stopPropagation();
+        setIsResizing(true);
+        var startX = e.clientX;
+        var startW = isNavCollapsed ? 56 : navWidth;
 
-          /**
-           * Displays keyboard shortcuts for configuring workspace navigation hotkeys and global panel triggers.
-           *
-           * This component renders a list of shortcuts with their descriptions and styling.
-           * It guarantees the display of a column of divs with each shortcut and its description.
-           */
-          var onMove = function (moveEv) {
-              var delta = moveEv.clientX - startX;
-              var nextW = Math.max(130, Math.min(380, startW + delta));
-              setNavWidth(nextW);
-              if (isNavCollapsed && nextW > 90) {
-                setIsNavCollapsed(false);
-                if (typeof window !== "undefined" && window.localStorage) {
-                  window.localStorage.setItem("dsh_settings_nav_collapsed", "false");
-                }
-              }
-              if (typeof window !== "undefined" && window.localStorage) {
-                window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
-              }
-            };
-          /**
-           * Displays a styled container with a title and optional gap between elements.
-           *
-           * @returns {JSX.Element} A JSX element representing the styled container.
-           */
-          var onUp = function () {
-              setIsResizing(false);
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
+        /**
+         * Displays keyboard shortcuts for configuring workspace navigation hotkeys and global panel triggers.
+         *
+         * This component renders a list of shortcuts with their descriptions and styling.
+         * It guarantees the display of a column of divs with each shortcut and its description.
+         */
+        var onMove = function (moveEv) {
+          var delta = moveEv.clientX - startX;
+          var nextW = Math.max(130, Math.min(380, startW + delta));
+          setNavWidth(nextW);
+          if (isNavCollapsed && nextW > 90) {
+            setIsNavCollapsed(false);
+            if (typeof window !== "undefined" && window.localStorage) {
+              window.localStorage.setItem("dsh_settings_nav_collapsed", "false");
+            }
+          }
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
+          }
         };
+        /**
+         * Displays a styled container with a title and optional gap between elements.
+         *
+         * @returns {JSX.Element} A JSX element representing the styled container.
+         */
+        var onUp = function () {
+          setIsResizing(false);
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
 
       /**
        * Toggles the collapse state of the navigation.
@@ -4234,15 +4234,15 @@ window.__ModuleLoader__.load({
        * If the navigation cannot be toggled (e.g., due to an invalid state), it returns `null`.
        */
       var toggleNavCollapse = function (e) {
-          e.stopPropagation();
-          setIsNavCollapsed(function (prev) {
-            var next = !prev;
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_settings_nav_collapsed", next ? "true" : "false");
-            }
-            return next;
-          });
-        };
+        e.stopPropagation();
+        setIsNavCollapsed(function (prev) {
+          var next = !prev;
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_settings_nav_collapsed", next ? "true" : "false");
+          }
+          return next;
+        });
+      };
 
       var collapsedGroupsState = React.useState({});
       var collapsedGroups = collapsedGroupsState[0],
@@ -4590,10 +4590,10 @@ window.__ModuleLoader__.load({
          * Fallbacks gracefully if localStorage operations fail.
          */
         var onOpenSettings = function (e) {
-            var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
-            if (sec) setActiveId(sec);
-            setOpen(true);
-          };
+          var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
+          if (sec) setActiveId(sec);
+          setOpen(true);
+        };
         window.addEventListener("dsh:open-settings", onOpenSettings);
         return function () {
           window.removeEventListener("dsh:open-settings", onOpenSettings);
@@ -4930,8 +4930,8 @@ window.__ModuleLoader__.load({
        * Fails if `onClose` or `onSectionOpen` are not defined or not functions.
        */
       var startSession = function (workspaceId) {
-          ctx.workspaces.startSession(workspaceId);
-        };
+        ctx.workspaces.startSession(workspaceId);
+      };
       ctx.slots.inject(
         "sidebar.settings",
         function () {
@@ -5258,22 +5258,22 @@ window.__ModuleLoader__.load({
          * Fails if the step ID is already marked as completed.
          */
         var checkIsTrajectory = function () {
-            var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
-            if (activeTab) {
-              var txt = (activeTab.textContent || "").trim().toLowerCase();
-              return (
-                txt === "trajectory" ||
-                txt.includes("trajectory") ||
-                txt === "轨迹" ||
-                txt.includes("轨迹")
-              );
-            }
-            return Boolean(
-              document.querySelector(
-                '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
-              ),
+          var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
+          if (activeTab) {
+            var txt = (activeTab.textContent || "").trim().toLowerCase();
+            return (
+              txt === "trajectory" ||
+              txt.includes("trajectory") ||
+              txt === "轨迹" ||
+              txt.includes("轨迹")
             );
-          };
+          }
+          return Boolean(
+            document.querySelector(
+              '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
+            ),
+          );
+        };
 
         React.useEffect(function () {
           /**
@@ -5284,8 +5284,8 @@ window.__ModuleLoader__.load({
            * @returns {void}
            */
           var update = function () {
-              setIsTrajectory(checkIsTrajectory());
-            };
+            setIsTrajectory(checkIsTrajectory());
+          };
           update();
           var timer = setInterval(update, 400);
           return function () {
@@ -5300,39 +5300,39 @@ window.__ModuleLoader__.load({
          * On failure, the function returns the original view without any changes.
          */
         var handleToggleView = function () {
-            setMenuOpen(false);
-            var onTrajectoryNow = checkIsTrajectory();
-            var targetName = onTrajectoryNow ? "chat" : "trajectory";
+          setMenuOpen(false);
+          var onTrajectoryNow = checkIsTrajectory();
+          var targetName = onTrajectoryNow ? "chat" : "trajectory";
 
-            var allTabs = Array.from(
-              document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+          var allTabs = Array.from(
+            document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+          );
+          var targetBtn = allTabs.find(function (b) {
+            var t = (b.textContent || "").trim().toLowerCase();
+            return (
+              (targetName === "chat" &&
+                (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
+              (targetName === "trajectory" &&
+                (t === "trajectory" ||
+                  t.includes("trajectory") ||
+                  t === "轨迹" ||
+                  t.includes("轨迹")))
             );
-            var targetBtn = allTabs.find(function (b) {
-              var t = (b.textContent || "").trim().toLowerCase();
-              return (
-                (targetName === "chat" &&
-                  (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
-                (targetName === "trajectory" &&
-                  (t === "trajectory" ||
-                    t.includes("trajectory") ||
-                    t === "轨迹" ||
-                    t.includes("轨迹")))
-              );
+          });
+
+          if (targetBtn) {
+            targetBtn.click();
+          } else {
+            var inactiveBtn = allTabs.find(function (b) {
+              return b.getAttribute("aria-selected") !== "true";
             });
+            if (inactiveBtn) inactiveBtn.click();
+          }
 
-            if (targetBtn) {
-              targetBtn.click();
-            } else {
-              var inactiveBtn = allTabs.find(function (b) {
-                return b.getAttribute("aria-selected") !== "true";
-              });
-              if (inactiveBtn) inactiveBtn.click();
-            }
-
-            setTimeout(function () {
-              setIsTrajectory(checkIsTrajectory());
-            }, 80);
-          };
+          setTimeout(function () {
+            setIsTrajectory(checkIsTrajectory());
+          }, 80);
+        };
 
         /**
          * Displays a SettingsPanel overlay with a mask and error boundary.
@@ -5341,23 +5341,23 @@ window.__ModuleLoader__.load({
          * Fallback to rendering the SettingsPanel directly if portals are not supported.
          */
         var handleDownloadLog = function () {
-            setMenuOpen(false);
-            setBusy(true);
-            try {
-              var exportUrl = "/api/session.export?id=" + encodeURIComponent(sessionId || "");
-              var a = document.createElement("a");
-              a.href = exportUrl;
-              a.download = (sessionId || "session") + ".jsonl";
-              document.body.appendChild(a);
-              a.click();
-              setTimeout(function () {
-                if (a.parentNode) a.parentNode.removeChild(a);
-                setBusy(false);
-              }, 1000);
-            } catch (e) {
+          setMenuOpen(false);
+          setBusy(true);
+          try {
+            var exportUrl = "/api/session.export?id=" + encodeURIComponent(sessionId || "");
+            var a = document.createElement("a");
+            a.href = exportUrl;
+            a.download = (sessionId || "session") + ".jsonl";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+              if (a.parentNode) a.parentNode.removeChild(a);
               setBusy(false);
-            }
-          };
+            }, 1000);
+          } catch (e) {
+            setBusy(false);
+          }
+        };
 
         var items = [
           {
@@ -5516,17 +5516,17 @@ window.__ModuleLoader__.load({
          * Fails if the settings are not valid or do not contain the necessary role information.
          */
         var getRoleBadgeStyle = function (role) {
-            if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
-              return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
-            } else if (role.indexOf("exec") !== -1) {
-              return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
-            } else if (role.indexOf("research") !== -1) {
-              return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
-            } else if (role.indexOf("orch") !== -1) {
-              return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
-            }
+          if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
+            return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
+          } else if (role.indexOf("exec") !== -1) {
+            return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
+          } else if (role.indexOf("research") !== -1) {
             return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
-          };
+          } else if (role.indexOf("orch") !== -1) {
+            return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
+          }
+          return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
+        };
 
         return h(
           "section",
@@ -5810,9 +5810,9 @@ window.__ModuleLoader__.load({
          * glyphs will be removed from the slots.
          */
         var closeMenu = function () {
-            menuContainer.style.display = "none";
-            menuContainer.innerHTML = "";
-          };
+          menuContainer.style.display = "none";
+          menuContainer.innerHTML = "";
+        };
 
         /**
          * Ensures the session is in the "ready" phase and either has no current pane or the current pane is blank.
@@ -5820,8 +5820,8 @@ window.__ModuleLoader__.load({
          * Fails silently if the session is not in the "ready" phase or if the current pane is not blank.
          */
         var onKeyDown = function (e) {
-            if (e.key === "Escape") closeMenu();
-          };
+          if (e.key === "Escape") closeMenu();
+        };
         /**
          * Displays context menu options for session management.
          * Ensures the session is in the "ready" phase and the current pane is blank.
@@ -5829,301 +5829,299 @@ window.__ModuleLoader__.load({
          * Fails silently if the session is not in the "ready" phase or the current pane is not blank.
          */
         var onContextMenu = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
 
-            var icons = {
-              chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-              terminal:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
-              container:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
-              cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
-              copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
-              paste:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
-              rename:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-              close:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
-              appearance:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
-              settings:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
-              reload:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+          var icons = {
+            chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            terminal:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+            container:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+            cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+            copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+            paste:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
+            rename:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+            close:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+            appearance:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
+            settings:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+            reload:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+          };
+
+          var x = e.clientX;
+          var y = e.clientY;
+          var selectedText = window.getSelection ? window.getSelection().toString() : "";
+          var targetEl = e.target;
+          var isEditable =
+            targetEl &&
+            (targetEl.tagName === "INPUT" ||
+              targetEl.tagName === "TEXTAREA" ||
+              targetEl.isContentEditable);
+          var sessionEl = targetEl
+            ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]')
+            : null;
+          var workspaceEl = targetEl
+            ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]')
+            : null;
+          var targetSessionId = sessionEl
+            ? sessionEl.getAttribute("data-session-id") || sessionEl.getAttribute("data-id")
+            : null;
+          var targetWorkspaceId = workspaceEl
+            ? workspaceEl.getAttribute("data-workspace-id") || workspaceEl.getAttribute("data-id")
+            : null;
+
+          var items = [];
+
+          // 1. Contextual Items (Rename / Close / Delete)
+          if (sessionEl) {
+            items.push({
+              id: "rename-session",
+              label: "Rename Conversation",
+              icon: icons.rename,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:rename-session", { detail: { id: targetSessionId } }),
+                );
+              },
+            });
+            items.push({
+              id: "close-session",
+              label: "Close / Archive Session",
+              icon: icons.close,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:close-session", { detail: { id: targetSessionId } }),
+                );
+              },
+            });
+            items.push({ type: "divider" });
+          } else if (workspaceEl) {
+            items.push({
+              id: "rename-workspace",
+              label: "Rename Workspace",
+              icon: icons.rename,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:rename-workspace", { detail: { id: targetWorkspaceId } }),
+                );
+              },
+            });
+            items.push({
+              id: "close-workspace",
+              label: "Close Workspace",
+              icon: icons.close,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:delete-workspace", { detail: { id: targetWorkspaceId } }),
+                );
+              },
+            });
+            items.push({ type: "divider" });
+          }
+
+          // 2. Clipboard actions
+          if (selectedText) {
+            if (isEditable) {
+              items.push({
+                id: "cut",
+                label: "Cut",
+                icon: icons.cut,
+                action: function () {
+                  navigator.clipboard.writeText(selectedText).then(function () {
+                    try {
+                      document.execCommand("delete");
+                    } catch (err) {}
+                  });
+                },
+              });
+            }
+            items.push({
+              id: "copy",
+              label:
+                'Copy ("' +
+                (selectedText.length > 20 ? selectedText.slice(0, 18) + "…" : selectedText) +
+                '")',
+              icon: icons.copy,
+              action: function () {
+                navigator.clipboard.writeText(selectedText);
+              },
+            });
+          }
+
+          items.push({
+            id: "paste",
+            label: "Paste",
+            icon: icons.paste,
+            action: function () {
+              navigator.clipboard.readText().then(function (text) {
+                if (!text) return;
+                try {
+                  if (
+                    document.activeElement &&
+                    (document.activeElement.tagName === "INPUT" ||
+                      document.activeElement.tagName === "TEXTAREA" ||
+                      document.activeElement.isContentEditable)
+                  ) {
+                    document.execCommand("insertText", false, text);
+                  } else {
+                    var activeInput = document.querySelector("textarea, input:focus");
+                    if (activeInput) {
+                      activeInput.value = (activeInput.value || "") + text;
+                      activeInput.dispatchEvent(new Event("input", { bubbles: true }));
+                    }
+                  }
+                } catch (err) {}
+              });
+            },
+          });
+
+          items.push({ type: "divider" });
+
+          // 3. Main actions
+          items.push({
+            id: "chat",
+            label: "New Conversation",
+            icon: icons.chat,
+            action: function () {
+              startSession();
+            },
+          });
+          items.push({
+            id: "terminal",
+            label: "New Terminal",
+            icon: icons.terminal,
+            action: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
+              );
+            },
+          });
+          items.push({
+            id: "container",
+            label: "New Container",
+            icon: icons.container,
+            action: function () {
+              window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+            },
+          });
+          items.push({ type: "divider" });
+
+          items.push({
+            id: "appearance",
+            label: "Appearance & Themes",
+            icon: icons.appearance,
+            action: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
+              );
+            },
+          });
+          items.push({
+            id: "settings",
+            label: "Settings & Preferences",
+            icon: icons.settings,
+            action: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-settings", { detail: { section: "general" } }),
+              );
+            },
+          });
+          items.push({ type: "divider" });
+          items.push({
+            id: "reload",
+            label: "Reload Window",
+            icon: icons.reload,
+            action: function () {
+              window.location.reload();
+            },
+          });
+
+          menuContainer.innerHTML = "";
+          var menuEl = document.createElement("div");
+          menuEl.style.minWidth = "220px";
+          menuEl.style.background = "var(--dsw-alias-surface-l0, #181825)";
+          menuEl.style.border = "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))";
+          menuEl.style.borderRadius = "10px";
+          menuEl.style.boxShadow = "0 12px 36px rgba(0,0,0,0.6)";
+          menuEl.style.padding = "5px";
+          menuEl.style.display = "flex";
+          menuEl.style.flexDirection = "column";
+          menuEl.style.gap = "2px";
+          menuEl.style.fontFamily = "inherit";
+
+          items.forEach(function (item) {
+            if (item.type === "divider") {
+              var div = document.createElement("div");
+              div.style.height = "1px";
+              div.style.background = "var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
+              div.style.margin = "4px 0";
+              menuEl.appendChild(div);
+              return;
+            }
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.style.display = "flex";
+            btn.style.alignItems = "center";
+            btn.style.gap = "10px";
+            btn.style.width = "100%";
+            btn.style.padding = "8px 12px";
+            btn.style.borderRadius = "6px";
+            btn.style.border = "none";
+            btn.style.background = "transparent";
+            btn.style.color = "var(--dsw-alias-label-primary, #fff)";
+            btn.style.fontSize = "13px";
+            btn.style.textAlign = "left";
+            btn.style.cursor = "pointer";
+            btn.style.fontFamily = "inherit";
+
+            btn.onmouseenter = function () {
+              btn.style.background =
+                "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
+            };
+            btn.onmouseleave = function () {
+              btn.style.background = "transparent";
+            };
+            btn.onclick = function (ev) {
+              ev.stopPropagation();
+              closeMenu();
+              item.action();
             };
 
-            var x = e.clientX;
-            var y = e.clientY;
-            var selectedText = window.getSelection ? window.getSelection().toString() : "";
-            var targetEl = e.target;
-            var isEditable =
-              targetEl &&
-              (targetEl.tagName === "INPUT" ||
-                targetEl.tagName === "TEXTAREA" ||
-                targetEl.isContentEditable);
-            var sessionEl = targetEl
-              ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]')
-              : null;
-            var workspaceEl = targetEl
-              ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]')
-              : null;
-            var targetSessionId = sessionEl
-              ? sessionEl.getAttribute("data-session-id") || sessionEl.getAttribute("data-id")
-              : null;
-            var targetWorkspaceId = workspaceEl
-              ? workspaceEl.getAttribute("data-workspace-id") || workspaceEl.getAttribute("data-id")
-              : null;
+            var iconSpan = document.createElement("span");
+            iconSpan.style.width = "16px";
+            iconSpan.style.height = "16px";
+            iconSpan.style.display = "inline-flex";
+            iconSpan.style.alignItems = "center";
+            iconSpan.style.justifyContent = "center";
+            iconSpan.style.color = "var(--dsw-alias-label-secondary, #a8a8a8)";
+            iconSpan.innerHTML = item.icon;
 
-            var items = [];
+            var textSpan = document.createElement("span");
+            textSpan.style.flex = "1";
+            textSpan.textContent = item.label;
 
-            // 1. Contextual Items (Rename / Close / Delete)
-            if (sessionEl) {
-              items.push({
-                id: "rename-session",
-                label: "Rename Conversation",
-                icon: icons.rename,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:rename-session", { detail: { id: targetSessionId } }),
-                  );
-                },
-              });
-              items.push({
-                id: "close-session",
-                label: "Close / Archive Session",
-                icon: icons.close,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:close-session", { detail: { id: targetSessionId } }),
-                  );
-                },
-              });
-              items.push({ type: "divider" });
-            } else if (workspaceEl) {
-              items.push({
-                id: "rename-workspace",
-                label: "Rename Workspace",
-                icon: icons.rename,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:rename-workspace", { detail: { id: targetWorkspaceId } }),
-                  );
-                },
-              });
-              items.push({
-                id: "close-workspace",
-                label: "Close Workspace",
-                icon: icons.close,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:delete-workspace", { detail: { id: targetWorkspaceId } }),
-                  );
-                },
-              });
-              items.push({ type: "divider" });
-            }
+            btn.appendChild(iconSpan);
+            btn.appendChild(textSpan);
+            menuEl.appendChild(btn);
+          });
 
-            // 2. Clipboard actions
-            if (selectedText) {
-              if (isEditable) {
-                items.push({
-                  id: "cut",
-                  label: "Cut",
-                  icon: icons.cut,
-                  action: function () {
-                    navigator.clipboard.writeText(selectedText).then(function () {
-                      try {
-                        document.execCommand("delete");
-                      } catch (err) {}
-                    });
-                  },
-                });
-              }
-              items.push({
-                id: "copy",
-                label:
-                  'Copy ("' +
-                  (selectedText.length > 20 ? selectedText.slice(0, 18) + "…" : selectedText) +
-                  '")',
-                icon: icons.copy,
-                action: function () {
-                  navigator.clipboard.writeText(selectedText);
-                },
-              });
-            }
+          menuContainer.appendChild(menuEl);
+          menuContainer.style.display = "block";
 
-            items.push({
-              id: "paste",
-              label: "Paste",
-              icon: icons.paste,
-              action: function () {
-                navigator.clipboard.readText().then(function (text) {
-                  if (!text) return;
-                  try {
-                    if (
-                      document.activeElement &&
-                      (document.activeElement.tagName === "INPUT" ||
-                        document.activeElement.tagName === "TEXTAREA" ||
-                        document.activeElement.isContentEditable)
-                    ) {
-                      document.execCommand("insertText", false, text);
-                    } else {
-                      var activeInput = document.querySelector("textarea, input:focus");
-                      if (activeInput) {
-                        activeInput.value = (activeInput.value || "") + text;
-                        activeInput.dispatchEvent(new Event("input", { bubbles: true }));
-                      }
-                    }
-                  } catch (err) {}
-                });
-              },
-            });
+          var menuWidth = 220;
+          var menuHeight = 240;
+          var finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+          var finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
 
-            items.push({ type: "divider" });
-
-            // 3. Main actions
-            items.push({
-              id: "chat",
-              label: "New Conversation",
-              icon: icons.chat,
-              action: function () {
-                startSession();
-              },
-            });
-            items.push({
-              id: "terminal",
-              label: "New Terminal",
-              icon: icons.terminal,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
-                );
-              },
-            });
-            items.push({
-              id: "container",
-              label: "New Container",
-              icon: icons.container,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-container", { detail: { id: null } }),
-                );
-              },
-            });
-            items.push({ type: "divider" });
-
-            items.push({
-              id: "appearance",
-              label: "Appearance & Themes",
-              icon: icons.appearance,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
-                );
-              },
-            });
-            items.push({
-              id: "settings",
-              label: "Settings & Preferences",
-              icon: icons.settings,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-settings", { detail: { section: "general" } }),
-                );
-              },
-            });
-            items.push({ type: "divider" });
-            items.push({
-              id: "reload",
-              label: "Reload Window",
-              icon: icons.reload,
-              action: function () {
-                window.location.reload();
-              },
-            });
-
-            menuContainer.innerHTML = "";
-            var menuEl = document.createElement("div");
-            menuEl.style.minWidth = "220px";
-            menuEl.style.background = "var(--dsw-alias-surface-l0, #181825)";
-            menuEl.style.border = "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))";
-            menuEl.style.borderRadius = "10px";
-            menuEl.style.boxShadow = "0 12px 36px rgba(0,0,0,0.6)";
-            menuEl.style.padding = "5px";
-            menuEl.style.display = "flex";
-            menuEl.style.flexDirection = "column";
-            menuEl.style.gap = "2px";
-            menuEl.style.fontFamily = "inherit";
-
-            items.forEach(function (item) {
-              if (item.type === "divider") {
-                var div = document.createElement("div");
-                div.style.height = "1px";
-                div.style.background = "var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
-                div.style.margin = "4px 0";
-                menuEl.appendChild(div);
-                return;
-              }
-              var btn = document.createElement("button");
-              btn.type = "button";
-              btn.style.display = "flex";
-              btn.style.alignItems = "center";
-              btn.style.gap = "10px";
-              btn.style.width = "100%";
-              btn.style.padding = "8px 12px";
-              btn.style.borderRadius = "6px";
-              btn.style.border = "none";
-              btn.style.background = "transparent";
-              btn.style.color = "var(--dsw-alias-label-primary, #fff)";
-              btn.style.fontSize = "13px";
-              btn.style.textAlign = "left";
-              btn.style.cursor = "pointer";
-              btn.style.fontFamily = "inherit";
-
-              btn.onmouseenter = function () {
-                btn.style.background =
-                  "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
-              };
-              btn.onmouseleave = function () {
-                btn.style.background = "transparent";
-              };
-              btn.onclick = function (ev) {
-                ev.stopPropagation();
-                closeMenu();
-                item.action();
-              };
-
-              var iconSpan = document.createElement("span");
-              iconSpan.style.width = "16px";
-              iconSpan.style.height = "16px";
-              iconSpan.style.display = "inline-flex";
-              iconSpan.style.alignItems = "center";
-              iconSpan.style.justifyContent = "center";
-              iconSpan.style.color = "var(--dsw-alias-label-secondary, #a8a8a8)";
-              iconSpan.innerHTML = item.icon;
-
-              var textSpan = document.createElement("span");
-              textSpan.style.flex = "1";
-              textSpan.textContent = item.label;
-
-              btn.appendChild(iconSpan);
-              btn.appendChild(textSpan);
-              menuEl.appendChild(btn);
-            });
-
-            menuContainer.appendChild(menuEl);
-            menuContainer.style.display = "block";
-
-            var menuWidth = 220;
-            var menuHeight = 240;
-            var finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
-            var finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
-
-            menuContainer.style.left = Math.max(8, finalX) + "px";
-            menuContainer.style.top = Math.max(8, finalY) + "px";
-          };
+          menuContainer.style.left = Math.max(8, finalX) + "px";
+          menuContainer.style.top = Math.max(8, finalY) + "px";
+        };
 
         document.addEventListener("click", closeMenu);
         document.addEventListener("scroll", closeMenu, true);
