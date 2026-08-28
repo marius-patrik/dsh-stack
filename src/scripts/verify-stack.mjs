@@ -256,9 +256,12 @@ async function main() {
       if (!codeExts.has(ext)) continue;
       const text = await fs.readFile(file, "utf8");
       const lower = text.toLowerCase();
-      for (const marker of ["todo", "fixme", "not implemented", "initialized: true"])
+      // Word-boundary match: a bare substring trips real identifiers like
+      // `autodoc` or `applyPaletteToDOM` (see #109) that contain "todo" but
+      // aren't placeholders.
+      for (const marker of [/\btodo\b/, /\bfixme\b/, /\bnot implemented\b/, "initialized: true"])
         assert(
-          !lower.includes(marker),
+          typeof marker === "string" ? !lower.includes(marker) : !marker.test(lower),
           `${rel} contains unfinished or placeholder marker ${marker}`,
         );
       assert(!/\bas any\b/.test(text), `${rel} contains an unchecked 'as any' cast`);
