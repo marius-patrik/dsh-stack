@@ -10,7 +10,7 @@ permissions:
 jobs:
   release:
     name: Automated SemVer Tag & Release
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip ci') && !contains(github.event.head_commit.message, 'chore(release)')"
 
     steps:
