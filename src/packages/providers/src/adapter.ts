@@ -197,7 +197,13 @@ function parseErrorBody(text: string): { message?: string; detail?: string } {
   return {};
 }
 
-/** providerRetryAfterMs implementation. */
+/**
+ * Returns the retry delay in milliseconds after which the request should be retried.
+ *
+ * @param value - A string representing the retry delay or a date string.
+ * @returns The retry delay in milliseconds or undefined if invalid.
+ * @returns undefined if the input is null or invalid.
+ */
 function providerRetryAfterMs(value: string | null): number | undefined {
   if (value === null) return undefined;
   if (/^\d+$/.test(value)) {
@@ -208,7 +214,12 @@ function providerRetryAfterMs(value: string | null): number | undefined {
   return Number.isFinite(delay) && delay > 0 ? delay : undefined;
 }
 
-/** requestId implementation. */
+/**
+ * Retrieves the request ID from the provided HTTP headers.
+ *
+ * @param headers - The HTTP headers containing potential request IDs.
+ * @returns The request ID as a string, or undefined if not found.
+ */
 function requestId(headers: Headers): ReturnType<typeof ProviderRequestId> | undefined {
   for (const name of [
     "x-request-id",
@@ -336,7 +347,13 @@ export class DialectAdapter extends LlmAdapter {
     });
   }
 
-  /** listModels implementation. */
+  /**
+   * Returns a list of visible models for the given provider.
+   *
+   * @param provider - The provider for which to list models.
+   * @returns A promise that resolves to an array of model information objects.
+   * @throws Throws an error if the gate is not visible.
+   */
   override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
     const connection = this.config.options(provider);
     const gate = await this.config.gate(provider, connection);
@@ -348,7 +365,15 @@ export class DialectAdapter extends LlmAdapter {
     return models.map((model) => modelInfo(provider, model));
   }
 
-  /** resolveModel implementation. */
+  /**
+   * Resolves a model for the given provider and model name.
+   *
+   * @param provider - The provider for which to resolve the model.
+   * @param model - The name of the model to resolve.
+   * @param _signal - Optional signal to abort the operation.
+   * @returns A promise that resolves to the resolved model information.
+   * @throws Throws an error if the model is not visible or if the gate is not visible.
+   */
   override async resolveModel(
     provider: string,
     model: string,
@@ -454,7 +479,13 @@ export class DialectAdapter extends LlmAdapter {
     }
   }
 
-  /** request implementation. */
+  /**
+   * Handles streaming requests from a watchdog iterator until completion or error.
+   *
+   * Guarantees to yield values from the iterator until done is true, then returns.
+   * On timeout or caller abortion, throws an LlmError with appropriate status.
+   * On unhandled error, throws an LlmError indicating transport failure.
+   */
   private async *request(
     options: GenerateOptions,
     signal: AbortSignal,

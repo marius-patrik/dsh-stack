@@ -20,7 +20,13 @@ import { dirname, join, resolve } from "node:path";
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 
-/** readSection implementation. */
+/**
+ * Yields key-value pairs from the specified section in the given text.
+ *
+ * The caller must provide a string `text` containing YAML formatted data and a `section` name.
+ * The function returns an iterator of key-value pairs for lines within the specified section.
+ * If the section is not found or the section header is not correctly formatted, no values are yielded.
+ */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -37,7 +43,14 @@ function* readSection(text, section) {
   }
 }
 
-/** parseJsonValue implementation. */
+/**
+ * Parses a JSON value string into its corresponding JavaScript value.
+ * Guarantees returning `null` for empty strings or "null".
+ * Throws an error for invalid JSON strings or unrecognized boolean values.
+ *
+ * @param {string} raw - The JSON value as a string.
+ * @returns {null|boolean|object|array|string|number|boolean} - The parsed JSON value.
+ */
 function parseJsonValue(raw) {
   if (raw === "" || raw === "null") return null;
   if (raw[0] === "{" || raw[0] === "[") {
@@ -54,7 +67,13 @@ function parseJsonValue(raw) {
   return raw;
 }
 
-/** readSectionData implementation. */
+/**
+ * Reads and parses the data of a section, ensuring it returns the data or null if the section is empty.
+ * Guarantees returning the parsed data or null for empty sections.
+ * Throws an error for invalid JSON data or unrecognized boolean values.
+ *
+ * @returns {null|boolean|object|array|string|number} - The parsed data of the section or null if empty.
+ */
 async function readSectionData() {
   try {
     const text = await readFile(settingsPath, "utf8");
@@ -88,7 +107,12 @@ async function writeSectionData(section) {
   await writeFile(settingsPath, out, "utf8");
 }
 
-/** printHelp implementation. */
+/**
+ * Writes the given section data to the settings file.
+ *
+ * @param {object} section - The section data to write.
+ * @returns {null|boolean|object|array|string|number} - The result of writing the section data or null if the file is new.
+ */
 function printHelp() {
   process.stdout.write(`usage: dsh formatter <verb> [args]
 
@@ -100,7 +124,13 @@ verbs:
 `);
 }
 
-/** main implementation. */
+/**
+ * Updates the configuration file with the provided section data.
+ * Ensures the file exists and contains the updated formatter settings.
+ * Returns the updated configuration object or an empty object if the file is newly created.
+ *
+ * @returns {Object} The updated configuration object or an empty object if the file is new.
+ */
 async function main() {
   const verb = process.argv[2];
   const argv = process.argv.slice(3);

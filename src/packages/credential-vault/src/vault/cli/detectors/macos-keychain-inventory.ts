@@ -19,7 +19,14 @@ const KEYCHAIN_IGNORED =
 export const macosKeychainInventory: Detector = {
   name: "macos-keychain-inventory",
   provider: "keychain",
-  /** detect implementation. */
+  /**
+   * Detects keychain items that match specific criteria.
+   *
+   * Returns an array of findings containing keychain items that are not ignored,
+   * do not match the claimed services, and meet the credential hint pattern.
+   *
+   * If the platform is not macOS (darwin), returns an empty array.
+   */
   async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const claimed = new Set(["gemini", "cursor-access-token", "cursor-refresh-token"]);

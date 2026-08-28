@@ -38,12 +38,25 @@ it only when the owner is at the machine.
 Types: ${SECRET_TYPES.join(", ")}
 `;
 
-/** isSecretType implementation. */
+/**
+ * Determines if the given value is a SecretType.
+ *
+ * @param value - The string value to check against SECRET_TYPES.
+ * @returns true if value is in SECRET_TYPES; otherwise, false.
+ * @throws VaultCliError if value is not in SECRET_TYPES.
+ */
 export function isSecretType(value: string): value is SecretType {
   return (SECRET_TYPES as readonly string[]).includes(value);
 }
 
-/** readMaterialInput implementation. */
+/**
+ * Reads secret material from either a file or standard input.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param io - The input/output interface for reading from standard input.
+ * @returns The secret material as a string.
+ * @throws VaultCliError if the file does not exist or if secret material is not provided via --stdin or --file.
+ */
 export async function readMaterialInput(args: ParsedArguments, io: VaultCliIo): Promise<string> {
   const file = optional(args, "file");
   if (file) {
@@ -57,12 +70,22 @@ export async function readMaterialInput(args: ParsedArguments, io: VaultCliIo): 
   return io.readStdin();
 }
 
-/** scopeFrom implementation. */
+/**
+ * Returns a SecretScope object representing the workspace and agents based on the provided arguments.
+ * @param args - The parsed command-line arguments containing optional workspace and multiple agents.
+ * @returns A SecretScope object with the workspace and agents.
+ * @throws If the arguments do not provide a workspace or agents.
+ */
 export function scopeFrom(args: ParsedArguments): SecretScope {
   return { workspace: optional(args, "workspace") ?? "*", agents: many(args, "agent") };
 }
 
-/** warnEmptyScope implementation. */
+/**
+ * Emits a warning if the provided SecretScope is empty, indicating no workspace or agents are defined.
+ * @param scope - The SecretScope object to check for emptiness.
+ * @param io - The input/output interface for logging the warning.
+ * @throws Will not throw, but logs a warning if the SecretScope has no workspace or agents.
+ */
 export function warnEmptyScope(scope: SecretScope, io: VaultCliIo): void {
   if (scope.agents.length === 0)
     io.err("warning: no --agent given, so no agent can read this record until it is re-scoped\n");

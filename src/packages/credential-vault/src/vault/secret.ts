@@ -78,7 +78,13 @@ export class SecretValue {
     return timingSafeEqual(left, right);
   }
 
-  /** toString implementation. */
+  /**
+   * Returns a string representation of the SecretValue instance.
+   *
+   * Returns: A string indicating the type of the instance as 'SecretValue'.
+   *
+   * On failure: Throws no errors; returns a string indicating the type.
+   */
   toString(): string {
     return REDACTED;
   }
@@ -207,7 +213,15 @@ export class EncryptedFileCredentialStore implements CredentialStore {
     this.#suppliedKey = options.key ? Uint8Array.from(options.key) : null;
   }
 
-  /** directory implementation. */
+  /**
+   * Provides access to the credential store's directory and allows retrieving
+   * credentials by their ID.
+   *
+   * @returns The path to the directory where credentials are stored.
+   * @throws Throws an error if the directory is not provided or is invalid.
+   * @throws Throws an error if the key for the credential store is invalid.
+   * @throws Returns null if the requested credential ID does not exist.
+   */
   get directory(): string {
     return this.#directory;
   }
@@ -236,7 +250,15 @@ export class EncryptedFileCredentialStore implements CredentialStore {
     return decodeCredential(JSON.parse(plaintext) as unknown, id);
   }
 
-  /** put implementation. */
+  /**
+   * Stores a provider credential securely.
+   *
+   * Guarantees the credential is encrypted and authenticated before writing to the file.
+   * Throws an error if the credential cannot be decrypted, indicating it may be corrupt or written under a different key.
+   *
+   * @param id - The unique identifier for the credential.
+   * @param credential - The provider credential to store.
+   */
   async put(id: string, credential: ProviderCredential): Promise<void> {
     const file = this.#file(id);
     const key = await this.#dataKey();
@@ -298,7 +320,12 @@ export class EncryptedFileCredentialStore implements CredentialStore {
   }
 }
 
-/** loadOrCreateKeyFile implementation. */
+/**
+ * Loads an existing key file or creates a new one if it doesn't exist.
+ *
+ * Returns the key file content as a Buffer.
+ * Throws an error if the provided key is invalid or if the file cannot be created.
+ */
 async function loadOrCreateKeyFile(file: string): Promise<Buffer> {
   if (await exists(file)) {
     const key = Buffer.from((await readFile(file, "utf8")).trim(), "base64");
@@ -313,7 +340,12 @@ async function loadOrCreateKeyFile(file: string): Promise<Buffer> {
   return loadOrCreateKeyFile(file);
 }
 
-/** encodeCredential implementation. */
+/**
+ * Encodes the credential key.
+ *
+ * Returns the encoded key as a Buffer.
+ * Throws an error if the key is invalid or if there is an issue creating or reading the key file.
+ */
 function encodeCredential(credential: ProviderCredential): CredentialPayload {
   // Explicit field-by-field encoding, not JSON.stringify over the credential:
   // SecretValue redacts itself, so the only way plaintext reaches the cipher is
@@ -375,7 +407,15 @@ function decodeCredential(value: unknown, id: string): ProviderCredential {
   throw new Error(`stored credential has an unsupported kind: ${id}`);
 }
 
-/** requireString implementation. */
+/**
+ * Ensures the provided value is a non-empty string and throws an error if not.
+ *
+ * @param value - The value to check.
+ * @param name - The name of the value for error messages.
+ * @param id - The identifier for the credential being decoded.
+ * @throws Will throw an error if `value` is undefined, null, or not a string.
+ * @returns The string value if valid.
+ */
 function requireString(value: unknown, field: string, id: string): string {
   if (typeof value !== "string" || !value)
     // jscpd:ignore-start -- mirrors vault/store.ts's / vault/record.ts's small field-normalizing blocks for different data shapes

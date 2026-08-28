@@ -63,7 +63,15 @@ function rateLimitFields(
   };
 }
 
-/** probeEndpoint implementation. */
+/**
+ * Probes an endpoint with the given route and authentication token.
+ *
+ * Guarantees a `QuotaSnapshot` if the probe is successful, otherwise returns a rejected Promise.
+ *
+ * @param route - The configuration for the probe, including the URL and headers.
+ * @param token - The authentication token used for the probe.
+ * @returns A Promise resolving to a `QuotaSnapshot` on success, or rejecting on failure.
+ */
 async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSnapshot> {
   const probe = route.probe;
   const now = new Date().toISOString();
@@ -213,7 +221,12 @@ function parseAnthropicReset(res: Response): string | undefined {
   return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
-/** parseRateLimitReset implementation. */
+/**
+ * Extracts the reset timestamp for rate limiting from the response headers.
+ * Guarantees returning an ISO string if the reset timestamp is valid.
+ * Returns `undefined` if no valid reset timestamp is found.
+ * Fails gracefully by returning `undefined` for invalid or missing headers.
+ */
 function parseRateLimitReset(res: Response): string | undefined {
   const reset = res.headers.get("x-ratelimit-reset");
   if (reset) {
@@ -247,7 +260,11 @@ export function createBuiltinProviders(
     const tokenRef = probeTokenRef(route);
     return {
       id: route.id,
-      /** read implementation. */
+      /**
+       * Reads the credential reference to its token, resolving to a `QuotaSnapshot`.
+       * Guarantees a `QuotaSnapshot` with the provider ID, status, and fetched timestamp.
+       * Fails if the operation is aborted, returning a snapshot with unknown status.
+       */
       async read(signal: { readonly aborted: boolean }): Promise<QuotaSnapshot> {
         if (signal.aborted) {
           return {

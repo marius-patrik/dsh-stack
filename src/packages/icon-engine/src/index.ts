@@ -23,18 +23,33 @@ export interface IconRequest {
 export class IconEngine {
   private readonly packs = new Map<string, IconPack>();
 
-  /** registerPack implementation. */
+  /**
+   * Registers an icon pack.
+   *
+   * @param pack - The icon pack to register.
+   * @throws Will throw an error if the pack ID is already registered.
+   * @returns Nothing.
+   */
   registerPack(pack: IconPack): void {
     if (this.packs.has(pack.id)) throw new Error(`Icon pack already registered: ${pack.id}`);
     this.packs.set(pack.id, pack);
   }
 
-  /** removePack implementation. */
+  /**
+   * Removes an icon pack by its ID if it exists.
+   *
+   * @param id - The ID of the icon pack to remove.
+   * @returns `true` if the pack was successfully removed; `false` if the pack was not found.
+   */
   removePack(id: string): boolean {
     return this.packs.delete(id);
   }
 
-  /** packsList implementation. */
+  /**
+   * Returns a sorted list of registered icon packs.
+   *
+   * @returns A sorted array of `IconPack` instances, ordered by priority descending.
+   */
   packsList(): readonly IconPack[] {
     return [...this.packs.values()].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   }
@@ -73,7 +88,13 @@ function keysFor(request: IconRequest): readonly string[] {
   return keys;
 }
 
-/** apply implementation. */
+/**
+ * Provides an IconEngine to the context, indicating the availability of icons.
+ *
+ * Guarantees that the `stack.icons` service is registered with an IconEngine.
+ *
+ * On failure, does nothing and leaves the context unchanged.
+ */
 export function apply(ctx: Context): void {
   ctx.provide("stack.icons", new IconEngine());
 }

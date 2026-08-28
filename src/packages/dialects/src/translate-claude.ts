@@ -72,7 +72,15 @@ export function mapClaudeFinishReason(reason: string): FinishReason {
   }
 }
 
-/** mapClaudeUsage implementation. */
+/**
+ * Converts a `WireUsage` object to a `TokenUsage` object, mapping specific usage metrics.
+ *
+ * Guarantees that the returned `TokenUsage` object contains input tokens and output tokens.
+ * Optionally includes cache read and write tokens if provided in the `WireUsage` object.
+ *
+ * @param usage - The `WireUsage` object containing usage metrics.
+ * @returns A `TokenUsage` object with mapped token counts.
+ */
 export function mapClaudeUsage(usage: WireUsage): TokenUsage {
   return {
     inputTokens: usage.input_tokens ?? 0,
@@ -87,7 +95,16 @@ export function mapClaudeUsage(usage: WireUsage): TokenUsage {
   };
 }
 
-/** closeBlock implementation. */
+/**
+ * Converts an `OpenBlock` to a `ContentBlock` based on its kind.
+ *
+ * Guarantees:
+ * - Returns a `ContentBlock` object with the appropriate type and properties based on the `OpenBlock` kind.
+ * - Handles `text`, `reasoning`, and `tool-call` kinds appropriately.
+ *
+ * Fails:
+ * - Throws an error if an unrecognized `kind` is encountered.
+ */
 function closeBlock(block: OpenBlock): ContentBlock {
   switch (block.kind) {
     case "text":
@@ -104,7 +121,16 @@ function closeBlock(block: OpenBlock): ContentBlock {
   }
 }
 
-/** translateClaude implementation. */
+/**
+ * Converts an `OpenBlock` to a `ContentBlock` based on its kind.
+ *
+ * Guarantees:
+ * - Returns a `ContentBlock` object of the correct type and properties.
+ * - Handles `text`, `reasoning`, and `tool-call` kinds appropriately.
+ *
+ * Fails:
+ * - Throws an error for unrecognized `kind` values.
+ */
 export async function* translateClaude(
   // jscpd:ignore-end
   events: AsyncIterable<SseEvent>,

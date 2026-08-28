@@ -83,7 +83,16 @@ function sshPublicKeyComment(publicKey: string): string | null {
 export const sshKeys: Detector = {
   name: "ssh-keys",
   provider: "ssh",
-  /** detect implementation. */
+  /**
+   * Detects SSH keys in the .ssh directory of the source machine.
+   *
+   * Guarantees a list of findings for each private key found with a valid header.
+   * If the public key half is missing, it includes a warning in the findings.
+   *
+   * @param source - The source of the files to check.
+   * @param context - Additional context for the detection process.
+   * @returns An array of findings, each describing an SSH key or a missing public key.
+   */
   async detect(source, context) {
     const directory = joinSource(source.home, ".ssh");
     const names = await source.listDirectory(directory);

@@ -35,7 +35,14 @@ export interface SkinRuntime {
   subscribe(listener: () => void): () => void;
 }
 
-/** createSkinRuntime implementation. */
+/**
+ * Creates a skin runtime environment.
+ *
+ * @param options - An array of skin options, at least one of which is required.
+ * @param reload - A function to reload the skin runtime.
+ * @returns A SkinRuntime instance that manages skin activation.
+ * @throws Will throw an error if no skins are provided or an unknown skin ID is set.
+ */
 export function createSkinRuntime(
   options: readonly SkinOption[] = defaultSkins,
   reload: () => void = () => undefined,

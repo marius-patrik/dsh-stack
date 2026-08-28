@@ -78,7 +78,15 @@ function parseToolInput(argumentsJson: string): Record<string, unknown> {
 }
 // jscpd:ignore-end
 
-/** serializeAssistant implementation. */
+/**
+ * Converts a Message object into a WireMessage suitable for serialization.
+ *
+ * Guarantees that the returned WireMessage has the role set to "assistant" and
+ * the content field populated with an array of WirePart objects representing
+ * the message's content blocks.
+ *
+ * Fails if the input message contains unsupported block types.
+ */
 function serializeAssistant(message: Message): WireMessage {
   const parts: WirePart[] = [];
   for (const block of message.content) {
@@ -95,7 +103,14 @@ function serializeAssistant(message: Message): WireMessage {
   return { role: "assistant", content: parts };
 }
 
-/** serializeUser implementation. */
+/**
+ * Converts a user message into a serializable wire message format.
+ *
+ * Guarantees that the returned message is structured as a WireMessage with the role "assistant" and content parts
+ * representing the message blocks. If a block is of type "tool-result" with an error, it includes an "is_error" flag.
+ *
+ * Fails to serialize blocks of unknown types, leaving them out of the resulting message.
+ */
 function serializeUser(message: Message): WireMessage {
   const parts: WirePart[] = [];
   for (const block of message.content) {
@@ -112,7 +127,12 @@ function serializeUser(message: Message): WireMessage {
   return { role: "user", content: parts };
 }
 
-/** stripTrailingSlash implementation. */
+/**
+ * Strips a trailing slash from the given string if present.
+ *
+ * Guarantees that the returned string no longer ends with a slash.
+ * Fails to process strings that are not valid UTF-8, returning them unchanged.
+ */
 function stripTrailingSlash(base: string): string {
   return base.endsWith("/") ? base.slice(0, -1) : base;
 }
@@ -205,7 +225,16 @@ export function serializeThinking(
 export const claudeDialect: Dialect = {
   id: "claude",
 
-  /** serialize implementation. */
+  /**
+   * Serializes the thinking configuration based on the effort and maxTokens.
+   * Ensures the budget is clamped to prevent degenerate responses and returns
+   * the `thinking` field if the budget is sufficient; otherwise, returns an
+   * empty object.
+   * @param effort - The caller's selected effort ID.
+   * @param maxTokens - The output cap for the request.
+   * @returns The `thinking` field with the type set to "enabled" and budget_tokens,
+   * or an empty object if the budget is insufficient.
+   */
   serialize(
     options: GenerateOptions,
     auth: DialectAuth,

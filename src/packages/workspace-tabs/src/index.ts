@@ -41,7 +41,13 @@ export function createWorkspaceTabs(options: WorkspaceTabsOptions = {}): Workspa
   };
 }
 
-/** reduceWorkspaceTabs implementation. */
+/**
+ * Adjusts the workspace tabs state based on the given action.
+ *
+ * Guarantees the state of workspace tabs is updated according to the action type.
+ * Returns the new state of workspace tabs after applying the action.
+ * Fails if the action type is unrecognized, leaving the state unchanged.
+ */
 export function reduceWorkspaceTabs(
   state: WorkspaceTabsState,
   action: WorkspaceTabsAction,
@@ -116,7 +122,13 @@ function closeTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState 
   return { ...state, tabs, panes };
 }
 
-/** closeOtherTabs implementation. */
+/**
+ * Closes all tabs except the specified one in the active pane and updates the state.
+ *
+ * Guarantees that the specified tab remains open and all other tabs in the same pane are closed.
+ * Returns the updated workspace state with the specified tab closed and the active tab adjusted if necessary.
+ * Fails gracefully by returning the original state if the tab is not found or no changes are needed.
+ */
 function closeOtherTabs(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState {
   const tab = state.tabs[tabId];
   if (!tab) return state;
@@ -129,7 +141,12 @@ function closeOtherTabs(state: WorkspaceTabsState, tabId: string): WorkspaceTabs
   return next;
 }
 
-/** activateTab implementation. */
+/**
+ * Activates the specified tab by ensuring it is the active tab within its pane.
+ * Guarantees that the specified tab becomes the active tab, and all other tabs in the same pane are closed.
+ * Returns the updated workspace state with the specified tab activated and the active tab ID set.
+ * Fails gracefully by returning the original state if the tab is not found or no changes are needed.
+ */
 function activateTab(state: WorkspaceTabsState, tabId: string): WorkspaceTabsState {
   if (!state.tabs[tabId]) return state;
   const panes = clonePanes(state.panes);
@@ -170,12 +187,24 @@ function splitPane(
   return { ...state, panes };
 }
 
-/** clampDockHeight implementation. */
+/**
+ * Adjusts the height of a dock pane to fit within the allowed range.
+ * Ensures the pane height is not less than the minimum allowed height
+ * and not greater than the maximum allowed height.
+ * Returns the updated workspace state with the clamped pane height.
+ * Throws an error if the new height is out of the allowed range.
+ */
 function clampDockHeight(value: number): number {
   return Math.min(800, Math.max(160, Math.round(value)));
 }
 
-/** newId implementation. */
+/**
+ * Moves a tab from the source pane to a new pane with a unique ID.
+ *
+ * Guarantees that the new pane ID is unique and not already in use.
+ * Returns the updated workspace state with the new pane and updated tab distribution.
+ * Throws an error if the new ID collides with an existing pane ID.
+ */
 function newId(): string {
   return `pane-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }

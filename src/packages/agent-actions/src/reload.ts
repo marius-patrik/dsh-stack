@@ -215,7 +215,13 @@ async function readBody(req: ReloadRequest): Promise<unknown> {
   return text === "" ? undefined : JSON.parse(text);
 }
 
-/** respond implementation. */
+/**
+ * Responds with a JSON status message to the client.
+ *
+ * Guarantees: Writes the HTTP status and JSON body to the response.
+ *
+ * On failure: Returns early with a 409 status and an error message.
+ */
 function respond(res: ReloadResponse, status: number, body: Record<string, unknown>): void {
   res.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
