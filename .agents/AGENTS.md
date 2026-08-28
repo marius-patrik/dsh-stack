@@ -123,6 +123,22 @@ The Stack version increments on every merge to `main`. Releases contain the comp
 
 The duplicate gate runs at a zero threshold, so `jscpd:ignore-start` is the only way past it. Every exemption states why the repetition is structural, and every one is closed; `pnpm verify` enforces both. Exempt the smallest region that needs it, never a whole file — an unclosed marker silences the rest of the file rather than the block it was written for. If the honest reason is "this should be extracted", extract it.
 
+## Unified surface components
+
+Every surface presenting the same concept uses the same components; only the topmost level — placement, sizing, docking, collapsibility — differs. A tab is a tab whether it sits in the main area, the bottom panel, or the secondary sidebar, so the tab strip, context menu, tab model, move semantics and empty state are written once and parameterised by placement. A capability that works in one surface and not another is a defect, not a scoping decision.
+
+## Reachability
+
+Every package must be reachable by the running system: mounted in the generated bundle patch, shipping a browser half through `dsh.client`, imported by another package's source, or exposed as a CLI. An extension additionally qualifies by being composed into a pack. `pnpm verify` enforces this. Before implementing, confirm the code you are about to change actually runs.
+
+## Destructive actions
+
+Destroying running work or user state is always a deliberate, separately-presented action, never the cheapest gesture. Closing a terminal or container tab detaches; killing it is its own action. A transfer commits only once a destination has taken ownership. Every destructive server route logs what ran, against what target, and which caller asked.
+
+## No silent no-ops
+
+An action that cannot proceed says so rather than returning as though it succeeded. `x ? doThing() : Promise.resolve()` in a mutating path converts a missing dependency into a lie about the outcome; surface the failure, or disable the control.
+
 ## Verification standard
 
 Completion requires workspace typecheck, workspace build, package-contract verification, duplicate-source verification, placeholder/unchecked-cast/unfinished-code verification, package tests, release packaging/manifest generation, and real user-visible UI wiring. Never weaken a verifier to make CI green; fix the implementation or repository structure.
