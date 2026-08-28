@@ -207,12 +207,13 @@ const inventoryPayload = {
         { entryId: "ui-sidebar", moduleName: "@dsh-stack/ui-sidebar", fiberPhase: "active" },
         { entryId: "lsp", moduleName: "@dsh-stack/lsp", fiberPhase: "failed" },
         { entryId: "hosts", moduleName: "@dsh-stack/hosts", fiberPhase: "pending" },
+        { entryId: "tool-bash", moduleName: "@deepseek-ai/dsh-tool-bash", fiberPhase: null },
       ],
     },
   },
 };
 const entries = parsePluginInventory(inventoryPayload);
-assert.equal(entries.length, 4);
+assert.equal(entries.length, 5);
 assert.equal(entries[2].entryId, "lsp");
 assert.equal(parsePluginInventory({ result: { ok: false, value: { entries: [] } } }), null);
 assert.equal(parsePluginInventory({ result: { ok: true, value: {} } }), null);
@@ -223,17 +224,28 @@ console.log("parsePluginInventory ok");
 
 // summarizePluginMetrics/formatPluginMetricsLine: counts and the banner.
 const metrics = summarizePluginMetrics(entries);
-assert.equal(metrics.total, 4);
+assert.equal(metrics.total, 5);
 assert.equal(metrics.active, 2);
+assert.equal(metrics.notMounted, 1);
+assert.deepEqual(
+  metrics.pending.map((entry) => entry.entryId),
+  ["hosts"],
+);
 assert.deepEqual(
   metrics.failed.map((entry) => entry.entryId),
   ["lsp"],
 );
-assert.deepEqual(summarizePluginMetrics([]), { total: 0, active: 0, failed: [] });
+assert.deepEqual(summarizePluginMetrics([]), {
+  total: 0,
+  active: 0,
+  pending: [],
+  notMounted: 0,
+  failed: [],
+});
 const at = new Date(2026, 0, 2, 3, 4, 5);
 assert.equal(
   formatPluginMetricsLine(metrics, at),
-  "── 03:04:05 · plugins: 4 total · 2 active · 1 failed ──",
+  "── 03:04:05 · plugins: 2 active · 1 pending · 1 not mounted · 1 failed ──",
 );
 assert.equal(formatPluginMetricsLine(null, at), "── 03:04:05 · plugins: server not answering ──");
 console.log("plugin metrics ok");
