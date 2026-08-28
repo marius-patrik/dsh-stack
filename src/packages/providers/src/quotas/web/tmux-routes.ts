@@ -11,6 +11,7 @@ import { respondToAction } from "./action-response.js";
 import { QUOTAS_PREFIX } from "./quotas-prefix.js";
 import { readJsonBody } from "./read-request-body.js";
 import { sanitizeDigits, sanitizeIdentifier } from "./sanitize.js";
+import { auditDestructiveAction } from "./audit-destructive-action.js";
 import { isRoute, type RouteContext } from "./route-context.js";
 
 const PREFIX = `${QUOTAS_PREFIX}/api/tmux`;
@@ -87,6 +88,7 @@ export async function handleTmuxRoute(ctx: RouteContext): Promise<boolean> {
     const body = await readJsonBody(req);
     const name = sanitizeIdentifier(body["name"]);
     if (name) {
+      auditDestructiveAction(req, "tmux", "kill-session", name);
       await respondToAction(res, () => execSync(`tmux kill-session -t ${name}`, { timeout: 2000 }));
     } else {
       sendJsonResponse(res, 400, { error: "session name required" });
