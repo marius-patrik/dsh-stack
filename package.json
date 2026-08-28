@@ -16,13 +16,14 @@
     "verify:jsdocs": "node src/scripts/verify-jsdocs.mjs",
     "verify:duplicates": "jscpd src/packages publish/extensions publish/packs publish/plugins src/scripts",
     "verify:dead-code": "knip --no-progress",
-    "verify": "pnpm run verify:plugin-readmes && pnpm run verify:jsdocs && pnpm run verify:duplicates && pnpm run verify:dead-code && pnpm run verify:reachability && node src/scripts/verify-stack.mjs && pnpm -r --if-present --workspace-concurrency=16 verify",
+    "verify": "pnpm run verify:plugin-readmes && pnpm run verify:jsdocs && pnpm run verify:duplicates && pnpm run verify:jscpd-exemptions && pnpm run verify:dead-code && pnpm run verify:reachability && node src/scripts/verify-stack.mjs && pnpm -r --if-present --workspace-concurrency=16 verify",
     "test": "pnpm -r --if-present --workspace-concurrency=16 test",
     "release:manifest": "node src/scripts/release.mjs manifest",
     "release:version": "node src/scripts/release.mjs version",
     "release:assets": "node src/scripts/release.mjs assets",
     "release:verify": "node src/scripts/verify-release-assets.mjs",
-    "verify:reachability": "node src/scripts/verify-package-reachability.mjs"
+    "verify:reachability": "node src/scripts/verify-package-reachability.mjs",
+    "verify:jscpd-exemptions": "node src/scripts/verify-jscpd-exemptions.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
