@@ -10,9 +10,15 @@ import { respondToAction } from "./action-response.js";
 import { QUOTAS_PREFIX } from "./quotas-prefix.js";
 import { readJsonBody } from "./read-request-body.js";
 import { sanitizeIdentifier } from "./sanitize.js";
+import { auditDestructiveAction } from "./audit-destructive-action.js";
 import { isRoute, type RouteContext } from "./route-context.js";
 
 const PREFIX = `${QUOTAS_PREFIX}/api/docker`;
+
+/**
+ * Container actions this route will execute. `stop` and `rm` destroy running
+ * work, so every one of them is audited below before it runs.
+ */
 const CONTAINER_ACTIONS = ["start", "stop", "restart", "rm"];
 
 /** Handle one `/quotas/api/docker/*` request; returns `true` if it matched and was handled. */
@@ -56,6 +62,7 @@ export async function handleDockerRoute(ctx: RouteContext): Promise<boolean> {
     const id = sanitizeIdentifier(body["id"]);
     const action = String(body["action"] || "");
     if (CONTAINER_ACTIONS.includes(action) && id) {
+      auditDestructiveAction(req, "docker", action, id);
       await respondToAction(res, () => execSync(`docker ${action} ${id}`, { timeout: 5000 }));
     } else {
       sendJsonResponse(res, 400, { error: "invalid action or container id" });
