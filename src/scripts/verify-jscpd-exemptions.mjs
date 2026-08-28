@@ -16,10 +16,11 @@
  * @module @dsh-stack/scripts/verify-jscpd-exemptions
  */
 import { promises as fs } from "node:fs";
-import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, relative } from "node:path";
+import { resolveRepoRoot } from "./lib/resolve-repo-root.mjs";
+import { walkSourceTree } from "./lib/walk-source-tree.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const root = resolveRepoRoot(import.meta.url);
 
 /** Trees carrying source that the duplicate gate scans. */
 const ROOTS = [
@@ -33,27 +34,13 @@ const ROOTS = [
 /** Shortest reason accepted. Anything briefer restates the marker rather than justifying it. */
 const MIN_REASON = 20;
 
-/** Yields every source file under `dir`, skipping build output and dependencies. */
-async function* walk(dir) {
-  let entries;
-  try {
-    entries = await fs.readdir(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    if (entry.name === "node_modules" || entry.name === "lib" || entry.name === ".git") continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) yield* walk(full);
-    else if (/\.(ts|tsx|mjs|js)$/.test(entry.name)) yield full;
-  }
-}
-
 const problems = [];
 let exemptions = 0;
 
 for (const rootName of ROOTS) {
-  for await (const file of walk(join(root, rootName))) {
+  for await (const file of walkSourceTree(join(root, rootName), {
+    extensions: ["ts", "tsx", "mjs", "js"],
+  })) {
     let text;
     try {
       text = await fs.readFile(file, "utf8");
