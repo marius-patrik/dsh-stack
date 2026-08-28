@@ -8,7 +8,7 @@ export {
   resolvePort,
   startPortHint,
 } from "./ports.js";
-export { packageDir, findHarnessDir, harnessCli, verbBin } from "./paths.js";
+export { packageDir, findHarnessDir, harnessCli, verbBin, tsxAvailable } from "./paths.js";
 export { route, parseLogsArgs, parseAttachArgs } from "./route.js";
 export type { RoutePlan, RouteOptions } from "./route.js";
 export { findListenerPid, stopServer, startServer } from "./processes.js";
