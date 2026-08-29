@@ -12,12 +12,24 @@ if (!["build", "typecheck", "test", "verify"].includes(command)) {
 const root = process.cwd();
 const repositoryRoot = resolve(root, "../../..");
 
-/** readJson implementation. */
+/**
+ * Reads and parses a JSON file.
+ *
+ * @param {string} path - Absolute path to the JSON file.
+ * @throws When the file cannot be read or contains invalid JSON.
+ */
 async function readJson(path) {
   return JSON.parse(await fs.readFile(path, "utf8"));
 }
 
-/** discoverStackPackages implementation. */
+/**
+ * Scans `src/packages`, `publish/extensions`, and `publish/packs` for
+ * directories containing a `stack.json` manifest, returning a Map of
+ * stack id to `{ dir, manifest }`.
+ *
+ * Catalog roots that do not exist and directories without a readable
+ * `stack.json` are silently skipped.
+ */
 async function discoverStackPackages() {
   const byId = new Map();
   for (const catalogRoot of ["src/packages", "publish/extensions", "publish/packs"]) {
@@ -51,8 +63,15 @@ const dependencies = dependencyIds.map((id) => {
 
 dependencies.sort((a, b) => a.id.localeCompare(b.id));
 
-const /** run implementation. */
-  run = (child) =>
+/**
+ * Spawns `pnpm run --if-present <command>` in a dependency's directory,
+ * inheriting stdio. Resolves on exit code 0; rejects with an Error on
+ * non-zero exit or signal termination.
+ *
+ * @param {{ dir: string, id: string }} child - The dependency to run against.
+ * @throws When the spawned process exits non-zero or is killed by a signal.
+ */
+const run = (child) =>
     new Promise((resolvePromise, reject) => {
       const childProcess = spawn("pnpm", ["run", "--if-present", command], {
         cwd: child.dir,

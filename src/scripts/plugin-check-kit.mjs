@@ -99,7 +99,13 @@ export async function loadClientLoaderSpec(clientUrl) {
 export function stubSettingsService() {
   const registrations = [];
   const service = {
-    /** register implementation. */
+    /**
+     * Registers a namespace with an optional base value.
+     * Returns an object with methods `get` to retrieve the base value and `watch` to subscribe to changes (which always returns undefined).
+     * @param {string} ns - The namespace to register.
+     * @param {_schema} _schema - The schema associated with the namespace.
+     * @param {Object} opts - Registration options including `base`.
+     */
     register(ns, _schema, opts) {
       registrations.push(ns);
       return { get: () => opts.base, watch: () => undefined };

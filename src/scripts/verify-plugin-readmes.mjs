@@ -9,7 +9,11 @@ const roots = [
 ];
 const missing = [];
 
-/** walk implementation. */
+/**
+ * Inspects a directory to check for the presence of a package.json and optionally a README file.
+ * If no README is found in a directory containing a package.json, it records the relative path.
+ * If no directories are found (excluding node_modules and packs), the function does nothing.
+ */
 async function walk(dir) {
   let entries;
   try {

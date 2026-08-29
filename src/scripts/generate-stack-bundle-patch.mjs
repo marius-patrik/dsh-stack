@@ -32,7 +32,16 @@ import { promises as fs } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-/** hasLoaderShape implementation. */
+/**
+ * Probes whether a package's built entry exports a cordis-compatible loader shape.
+ *
+ * Dynamic-imports the resolved entry and returns true when the module
+ * exports an `apply` function (either directly or via `default`).
+ * Returns false without throwing when the entry cannot be imported.
+ *
+ * @param {string} packageDir - Absolute path to the package root.
+ * @param {string|undefined} mainRelativePath - Relative entry path; defaults to `lib/index.js`.
+ */
 async function hasLoaderShape(packageDir, mainRelativePath) {
   const entryPath = join(packageDir, mainRelativePath ?? "lib/index.js");
   let mod;
@@ -88,12 +97,23 @@ const KNOWN_CORDIS_MOUNT_INCOMPATIBILITIES = new Set([
   "@dsh-stack/agent-personas",
 ]);
 
-/** readJson implementation. */
+/**
+ * Reads and parses a JSON file.
+ *
+ * @param {string} path - Absolute path to the JSON file.
+ * @throws When the file cannot be read or contains invalid JSON.
+ */
 async function readJson(path) {
   return JSON.parse(await fs.readFile(path, "utf8"));
 }
 
-/** discoverStackPackages implementation. */
+/**
+ * Scans `src/packages` and `publish/extensions` for package directories,
+ * returning a Map of package name to `{ dir, manifest }`.
+ *
+ * Directories without a readable `package.json` or without a string `name`
+ * field are silently skipped.
+ */
 async function discoverStackPackages() {
   const byName = new Map();
   for (const catalogRoot of ["src/packages", "publish/extensions"]) {
@@ -113,7 +133,13 @@ async function discoverStackPackages() {
   return byName;
 }
 
-/** collectMountablePackageNames implementation. */
+/**
+ * Resolves the dependency union across all domain packs, probes each candidate
+ * for the cordis loader shape, and returns `{ mountable, skipped }` — sorted
+ * lists of package names that can and cannot be mounted as bundle rows.
+ *
+ * @throws When a pack dependency cannot be resolved in the discovered packages.
+ */
 async function collectMountablePackageNames() {
   const byName = await discoverStackPackages();
   const union = new Set();
@@ -145,12 +171,19 @@ async function collectMountablePackageNames() {
   return { mountable, skipped };
 }
 
-/** rowIdFor implementation. */
+/**
+ * Derives a YAML-safe cordis row id from a scoped package name by stripping
+ * the `@dsh-stack/` prefix and replacing slashes with hyphens.
+ */
 function rowIdFor(packageName) {
   return packageName.replace(/^@dsh-stack\//, "").replaceAll("/", "-");
 }
 
-/** renderPatch implementation. */
+/**
+ * Renders the complete `cordis.patch.yml` content for the given package names,
+ * including the generated-file header comment and one `insert` row per package
+ * with quoted `name` values (YAML requires quoting the `@` prefix).
+ */
 function renderPatch(packageNames) {
   const header = [
     "# GENERATED FILE -- do not hand-edit.",
