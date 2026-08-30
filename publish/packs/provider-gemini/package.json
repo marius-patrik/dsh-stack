@@ -28,6 +28,10 @@
   "dependencies": {
     "@dsh-stack/provider-antigravity-sub": "workspace:*",
     "@dsh-stack/provider-gemini-api": "workspace:*",
-    "@dsh-stack/provider-gemini-sub": "workspace:*"
+    "@dsh-stack/provider-gemini-sub": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-antigravity": "workspace:*",
+    "@dsh-stack/dialect-code-assist": "workspace:*",
+    "@dsh-stack/dialect-openai": "workspace:*"
   }
 }

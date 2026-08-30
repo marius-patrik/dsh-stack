@@ -11,8 +11,8 @@
 
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";
 import type { ContentBlock, GenerateOptions, Message } from "@deepseek-ai/dsh-llm";
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
-import { parseSseData } from "./sse.js";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "@dsh-stack/dialects";
+import { parseSseData } from "@dsh-stack/dialects";
 import { translateOpenAi } from "./translate-openai.js";
 
 /** A request `messages` entry, discriminated on `role`. */
@@ -33,7 +33,7 @@ type WireMessage =
     };
 
 /** The request body for `POST {baseURL}/chat/completions`. */
-export interface WireRequestBody {
+interface WireRequestBody {
   model: string;
   messages: WireMessage[];
   stream: true;

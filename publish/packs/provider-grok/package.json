@@ -27,6 +27,8 @@
   },
   "dependencies": {
     "@dsh-stack/provider-grok-api": "workspace:*",
-    "@dsh-stack/provider-grok-sub": "workspace:*"
+    "@dsh-stack/provider-grok-sub": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-openai": "workspace:*"
   }
 }

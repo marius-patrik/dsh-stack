@@ -11,27 +11,27 @@
 
 import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";
 import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from "@deepseek-ai/dsh-llm";
-import type { SseEvent } from "./sse.js";
+import type { SseEvent } from "@dsh-stack/dialects";
 
-export interface WireUsage {
+interface WireUsage {
   input_tokens?: number;
   output_tokens?: number;
   cache_creation_input_tokens?: number;
   cache_read_input_tokens?: number;
 }
 
-export type WireBlockStart =
+type WireBlockStart =
   | { type: "text"; text: string }
   | { type: "tool_use"; id: string; name: string; input: unknown }
   | { type: "thinking"; thinking: string };
 
-export type WireDelta =
+type WireDelta =
   | { type: "text_delta"; text: string }
   | { type: "input_json_delta"; partial_json: string }
   | { type: "thinking_delta"; thinking: string }
   | { type: "signature_delta"; signature: string };
 
-export type WireEvent =
+type WireEvent =
   | { type: "message_start"; message: { id?: string; usage?: WireUsage } }
   | { type: "content_block_start"; index: number; content_block: WireBlockStart }
   | { type: "content_block_delta"; index: number; delta: WireDelta }

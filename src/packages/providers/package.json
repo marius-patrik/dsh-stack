@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-antigravity": "workspace:*",
     "@dsh-stack/credential-vault": "workspace:*",
     "@dsh-stack/plugin-kit": "workspace:*"
   },
@@ -60,6 +61,7 @@
     "@deepseek-ai/dsh-client-ui-primitives": "0.1.1-rc.2",
     "react": "^18.2.0",
     "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-antigravity": "workspace:*",
     "@dsh-stack/credential-vault": "workspace:*"
   },
   "devDependencies": {

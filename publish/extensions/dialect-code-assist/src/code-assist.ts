@@ -14,15 +14,14 @@
 import { randomUUID } from "node:crypto";
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";
 import type { ContentBlock, GenerateOptions } from "@deepseek-ai/dsh-llm";
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
-import { parseSseEvents } from "./sse.js";
-import { translateGemini } from "./translate-gemini.js";
-import { serializeContents, buildToolNameIndex } from "./gemini.js";
-import type { WireContent } from "./gemini.js";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "@dsh-stack/dialects";
+import { parseSseEvents } from "@dsh-stack/dialects";
+import { translateGemini, serializeContents, buildToolNameIndex } from "@dsh-stack/dialect-gemini";
+import type { WireContent } from "@dsh-stack/dialect-gemini";
 
 /** The inner `toVertexGenerateContentRequest` nested under `request`. */
 // jscpd:ignore-start -- structurally similar to gemini.ts's block but encodes Code Assist's distinct wire semantics; forcing a shared helper would blur real per-dialect differences
-export interface WireCodeAssistRequestBody {
+interface WireCodeAssistRequestBody {
   systemInstruction?: { parts: [{ text: string }] };
   contents: WireContent[];
   tools?: Array<{
@@ -42,7 +41,7 @@ export interface WireCodeAssistRequestBody {
 }
 
 /** The Code Assist request body: a wrapper over the inner Vertex request. */
-export interface WireCodeAssistWrapper {
+interface WireCodeAssistWrapper {
   model: string;
   project: string;
   user_prompt_id: string;

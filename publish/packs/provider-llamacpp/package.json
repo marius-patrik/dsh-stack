@@ -26,6 +26,8 @@
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "dependencies": {
-    "@dsh-stack/provider-llamacpp": "workspace:*"
+    "@dsh-stack/provider-llamacpp": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-openai": "workspace:*"
   }
 }

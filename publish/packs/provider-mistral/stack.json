@@ -4,7 +4,15 @@
   "version": "0.1.0",
   "kind": "pack",
   "description": "Mistral provider route.",
-  "files": ["package.json", "stack.json", "README.md"],
-  "dependencies": ["stack.ai.provider.mistral-api"],
+  "files": [
+    "package.json",
+    "stack.json",
+    "README.md"
+  ],
+  "dependencies": [
+    "stack.ai.provider.mistral-api",
+    "stack.ai.dialects",
+    "stack.ai.dialect.openai"
+  ],
   "optionalDependencies": []
 }

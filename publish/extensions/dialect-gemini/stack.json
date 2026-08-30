@@ -1,0 +1,10 @@
+{
+  "id": "stack.ai.dialect.gemini",
+  "name": "@dsh-stack/dialect-gemini",
+  "version": "0.1.0",
+  "kind": "extension",
+  "description": "Google Gemini wire dialect extension for the Stack dialects registry.",
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": ["stack.ai.dialects"],
+  "optionalDependencies": []
+}
