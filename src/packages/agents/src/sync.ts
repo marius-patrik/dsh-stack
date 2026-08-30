@@ -62,11 +62,15 @@ export function basePresetDir(): string | undefined {
   if (process.env.DSH_AGENTS_BASE_DIR !== undefined && process.env.DSH_AGENTS_BASE_DIR !== "") {
     return process.env.DSH_AGENTS_BASE_DIR;
   }
-  const modernPath = new URL("../../../../harness/packages/preset/agent-presets/presets", import.meta.url).pathname;
+  const modernPath = new URL(
+    "../../../../harness/packages/preset/agent-presets/presets",
+    import.meta.url,
+  ).pathname;
   if (existsSync(modernPath)) {
     return modernPath;
   }
-  const legacyPath = new URL("../../../../harness/apps/cli/config/agent-presets", import.meta.url).pathname;
+  const legacyPath = new URL("../../../../harness/apps/cli/config/agent-presets", import.meta.url)
+    .pathname;
   if (existsSync(legacyPath)) {
     return legacyPath;
   }
