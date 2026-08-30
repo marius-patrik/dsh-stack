@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "kind": "pack",
   "description": "Claude/Anthropic provider routes and the Claude skin, bundled as one vendor pack.",
-  "files": [
-    "package.json",
-    "stack.json",
-    "README.md"
-  ],
+  "files": ["package.json", "stack.json", "README.md"],
   "dependencies": [
     "stack.ai.provider.claude-sub",
     "stack.ai.provider.anthropic-api",

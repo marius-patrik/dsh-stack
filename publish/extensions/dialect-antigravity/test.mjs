@@ -12,9 +12,14 @@ const opts = {
     { role: "user", content: [{ type: "text", text: "second" }] },
   ],
 };
-const req = antigravityDialect.serialize(opts, auth, "https://cloudcode-pa.googleapis.com/v1internal", {
-  maxTokens: 64,
-});
+const req = antigravityDialect.serialize(
+  opts,
+  auth,
+  "https://cloudcode-pa.googleapis.com/v1internal",
+  {
+    maxTokens: 64,
+  },
+);
 // The method is what separates the subscription pool from the free tier.
 assert.equal(req.url, "https://cloudcode-pa.googleapis.com/v1internal:streamGenerateChat");
 const body = JSON.parse(req.body);
