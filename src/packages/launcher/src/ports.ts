@@ -4,6 +4,28 @@ import { join } from "node:path";
 /** Fallback port when neither the profile patch nor the server log pins one. */
 export const DEFAULT_PORT = 3080;
 
+const GATEWAY_PATTERN = /dsh gateway:\s*https?:\/\/[^\s:/]+:(\d+)/g;
+const WEB_PATTERN = /dsh web:\s*https?:\/\/[^\s:/]+:(\d+)/g;
+
+/** Last valid port captured by `pattern` in the log, or null. */
+function parseLastPort(logText: string, pattern: RegExp): number | null {
+  let port: number | null = null;
+  for (const match of logText.matchAll(pattern)) {
+    const parsed = Number(match[1]);
+    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) port = parsed;
+  }
+  return port;
+}
+
+/**
+ * Parse the gateway/API port from the log: the last valid
+ * `dsh gateway: http://<host>:<port>` line wins. Returns null when the log
+ * holds no such line.
+ */
+export function parseGatewayPort(logText: string): number | null {
+  return parseLastPort(logText, GATEWAY_PATTERN);
+}
+
 /**
  * Parse the port the web server actually bound from its own startup output.
  * `@dsh-stack/hosts` prints a `dsh gateway: http://127.0.0.1:<port>` line
@@ -15,19 +37,7 @@ export const DEFAULT_PORT = 3080;
  * last one wins. Returns null when neither line is present.
  */
 export function parseBoundPort(logText: string): number | null {
-  let webPort: number | null = null;
-  const gatewayPattern = /dsh gateway:\s*https?:\/\/[^\s:/]+:(\d+)/g;
-  for (const match of logText.matchAll(gatewayPattern)) {
-    const parsed = Number(match[1]);
-    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) webPort = parsed;
-  }
-  if (webPort !== null) return webPort;
-  const legacyPattern = /dsh web:\s*https?:\/\/[^\s:/]+:(\d+)/g;
-  for (const match of logText.matchAll(legacyPattern)) {
-    const parsed = Number(match[1]);
-    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) webPort = parsed;
-  }
-  return webPort;
+  return parseGatewayPort(logText) ?? parseLastPort(logText, WEB_PATTERN);
 }
 
 /**
@@ -62,19 +72,26 @@ export function readProfilePort(home: string, profile: string): number | null {
 
 /**
  * Resolve the port the web server is expected on, for status/stop checks:
- * the profile patch is the current declarative config and wins; the last
- * bound port in the log covers servers started with a non-default port and no
- * patch; DEFAULT_PORT is the final fallback.
+ * a `dsh gateway` line in the log is runtime truth — it names the port
+ * external consumers actually reach, which the profile patch cannot know
+ * after a restart on a different gateway port — so it wins over everything
+ * (dsh-stack#182); the profile patch is next; the last bound port in the log
+ * covers servers started with a non-default port and no patch; DEFAULT_PORT
+ * is the final fallback.
  */
 export function resolvePort(home: string, profile: string, logFile: string): number {
-  const patched = readProfilePort(home, profile);
-  if (patched !== null) return patched;
+  let logText = "";
   try {
-    const fromLog = parseBoundPort(readFileSync(logFile, "utf8"));
-    if (fromLog !== null) return fromLog;
+    logText = readFileSync(logFile, "utf8");
   } catch {
     /* no log yet */
   }
+  const gateway = parseGatewayPort(logText);
+  if (gateway !== null) return gateway;
+  const patched = readProfilePort(home, profile);
+  if (patched !== null) return patched;
+  const fromLog = parseBoundPort(logText);
+  if (fromLog !== null) return fromLog;
   return DEFAULT_PORT;
 }
 

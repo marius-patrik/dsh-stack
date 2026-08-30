@@ -149,6 +149,20 @@ assert.equal(startPortHint(homeB, "web"), 3081);
 assert.equal(startPortHint(homeB, "headless"), 3080);
 console.log("resolvePort/startPortHint ok");
 
+// resolvePort: a dsh gateway line in the log is runtime truth about the port
+// external consumers actually reach, so it wins even over a pinned profile
+// port (dsh-stack#182). A plain dsh-web line still defers to the profile pin.
+const gatewayLogFile = join(root, "dsh-gateway.log");
+writeFileSync(
+  gatewayLogFile,
+  "dsh web: http://127.0.0.1:3090\ndsh gateway: http://127.0.0.1:3080\n",
+);
+assert.equal(resolvePort(homeB, "web", gatewayLogFile), 3080);
+writeFileSync(gatewayLogFile, "dsh gateway: http://127.0.0.1:3080\n");
+assert.equal(resolvePort(homeB, "web", gatewayLogFile), 3080);
+rmSync(gatewayLogFile);
+console.log("resolvePort gateway-line-over-pin ok");
+
 // route: lifecycle, logs, package verbs, passthrough, dsh-restart alias,
 // dsh-tweaks.command default.
 assert.deepEqual(route(["restart"], { invokedName: "dsh" }), {
