@@ -31,11 +31,7 @@
     },
     "client": {
       "inject": [
-        "slots",
-        "locale",
-        "layout",
-        "workspaces",
-        "connection"
+        "@deepseek-ai/dsh-client-ui-primitives"
       ],
       "platform": "web",
       "immediately": false
