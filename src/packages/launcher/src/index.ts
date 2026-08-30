@@ -4,6 +4,7 @@ export { resolveHome, migrateHome } from "./home.js";
 export {
   DEFAULT_PORT,
   parseBoundPort,
+  parseGatewayPort,
   readProfilePort,
   resolvePort,
   startPortHint,
