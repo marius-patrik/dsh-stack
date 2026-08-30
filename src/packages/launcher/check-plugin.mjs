@@ -95,6 +95,22 @@ assert.equal(parseBoundPort("nothing bound yet"), null);
 assert.equal(parseBoundPort("dsh web: http://127.0.0.1:99999"), null);
 console.log("parseBoundPort ok");
 
+// parseBoundPort: dsh gateway line (the real API/proxy port) always wins over
+// the harness's own dsh-web line (the web-asset port), regardless of order.
+assert.equal(
+  parseBoundPort("dsh web: http://127.0.0.1:3081\ndsh gateway: http://127.0.0.1:3080\n"),
+  3080,
+);
+assert.equal(
+  parseBoundPort("dsh gateway: http://127.0.0.1:3080\ndsh web: http://127.0.0.1:3081\n"),
+  3080,
+);
+assert.equal(
+  parseBoundPort("dsh gateway: http://127.0.0.1:3080\ndsh gateway: http://127.0.0.1:3082\n"),
+  3082,
+);
+console.log("parseBoundPort gateway-line precedence ok");
+
 // readProfilePort: webserver entry of the profile patch.
 mkdirSync(join(homeB, "profiles", "web"), { recursive: true });
 writeFileSync(
@@ -132,6 +148,20 @@ assert.equal(resolvePort(homeB, "bare", logFile), 3080);
 assert.equal(startPortHint(homeB, "web"), 3081);
 assert.equal(startPortHint(homeB, "headless"), 3080);
 console.log("resolvePort/startPortHint ok");
+
+// resolvePort: a dsh gateway line in the log is runtime truth about the port
+// external consumers actually reach, so it wins even over a pinned profile
+// port (dsh-stack#182). A plain dsh-web line still defers to the profile pin.
+const gatewayLogFile = join(root, "dsh-gateway.log");
+writeFileSync(
+  gatewayLogFile,
+  "dsh web: http://127.0.0.1:3090\ndsh gateway: http://127.0.0.1:3080\n",
+);
+assert.equal(resolvePort(homeB, "web", gatewayLogFile), 3080);
+writeFileSync(gatewayLogFile, "dsh gateway: http://127.0.0.1:3080\n");
+assert.equal(resolvePort(homeB, "web", gatewayLogFile), 3080);
+rmSync(gatewayLogFile);
+console.log("resolvePort gateway-line-over-pin ok");
 
 // route: lifecycle, logs, package verbs, passthrough, dsh-restart alias,
 // dsh-tweaks.command default.
