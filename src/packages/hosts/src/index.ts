@@ -5,7 +5,7 @@
 
 import { Service, type Context } from "@deepseek-ai/cordis";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { scanTailscaleTopology } from "./tailscale.js";
+import { scanTailscaleTopology, syncTailscaleServe } from "./tailscale.js";
 import { getPrimaryLanIp } from "./local-interfaces.js";
 import { AccessGateway } from "./gateway.js";
 import { ClusterManager } from "./cluster.js";
@@ -18,11 +18,20 @@ export * from "./types.js";
 export * from "./github-actions-runner.js";
 
 export const name = "hosts";
-export const inject = ["webServer"];
+export const inject = ["webServer", "loader"];
+
+interface CordisLoaderEntry {
+  name: string;
+}
+
+interface CordisLoaderService {
+  create(entry: CordisLoaderEntry): Promise<unknown>;
+}
 
 declare module "@deepseek-ai/cordis" {
   interface Context {
     hosts: HostsService;
+    loader?: CordisLoaderService;
   }
 }
 
@@ -44,6 +53,15 @@ export class HostsService extends Service implements IHostsService {
     const access = this.getAccessConfig();
     this.gateway = new AccessGateway(access);
     void this.domainManager.registerMdns();
+    void syncTailscaleServe(access.gatewayPort);
+
+    const loader = ctx.get("loader") as CordisLoaderService | undefined;
+    if (loader && typeof loader.create === "function") {
+      void loader.create({ name: "@deepseek-ai/dsh-host-directory-picker-browse" }).catch(() => {});
+      void loader
+        .create({ name: "@deepseek-ai/dsh-client-ui-directory-picker-browse" })
+        .catch(() => {});
+    }
 
     const server = ctx.get("webServer");
     if (server) {

@@ -53,6 +53,7 @@ export class AccessGateway {
           const headers: http.OutgoingHttpHeaders = { ...clientReq.headers };
           headers.host = loopbackHost;
           if (headers.origin) headers.origin = loopbackOrigin;
+          headers["sec-fetch-site"] = "same-origin";
           delete headers["accept-encoding"]; // prevent gzip so HTML modification works cleanly
 
           const options: http.RequestOptions = {
@@ -116,7 +117,8 @@ export class AccessGateway {
             const key = rawHeaders[i]!;
             let val = rawHeaders[i + 1]!;
             if (key.toLowerCase() === "host") val = loopbackHost;
-            if (key.toLowerCase() === "origin") val = loopbackOrigin;
+            else if (key.toLowerCase() === "origin") val = loopbackOrigin;
+            else if (key.toLowerCase() === "sec-fetch-site") val = "same-origin";
             headers += `${key}: ${val}\r\n`;
           }
           headers += "\r\n";
