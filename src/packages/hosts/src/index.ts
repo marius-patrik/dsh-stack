@@ -58,7 +58,9 @@ export class HostsService extends Service implements IHostsService {
     const loader = ctx.get("loader") as CordisLoaderService | undefined;
     if (loader && typeof loader.create === "function") {
       void loader.create({ name: "@deepseek-ai/dsh-host-directory-picker-browse" }).catch(() => {});
-      void loader.create({ name: "@deepseek-ai/dsh-client-ui-directory-picker-browse" }).catch(() => {});
+      void loader
+        .create({ name: "@deepseek-ai/dsh-client-ui-directory-picker-browse" })
+        .catch(() => {});
     }
 
     const server = ctx.get("webServer");
