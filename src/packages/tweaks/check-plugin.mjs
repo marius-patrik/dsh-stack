@@ -3,7 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
+import {
+  assertClientInjectIsPackageIds,
+  assertLoaderShape,
+} from "../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "tweaks-"));
 process.env.HOME = root;
@@ -16,6 +19,10 @@ const { readTweaksSection, writeTweaksSection, normalizeSection, sectionsEqual }
 
 assertLoaderShape(plugin, "tweaks");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
+
+const manifest = JSON.parse(readFileSync(join(import.meta.dirname, "package.json"), "utf8"));
+assertClientInjectIsPackageIds(manifest.dsh.client.inject, manifest.name);
+console.log("dsh.client.inject is package ids ok:", JSON.stringify(manifest.dsh.client.inject));
 
 const home = join(root, ".agents");
 const base = {
