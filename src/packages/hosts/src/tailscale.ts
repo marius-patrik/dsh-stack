@@ -142,3 +142,18 @@ export async function scanTailscaleTopology(): Promise<{
     return { self: null, peers: [], active: false };
   }
 }
+
+/**
+ * Ensures Tailscale Serve proxies the HTTPS address to the local AccessGateway port.
+ */
+export async function syncTailscaleServe(gatewayPort: number): Promise<boolean> {
+  try {
+    await execFileAsync("tailscale", ["serve", "--bg", "--https=443", String(gatewayPort)], {
+      timeout: 5000,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
