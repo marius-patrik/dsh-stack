@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as plugin from "./lib/index.js";
-import { assertClientInjectIsPackageIds, assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
+import {
+  assertClientInjectIsPackageIds,
+  assertLoaderShape,
+} from "../../scripts/plugin-check-kit.mjs";
 
 assertLoaderShape(plugin, "agent-loops");
 

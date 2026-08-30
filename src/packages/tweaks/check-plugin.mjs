@@ -3,7 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertClientInjectIsPackageIds, assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
+import {
+  assertClientInjectIsPackageIds,
+  assertLoaderShape,
+} from "../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "tweaks-"));
 process.env.HOME = root;
