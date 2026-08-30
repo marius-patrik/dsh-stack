@@ -19,6 +19,7 @@
  * @module agents/sync
  */
 
+import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile, rename } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { join } from "node:path";
@@ -52,7 +53,7 @@ export interface SyncReport {
 
 /**
  * The shipped preset root: `DSH_AGENTS_BASE_DIR` when set, else the
- * `harness/apps/cli/config/agent-presets` tree beside this package's
+ * `harness/packages/preset/agent-presets/presets` tree beside this package's
  * checkout (four levels up from `lib/`, since packages now live under
  * `src/`). Returns undefined when neither
  * resolves, which degrades materialization to the bare persona row.
@@ -61,7 +62,15 @@ export function basePresetDir(): string | undefined {
   if (process.env.DSH_AGENTS_BASE_DIR !== undefined && process.env.DSH_AGENTS_BASE_DIR !== "") {
     return process.env.DSH_AGENTS_BASE_DIR;
   }
-  return new URL("../../../../harness/apps/cli/config/agent-presets", import.meta.url).pathname;
+  const modernPath = new URL("../../../../harness/packages/preset/agent-presets/presets", import.meta.url).pathname;
+  if (existsSync(modernPath)) {
+    return modernPath;
+  }
+  const legacyPath = new URL("../../../../harness/apps/cli/config/agent-presets", import.meta.url).pathname;
+  if (existsSync(legacyPath)) {
+    return legacyPath;
+  }
+  return modernPath;
 }
 
 /** Read a base preset's composition text, or undefined when unreadable. */
