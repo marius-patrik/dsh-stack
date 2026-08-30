@@ -8,7 +8,6 @@
 import { sendJsonResponse } from "@dsh-stack/plugin-kit";
 import type { QuotaRegistry, QuotaSnapshot } from "../index.js";
 import { probeBinariesAndUsage } from "./binary-probe.js";
-import { renderDashboard } from "./dashboard-render.js";
 import { QUOTAS_PREFIX } from "./quotas-prefix.js";
 import { isRoute, type RouteContext } from "./route-context.js";
 
@@ -25,9 +24,10 @@ export async function handleQuotaRoute(
   }
 
   if (isRoute(ctx, QUOTAS_PREFIX, "GET")) {
-    const snapshots = registry.all();
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
-    res.end(renderDashboard(snapshots));
+    sendJsonResponse(res, 200, {
+      message: "Quotas dashboard is consolidated into Settings > Providers / Models. Live data available at /quotas/api/snapshots",
+      snapshots: registry.all(),
+    });
     return true;
   }
 
