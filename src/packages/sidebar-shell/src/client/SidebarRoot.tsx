@@ -36,6 +36,7 @@ export function SidebarRoot({
       style={{
         width: contentWidth,
         minWidth: contentWidth,
+        maxWidth: contentWidth,
         height: "100%",
         display: "flex",
         flexDirection: "column",
