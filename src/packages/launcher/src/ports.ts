@@ -6,18 +6,28 @@ export const DEFAULT_PORT = 3080;
 
 /**
  * Parse the port the web server actually bound from its own startup output.
- * The server prints a line like `dsh web: http://127.0.0.1:3081`; when the log
- * holds several (across restarts) the last one wins. Returns null when no
- * bound-port line is present.
+ * `@dsh-stack/hosts` prints a `dsh gateway: http://127.0.0.1:<port>` line
+ * naming the gateway/API port that external consumers (Tailscale serve, the
+ * documented default) actually need; when present it always wins over the
+ * harness's own `dsh web: http://<host>:<port>` line, which names the
+ * web-asset port instead and has caused real confusion (dsh-stack#182).
+ * When the log holds several of the same kind of line (across restarts) the
+ * last one wins. Returns null when neither line is present.
  */
 export function parseBoundPort(logText: string): number | null {
-  let port: number | null = null;
-  const pattern = /dsh web:\s*https?:\/\/[^\s:/]+:(\d+)/g;
-  for (const match of logText.matchAll(pattern)) {
+  let webPort: number | null = null;
+  const gatewayPattern = /dsh gateway:\s*https?:\/\/[^\s:/]+:(\d+)/g;
+  for (const match of logText.matchAll(gatewayPattern)) {
     const parsed = Number(match[1]);
-    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) port = parsed;
+    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) webPort = parsed;
   }
-  return port;
+  if (webPort !== null) return webPort;
+  const legacyPattern = /dsh web:\s*https?:\/\/[^\s:/]+:(\d+)/g;
+  for (const match of logText.matchAll(legacyPattern)) {
+    const parsed = Number(match[1]);
+    if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) webPort = parsed;
+  }
+  return webPort;
 }
 
 /**

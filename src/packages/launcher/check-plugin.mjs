@@ -95,6 +95,22 @@ assert.equal(parseBoundPort("nothing bound yet"), null);
 assert.equal(parseBoundPort("dsh web: http://127.0.0.1:99999"), null);
 console.log("parseBoundPort ok");
 
+// parseBoundPort: dsh gateway line (the real API/proxy port) always wins over
+// the harness's own dsh-web line (the web-asset port), regardless of order.
+assert.equal(
+  parseBoundPort("dsh web: http://127.0.0.1:3081\ndsh gateway: http://127.0.0.1:3080\n"),
+  3080,
+);
+assert.equal(
+  parseBoundPort("dsh gateway: http://127.0.0.1:3080\ndsh web: http://127.0.0.1:3081\n"),
+  3080,
+);
+assert.equal(
+  parseBoundPort("dsh gateway: http://127.0.0.1:3080\ndsh gateway: http://127.0.0.1:3082\n"),
+  3082,
+);
+console.log("parseBoundPort gateway-line precedence ok");
+
 // readProfilePort: webserver entry of the profile patch.
 mkdirSync(join(homeB, "profiles", "web"), { recursive: true });
 writeFileSync(
