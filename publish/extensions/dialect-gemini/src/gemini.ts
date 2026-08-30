@@ -9,8 +9,8 @@
 
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";
 import type { CallId, ContentBlock, GenerateOptions, Message } from "@deepseek-ai/dsh-llm";
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
-import { parseNdjson } from "./ndjson.js";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "@dsh-stack/dialects";
+import { parseNdjson } from "@dsh-stack/dialects";
 import { translateGemini } from "./translate-gemini.js";
 
 /** One Gemini content part. */
@@ -27,7 +27,7 @@ export interface WireContent {
 
 /** The request body for a `:streamGenerateContent` call. */
 // jscpd:ignore-start -- structurally similar to claude.ts's request-shaping block but encodes Gemini-specific wire semantics; forcing a shared helper would blur real per-dialect differences
-export interface WireRequestBody {
+interface WireRequestBody {
   systemInstruction?: { parts: [{ text: string }] };
   contents: WireContent[];
   tools?: Array<{

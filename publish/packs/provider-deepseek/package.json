@@ -27,6 +27,8 @@
   },
   "dependencies": {
     "@dsh-stack/provider-deepseek-api": "workspace:*",
-    "@dsh-stack/skin-deepseek": "workspace:*"
+    "@dsh-stack/skin-deepseek": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-openai": "workspace:*"
   }
 }

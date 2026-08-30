@@ -11,23 +11,23 @@
 
 import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";
 import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from "@deepseek-ai/dsh-llm";
-import { DONE } from "./sse.js";
+import { DONE } from "@dsh-stack/dialects";
 
 /** One streamed choice; `finish_reason` is non-null only on its terminal chunk. */
-export interface WireChoice {
+interface WireChoice {
   delta?: WireDelta;
   finish_reason?: string | null;
 }
 
 /** The incremental content of one streamed choice; any subset of fields may be present per chunk. */
-export interface WireDelta {
+interface WireDelta {
   content?: string | null;
   reasoning_content?: string | null;
   tool_calls?: WireToolCallDelta[];
 }
 
 /** A streamed fragment of one tool call; fragments sharing an `index` concatenate into one call. */
-export interface WireToolCallDelta {
+interface WireToolCallDelta {
   /** Disambiguates parallel tool calls; stable across a call's deltas. */
   index: number;
   /** Present on the first delta of each call only. */
@@ -42,7 +42,7 @@ export interface WireToolCallDelta {
 }
 
 /** One parsed chat.completion.chunk payload. */
-export interface WireChunk {
+interface WireChunk {
   choices?: WireChoice[];
   /** Arrives attached to the finish chunk and/or as a trailing usage-only chunk. */
   usage?: WireUsage | null;
@@ -53,7 +53,7 @@ export interface WireChunk {
  * reports a cached count; `mapUsage` subtracts them to keep the harness
  * convention of disjoint counts.
  */
-export interface WireUsage {
+interface WireUsage {
   prompt_tokens?: number;
   completion_tokens?: number;
   prompt_cache_hit_tokens?: number;

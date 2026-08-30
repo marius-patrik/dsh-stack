@@ -5,6 +5,6 @@
   "kind": "pack",
   "description": "vLLM local-inference provider route.",
   "files": ["package.json", "stack.json", "README.md"],
-  "dependencies": ["stack.ai.provider.vllm"],
+  "dependencies": ["stack.ai.provider.vllm", "stack.ai.dialects", "stack.ai.dialect.openai"],
   "optionalDependencies": []
 }

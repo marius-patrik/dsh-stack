@@ -23,7 +23,7 @@
 
 import { LlmError } from "@deepseek-ai/dsh-llm";
 import type { GenerateOptions, StreamChunk, TokenUsage } from "@deepseek-ai/dsh-llm";
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "@dsh-stack/dialects";
 
 /**
  * Header carrying the Cloud AI Companion project this account chats under.
@@ -90,7 +90,7 @@ function count(value: string | number | undefined): number | undefined {
  * @param options - the harness request.
  * @returns the scalar turn and the preceding entries.
  */
-export function splitConversation(options: GenerateOptions): {
+function splitConversation(options: GenerateOptions): {
   userMessage: string;
   history: WireHistoryEntry[];
 } {

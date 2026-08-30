@@ -14,25 +14,25 @@ import { CallId, EMPTY_RESPONSE_CODE, LlmError } from "@deepseek-ai/dsh-llm";
 import type { ContentBlock, FinishReason, StreamChunk, TokenUsage } from "@deepseek-ai/dsh-llm";
 
 /** A `functionCall` part; `args` is a complete object (Gemini never streams it incrementally). */
-export interface WireGeminiFunctionCall {
+interface WireGeminiFunctionCall {
   name?: string;
   args?: Record<string, unknown>;
 }
 
 /** One candidate content part. */
-export interface WireGeminiPart {
+interface WireGeminiPart {
   text?: string;
   functionCall?: WireGeminiFunctionCall;
 }
 
 /** One candidate of a payload; text parts grow cumulatively across payloads. */
-export interface WireGeminiCandidate {
+interface WireGeminiCandidate {
   content?: { role?: string; parts?: WireGeminiPart[] };
   finishReason?: string;
 }
 
 /** One parsed NDJSON payload. `alternatives` is the older spelling of `candidates`. */
-export interface WireGeminiChunk {
+interface WireGeminiChunk {
   candidates?: WireGeminiCandidate[];
   alternatives?: WireGeminiCandidate[];
   usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };

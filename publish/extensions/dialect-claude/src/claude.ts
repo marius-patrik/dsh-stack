@@ -10,8 +10,8 @@
 
 import { contentHasImage, LlmError } from "@deepseek-ai/dsh-llm";
 import type { ContentBlock, GenerateOptions, Message } from "@deepseek-ai/dsh-llm";
-import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "./types.js";
-import { parseSseEvents } from "./sse.js";
+import type { Dialect, DialectAuth, DialectDefaults, WireRequest } from "@dsh-stack/dialects";
+import { parseSseEvents } from "@dsh-stack/dialects";
 import { translateClaude } from "./translate-claude.js";
 
 /** One Anthropic content part. */
@@ -27,14 +27,14 @@ interface WireMessage {
 }
 
 /** One entry of the request `tools` array. */
-export interface WireTool {
+interface WireTool {
   name: string;
   description: string;
   input_schema: Record<string, unknown>;
 }
 
 /** The request body for `POST {baseURL}/messages`. */
-export interface WireRequestBody {
+interface WireRequestBody {
   model: string;
   system?: string | readonly WireSystemBlock[];
   thinking?: { type: "enabled"; budget_tokens: number };
@@ -145,7 +145,7 @@ function stripTrailingSlash(base: string): string {
  * @param auth - the resolved credential for this request.
  * @returns the `system` field to spread into the body, or nothing.
  */
-export function serializeSystem(
+function serializeSystem(
   system: string | undefined,
   auth: DialectAuth,
 ): { system?: string | readonly WireSystemBlock[] } {
@@ -210,7 +210,7 @@ const ANSWER_HEADROOM = 1_024;
  * @param maxTokens - the output cap this request will carry.
  * @returns the `thinking` field to spread into the body, or nothing.
  */
-export function serializeThinking(
+function serializeThinking(
   effort: string | undefined,
   maxTokens: number,
 ): { thinking?: { type: "enabled"; budget_tokens: number } } {

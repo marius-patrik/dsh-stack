@@ -3,7 +3,7 @@
   "name": "@dsh-stack/dialects",
   "version": "0.1.0",
   "kind": "plugin",
-  "description": "Provider wire dialects (openai, claude, gemini, code-assist) for DeepSeek Harness LLM adapters.",
+  "description": "The provider-wire-dialect abstraction: registers the `ctx.dialects` registry that concrete dialect extensions (`@dsh-stack/dialect-openai`, `-claude`, `-gemini`, `-code-assist`, `-antigravity`) plug into.",
   "files": ["lib", "README.md", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []

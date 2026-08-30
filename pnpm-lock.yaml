@@ -63,6 +63,89 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  publish/extensions/dialect-antigravity:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+    devDependencies:
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.1.1-rc.2
+        version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-attachment@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))(@deepseek-ai/dsh-timeout@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  publish/extensions/dialect-claude:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+    devDependencies:
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.1.1-rc.2
+        version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-attachment@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))(@deepseek-ai/dsh-timeout@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  publish/extensions/dialect-code-assist:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-gemini':
+        specifier: workspace:*
+        version: link:../dialect-gemini
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+    devDependencies:
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.1.1-rc.2
+        version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-attachment@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))(@deepseek-ai/dsh-timeout@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  publish/extensions/dialect-gemini:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+    devDependencies:
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.1.1-rc.2
+        version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-attachment@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))(@deepseek-ai/dsh-timeout@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  publish/extensions/dialect-openai:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+    devDependencies:
+      '@deepseek-ai/dsh-llm':
+        specifier: 0.1.1-rc.2
+        version: 0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-attachment@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-brand@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1))(@deepseek-ai/dsh-timeout@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)(@deepseek-ai/dsh-invariants@0.1.1-rc.2(@deepseek-ai/cordis@4.0.1)))
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   publish/extensions/lucide-animated:
     dependencies:
       '@dsh-stack/icon-engine':
@@ -110,13 +193,16 @@ importers:
 
   publish/extensions/provider-antigravity-sub:
     dependencies:
-      '@dsh-stack/dialects':
+      '@dsh-stack/dialect-antigravity':
         specifier: workspace:*
-        version: link:../../../src/packages/dialects
+        version: link:../dialect-antigravity
       '@dsh-stack/providers':
         specifier: workspace:*
         version: link:../../../src/packages/providers
     devDependencies:
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -767,6 +853,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-claude':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-claude
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-anthropic-api':
         specifier: workspace:*
         version: link:../../extensions/provider-anthropic-api
@@ -782,6 +874,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-openai-api':
         specifier: workspace:*
         version: link:../../extensions/provider-openai-api
@@ -794,6 +892,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-deepseek-api':
         specifier: workspace:*
         version: link:../../extensions/provider-deepseek-api
@@ -806,6 +910,18 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-antigravity':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-antigravity
+      '@dsh-stack/dialect-code-assist':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-code-assist
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-antigravity-sub':
         specifier: workspace:*
         version: link:../../extensions/provider-antigravity-sub
@@ -821,6 +937,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-grok-api':
         specifier: workspace:*
         version: link:../../extensions/provider-grok-api
@@ -833,6 +955,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-groq-api':
         specifier: workspace:*
         version: link:../../extensions/provider-groq-api
@@ -842,6 +970,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-kimi-code':
         specifier: workspace:*
         version: link:../../extensions/provider-kimi-code
@@ -854,6 +988,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-llamacpp':
         specifier: workspace:*
         version: link:../../extensions/provider-llamacpp
@@ -863,6 +1003,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-mistral-api':
         specifier: workspace:*
         version: link:../../extensions/provider-mistral-api
@@ -872,6 +1018,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-ollama':
         specifier: workspace:*
         version: link:../../extensions/provider-ollama
@@ -881,6 +1033,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-openrouter-api':
         specifier: workspace:*
         version: link:../../extensions/provider-openrouter-api
@@ -890,6 +1048,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-vllm':
         specifier: workspace:*
         version: link:../../extensions/provider-vllm
@@ -899,6 +1063,12 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
       '@dsh-stack/provider-zen':
         specifier: workspace:*
         version: link:../../extensions/provider-zen
@@ -1337,6 +1507,9 @@ importers:
       '@dsh-stack/credential-vault':
         specifier: workspace:*
         version: link:../credential-vault
+      '@dsh-stack/dialect-antigravity':
+        specifier: workspace:*
+        version: link:../../../publish/extensions/dialect-antigravity
       '@dsh-stack/dialects':
         specifier: workspace:*
         version: link:../dialects
