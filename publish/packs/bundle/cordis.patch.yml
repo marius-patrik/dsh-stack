@@ -35,6 +35,10 @@
       name: '@dsh-stack/icon-engine'
     - id: lsp
       name: '@dsh-stack/lsp'
+    - id: marketplace
+      name: '@dsh-stack/marketplace'
+    - id: marketplace-source-dsh-stack
+      name: '@dsh-stack/marketplace-source-dsh-stack'
     - id: profile-ui
       name: '@dsh-stack/profile-ui'
     - id: provider-rotation
