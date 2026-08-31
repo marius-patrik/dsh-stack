@@ -13,10 +13,7 @@ const source = readFileSync(join(dir, "client-tab-move-protocol.js"), "utf8");
  * logic here, so this test exercises exactly what ships.
  */
 function loadProtocol(target) {
-  const factory = new Function(
-    "target",
-    `${source}\nreturn __dshCreateTabMoveProtocol(target);`,
-  );
+  const factory = new Function("target", `${source}\nreturn __dshCreateTabMoveProtocol(target);`);
   return factory(target);
 }
 

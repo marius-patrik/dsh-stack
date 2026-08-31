@@ -49,9 +49,7 @@ function __dshCreateTabMoveProtocol(target) {
    */
   function takeOwnership(area, tab) {
     if (!target || !surfaceHostsTab(area, tab)) return false;
-    target.dispatchEvent(
-      new CustomEvent(COMMITTED_EVENT, { detail: { id: tab.id, area: area } }),
-    );
+    target.dispatchEvent(new CustomEvent(COMMITTED_EVENT, { detail: { id: tab.id, area: area } }));
     return true;
   }
 
