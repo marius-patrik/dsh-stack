@@ -16,7 +16,7 @@
     "verify:jsdocs": "node src/scripts/verify-jsdocs.mjs",
     "verify:duplicates": "jscpd src/packages publish/extensions publish/packs publish/plugins src/scripts",
     "verify:dead-code": "knip --no-progress",
-    "verify": "pnpm run verify:plugin-readmes && pnpm run verify:jsdocs && pnpm run verify:duplicates && pnpm run verify:jscpd-exemptions && pnpm run verify:dead-code && pnpm run verify:reachability && pnpm run verify:non-cordis-exclusions && node src/scripts/verify-stack.mjs && pnpm -r --if-present --workspace-concurrency=16 verify",
+    "verify": "pnpm run verify:plugin-readmes && pnpm run verify:jsdocs && pnpm run verify:duplicates && pnpm run verify:jscpd-exemptions && pnpm run verify:dead-code && pnpm run verify:reachability && pnpm run verify:non-cordis-exclusions && pnpm run verify:stateful-client-packages && node src/scripts/verify-stack.mjs && pnpm -r --if-present --workspace-concurrency=16 verify",
     "test": "node --test 'src/scripts/**/*.test.mjs' && pnpm -r --if-present --workspace-concurrency=16 test",
     "release:manifest": "node src/scripts/release.mjs manifest",
     "release:version": "node src/scripts/release.mjs version",
@@ -24,6 +24,7 @@
     "release:verify": "node src/scripts/verify-release-assets.mjs",
     "verify:reachability": "node src/scripts/verify-package-reachability.mjs",
     "verify:non-cordis-exclusions": "node src/scripts/verify-non-cordis-exclusions.mjs",
+    "verify:stateful-client-packages": "node src/scripts/verify-stateful-client-packages.mjs",
     "verify:jscpd-exemptions": "node src/scripts/verify-jscpd-exemptions.mjs"
   },
   "devDependencies": {
