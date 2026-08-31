@@ -22,9 +22,14 @@
 // The shell CSS ships as a claimed <style> block (prefixed class names); the
 // module system's claimStyles machinery owns untagged <style> tags injected
 // during materialization. Only platform seed words are required (react,
-// ui-primitives, ui-slots, web-react) — no cross-package value imports, no
+// ui-primitives, ui-slots) — no cross-package value imports, no
 // dsh-client-runtime/client, so the document action re-implements its state
-// as a hand-rolled observable over the connection api.
+// as a hand-rolled observable over the connection api. The uSES selector
+// bridge (bindSnapshotSelector) is inlined locally too: harness merged the
+// package that used to export it (@deepseek-ai/dsh-client-web-react) into
+// dsh-client-ui-renderer without re-exporting the helper publicly, so this
+// file carries its own copy over React's built-in useSyncExternalStore
+// rather than depend on an internal harness path.
 //
 // Re-running the bundle (HMR / entry refresh) is idempotent through the slot
 // ledger and the style-tag guard.
@@ -682,8 +687,31 @@ window.__ModuleLoader__.load({
     if (typeof window !== "undefined") window.__dsh_P = P;
     var slotsModule = require("@deepseek-ai/dsh-client-ui-slots");
     var resolveSlotLabel = slotsModule.resolveSlotLabel;
-    var webReact = require("@deepseek-ai/dsh-client-web-react");
-    var bindSnapshotSelector = webReact.bindSnapshotSelector;
+    /**
+     * Bind a bare {subscribe, getSnapshot} observable to a typed uSES
+     * selector hook, over React's built-in useSyncExternalStore. Mirrors
+     * dsh-client-ui-renderer's internal (unexported) bindSnapshotSelector.
+     */
+    function bindSnapshotSelector(w) {
+      /** subscribe implementation. */
+      var subscribe = function (fn) {
+        return w.subscribe(fn);
+      };
+      return function useSelector(sel, eq) {
+        var isEqual = eq || Object.is;
+        var cacheRef = React.useRef(null);
+        /** getSelection implementation. */
+        var getSelection = function () {
+          var next = sel(w.getSnapshot());
+          if (cacheRef.current !== null && isEqual(cacheRef.current, next)) {
+            return cacheRef.current;
+          }
+          cacheRef.current = next;
+          return next;
+        };
+        return React.useSyncExternalStore(subscribe, getSelection);
+      };
+    }
     var h = React.createElement;
     var Fragment = React.Fragment;
     var createGlyphComponent = __dshCreateGlyphComponent(h);
