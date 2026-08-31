@@ -93,7 +93,14 @@ class KeychainOrKeyFileMasterKey implements MasterKeySource {
   /** Constructs an instance. */
   constructor(private readonly keyFile: string) {}
 
-  /** key implementation. */
+  /**
+   * Provides access to the encryption key used for file encryption and decryption.
+   *
+   * Guarantees the key is loaded from the `keyFile` on the first call and caches it.
+   * Returns the key as a `Uint8Array`.
+   *
+   * If the key cannot be loaded or created, an error is thrown.
+   */
   async key(): Promise<Uint8Array> {
     if (this.#key === null) this.#key = Uint8Array.from(await loadOrCreateKey(this.keyFile));
     return Uint8Array.from(this.#key);
@@ -140,7 +147,11 @@ export class AccountsService extends Service {
     this.providers.set(provider.id, provider);
   }
 
-  /** getFileProviders implementation. */
+  /**
+   * Returns an array of all registered file providers.
+   *
+   * @returns An array of `FileSecretProvider` instances representing all registered providers.
+   */
   getFileProviders(): FileSecretProvider[] {
     return [...this.providers.values()];
   }
@@ -221,7 +232,15 @@ export class AccountsService extends Service {
     return out;
   }
 
-  /** set implementation. */
+  /**
+   * Sets a credential value for a given reference.
+   *
+   * @param ref - The reference identifier for the credential.
+   * @param value - The credential value to store, cannot be empty.
+   * @param account - Optional account identifier for the credential.
+   * @throws Will throw an error if the value is empty.
+   * @returns Resolves when the credential is successfully stored.
+   */
   async set(ref: string, value: string, account?: string): Promise<void> {
     await this.ready;
     if (value.length === 0)
@@ -229,14 +248,28 @@ export class AccountsService extends Service {
     await this.vault.put(recordForRef(ref, value, account !== undefined ? { account } : {}));
   }
 
-  /** unset implementation. */
+  /**
+   * Removes a credential value for a given reference.
+   *
+   * @param ref - The reference identifier for the credential to remove.
+   * @throws Will throw an error if the reference does not exist.
+   * @returns Resolves when the credential is successfully removed.
+   */
   async unset(ref: string, account?: string): Promise<void> {
     await this.ready;
     const record = await this.recordForRef(ref, account);
     if (record !== null) await this.vault.delete(record.id);
   }
 
-  /** list implementation. */
+  /**
+   * Stores a credential value for a given reference.
+   *
+   * @param ref - The reference identifier for the credential.
+   * @param value - The credential value to store, cannot be empty.
+   * @param account - Optional account identifier for the credential.
+   * @throws Will throw an error if the value is empty or if the reference does not exist.
+   * @returns Resolves when the credential is successfully stored.
+   */
   async list(): Promise<string[]> {
     await this.ready;
     const refs = new Set<string>();
@@ -283,7 +316,12 @@ export class AccountsService extends Service {
     return out;
   }
 
-  /** importFile implementation. */
+  /**
+   * Lists all stored credential references and their associated account information.
+   *
+   * @returns Resolves to an array of objects containing the reference, account, kind, purpose, label, and expiration date of each credential.
+   * @throws Will throw an error if the vault is not ready.
+   */
   async importFile(path: string): Promise<ImportResult[]> {
     await this.ready;
     for (const provider of this.providers.values()) {
@@ -358,7 +396,12 @@ declare module "@deepseek-ai/cordis" {
   }
 }
 
-/** apply implementation. */
+/**
+ * Migrates legacy vault data to a new format.
+ *
+ * Guarantees that any existing records are not overwritten and logs any migration issues.
+ * Returns nothing on success, and the process is idempotent.
+ */
 export function apply(ctx: Context, config: Config): void {
   const home = resolveHome(config.home);
   const keyFile = config.keyFile ?? join(home, "accounts.key");

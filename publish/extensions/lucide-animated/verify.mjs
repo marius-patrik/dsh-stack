@@ -56,11 +56,17 @@ const resolvedIcons = [
   "ContainerIcon",
   "PackageIcon",
   "LockKeyholeIcon",
+  "PanelLeftIcon",
+  "PaletteIcon",
+  "LayersIcon",
 ];
 
 for (const icon of resolvedIcons) assert.equal(typeof iconComponents[icon], "object");
 assert.equal(resolveIcon("ui:settings"), "SettingsIcon");
 assert.equal(resolveIcon("ui:search"), "SearchIcon");
+assert.equal(resolveIcon("ui:sidebar"), "PanelLeftIcon");
+assert.equal(resolveIcon("ui:palette"), "PaletteIcon");
+assert.equal(resolveIcon("ui:layers"), "LayersIcon");
 assert.equal(resolveIcon("extension:ts"), "FileCode2Icon");
 assert.equal(resolveIcon("folder:expanded:src"), "FolderOpenIcon");
 assert.equal(resolveIcon("file:unknown.bin"), "FileIcon");

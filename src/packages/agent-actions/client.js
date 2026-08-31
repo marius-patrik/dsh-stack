@@ -18,7 +18,15 @@ window.__ModuleLoader__.load({
      * slot ledger.
      */
     var MODES_ROUTE = "/actions";
-    /** SessionModesGlyph implementation. */
+    /**
+     * Renders a glyph representing session modes.
+     *
+     * The caller must provide a `size` prop to define the glyph's dimensions.
+     *
+     * Returns a React SVG element representing the session modes glyph.
+     *
+     * On failure, the function returns an SVG element with the specified size and style.
+     */
     function SessionModesGlyph(props) {
       var React = require("react");
       var size = (props && props.size) || 16;
@@ -46,7 +54,14 @@ window.__ModuleLoader__.load({
         React.createElement("line", { x1: "16", x2: "16", y1: "18", y2: "22" }),
       );
     }
-    /** SessionModesSection implementation. */
+    /**
+     * Displays session modes by fetching and rendering them.
+     *
+     * Guarantees: Renders lines based on the fetched session modes data.
+     *             Updates the displayed data when the payload changes.
+     *
+     * Failure Path: If the fetch operation is cancelled or fails, no data is displayed.
+     */
     function SessionModesSection(props) {
       var React = require("react");
       var h = React.createElement;
@@ -174,7 +189,13 @@ window.__ModuleLoader__.load({
         ),
       );
     }
-    /** apply implementation. */
+    /**
+     * Injects a settings section into the UI based on the provided context.
+     *
+     * Guarantees that the settings section is displayed with the mode and relevant parts joined by " · ".
+     * Returns null if no parts are generated.
+     * Fails gracefully by returning null if no parts are available.
+     */
     function apply(ctx) {
       ctx.slots.inject(
         "settings.section",

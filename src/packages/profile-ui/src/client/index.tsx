@@ -5,8 +5,12 @@ import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-setti
 import type { SidebarFooterActionOwnerProps } from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import { SettingsSection, SettingsOptionRow } from "@dsh-stack/settings-panel";
-import { CheckIcon, SettingsIcon } from "@dsh-stack/lucide-animated/client";
+import {
+  SETTINGS_SECTION_ICON_SLOT,
+  SettingsSection,
+  SettingsOptionRow,
+} from "@dsh-stack/settings-panel";
+import { CheckIcon, LayersIcon, SettingsIcon } from "@dsh-stack/lucide-animated/client";
 import { createProfileRuntime } from "@dsh-stack/profile-runtime";
 import { profileOptions } from "../index.js";
 
@@ -93,6 +97,11 @@ function ProfileSettings({ close }: SettingsSectionOwnerProps) {
   );
 }
 
+/** Renders the Profiles section's nav glyph from the canonical animated icon set. */
+function ProfileSettingsIcon() {
+  return <LayersIcon aria-hidden="true" size={16} />;
+}
+
 /** Mount the profile selector and settings section into the client slot registry. */
 export function apply(ctx: ClientContext): void {
   ctx.slots.inject("sidebar.footer.action", () =>
@@ -108,6 +117,12 @@ export function apply(ctx: ClientContext): void {
         inject: () => ({}),
       },
       ProfileSettings,
+    ),
+  );
+  ctx.slots.inject(SETTINGS_SECTION_ICON_SLOT, () =>
+    ctx.slots.register(
+      { name: SETTINGS_SECTION_ICON_SLOT, id: "profiles", order: 0 },
+      ProfileSettingsIcon,
     ),
   );
 }

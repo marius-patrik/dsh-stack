@@ -50,7 +50,13 @@ export async function stopServer(port: number, log: (msg: string) => void): Prom
     } catch {
       /* already gone */
     }
-    await sleep(500);
+    // SIGKILL frees the process but the OS can take a moment longer to
+    // release the socket; a bare sleep here let `restart` bind before the
+    // port was actually free, fail with no diagnosable cause, and leave the
+    // harness down (#145). Poll the same way the SIGTERM path above does.
+    for (let i = 0; i < 15 && findListenerPid(port) !== null; i += 1) {
+      await sleep(200);
+    }
   }
   log("dsh: web server stopped.");
   return true;

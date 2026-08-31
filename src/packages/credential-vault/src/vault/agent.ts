@@ -187,7 +187,14 @@ export class PrivilegedVaultCustodian {
     this.#custody = options.custody ?? "privileged";
   }
 
-  /** identity implementation. */
+  /**
+   * Returns the same custodian with material access permanently removed, ensuring
+   * it is sealed. This operation is cheap, so an unsealed custodian should never
+   * be passed across a boundary.
+   *
+   * @returns A new `PrivilegedVaultCustodian` instance with custody set to "sealed".
+   * If already sealed, returns the current instance.
+   */
   get identity(): AgentIdentity {
     return { ...this.#identity };
   }

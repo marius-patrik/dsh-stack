@@ -37,6 +37,7 @@ import {
   startServer,
   statusReport,
   stopServer,
+  tsxAvailable,
   verbBin,
 } from "../lib/index.js";
 
@@ -60,7 +61,7 @@ function execBin(bin, prefixArgs, args) {
 /** Print the status report for the resolved port. */
 async function showStatus(home, profile) {
   const port = resolvePort(home, profile, logFile);
-  process.stdout.write(`${await statusReport(port, logFile)}\n`);
+  process.stdout.write(`${await statusReport(port, logFile, home, profile)}\n`);
 }
 
 /** Start the server and report the outcome. Returns false on failure. */
@@ -130,6 +131,8 @@ async function execute(plan, ctx) {
     }
     await attachToServer({
       port,
+      home,
+      profile,
       logFile,
       lines: plan.lines,
       intervalMs: plan.intervalMs,
@@ -155,6 +158,15 @@ async function execute(plan, ctx) {
   const cli = harnessCli(harnessDir);
   if (cli === null) {
     process.stderr.write(`dsh: harness CLI not found under ${harnessDir}\n`);
+    process.exitCode = 1;
+    return;
+  }
+  if (cli.tsx && !tsxAvailable(pkgDir)) {
+    process.stderr.write(
+      "dsh: no built harness CLI found, and the dev fallback needs 'tsx' from this " +
+        "checkout's node_modules, which isn't resolvable right now (mid-reinstall?). " +
+        "Run `pnpm install` in the checkout and try again.\n",
+    );
     process.exitCode = 1;
     return;
   }

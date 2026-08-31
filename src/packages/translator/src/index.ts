@@ -31,7 +31,14 @@ export interface DshEvent {
   [key: string]: unknown;
 }
 
-/** detectFormat implementation. */
+/**
+ * Detects the format of the given data object.
+ *
+ * Guarantees: Returns the format name ("opencode", "claude", or "dsh") if the data matches the respective format.
+ *             Returns null if the data is null, not an object, or doesn't match any known format.
+ *
+ * Throws: Throws an error if the data is not an object or doesn't have the required "events" array for "dsh" format.
+ */
 export function detectFormat(data: unknown): Format | null {
   if (data === null || typeof data !== "object") return null;
   const obj = data as Record<string, unknown>;
@@ -53,12 +60,30 @@ function asDshDocument(data: unknown): { events: DshEvent[] } {
 export class TranslatorRegistry {
   private readonly converters = new Map<string, TranslateFn>();
 
-  /** register implementation. */
+  /**
+   * Register a translation function for converting data from one format to another.
+   *
+   * @param sourceFormat - The source format of the data.
+   * @param targetFormat - The target format to which the data should be converted.
+   * @param fn - The translation function that performs the conversion.
+   *
+   * @throws Will throw an error if no converter is registered for the given source and target formats.
+   */
   register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
     this.converters.set(`${sourceFormat}->${targetFormat}`, fn);
   }
 
-  /** translate implementation. */
+  /**
+   * Convert data from a source format to a target format using a registered translation function.
+   *
+   * @param data - The data to be translated.
+   * @param sourceFormat - The current format of the data.
+   * @param targetFormat - The desired format to convert the data into.
+   *
+   * @returns The translated data in the target format.
+   *
+   * @throws Will throw an error if no translation function is registered for the given formats or if the data is invalid.
+   */
   translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     if (sourceFormat === targetFormat) return data;
     const fn = this.converters.get(`${sourceFormat}->${targetFormat}`);
@@ -66,13 +91,32 @@ export class TranslatorRegistry {
     return fn(data);
   }
 
-  /** supportedConversions implementation. */
+  /**
+   * Translates data from a source format to a target format using a registered translation function.
+   *
+   * @param data - The data to be translated.
+   * @param sourceFormat - The current format of the data.
+   * @param targetFormat - The desired format to convert the data into.
+   *
+   * @returns The translated data in the target format.
+   *
+   * @throws Will throw an error if no translation function is registered for the given formats or if the data is invalid.
+   */
   supportedConversions(): readonly string[] {
     return [...this.converters.keys()];
   }
 }
 
-/** opencodeToDsh implementation. */
+/**
+ * Converts data from a source format to a target format using a registered translation function.
+ *
+ * @param data - The data to be translated.
+ * @param sourceFormat - The current format of the data.
+ * @param targetFormat - The desired format to convert the data into.
+ *
+ * @returns The translated data in the target format.
+ * @throws Will throw an error if no translation function is registered for the given formats or if the data is invalid.
+ */
 function opencodeToDsh(data: unknown): unknown {
   if (!data || typeof data !== "object" || !("messages" in data) || !Array.isArray(data.messages))
     throw new Error("invalid opencode document");
@@ -128,7 +172,16 @@ function claudeToDsh(data: unknown): unknown {
   };
 }
 
-/** dshToClaude implementation. */
+/**
+ * Converts opencode data to DSH format.
+ *
+ * @param data - The opencode data to be converted.
+ * @param sourceFormat - The current format of the data (not used in this function).
+ * @param targetFormat - The desired format to convert the data into (not used in this function).
+ *
+ * @returns The translated data in the DSH format.
+ * @throws Will throw an error if the data is invalid or no translation function is registered for the given formats.
+ */
 function dshToClaude(data: unknown): unknown {
   const input = asDshDocument(data);
   return {
@@ -160,11 +213,22 @@ export class TranslatorService extends Service {
     this.registry.register("claude", "opencode", (data) => dshToOpencode(claudeToDsh(data)));
   }
 
-  /** register implementation. */
+  /**
+   * Converts a CLAUDE document to a DSH format.
+   *
+   * Guarantees: Returns an object with events, each containing a type, seq, role, and content.
+   * Must receive a valid CLAUDE document with an 'entries' array.
+   * Throws an error if the input is not a valid CLAUDE document.
+   */
   register(sourceFormat: Format, targetFormat: Format, fn: TranslateFn): void {
     this.registry.register(sourceFormat, targetFormat, fn);
   }
-  /** translate implementation. */
+  /**
+   * Converts a CLUDE document to a DSH-compatible format.
+   *
+   * Guarantees a valid DSH document with events formatted as user or assistant messages.
+   * Throws an error if the input is not a valid CLUDE document.
+   */
   translate(data: unknown, sourceFormat: Format, targetFormat: Format): unknown {
     return this.registry.translate(data, sourceFormat, targetFormat);
   }

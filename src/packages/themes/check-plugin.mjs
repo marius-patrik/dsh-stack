@@ -163,7 +163,13 @@ const registered = [];
 const sections = new Map([[NS, { active: "" }]]);
 ctx.provide("settings", {
   get: (ns) => sections.get(ns),
-  /** register implementation. */
+  /**
+   * Registers a new setting or web server route.
+   *
+   * Guarantees that the provided namespace or route is set in the sections.
+   * Returns an object with a getter method for the namespace and an undefined watch method.
+   * Fails if the namespace or route is already registered or if the provided parameters are invalid.
+   */
   register(_ns, _schema, opts) {
     sections.set(_ns, opts.base);
     return {
@@ -173,7 +179,11 @@ ctx.provide("settings", {
   },
 });
 ctx.provide("webServer", {
-  /** register implementation. */
+  /**
+   * Registers a new namespace or route, ensuring it is not already registered.
+   * Returns an object with a getter method for the namespace and an undefined watch method.
+   * Fails if the namespace or route is already registered or if the provided parameters are invalid.
+   */
   register(route) {
     registered.push(route);
     return () => undefined;
@@ -196,7 +206,13 @@ const res = {
   writeHead(s) {
     this._status = s;
   },
-  /** end implementation. */
+  /**
+   * Ends the response by setting the response body.
+   *
+   * @param {string|Buffer} b - The body content to be sent in the response.
+   * Guarantees that the response status is set to 200 and the body contains the theme name.
+   * Fails if the response status is not set or the body is not correctly updated.
+   */
   end(b) {
     this._body = b;
   },
@@ -234,11 +250,24 @@ assert.deepEqual(clientExports.inject, ["slots", "theme"]);
 const clientRegistrants = new Map();
 globalThis.fetch = async () => ({ ok: true, json: async () => ({ active: "", themes: [] }) });
 const clientCtx = {
-  /** effect implementation. */
+  /**
+   * Fetches and applies the active theme from the server.
+   * Guarantees that the `theme` is injected into the context.
+   * Throws an error if the `spec` does not match "react".
+   * @param {string} spec - The specification to check against.
+   * @throws {Error} If `spec` is not "react".
+   */
   effect(fn) {
     fn();
   },
-  /** on implementation. */
+  /**
+   * Fetches and applies the active theme from the server.
+   *
+   * Guarantees that the active theme is applied to the document.
+   * Throws an error if the fetch fails or an unexpected spec is requested.
+   *
+   * @returns The current theme context.
+   */
   on() {
     return () => undefined;
   },
@@ -246,13 +275,26 @@ const clientCtx = {
     getTheme: () => ({ active: { id: "light" }, themes: [] }),
     /** setTheme implementation. */
     setTheme() {},
-    /** register implementation. */
+    /**
+     * Registers the client context for theme management.
+     * Guarantees that the active theme is applied to the document.
+     * Throws an error if the fetch fails or an unexpected spec is requested.
+     * @param {string} spec - The specification to check against.
+     * @throws {Error} If `spec` is not "react" or if the fetch fails.
+     */
     register() {
       return () => undefined;
     },
   },
   slots: {
-    /** inject implementation. */
+    /**
+     * Executes the provided function `fn` within the context of the client.
+     * Guarantees that the `theme` is injected into the context if `spec` matches "react".
+     * Throws an error if `spec` does not match "react".
+     * @param {string} spec - The specification to check against.
+     * @param {function} fn - The function to execute in the context.
+     * @throws {Error} If `spec` is not "react".
+     */
     inject(name, fn) {
       clientRegistrants.set(name, fn);
     },

@@ -7,17 +7,37 @@ window.__ModuleLoader__.load({
 
     var STATUS_ROUTE = "/hosts/api/status";
 
-    /** createHostsStore implementation. */
+    /**
+     * Initializes a hosts store with loading and error handling.
+     * Emits updates to listeners when the status changes.
+     *
+     * Emits an "idle" status initially, changes to "loading" when fetching starts,
+     * and to "ready" when data is successfully loaded. Throws an error if fetching fails.
+     *
+     * @returns {void}
+     */
     function createHostsStore() {
       var listeners = new Set();
       var state = { data: null, status: "idle", error: null };
-      /** emit implementation. */
+      /**
+       * Emits updates to listeners when the status changes.
+       *
+       * Initially emits "idle", changes to "loading" when fetching starts, and to "ready" when data is successfully loaded.
+       * Throws an error if fetching fails.
+       *
+       * @returns {void}
+       */
       function emit() {
         listeners.forEach(function (listener) {
           listener();
         });
       }
-      /** load implementation. */
+      /**
+       * Begins the process of loading data, emitting "loading" status to listeners.
+       * If fetching is successful, updates the status to "ready". Throws an error and emits the error status if fetching fails.
+       *
+       * @returns {void}
+       */
       function load() {
         state = { data: state.data, status: "loading", error: null };
         emit();
@@ -53,7 +73,14 @@ window.__ModuleLoader__.load({
       };
     }
 
-    /** DeployGlyph implementation. */
+    /**
+     * Updates the deployment status and emits changes to listeners.
+     *
+     * Emits an error if the HTTP request fails, otherwise returns the deployment state.
+     *
+     * @returns {Object} The current deployment state, including data, status, and error.
+     * @throws {Error} Throws an error if the HTTP request fails.
+     */
     function DeployGlyph() {
       var React = require("react");
       return React.createElement(
@@ -149,7 +176,12 @@ window.__ModuleLoader__.load({
         [state && state.status],
       );
 
-      /** copyText implementation. */
+      /**
+       * Sets the current git branch in the local storage and updates the UI state.
+       * Guarantees that the git branch is set to "main" if retrieval fails or is unavailable.
+       * Returns nothing.
+       * Fails gracefully by setting the branch to "main" if retrieval from local storage fails.
+       */
       function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
@@ -184,157 +216,158 @@ window.__ModuleLoader__.load({
           }, 1200);
         };
 
-      var /** nodeCard implementation. */
-        nodeCard = function (node) {
-          var isOnline = node.online;
-          var isSelf = node.isSelf;
-          var dotColor = isOnline ? "#3fb950" : "#8b949e";
-          var osBadge = (node.os || "").toUpperCase();
+      /**
+       * Sets the current git branch in the local storage and updates the UI state.
+       * Guarantees that the UI state is updated to reflect the current or default branch.
+       * Returns nothing.
+       * Fails gracefully by setting the branch to "main" if retrieval from local storage fails.
+       */
+      var nodeCard = function (node) {
+        var isOnline = node.online;
+        var isSelf = node.isSelf;
+        var dotColor = isOnline ? "#3fb950" : "#8b949e";
+        var osBadge = (node.os || "").toUpperCase();
 
-          return h(
-            "div",
-            {
-              key: node.id,
-              style: {
-                padding: "14px 16px",
-                borderRadius: "10px",
-                border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.2))",
-                background: isSelf
-                  ? "rgba(99, 102, 241, 0.06)"
-                  : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))",
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              },
+        return h(
+          "div",
+          {
+            key: node.id,
+            style: {
+              padding: "14px 16px",
+              borderRadius: "10px",
+              border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.2))",
+              background: isSelf
+                ? "rgba(99, 102, 241, 0.06)"
+                : "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
             },
+          },
+          h(
+            "div",
+            { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            h("span", {
+              style: {
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: dotColor,
+                boxShadow: isOnline ? "0 0 6px rgba(63, 185, 80, 0.5)" : "none",
+              },
+            }),
+            h("strong", { style: { fontSize: "14px" } }, node.name),
             h(
-              "div",
-              { style: { display: "flex", alignItems: "center", gap: "8px" } },
-              h("span", {
-                style: {
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: dotColor,
-                  boxShadow: isOnline ? "0 0 6px rgba(63, 185, 80, 0.5)" : "none",
-                },
-              }),
-              h("strong", { style: { fontSize: "14px" } }, node.name),
-              h(
-                "span",
-                {
-                  style: {
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    background: isSelf
-                      ? "var(--dsw-alias-primary, #6366f1)"
-                      : "rgba(128,128,128,0.2)",
-                    color: isSelf ? "#fff" : "inherit",
-                  },
-                },
-                isSelf ? "COORDINATOR" : osBadge,
-              ),
-              h(
-                "span",
-                {
-                  style: {
-                    marginLeft: "auto",
-                    fontSize: "11px",
-                    opacity: 0.6,
-                  },
-                },
-                isOnline ? "Online" : "Offline",
-              ),
-            ),
-            h(
-              "div",
+              "span",
               {
                 style: {
-                  fontSize: "12px",
-                  opacity: 0.8,
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "12px",
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  background: isSelf
+                    ? "var(--dsw-alias-primary, #6366f1)"
+                    : "rgba(128,128,128,0.2)",
+                  color: isSelf ? "#fff" : "inherit",
                 },
               },
-              node.ips && node.ips[0]
-                ? h("span", null, "IP: ", h("code", null, node.ips[0]))
-                : null,
-              node.dnsName ? h("span", null, "DNS: ", h("code", null, node.dnsName)) : null,
+              isSelf ? "COORDINATOR" : osBadge,
             ),
-            !isSelf
-              ? h(
-                  "div",
-                  { style: { display: "flex", gap: "8px", marginTop: "4px" } },
-                  h(
-                    "button",
-                    {
-                      type: "button",
-                      onClick: function () {
-                        setDeployNode(deployNode === node.id ? null : node.id);
-                      },
-                      style: {
-                        fontSize: "11px",
-                        fontWeight: 500,
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.3))",
-                        background: "var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.05))",
-                        cursor: "pointer",
-                        color: "inherit",
-                      },
-                    },
-                    deployNode === node.id
-                      ? "Hide Deploy Command"
-                      : "Deploy Worker to " + node.name,
-                  ),
-                )
-              : null,
-            deployNode === node.id
-              ? h(
-                  "div",
+            h(
+              "span",
+              {
+                style: {
+                  marginLeft: "auto",
+                  fontSize: "11px",
+                  opacity: 0.6,
+                },
+              },
+              isOnline ? "Online" : "Offline",
+            ),
+          ),
+          h(
+            "div",
+            {
+              style: {
+                fontSize: "12px",
+                opacity: 0.8,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+              },
+            },
+            node.ips && node.ips[0] ? h("span", null, "IP: ", h("code", null, node.ips[0])) : null,
+            node.dnsName ? h("span", null, "DNS: ", h("code", null, node.dnsName)) : null,
+          ),
+          !isSelf
+            ? h(
+                "div",
+                { style: { display: "flex", gap: "8px", marginTop: "4px" } },
+                h(
+                  "button",
                   {
+                    type: "button",
+                    onClick: function () {
+                      setDeployNode(deployNode === node.id ? null : node.id);
+                    },
                     style: {
-                      marginTop: "6px",
-                      padding: "10px",
-                      borderRadius: "8px",
-                      background: "rgba(0,0,0,0.5)",
-                      border: "1px solid rgba(255,255,255,0.1)",
                       fontSize: "11px",
-                      fontFamily: "var(--ds-font-mono, monospace)",
+                      fontWeight: 500,
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.3))",
+                      background: "var(--dsw-alias-interactive-bg-hover, rgba(255,255,255,0.05))",
+                      cursor: "pointer",
+                      color: "inherit",
                     },
                   },
-                  h(
-                    "div",
-                    { style: { marginBottom: "6px", color: "var(--dsw-alias-label-secondary)" } },
-                    "Run on remote machine " + node.name + ":",
-                  ),
-                  h(
-                    "code",
-                    {
-                      style: {
-                        display: "block",
-                        wordBreak: "break-all",
-                        color: "#38bdf8",
-                        padding: "6px 8px",
-                        background: "rgba(0,0,0,0.3)",
-                        borderRadius: "4px",
-                      },
+                  deployNode === node.id ? "Hide Deploy Command" : "Deploy Worker to " + node.name,
+                ),
+              )
+            : null,
+          deployNode === node.id
+            ? h(
+                "div",
+                {
+                  style: {
+                    marginTop: "6px",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    background: "rgba(0,0,0,0.5)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    fontSize: "11px",
+                    fontFamily: "var(--ds-font-mono, monospace)",
+                  },
+                },
+                h(
+                  "div",
+                  { style: { marginBottom: "6px", color: "var(--dsw-alias-label-secondary)" } },
+                  "Run on remote machine " + node.name + ":",
+                ),
+                h(
+                  "code",
+                  {
+                    style: {
+                      display: "block",
+                      wordBreak: "break-all",
+                      color: "#38bdf8",
+                      padding: "6px 8px",
+                      background: "rgba(0,0,0,0.3)",
+                      borderRadius: "4px",
                     },
-                    node.os === "windows"
-                      ? 'powershell -Command "irm ' +
-                          (access ? access.permanentUrl : "http://localhost:3080") +
-                          '/hosts/bootstrap.ps1 | iex"'
-                      : "curl -fsSL " +
-                          (access ? access.permanentUrl : "http://localhost:3080") +
-                          "/hosts/bootstrap.sh | sh",
-                  ),
-                )
-              : null,
-          );
-        };
+                  },
+                  node.os === "windows"
+                    ? 'powershell -Command "irm ' +
+                        (access ? access.permanentUrl : "http://localhost:3080") +
+                        '/hosts/bootstrap.ps1 | iex"'
+                    : "curl -fsSL " +
+                        (access ? access.permanentUrl : "http://localhost:3080") +
+                        "/hosts/bootstrap.sh | sh",
+                ),
+              )
+            : null,
+        );
+      };
 
       var tabs = [
         { id: "cluster", label: "Cluster & Nodes" },
@@ -687,7 +720,14 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** apply implementation. */
+    /**
+     * Displays network status or synchronization information based on the active tab.
+     *
+     * Returns a React element representing the current tab's content or null if the tab is inactive.
+     *
+     * Fails by returning null if the activeTab is not recognized or if the conditions for displaying
+     * network or synchronization information are not met.
+     */
     function apply(ctx) {
       var store = createHostsStore();
       ctx.slots.inject(

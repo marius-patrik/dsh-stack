@@ -127,7 +127,15 @@ async function installCatalogExtension(
   }
 }
 
-/** makeThemeHandler implementation. */
+/**
+ * Sets up a handler for theme-related requests.
+ *
+ * Guarantees a JSON response with status codes 200 or 405.
+ * On failure, returns a 405 with "method not allowed" error.
+ *
+ * @param deps - Dependency injection for theme catalog.
+ * @returns A function that processes incoming POST requests to search for themes.
+ */
 function makeThemeHandler(
   deps: ThemeWebDeps,
 ): (req: IncomingMessage, res: ServerResponse) => Promise<void> {

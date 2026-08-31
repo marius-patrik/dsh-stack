@@ -8,7 +8,11 @@
   "dependencies": [
     "stack.ai.provider.gemini-sub",
     "stack.ai.provider.gemini-api",
-    "stack.ai.provider.antigravity-sub"
+    "stack.ai.provider.antigravity-sub",
+    "stack.ai.dialects",
+    "stack.ai.dialect.antigravity",
+    "stack.ai.dialect.code-assist",
+    "stack.ai.dialect.openai"
   ],
   "optionalDependencies": []
 }

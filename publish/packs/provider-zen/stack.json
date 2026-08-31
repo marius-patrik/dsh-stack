@@ -5,6 +5,6 @@
   "kind": "pack",
   "description": "OpenCode Zen provider route.",
   "files": ["package.json", "stack.json", "README.md"],
-  "dependencies": ["stack.ai.provider.zen"],
+  "dependencies": ["stack.ai.provider.zen", "stack.ai.dialects", "stack.ai.dialect.openai"],
   "optionalDependencies": []
 }

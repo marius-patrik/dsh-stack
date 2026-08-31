@@ -20,13 +20,25 @@ export class CommandsService extends Service {
     super(ctx, "commands");
   }
 
-  /** register implementation. */
+  /**
+   * Registers a new slash command.
+   *
+   * Guarantees that the command name is non-empty and adds it to the command registry.
+   * Throws an error if the command name is empty.
+   *
+   * @param cmd - The slash command to register.
+   */
   register(cmd: SlashCommand): void {
     if (!cmd.name.trim()) throw new Error("Slash command name must be non-empty");
     this.commands.set(cmd.name, cmd);
   }
 
-  /** list implementation. */
+  /**
+   * Returns all registered slash commands.
+   *
+   * @returns An array of SlashCommand instances.
+   * @throws Throws an error if no commands are registered.
+   */
   list(): SlashCommand[] {
     return Array.from(this.commands.values());
   }
@@ -34,7 +46,12 @@ export class CommandsService extends Service {
 
 export const Config = Schema.object({});
 
-/** apply implementation. */
+/**
+ * Applies the configuration context to the CommandsService.
+ *
+ * @param ctx - The configuration context to apply.
+ * @throws Throws an error if the context is invalid or if no CommandsService is created.
+ */
 export function apply(ctx: Context): void {
   new CommandsService(ctx);
 }

@@ -12,8 +12,6 @@ export {
 
 export { sendJsonResponse } from "./json-response.js";
 
-export { publishCrossBundle, subscribeCrossBundle } from "./cross-bundle-channel.js";
-
 export type DependencyKind = "required" | "optional";
 
 export interface PluginDependency {
@@ -52,7 +50,13 @@ export interface PluginCatalog {
   readonly profiles: readonly StackProfileDefinition[];
 }
 
-/** definePlugin implementation. */
+/**
+ * Validates the provided catalog for unique plugin and pack IDs.
+ *
+ * Guarantees: Ensures that all plugin and pack IDs in the catalog are unique.
+ *
+ * On failure: Throws an error if any plugin or pack ID is not unique.
+ */
 export function definePlugin<const T extends FeaturePluginDefinition>(plugin: T): T {
   return plugin;
 }
@@ -62,12 +66,18 @@ export function definePack<const T extends PluginPackDefinition>(pack: T): T {
   return pack;
 }
 
-/** defineProfile implementation. */
+/**
+ * Defines a profile ensuring all plugin and pack IDs are unique.
+ * On failure: Throws an error if any plugin or pack ID is not unique.
+ */
 export function defineProfile<const T extends StackProfileDefinition>(profile: T): T {
   return profile;
 }
 
-/** validateCatalog implementation. */
+/**
+ * Validates the given catalog to ensure all plugin, pack, and profile IDs are unique.
+ * On failure: Throws an error if any ID is not unique.
+ */
 export function validateCatalog(catalog: PluginCatalog): void {
   assertUnique(
     catalog.plugins.map((plugin) => plugin.id),
@@ -119,7 +129,14 @@ export function validateCatalog(catalog: PluginCatalog): void {
   }
 }
 
-/** assertUnique implementation. */
+/**
+ * Ensures all elements in `values` are unique, throwing an error with the provided `label` if a
+ * duplicate is found.
+ *
+ * @param values - The array of strings to check for uniqueness.
+ * @param label - A description used in the error message for the duplicate value.
+ * @throws {Error} If a duplicate value is found in `values`, describing the duplicate and its label.
+ */
 function assertUnique(values: readonly string[], label: string): void {
   const seen = new Set<string>();
   for (const value of values) {

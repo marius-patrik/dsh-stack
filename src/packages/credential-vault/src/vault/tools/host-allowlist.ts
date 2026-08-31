@@ -28,12 +28,20 @@ export function providerIdForPurpose(purpose: string): string {
  */
 export function allowedHostsFor(record: SecretRecord): string[] {
   const hosts = new Set<string>();
-  const /** addUrl implementation. */
-    addUrl = (value: string | null | undefined): void => {
-      if (!value) return;
-      const host = hostOf(value);
-      if (host) hosts.add(host);
-    };
+  /**
+   * Adds the base URL and, if applicable, additional OAuth URLs to the set of allowed hosts.
+   *
+   * Guarantees: Adds the base URL of the provider descriptor to the set of allowed hosts.
+   *            If the model catalog is of type "list_endpoint", adds its URL.
+   *            Depending on the authentication method, adds OAuth-related URLs to the set.
+   *
+   * On failure: No URLs are added to the set if any of the URLs are invalid or undefined.
+   */
+  const addUrl = (value: string | null | undefined): void => {
+    if (!value) return;
+    const host = hostOf(value);
+    if (host) hosts.add(host);
+  };
 
   const descriptor = findProviderDescriptor(providerIdForPurpose(record.purpose));
   if (descriptor) {
@@ -100,12 +108,24 @@ export function hostAllowed(patterns: readonly string[], hostname: string): bool
   });
 }
 
-/** normalizeHost implementation. */
+/**
+ * Ensures the hostname is in a consistent format by trimming, lowercasing, and removing trailing dots.
+ * Returns the normalized hostname or an empty string if the input is invalid.
+ *
+ * @param hostname - The hostname to normalize.
+ * @returns The normalized hostname or an empty string if invalid.
+ */
 function normalizeHost(value: string): string {
   return value.trim().toLowerCase().replace(/\.$/, "");
 }
 
-/** hostOf implementation. */
+/**
+ * Determines if the given hostname matches any pattern in the provided list of patterns.
+ * Returns the matching pattern or null if no match is found.
+ *
+ * @param value - The hostname to check against the patterns.
+ * @returns The matching pattern or null if no match is found.
+ */
 function hostOf(value: string): string | null {
   try {
     return normalizeHost(new URL(value).hostname);

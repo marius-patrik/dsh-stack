@@ -3,7 +3,14 @@ import { boolean, required, VaultCliError, type ParsedArguments } from "../argum
 import type { VaultCliIo } from "../io.js";
 import { openVault } from "../vault-location.js";
 
-/** totpCommand implementation. */
+/**
+ * Displays the Time-based One-Time Password (TOTP) code for a given record.
+ *
+ * Guarantees:
+ * - Outputs the TOTP code and its remaining validity period if not in JSON format.
+ * - Returns a JSON object containing the TOTP code, valid until timestamp, and remaining seconds if the `--json` flag is used.
+ * - Throws an error if the specified record is not a TOTP seed or does not exist.
+ */
 // jscpd:ignore-start -- mirrors vault/cli/commands/get.ts's small option-parsing shape for a different subcommand
 export async function totpCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const id = required(args, "id");

@@ -99,23 +99,43 @@ assert.deepEqual(ids, ["abc"]);
 // token when allowInteractive is false.
 rmSync(join(home, "share.token"), { force: true });
 const handler = share.makeShareHandler(home, "/share", true);
-const /** respond implementation. */
-  respond = async (url) => {
-    const res = {
-      _status: 0,
-      _body: "",
-      /** writeHead implementation. */
-      writeHead(s) {
-        this._status = s;
-      },
-      /** end implementation. */
-      end(b) {
-        this._body = b;
-      },
-    };
-    await handler({ url }, res);
-    return res;
+/**
+ * Handles a request to the `/share` endpoint.
+ *
+ * - Sets the response status using `writeHead`.
+ * - Writes the response body using `end`.
+ * - Returns the response object with `_status` and `_body`.
+ *
+ * On failure, returns a response with `_status` indicating the error and an empty `_body`.
+ */
+const respond = async (url) => {
+  const res = {
+    _status: 0,
+    _body: "",
+    /**
+     * Sets the response status and begins writing the response body.
+     *
+     * @param {number} s - The status code to set for the response.
+     * @returns {object} The response object with updated `_status` and an empty `_body`.
+     * On failure, returns a response with `_status` indicating the error and an empty `_body`.
+     */
+    writeHead(s) {
+      this._status = s;
+    },
+    /**
+     * Ends the response by setting the response body and finalizes the response object.
+     *
+     * @param {string} b - The body content to set for the response.
+     * @returns {object} The response object with updated `_status` and `_body`.
+     * On failure, returns a response with `_status` indicating the error and an empty `_body`.
+     */
+    end(b) {
+      this._body = b;
+    },
   };
+  await handler({ url }, res);
+  return res;
+};
 const plain = await respond(`/share/abc`);
 assert.equal(plain._status, 200);
 assert.ok(!plain._body.includes("#live"));

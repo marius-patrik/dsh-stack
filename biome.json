@@ -10,7 +10,10 @@
       "!**/lib",
       "!**/.turbo",
       "!**/.next",
-      "!harness"
+      "!harness",
+      "!worktrees",
+      "!**/worktrees",
+      "!.claude"
     ]
   },
   "formatter": {

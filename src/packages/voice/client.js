@@ -23,7 +23,13 @@ window.__ModuleLoader__.load({
 
     // ── host config (non-secret slice) ─────────────────────────────────────
     var hostConfig = { value: null, pending: null };
-    /** fetchHostConfig implementation. */
+    /**
+     * Fetches the host configuration from the server.
+     *
+     * @param {boolean} force - If true, forces a new fetch regardless of existing value or pending request.
+     * @returns {Promise<Object>} Resolves with the host configuration object on success.
+     * @throws {Error} Throws an error if fetching fails or is interrupted.
+     */
     function fetchHostConfig(force) {
       if (hostConfig.value !== null && !force) return Promise.resolve(hostConfig.value);
       if (hostConfig.pending !== null && !force) return hostConfig.pending;
@@ -45,7 +51,12 @@ window.__ModuleLoader__.load({
 
     // ── streaming TTS player (stop-on-new) ─────────────────────────────────
     var player = { audio: null, token: 0 };
-    /** stopPlayback implementation. */
+    /**
+     * Stops the current playback.
+     * Guarantees that the playback is paused or already stopped.
+     * Returns `null` if playback is successfully stopped.
+     * Throws an error if stopping playback fails unexpectedly.
+     */
     function stopPlayback() {
       player.token += 1;
       if (player.audio !== null) {
@@ -211,7 +222,14 @@ window.__ModuleLoader__.load({
         };
       }, []);
 
-      /** startBrowserRecognition implementation. */
+      /**
+       * Starts browser-based speech recognition.
+       *
+       * Guarantees that any ongoing recognition processes are stopped and cleaned up.
+       * Returns nothing.
+       *
+       * On failure, stops any ongoing recognition processes and cleans up media tracks without throwing errors.
+       */
       function startBrowserRecognition(SpeechRecognitionCtor) {
         var rec;
         try {
@@ -257,7 +275,13 @@ window.__ModuleLoader__.load({
         }
       }
 
-      /** startWhisperRecording implementation. */
+      /**
+       * Starts whisper recording and handles errors.
+       *
+       * Guarantees the transcript is captured for final and interim results.
+       * Returns to the "idle" state on completion or error.
+       * Sets the state to "error" and provides an error message on failure.
+       */
       function startWhisperRecording() {
         navigator.mediaDevices
           .getUserMedia({ audio: true })
@@ -323,7 +347,12 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** start implementation. */
+      /**
+       * Starts the media recording process. If successful, updates the state to "recording"
+       * and sets the error state to empty. If an error occurs, updates the state to "error"
+       * and sets the error message accordingly.
+       * @returns {Promise<void>} Resolves when the recording starts or rejects on error.
+       */
       function start() {
         setError("");
         fetchHostConfig()
@@ -347,7 +376,12 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** onClick implementation. */
+      /**
+       * Starts the media recording process. If successful, updates the state to "recording"
+       * and clears the error state. If an error occurs, updates the state to "error" and
+       * sets the appropriate error message.
+       * @returns {Promise<void>} Resolves when the recording starts or rejects on error.
+       */
       function onClick() {
         var s = stateRef.current;
         if (s === "listening") {
@@ -393,7 +427,13 @@ window.__ModuleLoader__.load({
     // Speaker button — neural read-aloud for one assistant message
     // ──────────────────────────────────────────────────────────────────────
     var lastAutoPlayed = { id: null };
-    /** SpeakerButton implementation. */
+    /**
+     * Toggles the speaker button's state. If in "listening" state, stops the recording and returns to "idle".
+     * If in "recording" state, stops the recording and transitions to "transcribing".
+     * If in "idle" or "error" state, starts the recording.
+     * @returns {Promise<void>} Resolves when the recording starts or rejects on error.
+     * On error, the state is set to "error" and an appropriate error message is displayed.
+     */
     function SpeakerButton(props) {
       var messageId = props.messageId,
         useSession = props.useSession;
@@ -429,7 +469,14 @@ window.__ModuleLoader__.load({
         [session, messageId],
       );
 
-      /** speak implementation. */
+      /**
+       * Toggles the speaker button's state based on its current state.
+       * - Transitions from "listening" to "idle".
+       * - Transitions from "recording" to "transcribing".
+       * - Transitions from "idle" or "error" to "recording".
+       * @returns {Promise<void>} Resolves when the recording starts or rejects on error.
+       * On error, the state is set to "error", and an error message is displayed.
+       */
       function speak() {
         if (stateRef.current === "speaking" || stateRef.current === "loading") {
           stopPlayback();
@@ -511,12 +558,25 @@ window.__ModuleLoader__.load({
     // ──────────────────────────────────────────────────────────────────────
     // Voice settings section
     // ──────────────────────────────────────────────────────────────────────
-    /** VoiceGlyph implementation. */
+    /**
+     * Initiates speech playback for the current text if the voice is not currently
+     * speaking or loading. If playback fails, it sets the state to idle.
+     *
+     * Returns: None
+     *
+     * Fails if the voice is already speaking or loading, or if the text is empty.
+     */
     function VoiceGlyph() {
       return SPEAKER_SVG;
     }
 
-    /** row implementation. */
+    /**
+     * Attempts to play the provided text and updates the state accordingly.
+     * If playback fails, the state is set to "idle".
+     *
+     * @param {string} text - The text to be played.
+     * @returns {void}
+     */
     function row(label, control, hint) {
       return h(
         "div",
@@ -541,7 +601,17 @@ window.__ModuleLoader__.load({
       color: "var(--dsw-alias-label-primary)",
     };
 
-    /** TextField implementation. */
+    /**
+     * Initiates a delayed speech action if certain conditions are met.
+     *
+     * Guarantees that speech is initiated only if the host configuration allows auto-read,
+     * the TTS service is enabled, and the current state is idle. The action is cancelled
+     * if the `cancelled` flag is set before the timeout expires.
+     *
+     * Returns: void
+     *
+     * On failure: Speech is not initiated if configuration is unreachable or conditions are not met.
+     */
     function TextField(props) {
       var local = useState(props.value);
       var value = local[0],
@@ -551,7 +621,12 @@ window.__ModuleLoader__.load({
         lastProp.current = props.value;
         if (value !== props.value) setValue(props.value);
       }
-      /** commit implementation. */
+      /**
+       * Initiates a read-aloud session if the current state is idle and not already playing.
+       * Guarantees that the read-aloud session is started or remains idle.
+       * Returns a function to cancel the read-aloud session.
+       * Fails silently if the configuration is unreachable or if the session is already playing.
+       */
       function commit() {
         if (value !== props.value) props.onCommit(value);
       }
@@ -569,7 +644,14 @@ window.__ModuleLoader__.load({
       });
     }
 
-    /** VoiceSection implementation. */
+    /**
+     * Returns a button element to control voice playback.
+     *
+     * The button displays a play or stop icon and changes its state based on the current voice state.
+     * It is disabled if there is no text to read.
+     *
+     * @returns {React.ReactNode} A button element for voice control.
+     */
     function VoiceSection(props) {
       var settings = props.settings; // { describe, mutate } injected from apply
       var viewTuple = useState({ status: "loading", view: null, error: null });
@@ -582,7 +664,13 @@ window.__ModuleLoader__.load({
       var preview = prevTuple[0],
         setPreview = prevTuple[1];
 
-      /** load implementation. */
+      /**
+       * Attempts to play the provided text and updates the state accordingly.
+       *
+       * Guarantees: Initiates speech playback for the current text if the voice is not currently speaking or loading.
+       *             Updates the state to idle if playback fails.
+       * Fails if the voice is already speaking or loading, or if the text is empty.
+       */
       function load() {
         setView({ status: "loading", view: null, error: null });
         settings
@@ -605,7 +693,12 @@ window.__ModuleLoader__.load({
       }
       useEffect(load, []);
 
-      /** mutate implementation. */
+      /**
+       * Sets the playback state based on the provided text. If playback fails, the state is set to "idle".
+       *
+       * @param {string} text - The text to be played.
+       * @returns {void}
+       */
       function mutate(ops) {
         var current = view.view;
         if (!current) return;
@@ -664,7 +757,13 @@ window.__ModuleLoader__.load({
               { id: "custom", label: "OpenAI-compatible endpoint" },
             ];
 
-      /** selectField implementation. */
+      /**
+       * Renders a field input with specified styles, value, and events.
+       *
+       * The field updates its value on change and commits the value on blur or Enter key press.
+       *
+       * @returns {React.ReactNode} An input field element.
+       */
       function selectField(label, value, options, onChange) {
         return row(
           label,
@@ -871,7 +970,15 @@ window.__ModuleLoader__.load({
     // ──────────────────────────────────────────────────────────────────────
     // Plugin body
     // ──────────────────────────────────────────────────────────────────────
-    /** apply implementation. */
+    /**
+     * Configures the text-to-speech settings.
+     *
+     * Sets the enabled status, provider, and API base URL for text-to-speech.
+     *
+     * @param {boolean} ttsEnabled - Whether text-to-speech is enabled.
+     * @param {string} ttsProvider - The provider for text-to-speech.
+     * @param {string} ttsApiBase - The base URL for the text-to-speech service.
+     */
     function apply(ctx) {
       var styleEl = document.getElementById("voice-style");
       if (!styleEl) {

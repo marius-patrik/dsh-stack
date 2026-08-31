@@ -20,16 +20,19 @@ const stackIds = new Map();
 const publicPackages = new Map();
 const sourceHashes = new Map();
 
-/** fail implementation. */
+/** Records a verification error for reporting after all checks complete. */
 function fail(message) {
   errors.push(message);
 }
-/** assert implementation. */
+/** Records a verification error when `condition` is falsy. */
 function assert(condition, message) {
   if (!condition) fail(message);
 }
 
-/** readJson implementation. */
+/**
+ * Reads and parses a JSON file, recording a verification error on failure.
+ * Returns the parsed object, or undefined when the file is unreadable.
+ */
 async function readJson(path, label) {
   try {
     return JSON.parse(await fs.readFile(path, "utf8"));
@@ -39,7 +42,7 @@ async function readJson(path, label) {
   }
 }
 
-/** exists implementation. */
+/** Returns true when the path is accessible, false otherwise. */
 async function exists(path) {
   try {
     await fs.access(path);
@@ -49,7 +52,7 @@ async function exists(path) {
   }
 }
 
-/** walk implementation. */
+/** Recursively yields file paths under `dir`, skipping directories in `ignoredDirs`. */
 async function* walk(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
@@ -60,7 +63,11 @@ async function* walk(dir) {
   }
 }
 
-/** trackedGeneratedFiles implementation. */
+/**
+ * Returns paths of generated output (`lib/`, `dist/`, `node_modules/`) that
+ * are tracked by git and should not be committed. Records a verification
+ * error when `git ls-files` itself fails; returns an empty array in that case.
+ */
 async function trackedGeneratedFiles() {
   try {
     const { stdout } = await execFileAsync(
@@ -93,7 +100,12 @@ async function trackedGeneratedFiles() {
   }
 }
 
-/** verifyCanonicalPackage implementation. */
+/**
+ * Validates a single canonical package directory against the Stack package
+ * contract: ESM module type, unique package name, stack.json structure
+ * (namespaced id, valid kind, semver version, declared files), and cross-
+ * reference consistency between package.json and stack.json.
+ */
 async function verifyCanonicalPackage(dir) {
   const relDir = relative(root, dir);
   const packagePath = join(dir, "package.json");
@@ -184,7 +196,11 @@ async function verifyCanonicalPackage(dir) {
   }
 }
 
-/** verifyPluginTree implementation. */
+/**
+ * Validates the composition tree under `publish/plugins/`: each wrapper must
+ * be a private ESM package whose `src/index.mjs` resolves its canonical
+ * implementation through `src/packages/` or `publish/extensions/`.
+ */
 async function verifyPluginTree() {
   const children = await fs.readdir(pluginsDir, { withFileTypes: true });
   for (const child of children) {
@@ -213,7 +229,13 @@ async function verifyPluginTree() {
   }
 }
 
-/** main implementation. */
+/**
+ * Runs the complete Stack verification pass: checks directory existence,
+ * generated-file cleanliness, per-package contract compliance, plugin tree
+ * wiring, cross-package dependency resolution, and source-level invariants
+ * (no TODO/FIXME markers, no `as any` casts, no plugins/ imports). Exits
+ * non-zero when any check fails.
+ */
 async function main() {
   assert(await exists(packagesDir), "packages/ canonical implementation root is missing");
   assert(await exists(extensionsDir), "extensions/ canonical extension root is missing");
@@ -256,9 +278,12 @@ async function main() {
       if (!codeExts.has(ext)) continue;
       const text = await fs.readFile(file, "utf8");
       const lower = text.toLowerCase();
-      for (const marker of ["todo", "fixme", "not implemented", "initialized: true"])
+      // Word-boundary match: a bare substring trips real identifiers like
+      // `autodoc` or `applyPaletteToDOM` (see #109) that contain "todo" but
+      // aren't placeholders.
+      for (const marker of [/\btodo\b/, /\bfixme\b/, /\bnot implemented\b/, "initialized: true"])
         assert(
-          !lower.includes(marker),
+          typeof marker === "string" ? !lower.includes(marker) : !marker.test(lower),
           `${rel} contains unfinished or placeholder marker ${marker}`,
         );
       assert(!/\bas any\b/.test(text), `${rel} contains an unchecked 'as any' cast`);

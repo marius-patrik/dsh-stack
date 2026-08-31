@@ -31,7 +31,16 @@ export interface WorkspaceThemeState {
   readonly skins: readonly SkinDefinition[];
 }
 
-/** resolveSidebarLogo implementation. */
+/**
+ * Determines the state of the sidebar logo based on the settings, skin definition, and sidebar state.
+ *
+ * Returns the logo state including whether to show the brand logo, the sidebar's collapsed state, and the asset ID.
+ *
+ * @param settings - The configuration settings for the sidebar.
+ * @param skin - The skin definition providing branding assets.
+ * @param collapsed - Indicates if the sidebar is collapsed.
+ * @returns The logo state object indicating the brand logo visibility, sidebar state, and asset ID.
+ */
 export function resolveSidebarLogo(
   settings: SidebarSettings,
   skin: SkinDefinition,
@@ -49,7 +58,12 @@ export function resolveSidebarLogo(
   };
 }
 
-/** shouldShowNewConversation implementation. */
+/**
+ * Returns true if the new conversation should be shown based on the provided settings.
+ *
+ * @param settings - The settings defining the visibility of new conversations.
+ * @returns true if new conversations should be shown; otherwise, false.
+ */
 export function shouldShowNewConversation(settings: SidebarConversationSettings): boolean {
   return settings.showNewConversation;
 }

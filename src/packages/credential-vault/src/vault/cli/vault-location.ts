@@ -38,12 +38,24 @@ export function resolveVaultDirectory(
   return vaultDirectory(path.join(home, ".agents", "secrets"));
 }
 
-/** vaultConfigFile implementation. */
+/**
+ * Reads the vault configuration file from the specified directory.
+ *
+ * @param directory - The directory where the vault configuration file is located.
+ * @returns The parsed VaultConfig object if valid, or null if the file does not exist or is malformed.
+ * @throws VaultCliError if the configuration file is missing, malformed, or has an unsupported schema version or master key.
+ */
 export function vaultConfigFile(directory: string): string {
   return path.join(directory, CONFIG_FILE);
 }
 
-/** readVaultConfig implementation. */
+/**
+ * Reads the vault configuration from the specified directory.
+ *
+ * @param directory - The directory where the vault configuration file is located.
+ * @returns The parsed VaultConfig object if valid, or null if the file does not exist or is malformed.
+ * @throws VaultCliError if the configuration file is missing, malformed, or has an unsupported schema version or master key.
+ */
 export async function readVaultConfig(directory: string): Promise<VaultConfig | null> {
   const file = vaultConfigFile(directory);
   if (!(await exists(file))) return null;
@@ -86,7 +98,14 @@ export interface OpenedVault {
   store: EncryptedFileVault;
 }
 
-/** openVault implementation. */
+/**
+ * Opens the vault using the provided environment settings for security.
+ *
+ * Guarantees an `OpenedVault` object if the vault is successfully opened.
+ * Throws a `VaultCliError` if the vault is passphrase-protected and no passphrase is provided.
+ *
+ * @param io - The input/output interface for interacting with the vault.
+ */
 export async function openVault(io: VaultCliIo): Promise<OpenedVault> {
   const directory = resolveVaultDirectory(io.env, io.home);
   const config = await readVaultConfig(directory);

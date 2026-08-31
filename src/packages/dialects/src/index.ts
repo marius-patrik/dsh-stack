@@ -1,37 +1,22 @@
 /**
- * dialects: provider wire dialects as a harness plugin. Registers the
- * `ctx.dialects` service and the bundled `openai`, `claude`, `gemini`, and
- * `code-assist` dialects; LLM adapter plugins (e.g. providers) resolve a
- * dialect by id to serialize requests and translate response streams.
+ * dialects: the provider-wire-dialect abstraction as a harness plugin.
+ * Registers the empty `ctx.dialects` registry; each concrete dialect
+ * (`openai`, `claude`, `gemini`, `code-assist`, `antigravity`) is its own
+ * extension package (`@dsh-stack/dialect-<id>`) that registers itself into
+ * this registry. LLM adapter plugins (e.g. providers) resolve a dialect by
+ * id to serialize requests and translate response streams.
  *
  * @module dialects
  */
 
 import { Context, Service } from "@deepseek-ai/cordis";
 import z from "@deepseek-ai/schemastery";
-import { claudeDialect } from "./claude.js";
-import { codeAssistDialect } from "./code-assist.js";
-import { antigravityDialect } from "./antigravity.js";
-export { antigravityDialect, ANTIGRAVITY_PROJECT_HEADER } from "./antigravity.js";
-import { geminiDialect } from "./gemini.js";
-import { openaiDialect } from "./openai.js";
 import type { Dialect, DialectId } from "./types.js";
 
 export type { Dialect, DialectAuth, DialectDefaults, DialectId, WireRequest } from "./types.js";
-export { parseSseData, parseSseEvents } from "./sse.js";
+export type { SseEvent } from "./sse.js";
+export { DONE, parseSseData, parseSseEvents } from "./sse.js";
 export { parseNdjson } from "./ndjson.js";
-export {
-  translateOpenAi,
-  mapFinishReason as mapOpenAiFinishReason,
-  mapUsage as mapOpenAiUsage,
-} from "./translate-openai.js";
-export { translateClaude, mapClaudeFinishReason, mapClaudeUsage } from "./translate-claude.js";
-export { translateGemini, mapGeminiFinishReason } from "./translate-gemini.js";
-export { serializeMessages as serializeOpenAiMessages } from "./openai.js";
-export {
-  serializeContents as serializeGeminiContents,
-  buildToolNameIndex as buildGeminiToolNameIndex,
-} from "./gemini.js";
 
 /**
  * The `dialects` service: a typed registry of provider wire dialects.
@@ -93,7 +78,7 @@ declare module "@deepseek-ai/cordis" {
 export const name = "dialects";
 export const inject: never[] = [];
 
-/** dialects configuration; empty — the bundled dialects are built in. */
+/** dialects configuration; empty — concrete dialects register from their own extension packages. */
 export interface Config {}
 
 /** Schemastery configuration for the plugin. */
@@ -102,16 +87,4 @@ export const Config: z<Config> = z.object({});
 /** apply implementation. */
 export function apply(ctx: Context, _config: Config): void {
   new DialectRegistry(ctx);
-  for (const dialect of [
-    openaiDialect,
-    claudeDialect,
-    geminiDialect,
-    codeAssistDialect,
-    antigravityDialect,
-  ]) {
-    ctx.effect(() => {
-      ctx.dialects.register(dialect);
-      return () => ctx.dialects.unregister(dialect.id);
-    });
-  }
 }

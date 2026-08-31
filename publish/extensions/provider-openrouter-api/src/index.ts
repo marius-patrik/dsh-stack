@@ -26,6 +26,18 @@ export const route: ProviderRoute = {
   probe: { url: "https://openrouter.ai/api/v1/models" },
   models: [
     {
+      id: "z-ai/glm-5.3-flash",
+      name: "GLM 5.3 Flash",
+      contextWindow: OPENAI_DEFAULT_CONTEXT,
+      maxTokens: 16_000,
+    },
+    {
+      id: "qwen/qwen-2.5-coder-32b-instruct",
+      name: "Qwen 2.5 Coder 32B",
+      contextWindow: OPENAI_DEFAULT_CONTEXT,
+      maxTokens: 16_000,
+    },
+    {
       id: "openai/gpt-4o",
       name: "OpenAI GPT-4o",
       contextWindow: OPENAI_DEFAULT_CONTEXT,
