@@ -82,6 +82,21 @@ jobs:
       - name: Build Stack workspace
         run: pnpm build
 
+      # Diagnostic for a currently-open investigation (dsh-stack#123 CI
+      # fallout): src/packages/workspace-tabs was deleted from this branch,
+      # the prune step above confirms it removes a cache-restored lib/ for
+      # it, yet verify-stack.mjs still finds the directory moments later.
+      # Prints whatever exists right before verify runs so the next run
+      # shows exactly what recreated it. Remove once that's understood.
+      - name: Diagnose workspace-tabs recreation
+        run: |
+          if [ -e src/packages/workspace-tabs ]; then
+            echo "src/packages/workspace-tabs EXISTS before verify:"
+            find src/packages/workspace-tabs -exec ls -la {} \;
+          else
+            echo "src/packages/workspace-tabs does not exist before verify"
+          fi
+
       - name: Verify Stack workspace
         run: pnpm verify
 
