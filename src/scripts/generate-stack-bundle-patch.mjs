@@ -30,32 +30,13 @@
  */
 import { promises as fs } from "node:fs";
 import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
-
-/**
- * Probes whether a package's built entry exports a cordis-compatible loader shape.
- *
- * Dynamic-imports the resolved entry and returns true when the module
- * exports an `apply` function (either directly or via `default`).
- * Returns false without throwing when the entry cannot be imported.
- *
- * @param {string} packageDir - Absolute path to the package root.
- * @param {string|undefined} mainRelativePath - Relative entry path; defaults to `lib/index.js`.
- */
-async function hasLoaderShape(packageDir, mainRelativePath) {
-  const entryPath = join(packageDir, mainRelativePath ?? "lib/index.js");
-  let mod;
-  try {
-    mod = await import(pathToFileURL(entryPath).href);
-  } catch {
-    return false;
-  }
-  if (typeof mod.apply === "function")
-    return typeof mod.name === "string" && mod.default === undefined;
-  if (mod.default && typeof mod.default === "object" && typeof mod.default.apply === "function")
-    return true;
-  return false;
-}
+import {
+  discoverStackPackages,
+  emitGeneratorOutput,
+  probeLoaderShape,
+  rowIdFor,
+  sortMountability,
+} from "./lib/stack-bundle-discovery.mjs";
 
 const mode = process.argv[2] ?? "write";
 if (!["write", "check", "list"].includes(mode)) {
@@ -137,32 +118,6 @@ async function readJson(path) {
 }
 
 /**
- * Scans `src/packages` and `publish/extensions` for package directories,
- * returning a Map of package name to `{ dir, manifest }`.
- *
- * Directories without a readable `package.json` or without a string `name`
- * field are silently skipped.
- */
-async function discoverStackPackages() {
-  const byName = new Map();
-  for (const catalogRoot of ["src/packages", "publish/extensions"]) {
-    const catalogDir = join(repositoryRoot, catalogRoot);
-    const entries = await fs.readdir(catalogDir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
-      const dir = join(catalogDir, entry.name);
-      try {
-        const manifest = await readJson(join(dir, "package.json"));
-        if (typeof manifest.name === "string") byName.set(manifest.name, { dir, manifest });
-      } catch {
-        // not every entry is a package (e.g. stray files); skip silently.
-      }
-    }
-  }
-  return byName;
-}
-
-/**
  * Resolves the dependency union across all domain packs, probes each candidate
  * for the cordis loader shape, and returns `{ mountable, skipped }` — sorted
  * lists of package names that can and cannot be mounted as bundle rows.
@@ -170,7 +125,7 @@ async function discoverStackPackages() {
  * @throws When a pack dependency cannot be resolved in the discovered packages.
  */
 async function collectMountablePackageNames() {
-  const byName = await discoverStackPackages();
+  const byName = await discoverStackPackages(repositoryRoot);
   const union = new Set();
   for (const packName of domainPackNames) {
     const packManifest = await readJson(join(packsRoot, packName, "package.json"));
@@ -192,20 +147,11 @@ async function collectMountablePackageNames() {
       );
       continue;
     }
-    if (await hasLoaderShape(dir, manifest.main)) mountable.push(name);
+    const { mountable: isMountable } = await probeLoaderShape(dir, manifest.main);
+    if (isMountable) mountable.push(name);
     else skipped.push(name);
   }
-  mountable.sort((a, b) => a.localeCompare(b));
-  skipped.sort((a, b) => a.localeCompare(b));
-  return { mountable, skipped };
-}
-
-/**
- * Derives a YAML-safe cordis row id from a scoped package name by stripping
- * the `@dsh-stack/` prefix and replacing slashes with hyphens.
- */
-function rowIdFor(packageName) {
-  return packageName.replace(/^@dsh-stack\//, "").replaceAll("/", "-");
+  return sortMountability(mountable, skipped);
 }
 
 /**
@@ -244,35 +190,17 @@ function renderPatch(packageNames) {
 const { mountable, skipped } = await collectMountablePackageNames();
 const content = renderPatch(mountable);
 
-if (mode === "list") {
-  // Machine-readable mode: emits this script's mountability decision as JSON
-  // so verifiers gate on the exact same mount/skip computation instead of
-  // re-deriving (and drifting from) the loader-shape probe.
-  console.log(JSON.stringify({ mountable, skipped }));
-} else if (mode === "check") {
-  let existing;
-  try {
-    existing = await fs.readFile(outputPath, "utf8");
-  } catch {
-    existing = undefined;
-  }
-  if (existing !== content) {
-    console.error(
-      `publish/packs/bundle/cordis.patch.yml is stale (${mountable.length} mountable plugins expected). ` +
-        "Run `node src/scripts/generate-stack-bundle-patch.mjs write` to regenerate.",
-    );
-    process.exit(1);
-  }
-  console.log(
-    `publish/packs/bundle/cordis.patch.yml is up to date: ${mountable.length} mountable plugins, ` +
-      `${skipped.length} client-only/non-cordis packages excluded.`,
-  );
-} else {
-  await fs.writeFile(outputPath, content);
-  console.log(
-    `Wrote publish/packs/bundle/cordis.patch.yml: ${mountable.length} mountable plugins ` +
-      `(excluded as non-cordis: ${skipped.join(", ") || "none"}).`,
-  );
-}
+await emitGeneratorOutput({
+  mode,
+  outputPath,
+  relativeOutputPath: "publish/packs/bundle/cordis.patch.yml",
+  content,
+  mountable,
+  skipped,
+  regenerateCommand: "node src/scripts/generate-stack-bundle-patch.mjs write",
+  includedLabel: "mountable plugins",
+  excludedLabel: "client-only/non-cordis packages",
+  excludedReasonWord: "non-cordis",
+});
 
 // jscpd:ignore-end

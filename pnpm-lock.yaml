@@ -730,6 +730,9 @@ importers:
       '@dsh-stack/profile-ui':
         specifier: workspace:*
         version: link:../../../src/packages/profile-ui
+      '@dsh-stack/provider-rotation':
+        specifier: workspace:*
+        version: link:../../../src/packages/provider-rotation
       '@dsh-stack/providers':
         specifier: workspace:*
         version: link:../../../src/packages/providers
@@ -811,6 +814,147 @@ importers:
       '@dsh-stack/voice':
         specifier: workspace:*
         version: link:../../../src/packages/voice
+      '@dsh-stack/workspace-files':
+        specifier: workspace:*
+        version: link:../../../src/packages/workspace-files
+
+  publish/packs/bundle-headless:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/agent-commands':
+        specifier: workspace:*
+        version: link:../../../src/packages/commands
+      '@dsh-stack/agent-loops':
+        specifier: workspace:*
+        version: link:../../../src/packages/loops
+      '@dsh-stack/agent-personas':
+        specifier: workspace:*
+        version: link:../../../src/packages/personas
+      '@dsh-stack/agent-preset-coding':
+        specifier: workspace:*
+        version: link:../../extensions/agent-preset-coding
+      '@dsh-stack/agent-preset-default':
+        specifier: workspace:*
+        version: link:../../extensions/agent-preset-default
+      '@dsh-stack/agent-skills':
+        specifier: workspace:*
+        version: link:../../../src/packages/skills
+      '@dsh-stack/agent-tools':
+        specifier: workspace:*
+        version: link:../../../src/packages/tools
+      '@dsh-stack/agents':
+        specifier: workspace:*
+        version: link:../../../src/packages/agents
+      '@dsh-stack/composition':
+        specifier: workspace:*
+        version: link:../../../src/packages/composition
+      '@dsh-stack/credential-vault':
+        specifier: workspace:*
+        version: link:../../../src/packages/credential-vault
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+      '@dsh-stack/formatters':
+        specifier: workspace:*
+        version: link:../../../src/packages/formatters
+      '@dsh-stack/icon-engine':
+        specifier: workspace:*
+        version: link:../../../src/packages/icon-engine
+      '@dsh-stack/lsp':
+        specifier: workspace:*
+        version: link:../../../src/packages/lsp
+      '@dsh-stack/lucide-animated':
+        specifier: workspace:*
+        version: link:../../extensions/lucide-animated
+      '@dsh-stack/profile-runtime':
+        specifier: workspace:*
+        version: link:../../../src/packages/profile-runtime
+      '@dsh-stack/profile-ui':
+        specifier: workspace:*
+        version: link:../../../src/packages/profile-ui
+      '@dsh-stack/provider-rotation':
+        specifier: workspace:*
+        version: link:../../../src/packages/provider-rotation
+      '@dsh-stack/providers':
+        specifier: workspace:*
+        version: link:../../../src/packages/providers
+      '@dsh-stack/repos':
+        specifier: workspace:*
+        version: link:../../../src/packages/repos
+      '@dsh-stack/sidebar-preferences':
+        specifier: workspace:*
+        version: link:../../../src/packages/sidebar-preferences
+      '@dsh-stack/sidebar-settings':
+        specifier: workspace:*
+        version: link:../../../src/packages/sidebar-settings
+      '@dsh-stack/sidebar-shell':
+        specifier: workspace:*
+        version: link:../../../src/packages/sidebar-shell
+      '@dsh-stack/skin-claude':
+        specifier: workspace:*
+        version: link:../../extensions/skin-claude
+      '@dsh-stack/skin-codex':
+        specifier: workspace:*
+        version: link:../../extensions/skin-codex
+      '@dsh-stack/skin-deepseek':
+        specifier: workspace:*
+        version: link:../../extensions/skin-deepseek
+      '@dsh-stack/skin-host':
+        specifier: workspace:*
+        version: link:../../../src/packages/skin-host
+      '@dsh-stack/skin-runtime':
+        specifier: workspace:*
+        version: link:../../../src/packages/skin-runtime
+      '@dsh-stack/skin-settings':
+        specifier: workspace:*
+        version: link:../../../src/packages/skin-settings
+      '@dsh-stack/themes':
+        specifier: workspace:*
+        version: link:../../../src/packages/themes
+      '@dsh-stack/trading-backtest':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-backtest
+      '@dsh-stack/trading-market-data':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-market-data
+      '@dsh-stack/trading-optimizer':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-optimizer
+      '@dsh-stack/trading-research':
+        specifier: workspace:*
+        version: link:../../../src/packages/trading-research
+      '@dsh-stack/translator':
+        specifier: workspace:*
+        version: link:../../../src/packages/translator
+      '@dsh-stack/tui':
+        specifier: workspace:*
+        version: link:../../../src/packages/tui
+      '@dsh-stack/tweak-drag-drop':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-drag-drop
+      '@dsh-stack/tweak-fork-undo':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-fork-undo
+      '@dsh-stack/tweak-keybinds':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-keybinds
+      '@dsh-stack/tweak-plan-toggle':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-plan-toggle
+      '@dsh-stack/tweak-share-links':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-share-links
+      '@dsh-stack/tweak-slash-commands':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-slash-commands
+      '@dsh-stack/tweak-stats':
+        specifier: workspace:*
+        version: link:../../extensions/tweak-stats
+      '@dsh-stack/tweaks':
+        specifier: workspace:*
+        version: link:../../../src/packages/tweaks
       '@dsh-stack/workspace-files':
         specifier: workspace:*
         version: link:../../../src/packages/workspace-files
