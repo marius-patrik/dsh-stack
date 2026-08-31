@@ -1,6 +1,6 @@
 # @dsh-stack/dialect-gemini
 
-The Google Gemini wire dialect extension. Registers `geminiDialect` into the `@dsh-stack/dialects` registry (`stack.ai.dialects`) so Gemini-family provider routes can resolve it by id at runtime via `ctx.dialects.get("gemini")`. Also exports the shared Gemini serialization helpers (`serializeContents`, `buildToolNameIndex`, `translateGemini`) that `@dsh-stack/dialect-code-assist` wraps — the Code Assist wire is a JSON envelope over the same `GenerateContent` vocabulary.
+Shared Google Gemini wire-format serialization helpers (`geminiDialect`, `serializeContents`, `buildToolNameIndex`, `translateGemini`) that `@dsh-stack/dialect-code-assist` wraps — the Code Assist wire is a JSON envelope over the same `GenerateContent` vocabulary. A plain library, not a mountable cordis extension: no current provider route resolves a `gemini` dialect id at runtime (`provider-gemini-api` uses `dialect: "openai"`, Google's OpenAI-compatible endpoint; `provider-gemini-sub` uses `dialect: "code-assist"`).
 
 ## Model Experience
 
