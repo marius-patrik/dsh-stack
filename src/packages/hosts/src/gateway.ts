@@ -78,8 +78,8 @@ export class AccessGateway {
               });
               proxyRes.on("end", () => {
                 const injected = body.includes("<head>")
-                   ? body.replace("<head>", "<head>" + UUID_POLYFILL)
-                   : UUID_POLYFILL + body;
+                  ? body.replace("<head>", "<head>" + UUID_POLYFILL)
+                  : UUID_POLYFILL + body;
                 const resHeaders = { ...proxyRes.headers };
                 resHeaders["content-length"] = Buffer.byteLength(injected).toString();
                 clientRes.writeHead(proxyRes.statusCode || 200, resHeaders);

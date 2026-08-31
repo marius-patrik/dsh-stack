@@ -18,6 +18,11 @@
 
 import type { QuotaProvider, QuotaSnapshot } from "./index.js";
 import type { ProbeTokenReader } from "./providers.js";
+import {
+  parseRateLimitHeaderNumber,
+  parseRateLimitReset,
+  rateLimitFields,
+} from "./rate-limit-headers.js";
 
 /** How long a configured-route probe may wait before it counts as unreachable. */
 const PROBE_TIMEOUT_MS = 15_000;
@@ -86,12 +91,22 @@ export function modelsEndpoint(baseURL: string): string {
   return `${baseURL.replace(/\/+$/, "")}/models`;
 }
 
-/** snapshot implementation. */
+/**
+ * Build one snapshot for a configured-route probe, carrying the directory
+ * entry's human `displayName` through so a per-account breakdown in the
+ * Settings UI (a numbered multi-account vendor like `openrouter-2`) can
+ * label each account without a second lookup back into model settings.
+ */
 function snapshot(
-  provider: string,
-  rest: Omit<QuotaSnapshot, "provider" | "fetchedAt">,
+  entry: ConfigurableProviderEntry,
+  rest: Omit<QuotaSnapshot, "provider" | "displayName" | "fetchedAt">,
 ): QuotaSnapshot {
-  return { provider, fetchedAt: new Date().toISOString(), ...rest };
+  return {
+    provider: entry.provider,
+    displayName: entry.displayName,
+    fetchedAt: new Date().toISOString(),
+    ...rest,
+  };
 }
 
 /**
@@ -111,14 +126,14 @@ export async function probeConfiguredRoute(
   if (profile.baseURL === undefined) {
     // A catalog route inherits its endpoint from the installed catalog, so
     // there is nothing here to probe. Saying so beats implying health.
-    return snapshot(entry.provider, {
+    return snapshot(entry, {
       status: "unknown",
       source: "manual",
       message: "No endpoint configured for this route; nothing to verify.",
     });
   }
   if (profile.apiKeyEnv !== undefined && (token === undefined || token.length === 0)) {
-    return snapshot(entry.provider, {
+    return snapshot(entry, {
       status: "unknown",
       source: "manual",
       message: `No credential configured (${profile.apiKeyEnv})`,
@@ -135,50 +150,59 @@ export async function probeConfiguredRoute(
       },
       signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
     });
+    // A custom gateway may still answer with the same generic
+    // `x-ratelimit-*`/`retry-after` headers a first-party API uses, so a
+    // multi-account vendor's meter bar and reset timer read real remaining
+    // capacity instead of only ever showing a bare status light.
+    const remaining = parseRateLimitHeaderNumber(response, "x-ratelimit-remaining");
+    const limit = parseRateLimitHeaderNumber(response, "x-ratelimit-limit");
+    const resetsAt = parseRateLimitReset(response);
     if (response.status === 200) {
-      return snapshot(entry.provider, {
+      return snapshot(entry, {
         status: "available",
         source: "endpoint",
         message: `${entry.displayName} healthy`,
+        ...rateLimitFields(remaining, limit, resetsAt),
       });
     }
     if (response.status === 401) {
-      return snapshot(entry.provider, {
+      return snapshot(entry, {
         status: "error",
         source: "endpoint",
         message: "Auth failed — the endpoint rejected this credential",
       });
     }
     if (response.status === 403) {
-      return snapshot(entry.provider, {
+      return snapshot(entry, {
         status: "error",
         source: "endpoint",
         message: "Quota exhausted or access denied",
       });
     }
     if (response.status === 429) {
-      return snapshot(entry.provider, {
+      return snapshot(entry, {
         status: "error",
         source: "endpoint",
-        message: "Rate limited",
+        message: `Rate limited${resetsAt !== undefined ? ` — resets ${new Date(resetsAt).toLocaleTimeString()}` : ""}`,
+        ...rateLimitFields(remaining, limit, resetsAt),
       });
     }
     if (response.status === 404) {
       // Plenty of gateways serve completions without a listing endpoint; that
       // is not a credential problem and must not be reported as one.
-      return snapshot(entry.provider, {
+      return snapshot(entry, {
         status: "unknown",
         source: "endpoint",
         message: "Endpoint serves no model listing; status cannot be verified.",
       });
     }
-    return snapshot(entry.provider, {
+    return snapshot(entry, {
       status: "unknown",
       source: "endpoint",
       message: `HTTP ${response.status}`,
     });
   } catch (error) {
-    return snapshot(entry.provider, {
+    return snapshot(entry, {
       status: "error",
       source: "endpoint",
       message: error instanceof Error ? error.message : String(error),
@@ -225,7 +249,7 @@ export function createConfiguredProviders(deps: ConfiguredProbeDeps): QuotaProvi
       /** read implementation. */
       async read(signal): Promise<QuotaSnapshot> {
         if (signal.aborted) {
-          return snapshot(entry.provider, {
+          return snapshot(entry, {
             status: "unknown",
             source: "manual",
             message: "Probe aborted",
@@ -235,7 +259,7 @@ export function createConfiguredProviders(deps: ConfiguredProbeDeps): QuotaProvi
         // the last probe must be what this one checks.
         const profile = readConfiguredProfile(entry, deps.describeSettings());
         if (profile === undefined) {
-          return snapshot(entry.provider, {
+          return snapshot(entry, {
             status: "unknown",
             source: "manual",
             message: "No stored configuration found for this route.",

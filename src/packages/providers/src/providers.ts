@@ -151,6 +151,24 @@ export const EFFORTS: ProviderReasoning = {
 };
 
 /**
+ * The vendor a numbered account id belongs to: strips a trailing `-<N>`
+ * (`openrouter-3` -> `openrouter`; `openrouter` itself is already bare).
+ * Matches the numbered-account naming convention `.data/settings.yaml`
+ * already uses across every multi-account vendor (#187). Exported so
+ * `@dsh-stack/provider-rotation` and the quotas web routes share this
+ * grouping instead of re-deriving it.
+ */
+export function vendorBaseId(provider: string): string {
+  return provider.replace(/-\d+$/, "");
+}
+
+/** The numbered suffix of an account id (bare ids sort first, at 1). */
+export function vendorSuffix(provider: string): number {
+  const match = /-(\d+)$/.exec(provider);
+  return match === null ? 1 : Number(match[1]);
+}
+
+/**
  * Credential-slot and route helpers shared by every provider extension.
  * Exported so `@dsh-stack/provider-<id>` extensions build their `ProviderRoute`
  * with the same conventions the routes used before they were split out of

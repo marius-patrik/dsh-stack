@@ -33,6 +33,7 @@ import {
 import { DialectAdapter, DEFAULT_STREAM_IDLE_TIMEOUT_MS } from "./adapter.js";
 import { ModelCatalog, DEFAULT_CATALOG_TTL_MS } from "./catalog.js";
 import type { ProviderConnection, ProviderGate, ProviderRouteAuthSlot } from "./adapter.js";
+import { vendorBaseId, vendorSuffix } from "./providers.js";
 import type { ProviderRoute } from "./providers.js";
 import { ProviderRegistry } from "./registry.js";
 import { applyQuotas, type QuotasConfig } from "./quotas/index.js";
@@ -82,6 +83,8 @@ export {
   ZEN_MAX_OUTPUT,
   ZEN_CLAUDE_CONTEXT,
   ZEN_CLAUDE_MAX_OUTPUT,
+  vendorBaseId,
+  vendorSuffix,
 } from "./providers.js";
 export type {
   AuthKind,
@@ -316,24 +319,6 @@ export function resolveProvidersOptions(config: Config): ResolvedProvidersOption
     liveCatalog: config.liveCatalog ?? true,
     catalogTtlMs,
   };
-}
-
-/**
- * The vendor a numbered account id belongs to: strips a trailing `-<N>`
- * (`openrouter-3` -> `openrouter`; `openrouter` itself is already bare).
- * Matches the numbered-account naming convention `.data/settings.yaml`
- * already uses across every multi-account vendor (#187). Exported so
- * `@dsh-stack/provider-rotation` shares this grouping instead of
- * re-deriving it for `ctx.llm`'s own provider ids.
- */
-export function vendorBaseId(provider: string): string {
-  return provider.replace(/-\d+$/, "");
-}
-
-/** The numbered suffix of an account id (bare ids sort first, at 1). */
-export function vendorSuffix(provider: string): number {
-  const match = /-(\d+)$/.exec(provider);
-  return match === null ? 1 : Number(match[1]);
 }
 
 /** toConnection implementation. */

@@ -6,10 +6,32 @@
  */
 
 import { sendJsonResponse } from "@dsh-stack/plugin-kit";
+import { vendorBaseId, vendorSuffix } from "../../providers.js";
 import type { QuotaRegistry, QuotaSnapshot } from "../index.js";
 import { probeBinariesAndUsage } from "./binary-probe.js";
 import { QUOTAS_PREFIX } from "./quotas-prefix.js";
 import { isRoute, type RouteContext } from "./route-context.js";
+
+/**
+ * A snapshot annotated with the vendor grouping the Settings UI needs to
+ * show every account of a multi-account provider (`openrouter`,
+ * `openrouter-2`, ...) together: `vendor` is the numbered id's base
+ * (#187's convention, already shared with `@dsh-stack/provider-rotation`),
+ * `accountIndex` its numbered suffix (bare ids sort first, at 1).
+ */
+interface VendorGroupedSnapshot extends QuotaSnapshot {
+  vendor: string;
+  accountIndex: number;
+}
+
+/** Annotate one snapshot with its vendor grouping. */
+function withVendorGrouping(snapshot: QuotaSnapshot): VendorGroupedSnapshot {
+  return {
+    ...snapshot,
+    vendor: vendorBaseId(snapshot.provider),
+    accountIndex: vendorSuffix(snapshot.provider),
+  };
+}
 
 /** Handle one core quota request (dashboard, integrations, snapshots, summary, refresh). */
 export async function handleQuotaRoute(
@@ -25,14 +47,15 @@ export async function handleQuotaRoute(
 
   if (isRoute(ctx, QUOTAS_PREFIX, "GET")) {
     sendJsonResponse(res, 200, {
-      message: "Quotas dashboard is consolidated into Settings > Providers / Models. Live data available at /quotas/api/snapshots",
-      snapshots: registry.all(),
+      message:
+        "Quotas dashboard is consolidated into Settings > Providers / Models. Live data available at /quotas/api/snapshots",
+      snapshots: registry.all().map(withVendorGrouping),
     });
     return true;
   }
 
   if (isRoute(ctx, `${QUOTAS_PREFIX}/api/snapshots`, "GET")) {
-    sendJsonResponse(res, 200, { snapshots: registry.all() });
+    sendJsonResponse(res, 200, { snapshots: registry.all().map(withVendorGrouping) });
     return true;
   }
 
@@ -47,8 +70,8 @@ export async function handleQuotaRoute(
         (s) => s.status === "available" && s.remaining !== undefined && s.remaining <= 0,
       ).length,
       providers: snapshots.map((s: QuotaSnapshot) => ({
-        provider: s.provider,
-        status: s.status,
+        ...withVendorGrouping(s),
+        displayName: s.displayName ?? null,
         remaining: s.remaining ?? null,
         limit: s.limit ?? null,
         resetsAt: s.resetsAt ?? null,
