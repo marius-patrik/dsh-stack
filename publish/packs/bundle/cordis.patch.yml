@@ -33,6 +33,8 @@
       name: '@dsh-stack/lsp'
     - id: profile-ui
       name: '@dsh-stack/profile-ui'
+    - id: provider-rotation
+      name: '@dsh-stack/provider-rotation'
     - id: providers
       name: '@dsh-stack/providers'
     - id: repos
