@@ -1,88 +1,122 @@
 /**
- * One collapsible group of the sidebar tree -- Pinned, Terminals, Containers,
- * Host Machine, Global, Archived -- and the two shapes a group can take.
- *
- * Issue #103 makes the arrangement a user preference rather than a fixed
- * layout, persisted as `treeLayout` in `@dsh-stack/sidebar-preferences`:
- *
- * - `sections` gives each group its own block, separated by a rule. This is
- *   what the sidebar has always looked like.
- * - `unified` drops the section chrome so every group reads as a node of one
- *   continuous tree, indented under a single root.
- *
- * Both shapes render from the same description, which is the point: a group
- * added later works under both without being written twice.
+ * The sidebar tree's shared collapsible-group shell: an icon, title, count
+ * badge, hover actions and a chevron toggling a body. Pinned, Containers,
+ * Terminals, Host, Global and Archived are all one instance of this shape;
+ * before #138 each was its own copy-pasted block inside
+ * `UnifiedWorkspacesBrowser`, which is exactly the duplication #96's
+ * Containers/Terminals split would otherwise have doubled.
  *
  * @module @dsh-stack/providers/client/sidebar-tree/tree-group
  */
 
 /**
- * Build the group renderer for one render pass.
- * @param runtime - the sidebar tree runtime (`h`).
- * @param parts - `{ renderTreeRow }`.
- * @param controller - the tree controller; `treeLayout` selects the shape.
- * @returns `renderTreeGroup(spec)`.
+ * Build the group renderer bound to one runtime.
+ * @param runtime - `{ React, h, glyphs }`. `glyphs.TriangleRight` is the
+ * expand/collapse chevron every group shares.
+ * @returns the render function.
  */
-function __dshCreateTreeGroup(runtime, parts, controller) {
+function __dshCreateTreeGroup(runtime) {
   var h = runtime.h;
-  var unified = controller.treeLayout === "unified";
+  var TriangleRightFill14 = runtime.glyphs.TriangleRight;
 
   /**
-   * The indent, in pixels, of a node at one depth.
-   * @param depth - 0 for a top-level group.
-   * @returns the left padding.
-   */
-  function indentAt(depth) {
-    return 8 + depth * 16;
-  }
-
-  /**
-   * Render one group: its header row, and its children when expanded.
-   * @param spec - `{ key, icon, label, badge, open, onToggle, actions, depth, children, separator }`.
+   * Renders one collapsible sidebar group.
+   * @param options - `{ icon, title, count, countTone, open, onToggle,
+   * actions, children, emptyText, wrapperStyle }`. `icon` is a rendered
+   * glyph element; `countTone` selects the badge color (`"primary"` or
+   * `"muted"`); omit `count` to hide the badge entirely; `children` is the
+   * group body, shown only when `open`, falling back to `emptyText` when it
+   * has no rows to display (a caller passes an empty array/no children to
+   * signal that).
    * @returns the group element.
    */
-  function renderTreeGroup(spec) {
-    var depth = spec.depth || 0;
+  return function renderTreeGroup(options) {
+    var tone =
+      options.countTone === "primary"
+        ? { background: "rgba(99, 102, 241, 0.15)", color: "var(--dsw-alias-primary, #6366f1)" }
+        : options.countTone === "success"
+          ? { background: "rgba(63, 185, 80, 0.18)", color: "#3fb950" }
+          : { background: "rgba(128,128,128,0.15)", color: "var(--dsw-alias-label-secondary)" };
+
+    var hasRows = Boolean(
+      options.children && (!Array.isArray(options.children) || options.children.length > 0),
+    );
+
     return h(
       "div",
       {
-        key: spec.key,
-        style: {
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          flex: "0 0 auto",
-          margin: unified ? 0 : "2px 0 4px 0",
-          paddingBottom: unified ? 0 : "4px",
-          borderBottom:
-            unified || spec.separator === false
-              ? undefined
-              : "1px solid var(--dsw-alias-border-l1)",
-        },
+        className: "dsh-tree-group",
+        style: Object.assign(
+          {
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            flex: "0 0 auto",
+            margin: "2px 0 4px 0",
+            paddingBottom: "4px",
+            borderBottom: "1px solid var(--dsw-alias-border-l1)",
+          },
+          options.wrapperStyle || {},
+        ),
       },
-      parts.renderTreeRow({
-        key: "header",
-        className: "dsh-tree-projectRow",
-        padLeft: indentAt(depth),
-        height: 28,
-        ariaExpanded: spec.open,
-        style: { fontWeight: depth === 0 ? 600 : 500 },
-        icon: spec.icon,
-        chevron: { open: spec.open },
-        title: spec.label,
-        badge: spec.badge,
-        onClick: spec.onToggle,
-        actions: spec.actions,
-      }),
-      spec.open
+      h(
+        "div",
+        {
+          className: "dsh-tree-projectRow",
+          role: "treeitem",
+          style: { position: "relative", paddingLeft: "8px", fontWeight: 600, height: "28px" },
+          "aria-expanded": options.open,
+          onClick: options.onToggle,
+        },
+        h("span", { className: "dsh-tree-slot dsh-tree-icon" }, options.icon),
+        h(
+          "span",
+          { className: "dsh-tree-slot dsh-tree-chevron" },
+          h(TriangleRightFill14, {
+            className: "dsh-tree-arrow" + (options.open ? " dsh-tree-arrowOpen" : ""),
+            size: 11,
+          }),
+        ),
+        h("span", { className: "dsh-tree-title" }, options.title),
+        options.count === undefined
+          ? null
+          : h(
+              "span",
+              {
+                style: Object.assign(
+                  {
+                    padding: "1px 6px",
+                    borderRadius: "8px",
+                    fontSize: "9.5px",
+                    fontWeight: 700,
+                    marginLeft: "4px",
+                  },
+                  tone,
+                ),
+              },
+              options.count,
+            ),
+        options.actions ? h("span", { className: "dsh-tree-actions" }, options.actions) : null,
+      ),
+      options.open
         ? h(
             "div",
             { style: { display: "flex", flexDirection: "column", width: "100%" } },
-            spec.children,
+            hasRows
+              ? options.children
+              : h(
+                  "div",
+                  {
+                    style: {
+                      padding: "4px 8px 4px 24px",
+                      fontSize: "11px",
+                      color: "var(--dsw-alias-label-tertiary)",
+                    },
+                  },
+                  options.emptyText || "(empty)",
+                ),
           )
         : null,
     );
-  }
-
-  return { render: renderTreeGroup, indentAt: indentAt, unified: unified };
+  };
 }

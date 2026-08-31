@@ -1,68 +1,101 @@
 /**
- * Derives every group the sidebar tree renders from the raw session,
- * workspace, terminal and container feeds.
+ * Derives the sidebar tree's groups from the raw session/workspace/live-process
+ * feeds: which chats are pinned, which folder each chat's workspace groups
+ * under, which are ungrouped or archived, and which terminal sessions and
+ * containers are currently live.
  *
- * This is the tree's whole classification rule in one place: which chat is
- * pinned, archived, a subagent of another chat, or attached to a workspace
- * folder -- and what is left over, which is the `Global` group (formerly
- * `Ungrouped`, renamed for issue #97). Terminals and containers are split
- * apart here rather than merged into a single `Active` list, which is what
- * issue #96 asked for; chats are no longer duplicated into a live group at
- * all, because they belong to the workspaces section they are grouped under.
- *
- * No React, no markup: given the feeds, the answer is the same every time,
- * which is what makes the rest of the tree renderable from a description.
+ * Pulled out of `providers/client.js`'s `UnifiedWorkspacesBrowser` for #138.
+ * The one behavior change from the pre-extraction version is #96: the old
+ * "Active" group mixed running chats into the same list as live terminals and
+ * containers. This grouping no longer produces a duplicate "active chats"
+ * list at all -- a busy/running chat still renders exactly once, in whatever
+ * group it already belongs to (pinned, its workspace folder, or Global), and
+ * `isRunningSession` lets the row renderer decorate it with a running
+ * indicator instead. Terminals and containers become their own groups
+ * (`terminalRows` / `containerRows`), each independently counted and
+ * collapsed, per #96's acceptance criterion.
  *
  * @module @dsh-stack/providers/client/sidebar-tree/session-grouping
  */
 
-/** localStorage key holding the ids the user pinned. */
-var __DSH_PINNED_SESSIONS_KEY = "dsh_pinned_sessions";
-/** localStorage key holding the ids the user archived. */
-var __DSH_ARCHIVED_SESSIONS_KEY = "dsh_archived_sessions";
+var SIDEBAR_PINNED_STORAGE_KEY = "dsh_pinned_sessions";
+var SIDEBAR_ARCHIVED_STORAGE_KEY = "dsh_archived_sessions";
 
 /**
- * Read one localStorage-backed id set, tolerating absent or corrupt storage.
- * @param key - storage key.
- * @returns a Set of ids; empty when nothing is stored.
+ * Read a JSON array of ids persisted to `localStorage`, tolerating a missing
+ * or corrupt value.
+ * @param key - the storage key.
+ * @returns the parsed ids, or an empty array.
  */
-function __dshReadSessionIdSet(key) {
-  var set = new Set();
+function __dshReadStoredIdSet(key) {
   try {
-    var stored = JSON.parse(localStorage.getItem(key) || "[]");
-    if (Array.isArray(stored))
-      stored.forEach(function (id) {
-        set.add(id);
-      });
+    var parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    return set;
-  }
-  return set;
-}
-
-/**
- * Persist one localStorage-backed id set.
- * @param key - storage key.
- * @param set - the ids to store.
- */
-function __dshWriteSessionIdSet(key, set) {
-  try {
-    localStorage.setItem(key, JSON.stringify(Array.from(set)));
-  } catch (error) {
-    // Storage is unavailable; the in-memory set still drives this page.
+    return [];
   }
 }
 
 /**
- * Classify one snapshot of the session and workspace feeds into the groups
- * the sidebar tree renders.
- * @param input - `{ sessionList, workspaceList, terminals, containers }`.
- * @returns the derived groups, predicates and pin/archive mutators.
+ * A session's parent id, under whichever field the session shape uses.
+ * @param session - a session record.
+ * @returns the parent session id, or null for a top-level session.
  */
-function __dshGroupSessions(input) {
-  var sessionList = input.sessionList || {};
-  var workspaceList = input.workspaceList || {};
-  var workspaces = workspaceList.items || [];
+function __dshSessionParentId(session) {
+  if (!session) return null;
+  return (
+    session.parentId || session.parentSessionId || session.parentSession || session.parent || null
+  );
+}
+
+/**
+ * Whether a session is a subagent of another session already in the feed --
+ * subagents render nested under their parent chat row, not as top-level rows.
+ * @param session - the candidate subagent.
+ * @param sessionsById - the full session-id lookup.
+ * @param sessionIds - the full session id list.
+ * @returns whether `session` has a live parent.
+ */
+function __dshIsSubagentChild(session, sessionsById, sessionIds) {
+  var parentId = __dshSessionParentId(session);
+  return Boolean(parentId && (sessionsById[parentId] || sessionIds.indexOf(parentId) !== -1));
+}
+
+/**
+ * Whether a session is running: busy, actively streaming, or mid-turn under
+ * any of the shape variants the session feed has used. Used only to decorate
+ * a chat row with a running indicator (#96) -- it no longer pulls the chat
+ * into a separate "Active" list.
+ * @param session - the session to check.
+ * @returns whether the session is currently running.
+ */
+function __dshIsRunningSession(session) {
+  return Boolean(
+    session &&
+      (session.busy === true ||
+        session.running === true ||
+        session.status === "busy" ||
+        session.status === "running" ||
+        session.phase === "running"),
+  );
+}
+
+/**
+ * Build the sidebar tree's grouped view of sessions, workspaces, terminals
+ * and containers, plus the pin/archive predicates and mutators the row
+ * renderers need.
+ * @param input - `{ sessionList, workspaceList, terminals, containers, archiveSession, loadAll }`.
+ * `archiveSession` is the injected cordis action (may reject, see
+ * `session-action-dispatch.js`); `loadAll` refreshes the terminal/container
+ * poll after a local mutation.
+ * @returns the grouped sidebar data.
+ */
+function __dshGroupSidebarSessions(input) {
+  var sessionList = input.sessionList || { ids: [], byId: {} };
+  var workspaceList = input.workspaceList || { items: [] };
+  var terminals = input.terminals || [];
+  var containers = input.containers || [];
+
   var sessionsById = sessionList.byId || {};
   var sessionIds =
     sessionList.ids && sessionList.ids.length > 0
@@ -70,235 +103,247 @@ function __dshGroupSessions(input) {
       : sessionList.order && sessionList.order.length > 0
         ? sessionList.order
         : Object.keys(sessionsById);
-
-  var pinnedIds = __dshReadSessionIdSet(__DSH_PINNED_SESSIONS_KEY);
-  var archivedIds = __dshReadSessionIdSet(__DSH_ARCHIVED_SESSIONS_KEY);
-  [
-    workspaceList.archivedSessionIds,
-    workspaceList.global && workspaceList.global.archivedSessionIds,
-  ]
-    .filter(Boolean)
-    .forEach(function (ids) {
-      ids.forEach(function (id) {
-        archivedIds.add(id);
-      });
-    });
+  var workspaces = workspaceList.items || [];
 
   /**
-   * The id of a session's parent, across the field names the feeds use.
-   * @param session - a session row.
-   * @returns the parent id, or null at the top level.
-   */
-  function parentIdOf(session) {
-    if (!session) return null;
-    return (
-      session.parentId || session.parentSessionId || session.parentSession || session.parent || null
-    );
-  }
-
-  /**
-   * True when a session hangs off another listed session, so it renders as a
-   * subagent under its parent instead of as a top-level row.
-   * @param session - a session row.
-   * @returns whether the session is a subagent child.
-   */
-  function isSubagentChild(session) {
-    var parentId = parentIdOf(session);
-    return Boolean(parentId && (sessionsById[parentId] || sessionIds.indexOf(parentId) !== -1));
-  }
-
-  /**
-   * Newest-first children of one session.
+   * A session's subagents, most-recently-updated first.
    * @param parentId - the parent session id.
-   * @returns the subagent rows.
+   * @returns the subagent sessions.
    */
-  function subagentsOf(parentId) {
+  function getSubagents(parentId) {
     if (!parentId) return [];
     return sessionIds
       .map(function (id) {
         return sessionsById[id];
       })
       .filter(function (session) {
-        return session && parentIdOf(session) === parentId;
+        return session && __dshSessionParentId(session) === parentId;
       })
-      .sort(byRecency);
+      .sort(function (a, b) {
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
   }
 
-  /**
-   * Sort comparator putting the most recently updated session first.
-   * @param left - a session row.
-   * @param right - a session row.
-   * @returns the comparison result.
-   */
-  function byRecency(left, right) {
-    return (right.updatedAt || 0) - (left.updatedAt || 0);
-  }
+  var archivedSet = new Set();
+  (workspaceList.archivedSessionIds || []).forEach(function (id) {
+    archivedSet.add(id);
+  });
+  ((workspaceList.global && workspaceList.global.archivedSessionIds) || []).forEach(function (id) {
+    archivedSet.add(id);
+  });
+  __dshReadStoredIdSet(SIDEBAR_ARCHIVED_STORAGE_KEY).forEach(function (id) {
+    archivedSet.add(id);
+  });
 
   /**
-   * True when a session is archived, by stored id or by its own flags.
-   * @param session - a session row, possibly undefined.
-   * @param sessionId - the id, when the row itself is not to hand.
+   * Whether a session is archived, by id or by its own flags.
+   * @param session - the session record, when loaded.
+   * @param sessionId - the session id, when only the id is known.
    * @returns whether the session is archived.
    */
-  function isArchived(session, sessionId) {
+  function isArchivedSession(session, sessionId) {
+    if (!session && !sessionId) return false;
     var id = sessionId || (session && session.id);
-    if (id && archivedIds.has(id)) return true;
+    if (id && archivedSet.has(id)) return true;
     return Boolean(
       session && (session.isArchived || session.archived || session.status === "archived"),
     );
   }
 
+  var pinnedSet = new Set(__dshReadStoredIdSet(SIDEBAR_PINNED_STORAGE_KEY));
+
   /**
-   * True when a session is pinned, by stored id or by its own flags.
-   * @param session - a session row, possibly undefined.
-   * @param sessionId - the id, when the row itself is not to hand.
+   * Whether a session is pinned, by id or by its own flags.
+   * @param session - the session record, when loaded.
+   * @param sessionId - the session id, when only the id is known.
    * @returns whether the session is pinned.
    */
-  function isPinned(session, sessionId) {
+  function isPinnedSession(session, sessionId) {
+    if (!session && !sessionId) return false;
     var id = sessionId || (session && session.id);
-    if (id && pinnedIds.has(id)) return true;
+    if (id && pinnedSet.has(id)) return true;
     return Boolean(session && (session.isPinned || session.pinned || session.favorite));
   }
 
-  /**
-   * True when a session reports itself as currently doing work. Chats no
-   * longer get their own live group (#96), so this drives the per-row running
-   * indicator instead of a separate list.
-   * @param session - a session row.
-   * @returns whether the session is running.
-   */
-  function isRunning(session) {
-    if (!session) return false;
-    return Boolean(
-      session.busy === true ||
-        session.running === true ||
-        session.status === "busy" ||
-        session.status === "running" ||
-        session.phase === "running",
-    );
-  }
+  var pinnedSessions = sessionIds
+    .map(function (id) {
+      return sessionsById[id];
+    })
+    .filter(function (session) {
+      return (
+        session &&
+        !__dshIsSubagentChild(session, sessionsById, sessionIds) &&
+        !isArchivedSession(session, session.id) &&
+        isPinnedSession(session, session.id)
+      );
+    })
+    .sort(function (a, b) {
+      return (b.updatedAt || 0) - (a.updatedAt || 0);
+    });
 
-  /**
-   * Every top-level, unarchived session matching one predicate, newest first.
-   * @param accept - predicate over a session row.
-   * @returns the matching rows.
-   */
-  function topLevelSessions(accept) {
-    return sessionIds
-      .map(function (id) {
-        return sessionsById[id];
-      })
-      .filter(function (session) {
-        if (!session || isSubagentChild(session) || isArchived(session, session.id)) return false;
-        return accept(session);
-      })
-      .sort(byRecency);
-  }
+  var terminalRows = terminals.filter(function (session) {
+    return Boolean(session.attached);
+  });
+  var containerRows = containers.filter(function (container) {
+    return Boolean(container.isRunning);
+  });
 
-  /**
-   * Strip a trailing slash so workspace paths and directory paths compare.
-   * @param path - a filesystem path.
-   * @returns the normalised path.
-   */
-  function normalisePath(path) {
-    if (!path) return path;
+  var folderSessions = {};
+  var accountedSessionIds = {};
+
+  /** Trailing-slash-normalized workspace path, or undefined when the workspace has none. */
+  function normalizedWorkspacePath(workspaceLike) {
+    var path = workspaceLike.cwd || workspaceLike.path;
+    if (!path) return undefined;
     return path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
   }
 
-  var folderSessions = {};
-  var accountedIds = {};
-
-  /**
-   * File one session under a workspace folder, marking it accounted for so it
-   * does not also fall into the Global group.
-   * @param path - the workspace's filesystem path.
-   * @param sessionId - the session id.
-   */
-  function fileUnderFolder(path, sessionId) {
-    var folder = normalisePath(path);
-    if (!folder) return;
-    if (!folderSessions[folder]) folderSessions[folder] = [];
-    var session = sessionsById[sessionId];
-    if (!session) return;
-    accountedIds[sessionId] = true;
-    if (!isSubagentChild(session) && !isArchived(session, sessionId))
-      folderSessions[folder].push(session);
-  }
-
   workspaces.forEach(function (workspace) {
+    var workspacePath = normalizedWorkspacePath(workspace);
+    if (!workspacePath) return;
+    if (!folderSessions[workspacePath]) folderSessions[workspacePath] = [];
     (workspace.sessionIds || []).forEach(function (sessionId) {
-      fileUnderFolder(workspace.cwd || workspace.path, sessionId);
+      var session = sessionsById[sessionId];
+      if (!session) return;
+      accountedSessionIds[sessionId] = true;
+      if (
+        !__dshIsSubagentChild(session, sessionsById, sessionIds) &&
+        !isArchivedSession(session, sessionId)
+      ) {
+        folderSessions[workspacePath].push(session);
+      }
     });
   });
 
   sessionIds.forEach(function (sessionId) {
     var session = sessionsById[sessionId];
-    if (!session || accountedIds[sessionId] || !session.workspaceId) return;
-    var matched = workspaces.find(function (workspace) {
+    if (!session || accountedSessionIds[sessionId] || !session.workspaceId) return;
+    var matchedWorkspace = workspaces.find(function (workspace) {
       return workspace.workspaceId === session.workspaceId;
     });
-    if (matched) fileUnderFolder(matched.cwd || matched.path, sessionId);
+    if (!matchedWorkspace) return;
+    var workspacePath = normalizedWorkspacePath(matchedWorkspace);
+    if (!workspacePath) return;
+    if (!folderSessions[workspacePath]) folderSessions[workspacePath] = [];
+    accountedSessionIds[sessionId] = true;
+    if (
+      !__dshIsSubagentChild(session, sessionsById, sessionIds) &&
+      !isArchivedSession(session, sessionId)
+    ) {
+      folderSessions[workspacePath].push(session);
+    }
   });
+
+  var ungroupedSessions = sessionIds
+    .filter(function (sessionId) {
+      var session = sessionsById[sessionId];
+      return (
+        !accountedSessionIds[sessionId] &&
+        session &&
+        !__dshIsSubagentChild(session, sessionsById, sessionIds) &&
+        !isArchivedSession(session, sessionId) &&
+        !isPinnedSession(session, sessionId)
+      );
+    })
+    .map(function (sessionId) {
+      return sessionsById[sessionId];
+    });
+
+  var archivedSessions = sessionIds
+    .map(function (id) {
+      return sessionsById[id];
+    })
+    .filter(function (session) {
+      return (
+        session &&
+        !__dshIsSubagentChild(session, sessionsById, sessionIds) &&
+        isArchivedSession(session, session.id)
+      );
+    })
+    .sort(function (a, b) {
+      return (b.updatedAt || 0) - (a.updatedAt || 0);
+    });
 
   return {
     sessionsById: sessionsById,
     sessionIds: sessionIds,
     workspaces: workspaces,
-    currentSessionId: sessionList.current,
+    getSubagents: getSubagents,
+    isPinnedSession: isPinnedSession,
+    isArchivedSession: isArchivedSession,
+    isRunningSession: __dshIsRunningSession,
+    pinnedSessions: pinnedSessions,
+    terminalRows: terminalRows,
+    containerRows: containerRows,
     folderSessions: folderSessions,
-    normalisePath: normalisePath,
-    subagentsOf: subagentsOf,
-    isPinned: isPinned,
-    isArchived: isArchived,
-    isRunning: isRunning,
-    pinned: topLevelSessions(function (session) {
-      return isPinned(session, session.id);
-    }),
+    ungroupedSessions: ungroupedSessions,
+    archivedSessions: archivedSessions,
     /**
-     * Sessions belonging to no workspace folder and not pinned: the `Global`
-     * group. Named `Ungrouped` before #97.
+     * Toggles a session's pinned state and persists it.
+     * @param sessionId - the session to pin or unpin.
      */
-    global: topLevelSessions(function (session) {
-      return !accountedIds[session.id] && !isPinned(session, session.id);
-    }),
-    archived: sessionIds
-      .map(function (id) {
-        return sessionsById[id];
-      })
-      .filter(function (session) {
-        return session && !isSubagentChild(session) && isArchived(session, session.id);
-      })
-      .sort(byRecency),
-    terminals: (input.terminals || []).filter(function (terminal) {
-      return Boolean(terminal.attached);
-    }),
-    containers: (input.containers || []).filter(function (container) {
-      return Boolean(container.isRunning);
-    }),
-    /**
-     * Flip one session's pinned state and persist it.
-     * @param sessionId - the session id.
-     */
-    togglePinned: function (sessionId) {
-      if (pinnedIds.has(sessionId)) pinnedIds.delete(sessionId);
-      else pinnedIds.add(sessionId);
-      __dshWriteSessionIdSet(__DSH_PINNED_SESSIONS_KEY, pinnedIds);
+    togglePinSession: function (sessionId) {
+      if (pinnedSet.has(sessionId)) pinnedSet.delete(sessionId);
+      else pinnedSet.add(sessionId);
+      try {
+        localStorage.setItem(SIDEBAR_PINNED_STORAGE_KEY, JSON.stringify(Array.from(pinnedSet)));
+      } catch (error) {
+        // Storage unavailable (private mode, blocked site data): the pin
+        // still applies for this render, but will not survive a reload.
+      }
     },
     /**
-     * Mark one session archived locally and persist it.
-     * @param sessionId - the session id.
+     * Marks a session archived locally and requests the server-side archive.
+     * @param sessionId - the session to archive.
+     * @param archiveSession - the injected archive action; may reject (#98).
+     * @returns the archive action's promise, so a caller can surface a failure.
      */
-    markArchived: function (sessionId) {
-      archivedIds.add(sessionId);
-      __dshWriteSessionIdSet(__DSH_ARCHIVED_SESSIONS_KEY, archivedIds);
+    archiveSessionLocally: function (sessionId, archiveSession) {
+      archivedSet.add(sessionId);
+      try {
+        localStorage.setItem(SIDEBAR_ARCHIVED_STORAGE_KEY, JSON.stringify(Array.from(archivedSet)));
+      } catch (error) {
+        // See togglePinSession.
+      }
+      return archiveSession(sessionId);
     },
     /**
-     * Clear one session's local archived mark and persist it.
-     * @param sessionId - the session id.
+     * Restores an archived session to its normal group.
+     * @param sessionId - the session to unarchive.
+     * @param quotasApiBase - the quotas API base path.
+     * @returns the unarchive request's promise.
      */
-    clearArchived: function (sessionId) {
-      archivedIds.delete(sessionId);
-      __dshWriteSessionIdSet(__DSH_ARCHIVED_SESSIONS_KEY, archivedIds);
+    unarchiveSession: function (sessionId, quotasApiBase) {
+      archivedSet.delete(sessionId);
+      try {
+        localStorage.setItem(SIDEBAR_ARCHIVED_STORAGE_KEY, JSON.stringify(Array.from(archivedSet)));
+      } catch (error) {
+        // See togglePinSession.
+      }
+      return fetch(quotasApiBase + "/sessions/unarchive", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: sessionId }),
+      });
+    },
+    /**
+     * Permanently deletes an archived session.
+     * @param sessionId - the session to delete.
+     * @param quotasApiBase - the quotas API base path.
+     * @returns the delete request's promise.
+     */
+    deletePermanentSession: function (sessionId, quotasApiBase) {
+      archivedSet.delete(sessionId);
+      try {
+        localStorage.setItem(SIDEBAR_ARCHIVED_STORAGE_KEY, JSON.stringify(Array.from(archivedSet)));
+      } catch (error) {
+        // See togglePinSession.
+      }
+      return fetch(quotasApiBase + "/sessions/delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: sessionId }),
+      });
     },
   };
 }

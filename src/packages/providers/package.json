@@ -12,7 +12,8 @@
     "client": {
       "inject": [
         "slots",
-        "locale"
+        "locale",
+        "@dsh-stack/sidebar-preferences"
       ],
       "platform": "web",
       "immediately": false
@@ -36,10 +37,11 @@
     "cordis.patch.yml",
     "presets",
     "client.js",
+    "client",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client-tab-move-protocol.js client.js > lib/client.js",
+    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client-tab-move-protocol.js client/sidebar-tree/format-time-ago.js client/sidebar-tree/session-grouping.js client/sidebar-tree/session-action-dispatch.js client/sidebar-tree/tree-notice.js client/sidebar-tree/tree-group.js client/sidebar-tree/row-actions-menu.js client/sidebar-tree/live-process-row.js client/sidebar-tree/tree-row.js client/sidebar-tree/new-item-menu.js client/sidebar-tree/directory-entries.js client/sidebar-tree/collapsed-rail.js client/sidebar-tree/sidebar-tree.js client.js > lib/client.js",
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
     "test": "node check-plugin.mjs && node tab-move-protocol.test.mjs && node adapter.test.mjs"
   },
@@ -47,7 +49,8 @@
     "@dsh-stack/dialects": "workspace:*",
     "@dsh-stack/dialect-antigravity": "workspace:*",
     "@dsh-stack/credential-vault": "workspace:*",
-    "@dsh-stack/plugin-kit": "workspace:*"
+    "@dsh-stack/plugin-kit": "workspace:*",
+    "@dsh-stack/sidebar-preferences": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",

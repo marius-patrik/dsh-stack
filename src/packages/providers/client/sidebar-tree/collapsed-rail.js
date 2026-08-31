@@ -1,90 +1,33 @@
 /**
- * The sidebar tree at rail width: search, New Item, a live-process indicator
- * and a way back to the expanded workspaces explorer.
- *
- * The rail carried its own shorter copy of the New Item menu, so the two
- * drifted apart; it now opens the same menu the tree does, anchored to the
- * rail button.
+ * The sidebar tree's collapsed-rail view: four icon buttons (search, new
+ * item, terminals/sandboxes, workspaces explorer) shown when the sidebar is
+ * narrow (`!props.wide`), in place of the full tree.
  *
  * @module @dsh-stack/providers/client/sidebar-tree/collapsed-rail
  */
 
 /**
- * Build the collapsed-rail renderer for one render pass.
- * @param runtime - the sidebar tree runtime (`h`, `SelectDropdownMenu`, glyphs).
- * @param parts - `{ newItemMenu }`.
- * @param controller - the tree controller for this render pass.
- * @returns `renderCollapsedRail()`.
+ * Build the collapsed-rail renderer bound to one runtime.
+ * @param runtime - `{ React, h, glyphs, SelectDropdownMenu }`.
+ * @returns the render function.
  */
-function __dshCreateCollapsedRail(runtime, parts, controller) {
+function __dshCreateCollapsedRail(runtime) {
   var h = runtime.h;
   var glyphs = runtime.glyphs;
-
-  var RAIL_BUTTON_STYLE = {
-    width: "34px",
-    height: "34px",
-    borderRadius: "8px",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "var(--dsw-alias-label-primary, #ffffff)",
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    transition: "background 120ms ease",
-  };
+  var SelectDropdownMenu = runtime.SelectDropdownMenu;
 
   /**
-   * One rail button.
-   * @param spec - `{ key, title, icon, onClick, buttonRef, extraStyle, badge }`.
-   * @returns the button element.
-   */
-  function railButton(spec) {
-    return h(
-      "button",
-      {
-        key: spec.key,
-        ref: spec.buttonRef,
-        type: "button",
-        className: "dsh-tree-actionBtn dsh-rail-btn",
-        title: spec.title,
-        "aria-label": spec.ariaLabel || spec.title,
-        style: Object.assign({}, RAIL_BUTTON_STYLE, spec.extraStyle),
-        onClick: spec.onClick,
-      },
-      spec.icon,
-      spec.badge || null,
-    );
-  }
-
-  /**
-   * The dot marking that something is running while the sidebar is collapsed.
-   * @returns the dot element.
-   */
-  function renderRailLiveDot() {
-    return h("span", {
-      key: "live",
-      style: {
-        position: "absolute",
-        top: "6px",
-        right: "6px",
-        width: "6px",
-        height: "6px",
-        borderRadius: "50%",
-        background: "#3fb950",
-        boxShadow: "0 0 4px #3fb950",
-      },
-    });
-  }
-
-  /**
-   * Render the rail.
+   * Renders the collapsed rail.
+   * @param ctx - `{ showSearchButton, handleExpand, setSearchExpanded,
+   * searchInputRef, plusMenu, setPlusMenu, railPlusButtonRef, totalLive,
+   * firstTerminalName, onCreateChat, onCreateTerminal, onCreateContainer,
+   * onOpenWorkspace }`.
    * @returns the rail element.
    */
-  function renderCollapsedRail() {
-    var plusMenu = controller.plusMenu;
-    var isPlusOpen = Boolean(plusMenu && (plusMenu === "rail" || plusMenu.key === "rail"));
-    var liveCount = controller.grouping.terminals.length + controller.grouping.containers.length;
+  return function renderCollapsedRail(ctx) {
+    var isRailPlusOpen = Boolean(
+      ctx.plusMenu === "rail" || (ctx.plusMenu && ctx.plusMenu.key === "rail"),
+    );
 
     return h(
       "div",
@@ -101,75 +44,147 @@ function __dshCreateCollapsedRail(runtime, parts, controller) {
           position: "relative",
         },
       },
-      controller.showSearchButton
-        ? railButton({
-            key: "search",
-            title: "Search workspaces & chats",
-            ariaLabel: "Search",
-            icon: h(glyphs.search, { size: 16, className: "dsh-icon-search dsh-icon-animated" }),
-            onClick: controller.expandAndSearch,
-          })
+      ctx.showSearchButton
+        ? h(
+            "button",
+            {
+              type: "button",
+              className: "dsh-tree-actionBtn dsh-rail-btn",
+              title: "Search workspaces & chats",
+              "aria-label": "Search",
+              style: railButtonStyle(),
+              onClick: function (event) {
+                ctx.handleExpand(event);
+                setTimeout(function () {
+                  ctx.setSearchExpanded(true);
+                  if (ctx.searchInputRef.current) ctx.searchInputRef.current.focus();
+                }, 150);
+              },
+            },
+            h(glyphs.Search, { size: 16, className: "dsh-icon-search dsh-icon-animated" }),
+          )
         : null,
+
       h(
         "div",
-        { key: "new-item", style: { position: "relative" } },
-        railButton({
-          key: "plus",
-          title: "New Item (+)",
-          ariaLabel: "New Item",
-          buttonRef: controller.railPlusButtonRef,
-          icon: h(glyphs.plus, { size: 16, className: "dsh-icon-plus dsh-icon-animated" }),
-          onClick: function (event) {
-            event.stopPropagation();
-            var rect = event.currentTarget.getBoundingClientRect();
-            var swapped =
-              typeof document !== "undefined" &&
-              document.body.classList.contains("dsh-sidebars-swapped");
-            controller.setPlusMenu(
-              isPlusOpen
-                ? null
-                : {
-                    key: "rail",
-                    pos: {
-                      x: Math.max(8, swapped ? rect.left - 194 : rect.right + 4),
-                      y: Math.max(8, rect.top),
-                    },
-                  },
-            );
+        { style: { position: "relative" } },
+        h(
+          "button",
+          {
+            ref: ctx.railPlusButtonRef,
+            type: "button",
+            className: "dsh-tree-actionBtn dsh-rail-btn",
+            title: "New Item (+)",
+            "aria-label": "New Item",
+            style: railButtonStyle(),
+            onClick: function (event) {
+              event.stopPropagation();
+              var rect = event.currentTarget.getBoundingClientRect();
+              var isSwapped =
+                typeof document !== "undefined" &&
+                document.body.classList.contains("dsh-sidebars-swapped");
+              var posX = isSwapped ? rect.left - 194 : rect.right + 4;
+              var posY = rect.top;
+              ctx.setPlusMenu(
+                isRailPlusOpen
+                  ? null
+                  : { key: "rail", pos: { x: Math.max(8, posX), y: Math.max(8, posY) } },
+              );
+            },
           },
-        }),
-        isPlusOpen
-          ? h(runtime.SelectDropdownMenu, {
+          h(glyphs.Plus, { size: 16, className: "dsh-icon-plus dsh-icon-animated" }),
+        ),
+        isRailPlusOpen
+          ? h(SelectDropdownMenu, {
               open: true,
-              position: plusMenu && plusMenu.pos ? plusMenu.pos : null,
-              anchorRef: controller.railPlusButtonRef,
+              position: ctx.plusMenu && ctx.plusMenu.pos ? ctx.plusMenu.pos : null,
+              anchorRef: ctx.railPlusButtonRef,
               onClose: function () {
-                controller.setPlusMenu(null);
+                ctx.setPlusMenu(null);
               },
-              items: parts.newItemMenu.items,
+              items: __dshNewSessionMenuItems(h, glyphs).concat([
+                {
+                  id: "open-workspace",
+                  label: "Open Workspace…",
+                  icon: h(glyphs.BlueFolder, { size: 13 }),
+                },
+              ]),
               onSelect: function (actionId) {
-                parts.newItemMenu.select(actionId, controller.defaultDirectory);
+                ctx.setPlusMenu(null);
+                if (actionId === "chat") ctx.onCreateChat();
+                else if (actionId === "terminal") ctx.onCreateTerminal();
+                else if (actionId === "container") ctx.onCreateContainer();
+                else if (actionId === "open-workspace") ctx.handleExpand();
               },
             })
           : null,
       ),
-      railButton({
-        key: "processes",
-        title: liveCount > 0 ? "Active processes (" + liveCount + ")" : "Terminals & Sandboxes",
-        ariaLabel: "Terminals & Sandboxes",
-        extraStyle: { position: "relative" },
-        icon: h(glyphs.terminals, { size: 16, className: "dsh-icon-terminal dsh-icon-animated" }),
-        badge: liveCount > 0 ? renderRailLiveDot() : null,
-        onClick: controller.openFirstTerminal,
-      }),
-      railButton({
-        key: "explorer",
-        title: "Workspaces Explorer",
-        icon: h(glyphs.blueFolder, { size: 16, className: "dsh-icon-folder dsh-icon-animated" }),
-        onClick: controller.expandSidebar,
-      }),
-    );
-  }
 
-  return renderCollapsedRail;
+      h(
+        "button",
+        {
+          type: "button",
+          className: "dsh-tree-actionBtn dsh-rail-btn",
+          title:
+            ctx.totalLive > 0
+              ? "Active processes (" + ctx.totalLive + ")"
+              : "Terminals & Sandboxes",
+          "aria-label": "Terminals & Sandboxes",
+          style: Object.assign({ position: "relative" }, railButtonStyle()),
+          onClick: function () {
+            window.dispatchEvent(
+              new CustomEvent("dsh:open-terminal", {
+                detail: { session: ctx.firstTerminalName || "0" },
+              }),
+            );
+          },
+        },
+        h(glyphs.Terminals, { size: 16, className: "dsh-icon-terminal dsh-icon-animated" }),
+        ctx.totalLive > 0
+          ? h("span", {
+              style: {
+                position: "absolute",
+                top: "6px",
+                right: "6px",
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "#3fb950",
+                boxShadow: "0 0 4px #3fb950",
+              },
+            })
+          : null,
+      ),
+
+      h(
+        "button",
+        {
+          type: "button",
+          className: "dsh-tree-actionBtn dsh-rail-btn",
+          title: "Workspaces Explorer",
+          "aria-label": "Workspaces Explorer",
+          style: railButtonStyle(),
+          onClick: ctx.handleExpand,
+        },
+        h(glyphs.BlueFolder, { size: 16, className: "dsh-icon-folder dsh-icon-animated" }),
+      ),
+    );
+  };
+
+  /** The style every rail icon button shares. */
+  function railButtonStyle() {
+    return {
+      width: "34px",
+      height: "34px",
+      borderRadius: "8px",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "var(--dsw-alias-label-primary, #ffffff)",
+      background: "transparent",
+      border: "none",
+      cursor: "pointer",
+      transition: "background 120ms ease",
+    };
+  }
 }

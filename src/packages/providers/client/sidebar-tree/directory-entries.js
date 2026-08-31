@@ -1,208 +1,288 @@
 /**
- * The filesystem half of the sidebar tree: directory rows, the chats filed
- * under them, and file rows, expanded lazily from the quotas filesystem API.
- *
- * Right-clicking a directory used to set the tree's context-menu state to an
- * id nothing rendered a menu for, so the menu never appeared -- one more of
- * the "context menu does nothing" reports behind issue #98. A directory's
- * context menu is now the same New Item menu its `+` button opens, placed at
- * the cursor.
+ * Renders the Host Machine group's filesystem tree: directories (decorated
+ * as an app bundle, a vendor/internal folder, a repo, a workspace or a plain
+ * folder), the chats grouped under each directory, and files. Recurses into
+ * expanded subdirectories.
  *
  * @module @dsh-stack/providers/client/sidebar-tree/directory-entries
  */
 
 /**
- * Build the directory renderer for one render pass.
- * @param runtime - the sidebar tree runtime (`h`, glyphs, `renderAppIcon`).
- * @param parts - `{ renderTreeRow, renderChatRow, newItemMenu }`.
- * @param controller - the tree controller for this render pass.
- * @returns `renderDirectoryEntries(directoryPath, depth)`.
+ * Build the directory-entries renderer bound to one runtime.
+ * @param runtime - `{ React, h, glyphs, renderAppIcon }`.
+ * @param renderChatRow - the chat-row renderer from `tree-row.js`, for the
+ * chats grouped under each directory.
+ * @param renderNewItemMenu - the "+" button renderer from `new-item-menu.js`,
+ * for each folder row's own new-item action.
+ * @returns the render function.
  */
-function __dshCreateDirectoryEntries(runtime, parts, controller) {
+function __dshCreateDirectoryEntries(runtime, renderChatRow, renderNewItemMenu) {
   var h = runtime.h;
   var glyphs = runtime.glyphs;
+  var renderAppIcon = runtime.renderAppIcon;
 
-  var VENDOR_DIRECTORIES = ["node_modules", ".git", "dist", "lib", ".turbo"];
-  var BUNDLE_SUFFIXES = [".app", ".dmg", ".pkg"];
+  var VENDOR_OR_INTERNAL_NAMES = [
+    "Applications",
+    "Library",
+    "System",
+    "Users",
+    "node_modules",
+    ".git",
+    "dist",
+    "lib",
+    ".turbo",
+  ];
 
   /**
-   * The placeholder shown while a directory loads, or when it is empty.
-   * @param key - React key.
-   * @param padLeft - the row's indent in pixels.
-   * @param text - the message.
-   * @returns the placeholder element.
+   * Whether a directory entry's name marks it as a vendor/internal/system
+   * folder that never gets repo or workspace decoration.
+   * @param name - the entry's file name.
+   * @returns whether the name is vendor/internal.
    */
-  function renderPlaceholder(key, padLeft, text) {
-    return h(
-      "div",
-      {
-        key: key,
-        style: {
-          padding: "4px 8px 4px " + padLeft + "px",
-          fontSize: "11px",
-          color: "var(--dsw-alias-label-tertiary)",
+  function isVendorOrInternalName(name) {
+    if (!name) return false;
+    var lower = name.toLowerCase();
+    return VENDOR_OR_INTERNAL_NAMES.indexOf(name) !== -1 || lower === "system" || lower === "users";
+  }
+
+  /**
+   * Renders one directory level's entries: subdirectories (recursively, when
+   * expanded) and files. Filtered by the tree's search query when one is
+   * active.
+   * @param dirPath - the directory to render.
+   * @param depth - the directory's nesting depth, driving indent.
+   * @param ctx - `{ dirCache, loadingPaths, searchQuery, expandedPaths,
+   * toggleExpand, folderSessions, workspaces, ellipsisOpen, setEllipsisOpen,
+   * plusMenu, newItemMenuCtx, chatRowCtx }`. `newItemMenuCtx` and
+   * `chatRowCtx` are passed through unchanged to `renderNewItemMenu` and
+   * `renderChatRow`.
+   * @returns the entries, or a loading/empty placeholder.
+   */
+  function renderDirEntries(dirPath, depth, ctx) {
+    var entries = ctx.dirCache[dirPath];
+    var itemLeftPad = 8 + depth * 16;
+
+    if (ctx.loadingPaths[dirPath]) {
+      return h(
+        "div",
+        {
+          key: "loading-" + dirPath,
+          style: {
+            padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
+            fontSize: "11px",
+            color: "var(--dsw-alias-label-tertiary)",
+          },
         },
-      },
-      text,
-    );
-  }
-
-  /**
-   * True when a name ends in one of the macOS bundle suffixes.
-   * @param name - the entry name.
-   * @returns whether the entry is an application bundle.
-   */
-  function isBundle(name) {
-    return BUNDLE_SUFFIXES.some(function (suffix) {
-      return (name || "").endsWith(suffix);
-    });
-  }
-
-  /**
-   * The glyph a directory row shows, by what the directory is.
-   * @param entry - the directory entry.
-   * @param traits - `{ isVendor, isRepo, isWorkspace }`.
-   * @returns the icon element.
-   */
-  function directoryIcon(entry, traits) {
-    if (isBundle(entry.name)) return runtime.renderAppIcon(entry.name, 16, entry.path);
-    if (entry.name === "Applications") return h(glyphs.app, { size: 15 });
-    if (entry.name === "Library") return h(glyphs.library, { size: 15 });
-    if (entry.name.toLowerCase() === "system") return h(glyphs.system, { size: 15 });
-    if (entry.name.toLowerCase() === "users") return h(glyphs.users, { size: 15 });
-    if (traits.isRepo) return h(glyphs.repo, { size: 15 });
-    if (traits.isWorkspace) return h(glyphs.workspace, { size: 15 });
-    return h(glyphs.folderOpen, { size: 15 });
-  }
-
-  /**
-   * Classify one directory entry against the workspace list.
-   * @param entry - the directory entry.
-   * @returns `{ isVendor, isWorkspace, isRepo }`.
-   */
-  function traitsOf(entry) {
-    var lowered = (entry.name || "").toLowerCase();
-    var isVendor =
-      VENDOR_DIRECTORIES.indexOf(entry.name) !== -1 ||
-      entry.name === "Applications" ||
-      entry.name === "Library" ||
-      lowered === "system" ||
-      lowered === "users";
-    var entryPath = controller.grouping.normalisePath(entry.path);
-    var isWorkspace =
-      !isVendor &&
-      controller.grouping.workspaces.some(function (workspace) {
-        var workspacePath = controller.grouping.normalisePath(workspace.path || workspace.cwd);
-        return Boolean(workspacePath) && workspacePath === entryPath && entryPath !== "/Users/user";
-      });
-    return {
-      isVendor: isVendor,
-      isWorkspace: isWorkspace,
-      isRepo: !isVendor && Boolean(entry.isRepo || isWorkspace),
-    };
-  }
-
-  /**
-   * One file row.
-   * @param entry - the file entry.
-   * @param padLeft - the row's indent in pixels.
-   * @returns the row element.
-   */
-  function renderFileRow(entry, padLeft) {
-    var isApplication = isBundle(entry.name) || (entry.name || "").endsWith(".exe");
-    return parts.renderTreeRow({
-      key: entry.path,
-      className: "dsh-tree-sessionRow",
-      padLeft: padLeft,
-      height: 28,
-      icon: isApplication
-        ? runtime.renderAppIcon(entry.name, 15, entry.path)
-        : h(glyphs.file, { size: 13 }),
-      iconStyle: {
-        width: "16px",
-        color: isApplication ? "var(--dsw-alias-primary)" : "var(--dsw-alias-label-tertiary)",
-      },
-      title: entry.name,
-      titleHint: entry.path,
-      titleStyle: { fontSize: "12px", marginLeft: "4px" },
-      onClick: function () {
-        controller.openFileTab(entry);
-      },
-    });
-  }
-
-  /**
-   * One directory row, with its chats and children when expanded.
-   * @param entry - the directory entry.
-   * @param depth - the entry's depth in the tree.
-   * @returns the row element and any expanded children.
-   */
-  function renderDirectoryRow(entry, depth) {
-    var traits = traitsOf(entry);
-    var isExpanded = Boolean(controller.expandedPaths[entry.path]);
-    var chats = controller.grouping.folderSessions[entry.path] || [];
-    return h(
-      "div",
-      { key: entry.path, style: { display: "flex", flexDirection: "column", width: "100%" } },
-      parts.renderTreeRow({
-        key: "row",
-        className: "dsh-tree-projectRow",
-        padLeft: 8 + depth * 16,
-        height: 28,
-        ariaExpanded: isExpanded,
-        icon: directoryIcon(entry, traits),
-        chevron: { open: isExpanded },
-        title: entry.name,
-        titleHint: entry.path,
-        badge: chats.length > 0 ? { text: chats.length, tone: "accent" } : null,
-        onClick: function () {
-          controller.toggleDirectory(entry.path);
+        "Loading…",
+      );
+    }
+    if (!entries || entries.length === 0) {
+      return h(
+        "div",
+        {
+          key: "empty-" + dirPath,
+          style: {
+            padding: "4px 8px 4px " + (itemLeftPad + 16) + "px",
+            fontSize: "11px",
+            color: "var(--dsw-alias-label-tertiary)",
+          },
         },
-        onDoubleClick: traits.isRepo
-          ? function (event) {
-              event.stopPropagation();
-              controller.openRepoTab(entry);
-            }
-          : undefined,
-        onContextMenu: controller.openNewItemMenuAt("folder-plus::" + entry.path),
-        actions: parts.newItemMenu.renderButton(entry.path, "folder-plus::" + entry.path),
-      }),
-      isExpanded
-        ? h(
-            "div",
-            { style: { display: "flex", flexDirection: "column", width: "100%" } },
-            chats.map(function (chat) {
-              return parts.renderChatRow(chat, 8 + (depth + 1) * 16);
+        "(empty)",
+      );
+    }
+
+    var query =
+      ctx.searchQuery && ctx.searchQuery.trim() ? ctx.searchQuery.trim().toLowerCase() : "";
+    var visibleEntries = query
+      ? entries.filter(function (entry) {
+          return (entry.name || "").toLowerCase().indexOf(query) !== -1;
+        })
+      : entries;
+
+    if (visibleEntries.length === 0 && query) return null;
+
+    return visibleEntries.map(function (entry) {
+      var isDir = Boolean(entry.isDirectory);
+      var isExpanded = Boolean(ctx.expandedPaths[entry.path]);
+
+      if (!isDir) {
+        var isAppFile =
+          entry.name.endsWith(".app") ||
+          entry.name.endsWith(".exe") ||
+          entry.name.endsWith(".dmg") ||
+          entry.name.endsWith(".pkg");
+        return h(
+          "div",
+          {
+            key: entry.path,
+            className: "dsh-tree-sessionRow",
+            role: "treeitem",
+            style: { paddingLeft: itemLeftPad + "px", height: "28px" },
+            onClick: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-file-tab", {
+                  detail: {
+                    id: "file::" + entry.path,
+                    type: "file",
+                    title: entry.name,
+                    path: entry.path,
+                  },
+                }),
+              );
+            },
+          },
+          h(
+            "span",
+            {
+              className: "dsh-tree-slot",
+              style: {
+                width: "16px",
+                color: isAppFile ? "var(--dsw-alias-primary)" : "var(--dsw-alias-label-tertiary)",
+              },
+            },
+            isAppFile ? renderAppIcon(entry.name, 15, entry.path) : h(glyphs.File, { size: 13 }),
+          ),
+          h(
+            "span",
+            {
+              className: "dsh-tree-sessionTitle",
+              style: { fontSize: "12px", marginLeft: "4px" },
+              title: entry.path,
+            },
+            entry.name,
+          ),
+        );
+      }
+
+      var chatsInDir = ctx.folderSessions[entry.path] || [];
+      var isAppBundle = Boolean(
+        entry.name &&
+          (entry.name.endsWith(".app") ||
+            entry.name.endsWith(".dmg") ||
+            entry.name.endsWith(".pkg")),
+      );
+      var isApplications = entry.name === "Applications";
+      var isLibrary = entry.name === "Library";
+      var isSystem = entry.name === "System" || entry.name.toLowerCase() === "system";
+      var isUsers = entry.name === "Users" || entry.name.toLowerCase() === "users";
+      var isVendorOrInternal = isVendorOrInternalName(entry.name);
+      var isWorkspace =
+        !isVendorOrInternal &&
+        Boolean(
+          ctx.workspaces &&
+            ctx.workspaces.some(function (workspace) {
+              var workspacePath = workspace.path || workspace.cwd;
+              if (!workspacePath) return false;
+              if (workspacePath.length > 1 && workspacePath.endsWith("/"))
+                workspacePath = workspacePath.slice(0, -1);
+              var entryPath = entry.path;
+              if (entryPath && entryPath.length > 1 && entryPath.endsWith("/"))
+                entryPath = entryPath.slice(0, -1);
+              return workspacePath === entryPath && entryPath !== "/Users/user";
             }),
-            renderDirectoryEntries(entry.path, depth + 1),
-          )
-        : null,
-    );
+        );
+      var isRepo =
+        !isVendorOrInternal && Boolean(entry.isRepo || entry.name === "dsh-stack" || isWorkspace);
+
+      var icon = isAppBundle
+        ? renderAppIcon(entry.name, 16, entry.path)
+        : isApplications
+          ? h(glyphs.App, { size: 15 })
+          : isLibrary
+            ? h(glyphs.Library, { size: 15 })
+            : isSystem
+              ? h(glyphs.System, { size: 15 })
+              : isUsers
+                ? h(glyphs.Users, { size: 15 })
+                : isRepo
+                  ? h(glyphs.Repo, { size: 15 })
+                  : isWorkspace
+                    ? h(glyphs.Workspace, { size: 15 })
+                    : h(glyphs.FolderOpen, { size: 15 });
+
+      return h(
+        "div",
+        { key: entry.path, style: { display: "flex", flexDirection: "column", width: "100%" } },
+        h(
+          "div",
+          {
+            className: "dsh-tree-projectRow",
+            role: "treeitem",
+            style: { position: "relative", paddingLeft: itemLeftPad + "px", height: "28px" },
+            "aria-expanded": isExpanded,
+            onClick: function () {
+              ctx.toggleExpand(entry.path);
+            },
+            onDoubleClick: isRepo
+              ? function (event) {
+                  event.stopPropagation();
+                  window.dispatchEvent(
+                    new CustomEvent("dsh:open-repo-tab", {
+                      detail: {
+                        id: "repo::" + entry.path,
+                        type: "repo",
+                        title: entry.name,
+                        path: entry.path,
+                      },
+                    }),
+                  );
+                }
+              : undefined,
+            onContextMenu: function (event) {
+              event.preventDefault();
+              event.stopPropagation();
+              ctx.setEllipsisOpen({
+                id: "folder::" + entry.path,
+                pos: { x: event.clientX, y: event.clientY },
+              });
+            },
+          },
+          h("span", { className: "dsh-tree-slot dsh-tree-icon" }, icon),
+          h(
+            "span",
+            { className: "dsh-tree-slot dsh-tree-chevron" },
+            h(glyphs.TriangleRight, {
+              className: "dsh-tree-arrow" + (isExpanded ? " dsh-tree-arrowOpen" : ""),
+              size: 11,
+            }),
+          ),
+          h("span", { className: "dsh-tree-title", title: entry.path }, entry.name),
+          chatsInDir.length > 0
+            ? h(
+                "span",
+                {
+                  style: {
+                    padding: "1px 5px",
+                    borderRadius: "8px",
+                    fontSize: "9.5px",
+                    background: "rgba(99, 102, 241, 0.15)",
+                    color: "var(--dsw-alias-primary, #6366f1)",
+                    fontWeight: 700,
+                    marginLeft: "4px",
+                  },
+                },
+                chatsInDir.length,
+              )
+            : null,
+          h(
+            "span",
+            { className: "dsh-tree-actions" },
+            renderNewItemMenu(entry.path, "folder-plus::" + entry.path, ctx.newItemMenuCtx),
+          ),
+        ),
+        isExpanded
+          ? h(
+              "div",
+              { style: { display: "flex", flexDirection: "column", width: "100%" } },
+              chatsInDir.map(function (chat) {
+                return renderChatRow(chat, 8 + (depth + 1) * 16, ctx.chatRowCtx);
+              }),
+              renderDirEntries(entry.path, depth + 1, ctx),
+            )
+          : null,
+      );
+    });
   }
 
-  /**
-   * Every entry of one directory at one depth.
-   * @param directoryPath - the directory to list.
-   * @param depth - the directory's depth in the tree.
-   * @returns the rows, a placeholder, or null when search hides them all.
-   */
-  function renderDirectoryEntries(directoryPath, depth) {
-    var padLeft = 8 + depth * 16 + 16;
-    if (controller.loadingPaths[directoryPath])
-      return renderPlaceholder("loading-" + directoryPath, padLeft, "Loading…");
-    var entries = controller.dirCache[directoryPath];
-    if (!entries || entries.length === 0)
-      return renderPlaceholder("empty-" + directoryPath, padLeft, "(empty)");
-    var visible = entries.filter(function (entry) {
-      return controller.matchesSearch(entry.name);
-    });
-    if (visible.length === 0) return null;
-    return visible.map(function (entry) {
-      return entry.isDirectory
-        ? renderDirectoryRow(entry, depth)
-        : renderFileRow(entry, 8 + depth * 16);
-    });
-  }
-
-  return renderDirectoryEntries;
+  return renderDirEntries;
 }

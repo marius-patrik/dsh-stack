@@ -8,11 +8,22 @@ export const inject: string[] = [];
  */
 export function apply(): void {}
 
+/**
+ * The sidebar tree's layout (#103): `"sections"` renders each group
+ * (Pinned, Containers, Terminals, Host Machine, Global, Archived) as its own
+ * visually separated block, the shape the tree has always had. `"unified"`
+ * renders the same groups as one continuous tree with no dividers between
+ * them.
+ */
+export type SidebarTreeLayout = "sections" | "unified";
+
 export interface SidebarPreferences {
   readonly showBrandLogo: boolean;
   readonly showNewConversation: boolean;
   /** Whether the sidebar renders the file/workspace tree region. */
   readonly showFiles: boolean;
+  /** Whether the sidebar tree renders as discrete sections or one unified tree. */
+  readonly treeLayout: SidebarTreeLayout;
 }
 
 export type SidebarPreferenceKey = keyof SidebarPreferences;
@@ -21,6 +32,7 @@ export const defaultSidebarPreferences: SidebarPreferences = {
   showBrandLogo: true,
   showNewConversation: true,
   showFiles: true,
+  treeLayout: "sections",
 };
 
 const STORAGE_KEY = "dsh-stack.sidebar.preferences";
@@ -50,6 +62,7 @@ function read(): SidebarPreferences {
     showNewConversation:
       parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
     showFiles: parsed.showFiles ?? defaultSidebarPreferences.showFiles,
+    treeLayout: parsed.treeLayout ?? defaultSidebarPreferences.treeLayout,
   };
 }
 
@@ -71,7 +84,7 @@ export const sidebarPreferences = {
     return read();
   },
   /** Updates one sidebar preference when its value changes. */
-  set(key: SidebarPreferenceKey, value: boolean): void {
+  set<K extends SidebarPreferenceKey>(key: K, value: SidebarPreferences[K]): void {
     const current = read();
     if (current[key] === value) return;
     write({ ...current, [key]: value });
@@ -83,11 +96,13 @@ export const sidebarPreferences = {
       showBrandLogo: patch.showBrandLogo ?? current.showBrandLogo,
       showNewConversation: patch.showNewConversation ?? current.showNewConversation,
       showFiles: patch.showFiles ?? current.showFiles,
+      treeLayout: patch.treeLayout ?? current.treeLayout,
     };
     if (
       next.showBrandLogo === current.showBrandLogo &&
       next.showNewConversation === current.showNewConversation &&
-      next.showFiles === current.showFiles
+      next.showFiles === current.showFiles &&
+      next.treeLayout === current.treeLayout
     )
       return;
     write(next);

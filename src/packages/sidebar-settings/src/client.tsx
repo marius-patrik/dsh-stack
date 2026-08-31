@@ -51,6 +51,13 @@ export function SidebarSettings({ preferences, close }: SidebarSettingsProps) {
         checked={state.showFiles}
         onChange={(value) => change("showFiles", value)}
       />
+      <SettingsToggleRow
+        id="sidebar-tree-layout-unified"
+        label="Combine sidebar sections into one tree"
+        description="Render Pinned, Containers, Terminals, Host Machine, Global and Archived as one continuous tree instead of separate sections."
+        checked={state.treeLayout === "unified"}
+        onChange={(value) => preferences.set("treeLayout", value ? "unified" : "sections")}
+      />
     </SettingsSection>
   );
 }
