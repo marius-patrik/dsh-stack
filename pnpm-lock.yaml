@@ -814,9 +814,6 @@ importers:
       '@dsh-stack/workspace-files':
         specifier: workspace:*
         version: link:../../../src/packages/workspace-files
-      '@dsh-stack/workspace-tabs':
-        specifier: workspace:*
-        version: link:../../../src/packages/workspace-tabs
 
   publish/packs/core:
     dependencies:
@@ -1168,9 +1165,6 @@ importers:
       '@dsh-stack/workspace-files':
         specifier: workspace:*
         version: link:../../../src/packages/workspace-files
-      '@dsh-stack/workspace-tabs':
-        specifier: workspace:*
-        version: link:../../../src/packages/workspace-tabs
 
   publish/packs/vcs:
     dependencies:
@@ -1921,12 +1915,6 @@ importers:
         version: 5.9.3
 
   src/packages/workspace-files:
-    devDependencies:
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
-  src/packages/workspace-tabs:
     devDependencies:
       typescript:
         specifier: ^6.0.3
