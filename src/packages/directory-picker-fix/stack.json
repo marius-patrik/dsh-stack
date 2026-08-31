@@ -1,0 +1,10 @@
+{
+  "id": "stack.infra.directory-picker-fix",
+  "name": "@dsh-stack/directory-picker-fix",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Statically mounts the resolved directory-picker backend instead of harness's dynamic auto-chooser, avoiding a loader-entry double-registration under full Stack composition (#188).",
+  "files": ["lib", "package.json", "stack.json", "README.md"],
+  "dependencies": [],
+  "optionalDependencies": []
+}
