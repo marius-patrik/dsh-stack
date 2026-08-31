@@ -28,6 +28,8 @@
   "dependencies": {
     "@dsh-stack/provider-anthropic-api": "workspace:*",
     "@dsh-stack/provider-claude-sub": "workspace:*",
-    "@dsh-stack/skin-claude": "workspace:*"
+    "@dsh-stack/skin-claude": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-claude": "workspace:*"
   }
 }

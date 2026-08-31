@@ -6,11 +6,16 @@ import {
   Tooltip,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { SidebarRootComponentProps } from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import { sidebarPreferences } from "@dsh-stack/sidebar-preferences";
+import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+import type {} from "@dsh-stack/sidebar-preferences/client";
 import { SidebarOptionsMenu } from "./SidebarOptionsMenu.js";
 
 const railWidth = 56;
 const transition = "width 180ms ease, opacity 150ms ease";
+
+export type SidebarRootProps = SidebarRootComponentProps & {
+  sidebarPreferences: ClientContext["sidebarPreferences"];
+};
 
 /** SidebarRoot implementation. */
 export function SidebarRoot({
@@ -20,10 +25,14 @@ export function SidebarRoot({
   toggleSidebar,
   t,
   renderSlot,
-}: SidebarRootComponentProps) {
+  sidebarPreferences,
+}: SidebarRootProps) {
   const [preferences, setPreferences] = useState(sidebarPreferences.get());
 
-  useEffect(() => sidebarPreferences.subscribe(() => setPreferences(sidebarPreferences.get())), []);
+  useEffect(
+    () => sidebarPreferences.subscribe(() => setPreferences(sidebarPreferences.get())),
+    [sidebarPreferences],
+  );
 
   const wide = !collapsed;
   const contentWidth = wide ? width : railWidth;
@@ -36,6 +45,7 @@ export function SidebarRoot({
       style={{
         width: contentWidth,
         minWidth: contentWidth,
+        maxWidth: contentWidth,
         height: "100%",
         display: "flex",
         flexDirection: "column",

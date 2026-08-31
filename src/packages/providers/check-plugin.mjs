@@ -41,6 +41,31 @@ const extensions = new Map(
   ),
 );
 
+// Same split applies one layer down: `dialects` only owns the registry, and
+// every concrete wire dialect a route above resolves against lives in its own
+// `@dsh-stack/dialect-<id>` extension. Loaded the same way, for the same
+// reason — this test exercises the dialect resolution real deployments get.
+// `gemini` is deliberately absent: no provider route above resolves it via
+// `ctx.dialects.get("gemini")` (`provider-gemini-api` uses `openai`,
+// `provider-gemini-sub` uses `code-assist`) — `@dsh-stack/dialect-gemini` is
+// a plain library `@dsh-stack/dialect-code-assist` imports its serialization
+// helpers from directly, not a mountable dialect extension (dsh-stack#194).
+const DIALECT_IDS = ["openai", "claude", "code-assist", "antigravity"];
+const dialectExtensions = new Map(
+  await Promise.all(
+    DIALECT_IDS.map(async (id) => [
+      id,
+      await import(`../../../publish/extensions/dialect-${id}/lib/index.js`),
+    ]),
+  ),
+);
+
+/** Apply the dialects plugin, then every concrete dialect extension's registration. */
+function applyDialects(ctx) {
+  dialects.apply(ctx, {});
+  for (const extension of dialectExtensions.values()) extension.apply(ctx);
+}
+
 /** Apply the providers plugin, then every provider extension's route registration. */
 function applyProviders(ctx, config) {
   providers.apply(ctx, config);
@@ -52,7 +77,7 @@ assertLoaderShape(providers, "providers");
 console.log("loader shape ok:", providers.name, "inject=", JSON.stringify(providers.inject));
 
 const ctx = new Context();
-dialects.apply(ctx, {});
+applyDialects(ctx);
 
 const llm = {
   configurable: [],
@@ -205,7 +230,7 @@ console.log(
 // mode "all" restores every route: uncatalogued models resolve, and a missing
 // key surfaces on the request as MISSING_CREDENTIAL instead of at the filter.
 const ctxAll = new Context();
-dialects.apply(ctxAll, {});
+applyDialects(ctxAll);
 const llmAll = {
   configurable: [],
   adapter: undefined,
@@ -622,7 +647,7 @@ console.log("403 quota classification ok");
 // ---- the credential gate keeps unusable rows out of the selector ----
 {
   const ctxBare = new Context();
-  dialects.apply(ctxBare, {});
+  applyDialects(ctxBare);
   const llmBare = {
     configurable: [],
     adapter: undefined,
@@ -669,7 +694,7 @@ console.log("403 quota classification ok");
   // A subscription whose stored login no longer resolves is the one case that
   // must be surfaced: the record exists, so the user has to act on it.
   const ctxStale = new Context();
-  dialects.apply(ctxStale, {});
+  applyDialects(ctxStale);
   const llmStale = {
     configurable: [],
     adapter: undefined,

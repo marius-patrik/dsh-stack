@@ -27,6 +27,8 @@
   },
   "dependencies": {
     "@dsh-stack/provider-kimi-code": "workspace:*",
-    "@dsh-stack/provider-kimi-sub": "workspace:*"
+    "@dsh-stack/provider-kimi-sub": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-openai": "workspace:*"
   }
 }

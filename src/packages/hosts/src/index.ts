@@ -54,11 +54,17 @@ export class HostsService extends Service implements IHostsService {
     this.gateway = new AccessGateway(access);
     void this.domainManager.registerMdns();
     void syncTailscaleServe(access.gatewayPort);
+    // dsh web's own startup banner reports the web-asset port, not this
+    // gateway port — Tailscale serve and every external consumer need this
+    // one. ports.ts prefers this line over the harness banner when present.
+    console.log(`dsh gateway: http://127.0.0.1:${access.gatewayPort}`);
 
     const loader = ctx.get("loader") as CordisLoaderService | undefined;
     if (loader && typeof loader.create === "function") {
       void loader.create({ name: "@deepseek-ai/dsh-host-directory-picker-browse" }).catch(() => {});
-      void loader.create({ name: "@deepseek-ai/dsh-client-ui-directory-picker-browse" }).catch(() => {});
+      void loader
+        .create({ name: "@deepseek-ai/dsh-client-ui-directory-picker-browse" })
+        .catch(() => {});
     }
 
     const server = ctx.get("webServer");

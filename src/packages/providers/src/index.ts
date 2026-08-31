@@ -318,6 +318,24 @@ export function resolveProvidersOptions(config: Config): ResolvedProvidersOption
   };
 }
 
+/**
+ * The vendor a numbered account id belongs to: strips a trailing `-<N>`
+ * (`openrouter-3` -> `openrouter`; `openrouter` itself is already bare).
+ * Matches the numbered-account naming convention `.data/settings.yaml`
+ * already uses across every multi-account vendor (#187). Exported so
+ * `@dsh-stack/provider-rotation` shares this grouping instead of
+ * re-deriving it for `ctx.llm`'s own provider ids.
+ */
+export function vendorBaseId(provider: string): string {
+  return provider.replace(/-\d+$/, "");
+}
+
+/** The numbered suffix of an account id (bare ids sort first, at 1). */
+export function vendorSuffix(provider: string): number {
+  const match = /-(\d+)$/.exec(provider);
+  return match === null ? 1 : Number(match[1]);
+}
+
 /** toConnection implementation. */
 function toConnection(
   route: ProviderRoute,
@@ -419,6 +437,28 @@ export function apply(ctx: Context, config: Config): void {
   const /** connections implementation. */
     connections = (provider: string): ProviderConnection =>
       toConnection(ctx.providers.get(provider), resolved());
+
+  /**
+   * Other registered routes for the same vendor as `provider` (#187): same
+   * `<vendor>` base id (`openrouter-3` -> `openrouter`) and the same dialect
+   * and base URL, so a numbering coincidence between two genuinely different
+   * routes never gets treated as an interchangeable account. Ordered by
+   * ascending numeric suffix (the unsuffixed id sorts first).
+   */
+  const rotationSiblings = (provider: string): readonly string[] => {
+    const connection = connections(provider);
+    const base = vendorBaseId(provider);
+    return ctx.providers
+      .ids()
+      .filter(
+        (id) =>
+          id !== provider &&
+          vendorBaseId(id) === base &&
+          connections(id).dialectId === connection.dialectId &&
+          connections(id).baseURL === connection.baseURL,
+      )
+      .sort((a, b) => vendorSuffix(a) - vendorSuffix(b));
+  };
 
   const memory = new Map<string, string>();
 
@@ -702,6 +742,10 @@ export function apply(ctx: Context, config: Config): void {
     gate,
     resolveUserId,
     catalog: modelCatalog,
+    rotationSiblings,
+    onRotate: (from, to, code) => {
+      ctx.logger.warn(`providers: ${from} hit ${code}, retrying ${to}`);
+    },
   });
   // Both `ctx.llm` registrations below throw if handed zero providers, which
   // this plugin's own registry legitimately holds until at least one

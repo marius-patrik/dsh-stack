@@ -1,4 +1,12 @@
-import { publishCrossBundle, subscribeCrossBundle } from "@dsh-stack/plugin-kit";
+export const name = "sidebar-preferences";
+export const inject: string[] = [];
+
+/**
+ * Host loader entry for the browser-only sidebar-preferences plugin: mounting
+ * it puts the package on the loader's entry list so the client-modules
+ * scanner picks up its `dsh.client` bundle.
+ */
+export function apply(): void {}
 
 export interface SidebarPreferences {
   readonly showBrandLogo: boolean;
@@ -18,16 +26,16 @@ export const defaultSidebarPreferences: SidebarPreferences = {
 const STORAGE_KEY = "dsh-stack.sidebar.preferences";
 
 /**
- * Cross-bundle change channel. This module is inlined into every consuming
- * client bundle, so a module-local listener set would only ever notify the copy
- * that was mutated -- see plugin-kit's cross-bundle-channel.
+ * Change listeners. `sidebarPreferences` is a singleton -- its client plugin
+ * provides it as the cordis `sidebarPreferences` service, so every surface
+ * shares this one listener set (see #108).
  */
-const CHANGE_CHANNEL = "dsh-stack.sidebar.preferences:changed";
+const listeners = new Set<() => void>();
 
 /**
  * Reads persisted sidebar preferences, falling back to defaults. Deliberately
- * uncached: `localStorage` is the single source of truth shared by every
- * bundled copy of this module, so caching here would let copies diverge.
+ * uncached: `localStorage` is the durable source of truth, so caching here
+ * would let a fresh page load miss a change made in another tab.
  */
 function read(): SidebarPreferences {
   let parsed: Partial<SidebarPreferences> = {};
@@ -52,9 +60,9 @@ function write(next: SidebarPreferences): void {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // Storage is unavailable (private mode, blocked site data); the change
-    // still broadcasts so live subscribers re-render for this page's lifetime.
+    // still notifies live subscribers so they re-render for this page's lifetime.
   }
-  publishCrossBundle(CHANGE_CHANNEL);
+  for (const listener of listeners) listener();
 }
 
 export const sidebarPreferences = {
@@ -86,6 +94,7 @@ export const sidebarPreferences = {
   },
   /** Subscribes to preference changes and returns an unsubscribe function. */
   subscribe(listener: () => void): () => void {
-    return subscribeCrossBundle(CHANGE_CHANNEL, listener);
+    listeners.add(listener);
+    return () => listeners.delete(listener);
   },
 };

@@ -21,14 +21,20 @@ export const route: ProviderRoute = {
   probe: { url: "https://api.groq.com/openai/v1/models" },
   models: [
     {
-      id: "llama-3.3-70b-versatile",
-      name: "Llama 3.3 70B",
+      id: "qwen/qwen3.8-27b",
+      name: "Qwen 3.8 27B",
       contextWindow: GROQ_CONTEXT,
       maxTokens: GROQ_MAX_OUTPUT,
     },
     {
-      id: "llama-3.1-8b-instant",
-      name: "Llama 3.1 8B",
+      id: "openai/gpt-oss-120b",
+      name: "GPT-OSS 120B",
+      contextWindow: GROQ_CONTEXT,
+      maxTokens: GROQ_MAX_OUTPUT,
+    },
+    {
+      id: "qwen/qwen3.6-27b",
+      name: "Qwen 3.6 27B",
       contextWindow: GROQ_CONTEXT,
       maxTokens: GROQ_MAX_OUTPUT,
     },

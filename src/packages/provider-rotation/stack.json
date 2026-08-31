@@ -1,0 +1,10 @@
+{
+  "id": "stack.ai.provider-rotation",
+  "name": "@dsh-stack/provider-rotation",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "description": "Automatic same-vendor account failover for ctx.llm routes.",
+  "files": ["lib", "package.json", "README.md"],
+  "dependencies": ["stack.ai.providers"],
+  "optionalDependencies": []
+}

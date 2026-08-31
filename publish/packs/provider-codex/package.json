@@ -27,6 +27,8 @@
   },
   "dependencies": {
     "@dsh-stack/provider-openai-api": "workspace:*",
-    "@dsh-stack/skin-codex": "workspace:*"
+    "@dsh-stack/skin-codex": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/dialect-openai": "workspace:*"
   }
 }

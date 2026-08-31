@@ -1,12 +1,18 @@
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
-import type { SidebarRootInjected } from "@deepseek-ai/dsh-client-ui-sidebar/client";
+import type {
+  SidebarRootComponentProps,
+  SidebarRootInjected,
+} from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
+import type {} from "@dsh-stack/sidebar-preferences/client";
 import { SidebarRoot } from "./SidebarRoot.js";
 
-export const inject = ["slots", "layout", "workspaces", "locale"];
+export const inject = ["slots", "layout", "workspaces", "locale", "sidebarPreferences"];
 
 /** Register the stack sidebar shell into the layout sidebar slot. */
 export function apply(ctx: ClientContext): void {
+  const preferences = ctx.sidebarPreferences;
+
   /**
    * Registers the stack sidebar shell into the layout sidebar slot.
    *
@@ -35,7 +41,8 @@ export function apply(ctx: ClientContext): void {
           },
           inject: injectProps,
         },
-        SidebarRoot,
+        (props: SidebarRootComponentProps) =>
+          SidebarRoot({ ...props, sidebarPreferences: preferences }),
       ),
     "stack-sidebar: slot registration",
   );

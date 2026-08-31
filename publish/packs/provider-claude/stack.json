@@ -8,7 +8,9 @@
   "dependencies": [
     "stack.ai.provider.claude-sub",
     "stack.ai.provider.anthropic-api",
-    "stack.ui.skin.claude"
+    "stack.ui.skin.claude",
+    "stack.ai.dialects",
+    "stack.ai.dialect.claude"
   ],
   "optionalDependencies": []
 }
