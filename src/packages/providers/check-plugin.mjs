@@ -45,7 +45,12 @@ const extensions = new Map(
 // every concrete wire dialect a route above resolves against lives in its own
 // `@dsh-stack/dialect-<id>` extension. Loaded the same way, for the same
 // reason — this test exercises the dialect resolution real deployments get.
-const DIALECT_IDS = ["openai", "claude", "gemini", "code-assist", "antigravity"];
+// `gemini` is deliberately absent: no provider route above resolves it via
+// `ctx.dialects.get("gemini")` (`provider-gemini-api` uses `openai`,
+// `provider-gemini-sub` uses `code-assist`) — `@dsh-stack/dialect-gemini` is
+// a plain library `@dsh-stack/dialect-code-assist` imports its serialization
+// helpers from directly, not a mountable dialect extension (dsh-stack#194).
+const DIALECT_IDS = ["openai", "claude", "code-assist", "antigravity"];
 const dialectExtensions = new Map(
   await Promise.all(
     DIALECT_IDS.map(async (id) => [

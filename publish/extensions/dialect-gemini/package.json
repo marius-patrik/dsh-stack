@@ -1,7 +1,7 @@
 {
   "name": "@dsh-stack/dialect-gemini",
   "version": "0.1.0",
-  "description": "Google Gemini wire dialect extension for the Stack dialects registry.",
+  "description": "Google Gemini wire-format serialization helpers, shared by the code-assist dialect.",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -22,7 +22,7 @@
     "access": "public"
   },
   "stack": {
-    "kind": "extension",
+    "kind": "library",
     "id": "stack.ai.dialect.gemini"
   },
   "scripts": {
@@ -35,7 +35,6 @@
     "@dsh-stack/dialects": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-llm": "0.1.1-rc.2"
   },
   "devDependencies": {
