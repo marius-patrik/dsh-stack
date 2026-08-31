@@ -1524,6 +1524,10 @@ importers:
         version: 6.0.3
 
   src/packages/launcher:
+    dependencies:
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
     devDependencies:
       '@types/node':
         specifier: ^22.0.0

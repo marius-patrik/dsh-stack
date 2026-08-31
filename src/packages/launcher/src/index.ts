@@ -18,6 +18,7 @@ export { statusReport } from "./status.js";
 export { readLogTail, followLog } from "./logs.js";
 export { fetchPluginInventory, parsePluginInventory } from "./plugin-inventory.js";
 export type { PluginInventoryEntry } from "./plugin-inventory.js";
+export { browserSessionCookieHeader, readBrowserSessionSecret } from "./browser-session-cookie.js";
 export { summarizePluginMetrics, formatPluginMetricsLine } from "./plugin-metrics.js";
 export type { PluginMetrics } from "./plugin-metrics.js";
 export { attachToServer } from "./attach.js";

@@ -26,6 +26,9 @@
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs"
   },
+  "dependencies": {
+    "yaml": "^2.9.0"
+  },
   "devDependencies": {
     "typescript": "^5.9.0",
     "@types/node": "^22.0.0"

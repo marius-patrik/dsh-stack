@@ -3,6 +3,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 
 const {
   readTweaks,
@@ -19,6 +20,8 @@ const {
   parsePluginInventory,
   summarizePluginMetrics,
   formatPluginMetricsLine,
+  readBrowserSessionSecret,
+  browserSessionCookieHeader,
 } = await import("./lib/index.js");
 
 const root = mkdtempSync(join(tmpdir(), "launcher-"));
@@ -288,6 +291,92 @@ assert.equal(readLogTail(logFile, 2), "l2\nl3\n");
 assert.equal(readLogTail(logFile, 50), "l1\nl2\nl3\n");
 assert.equal(readLogTail(join(root, "nope.log"), 50), null);
 console.log("logs helpers ok");
+
+// readBrowserSessionSecret + browserSessionCookieHeader: read the same
+// on-disk shape harness's dsh-credentials-local writes, and mint a cookie an
+// independent reimplementation of browser-auth.ts's own verification logic
+// (HMAC-SHA256 over base64url JSON, matching cookie name) accepts.
+/** Base64url-encode, matching browser-session-cookie.ts's own encoder. */
+function encodeBase64Url(value) {
+  return value.toString("base64").replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+/**
+ * Verifies a minted cookie against an independent reimplementation of
+ * harness's browser-auth.ts decode/HMAC-check logic, so this test proves the
+ * cookie is actually acceptable rather than just round-tripping the
+ * package's own encoder against itself.
+ */
+function independentlyVerifyCookie(cookieHeader, secret, authority) {
+  const eq = cookieHeader.indexOf("=");
+  const name = cookieHeader.slice(0, eq);
+  const value = cookieHeader.slice(eq + 1);
+  const expectedName =
+    "dsh-auth-" + encodeBase64Url(createHash("sha256").update(authority).digest());
+  assert.equal(name, expectedName, "cookie name must be dsh-auth-<sha256(authority)>");
+  const [version, body, signature] = value.split(".");
+  assert.equal(version, "v1");
+  const expectedSignature = encodeBase64Url(createHmac("sha256", secret).update(body).digest());
+  assert.equal(signature, expectedSignature, "HMAC signature must verify against the secret");
+  const payload = JSON.parse(
+    Buffer.from(body.replaceAll("-", "+").replaceAll("_", "/"), "base64").toString("utf8"),
+  );
+  assert.equal(payload.version, 1);
+  assert.equal(payload.authority, authority);
+  assert.ok(payload.expiresAt > payload.issuedAt);
+  return payload;
+}
+
+const authHome = join(root, "auth-home");
+mkdirSync(authHome, { recursive: true });
+const realSecretBytes = randomBytes(32);
+const realSecret = encodeBase64Url(realSecretBytes);
+writeFileSync(
+  join(authHome, ".credentials.yaml"),
+  [
+    "version: 1",
+    "refs: {}",
+    "records:",
+    "  client-connection/browser-session:",
+    "    kind: grant",
+    "    payload:",
+    "      version: 1",
+    `      secret: ${realSecret}`,
+    "",
+  ].join("\n"),
+);
+const readSecret = await readBrowserSessionSecret(authHome);
+assert.ok(readSecret !== undefined, "secret must be read from a well-formed credentials file");
+assert.ok(readSecret.equals(realSecretBytes), "read secret must round-trip exactly");
+const cookie = browserSessionCookieHeader(readSecret, "127.0.0.1:3080");
+independentlyVerifyCookie(cookie, realSecretBytes, "127.0.0.1:3080");
+
+// Missing file, missing record, and wrong-shaped record all degrade to
+// undefined rather than throwing.
+assert.equal(await readBrowserSessionSecret(join(root, "nope-home")), undefined);
+const emptyHome = join(root, "empty-home");
+mkdirSync(emptyHome, { recursive: true });
+writeFileSync(join(emptyHome, ".credentials.yaml"), "version: 1\nrefs: {}\nrecords: {}\n");
+assert.equal(await readBrowserSessionSecret(emptyHome), undefined);
+const wrongVersionHome = join(root, "wrong-version-home");
+mkdirSync(wrongVersionHome, { recursive: true });
+writeFileSync(
+  join(wrongVersionHome, ".credentials.yaml"),
+  [
+    "version: 1",
+    "refs: {}",
+    "records:",
+    "  client-connection/browser-session:",
+    "    kind: grant",
+    "    payload:",
+    "      version: 2",
+    `      secret: ${realSecret}`,
+    "",
+  ].join("\n"),
+);
+assert.equal(await readBrowserSessionSecret(wrongVersionHome), undefined);
+console.log(
+  "browser-session cookie ok (secret round-trip, independent HMAC verification, degrade-to-undefined)",
+);
 
 rmSync(root, { recursive: true, force: true });
 console.log("plugin check passed");

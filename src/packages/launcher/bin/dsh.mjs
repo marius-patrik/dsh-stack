@@ -61,7 +61,7 @@ function execBin(bin, prefixArgs, args) {
 /** Print the status report for the resolved port. */
 async function showStatus(home, profile) {
   const port = resolvePort(home, profile, logFile);
-  process.stdout.write(`${await statusReport(port, logFile)}\n`);
+  process.stdout.write(`${await statusReport(port, logFile, home, profile)}\n`);
 }
 
 /** Start the server and report the outcome. Returns false on failure. */
@@ -131,6 +131,8 @@ async function execute(plan, ctx) {
     }
     await attachToServer({
       port,
+      home,
+      profile,
       logFile,
       lines: plan.lines,
       intervalMs: plan.intervalMs,
