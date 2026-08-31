@@ -58,8 +58,8 @@ async function hasLoaderShape(packageDir, mainRelativePath) {
 }
 
 const mode = process.argv[2] ?? "write";
-if (!["write", "check"].includes(mode)) {
-  console.error("usage: node generate-stack-bundle-patch.mjs <write|check>");
+if (!["write", "check", "list"].includes(mode)) {
+  console.error("usage: node generate-stack-bundle-patch.mjs <write|check|list>");
   process.exit(2);
 }
 
@@ -213,7 +213,12 @@ function renderPatch(packageNames) {
 const { mountable, skipped } = await collectMountablePackageNames();
 const content = renderPatch(mountable);
 
-if (mode === "check") {
+if (mode === "list") {
+  // Machine-readable mode: emits this script's mountability decision as JSON
+  // so verifiers gate on the exact same mount/skip computation instead of
+  // re-deriving (and drifting from) the loader-shape probe.
+  console.log(JSON.stringify({ mountable, skipped }));
+} else if (mode === "check") {
   let existing;
   try {
     existing = await fs.readFile(outputPath, "utf8");
