@@ -2,3 +2,5 @@ packages:
   - "src/packages/*"
   - "publish/extensions/*"
   - "publish/packs/*"
+allowBuilds:
+  koffi: true

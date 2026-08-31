@@ -98,6 +98,35 @@ const KNOWN_CORDIS_MOUNT_INCOMPATIBILITIES = new Set([
 ]);
 
 /**
+ * Static `disabled: true` overrides this generator emits verbatim, each for
+ * a documented reason a pure dependency-graph derivation cannot express on
+ * its own. A constituent package's own `dsh.bundle.patch` (e.g.
+ * `@dsh-stack/directory-picker-fix`'s `cordis.patch.yml`) is NOT read here:
+ * only a profile's *top-level* `dsh.profile.bundles` layers have their own
+ * patch applied at boot, and this bundle (`@dsh-stack/pack-bundle`) is the
+ * one Stack profiles actually list there -- everything it composes arrives
+ * as a bare `insert` row, so a disable that must land in the tree this
+ * bundle produces has to be authored here.
+ *
+ * - `directory-picker` (harness's own `@deepseek-ai/dsh-host-directory-picker-auto`,
+ *   inserted below as a row of its own via the union scan) mounts its
+ *   resolved backend as a *dynamic* Loader entry from inside its own
+ *   `apply()`; under this bundle's full concurrent boot, that dynamic mount
+ *   can race a second resolution of the same entry, double-registering the
+ *   `directoryPicker` cordis service and aborting the boot with `service
+ *   "directoryPicker" has been registered at <...>` (dsh-stack#188 -- did not
+ *   reproduce in harness's own isolated `directory-picker-auto` test suite,
+ *   nor in a bare `dsh web` boot with no Stack packages composed at all; only
+ *   reproduced with this bundle's full ~250-entry composition present).
+ *   `@dsh-stack/directory-picker-fix` (also inserted below) replaces it with
+ *   a statically-composed equivalent that reuses harness's own exported
+ *   resolver, so the native/browse choice stays exactly as adaptive as
+ *   before -- this disable does not hardcode one backend, it only routes
+ *   around the dynamic Loader-entry path that races.
+ */
+const STATIC_DISABLE_ROWS = ["directory-picker"];
+
+/**
  * Reads and parses a JSON file.
  *
  * @param {string} path - Absolute path to the JSON file.
@@ -207,7 +236,9 @@ function renderPatch(packageNames) {
     .map((name) => `    - id: ${rowIdFor(name)}\n      name: '${name}'`)
     .join("\n");
 
-  return `${header}- insert:\n${rows}\n`;
+  const disables = STATIC_DISABLE_ROWS.map((id) => `- id: ${id}\n  disabled: true\n`).join("");
+
+  return `${header}${disables}- insert:\n${rows}\n`;
 }
 
 const { mountable, skipped } = await collectMountablePackageNames();
