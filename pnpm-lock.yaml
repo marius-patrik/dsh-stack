@@ -724,6 +724,12 @@ importers:
       '@dsh-stack/lucide-animated':
         specifier: workspace:*
         version: link:../../extensions/lucide-animated
+      '@dsh-stack/marketplace':
+        specifier: workspace:*
+        version: link:../../../src/packages/marketplace
+      '@dsh-stack/marketplace-source-dsh-stack':
+        specifier: workspace:*
+        version: link:../../extensions/marketplace-source-dsh-stack
       '@dsh-stack/profile-runtime':
         specifier: workspace:*
         version: link:../../../src/packages/profile-runtime
@@ -868,6 +874,12 @@ importers:
       '@dsh-stack/lucide-animated':
         specifier: workspace:*
         version: link:../../extensions/lucide-animated
+      '@dsh-stack/marketplace':
+        specifier: workspace:*
+        version: link:../../../src/packages/marketplace
+      '@dsh-stack/marketplace-source-dsh-stack':
+        specifier: workspace:*
+        version: link:../../extensions/marketplace-source-dsh-stack
       '@dsh-stack/profile-runtime':
         specifier: workspace:*
         version: link:../../../src/packages/profile-runtime
@@ -970,6 +982,12 @@ importers:
       '@dsh-stack/credential-vault':
         specifier: workspace:*
         version: link:../../../src/packages/credential-vault
+      '@dsh-stack/marketplace':
+        specifier: workspace:*
+        version: link:../../../src/packages/marketplace
+      '@dsh-stack/marketplace-source-dsh-stack':
+        specifier: workspace:*
+        version: link:../../extensions/marketplace-source-dsh-stack
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
         version: link:../../../src/packages/plugin-kit
