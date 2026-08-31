@@ -91,22 +91,10 @@ const ALLOWED_NON_CORDIS_EXCLUSIONS = new Map([
     "@dsh-stack/sidebar-preferences",
     "client-only extension (composed into packs, no cordis host entry)",
   ],
-  [
-    "@dsh-stack/skin-claude",
-    "client-only extension (composed into packs, no cordis host entry)",
-  ],
-  [
-    "@dsh-stack/skin-codex",
-    "client-only extension (composed into packs, no cordis host entry)",
-  ],
-  [
-    "@dsh-stack/skin-deepseek",
-    "client-only extension (composed into packs, no cordis host entry)",
-  ],
-  [
-    "@dsh-stack/skin-runtime",
-    "client-only extension (composed into packs, no cordis host entry)",
-  ],
+  ["@dsh-stack/skin-claude", "client-only extension (composed into packs, no cordis host entry)"],
+  ["@dsh-stack/skin-codex", "client-only extension (composed into packs, no cordis host entry)"],
+  ["@dsh-stack/skin-deepseek", "client-only extension (composed into packs, no cordis host entry)"],
+  ["@dsh-stack/skin-runtime", "client-only extension (composed into packs, no cordis host entry)"],
   [
     "@dsh-stack/trading-backtest",
     "client-only extension (composed into packs, no cordis host entry)",
@@ -115,26 +103,11 @@ const ALLOWED_NON_CORDIS_EXCLUSIONS = new Map([
     "@dsh-stack/trading-research",
     "client-only extension (composed into packs, no cordis host entry)",
   ],
-  [
-    "@dsh-stack/tui",
-    "client-only extension (composed into packs, no cordis host entry)",
-  ],
-  [
-    "@dsh-stack/composition",
-    "pre-existing dead plugin, tracked by #123",
-  ],
-  [
-    "@dsh-stack/workspace-files",
-    "pre-existing dead plugin, tracked by #123",
-  ],
-  [
-    "@dsh-stack/trading-market-data",
-    "pre-existing dead plugin, tracked by #123",
-  ],
-  [
-    "@dsh-stack/trading-optimizer",
-    "pre-existing dead plugin, tracked by #123",
-  ],
+  ["@dsh-stack/tui", "client-only extension (composed into packs, no cordis host entry)"],
+  ["@dsh-stack/composition", "pre-existing dead plugin, tracked by #123"],
+  ["@dsh-stack/workspace-files", "pre-existing dead plugin, tracked by #123"],
+  ["@dsh-stack/trading-market-data", "pre-existing dead plugin, tracked by #123"],
+  ["@dsh-stack/trading-optimizer", "pre-existing dead plugin, tracked by #123"],
 ]);
 
 /**
@@ -157,9 +130,7 @@ const { skipped } = JSON.parse(stdout);
 const excluded = [...new Set(skipped.map(excludedPackageName))];
 
 const unlisted = excluded.filter((name) => !ALLOWED_NON_CORDIS_EXCLUSIONS.has(name));
-const stale = [...ALLOWED_NON_CORDIS_EXCLUSIONS.keys()].filter(
-  (name) => !excluded.includes(name),
-);
+const stale = [...ALLOWED_NON_CORDIS_EXCLUSIONS.keys()].filter((name) => !excluded.includes(name));
 
 if (unlisted.length > 0 || stale.length > 0) {
   for (const name of unlisted) {

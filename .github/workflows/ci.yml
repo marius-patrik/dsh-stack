@@ -61,6 +61,24 @@ jobs:
             ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
             ts-build-${{ runner.os }}-
 
+      # The cache above is keyed by lockfile hash with loose restore-keys, so
+      # it can warm-start from a run that predates a package deletion -- the
+      # restored lib/ for a since-removed src/packages/<id> has no sibling
+      # package.json in this checkout, which the workspace verifier reads as
+      # a broken package rather than a stale artifact. Prune any restored
+      # lib/ whose canonical package.json is gone before the cache's content
+      # reaches build/verify/typecheck.
+      - name: Prune orphaned build cache
+        run: |
+          for lib in src/packages/*/lib publish/plugins/*/lib publish/extensions/*/lib publish/packs/*/lib; do
+            [ -d "$lib" ] || continue
+            pkg="$(dirname "$lib")"
+            if [ ! -f "$pkg/package.json" ]; then
+              echo "Removing orphaned build cache: $lib (no $pkg/package.json)"
+              rm -rf "$lib"
+            fi
+          done
+
       - name: Build Stack workspace
         run: pnpm build
 
@@ -119,6 +137,24 @@ jobs:
           restore-keys: |
             ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
             ts-build-${{ runner.os }}-
+
+      # The cache above is keyed by lockfile hash with loose restore-keys, so
+      # it can warm-start from a run that predates a package deletion -- the
+      # restored lib/ for a since-removed src/packages/<id> has no sibling
+      # package.json in this checkout, which the workspace verifier reads as
+      # a broken package rather than a stale artifact. Prune any restored
+      # lib/ whose canonical package.json is gone before the cache's content
+      # reaches build/verify/typecheck.
+      - name: Prune orphaned build cache
+        run: |
+          for lib in src/packages/*/lib publish/plugins/*/lib publish/extensions/*/lib publish/packs/*/lib; do
+            [ -d "$lib" ] || continue
+            pkg="$(dirname "$lib")"
+            if [ ! -f "$pkg/package.json" ]; then
+              echo "Removing orphaned build cache: $lib (no $pkg/package.json)"
+              rm -rf "$lib"
+            fi
+          done
 
       - name: Build Stack workspace
         run: pnpm build
