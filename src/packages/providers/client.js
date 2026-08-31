@@ -9341,64 +9341,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
 
       React.useEffect(function () {
         /**
-         * Handles the click event for the "Stash All" button, discarding changes.
-         *
-         * This function is called when the "Stash All" button is clicked, and it discards
-         * changes without further confirmation.
-         */
-        var onTabMovedToTop = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            if (
-              prev.some(function (t) {
-                return t.id === tab.id;
-              })
-            )
-              return prev;
-            return prev.concat([tab]);
-          });
-          setActiveTab(tab.id);
-        };
-        /**
-         * Triggers the discard of all changes when the button is clicked.
-         *
-         * On failure, the `handleDiscardChanges` function is called to discard the changes.
-         */
-        var onTabMovedToBottom = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            var remaining = prev.filter(function (t) {
-              return t.id !== tab.id;
-            });
-            return remaining;
-          });
-          setActiveTab(function (curr) {
-            if (curr === tab.id) return null;
-            return curr;
-          });
-        };
-        /**
-         * Displays a warning dialog prompting the user to confirm discarding all changes.
-         *
-         * Guarantees a dialog with a "Discard All" option will be shown if there are changed files.
-         * Fails if the user chooses not to discard all changes.
-         */
-        var onTabMovedToRight = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            return prev.filter(function (t) {
-              return t.id !== tab.id;
-            });
-          });
-          setActiveTab(function (curr) {
-            if (curr === tab.id) return null;
-            return curr;
-          });
-        };
-        /**
          * Displays the header for the changed files section and indicates the status of the working tree.
          *
          * @returns {JSX.Element} A JSX element representing the header and status message for the changed files section.
@@ -9567,9 +9509,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
         };
 
-        window.addEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
-        window.addEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
-        window.addEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
         window.addEventListener("dsh:open-file-tab", onOpenFileTab);
         window.addEventListener("dsh:open-repo-tab", onOpenRepoTab);
         window.addEventListener("dsh:open-terminal", onOpenTerminal);
@@ -9577,9 +9516,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         window.addEventListener("dsh:focus-chat", onFocusChat);
         window.addEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
         return function () {
-          window.removeEventListener("dsh:tab-moved-to-top", onTabMovedToTop);
-          window.removeEventListener("dsh:tab-moved-to-bottom", onTabMovedToBottom);
-          window.removeEventListener("dsh:tab-moved-to-right", onTabMovedToRight);
           window.removeEventListener("dsh:open-file-tab", onOpenFileTab);
           window.removeEventListener("dsh:open-repo-tab", onOpenRepoTab);
           window.removeEventListener("dsh:open-terminal", onOpenTerminal);
