@@ -30,8 +30,7 @@
     "stack.ui.skin.settings",
     "stack.ui.themes",
     "stack.ui.tui",
-    "stack.workspace.files",
-    "stack.workspace.tabs"
+    "stack.workspace.files"
   ],
   "optionalDependencies": []
 }

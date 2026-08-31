@@ -78,7 +78,6 @@
     "@dsh-stack/tweak-stats": "workspace:*",
     "@dsh-stack/tweaks": "workspace:*",
     "@dsh-stack/voice": "workspace:*",
-    "@dsh-stack/workspace-files": "workspace:*",
-    "@dsh-stack/workspace-tabs": "workspace:*"
+    "@dsh-stack/workspace-files": "workspace:*"
   }
 }
