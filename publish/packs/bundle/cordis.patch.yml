@@ -37,12 +37,16 @@
       name: '@dsh-stack/providers'
     - id: repos
       name: '@dsh-stack/repos'
+    - id: sidebar-preferences
+      name: '@dsh-stack/sidebar-preferences'
     - id: sidebar-settings
       name: '@dsh-stack/sidebar-settings'
     - id: sidebar-shell
       name: '@dsh-stack/sidebar-shell'
     - id: skin-host
       name: '@dsh-stack/skin-host'
+    - id: skin-runtime
+      name: '@dsh-stack/skin-runtime'
     - id: skin-settings
       name: '@dsh-stack/skin-settings'
     - id: themes

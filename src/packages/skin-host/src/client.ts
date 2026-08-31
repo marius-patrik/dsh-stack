@@ -2,14 +2,12 @@ import { createElement, type ComponentType } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import { createSkinRuntime } from "@dsh-stack/skin-runtime";
+import type {} from "@dsh-stack/skin-runtime/client";
 import { CodexBrandMark, CodexBrandName } from "@dsh-stack/skin-codex/client";
 import { ClaudeBrandMark, ClaudeBrandName } from "@dsh-stack/skin-claude/client";
 import { DeepSeekBrandMark, DeepSeekBrandName } from "@dsh-stack/skin-deepseek/client";
 
-export const inject = ["slots"];
-
-const runtime = createSkinRuntime(undefined, () => window.location.reload());
+export const inject = ["slots", "skin"];
 
 interface SkinComponents {
   readonly mark: ComponentType<{ size?: number }>;
@@ -24,7 +22,7 @@ const components: Record<string, SkinComponents> = {
 
 /** Register the active skin's branding components in the declared UI slots. */
 export function apply(ctx: ClientContext): void {
-  const active = runtime.getActive();
+  const active = ctx.skin.getActive();
   const selected = components[active] ?? components.deepseek!;
   const /** Mark implementation. */
     Mark = (props: { size?: number }) => createElement(selected.mark, props);

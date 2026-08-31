@@ -1588,11 +1588,10 @@ importers:
         version: 6.0.3
 
   src/packages/sidebar-preferences:
-    dependencies:
-      '@dsh-stack/plugin-kit':
-        specifier: workspace:*
-        version: link:../plugin-kit
     devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1709,11 +1708,10 @@ importers:
         version: 6.0.3
 
   src/packages/skin-runtime:
-    dependencies:
-      '@dsh-stack/plugin-kit':
-        specifier: workspace:*
-        version: link:../plugin-kit
     devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
