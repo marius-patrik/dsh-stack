@@ -222,6 +222,7 @@ window.__ModuleLoader__.load({
      * so both use the identical group/button styling.
      */
     function createChoiceButtonGroup(title, options, isSelectedFn, onSelectFn) {
+      var h = require("react").createElement;
       return h(
         "div",
         {
