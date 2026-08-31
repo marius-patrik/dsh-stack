@@ -5,6 +5,6 @@
   "kind": "pack",
   "description": "AI protocol and model dialect composition pack.",
   "files": ["package.json", "stack.json", "README.md"],
-  "dependencies": ["stack.ai.dialects", "stack.ai.providers"],
+  "dependencies": ["stack.ai.dialects", "stack.ai.providers", "stack.ai.provider-rotation"],
   "optionalDependencies": []
 }

@@ -322,14 +322,16 @@ export function resolveProvidersOptions(config: Config): ResolvedProvidersOption
  * The vendor a numbered account id belongs to: strips a trailing `-<N>`
  * (`openrouter-3` -> `openrouter`; `openrouter` itself is already bare).
  * Matches the numbered-account naming convention `.data/settings.yaml`
- * already uses across every multi-account vendor (#187).
+ * already uses across every multi-account vendor (#187). Exported so
+ * `@dsh-stack/provider-rotation` shares this grouping instead of
+ * re-deriving it for `ctx.llm`'s own provider ids.
  */
-function vendorBaseId(provider: string): string {
+export function vendorBaseId(provider: string): string {
   return provider.replace(/-\d+$/, "");
 }
 
 /** The numbered suffix of an account id (bare ids sort first, at 1). */
-function vendorSuffix(provider: string): number {
+export function vendorSuffix(provider: string): number {
   const match = /-(\d+)$/.exec(provider);
   return match === null ? 1 : Number(match[1]);
 }
