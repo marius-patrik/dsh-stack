@@ -5,6 +5,7 @@ export {
   DEFAULT_PORT,
   parseBoundPort,
   parseGatewayPort,
+  parseLaunchToken,
   readProfilePort,
   resolvePort,
   startPortHint,
