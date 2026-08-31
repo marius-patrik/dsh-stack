@@ -35,6 +35,12 @@ window.__ModuleLoader__.load({
     var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
     var P = require("@deepseek-ai/dsh-client-ui-primitives");
 
+    // Commit protocol for moving tabs between the shell surfaces (main area,
+    // bottom panel, secondary sidebar). Destinations commit only once they
+    // have taken ownership; sources remove their copy on the commit event.
+    // See client-tab-move-protocol.js (prepended to this bundle at build time).
+    var tabMove = __dshCreateTabMoveProtocol(typeof window !== "undefined" ? window : undefined);
+
     var NS = "providers";
     var VAULT_API = "/vault/api";
     var QUOTAS_API = "/quotas/api";
@@ -3746,6 +3752,43 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var containerLogsState = React.useState("Loading container logs…");
       var containerLogs = containerLogsState[0],
         setContainerLogs = containerLogsState[1];
+
+      // A terminal/container tab this panel holds has been committed to
+      // another surface (main area or secondary sidebar): drop it from the
+      // panel's lists. Removal is commit-driven — a move request no
+      // destination accepted leaves the panel's copy untouched.
+      React.useEffect(function () {
+        return tabMove.onForeignCommit("bottom", function (detail) {
+          var committedId = detail && detail.id;
+          if (!committedId) return;
+          setData(function (prev) {
+            return Object.assign({}, prev, {
+              sessions: prev.sessions.filter(function (s) {
+                return s.name !== committedId;
+              }),
+            });
+          });
+          setContainers(function (prev) {
+            return prev.filter(function (c) {
+              return c.id !== committedId;
+            });
+          });
+        });
+      }, []);
+
+      // Destination-side: a move to this panel was requested. Accept it only
+      // when this surface can host the tab's type (takeOwnership checks
+      // surfaceHostsTab, refusing a chat tab rather than swallowing it --
+      // #122). sessions/containers are backend-polled and already
+      // deduplicated against the main area's window.__dsh_top_tab_ids__ map,
+      // so accepting here only needs to fire the commit for the source to
+      // drop its copy; the panel's own poll then renders the real session or
+      // container once it is no longer excluded by that map.
+      React.useEffect(function () {
+        return tabMove.onMoveRequested("bottom", function (tab) {
+          tabMove.takeOwnership("bottom", tab);
+        });
+      }, []);
       // activeView: "chat" | "terminal" | "container"
       var activeViewState = React.useState(
         props.initialView ||
@@ -4384,19 +4427,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   var raw = e.dataTransfer.getData("text/dsh-tab");
                   if (raw) {
                     var tabData = JSON.parse(raw);
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-bottom", { detail: tabData }),
-                    );
+                    // Ownership moves only once the destination commits; the
+                    // sending surface drops its copy on the commit event.
+                    tabMove.requestMove("bottom", tabData);
                     if (tabData.type === "terminal") selectTerminalTab(tabData.id);
                     else if (tabData.type === "container") {
                       setSelectedContainer(tabData.id);
                       setActiveView("container");
-                      setIsCollapsed(false);
-                    } else if (tabData.type === "chat") {
-                      setActiveView("chat");
-                      setSelectedSession(null);
-                      setSelectedContainer(null);
-                      setIsCollapsed(false);
                     }
                   }
                 } catch (err) {}
@@ -4430,11 +4467,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   onContextMenu: function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    window.dispatchEvent(
-                      new CustomEvent("dsh:tab-moved-to-top", {
-                        detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                      }),
-                    );
+                    tabMove.requestMove("top", {
+                      id: "chat-main",
+                      type: "chat",
+                      title: "Conversation",
+                    });
                   },
                   style: {
                     display: "inline-flex",
@@ -4461,11 +4498,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                     title: "Restore to Top Tab Bar",
                     onClick: function (e) {
                       e.stopPropagation();
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                        }),
-                      );
+                      tabMove.requestMove("top", {
+                        id: "chat-main",
+                        type: "chat",
+                        title: "Conversation",
+                      });
                     },
                     style: {
                       display: "inline-flex",
@@ -4954,73 +4991,43 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 ].filter(Boolean),
                 onSelect: function (actionId) {
                   setTabActionsOpen(false);
+                  // Move requests only; this panel drops its copy of the tab
+                  // when the destination surface commits the transfer.
                   if (actionId === "move-top") {
                     if (activeView === "terminal" && selectedSession) {
-                      var targetSess = selectedSession;
-                      setSessions(function (prev) {
-                        return prev.filter(function (s) {
-                          return s.name !== targetSess;
-                        });
+                      tabMove.requestMove("top", {
+                        id: selectedSession,
+                        type: "terminal",
+                        title: selectedSession,
+                        session: selectedSession,
                       });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: {
-                            id: targetSess,
-                            type: "terminal",
-                            title: targetSess,
-                            session: targetSess,
-                          },
-                        }),
-                      );
                     } else if (activeView === "container" && selectedContainer) {
-                      var targetCont = selectedContainer;
-                      setContainers(function (prev) {
-                        return prev.filter(function (c) {
-                          return c.id !== targetCont;
-                        });
+                      tabMove.requestMove("top", {
+                        id: selectedContainer,
+                        type: "container",
+                        title: selectedContainer,
                       });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: { id: targetCont, type: "container", title: targetCont },
-                        }),
-                      );
                     } else if (activeView === "chat") {
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-top", {
-                          detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                        }),
-                      );
+                      tabMove.requestMove("top", {
+                        id: "chat-main",
+                        type: "chat",
+                        title: "Conversation",
+                      });
                     }
                   } else if (actionId === "move-right") {
                     if (activeView === "terminal" && selectedSession) {
-                      var targetS = selectedSession;
-                      setSessions(function (prev) {
-                        return prev.filter(function (s) {
-                          return s.name !== targetS;
-                        });
+                      tabMove.requestMove("right", {
+                        id: selectedSession,
+                        type: "terminal",
+                        title: selectedSession,
+                        session: selectedSession,
                       });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-right", {
-                          detail: {
-                            id: targetS,
-                            type: "terminal",
-                            title: targetS,
-                            session: targetS,
-                          },
-                        }),
-                      );
                     } else if (activeView === "container" && selectedContainer) {
-                      var targetC = selectedContainer;
-                      setContainers(function (prev) {
-                        return prev.filter(function (c) {
-                          return c.id !== targetC;
-                        });
+                      tabMove.requestMove("right", {
+                        id: selectedContainer,
+                        type: "container",
+                        title: selectedContainer,
                       });
-                      window.dispatchEvent(
-                        new CustomEvent("dsh:tab-moved-to-right", {
-                          detail: { id: targetC, type: "container", title: targetC },
-                        }),
-                      );
                     }
                   } else if (actionId === "stop-container" && selectedContainer) {
                     fetch(QUOTAS_API + "/docker/containers/action", {
@@ -6077,11 +6084,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             {
               type: "button",
               onClick: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:tab-moved-to-top", {
-                    detail: { id: "chat-main", type: "chat", title: "Conversation" },
-                  }),
-                );
+                tabMove.requestMove("top", {
+                  id: "chat-main",
+                  type: "chat",
+                  title: "Conversation",
+                });
               },
               style: {
                 display: "inline-flex",
@@ -6106,11 +6113,12 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               type: "button",
               onClick: function () {
                 var termId = "term-" + Date.now().toString(36);
-                window.dispatchEvent(
-                  new CustomEvent("dsh:tab-moved-to-top", {
-                    detail: { id: termId, type: "terminal", title: termId, session: "0" },
-                  }),
-                );
+                tabMove.requestMove("top", {
+                  id: termId,
+                  type: "terminal",
+                  title: termId,
+                  session: "0",
+                });
               },
               style: {
                 display: "inline-flex",
@@ -6224,9 +6232,24 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
          *
          * @returns {void} No value is returned, but it ensures the menu is properly cleaned up.
          */
-        var onMoveToRight = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
+        window.addEventListener("dsh:toggle-right-sidebar", onToggle);
+        window.addEventListener("dsh:toggle-secondary-sidebar", onToggle);
+        return function () {
+          window.removeEventListener("dsh:toggle-right-sidebar", onToggle);
+          window.removeEventListener("dsh:toggle-secondary-sidebar", onToggle);
+        };
+      }, []);
+
+      // Destination-side: a move to this sidebar was requested. Accept it
+      // only when this surface can host the tab's type (takeOwnership checks
+      // surfaceHostsTab) — refusing rather than accepting a type it cannot
+      // render is the fix for #122. Acceptance both adds the tab here and
+      // fires the commit every other surface's onForeignCommit listens for,
+      // so the source drops its copy only once this destination has taken
+      // ownership, never before.
+      React.useEffect(function () {
+        return tabMove.onMoveRequested("right", function (tab) {
+          if (!tabMove.takeOwnership("right", tab)) return;
           setTabs(function (prev) {
             if (
               prev.some(function (t) {
@@ -6238,48 +6261,23 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           });
           setActiveTab(tab.id);
           setIsOpen(true);
-        };
-        /**
-         * Stops the propagation of the click event and does not guarantee any specific
-         * behavior on failure since no explicit error handling is provided.
-         *
-         * @param {MouseEvent} e - The mouse event being handled.
-         */
-        var onMoveToTop = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
+        });
+      }, []);
+
+      // A tab this sidebar holds has been committed to another surface (main
+      // area or bottom panel): drop it from the strip. Removal is
+      // commit-driven — a move request no destination accepted leaves the
+      // sidebar's copy untouched (#122).
+      React.useEffect(function () {
+        return tabMove.onForeignCommit("right", function (detail) {
+          var committedId = detail && detail.id;
+          if (!committedId) return;
           setTabs(function (prev) {
             return prev.filter(function (t) {
-              return t.id !== tab.id;
+              return t.id !== committedId;
             });
           });
-        };
-        /**
-         * Stops the propagation of the event and toggles the danger style on the button.
-         * The caller must ensure the `e` parameter is an event object. On failure, the event
-         * propagation is stopped, and the button's style changes based on the `item.danger` value.
-         */
-        var onMoveToBottom = function (e) {
-          var tab = e.detail;
-          if (!tab) return;
-          setTabs(function (prev) {
-            return prev.filter(function (t) {
-              return t.id !== tab.id;
-            });
-          });
-        };
-        window.addEventListener("dsh:toggle-right-sidebar", onToggle);
-        window.addEventListener("dsh:toggle-secondary-sidebar", onToggle);
-        window.addEventListener("dsh:tab-moved-to-right", onMoveToRight);
-        window.addEventListener("dsh:tab-moved-to-top", onMoveToTop);
-        window.addEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
-        return function () {
-          window.removeEventListener("dsh:toggle-right-sidebar", onToggle);
-          window.removeEventListener("dsh:toggle-secondary-sidebar", onToggle);
-          window.removeEventListener("dsh:tab-moved-to-right", onMoveToRight);
-          window.removeEventListener("dsh:tab-moved-to-top", onMoveToTop);
-          window.removeEventListener("dsh:tab-moved-to-bottom", onMoveToBottom);
-        };
+        });
       }, []);
 
       var /** handleResizeStart implementation. */
@@ -9589,6 +9587,48 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           window.removeEventListener("dsh:focus-chat", onFocusChat);
           window.removeEventListener("dsh:close-terminal-tab", onCloseTerminalTab);
         };
+      }, []);
+
+      // A tab the main area holds has been committed to another surface
+      // (bottom panel or secondary sidebar): drop it from the strip. Removal
+      // is commit-driven — a move request no destination accepted leaves the
+      // main area's copy untouched (#122).
+      React.useEffect(function () {
+        return tabMove.onForeignCommit("top", function (detail) {
+          var committedId = detail && detail.id;
+          if (!committedId) return;
+          setTabs(function (prev) {
+            return prev.filter(function (t) {
+              return t.id !== committedId;
+            });
+          });
+          setActiveTab(function (curr) {
+            if (curr === committedId) return null;
+            return curr;
+          });
+        });
+      }, []);
+
+      // Destination-side: a move to the main area was requested. The main
+      // area hosts every tab type (surfaceHostsTab returns true for "top"),
+      // so takeOwnership only fails when the tab itself is malformed. On
+      // success, add the tab here and select it -- the commit this fires is
+      // what tells the source (panel or sidebar) to drop its own copy, never
+      // before (#122).
+      React.useEffect(function () {
+        return tabMove.onMoveRequested("top", function (tab) {
+          if (!tabMove.takeOwnership("top", tab)) return;
+          setTabs(function (prev) {
+            if (
+              prev.some(function (t) {
+                return t.id === tab.id;
+              })
+            )
+              return prev;
+            return prev.concat([tab]);
+          });
+          setActiveTab(tab.id);
+        });
       }, []);
 
       /**
