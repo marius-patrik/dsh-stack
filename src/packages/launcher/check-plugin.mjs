@@ -10,6 +10,7 @@ const {
   resolveHome,
   migrateHome,
   parseBoundPort,
+  parseLaunchToken,
   readProfilePort,
   resolvePort,
   startPortHint,
@@ -113,6 +114,25 @@ assert.equal(
   3082,
 );
 console.log("parseBoundPort gateway-line precedence ok");
+
+// parseLaunchToken: last dsh-web line WITH a token wins, a token-less dsh-web
+// line (the pre-auth boot announcement some harness pins also print) is
+// ignored, and a restart's later token supersedes an earlier one.
+assert.equal(parseLaunchToken("dsh web: http://127.0.0.1:3081\n"), null);
+assert.equal(
+  parseLaunchToken(
+    "dsh web: http://127.0.0.1:3081\ndsh web: http://127.0.0.1:3081/?token=abc-123_XYZ\n",
+  ),
+  "abc-123_XYZ",
+);
+assert.equal(
+  parseLaunchToken(
+    "dsh web: http://127.0.0.1:3081/?token=first-token\ndsh web: http://127.0.0.1:3081/?token=second-token\n",
+  ),
+  "second-token",
+);
+assert.equal(parseLaunchToken("nothing bound yet"), null);
+console.log("parseLaunchToken ok");
 
 // readProfilePort: webserver entry of the profile patch.
 mkdirSync(join(homeB, "profiles", "web"), { recursive: true });

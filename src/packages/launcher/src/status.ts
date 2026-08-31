@@ -1,7 +1,9 @@
+import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { findListenerPid } from "./processes.js";
 import { fetchPluginInventory } from "./plugin-inventory.js";
 import { summarizePluginMetrics } from "./plugin-metrics.js";
+import { parseLaunchToken } from "./ports.js";
 
 /** Tailscale addresses for the status URL, when the tailscale CLI exists. */
 interface TailscaleInfo {
@@ -68,6 +70,18 @@ export async function statusReport(
   let url = `http://127.0.0.1:${port}`;
   if (ts.dns.length > 0) url = `http://${ts.dns}:${port}`;
   else if (ts.ip.length > 0) url = `http://${ts.ip}:${port}`;
+  // Since #218's harness bump, every address needs the boot-printed token
+  // (or an existing signed cookie for that exact origin, which this CLI
+  // invocation cannot see) before the browser gets past its 401 page --
+  // append it so the printed address actually opens, not just names a host.
+  let logText = "";
+  try {
+    logText = readFileSync(logFile, "utf8");
+  } catch {
+    /* no log yet */
+  }
+  const token = parseLaunchToken(logText);
+  if (token !== null) url = `${url}/?token=${token}`;
   const lines = [
     `● dsh web server is running (PID: ${pid})`,
     `  Address: ${url}`,

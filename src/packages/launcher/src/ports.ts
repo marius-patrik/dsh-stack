@@ -6,6 +6,7 @@ export const DEFAULT_PORT = 3080;
 
 const GATEWAY_PATTERN = /dsh gateway:\s*https?:\/\/[^\s:/]+:(\d+)/g;
 const WEB_PATTERN = /dsh web:\s*https?:\/\/[^\s:/]+:(\d+)/g;
+const LAUNCH_TOKEN_PATTERN = /dsh web:\s*https?:\/\/[^\s]+\?token=([A-Za-z0-9_-]+)/g;
 
 /** Last valid port captured by `pattern` in the log, or null. */
 function parseLastPort(logText: string, pattern: RegExp): number | null {
@@ -24,6 +25,27 @@ function parseLastPort(logText: string, pattern: RegExp): number | null {
  */
 export function parseGatewayPort(logText: string): number | null {
   return parseLastPort(logText, GATEWAY_PATTERN);
+}
+
+/**
+ * Parse the current launch token from the log: the last `dsh web:
+ * http://<host>:<port>/?token=<value>` line wins, matching every other
+ * "last boot wins" parse in this module. Harness's boot flow (since the
+ * harness bump in #218) prints this line once per process start; the same
+ * token authenticates a `/?token=...` exchange for ANY Host the request
+ * carries (harness's browser-auth.ts only checks the token value, not the
+ * authority, at exchange time -- authority-binding happens on the cookie it
+ * mints afterward), so it can be reused to build a working link for a host
+ * the boot line itself never printed (e.g. a Tailscale address). Returns
+ * null when the log holds no such line, or once the server that printed it
+ * has restarted and rotated to a new token.
+ */
+export function parseLaunchToken(logText: string): string | null {
+  let token: string | null = null;
+  for (const match of logText.matchAll(LAUNCH_TOKEN_PATTERN)) {
+    if (match[1] !== undefined) token = match[1];
+  }
+  return token;
 }
 
 /**
