@@ -87,14 +87,9 @@ const ALLOWED_NON_CORDIS_EXCLUSIONS = new Map([
     "@dsh-stack/profile-runtime",
     "client-only extension (composed into packs, no cordis host entry)",
   ],
-  [
-    "@dsh-stack/sidebar-preferences",
-    "client-only extension (composed into packs, no cordis host entry)",
-  ],
   ["@dsh-stack/skin-claude", "client-only extension (composed into packs, no cordis host entry)"],
   ["@dsh-stack/skin-codex", "client-only extension (composed into packs, no cordis host entry)"],
   ["@dsh-stack/skin-deepseek", "client-only extension (composed into packs, no cordis host entry)"],
-  ["@dsh-stack/skin-runtime", "client-only extension (composed into packs, no cordis host entry)"],
   [
     "@dsh-stack/trading-backtest",
     "client-only extension (composed into packs, no cordis host entry)",

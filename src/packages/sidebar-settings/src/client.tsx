@@ -7,18 +7,22 @@ import {
   SettingsToggleRow,
 } from "@dsh-stack/settings-panel";
 import { PanelLeftIcon } from "@dsh-stack/lucide-animated/client";
-import { sidebarPreferences, type SidebarPreferences } from "@dsh-stack/sidebar-preferences";
-import type { SidebarPreferenceKey } from "@dsh-stack/sidebar-preferences";
+import type { SidebarPreferences, SidebarPreferenceKey } from "@dsh-stack/sidebar-preferences";
+import type {} from "@dsh-stack/sidebar-preferences/client";
 
 /** Cordis client services this plugin's `apply` reaches for; activation waits on them. */
-export const inject = ["slots"];
+export const inject = ["slots", "sidebarPreferences"];
+
+type SidebarSettingsProps = SettingsSectionOwnerProps & {
+  preferences: ClientContext["sidebarPreferences"];
+};
 
 /** Renders the sidebar settings section. */
-export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
-  const [state, setState] = useState<SidebarPreferences>(sidebarPreferences.get());
-  useEffect(() => sidebarPreferences.subscribe(() => setState(sidebarPreferences.get())), []);
+export function SidebarSettings({ preferences, close }: SidebarSettingsProps) {
+  const [state, setState] = useState<SidebarPreferences>(preferences.get());
+  useEffect(() => preferences.subscribe(() => setState(preferences.get())), [preferences]);
   const /** change implementation. */
-    change = (key: SidebarPreferenceKey, value: boolean) => sidebarPreferences.set(key, value);
+    change = (key: SidebarPreferenceKey, value: boolean) => preferences.set(key, value);
   return (
     <SettingsSection
       label="Sidebar"
@@ -58,10 +62,13 @@ export function SidebarSettingsIcon() {
 
 /** Registers the sidebar settings section with the settings slot registry. */
 export function apply(ctx: ClientContext): void {
+  const preferences = ctx.sidebarPreferences;
   ctx.slots.inject("settings.section", () =>
     ctx.slots.register(
       { name: "settings.section", id: "sidebar", order: 30, label: "Sidebar", inject: () => ({}) },
-      SidebarSettings,
+      (props: SettingsSectionOwnerProps) => (
+        <SidebarSettings {...props} preferences={preferences} />
+      ),
     ),
   );
   ctx.slots.inject(SETTINGS_SECTION_ICON_SLOT, () =>
