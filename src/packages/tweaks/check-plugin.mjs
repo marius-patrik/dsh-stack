@@ -132,9 +132,6 @@ const stubModules = {
   "@deepseek-ai/dsh-client-ui-slots": {
     resolveSlotLabel: (label) => (typeof label === "function" ? label() : label),
   },
-  "@deepseek-ai/dsh-client-web-react": {
-    bindSnapshotSelector: (observable) => (selector) => selector(observable.getSnapshot()),
-  },
 };
 const /** stubRequire implementation. */ stubRequire = (name) => stubModules[name];
 const clientModule = clientSpec.factory(stubRequire);
