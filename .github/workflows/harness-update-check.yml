@@ -12,7 +12,7 @@ permissions:
 jobs:
   check:
     name: Check for new upstream harness commits
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

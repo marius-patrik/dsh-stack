@@ -6,6 +6,10 @@ import { formatPluginMetricsLine, summarizePluginMetrics } from "./plugin-metric
 export interface AttachOptions {
   /** Port the running server was resolved to (never assumed — see ports.ts). */
   port: number;
+  /** Resolved DSH_HOME, needed to authenticate the plugin-inventory RPC. */
+  home: string;
+  /** Active profile name, needed to authenticate the plugin-inventory RPC. */
+  profile: string;
   /** Log file the background server writes to. */
   logFile: string;
   /** Lines of backlog printed before streaming starts. */
@@ -23,7 +27,7 @@ export interface AttachOptions {
  * watcher and the poll timer and resolves, leaving the server running.
  */
 export function attachToServer(opts: AttachOptions): Promise<void> {
-  const { port, logFile, lines, intervalMs, out } = opts;
+  const { port, home, profile, logFile, lines, intervalMs, out } = opts;
   return new Promise((resolve) => {
     out(`dsh: attached to web server on port ${port} (Ctrl-C detaches, server keeps running)\n`);
     const stopFollow = followLog(logFile, lines, out);
@@ -34,7 +38,7 @@ export function attachToServer(opts: AttachOptions): Promise<void> {
       if (polling) return; // a slow RPC must not stack up polls
       polling = true;
       try {
-        const entries = await fetchPluginInventory(port);
+        const entries = await fetchPluginInventory(port, home, profile);
         const metrics = entries === null ? null : summarizePluginMetrics(entries);
         out(`${formatPluginMetricsLine(metrics, new Date())}\n`);
       } finally {

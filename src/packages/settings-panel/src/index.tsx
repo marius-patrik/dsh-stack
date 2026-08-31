@@ -11,6 +11,9 @@
  */
 import type { CSSProperties, ReactNode } from "react";
 
+export { SETTINGS_SECTION_ICON_SLOT } from "./section-icon-slot.js";
+export type { SettingsSectionIconOwnerProps } from "./section-icon-slot.js";
+
 /** Vertical rhythm between a section's option rows, in pixels. */
 const OPTION_GAP = 8;
 

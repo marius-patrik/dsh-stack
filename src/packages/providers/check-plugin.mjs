@@ -41,6 +41,31 @@ const extensions = new Map(
   ),
 );
 
+// Same split applies one layer down: `dialects` only owns the registry, and
+// every concrete wire dialect a route above resolves against lives in its own
+// `@dsh-stack/dialect-<id>` extension. Loaded the same way, for the same
+// reason — this test exercises the dialect resolution real deployments get.
+// `gemini` is deliberately absent: no provider route above resolves it via
+// `ctx.dialects.get("gemini")` (`provider-gemini-api` uses `openai`,
+// `provider-gemini-sub` uses `code-assist`) — `@dsh-stack/dialect-gemini` is
+// a plain library `@dsh-stack/dialect-code-assist` imports its serialization
+// helpers from directly, not a mountable dialect extension (dsh-stack#194).
+const DIALECT_IDS = ["openai", "claude", "code-assist", "antigravity"];
+const dialectExtensions = new Map(
+  await Promise.all(
+    DIALECT_IDS.map(async (id) => [
+      id,
+      await import(`../../../publish/extensions/dialect-${id}/lib/index.js`),
+    ]),
+  ),
+);
+
+/** Apply the dialects plugin, then every concrete dialect extension's registration. */
+function applyDialects(ctx) {
+  dialects.apply(ctx, {});
+  for (const extension of dialectExtensions.values()) extension.apply(ctx);
+}
+
 /** Apply the providers plugin, then every provider extension's route registration. */
 function applyProviders(ctx, config) {
   providers.apply(ctx, config);
@@ -52,29 +77,59 @@ assertLoaderShape(providers, "providers");
 console.log("loader shape ok:", providers.name, "inject=", JSON.stringify(providers.inject));
 
 const ctx = new Context();
-dialects.apply(ctx, {});
+applyDialects(ctx);
 
 const llm = {
   configurable: [],
   adapter: undefined,
   registeredProviders: undefined,
-  /** registerConfigurableProviders implementation. */
+  /**
+   * Determines the failure type based on the HTTP status code and provider message.
+   *
+   * - Returns "AUTH" for 401 errors unless the message indicates a quota or rate limit.
+   * - Returns "QUOTA" for 403 errors with a "permission_error" message.
+   * - Returns "RATE_LIMIT" for 429 errors.
+   * - Returns an empty string for messages that do not indicate a failure type.
+   */
   registerConfigurableProviders(entries) {
     this.configurable = [...entries];
     const self = this;
-    /** handle implementation. */
+    /**
+     * Registers a provider for the given context.
+     *
+     * @param {string} _ns - The namespace for the provider.
+     * @param {object} _schema - The schema for the provider.
+     * @param {object} opts - Configuration options for the provider.
+     * @returns {object} An object with `get` to retrieve the base value and `watch` to get the current value.
+     */
     const handle = () => {};
     handle.replace = (next) => {
       self.configurable = [...next];
     };
     return handle;
   },
-  /** registerAdapter implementation. */
+  /**
+   * Classifies HTTP error codes as either "AUTH" or "QUOTA" based on the error detail.
+   *
+   * - Returns "QUOTA" if the error code is 403 and the detail contains quota wording.
+   * - Returns "AUTH" for any 403 without quota wording or for a 401 error.
+   * - Returns "AUTH" for errors like invalid API key or insufficient funding.
+   */
   registerAdapter(registered, adapter) {
     this.adapter = adapter;
     this.registeredProviders = [...registered];
     const self = this;
-    /** handle implementation. */
+    /**
+     * Registers configurable providers and allows replacing the current set of
+     * configurable providers.
+     *
+     * @returns A function that can be used to replace the current set of configurable
+     * providers.
+     *
+     * On failure, the function does not throw or otherwise indicate failure; it
+     * simply returns a new function that reflects the updated set of configurable
+     * providers.
+     */
     const handle = () => {};
     handle.replace = (next) => {
       self.registeredProviders = [...next];
@@ -92,7 +147,13 @@ const settings = {
 };
 ctx.provide("settings", settings);
 const credentialsMin = {
-  /** resolve implementation. */
+  /**
+   * Resolves the value for the given reference.
+   *
+   * Guarantees to return an object with `value` and `source` properties if the
+   * reference matches known credentials. Returns `undefined` for unknown
+   * references or if no match is found.
+   */
   async resolve(ref) {
     if (ref === "CLAUDE_SUB_OAUTH_TOKEN") return { value: "test-oauth-token", source: "test" };
     if (ref === "OPENAI_API_KEY") return { value: "test-openai-key", source: "test" };
@@ -169,7 +230,7 @@ console.log(
 // mode "all" restores every route: uncatalogued models resolve, and a missing
 // key surfaces on the request as MISSING_CREDENTIAL instead of at the filter.
 const ctxAll = new Context();
-dialects.apply(ctxAll, {});
+applyDialects(ctxAll);
 const llmAll = {
   configurable: [],
   adapter: undefined,
@@ -178,7 +239,13 @@ const llmAll = {
   registerConfigurableProviders(entries) {
     this.configurable = [...entries];
     const self = this;
-    /** handle implementation. */
+    /**
+     * Classifies HTTP 403 responses based on the error message content.
+     *
+     * - Returns "QUOTA" if the response includes quota-related wording.
+     * - Returns "AUTH" for any 403 response without quota wording or for a 401 response.
+     * - Returns "AUTH" for responses with a funding problem indicated by an error message.
+     */
     const handle = () => {};
     handle.replace = (next) => {
       self.configurable = [...next];
@@ -190,7 +257,16 @@ const llmAll = {
     this.adapter = adapter;
     this.registeredProviders = [...registered];
     const self = this;
-    /** handle implementation. */
+    /**
+     * Classifies an HTTP error code and message into a failure category.
+     *
+     * @param {number} code - The HTTP status code.
+     * @param {string | undefined} message - The optional error message.
+     * @returns {string} The failure category, such as "AUTH", "QUOTA", or "RATE_LIMIT".
+     * A 403 with a quota message is classified as "QUOTA", a 401 without a specific
+     * message is classified as "AUTH", and a 429 is classified as "RATE_LIMIT".
+     * If the message does not specify the failure type, it defaults to "AUTH".
+     */
     const handle = () => {};
     handle.replace = (next) => {
       self.registeredProviders = [...next];
@@ -202,7 +278,14 @@ const llmAll = {
 ctxAll.provide("llm", llmAll);
 ctxAll.provide("settings", settings);
 const credentialsFull = {
-  /** resolve implementation. */
+  /**
+   * Classifies HTTP error codes and messages to determine the type of failure.
+   *
+   * @param {number} code - The HTTP status code.
+   * @param {string} detail - The error detail message.
+   * @returns {string} - Returns "QUOTA" if the error is due to a usage limit, "AUTH" if it's an authentication issue, or "FUNDING" if it's a funding problem.
+   *                    Returns "AUTH" for 403 without quota wording and 401 errors.
+   */
   async resolve(ref) {
     if (ref === "CLAUDE_SUB_OAUTH_TOKEN") return { value: "test-oauth-token", source: "test" };
     if (ref === "GROK_SUB_OAUTH_TOKEN") return { value: "test-grok-token", source: "test" };
@@ -256,7 +339,11 @@ globalThis.fetch = async (url, init) => {
   capturedAuth = init.headers["authorization"];
   return new Response(
     new ReadableStream({
-      /** start implementation. */
+      /**
+       * Emits a series of SSE events to start a new message context.
+       * Emits `message_start`, `content_block_start`, `content_block_delta`, `content_block_stop`, `message_delta`, and `message_stop` events in sequence.
+       * Guarantees that the message context is initialized and ready for content.
+       */
       start(controller) {
         controller.enqueue(new TextEncoder().encode(sseBody));
         controller.close();
@@ -305,7 +392,11 @@ globalThis.fetch = async (url, init) => {
   capturedAuth = init.headers["authorization"];
   return new Response(
     new ReadableStream({
-      /** start implementation. */
+      /**
+       * Sends a stream of text chunks to the API and logs the response.
+       * Guarantees that the assembled text includes "Hello world" and logs the URL, text, and usage.
+       * Fails if no usage chunk is found or the assembled text does not contain "Hello world".
+       */
       start(controller) {
         controller.enqueue(new TextEncoder().encode(openaiBody));
         controller.close();
@@ -352,7 +443,11 @@ globalThis.fetch = async (url, init) => {
   capturedAuth = init.headers["authorization"];
   return new Response(
     new ReadableStream({
-      /** start implementation. */
+      /**
+       * Verifies and asserts the correctness of API responses from different services.
+       * Ensures the OpenAI API stream returns expected text and the proxy routes and
+       * OpenCode Zen services have the expected models in their catalogs.
+       */
       start(controller) {
         controller.enqueue(new TextEncoder().encode(openaiBody));
         controller.close();
@@ -413,7 +508,14 @@ globalThis.fetch = async (url, init) => {
   capturedInit = init;
   return new Response(
     new ReadableStream({
-      /** start implementation. */
+      /**
+       * Attempts to resolve an API credential based on the provided reference.
+       * Returns a credential object with the value and source if found; otherwise, returns undefined.
+       * Fails if the reference does not match any known credential type.
+       *
+       * @param ref - The reference string used to identify the credential type.
+       * @returns An object containing the credential value and source if the reference matches; otherwise, undefined.
+       */
       start(controller) {
         controller.enqueue(new TextEncoder().encode(openaiBody));
         controller.close();
@@ -454,7 +556,12 @@ globalThis.fetch = async (url, init) => {
   capturedInit = init;
   return new Response(
     new ReadableStream({
-      /** start implementation. */
+      /**
+       * Attempts to enqueue data and close the controller.
+       * Fails if the controller is not properly initialized or if enqueueing fails.
+       *
+       * @param controller - The controller to enqueue data and close.
+       */
       start(controller) {
         controller.enqueue(new TextEncoder().encode(assistBody));
         controller.close();
@@ -540,7 +647,7 @@ console.log("403 quota classification ok");
 // ---- the credential gate keeps unusable rows out of the selector ----
 {
   const ctxBare = new Context();
-  dialects.apply(ctxBare, {});
+  applyDialects(ctxBare);
   const llmBare = {
     configurable: [],
     adapter: undefined,
@@ -587,7 +694,7 @@ console.log("403 quota classification ok");
   // A subscription whose stored login no longer resolves is the one case that
   // must be surfaced: the record exists, so the user has to act on it.
   const ctxStale = new Context();
-  dialects.apply(ctxStale, {});
+  applyDialects(ctxStale);
   const llmStale = {
     configurable: [],
     adapter: undefined,

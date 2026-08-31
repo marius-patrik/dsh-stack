@@ -86,7 +86,12 @@ export function sessionStatsFromCache(
   };
 }
 
-/** num implementation. */
+/**
+ * Returns the value as a number, or 0 if the value is not a number.
+ *
+ * @param value - The value to convert to a number.
+ * @returns The numeric value if `value` is a number, otherwise 0.
+ */
 function num(value: unknown): number {
   return typeof value === "number" ? value : 0;
 }
@@ -145,8 +150,16 @@ export function formatTable(rows: SessionStatsRow[]): string {
   ]);
   // jscpd:ignore-end
   const widths = header.map((h, i) => Math.max(h.length, ...body.map((r) => (r[i] ?? "").length)));
-  const /** line implementation. */
-    line = (cells: string[]): string => cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
+  /**
+   * Formats an array of cells into a single aligned row string.
+   *
+   * Ensures each cell is right-aligned to the maximum width of its column.
+   * Returns a string representing one aligned row.
+   *
+   * Fails if the `cells` array does not match the expected column width.
+   */
+  const line = (cells: string[]): string =>
+    cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
   return [line(header), body.map(line).join("\n")].join("\n");
 }
 
@@ -174,7 +187,12 @@ export function formatCsv(rows: SessionStatsRow[]): string {
   return [header, ...body].join("\n");
 }
 
-/** csv implementation. */
+/**
+ * Converts a session stats row to a CSV-formatted string.
+ *
+ * Guarantees: Returns a CSV string with the sessionId, cwd, createdAt, turns, steps, llmMs, toolMs, ttftMs, and decodeMs fields properly escaped.
+ * Fails: Throws an error if the input row contains invalid data types or missing required fields.
+ */
 function csv(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }

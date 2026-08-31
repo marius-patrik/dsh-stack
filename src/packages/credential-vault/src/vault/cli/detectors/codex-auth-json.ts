@@ -25,7 +25,17 @@ const OPENAI_TOKEN_ENDPOINT = "https://auth.openai.com/oauth/token";
 export const codexAuthJson: Detector = {
   name: "codex-auth-json",
   provider: "openai",
-  /** detect implementation. */
+  /**
+   * Detects authentication information from the provided source.
+   *
+   * Guarantees an array of `Finding` objects if authentication tokens are found;
+   * otherwise, returns an empty array. On failure to parse or find tokens, no
+   * findings are returned.
+   *
+   * @param source - The source providing the file to check.
+   * @param context - Additional context for the detection process.
+   * @returns An array of `Finding` objects containing authentication details or an empty array.
+   */
   async detect(source, context) {
     const file = joinSource(source.home, ".codex/auth.json");
     const document = parseJson(await source.readFile(file));

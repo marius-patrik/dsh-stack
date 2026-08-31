@@ -70,8 +70,14 @@ export function apply(ctx: Context, config: FormatterConfigType): void {
   );
 
   ctx.inject(["settings"], (sctx) => {
-    const /** settings implementation. */
-      settings = () => sctx.settings.get(NS) as FormatterSettingsType | undefined;
+    /**
+     * Provides formatter settings for a given namespace.
+     *
+     * Guarantees the return of `FormatterSettingsType` or `undefined` based on the availability of settings for the given namespace.
+     *
+     * @returns The formatter settings for the specified namespace or `undefined` if not found.
+     */
+    const settings = () => sctx.settings.get(NS) as FormatterSettingsType | undefined;
     // jscpd:ignore-end
 
     ctx.tools.register(

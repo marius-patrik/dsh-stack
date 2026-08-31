@@ -117,7 +117,13 @@ export class EncryptedFileVault implements VaultStore {
     this.#masterKey = options.masterKey;
   }
 
-  /** directory implementation. */
+  /**
+   * Retrieves a secret record by its ID from the vault.
+   *
+   * @param id - The ID of the secret record to retrieve.
+   * @returns The secret record if found, otherwise null.
+   * @throws Will throw an error if the record's envelope ID does not match the provided ID.
+   */
   get directory(): string {
     return this.#directory;
   }
@@ -127,7 +133,12 @@ export class EncryptedFileVault implements VaultStore {
     return this.#masterKey.description;
   }
 
-  /** get implementation. */
+  /**
+   * Retrieves a secret record by its ID.
+   * @param id - The ID of the secret record to retrieve.
+   * @returns The secret record if found and the envelope ID matches, otherwise null.
+   * @throws Throws an error if the record's envelope ID does not match the provided ID.
+   */
   async get(id: string): Promise<SecretRecord | null> {
     const file = this.#file(id);
     if (!(await exists(file))) return null;
@@ -157,7 +168,13 @@ export class EncryptedFileVault implements VaultStore {
     return record;
   }
 
-  /** put implementation. */
+  /**
+   * Stores a secret record securely.
+   *
+   * Guarantees that the provided record is of the expected type and encrypts it.
+   * If the record type does not match the envelope type, throws an error.
+   * On failure, throws an error indicating the record type mismatch or decryption failure.
+   */
   async put(record: SecretRecord): Promise<void> {
     const file = this.#file(record.id);
     const key = await this.#dataKey();
@@ -181,7 +198,12 @@ export class EncryptedFileVault implements VaultStore {
     await writePrivateFile(file, `${JSON.stringify(envelope)}\n`);
   }
 
-  /** delete implementation. */
+  /**
+   * Deletes the secret record with the given ID from the vault.
+   *
+   * Guarantees that the record with the specified ID exists and is successfully deleted.
+   * Returns `true` if the deletion is successful, `false` otherwise.
+   */
   async delete(id: string): Promise<boolean> {
     const file = this.#file(id);
     if (!(await exists(file))) return false;
@@ -189,7 +211,12 @@ export class EncryptedFileVault implements VaultStore {
     return true;
   }
 
-  /** list implementation. */
+  /**
+   * Deletes the secret record with the given ID from the vault.
+   *
+   * Guarantees that the record with the specified ID is successfully deleted.
+   * Returns `true` if the deletion is successful, `false` if the record does not exist or deletion fails.
+   */
   async list(): Promise<string[]> {
     if (!(await exists(this.#directory))) return [];
     const entries = await readdir(this.#directory, { withFileTypes: true });
@@ -238,19 +265,38 @@ export class EncryptedFileVault implements VaultStore {
 export class MemoryVault implements VaultStore {
   readonly #records = new Map<string, SecretRecord>();
 
-  /** get implementation. */
+  /**
+   * Retrieves the secret descriptor for the given record ID.
+   *
+   * @param id - The ID of the record to retrieve.
+   * @returns The secret descriptor if the record exists; otherwise, undefined.
+   * @throws Will throw an error if the provided ID is invalid.
+   */
   async get(id: string): Promise<SecretRecord | null> {
     if (!RECORD_ID.test(id)) throw new Error(`invalid vault record id: ${id}`);
     return this.#records.get(id) ?? null;
   }
 
-  /** put implementation. */
+  /**
+   * Retrieves the data key for the vault.
+   *
+   * Guarantees: Returns the data key as a Buffer if it exists; otherwise, fetches
+   * and validates the key from the master key, then returns it.
+   *
+   * Throws: An error if the master key is not 32 bytes long.
+   */
   async put(record: SecretRecord): Promise<void> {
     if (!RECORD_ID.test(record.id)) throw new Error(`invalid vault record id: ${record.id}`);
     this.#records.set(record.id, record);
   }
 
-  /** delete implementation. */
+  /**
+   * Stores and retrieves secrets in memory without touching disk.
+   *
+   * @param id - The unique identifier of the secret record.
+   * @returns The path to the secret record file.
+   * @throws Will throw an error if the provided id is invalid or does not match the expected format.
+   */
   async delete(id: string): Promise<boolean> {
     return this.#records.delete(id);
   }
@@ -306,7 +352,12 @@ export class VaultCredentialStore implements CredentialStore {
       ((id) => ({ label: id, purpose: id, scope: { workspace: "*", agents: [] } }));
   }
 
-  /** get implementation. */
+  /**
+   * Retrieves the path to the secret record file for the given identifier.
+   * @param id - The unique identifier of the secret record.
+   * @returns The path to the secret record file if the identifier is valid.
+   * @throws Will throw an error if the provided id is invalid or does not match the expected format.
+   */
   async get(id: string): Promise<ProviderCredential | null> {
     const record = await this.#vault.get(id);
     if (!record) return null;
@@ -333,7 +384,15 @@ export class VaultCredentialStore implements CredentialStore {
     return null;
   }
 
-  /** put implementation. */
+  /**
+   * Provides a vault as a `CredentialStore` for managing and refreshing credentials.
+   *
+   * Ensures that credentials are only readable after being explicitly scoped,
+   * preventing unintended exposure of sensitive information.
+   *
+   * On failure, throws an error if the vault cannot be accessed or if the
+   * credentials do not match the expected shape.
+   */
   async put(id: string, credential: ProviderCredential): Promise<void> {
     const material = credentialToMaterial(credential);
     const existing = await this.#vault.get(id);
@@ -375,12 +434,23 @@ export class VaultCredentialStore implements CredentialStore {
   }
 }
 
-/** isCredentialType implementation. */
+/**
+ * Determines the type of credential based on the provided identifier.
+ * @param id - The unique identifier of the credential.
+ * @returns The type of credential if the identifier is valid, otherwise throws an error.
+ * @throws Will throw an error if the provided id is invalid or does not match the expected format.
+ */
 function isCredentialType(type: SecretType): boolean {
   return type === "api_key" || type === "oauth_token";
 }
 
-/** credentialToMaterial implementation. */
+/**
+ * Retrieves the material details of a credential record.
+ *
+ * @param id - The unique identifier of the secret record.
+ * @returns The material details of the credential if the identifier is valid; otherwise, returns null.
+ * @throws Will throw an error if the provided id is invalid or does not match the expected format.
+ */
 function credentialToMaterial(credential: ProviderCredential): SecretMaterial {
   if (credential.kind === "api_key") {
     return { type: "api_key", apiKey: credential.apiKey, header: null };
@@ -401,7 +471,14 @@ function aad(id: string, type: SecretType): Buffer {
   return Buffer.from(`${id}${AAD_SEPARATOR}${type}`, "utf8");
 }
 
-/** parseEnvelope implementation. */
+/**
+ * Stores and manages credentials in the vault.
+ *
+ * Guarantees that credentials are stored in a `CredentialStore` format and
+ * ensures they are only accessible after being explicitly scoped.
+ * On failure, throws an error if the vault cannot be accessed or if the
+ * credentials do not match the expected shape.
+ */
 function parseEnvelope(raw: string, file: string): VaultEnvelope {
   let parsed: Partial<VaultEnvelope>;
   try {

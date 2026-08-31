@@ -28,6 +28,31 @@ export function assertLoaderShape(plugin, expectedName) {
 }
 
 /**
+ * Assert that a package's `dsh.client.inject` field (package.json) holds only
+ * scoped package names — the namespace this field is actually consumed as
+ * (harness's `dsh-client-modules` scanner copies it into the boot manifest's
+ * informational preflight/HMR-diffing edges), never bare cordis service names
+ * like `"slots"` or `"locale"`. The two namespaces are easy to confuse: a
+ * package's own client bundle separately declares a real, activation-gating
+ * `export const inject = [...]` using service names (a cordis fiber inject,
+ * unrelated to this field) — see dsh-stack#91.
+ *
+ * @param {readonly unknown[]} clientInject - the package.json `dsh.client.inject` array.
+ * @param {string} packageName - the owning package's name, for the error message.
+ */
+export function assertClientInjectIsPackageIds(clientInject, packageName) {
+  for (const entry of clientInject) {
+    if (typeof entry !== "string" || !/^@(deepseek-ai|dsh-stack)\/[a-z0-9-]+$/.test(entry)) {
+      throw new Error(
+        `${packageName}: dsh.client.inject entry ${JSON.stringify(entry)} is not a scoped package id — ` +
+          `this field is informational preflight/HMR-diffing metadata and must name real packages, not cordis ` +
+          `service names (those belong in the client bundle's own "export const inject", a separate mechanism)`,
+      );
+    }
+  }
+}
+
+/**
  * Verify one `@dsh-stack/provider-<id>` extension: boots a `Context` with
  * `dialects` and the `providers` registry applied, applies the extension, and
  * asserts it registered exactly its own route under its own id with the
@@ -99,7 +124,13 @@ export async function loadClientLoaderSpec(clientUrl) {
 export function stubSettingsService() {
   const registrations = [];
   const service = {
-    /** register implementation. */
+    /**
+     * Registers a namespace with an optional base value.
+     * Returns an object with methods `get` to retrieve the base value and `watch` to subscribe to changes (which always returns undefined).
+     * @param {string} ns - The namespace to register.
+     * @param {_schema} _schema - The schema associated with the namespace.
+     * @param {Object} opts - Registration options including `base`.
+     */
     register(ns, _schema, opts) {
       registrations.push(ns);
       return { get: () => opts.base, watch: () => undefined };

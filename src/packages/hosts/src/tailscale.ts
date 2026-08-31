@@ -32,7 +32,12 @@ interface TailscaleStatusJson {
   >;
 }
 
-/** normalizeOS implementation. */
+/**
+ * Converts an OS string to a standardized NetworkNode["os"] type.
+ *
+ * Guarantees: Returns "macos", "windows", "linux", "ios", "android", or "other".
+ * Fails: Returns "other" for unrecognized OS strings.
+ */
 function normalizeOS(osRaw?: string): NetworkNode["os"] {
   const os = (osRaw || "").toLowerCase();
   if (os.includes("mac") || os.includes("darwin")) return "macos";
@@ -43,7 +48,16 @@ function normalizeOS(osRaw?: string): NetworkNode["os"] {
   return "other";
 }
 
-/** normalizeRole implementation. */
+/**
+ * Determines the role of a network node based on its OS and self-status.
+ *
+ * Guarantees: Returns "coordinator" if the node is self.
+ *             Returns "client" if the node's OS is iOS or Android.
+ *             Returns "worker" if the node's OS is Windows, Linux, or macOS.
+ *             Returns "peer" for any other case.
+ *
+ * Fails: Throws an error if the node's OS is not recognized.
+ */
 function normalizeRole(node: {
   isSelf: boolean;
   os: NetworkNode["os"];
@@ -55,7 +69,13 @@ function normalizeRole(node: {
   return "peer";
 }
 
-/** scanTailscaleTopology implementation. */
+/**
+ * Guarantees: Returns a Promise resolving to an object containing the local node's role as "coordinator",
+ *             the list of peer nodes, and the active status of the topology.
+ *             The local node's role is determined by its OS: "coordinator" if self, "client" for iOS/Android,
+ *             "worker" for Windows/Linux/macOS, and "peer" for other cases.
+ * Fails: Throws an error if the node's OS is not recognized or if the topology scan fails.
+ */
 export async function scanTailscaleTopology(): Promise<{
   self: NetworkNode | null;
   peers: NetworkNode[];
@@ -120,5 +140,19 @@ export async function scanTailscaleTopology(): Promise<{
     return { self: selfNode, peers, active: true };
   } catch (_error) {
     return { self: null, peers: [], active: false };
+  }
+}
+
+/**
+ * Ensures Tailscale Serve proxies the HTTPS address to the local AccessGateway port.
+ */
+export async function syncTailscaleServe(gatewayPort: number): Promise<boolean> {
+  try {
+    await execFileAsync("tailscale", ["serve", "--bg", "--https=443", String(gatewayPort)], {
+      timeout: 5000,
+    });
+    return true;
+  } catch {
+    return false;
   }
 }

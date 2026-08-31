@@ -5,6 +5,6 @@
   "kind": "pack",
   "description": "Ollama local-inference provider route.",
   "files": ["package.json", "stack.json", "README.md"],
-  "dependencies": ["stack.ai.provider.ollama"],
+  "dependencies": ["stack.ai.provider.ollama", "stack.ai.dialects", "stack.ai.dialect.openai"],
   "optionalDependencies": []
 }

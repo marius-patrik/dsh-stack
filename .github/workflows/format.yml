@@ -11,19 +11,18 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   format:
     name: Format repository
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout PR head
         uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -31,25 +30,13 @@ jobs:
           node-version: 22.19.0
           package-manager-cache: false
 
-      - name: Format whole repository
-        run: npx --yes @biomejs/biome@2.2.0 format --write .
-
-      - name: Commit formatting changes
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          if git diff --quiet; then
-            echo "Repository is already formatted."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "style: format repository"
-          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
-          echo "Formatting changes pushed; the new branch head will run this workflow again."
-          exit 0
-
-      - name: Verify formatting
+      - name: Verify repository formatting
         run: |
           npx --yes @biomejs/biome@2.2.0 format --write .
-          git diff --exit-code
+          if ! git diff --quiet; then
+            echo "::error::Repository contains unformatted files. Run 'npx @biomejs/biome format --write .' locally before pushing."
+            git diff --stat
+            git diff
+            exit 1
+          fi
+          echo "Repository formatting is clean."

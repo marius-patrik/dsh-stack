@@ -71,7 +71,18 @@ export interface InstallThemeOptions {
   extension?: string;
 }
 
-/** installThemeSource implementation. */
+/**
+ * Installs a theme source into the theme store.
+ *
+ * Guarantees that the provided theme source is mapped and stored with the given home and root directory.
+ * Returns the stored theme definition if successful, or rejects on failure.
+ *
+ * @param home - The directory where the theme is stored.
+ * @param root - The root directory for the theme installation.
+ * @param source - The theme source to install.
+ * @param options - Additional options for the installation.
+ * @returns The stored theme definition if successful.
+ */
 export async function installThemeSource(
   home: string,
   root: string,
@@ -102,7 +113,14 @@ export async function installVsix(
   return stored;
 }
 
-/** listInstalled implementation. */
+/**
+ * Lists all installed themes.
+ *
+ * Guarantees that the returned array contains `StoredTheme` objects representing
+ * the installed themes in the specified home and root directories.
+ *
+ * @returns A promise that resolves to an array of `StoredTheme` objects.
+ */
 export async function listInstalled(home: string, root: string): Promise<StoredTheme[]> {
   return listThemes(storeHandle(home, root));
 }

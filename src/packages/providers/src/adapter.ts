@@ -114,7 +114,20 @@ export interface DialectAdapterOptions {
    * for hosts that want the static tables only.
    */
   catalog?: ModelCatalog;
+  /**
+   * Other registered provider ids that are additional accounts for the same
+   * vendor as `provider` (e.g. `openrouter` -> `["openrouter-2",
+   * "openrouter-3"]`), in the order they should be tried. Excludes `provider`
+   * itself. Omitted or empty means no same-vendor failover is possible for
+   * that provider (see {@link DialectAdapter.stream}, #187).
+   */
+  rotationSiblings?: (provider: string) => readonly string[];
+  /** Called once a rate-limited or quota-exhausted request is about to retry against a same-vendor sibling account. */
+  onRotate?: (fromProvider: string, toProvider: string, code: string) => void;
 }
+
+/** {@link httpErrorCode} results that a same-vendor sibling account can plausibly avoid. */
+const ROTATABLE_CODES: ReadonlySet<string> = new Set([QUOTA_EXCEEDED_CODE, "RATE_LIMIT"]);
 
 /** One model entry advertised by {@link DialectAdapter}. */
 export interface ProviderModel extends ProviderCatalogModel {}
@@ -197,7 +210,13 @@ function parseErrorBody(text: string): { message?: string; detail?: string } {
   return {};
 }
 
-/** providerRetryAfterMs implementation. */
+/**
+ * Returns the retry delay in milliseconds after which the request should be retried.
+ *
+ * @param value - A string representing the retry delay or a date string.
+ * @returns The retry delay in milliseconds or undefined if invalid.
+ * @returns undefined if the input is null or invalid.
+ */
 function providerRetryAfterMs(value: string | null): number | undefined {
   if (value === null) return undefined;
   if (/^\d+$/.test(value)) {
@@ -208,7 +227,12 @@ function providerRetryAfterMs(value: string | null): number | undefined {
   return Number.isFinite(delay) && delay > 0 ? delay : undefined;
 }
 
-/** requestId implementation. */
+/**
+ * Retrieves the request ID from the provided HTTP headers.
+ *
+ * @param headers - The HTTP headers containing potential request IDs.
+ * @returns The request ID as a string, or undefined if not found.
+ */
 function requestId(headers: Headers): ReturnType<typeof ProviderRequestId> | undefined {
   for (const name of [
     "x-request-id",
@@ -266,6 +290,11 @@ export function httpErrorCode(status: number, detail: string | undefined): strin
   if ((status === 401 || status === 403) && isExhaustedQuota(detail)) return QUOTA_EXCEEDED_CODE;
   if (status === 401 || status === 403) return "AUTH";
   if (isExhaustedQuota(detail)) return QUOTA_EXCEEDED_CODE;
+  // 402 Payment Required is unambiguous by HTTP semantics alone -- unlike 401/403
+  // it needs no wording match, since providers use it exclusively for credit/balance
+  // exhaustion (OpenRouter: "requires more credits", "Prompt tokens limit exceeded",
+  // "would exceed your available credits"), never for a bad credential.
+  if (status === 402) return QUOTA_EXCEEDED_CODE;
   if (status === 429) return "RATE_LIMIT";
   if (status === 400) {
     if (detail !== undefined && isContextWindowExceededError(detail))
@@ -336,7 +365,13 @@ export class DialectAdapter extends LlmAdapter {
     });
   }
 
-  /** listModels implementation. */
+  /**
+   * Returns a list of visible models for the given provider.
+   *
+   * @param provider - The provider for which to list models.
+   * @returns A promise that resolves to an array of model information objects.
+   * @throws Throws an error if the gate is not visible.
+   */
   override async listModels(provider: string): Promise<readonly LlmModelInfo[]> {
     const connection = this.config.options(provider);
     const gate = await this.config.gate(provider, connection);
@@ -348,7 +383,15 @@ export class DialectAdapter extends LlmAdapter {
     return models.map((model) => modelInfo(provider, model));
   }
 
-  /** resolveModel implementation. */
+  /**
+   * Resolves a model for the given provider and model name.
+   *
+   * @param provider - The provider for which to resolve the model.
+   * @param model - The name of the model to resolve.
+   * @param _signal - Optional signal to abort the operation.
+   * @returns A promise that resolves to the resolved model information.
+   * @throws Throws an error if the model is not visible or if the gate is not visible.
+   */
   override async resolveModel(
     provider: string,
     model: string,
@@ -386,14 +429,23 @@ export class DialectAdapter extends LlmAdapter {
   }
 
   /** stream implementation. */
-  async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
-    // One resolution per stream call: connection facts and credentials freeze
+  /**
+   * Runs one request attempt against `provider` from start to finish. Same
+   * behavior `stream` had before same-vendor rotation (#187): one connection
+   * resolution per call, idle watchdog, and the timeout/abort/transport error
+   * normalization every attempt needs regardless of which candidate it is.
+   */
+  async *#streamOneProvider(
+    provider: string,
+    options: GenerateOptions,
+  ): AsyncIterable<StreamChunk> {
+    // One resolution per attempt: connection facts and credentials freeze
     // here for this whole request, so an in-flight stream never observes a
     // configuration change and the next call re-resolves.
-    const connection = this.config.options(options.provider);
-    const gate = await this.config.gate(options.provider, connection);
+    const connection = this.config.options(provider);
+    const gate = await this.config.gate(provider, connection);
     if (gate !== undefined) throw gate.reason;
-    const auth = await this.config.resolveAuth(options.provider, connection);
+    const auth = await this.config.resolveAuth(provider, connection);
     const dialect = this.config.getDialect(connection.dialectId);
     const userId = this.config.resolveUserId();
     const consumer = new AbortController();
@@ -407,7 +459,7 @@ export class DialectAdapter extends LlmAdapter {
       STREAM_IDLE_TIMEOUT_CODE,
     );
     const iterator = this.request(
-      options,
+      { ...options, provider },
       watchdog.signal,
       connection,
       auth,
@@ -454,7 +506,52 @@ export class DialectAdapter extends LlmAdapter {
     }
   }
 
-  /** request implementation. */
+  /**
+   * Streams a request against `options.provider`, failing over to same-vendor
+   * sibling accounts (#187) on a rate-limit or quota/balance-exhaustion error
+   * that struck before any chunk reached the caller. A failure after partial
+   * output never rotates: the caller already has content attributed to the
+   * first provider, and a fresh attempt from a sibling would answer the same
+   * prompt twice.
+   */
+  async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
+    const candidates = [
+      options.provider,
+      ...(this.config.rotationSiblings?.(options.provider) ?? []),
+    ];
+    for (let index = 0; index < candidates.length; index++) {
+      const provider = candidates[index]!;
+      const iterator = this.#streamOneProvider(provider, options)[Symbol.asyncIterator]();
+      let yieldedAny = false;
+      try {
+        while (true) {
+          const result = await iterator.next();
+          if (result.done) return;
+          yieldedAny = true;
+          yield result.value;
+        }
+      } catch (error: unknown) {
+        const nextProvider = candidates[index + 1];
+        if (
+          yieldedAny ||
+          nextProvider === undefined ||
+          !(error instanceof LlmError) ||
+          !ROTATABLE_CODES.has(error.code)
+        ) {
+          throw error;
+        }
+        this.config.onRotate?.(provider, nextProvider, error.code);
+      }
+    }
+  }
+
+  /**
+   * Handles streaming requests from a watchdog iterator until completion or error.
+   *
+   * Guarantees to yield values from the iterator until done is true, then returns.
+   * On timeout or caller abortion, throws an LlmError with appropriate status.
+   * On unhandled error, throws an LlmError indicating transport failure.
+   */
   private async *request(
     options: GenerateOptions,
     signal: AbortSignal,

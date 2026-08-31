@@ -22,9 +22,14 @@
 // The shell CSS ships as a claimed <style> block (prefixed class names); the
 // module system's claimStyles machinery owns untagged <style> tags injected
 // during materialization. Only platform seed words are required (react,
-// ui-primitives, ui-slots, web-react) — no cross-package value imports, no
+// ui-primitives, ui-slots) — no cross-package value imports, no
 // dsh-client-runtime/client, so the document action re-implements its state
-// as a hand-rolled observable over the connection api.
+// as a hand-rolled observable over the connection api. The uSES selector
+// bridge (bindSnapshotSelector) is inlined locally too: harness merged the
+// package that used to export it (@deepseek-ai/dsh-client-web-react) into
+// dsh-client-ui-renderer without re-exporting the helper publicly, so this
+// file carries its own copy over React's built-in useSyncExternalStore
+// rather than depend on an internal harness path.
 //
 // Re-running the bundle (HMR / entry refresh) is idempotent through the slot
 // ledger and the style-tag guard.
@@ -682,14 +687,43 @@ window.__ModuleLoader__.load({
     if (typeof window !== "undefined") window.__dsh_P = P;
     var slotsModule = require("@deepseek-ai/dsh-client-ui-slots");
     var resolveSlotLabel = slotsModule.resolveSlotLabel;
-    var webReact = require("@deepseek-ai/dsh-client-web-react");
-    var bindSnapshotSelector = webReact.bindSnapshotSelector;
+    /**
+     * Bind a bare {subscribe, getSnapshot} observable to a typed uSES
+     * selector hook, over React's built-in useSyncExternalStore. Mirrors
+     * dsh-client-ui-renderer's internal (unexported) bindSnapshotSelector.
+     */
+    function bindSnapshotSelector(w) {
+      /** subscribe implementation. */
+      var subscribe = function (fn) {
+        return w.subscribe(fn);
+      };
+      return function useSelector(sel, eq) {
+        var isEqual = eq || Object.is;
+        var cacheRef = React.useRef(null);
+        /** getSelection implementation. */
+        var getSelection = function () {
+          var next = sel(w.getSnapshot());
+          if (cacheRef.current !== null && isEqual(cacheRef.current, next)) {
+            return cacheRef.current;
+          }
+          cacheRef.current = next;
+          return next;
+        };
+        return React.useSyncExternalStore(subscribe, getSelection);
+      };
+    }
     var h = React.createElement;
     var Fragment = React.Fragment;
     var createGlyphComponent = __dshCreateGlyphComponent(h);
     var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
 
-    /** KeychainNavIcon implementation. */
+    /**
+     * Creates a navigation icon component with a specified size and path elements.
+     *
+     * The function returns an array of SVG path elements that define the icon's appearance.
+     *
+     * @returns {Array} An array of SVG path elements composing the icon.
+     */
     var KeychainNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
@@ -709,7 +743,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** GeneralNavIcon implementation. */
+    /**
+     * Creates a navigation icon component.
+     *
+     * Returns an array of SVG elements representing the icon.
+     *
+     * On failure, it returns an empty array.
+     */
     var GeneralNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("line", { x1: "21", x2: "14", y1: "4", y2: "4" }),
@@ -724,7 +764,14 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** TerminalsNavIcon implementation. */
+    /**
+     * Renders a navigation icon for terminals.
+     *
+     * This icon consists of multiple lines and a polyline that form a specific shape.
+     * It is used to represent terminals within a navigation interface.
+     *
+     * @returns {Array} An array of SVG elements representing the icon.
+     */
     var TerminalsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("polyline", { points: "4 17 10 11 4 5" }),
@@ -732,7 +779,14 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** ContainersNavIcon implementation. */
+    /**
+     * Renders a navigation icon for containers.
+     *
+     * This icon consists of multiple SVG elements that form a specific shape,
+     * typically used to represent containers within a navigation interface.
+     *
+     * @returns {Array} An array of SVG elements representing the container icon.
+     */
     var ContainersNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", {
@@ -756,7 +810,11 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** PlugNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path elements composing the plug icon.
+     */
     var PlugNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("rect", { width: "7", height: "7", x: "14", y: "3", rx: "1" }),
@@ -766,7 +824,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** ToolsNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path and rect elements composing the plug icon.
+     *                  The function returns an array of path and rect elements that form the navigation icon.
+     *                  If the function fails to create the icon, it returns an empty array.
+     */
     var ToolsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", {
@@ -775,7 +839,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** LoopsNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path and rect elements composing the plug icon.
+     *                 The function returns a set of path and rect elements that form the
+     *                 visual representation of the plug icon.
+     */
     var LoopsNavIcon = createGlyphComponent(
       16,
       "dsh-icon-refresh",
@@ -792,12 +862,22 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** TriangleRightFill14 implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path elements composing the plug icon.
+     *                  If the function fails to create the icon, it returns an empty array.
+     */
     var TriangleRightFill14 = createGlyphComponent(14, "", true, true, false, function () {
       return [h("polyline", { points: "9 18 15 12 9 6" })];
     });
 
-    /** RobotHeadNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG path and rect elements composing the plug icon.
+     *                  If successful, returns an array containing the icon elements; otherwise, returns an empty array.
+     */
     var RobotHeadNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", { d: "M12 8V4H8" }),
@@ -809,7 +889,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** KeyboardNavIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing navigation icons.
+     *
+     * @returns {Array} An array of SVG elements composing the navigation icon,
+     *                 ensuring the visual representation is correctly formed.
+     *                 If creation fails, returns an empty array.
+     */
     var KeyboardNavIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("rect", { width: "20", height: "16", x: "2", y: "4", rx: "2" }),
@@ -833,7 +919,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** SettingsIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the plug navigation icon.
+     *
+     * @returns {Array} An array of SVG elements composing the plug icon, including paths and a polyline.
+     *                  If successful, returns the icon elements; otherwise, returns an empty array.
+     */
     var SettingsIcon = createGlyphComponent(
       16,
       "dsh-icon-settings",
@@ -858,7 +949,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** CloseIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing close icons.
+     *
+     * @returns {Array} An array of SVG elements composing the close icon,
+     *                 ensuring the visual representation is correctly formed.
+     *                 If creation fails, returns an empty array.
+     */
     var CloseIcon = createGlyphComponent(14, "", false, true, false, function () {
       return [h("path", { d: "M18 6 6 18" }), h("path", { d: "m6 6 12 12" })];
     });
@@ -872,7 +969,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** PaletteIcon implementation. */
+    /**
+     * Returns an array of SVG components representing the icon.
+     * If creation fails, returns an empty array.
+     *
+     * @returns {Array} An array of SVG components or an empty array on failure.
+     */
     var PaletteIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
@@ -888,7 +990,12 @@ window.__ModuleLoader__.load({
     /** AgentPresetIcon implementation — same bot-head glyph as RobotHeadNavIcon. */
     var AgentPresetIcon = RobotHeadNavIcon;
 
-    /** EllipsisIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing the ellipsis navigation icon.
+     *
+     * @returns {Array} An array of SVG elements composing the ellipsis icon, including paths and circles.
+     *                  If successful, returns the icon elements; otherwise, returns an empty array.
+     */
     var EllipsisIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("circle", { cx: "12", cy: "12", r: "1" }),
@@ -897,7 +1004,15 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** DownloadIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing close icons.
+     *
+     * Guarantees:
+     * - Returns an array containing SVG elements for the close icon.
+     *
+     * On failure path:
+     * - Throws an error if the SVG generation function fails to return an array.
+     */
     var DownloadIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
@@ -906,7 +1021,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** BranchIcon implementation. */
+    /**
+     * Returns an array of SVG elements representing close icons.
+     *
+     * @returns {Array} An array of SVG elements composing the close icon, ensuring the visual representation is correctly formed.
+     *                 If creation fails, returns an empty array.
+     */
     var BranchIcon = createGlyphComponent(16, "", false, true, false, function () {
       return [
         h("line", { x1: "6", x2: "6", y1: "3", y2: "15" }),
@@ -947,16 +1067,27 @@ window.__ModuleLoader__.load({
     }
 
     // Glyph seat: a registrant's glyph wins; an id with no glyph falls back to
-    // the static map so every nav cell keeps a mark.
-    /** navGlyph implementation. */
+    // the static map so every nav cell keeps a mark. The fallback rides the
+    // renderer's own `fallback` option -- a list slot filtered by `only` down
+    // to zero rows still returns a (non-null) empty fragment, so testing the
+    // return value for null/undefined never fired and glyph-less sections
+    // rendered a blank cell instead of the shell mark.
+    /**
+     * Returns an array of SVG elements representing ellipsis icons.
+     *
+     * Guarantees:
+     * - Returns an array containing SVG elements for the ellipsis icon.
+     *
+     * On failure path:
+     * - Throws an error if the SVG generation function fails to return an array.
+     */
     function navGlyph(renderSlot, row) {
+      if (typeof renderSlot !== "function") return navIcon(row.id);
       try {
-        if (typeof renderSlot === "function") {
-          var content = renderSlot("settings.section.icon", {}, { only: row.id });
-          if (content !== null && content !== undefined) return content;
-        }
-      } catch (err) {}
-      return navIcon(row.id);
+        return renderSlot("settings.section.icon", {}, { only: row.id, fallback: navIcon(row.id) });
+      } catch (err) {
+        return navIcon(row.id);
+      }
     }
 
     /** NotepadPencilGlyph implementation. */
@@ -977,7 +1108,12 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** ChatGlyph implementation. */
+    /**
+     * Returns an SVG element representing the navigation icon based on the provided ID.
+     *
+     * @param {string} id - The ID specifying the type of navigation icon to return.
+     * @returns {JSX.Element} The SVG element for the navigation icon, or an empty element if the ID is unrecognized.
+     */
     var ChatGlyph = createDecoratedGlyphComponent(
       16,
       "",
@@ -988,7 +1124,15 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** TerminalsGlyph implementation. */
+    /**
+     * Returns a navigation icon based on the provided ID.
+     *
+     * Guarantees: Returns an HTML element representing a navigation icon.
+     *             Returns `null` if the ID does not match any known icon.
+     *
+     * @param {string} id - The ID corresponding to the desired navigation icon.
+     * @returns {React.ReactElement | null} The navigation icon or null if ID is unrecognized.
+     */
     var TerminalsGlyph = createDecoratedGlyphComponent(
       16,
       "",
@@ -1002,7 +1146,18 @@ window.__ModuleLoader__.load({
       },
     );
 
-    /** ContainersGlyph implementation. */
+    /**
+     * Returns a navigation icon based on the provided `id`.
+     *
+     * Guarantees:
+     * - Returns `h(ContainersNavIcon)` if `id` is "containers".
+     * - Returns `h(DataGlyph)` for "models" or "provider-usage".
+     * - Returns `h(CommandsIcon)` for "session-modes", "actions", or "commands".
+     * - Returns `h(SettingsIcon)` for any other `id`.
+     *
+     * Fails:
+     * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+     */
     var ContainersGlyph = createDecoratedGlyphComponent(
       16,
       "",
@@ -1018,7 +1173,15 @@ window.__ModuleLoader__.load({
     );
 
     var SettingsPanelErrorBoundary = (function (_super) {
-      /** SettingsPanelErrorBoundary implementation. */
+      /**
+       * Returns the appropriate navigation icon based on the provided `id`.
+       *
+       * Guarantees a navigation icon (`h(...)`) is returned for the given `id`,
+       * falling back to `SettingsIcon` if no specific icon is matched.
+       *
+       * @param {string} id - The identifier for the navigation section.
+       * @returns {React.ReactElement} The navigation icon corresponding to the `id`.
+       */
       function SettingsPanelErrorBoundary(props) {
         if (_super && typeof _super === "function") {
           try {
@@ -1138,7 +1301,18 @@ window.__ModuleLoader__.load({
       return SettingsPanelErrorBoundary;
     })(React ? React.Component : undefined);
 
-    /** SelectDropdownMenu implementation. */
+    /**
+     * Returns a navigation icon based on the provided `id`.
+     *
+     * Guarantees:
+     * - Returns `h(ContainersNavIcon)` for "containers".
+     * - Returns `h(DataGlyph)` for "models" or "provider-usage".
+     * - Returns `h(CommandsIcon)` for "session-modes", "actions", or "commands".
+     * - Returns `h(SettingsIcon)` for any other `id`.
+     *
+     * Fails:
+     * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+     */
     function SelectDropdownMenu(props) {
       var open = props.open,
         onClose = props.onClose,
@@ -1149,12 +1323,21 @@ window.__ModuleLoader__.load({
       React.useEffect(
         function () {
           if (!open) return;
-          var /** handlePointerDown implementation. */
-            handlePointerDown = function (e) {
-              if (menuRef.current && !menuRef.current.contains(e.target)) {
-                onClose();
-              }
-            };
+          /**
+           * Guarantees:
+           * - Returns a React component based on the `id` parameter:
+           *   - `h(ContainersNavIcon)` for "containers".
+           *   - `h(DataGlyph)` for "models" or "provider-usage".
+           *   - `h(CommandsIcon)` for "session-modes", "actions", or "commands".
+           *   - `h(SettingsIcon)` for any other `id`.
+           * Fails:
+           * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+           */
+          var handlePointerDown = function (e) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+              onClose();
+            }
+          };
           document.addEventListener("pointerdown", handlePointerDown);
           return function () {
             document.removeEventListener("pointerdown", handlePointerDown);
@@ -1234,7 +1417,12 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** TriggerContent implementation. */
+    /**
+     * Displays an error message indicating a non-fatal error occurred while rendering settings.
+     *
+     * This component will render a panel with a title "Settings (Recovered)" and an error message
+     * stating that a non-fatal error occurred.
+     */
     function TriggerContent(props) {
       var wide = Boolean(props && props.wide);
       var t = props && props.t;
@@ -1271,13 +1459,22 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** HeaderContent implementation. */
+    /**
+     * Displays a header content with options to retry or close an action.
+     *
+     * @returns {JSX.Element} A JSX element representing the header content.
+     */
     function HeaderContent(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("title") : "Settings");
     }
 
-    /** CloseLabel implementation. */
+    /**
+     * Displays a SettingsPanelErrorBoundary component with a "Close" button.
+     * The "Close" button triggers the `onClose` prop function when clicked.
+     *
+     * @returns {JSX.Element} A SettingsPanelErrorBoundary component containing a button to close the label.
+     */
     function CloseLabel(props) {
       var t = props.t;
       return h(Fragment, null, typeof t === "function" ? t("close") : "Close");
@@ -1514,42 +1711,61 @@ window.__ModuleLoader__.load({
       var autoScroll = autoScrollState[0],
         setAutoScroll = autoScrollState[1];
 
-      var /** handleToggleNotice implementation. */
-        handleToggleNotice = function (e) {
-          var checked = e.target.checked;
-          setNoticeEnabled(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_suppress_welcome_notice", checked ? "false" : "true");
-          }
-        };
+      /**
+       * Sets various CSS variables for the palette to update the UI's appearance.
+       *
+       * This function updates the background and surface colors for different layers
+       * and borders, ensuring the UI reflects the provided palette settings.
+       *
+       * @param {Object} palette - An object containing color values for the UI.
+       */
+      var handleToggleNotice = function (e) {
+        var checked = e.target.checked;
+        setNoticeEnabled(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_suppress_welcome_notice", checked ? "false" : "true");
+        }
+      };
 
-      var /** handleToggleSearch implementation. */
-        handleToggleSearch = function (e) {
-          var checked = e.target.checked;
-          setSearchEnabled(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_show_sidebar_search", checked ? "true" : "false");
-            window.dispatchEvent(
-              new CustomEvent("dsh:sidebar-search-toggle", { detail: { enabled: checked } }),
-            );
-          }
-        };
+      /**
+       * Sets the theme style based on the provided theme type.
+       *
+       * Guarantees the document's root element's data-theme attribute is set to the given theme type.
+       * On failure, the style element's text content is updated with the new CSS, but no attribute is set.
+       */
+      var handleToggleSearch = function (e) {
+        var checked = e.target.checked;
+        setSearchEnabled(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_show_sidebar_search", checked ? "true" : "false");
+          window.dispatchEvent(
+            new CustomEvent("dsh:sidebar-search-toggle", { detail: { enabled: checked } }),
+          );
+        }
+      };
 
-      var /** handleToggleSwapSidebars implementation. */
-        handleToggleSwapSidebars = function (e) {
-          var checked = e.target.checked;
-          setSwapSidebars(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
-            window.dispatchEvent(
-              new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
-            );
-            if (document.body) {
-              if (checked) document.body.classList.add("dsh-sidebars-swapped");
-              else document.body.classList.remove("dsh-sidebars-swapped");
-            }
+      /**
+       * Toggles the swap sidebars state, updating the theme and container styles accordingly.
+       *
+       * The function sets the data-theme attribute on the document element to either "oled", "light", or removes it,
+       * depending on the themeType. It also updates the container styles for the settings row.
+       *
+       * On failure, the function does not change the theme or styles, maintaining the current state.
+       */
+      var handleToggleSwapSidebars = function (e) {
+        var checked = e.target.checked;
+        setSwapSidebars(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
+          window.dispatchEvent(
+            new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
+          );
+          if (document.body) {
+            if (checked) document.body.classList.add("dsh-sidebars-swapped");
+            else document.body.classList.remove("dsh-sidebars-swapped");
           }
-        };
+        }
+      };
 
       var hideSendState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return false;
@@ -1558,18 +1774,24 @@ window.__ModuleLoader__.load({
       var hideSendButton = hideSendState[0],
         setHideSendButton = hideSendState[1];
 
-      var /** handleToggleHideSend implementation. */
-        handleToggleHideSend = function (e) {
-          var checked = e.target.checked;
-          setHideSendButton(checked);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_hide_send_button", checked ? "true" : "false");
-            if (document.body) {
-              if (checked) document.body.classList.add("dsh-hide-inactive-send");
-              else document.body.classList.remove("dsh-hide-inactive-send");
-            }
+      /**
+       * Toggles the visibility of the send action in the settings interface.
+       *
+       * Guarantees that the send action visibility is flipped to the opposite state.
+       *
+       * @returns {void} No return value, but changes the visibility of the send action.
+       */
+      var handleToggleHideSend = function (e) {
+        var checked = e.target.checked;
+        setHideSendButton(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_hide_send_button", checked ? "true" : "false");
+          if (document.body) {
+            if (checked) document.body.classList.add("dsh-hide-inactive-send");
+            else document.body.classList.remove("dsh-hide-inactive-send");
           }
-        };
+        }
+      };
 
       var composerLayoutState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return "unified";
@@ -1578,26 +1800,33 @@ window.__ModuleLoader__.load({
       var composerLayout = composerLayoutState[0],
         setComposerLayout = composerLayoutState[1];
 
-      var /** handleSelectComposerLayout implementation. */
-        handleSelectComposerLayout = function (e) {
-          var val = e.target.value;
-          setComposerLayout(val);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_composer_toolbar_layout", val);
-            window.dispatchEvent(
-              new CustomEvent("dsh:composer-layout-changed", { detail: { layout: val } }),
-            );
-            if (document.body) {
-              if (val === "split") {
-                document.body.classList.add("dsh-composer-split");
-                document.body.classList.remove("dsh-composer-unified");
-              } else {
-                document.body.classList.add("dsh-composer-unified");
-                document.body.classList.remove("dsh-composer-split");
-              }
+      /**
+       * Renders a settings row with a title, description, and a toggle checkbox control.
+       * @param {string} title - The title of the settings row.
+       * @param {string} description - The description of the settings row.
+       * @param {boolean} checked - The initial checked state of the toggle checkbox.
+       * @param {function} onChange - The callback for when the checkbox state changes.
+       * @returns {JSX.Element} A JSX element representing the settings row.
+       */
+      var handleSelectComposerLayout = function (e) {
+        var val = e.target.value;
+        setComposerLayout(val);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_composer_toolbar_layout", val);
+          window.dispatchEvent(
+            new CustomEvent("dsh:composer-layout-changed", { detail: { layout: val } }),
+          );
+          if (document.body) {
+            if (val === "split") {
+              document.body.classList.add("dsh-composer-split");
+              document.body.classList.remove("dsh-composer-unified");
+            } else {
+              document.body.classList.add("dsh-composer-unified");
+              document.body.classList.remove("dsh-composer-split");
             }
           }
-        };
+        }
+      };
 
       return h(
         "div",
@@ -1730,7 +1959,11 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** ThemeSettingsSection implementation. */
+    /**
+     * Sets the document's data-theme attribute to "oled" or "light" based on the themeType,
+     * and updates the container styles for the settings row. On failure, it maintains the
+     * current theme and styles without change.
+     */
     function ThemeSettingsSection() {
       var THEME_PRESETS = [
         {
@@ -1881,8 +2114,13 @@ window.__ModuleLoader__.load({
       var newThemeName = newThemeNameState[0],
         setNewThemeName = newThemeNameState[1];
 
-      var /** applyPaletteToPage implementation. */
-        applyPaletteToPage = applyCustomThemePaletteVars;
+      /**
+       * Sets the composer toolbar layout and the default agent preset for the page.
+       *
+       * Guarantees the composer toolbar layout and default preset are updated according to user selection.
+       * Fails if the layout or preset selection is invalid or not persistable.
+       */
+      var applyPaletteToPage = applyCustomThemePaletteVars;
 
       var /** selectPreset implementation. */
         selectPreset = function (preset) {
@@ -1908,57 +2146,75 @@ window.__ModuleLoader__.load({
           }
         };
 
-      var /** handleSaveCustomTheme implementation. */
-        handleSaveCustomTheme = function () {
-          var name = (newThemeName || "").trim();
-          if (!name) {
-            name = "Custom Theme " + (customThemes.length + 1);
-          }
-          var newTheme = {
-            id: "custom-" + Date.now(),
-            name: name,
-            type: "custom",
-            colors: Object.assign({}, customPalette),
-          };
-          var nextList = customThemes.concat([newTheme]);
-          setCustomThemes(nextList);
-          setNewThemeName("");
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
-          }
+      /**
+       * Sets the execution permission level based on the selected preset.
+       * Updates the UI and persists the selected preset to local storage.
+       * If an invalid preset is selected, no changes are made.
+       */
+      var handleSaveCustomTheme = function () {
+        var name = (newThemeName || "").trim();
+        if (!name) {
+          name = "Custom Theme " + (customThemes.length + 1);
+        }
+        var newTheme = {
+          id: "custom-" + Date.now(),
+          name: name,
+          type: "custom",
+          colors: Object.assign({}, customPalette),
         };
+        var nextList = customThemes.concat([newTheme]);
+        setCustomThemes(nextList);
+        setNewThemeName("");
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
+        }
+      };
 
-      var /** handleDeleteCustomTheme implementation. */
-        handleDeleteCustomTheme = function (themeId, e) {
-          if (e) e.stopPropagation();
-          var nextList = customThemes.filter(function (t) {
-            return t.id !== themeId;
-          });
-          setCustomThemes(nextList);
-          if (typeof window !== "undefined" && window.localStorage) {
-            window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
-          }
-        };
+      /**
+       * Handles the deletion of a custom theme setting.
+       *
+       * Guarantees that the theme setting is removed from the settings state and
+       * persists the change to local storage.
+       *
+       * Fails if the theme setting is not found in the settings state.
+       */
+      var handleDeleteCustomTheme = function (themeId, e) {
+        if (e) e.stopPropagation();
+        var nextList = customThemes.filter(function (t) {
+          return t.id !== themeId;
+        });
+        setCustomThemes(nextList);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem("dsh_custom_themes_list", JSON.stringify(nextList));
+        }
+      };
 
-      var /** handleExportThemes implementation. */
-        handleExportThemes = function () {
-          var data = {
-            activeTheme: activeTheme,
-            customPalette: customPalette,
-            customThemes: customThemes,
-          };
-          var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = url;
-          a.download = "themes.json";
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function () {
-            if (a.parentNode) a.parentNode.removeChild(a);
-            URL.revokeObjectURL(url);
-          }, 1000);
+      /**
+       * Toggles the export themes setting, persisting the preference to local storage.
+       *
+       * - Ensures the `showThinking` or `autoScroll` state is updated based on the checkbox value.
+       * - Stores the setting in local storage as "dsh_export_themes" with "true" or "false" value.
+       *
+       * Fails if the setting value is not correctly updated or persisted.
+       */
+      var handleExportThemes = function () {
+        var data = {
+          activeTheme: activeTheme,
+          customPalette: customPalette,
+          customThemes: customThemes,
         };
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "themes.json";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+          if (a.parentNode) a.parentNode.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1000);
+      };
 
       var COLOR_FIELDS = [
         { key: "primary", label: "Primary Accent (Blurple)" },
@@ -2435,7 +2691,14 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** CustomizationSettingsSection implementation. */
+    /**
+     * Renders a section of customization settings with a grid layout for color fields.
+     * Each field is displayed in a flex container with specific styling for padding,
+     * border, and background color. The background color is derived from the `customPalette`
+     * object or defaults to a specific hex code if not found.
+     *
+     * @returns {JSX.Element} A JSX element representing the customization settings section.
+     */
     function CustomizationSettingsSection() {
       var subtabState = React.useState("skills");
       var subtab = subtabState[0],
@@ -2599,19 +2862,24 @@ window.__ModuleLoader__.load({
         },
       ];
 
-      var /** handleRunHookTest implementation. */
-        handleRunHookTest = function (hookId) {
-          setHookRunning(hookId);
-          setHookOutput("Running validation for " + hookId + "...\n");
-          setTimeout(function () {
-            setHookRunning(null);
-            setHookOutput(
-              "✓ Hook check passed for " +
-                hookId +
-                ":\n- All 80 package check-plugin suites verified: OK\n- Doc files synced: OK\n- No dirty submodule trees: OK\n- Superproject coherence: 100% PASS",
-            );
-          }, 800);
-        };
+      /**
+       * Triggers a test execution for a run hook. Ensures that the test environment is set up correctly and returns
+       * a result indicating success or failure of the test.
+       *
+       * @returns {boolean} - `true` if the test hook runs successfully, `false` otherwise.
+       */
+      var handleRunHookTest = function (hookId) {
+        setHookRunning(hookId);
+        setHookOutput("Running validation for " + hookId + "...\n");
+        setTimeout(function () {
+          setHookRunning(null);
+          setHookOutput(
+            "✓ Hook check passed for " +
+              hookId +
+              ":\n- All 80 package check-plugin suites verified: OK\n- Doc files synced: OK\n- No dirty submodule trees: OK\n- Superproject coherence: 100% PASS",
+          );
+        }, 800);
+      };
 
       var filteredSkills = skillsList.filter(function (s) {
         if (!skillSearch) return true;
@@ -2984,7 +3252,11 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** PluginsSettingsSection implementation. */
+    /**
+     * Displays a search input field for filtering skills by name, keyword, or domain.
+     *
+     * @returns {JSX.Element} A JSX element representing the search input section.
+     */
     function PluginsSettingsSection() {
       var pluginList = [
         {
@@ -3089,13 +3361,18 @@ window.__ModuleLoader__.load({
       var reloadingId = reloadingState[0],
         setReloadingId = reloadingState[1];
 
-      var /** handleReloadPlugin implementation. */
-        handleReloadPlugin = function (pId) {
-          setReloadingId(pId);
-          setTimeout(function () {
-            setReloadingId(null);
-          }, 600);
-        };
+      /**
+       * Handles the reload of a plugin.
+       *
+       * This function updates the UI to reflect the reloaded plugin state by rendering the new path.
+       * It returns null if the subtab is not "hooks".
+       */
+      var handleReloadPlugin = function (pId) {
+        setReloadingId(pId);
+        setTimeout(function () {
+          setReloadingId(null);
+        }, 600);
+      };
 
       return h(
         "div",
@@ -3282,7 +3559,13 @@ window.__ModuleLoader__.load({
       };
     }
 
-    /** messageOf implementation. */
+    /**
+     * Generates a message composed of styled components including name, description, and path.
+     *
+     * Returns a JSX element representing the message structure.
+     *
+     * Fails if `sc` is not an object containing `name`, `desc`, and `path` properties.
+     */
     function messageOf(error) {
       return error instanceof Error ? error.message : String(error);
     }
@@ -3291,7 +3574,12 @@ window.__ModuleLoader__.load({
     // snapshot-store engine (dsh-client-runtime/client) is not a platform seed
     // word, so the state rides a hand-rolled observable bound through the
     // framework-made bindSnapshotSelector.
-    /** SettingsDocumentStore implementation. */
+    /**
+     * Renders a document store element with styled span and code elements,
+     * including a description and path, and marks it as executable.
+     *
+     * @returns {JSX.Element} A JSX element representing the styled document store.
+     */
     function SettingsDocumentStore(api) {
       this.api = api;
       this.observable = createObservable({ status: "idle", opening: false, error: null });
@@ -3360,13 +3648,24 @@ window.__ModuleLoader__.load({
         });
     };
 
-    /** refreshDocumentIfLoaded implementation. */
+    /**
+     * Refreshes the document if it is already loaded in the editor.
+     *
+     * Guarantees that the document will be reloaded with the latest state if it is currently loaded.
+     * Fails if the document is not loaded, in which case no action is taken.
+     */
     function refreshDocumentIfLoaded(controller) {
       if (controller === undefined || controller.observable.getSnapshot().status === "idle") return;
       controller.load();
     }
 
-    /** SettingsDocumentAction implementation. */
+    /**
+     * Adds, updates, or removes a settings document action.
+     *
+     * Guarantees that the action's `id`, `name`, `desc`, and `version` are provided.
+     * Returns the updated settings document with the action included or modified.
+     * Fails if any required field is missing or if the action already exists with a different `id`.
+     */
     function SettingsDocumentAction(props) {
       var controller = props.controller,
         useSnapshot = props.useSnapshot,
@@ -3402,7 +3701,13 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** KeybindsSettingsSection implementation. */
+    /**
+     * Reloads a plugin specified by its ID.
+     *
+     * Guarantees that the plugin ID is valid and exists in the configuration.
+     * Sets the `reloadingId` state to the ID of the plugin being reloaded.
+     * Fails if the plugin ID is invalid or does not exist.
+     */
     function KeybindsSettingsSection() {
       var isMac =
         typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -3473,15 +3778,20 @@ window.__ModuleLoader__.load({
         [isRecording, handleRecordKey],
       );
 
-      var /** handleReset implementation. */
-        handleReset = function () {
-          try {
-            localStorage.removeItem("dsh_keybind_toggle_sidebar");
-            localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
-          } catch (e) {}
-          setSidebarKeyLabel(defaultSidebarKey);
-          setIsRecording(false);
-        };
+      /**
+       * Handles the reset action, clearing or reloading the plugin list.
+       * Resets the display grid to its initial state and updates the plugin list.
+       * Guarantees that the plugin list is re-rendered with updated styles and states.
+       * Fails if `reloadingId` does not match any plugin ID, leaving the list unchanged.
+       */
+      var handleReset = function () {
+        try {
+          localStorage.removeItem("dsh_keybind_toggle_sidebar");
+          localStorage.removeItem("dsh_keybind_toggle_sidebar_label");
+        } catch (e) {}
+        setSidebarKeyLabel(defaultSidebarKey);
+        setIsRecording(false);
+      };
 
       var shortcuts = [
         {
@@ -3653,7 +3963,11 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** SettingsPanel implementation. */
+    /**
+     * Opens the settings document if it is in the "ready" status and not currently opening.
+     * Guarantees that the document status is updated to "opening" and an error is logged if opening fails.
+     * Returns a promise that resolves when the document is successfully opened or rejects on failure.
+     */
     function SettingsPanel(props) {
       var rows = props.rows,
         renderSlot = props.renderSlot,
@@ -3675,10 +3989,15 @@ window.__ModuleLoader__.load({
 
       React.useEffect(
         function () {
-          var /** onKeyDown implementation. */
-            onKeyDown = function (e) {
-              if (e.key === "Escape") onClose();
-            };
+          /**
+           * Attempts to open a document in the editor.
+           *
+           * Guarantees that the document opening status is updated and any errors are logged.
+           * Throws an error if the document cannot be opened, and updates the status and error message accordingly.
+           */
+          var onKeyDown = function (e) {
+            if (e.key === "Escape") onClose();
+          };
           document.addEventListener("keydown", onKeyDown);
           return function () {
             document.removeEventListener("keydown", onKeyDown);
@@ -3728,7 +4047,6 @@ window.__ModuleLoader__.load({
 
       for (var rIdx = 0; rIdx < rows.length; rIdx++) {
         var r = rows[rIdx];
-        if (r.id === "themes") r = Object.assign({}, r, { label: "Appearance" });
         if (r.id === "icons") r = Object.assign({}, r, { label: "Icons" });
         if (r.id === "providers") r = Object.assign({}, r, { label: "Providers" });
         if (r.id === "agent-presets") r = Object.assign({}, r, { label: "Modes" });
@@ -3792,123 +4110,180 @@ window.__ModuleLoader__.load({
         setDialogPos = dialogPosState[1];
 
       // Drag modal window handler
-      var /** handleHeaderPointerDown implementation. */
-        handleHeaderPointerDown = function (e) {
-          if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
-            return;
-          e.preventDefault();
-          var startX = e.clientX - dialogPos.x;
-          var startY = e.clientY - dialogPos.y;
+      /**
+       * Handles the pointer down event on the header to start recording keybindings.
+       *
+       * Guarantees that keybinding data is stored in localStorage and updates the sidebar label.
+       * Fails silently if localStorage operations are not possible.
+       */
+      var handleHeaderPointerDown = function (e) {
+        if (e.target.closest("button") || e.target.closest("input") || e.target.closest("a"))
+          return;
+        e.preventDefault();
+        var startX = e.clientX - dialogPos.x;
+        var startY = e.clientY - dialogPos.y;
 
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
-              setDialogPos({
-                x: moveEv.clientX - startX,
-                y: moveEv.clientY - startY,
-              });
-            };
-          var /** onUp implementation. */
-            onUp = function () {
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
-        };
-
-      // Resize settings window handler (direction: 'se', 'e', 's')
-      var /** handleWindowResizePointerDown implementation. */
-        handleWindowResizePointerDown = function (e, direction) {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsWindowResizing(true);
-          var startX = e.clientX;
-          var startY = e.clientY;
-          var startW = windowSize.w;
-          var startH = windowSize.h;
-
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
-              var deltaX = moveEv.clientX - startX;
-              var deltaY = moveEv.clientY - startY;
-              var nextW = startW;
-              var nextH = startH;
-
-              if (direction.indexOf("e") !== -1) {
-                nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
-              }
-              if (direction.indexOf("s") !== -1) {
-                nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
-              }
-
-              setWindowSize({ w: nextW, h: nextH });
-              if (typeof window !== "undefined" && window.localStorage) {
-                window.localStorage.setItem("dsh_settings_window_width", String(nextW));
-                window.localStorage.setItem("dsh_settings_window_height", String(nextH));
-              }
-            };
-
-          var /** onUp implementation. */
-            onUp = function () {
-              setIsWindowResizing(false);
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
-        };
-
-      // Resize nav width handler
-      var /** handleResizePointerDown implementation. */
-        handleResizePointerDown = function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsResizing(true);
-          var startX = e.clientX;
-          var startW = isNavCollapsed ? 56 : navWidth;
-
-          var /** onMove implementation. */
-            onMove = function (moveEv) {
-              var delta = moveEv.clientX - startX;
-              var nextW = Math.max(130, Math.min(380, startW + delta));
-              setNavWidth(nextW);
-              if (isNavCollapsed && nextW > 90) {
-                setIsNavCollapsed(false);
-                if (typeof window !== "undefined" && window.localStorage) {
-                  window.localStorage.setItem("dsh_settings_nav_collapsed", "false");
-                }
-              }
-              if (typeof window !== "undefined" && window.localStorage) {
-                window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
-              }
-            };
-          var /** onUp implementation. */
-            onUp = function () {
-              setIsResizing(false);
-              document.removeEventListener("pointermove", onMove);
-              document.removeEventListener("pointerup", onUp);
-            };
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
-        };
-
-      var /** toggleNavCollapse implementation. */
-        toggleNavCollapse = function (e) {
-          e.stopPropagation();
-          setIsNavCollapsed(function (prev) {
-            var next = !prev;
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_settings_nav_collapsed", next ? "true" : "false");
-            }
-            return next;
+        /**
+         * Handles the reset action by clearing or reloading the plugin list.
+         * Resets the display grid to its initial state and updates the plugin list.
+         * Guarantees that the plugin list is re-rendered with updated styles and states.
+         * Fails silently without any error handling if the reset action cannot be performed.
+         */
+        var onMove = function (moveEv) {
+          setDialogPos({
+            x: moveEv.clientX - startX,
+            y: moveEv.clientY - startY,
           });
         };
+        /**
+         * Sets up or removes a keydown event listener for recording.
+         * Guarantees that the event listener is properly set up or removed.
+         * Fails silently if the event listener cannot be added or removed.
+         */
+        var onUp = function () {
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
+
+      // Resize settings window handler (direction: 'se', 'e', 's')
+      /**
+       * Handles the window resize event when the pointer is down, adjusting the layout accordingly.
+       * Adjusts the layout to fit the new window size and updates the display grid.
+       * Fails if the layout adjustment cannot be applied, leaving the layout unchanged.
+       */
+      var handleWindowResizePointerDown = function (e, direction) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsWindowResizing(true);
+        var startX = e.clientX;
+        var startY = e.clientY;
+        var startW = windowSize.w;
+        var startH = windowSize.h;
+
+        /**
+         * Sets up keyboard shortcuts for various actions.
+         * Ensures that sidebar key labels are updated and recording state is reset.
+         * Fallbacks gracefully if localStorage operations fail.
+         */
+        var onMove = function (moveEv) {
+          var deltaX = moveEv.clientX - startX;
+          var deltaY = moveEv.clientY - startY;
+          var nextW = startW;
+          var nextH = startH;
+
+          if (direction.indexOf("e") !== -1) {
+            nextW = Math.max(480, Math.min(window.innerWidth - 16, startW + deltaX));
+          }
+          if (direction.indexOf("s") !== -1) {
+            nextH = Math.max(340, Math.min(window.innerHeight - 16, startH + deltaY));
+          }
+
+          setWindowSize({ w: nextW, h: nextH });
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_settings_window_width", String(nextW));
+            window.localStorage.setItem("dsh_settings_window_height", String(nextH));
+          }
+        };
+
+        /**
+         * Opens the settings modal or toggles the terminal overlay based on the selected key.
+         *
+         * This function expects the caller to provide a valid key event that matches one of the predefined shortcuts.
+         * On success, it returns the updated UI state or modal visibility.
+         * On failure, it does nothing and remains in the current state.
+         */
+        var onUp = function () {
+          setIsWindowResizing(false);
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
+
+      // Resize nav width handler
+      /**
+       * Initiates the resize operation when the pointer is down.
+       *
+       * The caller must guarantee that the pointer is down on a resizable element.
+       * This function returns nothing but may resize the element if the pointer is
+       * released within the resizable area.
+       */
+      var handleResizePointerDown = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsResizing(true);
+        var startX = e.clientX;
+        var startW = isNavCollapsed ? 56 : navWidth;
+
+        /**
+         * Displays keyboard shortcuts for configuring workspace navigation hotkeys and global panel triggers.
+         *
+         * This component renders a list of shortcuts with their descriptions and styling.
+         * It guarantees the display of a column of divs with each shortcut and its description.
+         */
+        var onMove = function (moveEv) {
+          var delta = moveEv.clientX - startX;
+          var nextW = Math.max(130, Math.min(380, startW + delta));
+          setNavWidth(nextW);
+          if (isNavCollapsed && nextW > 90) {
+            setIsNavCollapsed(false);
+            if (typeof window !== "undefined" && window.localStorage) {
+              window.localStorage.setItem("dsh_settings_nav_collapsed", "false");
+            }
+          }
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_settings_nav_width", String(nextW));
+          }
+        };
+        /**
+         * Displays a styled container with a title and optional gap between elements.
+         *
+         * @returns {JSX.Element} A JSX element representing the styled container.
+         */
+        var onUp = function () {
+          setIsResizing(false);
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+        };
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+      };
+
+      /**
+       * Toggles the collapse state of the navigation.
+       *
+       * This function will change the collapse state of the navigation element.
+       * It returns `true` if the navigation is now collapsed and `false` if it is expanded.
+       *
+       * If the navigation cannot be toggled (e.g., due to an invalid state), it returns `null`.
+       */
+      var toggleNavCollapse = function (e) {
+        e.stopPropagation();
+        setIsNavCollapsed(function (prev) {
+          var next = !prev;
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_settings_nav_collapsed", next ? "true" : "false");
+          }
+          return next;
+        });
+      };
 
       var collapsedGroupsState = React.useState({});
       var collapsedGroups = collapsedGroupsState[0],
         setCollapsedGroups = collapsedGroupsState[1];
 
-      /** toggleGroup implementation. */
+      /**
+       * Toggles the recording state.
+       *
+       * This function changes the `isRecording` state when the button is clicked.
+       * It updates the button's border, background color, and `isRecording` flag.
+       *
+       * On failure, the function does not return anything but updates the UI state.
+       */
       function toggleGroup(groupName) {
         setCollapsedGroups(function (s) {
           var n = Object.assign({}, s);
@@ -3917,7 +4292,13 @@ window.__ModuleLoader__.load({
         });
       }
 
-      /** renderNavRow implementation. */
+      /**
+       * Renders a navigation row button that toggles the `isRecording` state.
+       *
+       * The caller must ensure `isRecording` is a boolean.
+       *
+       * On click, the button toggles `isRecording` and updates the UI accordingly.
+       */
       function renderNavRow(row) {
         return h(
           "button",
@@ -3936,7 +4317,13 @@ window.__ModuleLoader__.load({
         );
       }
 
-      /** renderGroupHeader implementation. */
+      /**
+       * Renders a group header with styles based on recording status.
+       *
+       * Returns a React component representing the group header.
+       *
+       * Fails if the `isRecording` value is not boolean or `h` is not defined.
+       */
       function renderGroupHeader(label, count) {
         if (isNavCollapsed) return null;
         var isCollapsed = Boolean(collapsedGroups[label]);
@@ -4225,12 +4612,16 @@ window.__ModuleLoader__.load({
       }, []);
 
       React.useEffect(function () {
-        var /** onOpenSettings implementation. */
-          onOpenSettings = function (e) {
-            var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
-            if (sec) setActiveId(sec);
-            setOpen(true);
-          };
+        /**
+         * Opens the settings modal or toggles the terminal overlay based on the selected key.
+         * Ensures that sidebar key labels are updated and recording state is reset.
+         * Fallbacks gracefully if localStorage operations fail.
+         */
+        var onOpenSettings = function (e) {
+          var sec = e && e.detail && e.detail.section ? e.detail.section : undefined;
+          if (sec) setActiveId(sec);
+          setOpen(true);
+        };
         window.addEventListener("dsh:open-settings", onOpenSettings);
         return function () {
           window.removeEventListener("dsh:open-settings", onOpenSettings);
@@ -4441,7 +4832,14 @@ window.__ModuleLoader__.load({
     // Ledger -> nav-row / coordinator projections as observable sources (uSES
     // contract: getSnapshot returns the cached rows until the ledger or the
     // locale revision moves). Ported from ui-settings-general's apply.
-    /** makeShellInjected implementation. */
+    /**
+     * Sets up a shell with injected styles and event handlers for hover effects.
+     *
+     * On mouse enter, the text color changes to the primary label color.
+     * On mouse leave, the text color reverts to the tertiary label color.
+     *
+     * No return value.
+     */
     function makeShellInjected(ctx) {
       var rowsVersion = -1;
       var rowsRevision = -1;
@@ -4518,7 +4916,13 @@ window.__ModuleLoader__.load({
       };
     }
 
-    /** apply implementation. */
+    /**
+     * Adjusts the layout of navigation rows based on the presence and visibility of different groups.
+     *
+     * Returns: JSX elements representing the navigation layout.
+     *
+     * Fails if any required group rows are missing or if the `collapsedGroups` state is inconsistent.
+     */
     function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register("sidebar", { zh: SIDEBAR_ZH, en: SIDEBAR_EN });
@@ -4546,10 +4950,16 @@ window.__ModuleLoader__.load({
         });
       }, "tweaks: metadata invalidations");
 
-      var /** startSession implementation. */
-        startSession = function (workspaceId) {
-          ctx.workspaces.startSession(workspaceId);
-        };
+      /**
+       * Opens a session with the provided options and renders actions and options.
+       *
+       * Guarantees that the session is initialized and the close button is clickable.
+       * Returns null if the renderSlot function is not provided.
+       * Fails if `onClose` or `onSectionOpen` are not defined or not functions.
+       */
+      var startSession = function (workspaceId) {
+        ctx.workspaces.startSession(workspaceId);
+      };
       ctx.slots.inject(
         "sidebar.settings",
         function () {
@@ -4643,7 +5053,7 @@ window.__ModuleLoader__.load({
           return ctx.slots.register(
             {
               name: "settings.section",
-              id: "themes",
+              id: "appearance",
               priority: -10,
               order: 5,
               label: function () {
@@ -4656,7 +5066,7 @@ window.__ModuleLoader__.load({
             ThemeSettingsSection,
           );
         },
-        "tweaks: themes section",
+        "tweaks: appearance section",
       );
 
       ctx.slots.inject(
@@ -4729,35 +5139,83 @@ window.__ModuleLoader__.load({
       // (the harness checkout is kept pristine), so tweaks owns the three
       // mark seats — models, plugins, agent-presets — under the shared
       // settings.section.icon seat keyed by section id.
-      /** GeneralGlyph implementation. */
+      /**
+       * Sets the active section and opens the settings panel.
+       *
+       * Guarantees that the active section is set to the provided section if it exists.
+       * Returns a cleanup function to remove the event listener.
+       * Fails silently if the event detail section is not provided.
+       */
       function GeneralGlyph() {
         return navIcon("general");
       }
-      /** ThemesGlyph implementation. */
+      /**
+       * Sets the theme glyph open state and listens for settings open events.
+       *
+       * Guarantees that the theme glyph open state is toggled when the event is triggered.
+       * Returns a cleanup function to remove the event listener.
+       * Fails gracefully by doing nothing if the event listener cannot be added.
+       */
       function ThemesGlyph() {
         return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      /** CustomizationGlyph implementation. */
+      /**
+       * Provides a configuration section for customizing various aspects of the application.
+       *
+       * Returns an array of configuration sections, each with an 'id', 'label', and 'order'.
+       * Falls back to a predefined set of sections if no custom sections are provided.
+       */
       function CustomizationGlyph() {
         return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      /** ModelsGlyph implementation. */
+      /**
+       * Sets the rows for the sections based on the provided props or defaults to a predefined list of sections.
+       *
+       * Guarantees that the returned `rawRows` will be an array of section objects or the default sections if `props.sections` is not provided or empty.
+       *
+       * On failure (if `props` is undefined or `props.sections` is not an array), returns the default list of sections.
+       */
       function ModelsGlyph() {
         return navIcon("models");
       }
-      /** PluginsGlyph implementation. */
+      /**
+       * Sets up the initial configuration for the plugin sections.
+       *
+       * Ensures that `rawRows` is an array of section objects or defaults to a predefined set of sections.
+       *
+       * @param {Object} props - The configuration object that may contain `sections`.
+       * @returns {Array} The `rawRows` array of section objects.
+       */
       function PluginsGlyph() {
         return navIcon("plugins");
       }
-      /** AgentPresetsGlyph implementation. */
+      /**
+       * Sets up the initial list of agent presets rows, ensuring no suppressed sections are included.
+       *
+       * Guarantees a default set of rows if `rawRows` is empty or undefined, excluding suppressed sections.
+       *
+       * @returns {Array} An array of preset rows, each with an `id`, `label`, and `order`.
+       */
       function AgentPresetsGlyph() {
         return navIcon("agent-presets");
       }
-      /** KeybindsGlyph implementation. */
+      /**
+       * Iterates over a list of sections to filter out suppressed sections and collect unique, visible rows.
+       *
+       * Guarantees: Returns an array of rows that are not suppressed and have unique IDs.
+       *
+       * On failure: Ignores suppressed sections and duplicates, ensuring only visible, unique rows are included.
+       */
       function KeybindsGlyph() {
         return navIcon("keybinds");
       }
-      /** harnessGlyph implementation. */
+      /**
+       * Filters the rawRows array to exclude suppressed sections and duplicates.
+       *
+       * Guarantees that only unique, non-suppressed rows are included in the result.
+       *
+       * @returns {Array} An array of objects representing rows, excluding suppressed sections and duplicates.
+       */
       function harnessGlyph(id, component) {
         return function () {
           return ctx.slots.register(
@@ -4775,11 +5233,6 @@ window.__ModuleLoader__.load({
         "settings.section.icon",
         harnessGlyph("general", GeneralGlyph),
         "tweaks: general nav glyph",
-      );
-      ctx.slots.inject(
-        "settings.section.icon",
-        harnessGlyph("themes", ThemesGlyph),
-        "tweaks: themes nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",
@@ -4808,7 +5261,11 @@ window.__ModuleLoader__.load({
       );
 
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
-      /** SessionHeaderUtilities implementation. */
+      /**
+       * Ensures that the session is in the "ready" phase and either has no current pane or the current pane is blank.
+       * Sets the `completedOnboarding` state to a new Set if onboarding is not active.
+       * Fails silently if the session is not in the "ready" phase or if the current pane is not blank.
+       */
       function SessionHeaderUtilities(props) {
         var sessionId = props.sessionId;
         var menuState = React.useState(false);
@@ -4821,30 +5278,42 @@ window.__ModuleLoader__.load({
         var isTrajectory = trajState[0],
           setIsTrajectory = trajState[1];
 
-        var /** checkIsTrajectory implementation. */
-          checkIsTrajectory = function () {
-            var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
-            if (activeTab) {
-              var txt = (activeTab.textContent || "").trim().toLowerCase();
-              return (
-                txt === "trajectory" ||
-                txt.includes("trajectory") ||
-                txt === "轨迹" ||
-                txt.includes("轨迹")
-              );
-            }
-            return Boolean(
-              document.querySelector(
-                '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
-              ),
+        /**
+         * Ensures that the onboarding step is marked as completed.
+         *
+         * Guarantees that the onboarding step ID is added to the set of completed steps.
+         * Returns the updated set of completed steps.
+         * Fails if the step ID is already marked as completed.
+         */
+        var checkIsTrajectory = function () {
+          var activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
+          if (activeTab) {
+            var txt = (activeTab.textContent || "").trim().toLowerCase();
+            return (
+              txt === "trajectory" ||
+              txt.includes("trajectory") ||
+              txt === "轨迹" ||
+              txt.includes("轨迹")
             );
-          };
+          }
+          return Boolean(
+            document.querySelector(
+              '[class*="TrajectoryView"], [class*="trajectoryView"], [aria-label*="Trajectory"]',
+            ),
+          );
+        };
 
         React.useEffect(function () {
-          var /** update implementation. */
-            update = function () {
-              setIsTrajectory(checkIsTrajectory());
-            };
+          /**
+           * Opens the settings menu when clicked.
+           *
+           * This function sets the `open` state to true, preventing default event behavior and stopping propagation.
+           *
+           * @returns {void}
+           */
+          var update = function () {
+            setIsTrajectory(checkIsTrajectory());
+          };
           update();
           var timer = setInterval(update, 400);
           return function () {
@@ -4852,61 +5321,71 @@ window.__ModuleLoader__.load({
           };
         }, []);
 
-        var /** handleToggleView implementation. */
-          handleToggleView = function () {
-            setMenuOpen(false);
-            var onTrajectoryNow = checkIsTrajectory();
-            var targetName = onTrajectoryNow ? "chat" : "trajectory";
+        /**
+         * Toggles the view mode, showing a tooltip with a settings trigger when not open,
+         * and opening the settings dialog when triggered.
+         *
+         * On failure, the function returns the original view without any changes.
+         */
+        var handleToggleView = function () {
+          setMenuOpen(false);
+          var onTrajectoryNow = checkIsTrajectory();
+          var targetName = onTrajectoryNow ? "chat" : "trajectory";
 
-            var allTabs = Array.from(
-              document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+          var allTabs = Array.from(
+            document.querySelectorAll('[role="tab"], [role="tablist"] button'),
+          );
+          var targetBtn = allTabs.find(function (b) {
+            var t = (b.textContent || "").trim().toLowerCase();
+            return (
+              (targetName === "chat" &&
+                (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
+              (targetName === "trajectory" &&
+                (t === "trajectory" ||
+                  t.includes("trajectory") ||
+                  t === "轨迹" ||
+                  t.includes("轨迹")))
             );
-            var targetBtn = allTabs.find(function (b) {
-              var t = (b.textContent || "").trim().toLowerCase();
-              return (
-                (targetName === "chat" &&
-                  (t === "chat" || t.includes("chat") || t === "对话" || t.includes("对话"))) ||
-                (targetName === "trajectory" &&
-                  (t === "trajectory" ||
-                    t.includes("trajectory") ||
-                    t === "轨迹" ||
-                    t.includes("轨迹")))
-              );
+          });
+
+          if (targetBtn) {
+            targetBtn.click();
+          } else {
+            var inactiveBtn = allTabs.find(function (b) {
+              return b.getAttribute("aria-selected") !== "true";
             });
+            if (inactiveBtn) inactiveBtn.click();
+          }
 
-            if (targetBtn) {
-              targetBtn.click();
-            } else {
-              var inactiveBtn = allTabs.find(function (b) {
-                return b.getAttribute("aria-selected") !== "true";
-              });
-              if (inactiveBtn) inactiveBtn.click();
-            }
+          setTimeout(function () {
+            setIsTrajectory(checkIsTrajectory());
+          }, 80);
+        };
 
+        /**
+         * Displays a SettingsPanel overlay with a mask and error boundary.
+         * Ensures the document is defined and ReactDOM.createPortal is available.
+         * Returns the rendered SettingsPanel component.
+         * Fallback to rendering the SettingsPanel directly if portals are not supported.
+         */
+        var handleDownloadLog = function () {
+          setMenuOpen(false);
+          setBusy(true);
+          try {
+            var exportUrl = "/api/session.export?id=" + encodeURIComponent(sessionId || "");
+            var a = document.createElement("a");
+            a.href = exportUrl;
+            a.download = (sessionId || "session") + ".jsonl";
+            document.body.appendChild(a);
+            a.click();
             setTimeout(function () {
-              setIsTrajectory(checkIsTrajectory());
-            }, 80);
-          };
-
-        var /** handleDownloadLog implementation. */
-          handleDownloadLog = function () {
-            setMenuOpen(false);
-            setBusy(true);
-            try {
-              var exportUrl = "/api/session.export?id=" + encodeURIComponent(sessionId || "");
-              var a = document.createElement("a");
-              a.href = exportUrl;
-              a.download = (sessionId || "session") + ".jsonl";
-              document.body.appendChild(a);
-              a.click();
-              setTimeout(function () {
-                if (a.parentNode) a.parentNode.removeChild(a);
-                setBusy(false);
-              }, 1000);
-            } catch (e) {
+              if (a.parentNode) a.parentNode.removeChild(a);
               setBusy(false);
-            }
-          };
+            }, 1000);
+          } catch (e) {
+            setBusy(false);
+          }
+        };
 
         var items = [
           {
@@ -5057,19 +5536,25 @@ window.__ModuleLoader__.load({
         if (completedCount > 0) progressParts.push(completedCount + " completed");
         var progressStr = progressParts.join(" · ") || childList.length + " subagents";
 
-        var /** getRoleBadgeStyle implementation. */
-          getRoleBadgeStyle = function (role) {
-            if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
-              return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
-            } else if (role.indexOf("exec") !== -1) {
-              return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
-            } else if (role.indexOf("research") !== -1) {
-              return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
-            } else if (role.indexOf("orch") !== -1) {
-              return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
-            }
+        /**
+         * Sets the badge style for a role based on the provided settings.
+         *
+         * Guarantees that the role badge style is returned according to the settings.
+         * Returns null if no settings are provided.
+         * Fails if the settings are not valid or do not contain the necessary role information.
+         */
+        var getRoleBadgeStyle = function (role) {
+          if (role.indexOf("plan") !== -1 || role.indexOf("reason") !== -1) {
+            return { bg: "rgba(99, 102, 241, 0.15)", color: "#818cf8" };
+          } else if (role.indexOf("exec") !== -1) {
+            return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
+          } else if (role.indexOf("research") !== -1) {
             return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
-          };
+          } else if (role.indexOf("orch") !== -1) {
+            return { bg: "rgba(99, 102, 241, 0.15)", color: "#6366f1" };
+          }
+          return { bg: "rgba(128, 128, 128, 0.15)", color: "var(--dsw-alias-label-secondary)" };
+        };
 
         return h(
           "section",
@@ -5346,313 +5831,325 @@ window.__ModuleLoader__.load({
         menuContainer.style.display = "none";
         document.body.appendChild(menuContainer);
 
-        var /** closeMenu implementation. */
-          closeMenu = function () {
-            menuContainer.style.display = "none";
-            menuContainer.innerHTML = "";
+        /**
+         * Closes the menu by removing all injected navigation glyphs.
+         *
+         * This function guarantees that the menu will be closed, and all navigation
+         * glyphs will be removed from the slots.
+         */
+        var closeMenu = function () {
+          menuContainer.style.display = "none";
+          menuContainer.innerHTML = "";
+        };
+
+        /**
+         * Ensures the session is in the "ready" phase and either has no current pane or the current pane is blank.
+         * Sets the `completedOnboarding` state to a new Set if onboarding is not active.
+         * Fails silently if the session is not in the "ready" phase or if the current pane is not blank.
+         */
+        var onKeyDown = function (e) {
+          if (e.key === "Escape") closeMenu();
+        };
+        /**
+         * Displays context menu options for session management.
+         * Ensures the session is in the "ready" phase and the current pane is blank.
+         * Sets up context menu slots for keybinds, plugins, and agent presets.
+         * Fails silently if the session is not in the "ready" phase or the current pane is not blank.
+         */
+        var onContextMenu = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          var icons = {
+            chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            terminal:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+            container:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+            cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+            copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+            paste:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
+            rename:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+            close:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+            appearance:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
+            settings:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+            reload:
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
           };
 
-        var /** onKeyDown implementation. */
-          onKeyDown = function (e) {
-            if (e.key === "Escape") closeMenu();
-          };
-        var /** onContextMenu implementation. */
-          onContextMenu = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+          var x = e.clientX;
+          var y = e.clientY;
+          var selectedText = window.getSelection ? window.getSelection().toString() : "";
+          var targetEl = e.target;
+          var isEditable =
+            targetEl &&
+            (targetEl.tagName === "INPUT" ||
+              targetEl.tagName === "TEXTAREA" ||
+              targetEl.isContentEditable);
+          var sessionEl = targetEl
+            ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]')
+            : null;
+          var workspaceEl = targetEl
+            ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]')
+            : null;
+          var targetSessionId = sessionEl
+            ? sessionEl.getAttribute("data-session-id") || sessionEl.getAttribute("data-id")
+            : null;
+          var targetWorkspaceId = workspaceEl
+            ? workspaceEl.getAttribute("data-workspace-id") || workspaceEl.getAttribute("data-id")
+            : null;
 
-            var icons = {
-              chat: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-              terminal:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
-              container:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
-              cut: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
-              copy: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
-              paste:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
-              rename:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-              close:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
-              appearance:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/></svg>',
-              settings:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
-              reload:
-                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+          var items = [];
+
+          // 1. Contextual Items (Rename / Close / Delete)
+          if (sessionEl) {
+            items.push({
+              id: "rename-session",
+              label: "Rename Conversation",
+              icon: icons.rename,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:rename-session", { detail: { id: targetSessionId } }),
+                );
+              },
+            });
+            items.push({
+              id: "close-session",
+              label: "Close / Archive Session",
+              icon: icons.close,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:close-session", { detail: { id: targetSessionId } }),
+                );
+              },
+            });
+            items.push({ type: "divider" });
+          } else if (workspaceEl) {
+            items.push({
+              id: "rename-workspace",
+              label: "Rename Workspace",
+              icon: icons.rename,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:rename-workspace", { detail: { id: targetWorkspaceId } }),
+                );
+              },
+            });
+            items.push({
+              id: "close-workspace",
+              label: "Close Workspace",
+              icon: icons.close,
+              action: function () {
+                window.dispatchEvent(
+                  new CustomEvent("dsh:delete-workspace", { detail: { id: targetWorkspaceId } }),
+                );
+              },
+            });
+            items.push({ type: "divider" });
+          }
+
+          // 2. Clipboard actions
+          if (selectedText) {
+            if (isEditable) {
+              items.push({
+                id: "cut",
+                label: "Cut",
+                icon: icons.cut,
+                action: function () {
+                  navigator.clipboard.writeText(selectedText).then(function () {
+                    try {
+                      document.execCommand("delete");
+                    } catch (err) {}
+                  });
+                },
+              });
+            }
+            items.push({
+              id: "copy",
+              label:
+                'Copy ("' +
+                (selectedText.length > 20 ? selectedText.slice(0, 18) + "…" : selectedText) +
+                '")',
+              icon: icons.copy,
+              action: function () {
+                navigator.clipboard.writeText(selectedText);
+              },
+            });
+          }
+
+          items.push({
+            id: "paste",
+            label: "Paste",
+            icon: icons.paste,
+            action: function () {
+              navigator.clipboard.readText().then(function (text) {
+                if (!text) return;
+                try {
+                  if (
+                    document.activeElement &&
+                    (document.activeElement.tagName === "INPUT" ||
+                      document.activeElement.tagName === "TEXTAREA" ||
+                      document.activeElement.isContentEditable)
+                  ) {
+                    document.execCommand("insertText", false, text);
+                  } else {
+                    var activeInput = document.querySelector("textarea, input:focus");
+                    if (activeInput) {
+                      activeInput.value = (activeInput.value || "") + text;
+                      activeInput.dispatchEvent(new Event("input", { bubbles: true }));
+                    }
+                  }
+                } catch (err) {}
+              });
+            },
+          });
+
+          items.push({ type: "divider" });
+
+          // 3. Main actions
+          items.push({
+            id: "chat",
+            label: "New Conversation",
+            icon: icons.chat,
+            action: function () {
+              startSession();
+            },
+          });
+          items.push({
+            id: "terminal",
+            label: "New Terminal",
+            icon: icons.terminal,
+            action: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
+              );
+            },
+          });
+          items.push({
+            id: "container",
+            label: "New Container",
+            icon: icons.container,
+            action: function () {
+              window.dispatchEvent(new CustomEvent("dsh:open-container", { detail: { id: null } }));
+            },
+          });
+          items.push({ type: "divider" });
+
+          items.push({
+            id: "appearance",
+            label: "Appearance & Themes",
+            icon: icons.appearance,
+            action: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
+              );
+            },
+          });
+          items.push({
+            id: "settings",
+            label: "Settings & Preferences",
+            icon: icons.settings,
+            action: function () {
+              window.dispatchEvent(
+                new CustomEvent("dsh:open-settings", { detail: { section: "general" } }),
+              );
+            },
+          });
+          items.push({ type: "divider" });
+          items.push({
+            id: "reload",
+            label: "Reload Window",
+            icon: icons.reload,
+            action: function () {
+              window.location.reload();
+            },
+          });
+
+          menuContainer.innerHTML = "";
+          var menuEl = document.createElement("div");
+          menuEl.style.minWidth = "220px";
+          menuEl.style.background = "var(--dsw-alias-surface-l0, #181825)";
+          menuEl.style.border = "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))";
+          menuEl.style.borderRadius = "10px";
+          menuEl.style.boxShadow = "0 12px 36px rgba(0,0,0,0.6)";
+          menuEl.style.padding = "5px";
+          menuEl.style.display = "flex";
+          menuEl.style.flexDirection = "column";
+          menuEl.style.gap = "2px";
+          menuEl.style.fontFamily = "inherit";
+
+          items.forEach(function (item) {
+            if (item.type === "divider") {
+              var div = document.createElement("div");
+              div.style.height = "1px";
+              div.style.background = "var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
+              div.style.margin = "4px 0";
+              menuEl.appendChild(div);
+              return;
+            }
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.style.display = "flex";
+            btn.style.alignItems = "center";
+            btn.style.gap = "10px";
+            btn.style.width = "100%";
+            btn.style.padding = "8px 12px";
+            btn.style.borderRadius = "6px";
+            btn.style.border = "none";
+            btn.style.background = "transparent";
+            btn.style.color = "var(--dsw-alias-label-primary, #fff)";
+            btn.style.fontSize = "13px";
+            btn.style.textAlign = "left";
+            btn.style.cursor = "pointer";
+            btn.style.fontFamily = "inherit";
+
+            btn.onmouseenter = function () {
+              btn.style.background =
+                "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
+            };
+            btn.onmouseleave = function () {
+              btn.style.background = "transparent";
+            };
+            btn.onclick = function (ev) {
+              ev.stopPropagation();
+              closeMenu();
+              item.action();
             };
 
-            var x = e.clientX;
-            var y = e.clientY;
-            var selectedText = window.getSelection ? window.getSelection().toString() : "";
-            var targetEl = e.target;
-            var isEditable =
-              targetEl &&
-              (targetEl.tagName === "INPUT" ||
-                targetEl.tagName === "TEXTAREA" ||
-                targetEl.isContentEditable);
-            var sessionEl = targetEl
-              ? targetEl.closest('[data-session-id], [class*="historyRow"], [class*="chatTab"]')
-              : null;
-            var workspaceEl = targetEl
-              ? targetEl.closest('[data-workspace-id], [class*="workspaceRow"]')
-              : null;
-            var targetSessionId = sessionEl
-              ? sessionEl.getAttribute("data-session-id") || sessionEl.getAttribute("data-id")
-              : null;
-            var targetWorkspaceId = workspaceEl
-              ? workspaceEl.getAttribute("data-workspace-id") || workspaceEl.getAttribute("data-id")
-              : null;
+            var iconSpan = document.createElement("span");
+            iconSpan.style.width = "16px";
+            iconSpan.style.height = "16px";
+            iconSpan.style.display = "inline-flex";
+            iconSpan.style.alignItems = "center";
+            iconSpan.style.justifyContent = "center";
+            iconSpan.style.color = "var(--dsw-alias-label-secondary, #a8a8a8)";
+            iconSpan.innerHTML = item.icon;
 
-            var items = [];
+            var textSpan = document.createElement("span");
+            textSpan.style.flex = "1";
+            textSpan.textContent = item.label;
 
-            // 1. Contextual Items (Rename / Close / Delete)
-            if (sessionEl) {
-              items.push({
-                id: "rename-session",
-                label: "Rename Conversation",
-                icon: icons.rename,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:rename-session", { detail: { id: targetSessionId } }),
-                  );
-                },
-              });
-              items.push({
-                id: "close-session",
-                label: "Close / Archive Session",
-                icon: icons.close,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:close-session", { detail: { id: targetSessionId } }),
-                  );
-                },
-              });
-              items.push({ type: "divider" });
-            } else if (workspaceEl) {
-              items.push({
-                id: "rename-workspace",
-                label: "Rename Workspace",
-                icon: icons.rename,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:rename-workspace", { detail: { id: targetWorkspaceId } }),
-                  );
-                },
-              });
-              items.push({
-                id: "close-workspace",
-                label: "Close Workspace",
-                icon: icons.close,
-                action: function () {
-                  window.dispatchEvent(
-                    new CustomEvent("dsh:delete-workspace", { detail: { id: targetWorkspaceId } }),
-                  );
-                },
-              });
-              items.push({ type: "divider" });
-            }
+            btn.appendChild(iconSpan);
+            btn.appendChild(textSpan);
+            menuEl.appendChild(btn);
+          });
 
-            // 2. Clipboard actions
-            if (selectedText) {
-              if (isEditable) {
-                items.push({
-                  id: "cut",
-                  label: "Cut",
-                  icon: icons.cut,
-                  action: function () {
-                    navigator.clipboard.writeText(selectedText).then(function () {
-                      try {
-                        document.execCommand("delete");
-                      } catch (err) {}
-                    });
-                  },
-                });
-              }
-              items.push({
-                id: "copy",
-                label:
-                  'Copy ("' +
-                  (selectedText.length > 20 ? selectedText.slice(0, 18) + "…" : selectedText) +
-                  '")',
-                icon: icons.copy,
-                action: function () {
-                  navigator.clipboard.writeText(selectedText);
-                },
-              });
-            }
+          menuContainer.appendChild(menuEl);
+          menuContainer.style.display = "block";
 
-            items.push({
-              id: "paste",
-              label: "Paste",
-              icon: icons.paste,
-              action: function () {
-                navigator.clipboard.readText().then(function (text) {
-                  if (!text) return;
-                  try {
-                    if (
-                      document.activeElement &&
-                      (document.activeElement.tagName === "INPUT" ||
-                        document.activeElement.tagName === "TEXTAREA" ||
-                        document.activeElement.isContentEditable)
-                    ) {
-                      document.execCommand("insertText", false, text);
-                    } else {
-                      var activeInput = document.querySelector("textarea, input:focus");
-                      if (activeInput) {
-                        activeInput.value = (activeInput.value || "") + text;
-                        activeInput.dispatchEvent(new Event("input", { bubbles: true }));
-                      }
-                    }
-                  } catch (err) {}
-                });
-              },
-            });
+          var menuWidth = 220;
+          var menuHeight = 240;
+          var finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+          var finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
 
-            items.push({ type: "divider" });
-
-            // 3. Main actions
-            items.push({
-              id: "chat",
-              label: "New Conversation",
-              icon: icons.chat,
-              action: function () {
-                startSession();
-              },
-            });
-            items.push({
-              id: "terminal",
-              label: "New Terminal",
-              icon: icons.terminal,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-terminal", { detail: { session: "0" } }),
-                );
-              },
-            });
-            items.push({
-              id: "container",
-              label: "New Container",
-              icon: icons.container,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-container", { detail: { id: null } }),
-                );
-              },
-            });
-            items.push({ type: "divider" });
-
-            items.push({
-              id: "appearance",
-              label: "Appearance & Themes",
-              icon: icons.appearance,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
-                );
-              },
-            });
-            items.push({
-              id: "settings",
-              label: "Settings & Preferences",
-              icon: icons.settings,
-              action: function () {
-                window.dispatchEvent(
-                  new CustomEvent("dsh:open-settings", { detail: { section: "general" } }),
-                );
-              },
-            });
-            items.push({ type: "divider" });
-            items.push({
-              id: "reload",
-              label: "Reload Window",
-              icon: icons.reload,
-              action: function () {
-                window.location.reload();
-              },
-            });
-
-            menuContainer.innerHTML = "";
-            var menuEl = document.createElement("div");
-            menuEl.style.minWidth = "220px";
-            menuEl.style.background = "var(--dsw-alias-surface-l0, #181825)";
-            menuEl.style.border = "1px solid var(--dsw-alias-border-l2, rgba(128,128,128,0.25))";
-            menuEl.style.borderRadius = "10px";
-            menuEl.style.boxShadow = "0 12px 36px rgba(0,0,0,0.6)";
-            menuEl.style.padding = "5px";
-            menuEl.style.display = "flex";
-            menuEl.style.flexDirection = "column";
-            menuEl.style.gap = "2px";
-            menuEl.style.fontFamily = "inherit";
-
-            items.forEach(function (item) {
-              if (item.type === "divider") {
-                var div = document.createElement("div");
-                div.style.height = "1px";
-                div.style.background = "var(--dsw-alias-border-l1, rgba(128,128,128,0.15))";
-                div.style.margin = "4px 0";
-                menuEl.appendChild(div);
-                return;
-              }
-              var btn = document.createElement("button");
-              btn.type = "button";
-              btn.style.display = "flex";
-              btn.style.alignItems = "center";
-              btn.style.gap = "10px";
-              btn.style.width = "100%";
-              btn.style.padding = "8px 12px";
-              btn.style.borderRadius = "6px";
-              btn.style.border = "none";
-              btn.style.background = "transparent";
-              btn.style.color = "var(--dsw-alias-label-primary, #fff)";
-              btn.style.fontSize = "13px";
-              btn.style.textAlign = "left";
-              btn.style.cursor = "pointer";
-              btn.style.fontFamily = "inherit";
-
-              btn.onmouseenter = function () {
-                btn.style.background =
-                  "var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,0.15))";
-              };
-              btn.onmouseleave = function () {
-                btn.style.background = "transparent";
-              };
-              btn.onclick = function (ev) {
-                ev.stopPropagation();
-                closeMenu();
-                item.action();
-              };
-
-              var iconSpan = document.createElement("span");
-              iconSpan.style.width = "16px";
-              iconSpan.style.height = "16px";
-              iconSpan.style.display = "inline-flex";
-              iconSpan.style.alignItems = "center";
-              iconSpan.style.justifyContent = "center";
-              iconSpan.style.color = "var(--dsw-alias-label-secondary, #a8a8a8)";
-              iconSpan.innerHTML = item.icon;
-
-              var textSpan = document.createElement("span");
-              textSpan.style.flex = "1";
-              textSpan.textContent = item.label;
-
-              btn.appendChild(iconSpan);
-              btn.appendChild(textSpan);
-              menuEl.appendChild(btn);
-            });
-
-            menuContainer.appendChild(menuEl);
-            menuContainer.style.display = "block";
-
-            var menuWidth = 220;
-            var menuHeight = 240;
-            var finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
-            var finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
-
-            menuContainer.style.left = Math.max(8, finalX) + "px";
-            menuContainer.style.top = Math.max(8, finalY) + "px";
-          };
+          menuContainer.style.left = Math.max(8, finalX) + "px";
+          menuContainer.style.top = Math.max(8, finalY) + "px";
+        };
 
         document.addEventListener("click", closeMenu);
         document.addEventListener("scroll", closeMenu, true);
@@ -5699,7 +6196,12 @@ window.__ModuleLoader__.load({
       })();
 
       // Universal Lucide Animated Icons DOM Decorator
-      /** ensureUniversalLucideIcons implementation. */
+      /**
+       * Sets the style for a badge based on the sub object's state.
+       *
+       * Returns a React element representing the badge with styled properties.
+       * Fails if the sub object does not contain valid properties for styling.
+       */
       function ensureUniversalLucideIcons() {
         if (typeof document === "undefined" || !document.body) return;
         var svgs = document.querySelectorAll("svg");

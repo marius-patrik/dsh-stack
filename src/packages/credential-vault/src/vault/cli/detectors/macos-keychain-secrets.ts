@@ -51,7 +51,13 @@ const KEYCHAIN_SECRET_SOURCES: readonly KeychainSecretSource[] = [
   { service: /^GitHub - https:\/\/api\.github\.com$/, provider: "github", purpose: () => "github" },
 ];
 
-/** keychainSecretSourceFor implementation. */
+/**
+ * Returns the `KeychainSecretSource` for the given service if it matches any
+ * entry in the `KEYCHAIN_SECRET_SOURCES` list; otherwise, returns `null`.
+ *
+ * @param service - The service identifier to match against stored secrets.
+ * @returns The `KeychainSecretSource` if a match is found, or `null` if not.
+ */
 export function keychainSecretSourceFor(service: string): KeychainSecretSource | null {
   return KEYCHAIN_SECRET_SOURCES.find((entry) => entry.service.test(service)) ?? null;
 }
@@ -144,7 +150,14 @@ async function openKeychainSecret(
 export const macosKeychainSecrets: Detector = {
   name: "macos-keychain-secrets",
   provider: "keychain",
-  /** detect implementation. */
+  /**
+   * Detects and returns secrets stored in the macOS Keychain.
+   *
+   * Guarantees an array of secrets, each containing the `expiresAt`, `plan`, `origin`, `fingerprints`, `notes`, and `material`.
+   * Returns an empty array if the source platform is not macOS.
+   *
+   * On failure, returns an empty array.
+   */
   async detect(source, context) {
     if (source.platform !== "darwin") return [];
     // Collect the allowlisted items, then resolve them concurrently.

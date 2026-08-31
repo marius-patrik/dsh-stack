@@ -5,6 +5,6 @@
   "kind": "extension",
   "description": "antigravity-sub provider-route extension for the Stack `providers` registry.",
   "files": ["lib", "README.md", "package.json", "stack.json"],
-  "dependencies": ["stack.ai.providers"],
+  "dependencies": ["stack.ai.providers", "stack.ai.dialect.antigravity"],
   "optionalDependencies": []
 }

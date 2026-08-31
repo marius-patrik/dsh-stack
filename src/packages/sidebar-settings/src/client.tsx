@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
-import { SettingsOptionRow, SettingsSection, SettingsToggleRow } from "@dsh-stack/settings-panel";
-import { sidebarPreferences, type SidebarPreferences } from "@dsh-stack/sidebar-preferences";
-import type { SidebarTreeLayout } from "@dsh-stack/sidebar-preferences";
+import {
+  SETTINGS_SECTION_ICON_SLOT,
+  SettingsSection,
+  SettingsToggleRow,
+} from "@dsh-stack/settings-panel";
+import { PanelLeftIcon } from "@dsh-stack/lucide-animated/client";
+import type { SidebarPreferences, SidebarPreferenceKey } from "@dsh-stack/sidebar-preferences";
+import type {} from "@dsh-stack/sidebar-preferences/client";
 
 /** Cordis client services this plugin's `apply` reaches for; activation waits on them. */
-export const inject = ["slots"];
+export const inject = ["slots", "sidebarPreferences"];
 
-/** The two sidebar tree arrangements a user picks between, with their copy. */
-const TREE_LAYOUT_CHOICES: readonly { readonly id: SidebarTreeLayout; readonly label: string }[] = [
-  { id: "sections", label: "Split sections — each group in its own block" },
-  { id: "unified", label: "Unified tree — every group under one root" },
-];
+type SidebarSettingsProps = SettingsSectionOwnerProps & {
+  preferences: ClientContext["sidebarPreferences"];
+};
 
 /** Renders the sidebar settings section. */
-export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
-  const [state, setState] = useState<SidebarPreferences>(sidebarPreferences.get());
-  useEffect(() => sidebarPreferences.subscribe(() => setState(sidebarPreferences.get())), []);
+export function SidebarSettings({ preferences, close }: SidebarSettingsProps) {
+  const [state, setState] = useState<SidebarPreferences>(preferences.get());
+  useEffect(() => preferences.subscribe(() => setState(preferences.get())), [preferences]);
+  const /** change implementation. */
+    change = (key: SidebarPreferenceKey, value: boolean) => preferences.set(key, value);
   return (
     <SettingsSection
       label="Sidebar"
@@ -30,33 +35,46 @@ export function SidebarSettings({ close }: SettingsSectionOwnerProps) {
         label="Show brand logo"
         description="Show the active skin's logo."
         checked={state.showBrandLogo}
-        onChange={(value) => sidebarPreferences.set("showBrandLogo", value)}
+        onChange={(value) => change("showBrandLogo", value)}
       />
       <SettingsToggleRow
         id="sidebar-show-new-conversation"
         label="Show New Conversation"
         description="Show the New Conversation action."
         checked={state.showNewConversation}
-        onChange={(value) => sidebarPreferences.set("showNewConversation", value)}
+        onChange={(value) => change("showNewConversation", value)}
       />
-      {TREE_LAYOUT_CHOICES.map((choice) => (
-        <SettingsOptionRow
-          key={choice.id}
-          label={choice.label}
-          selected={state.treeLayout === choice.id}
-          onSelect={() => sidebarPreferences.set("treeLayout", choice.id)}
-        />
-      ))}
+      <SettingsToggleRow
+        id="sidebar-show-files"
+        label="Show files"
+        description="Show the file/workspace tree region."
+        checked={state.showFiles}
+        onChange={(value) => change("showFiles", value)}
+      />
     </SettingsSection>
   );
 }
 
+/** Renders the Sidebar section's nav glyph from the canonical animated icon set. */
+export function SidebarSettingsIcon() {
+  return <PanelLeftIcon aria-hidden="true" size={16} />;
+}
+
 /** Registers the sidebar settings section with the settings slot registry. */
 export function apply(ctx: ClientContext): void {
+  const preferences = ctx.sidebarPreferences;
   ctx.slots.inject("settings.section", () =>
     ctx.slots.register(
       { name: "settings.section", id: "sidebar", order: 30, label: "Sidebar", inject: () => ({}) },
-      SidebarSettings,
+      (props: SettingsSectionOwnerProps) => (
+        <SidebarSettings {...props} preferences={preferences} />
+      ),
+    ),
+  );
+  ctx.slots.inject(SETTINGS_SECTION_ICON_SLOT, () =>
+    ctx.slots.register(
+      { name: SETTINGS_SECTION_ICON_SLOT, id: "sidebar", order: 0 },
+      SidebarSettingsIcon,
     ),
   );
 }

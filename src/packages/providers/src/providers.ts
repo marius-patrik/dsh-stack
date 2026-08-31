@@ -9,7 +9,7 @@
 
 import type { DialectId } from "@dsh-stack/dialects";
 import type { CatalogSource } from "./catalog.js";
-import { ANTIGRAVITY_PROJECT_HEADER } from "@dsh-stack/dialects";
+import { ANTIGRAVITY_PROJECT_HEADER } from "@dsh-stack/dialect-antigravity";
 
 /** How a provider authenticates; the launcher filter and account UI group on this. */
 export type AuthKind = "api-key" | "oauth" | "none";
@@ -165,7 +165,12 @@ export const HEADER = (headerName: string, ref: string): CredentialSlot => ({
   headerName,
   ref,
 });
-/** HEADERS implementation. */
+/**
+ * Returns the headers as-is.
+ *
+ * @param headers - A record of header key-value pairs.
+ * @returns The same record of header key-value pairs.
+ */
 export const HEADERS = (headers: Record<string, string>) => headers;
 
 /**

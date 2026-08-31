@@ -32,9 +32,10 @@
   },
   "dependencies": {
     "@dsh-stack/providers": "workspace:*",
-    "@dsh-stack/dialects": "workspace:*"
+    "@dsh-stack/dialect-antigravity": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "@dsh-stack/dialects": "workspace:*"
   }
 }

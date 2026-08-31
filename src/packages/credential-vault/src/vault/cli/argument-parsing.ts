@@ -47,7 +47,15 @@ export function parseVaultArguments(argv: readonly string[]): ParsedArguments {
   return { positional, options, booleans };
 }
 
-/** push implementation. */
+/**
+ * Ensures the specified key in the map has an array of strings, appending the given value to it.
+ * If the key does not exist, it creates a new array with the given value.
+ * Throws a VaultCliError if the key is required but not provided.
+ *
+ * @param map - The map to update.
+ * @param key - The key under which to store the value.
+ * @param value - The value to add to the array.
+ */
 function push(map: Map<string, string[]>, key: string, value: string): void {
   const existing = map.get(key);
   if (existing) existing.push(value);
@@ -59,19 +67,42 @@ export function optional(args: ParsedArguments, name: string): string | null {
   return args.options.get(name)?.at(-1) ?? null;
 }
 
-/** many implementation. */
+/**
+ * Retrieves a list of values associated with the given name from the options.
+ * Returns an empty array if the name is not found.
+ * Throws a VaultCliError if the name is required but not provided.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param name - The name of the option to retrieve.
+ * @returns An array of strings for the given option name.
+ */
 export function many(args: ParsedArguments, name: string): string[] {
   return [...(args.options.get(name) ?? [])];
 }
 
-/** required implementation. */
+/**
+ * Retrieves a value associated with the given name from the options.
+ * Throws a VaultCliError if the name is required but not provided.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param name - The name of the required option to retrieve.
+ * @returns The string value for the given option name.
+ */
 export function required(args: ParsedArguments, name: string): string {
   const value = optional(args, name);
   if (!value) throw new VaultCliError(`--${name} is required`);
   return value;
 }
 
-/** boolean implementation. */
+/**
+ * Retrieves a value associated with the given name from the options.
+ * Returns undefined if the name is not found and optional is used.
+ * Throws a VaultCliError if the name is required but not provided.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param name - The name of the option to retrieve.
+ * @returns The string value for the given option name or undefined if optional and not found.
+ */
 export function boolean(args: ParsedArguments, name: string): boolean {
   return args.booleans.has(name) || optional(args, name) === "true";
 }

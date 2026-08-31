@@ -18,10 +18,11 @@
  * @module @dsh-stack/scripts/verify-package-reachability
  */
 import { promises as fs } from "node:fs";
-import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, relative } from "node:path";
+import { resolveRepoRoot } from "./lib/resolve-repo-root.mjs";
+import { walkSourceTree } from "./lib/walk-source-tree.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const root = resolveRepoRoot(import.meta.url);
 
 /**
  * Package roots scanned for reachability, relative to the repository root.
@@ -106,7 +107,6 @@ const ALLOWED_UNREACHABLE = new Map([
   // switched off: nothing NEW may become unreachable. Delete an entry by fixing
   // the package, never to quiet the gate.
   ["@dsh-stack/composition", "pre-existing dead plugin, tracked by #123"],
-  ["@dsh-stack/workspace-tabs", "pre-existing dead plugin, tracked by #123"],
   ["@dsh-stack/workspace-files", "pre-existing dead plugin, tracked by #123"],
   ["@dsh-stack/automations", "orphaned plugin scaffold, tracked by #60 and #123"],
   ["@dsh-stack/trading-market-data", "pre-existing dead plugin, tracked by #123"],
@@ -120,22 +120,6 @@ async function readJsonOrNull(path) {
     return JSON.parse(await fs.readFile(path, "utf8"));
   } catch {
     return null;
-  }
-}
-
-/** Yields every file under `dir`, skipping build output and dependencies. */
-async function* walk(dir) {
-  let entries;
-  try {
-    entries = await fs.readdir(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    if (entry.name === "node_modules" || entry.name === "lib" || entry.name === ".git") continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) yield* walk(full);
-    else yield full;
   }
 }
 
@@ -181,7 +165,7 @@ async function collectImporters(packages) {
   const byDir = new Map(packages.map((pkg) => [pkg.dir, pkg.name]));
   const importers = new Map();
   for (const rootName of IMPORT_SEARCH_ROOTS) {
-    for await (const file of walk(join(root, rootName))) {
+    for await (const file of walkSourceTree(join(root, rootName))) {
       if (!/\.(ts|tsx|mjs|js|json)$/.test(file)) continue;
       if (file.endsWith("package.json")) continue;
       let text;
