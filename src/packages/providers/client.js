@@ -13023,14 +13023,43 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
      *
      * On failure, the active category remains unchanged unless explicitly set by another action.
      */
+    /**
+     * Stable fallback for `props.useSessions` when it isn't a function yet, so
+     * UnifiedWorkspacesBrowser always calls a hook in this slot every render
+     * (see the comment above `useSessions`'s assignment for why).
+     */
+    function noopSessionsHook() {
+      return { ids: [], byId: {} };
+    }
+    /**
+     * Stable fallback for `props.useWorkspaces` when it isn't a function yet, so
+     * UnifiedWorkspacesBrowser always calls a hook in this slot every render
+     * (see the comment above `useWorkspaces`'s assignment for why).
+     */
+    function noopWorkspacesHook() {
+      return { items: [] };
+    }
+
+    /** UnifiedWorkspacesBrowser implementation. */
     function UnifiedWorkspacesBrowser(props) {
       ensureTreeStyles();
       ensureModelPickerDecoration();
       var wide = Boolean(props && props.wide);
       var expandSidebar = props && props.expandSidebar;
 
-      var useSessions = props && props.useSessions;
-      var useWorkspaces = props && props.useWorkspaces;
+      // Which hook to call (real or no-op) is decided here, outside the call
+      // itself: props.useSessions/props.useWorkspaces being a function can
+      // differ between renders (e.g. the providing package mounting after an
+      // initial render with no hooks yet), and calling a hook only on renders
+      // where it happens to be present rendered a different number of hooks
+      // across renders, tripping React error #310 (dsh-stack#195). The
+      // selected hook is always invoked below, every render, in the same slot.
+      var useSessions =
+        typeof (props && props.useSessions) === "function" ? props.useSessions : noopSessionsHook;
+      var useWorkspaces =
+        typeof (props && props.useWorkspaces) === "function"
+          ? props.useWorkspaces
+          : noopWorkspacesHook;
       var openSession = props && props.open;
       var startSession = props && props.startSession;
       var renameSession = props && props.renameSession;
@@ -13038,34 +13067,22 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var forkSession = props && props.forkSession;
       var createWorkspace = props && props.createWorkspace;
 
-      var sessionList =
-        typeof useSessions === "function"
-          ? (function () {
-              try {
-                return (
-                  useSessions(function (s) {
-                    return s;
-                  }) || { ids: [], byId: {} }
-                );
-              } catch (e) {
-                return { ids: [], byId: {} };
-              }
-            })()
-          : { ids: [], byId: {} };
-      var workspaceList =
-        typeof useWorkspaces === "function"
-          ? (function () {
-              try {
-                return (
-                  useWorkspaces(function (s) {
-                    return s;
-                  }) || { items: [] }
-                );
-              } catch (e) {
-                return { items: [] };
-              }
-            })()
-          : { items: [] };
+      var sessionList;
+      try {
+        sessionList = useSessions(function (s) {
+          return s;
+        }) || { ids: [], byId: {} };
+      } catch (e) {
+        sessionList = { ids: [], byId: {} };
+      }
+      var workspaceList;
+      try {
+        workspaceList = useWorkspaces(function (s) {
+          return s;
+        }) || { items: [] };
+      } catch (e) {
+        workspaceList = { items: [] };
+      }
 
       var currentRootState = React.useState("/");
       var currentRoot = currentRootState[0],
