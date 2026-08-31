@@ -1,6 +1,9 @@
 import type { Context } from "@deepseek-ai/cordis";
 import { createSkinRuntime, type SkinRuntime } from "./index.js";
 
+export { defaultSkins, type SkinId, type SkinOption } from "./index.js";
+export type { SkinRuntime };
+
 export const inject: readonly string[] = [];
 
 declare module "@deepseek-ai/cordis" {

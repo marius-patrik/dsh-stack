@@ -49,6 +49,13 @@ function stackClientPluginPackages(): ReadonlySet<string> {
 
 const STACK_CLIENT_PLUGIN_PACKAGES = stackClientPluginPackages();
 
+/** Whether `specifier` names a `dsh.client`-declaring package itself, or one of its subpaths (e.g. `./client`). */
+function isStackClientPluginSpecifier(specifier: string): boolean {
+  for (const name of STACK_CLIENT_PLUGIN_PACKAGES)
+    if (specifier === name || specifier.startsWith(`${name}/`)) return true;
+  return false;
+}
+
 /**
  * Build the tsdown config for one stack package's browser client bundle.
  * @param id - full package name (`@dsh-stack/<name>`), stamped into the
@@ -66,9 +73,9 @@ export function clientBundle(id: string, entry = "src/client/index.ts"): UserCon
     dts: false,
     clean: false,
     sourcemap: true,
-    external: [...CLIENT_EXTERNALS, /^@deepseek-ai\/dsh-client-/, ...STACK_CLIENT_PLUGIN_PACKAGES],
+    external: [...CLIENT_EXTERNALS, /^@deepseek-ai\/dsh-client-/],
     noExternal: (specifier: string) =>
-      specifier.startsWith("@dsh-stack/") && !STACK_CLIENT_PLUGIN_PACKAGES.has(specifier),
+      specifier.startsWith("@dsh-stack/") && !isStackClientPluginSpecifier(specifier),
     define: {
       "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "production"),
       "import.meta.env.MODE": JSON.stringify(process.env.NODE_ENV ?? "production"),
