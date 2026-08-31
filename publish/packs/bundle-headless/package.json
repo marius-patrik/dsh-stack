@@ -1,6 +1,6 @@
 {
-  "name": "@dsh-stack/pack-bundle",
-  "description": "Harness-bootable dsh.bundle wrapper that mounts the complete dsh-stack catalog (every plugin/extension reachable from the ai, core, ux, integrations, agents, trading and vcs packs) into a single profile bundle entry, so a profile loads the whole Stack with one dsh.profile.bundles line instead of manual per-plugin wiring.",
+  "name": "@dsh-stack/pack-bundle-headless",
+  "description": "Harness-bootable dsh.bundle wrapper that mounts the headless-safe subset of the dsh-stack catalog (every plugin/extension the full bundle mounts whose declared inject list names neither webServer nor loader -- the two services a dsh --profile headless boot never composes) into a single profile bundle entry.",
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
@@ -15,7 +15,7 @@
   },
   "stack": {
     "kind": "pack",
-    "id": "stack.pack.bundle"
+    "id": "stack.pack.bundle-headless"
   },
   "dsh": {
     "bundle": {
@@ -23,16 +23,15 @@
     }
   },
   "scripts": {
-    "build": "node ../../../src/scripts/pack.mjs build && node ../../../src/scripts/generate-stack-bundle-patch.mjs write",
+    "build": "node ../../../src/scripts/pack.mjs build && node ../../../src/scripts/generate-stack-bundle-headless-patch.mjs write",
     "typecheck": "node ../../../src/scripts/pack.mjs typecheck",
     "test": "node ../../../src/scripts/pack.mjs test",
-    "verify": "node ../../../src/scripts/generate-stack-bundle-patch.mjs check && node ../../../src/scripts/pack.mjs verify"
+    "verify": "node ../../../src/scripts/generate-stack-bundle-headless-patch.mjs check && node ../../../src/scripts/pack.mjs verify"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "dependencies": {
-    "@dsh-stack/agent-actions": "workspace:*",
     "@dsh-stack/agent-commands": "workspace:*",
     "@dsh-stack/agent-loops": "workspace:*",
     "@dsh-stack/agent-personas": "workspace:*",
@@ -45,7 +44,6 @@
     "@dsh-stack/credential-vault": "workspace:*",
     "@dsh-stack/dialects": "workspace:*",
     "@dsh-stack/formatters": "workspace:*",
-    "@dsh-stack/hosts": "workspace:*",
     "@dsh-stack/icon-engine": "workspace:*",
     "@dsh-stack/lsp": "workspace:*",
     "@dsh-stack/lucide-animated": "workspace:*",
@@ -78,7 +76,6 @@
     "@dsh-stack/tweak-slash-commands": "workspace:*",
     "@dsh-stack/tweak-stats": "workspace:*",
     "@dsh-stack/tweaks": "workspace:*",
-    "@dsh-stack/voice": "workspace:*",
     "@dsh-stack/workspace-files": "workspace:*"
   }
 }
