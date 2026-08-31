@@ -33,8 +33,8 @@ function tailscaleInfo(): TailscaleInfo {
  * a summary line plus one line per failed plugin (up to five). Returns an
  * empty list when the server doesn't answer.
  */
-async function pluginHealth(port: number): Promise<string[]> {
-  const entries = await fetchPluginInventory(port);
+async function pluginHealth(port: number, home: string, profile: string): Promise<string[]> {
+  const entries = await fetchPluginInventory(port, home, profile);
   if (entries === null) return [];
   const metrics = summarizePluginMetrics(entries);
   const lines = [
@@ -51,8 +51,15 @@ async function pluginHealth(port: number): Promise<string[]> {
  * Build the `dsh status` report for the server expected on `port`: running
  * state with PID and preferred URL (Tailscale DNS, then Tailscale IP, then
  * loopback), the log file location, and plugin health when reachable.
+ * `home` and `profile` are needed to authenticate the plugin-inventory RPC
+ * (see plugin-inventory.ts).
  */
-export async function statusReport(port: number, logFile: string): Promise<string> {
+export async function statusReport(
+  port: number,
+  logFile: string,
+  home: string,
+  profile: string,
+): Promise<string> {
   const pid = findListenerPid(port);
   if (pid === null) {
     return `○ dsh web server is not running (port ${port} is free)`;
@@ -66,6 +73,6 @@ export async function statusReport(port: number, logFile: string): Promise<strin
     `  Address: ${url}`,
     `  Logs:    ${logFile}`,
   ];
-  lines.push(...(await pluginHealth(port)));
+  lines.push(...(await pluginHealth(port, home, profile)));
   return lines.join("\n");
 }
