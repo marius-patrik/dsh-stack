@@ -9,7 +9,7 @@ declare module "@deepseek-ai/cordis" {
     /** The page's single sidebar-preferences store; owned here so every surface reads and writes the same state. */
     sidebarPreferences: {
       get(): SidebarPreferences;
-      set(key: SidebarPreferenceKey, value: boolean): void;
+      set<K extends SidebarPreferenceKey>(key: K, value: SidebarPreferences[K]): void;
       update(patch: Partial<SidebarPreferences>): void;
       subscribe(listener: () => void): () => void;
     };

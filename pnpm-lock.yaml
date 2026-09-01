@@ -1719,6 +1719,9 @@ importers:
       '@dsh-stack/plugin-kit':
         specifier: workspace:*
         version: link:../plugin-kit
+      '@dsh-stack/sidebar-preferences':
+        specifier: workspace:*
+        version: link:../sidebar-preferences
       react:
         specifier: ^18.2.0
         version: 18.3.1

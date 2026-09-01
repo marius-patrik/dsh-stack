@@ -24,6 +24,17 @@
       ],
       "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
     },
+    "src/packages/providers": {
+      "entry": [
+        "src/index.{ts,tsx,mjs,js}",
+        "src/client.{ts,tsx}",
+        "client.js",
+        "*.mjs",
+        "bin/*.mjs"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"],
+      "ignoreDependencies": ["@dsh-stack/sidebar-preferences"]
+    },
     "publish/extensions/skin-claude": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],
       "project": ["src/**/*.{ts,tsx}", "*.mjs"],
