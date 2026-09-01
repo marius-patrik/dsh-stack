@@ -16,6 +16,11 @@
 
 import type { ProviderRoute } from "../providers.js";
 import type { QuotaProvider, QuotaSnapshot } from "./index.js";
+import {
+  parseRateLimitHeaderNumber,
+  parseRateLimitReset,
+  rateLimitFields,
+} from "./rate-limit-headers.js";
 
 /** Resolve one credential reference to its secret value, or undefined. */
 export type ProbeTokenReader = (ref: string) => Promise<string | undefined>;
@@ -50,19 +55,6 @@ function isAnthropic(url: string): boolean {
 /** How long a quota probe may wait before it is reported as unreachable. */
 const PROBE_TIMEOUT_MS = 15_000;
 
-/** Build the rate-limit fields shared by the healthy and rate-limited snapshot branches. */
-function rateLimitFields(
-  remaining: number | undefined,
-  limit: number | undefined,
-  resetsAt: string | undefined,
-): Pick<QuotaSnapshot, "remaining" | "limit" | "resetsAt"> {
-  return {
-    ...(remaining !== undefined ? { remaining } : {}),
-    ...(limit !== undefined ? { limit } : {}),
-    ...(resetsAt !== undefined ? { resetsAt } : {}),
-  };
-}
-
 /**
  * Probes an endpoint with the given route and authentication token.
  *
@@ -75,6 +67,7 @@ function rateLimitFields(
 async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSnapshot> {
   const probe = route.probe;
   const now = new Date().toISOString();
+  const displayName = route.displayName;
   const headers: Record<string, string> = { ...(route.headers ?? {}), ...(probe.headers ?? {}) };
 
   // Set auth header based on authStyle; credential-less routes (local) skip auth entirely
@@ -122,18 +115,19 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
     // probe against it must read those to surface a nearing-limit state
     // rather than only ever seeing "healthy" until the token is rejected.
     const remaining =
-      parseHeader(res, "x-ratelimit-remaining") ??
-      parseHeader(res, "anthropic-ratelimit-tokens-remaining") ??
-      parseHeader(res, "anthropic-ratelimit-requests-remaining");
+      parseRateLimitHeaderNumber(res, "x-ratelimit-remaining") ??
+      parseRateLimitHeaderNumber(res, "anthropic-ratelimit-tokens-remaining") ??
+      parseRateLimitHeaderNumber(res, "anthropic-ratelimit-requests-remaining");
     const limit =
-      parseHeader(res, "x-ratelimit-limit") ??
-      parseHeader(res, "anthropic-ratelimit-tokens-limit") ??
-      parseHeader(res, "anthropic-ratelimit-requests-limit");
+      parseRateLimitHeaderNumber(res, "x-ratelimit-limit") ??
+      parseRateLimitHeaderNumber(res, "anthropic-ratelimit-tokens-limit") ??
+      parseRateLimitHeaderNumber(res, "anthropic-ratelimit-requests-limit");
     const resetsAt = parseRateLimitReset(res) ?? parseAnthropicReset(res);
 
     if (status === 200) {
       return {
         provider: route.id,
+        displayName,
         status: "available",
         fetchedAt: now,
         source: "endpoint",
@@ -145,6 +139,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
     if (status === 429) {
       return {
         provider: route.id,
+        displayName,
         status: "error",
         fetchedAt: now,
         source: "endpoint",
@@ -156,6 +151,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
     if (status === 403) {
       return {
         provider: route.id,
+        displayName,
         status: "error",
         fetchedAt: now,
         source: "endpoint",
@@ -170,6 +166,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
       if (/credits?[\s_-]*error|payment method|billing/i.test(body)) {
         return {
           provider: route.id,
+          displayName,
           status: "error",
           fetchedAt: now,
           source: "endpoint",
@@ -178,6 +175,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
       }
       return {
         provider: route.id,
+        displayName,
         status: "error",
         fetchedAt: now,
         source: "endpoint",
@@ -187,6 +185,7 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
 
     return {
       provider: route.id,
+      displayName,
       status: "unknown",
       fetchedAt: now,
       source: "endpoint",
@@ -195,20 +194,13 @@ async function probeEndpoint(route: ProbeRoute, token: string): Promise<QuotaSna
   } catch (err) {
     return {
       provider: route.id,
+      displayName,
       status: "error",
       fetchedAt: now,
       source: "endpoint",
       message: err instanceof Error ? err.message : String(err),
     };
   }
-}
-
-/** parseHeader implementation. */
-function parseHeader(res: Response, name: string): number | undefined {
-  const val = res.headers.get(name);
-  if (!val) return undefined;
-  const n = Number(val);
-  return Number.isFinite(n) ? n : undefined;
 }
 
 /** Read Anthropic's own reset-timestamp header (`anthropic-ratelimit-tokens-reset`), an ISO string. */
@@ -219,26 +211,6 @@ function parseAnthropicReset(res: Response): string | undefined {
   if (!reset) return undefined;
   const parsed = new Date(reset);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
-}
-
-/**
- * Extracts the reset timestamp for rate limiting from the response headers.
- * Guarantees returning an ISO string if the reset timestamp is valid.
- * Returns `undefined` if no valid reset timestamp is found.
- * Fails gracefully by returning `undefined` for invalid or missing headers.
- */
-function parseRateLimitReset(res: Response): string | undefined {
-  const reset = res.headers.get("x-ratelimit-reset");
-  if (reset) {
-    const ts = Number(reset);
-    if (Number.isFinite(ts)) return new Date(ts < 1e12 ? ts * 1000 : ts).toISOString();
-  }
-  const retryAfter = res.headers.get("retry-after");
-  if (retryAfter) {
-    const seconds = Number(retryAfter);
-    if (Number.isFinite(seconds)) return new Date(Date.now() + seconds * 1000).toISOString();
-  }
-  return undefined;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -269,6 +241,7 @@ export function createBuiltinProviders(
         if (signal.aborted) {
           return {
             provider: route.id,
+            displayName: route.displayName,
             status: "unknown",
             fetchedAt: new Date().toISOString(),
             source: "endpoint",
@@ -283,6 +256,7 @@ export function createBuiltinProviders(
         if (token === undefined || token.length === 0) {
           return {
             provider: route.id,
+            displayName: route.displayName,
             status: "unknown",
             fetchedAt: new Date().toISOString(),
             source: "endpoint",

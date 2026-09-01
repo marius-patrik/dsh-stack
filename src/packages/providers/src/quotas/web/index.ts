@@ -1,10 +1,7 @@
 /**
- * Slim entry point re-assembling the quotas web surface from its
- * decomposed pieces: binary/usage probing, meter-bar/dashboard rendering,
- * and the per-domain route handlers (tmux, docker, filesystem, git,
- * sessions, core quota routes) dispatched in turn by `makeQuotaHandler`.
- * Public API (`QUOTAS_PREFIX`, `mountQuotaWeb`) is unchanged from the
- * previous single-file `web.ts`.
+ * Slim entry point re-assembling the quotas web surface: binary/usage probing,
+ * snapshot telemetry APIs, and per-domain route handlers (tmux, docker, filesystem,
+ * git, sessions, core quota snapshot routes) dispatched in turn by `makeQuotaHandler`.
  * @module providers/quotas/web
  */
 
