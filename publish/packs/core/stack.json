@@ -7,6 +7,8 @@
   "files": ["package.json", "stack.json", "README.md"],
   "dependencies": [
     "stack.core.composition",
+    "stack.core.marketplace",
+    "stack.core.marketplace-source.dsh-stack",
     "stack.library.plugin-kit",
     "stack.security.credentials"
   ],

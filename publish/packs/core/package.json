@@ -28,6 +28,8 @@
   "dependencies": {
     "@dsh-stack/composition": "workspace:*",
     "@dsh-stack/credential-vault": "workspace:*",
+    "@dsh-stack/marketplace": "workspace:*",
+    "@dsh-stack/marketplace-source-dsh-stack": "workspace:*",
     "@dsh-stack/plugin-kit": "workspace:*"
   }
 }
