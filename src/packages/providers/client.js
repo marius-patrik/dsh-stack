@@ -33,6 +33,7 @@ window.__ModuleLoader__.load({
     var Fragment = React.Fragment;
     var createGlyphComponent = __dshCreateGlyphComponent(h);
     var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
+    var quotaWidgets = __dshCreateQuotaWidgets(h);
     var P = require("@deepseek-ai/dsh-client-ui-primitives");
 
     // Commit protocol for moving tabs between the shell surfaces (main area,
@@ -1097,6 +1098,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       },
     ];
 
+    // Vendor bases already rendered by a PROVIDERS_CATALOG card above (every
+    // shipped route this plugin owns a built-in probe for). Anything a live
+    // snapshot names outside this set is a route this catalog never learned
+    // about at all -- above all the numbered multi-account custom providers
+    // (openrouter-2, groq-3, ...) a user adds through model settings -- and
+    // gets its own card in the "Custom & Multi-Account Providers" section
+    // instead of silently having no quota surface anywhere (#164).
+    var COVERED_VENDOR_IDS = {};
+    PROVIDERS_CATALOG.forEach(function (p) {
+      (p.probeIds || []).forEach(function (id) {
+        COVERED_VENDOR_IDS[quotaWidgets.vendorBaseId(id)] = true;
+      });
+    });
+
     /**
      * Provides configuration details for different subscription models.
      *
@@ -1719,6 +1734,20 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var probingState = React.useState({});
       var probing = probingState[0],
         setProbing = probingState[1];
+      // One shared clock for every reset-timer countdown on this page,
+      // instead of a per-row interval: a settings tab can list dozens of
+      // accounts across several multi-account providers at once.
+      var nowState = React.useState(Date.now());
+      var now = nowState[0],
+        setNow = nowState[1];
+      React.useEffect(function () {
+        var timer = setInterval(function () {
+          setNow(Date.now());
+        }, 30000);
+        return function () {
+          clearInterval(timer);
+        };
+      }, []);
 
       var load = React.useCallback(function () {
         setData(function (s) {
@@ -1857,6 +1886,17 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             });
           });
       };
+
+      // Every vendor a live snapshot names that no PROVIDERS_CATALOG card
+      // already covers -- above all the numbered multi-account custom
+      // providers (openrouter-2, groq-3, ...) a user adds through model
+      // settings -- grouped so every account of the same vendor renders
+      // together instead of only the first one a lookup happens to pick.
+      var customVendorGroups = quotaWidgets.groupQuotaSnapshotsByVendor(
+        (data.snapshots || []).filter(function (s) {
+          return !COVERED_VENDOR_IDS[s.vendor || quotaWidgets.vendorBaseId(s.provider)];
+        }),
+      );
 
       return h(
         "div",
@@ -2157,6 +2197,25 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                   ),
                 ),
               ),
+              primarySnap && (primarySnap.limit !== undefined || primarySnap.resetsAt !== undefined)
+                ? h(
+                    "div",
+                    {
+                      style: {
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                        flexWrap: "wrap",
+                      },
+                    },
+                    h(quotaWidgets.QuotaMeterBar, {
+                      remaining: primarySnap.remaining,
+                      limit: primarySnap.limit,
+                      unit: primarySnap.unit,
+                    }),
+                    h(quotaWidgets.QuotaResetTimer, { resetsAt: primarySnap.resetsAt, now: now }),
+                  )
+                : null,
               isClaude && claudeStats
                 ? h(
                     "div",
@@ -2480,6 +2539,177 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
               : null,
           );
         }),
+        customVendorGroups.length > 0
+          ? h(
+              Fragment,
+              null,
+              h(
+                "div",
+                {
+                  style: {
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "var(--dsw-alias-label-secondary)",
+                    marginTop: "4px",
+                  },
+                },
+                "Custom & Multi-Account Providers",
+              ),
+              customVendorGroups.map(function (group) {
+                var availableCount = group.accounts.filter(function (a) {
+                  return a.status === "available";
+                }).length;
+                return h(
+                  "div",
+                  {
+                    key: "vendor::" + group.vendor,
+                    style: {
+                      borderRadius: "10px",
+                      border: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.18))",
+                      background: "var(--dsw-alias-surface-l0, rgba(255,255,255,0.02))",
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                    },
+                  },
+                  h(
+                    "div",
+                    {
+                      style: {
+                        padding: "14px 20px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "10px",
+                        background: "var(--dsw-alias-surface-l1, rgba(128,128,128,0.03))",
+                      },
+                    },
+                    h(
+                      "div",
+                      { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                      h(ProviderBrandIcon, { id: group.vendor, size: 20 }),
+                      h(
+                        "span",
+                        {
+                          style: {
+                            fontSize: "15px",
+                            fontWeight: 600,
+                            color: "var(--dsw-alias-label-primary)",
+                          },
+                        },
+                        group.label,
+                      ),
+                      h(
+                        "span",
+                        {
+                          style: {
+                            padding: "2px 7px",
+                            borderRadius: "10px",
+                            fontSize: "10px",
+                            fontWeight: 600,
+                            background: "rgba(99, 102, 241, 0.12)",
+                            color: "var(--dsw-alias-primary, #6366f1)",
+                          },
+                        },
+                        group.accounts.length +
+                          (group.accounts.length === 1 ? " account" : " accounts"),
+                      ),
+                    ),
+                    h(
+                      "span",
+                      { style: { fontSize: "11px", color: "var(--dsw-alias-label-secondary)" } },
+                      availableCount + " / " + group.accounts.length + " available",
+                    ),
+                  ),
+                  h(
+                    "div",
+                    {
+                      style: {
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                        padding: "12px 20px 16px",
+                      },
+                    },
+                    group.accounts.map(function (snap) {
+                      return h(
+                        "div",
+                        {
+                          key: snap.provider,
+                          style: {
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            flexWrap: "wrap",
+                            gap: "12px",
+                            padding: "10px 14px",
+                            borderRadius: "8px",
+                            border: "1px solid var(--dsw-alias-border-l1)",
+                            background: "var(--dsw-alias-surface-l1)",
+                          },
+                        },
+                        h(
+                          "div",
+                          {
+                            style: {
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "4px",
+                              minWidth: "160px",
+                            },
+                          },
+                          h(
+                            "code",
+                            { style: { fontSize: "12px", fontWeight: 600 } },
+                            snap.displayName || snap.provider,
+                          ),
+                          h(quotaWidgets.QuotaStatusDot, { status: snap.status }),
+                          snap.message
+                            ? h(
+                                "span",
+                                {
+                                  style: {
+                                    fontSize: "10px",
+                                    color: "var(--dsw-alias-label-tertiary)",
+                                  },
+                                },
+                                snap.message,
+                              )
+                            : null,
+                        ),
+                        h(quotaWidgets.QuotaMeterBar, {
+                          remaining: snap.remaining,
+                          limit: snap.limit,
+                          unit: snap.unit,
+                        }),
+                        h(quotaWidgets.QuotaResetTimer, { resetsAt: snap.resetsAt, now: now }),
+                        h(
+                          "button",
+                          {
+                            onClick: function () {
+                              handleProbe(snap.provider);
+                            },
+                            disabled: probing[snap.provider],
+                            style: {
+                              padding: "4px 10px",
+                              borderRadius: "6px",
+                              fontSize: "11px",
+                              border: "1px solid var(--dsw-alias-border-l2)",
+                              background: "var(--dsw-alias-surface-l2)",
+                              color: "var(--dsw-alias-label-primary)",
+                              cursor: "pointer",
+                            },
+                          },
+                          probing[snap.provider] ? "Probing…" : "Probe",
+                        ),
+                      );
+                    }),
+                  ),
+                );
+              }),
+            )
+          : null,
         editModal
           ? h(EditValueModal, {
               target: editModal,
@@ -2524,6 +2754,37 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       var addModelModalState = React.useState(null);
       var addModelModal = addModelModalState[0],
         setAddModelModal = addModelModalState[1];
+      // Live quota status per provider, so the models catalog carries the
+      // same "is this route actually usable right now" signal the Accounts
+      // tab shows instead of only ever listing static model metadata (#164).
+      var snapshotsState = React.useState([]);
+      var snapshots = snapshotsState[0],
+        setSnapshots = snapshotsState[1];
+      var nowState = React.useState(Date.now());
+      var now = nowState[0],
+        setNow = nowState[1];
+      React.useEffect(function () {
+        /** Fetches the live quota snapshots this section's provider cards read their status badge from. */
+        var loadSnapshots = function () {
+          fetch(QUOTAS_API + "/snapshots")
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (res) {
+              setSnapshots((res && res.snapshots) || []);
+            })
+            .catch(function () {
+              setSnapshots([]);
+            });
+        };
+        loadSnapshots();
+        var timer = setInterval(function () {
+          setNow(Date.now());
+        }, 30000);
+        return function () {
+          clearInterval(timer);
+        };
+      }, []);
 
       return h(
         "div",
@@ -2613,40 +2874,67 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
                 gap: "12px",
               },
             },
-            h(
-              "div",
-              { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
-              h(
+            (function () {
+              var activeSnapshots = snapshots.filter(function (s) {
+                return prov.probeIds.indexOf(s.provider) !== -1;
+              });
+              var primarySnap = activeSnapshots[0];
+              return h(
                 "div",
-                { style: { display: "flex", alignItems: "center", gap: "10px" } },
-                h(ProviderBrandIcon, { id: prov.id, size: 20 }),
-                h(
-                  "span",
-                  {
-                    style: {
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: "var(--dsw-alias-label-primary)",
-                    },
+                {
+                  style: {
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: "10px",
                   },
-                  prov.name,
-                ),
+                },
                 h(
-                  "span",
-                  {
-                    style: {
-                      padding: "1px 6px",
-                      borderRadius: "10px",
-                      fontSize: "10.5px",
-                      background: "rgba(99,102,241,0.12)",
-                      color: "#6366f1",
-                      fontWeight: 600,
+                  "div",
+                  { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                  h(ProviderBrandIcon, { id: prov.id, size: 20 }),
+                  h(
+                    "span",
+                    {
+                      style: {
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "var(--dsw-alias-label-primary)",
+                      },
                     },
-                  },
-                  prov.models.length + " models",
+                    prov.name,
+                  ),
+                  h(
+                    "span",
+                    {
+                      style: {
+                        padding: "1px 6px",
+                        borderRadius: "10px",
+                        fontSize: "10.5px",
+                        background: "rgba(99,102,241,0.12)",
+                        color: "#6366f1",
+                        fontWeight: 600,
+                      },
+                    },
+                    prov.models.length + " models",
+                  ),
                 ),
-              ),
-            ),
+                primarySnap
+                  ? h(
+                      "div",
+                      { style: { display: "flex", alignItems: "center", gap: "12px" } },
+                      h(quotaWidgets.QuotaStatusDot, { status: primarySnap.status }),
+                      h(quotaWidgets.QuotaMeterBar, {
+                        remaining: primarySnap.remaining,
+                        limit: primarySnap.limit,
+                        unit: primarySnap.unit,
+                      }),
+                      h(quotaWidgets.QuotaResetTimer, { resetsAt: primarySnap.resetsAt, now: now }),
+                    )
+                  : null,
+              );
+            })(),
             h(
               "div",
               {
