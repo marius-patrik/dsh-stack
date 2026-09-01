@@ -19,6 +19,8 @@
     "stack.ai.provider-rotation",
     "stack.ai.providers",
     "stack.core.composition",
+    "stack.core.marketplace",
+    "stack.core.marketplace-source.dsh-stack",
     "stack.dev.formatters",
     "stack.dev.lsp",
     "stack.security.credentials",
