@@ -35,6 +35,13 @@ export type {
 
 export interface QuotaSnapshot {
   provider: string;
+  /**
+   * Human label for this provider (a route's `displayName`, or a configured
+   * route's directory entry name). Lets a per-account breakdown for a
+   * numbered multi-account vendor (`openrouter-2`, ...) show a name instead
+   * of the bare id, without a second lookup back into model settings.
+   */
+  displayName?: string;
   status: "available" | "unknown" | "error";
   used?: number;
   limit?: number;
