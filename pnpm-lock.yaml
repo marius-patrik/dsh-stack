@@ -204,6 +204,19 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  publish/extensions/provider-cerebras-api:
+    dependencies:
+      '@dsh-stack/providers':
+        specifier: workspace:*
+        version: link:../../../src/packages/providers
+    devDependencies:
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   publish/extensions/provider-claude-sub:
     dependencies:
       '@dsh-stack/providers':
@@ -387,6 +400,19 @@ importers:
         version: 6.0.3
 
   publish/extensions/provider-vllm:
+    dependencies:
+      '@dsh-stack/providers':
+        specifier: workspace:*
+        version: link:../../../src/packages/providers
+    devDependencies:
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  publish/extensions/provider-zai-api:
     dependencies:
       '@dsh-stack/providers':
         specifier: workspace:*
@@ -1010,6 +1036,21 @@ importers:
         specifier: workspace:*
         version: link:../../../src/packages/lsp
 
+  publish/packs/provider-cerebras:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+      '@dsh-stack/provider-cerebras-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-cerebras-api
+
   publish/packs/provider-claude:
     dependencies:
       '@deepseek-ai/cordis':
@@ -1219,6 +1260,21 @@ importers:
       '@dsh-stack/provider-vllm':
         specifier: workspace:*
         version: link:../../extensions/provider-vllm
+
+  publish/packs/provider-zai:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@dsh-stack/dialect-openai':
+        specifier: workspace:*
+        version: link:../../extensions/dialect-openai
+      '@dsh-stack/dialects':
+        specifier: workspace:*
+        version: link:../../../src/packages/dialects
+      '@dsh-stack/provider-zai-api':
+        specifier: workspace:*
+        version: link:../../extensions/provider-zai-api
 
   publish/packs/provider-zen:
     dependencies:

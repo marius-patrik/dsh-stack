@@ -10,7 +10,7 @@ import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 // extensions/provider-<id>); this package only owns the registry and dispatch
 // mechanics. Loaded here by relative path (not a package.json dependency —
 // that would invert the real ownership direction, the plugin does not depend
-// on its extensions) purely so this contract test can exercise the same 18
+// on its extensions) purely so this contract test can exercise the same 20
 // routes real deployments assemble, the way the split shipped them.
 const EXTENSION_IDS = [
   "kimi-code",
@@ -27,6 +27,8 @@ const EXTENSION_IDS = [
   "mistral-api",
   "groq-api",
   "openrouter-api",
+  "cerebras-api",
+  "zai-api",
   "zen",
   "ollama",
   "llamacpp",
