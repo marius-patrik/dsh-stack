@@ -18,6 +18,12 @@
 //     the General section, the loopback-only open-document action, and the
 //     `sidebar` + `settings` dictionaries, since ui-sidebar and
 //     ui-settings-general are disabled in the web profile patch.
+//   settings.onboarding "welcome-notice" override (TweaksWelcomeNoticeOverride)
+//     — shadows client-ui-settings-models' own WelcomeNotice entry so the
+//     General section's "Internal Testing Notice" toggle actually gates it,
+//     and persists its own acknowledgement to localStorage so dismissal
+//     survives reload for a remote (non-loopback) browser too, instead of
+//     the harness store's loopback-only durable / remote memory-only split.
 //
 // The shell CSS ships as a claimed <style> block (prefixed class names); the
 // module system's claimStyles machinery owns untagged <style> tags injected
@@ -99,6 +105,11 @@ const SHELL_CSS = `
 .dsh-tw-mask { position: absolute; inset: 0; background: transparent !important; backdrop-filter: none !important; pointer-events: auto; }
 .dsh-tw-panel { position: relative; z-index: 1; pointer-events: auto; display: flex; flex-direction: row; min-width: 480px; min-height: 340px; border-radius: 24px; overflow: hidden; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.14) !important; border: 1.5px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.22)) !important; --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2); }
 :root[data-theme="oled"] .dsh-tw-panel, body[data-theme="oled"] .dsh-tw-panel { background: #050505 !important; border: 1.5px solid #333333 !important; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95), 0 0 0 1px #222222 !important; }
+.dsh-tw-welcomeNotice { position: relative; z-index: 1; pointer-events: auto; display: flex; flex-direction: column; gap: 14px; width: 420px; max-width: calc(100vw - 48px); padding: 24px; box-sizing: border-box; border-radius: 20px; background: var(--dsw-alias-bg-layer-2); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.14) !important; border: 1.5px solid var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.22)) !important; }
+.dsh-tw-welcomeNoticeTitle { margin: 0; font-size: 16px; font-weight: 600; color: var(--dsw-alias-label-primary); }
+.dsh-tw-welcomeNoticeBody { margin: 0; font-size: 13.5px; line-height: 20px; color: var(--dsw-alias-label-secondary); white-space: pre-line; }
+.dsh-tw-welcomeNoticeActions { display: flex; justify-content: flex-end; }
+.dsh-tw-welcomeNoticeButton { border: none; border-radius: 10px; padding: 8px 18px; background: var(--dsw-alias-primary, #6366f1); color: #fff; font-size: 13.5px; font-weight: 500; cursor: pointer; }
 .dsh-tw-nav { position: relative; flex: none; display: flex; flex-direction: column; gap: 14px; width: 192px; min-width: 56px; max-width: 380px; height: 100%; padding: 18px 10px 0; box-sizing: border-box; border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)); transition: width 80ms ease; user-select: none; overflow: hidden; }
 .dsh-tw-nav.dsh-tw-navCollapsed { width: 56px !important; padding: 18px 6px 0; }
 .dsh-tw-nav.dsh-tw-navCollapsed .dsh-tw-navLabel { display: none; }
@@ -1648,6 +1659,18 @@ window.__ModuleLoader__.load({
     }
 
     /**
+     * Whether the Settings -> General "Internal Testing Notice" toggle is on
+     * (i.e. the notice is allowed to show). Shared by the toggle's own
+     * checkbox state and by TweaksWelcomeNoticeOverride, the settings.onboarding
+     * override that actually gates the modal, so the two never disagree about
+     * the default (unset key) reading.
+     */
+    function isWelcomeNoticeEnabled() {
+      if (typeof window === "undefined" || !window.localStorage) return false;
+      return window.localStorage.getItem("dsh_suppress_welcome_notice") === "false";
+    }
+
+    /**
      * Renders a <select> control for use as a settings row's control element, from an array
      * of {value, label} option entries.
      */
@@ -1663,10 +1686,7 @@ window.__ModuleLoader__.load({
 
     /** GeneralSection implementation. */
     function GeneralSection(props) {
-      var noticeState = React.useState(function () {
-        if (typeof window === "undefined" || !window.localStorage) return false;
-        return window.localStorage.getItem("dsh_suppress_welcome_notice") === "false";
-      });
+      var noticeState = React.useState(isWelcomeNoticeEnabled);
       var noticeEnabled = noticeState[0],
         setNoticeEnabled = noticeState[1];
 
@@ -2014,6 +2034,88 @@ window.__ModuleLoader__.load({
           "Full-Width Conversation",
           "Expand the transcript and composer to fill the conversation column instead of the adaptive centered width",
           createSettingsToggleCheckbox(fullWidthConversation, handleToggleFullWidthConversation),
+        ),
+      );
+    }
+
+    /**
+     * Stack-owned override for the harness "welcome-notice" settings.onboarding
+     * entry (client-ui-settings-models' WelcomeNotice, registered at the
+     * default priority 0). Registering under the same id at priority -10 wins
+     * the slot's per-id shadowing cell (the same override mechanism this file
+     * already uses for every settings.section entry), so this component is
+     * the one that actually mounts; the harness modal underneath never
+     * renders.
+     *
+     * Gated on the same "dsh_suppress_welcome_notice" key the "Internal
+     * Testing Notice" toggle writes: when the toggle is off, the step
+     * completes itself immediately (transparent pass-through to the next
+     * onboarding step) instead of showing anything. When the toggle is on,
+     * acknowledgement is persisted to "dsh_welcome_notice_acknowledged" in
+     * localStorage rather than through the harness WelcomeNoticeStore, whose
+     * acknowledgement is durable only for a loopback browser and memory-only
+     * (lost on reload/navigation) for a remote one.
+     */
+    function TweaksWelcomeNoticeOverride(props) {
+      var complete = props && props.complete;
+      var finishedRef = React.useRef(false);
+      var finish = React.useCallback(
+        function () {
+          if (finishedRef.current) return;
+          finishedRef.current = true;
+          if (typeof complete === "function") complete();
+        },
+        [complete],
+      );
+
+      var enabled = isWelcomeNoticeEnabled();
+      var acknowledged =
+        typeof window !== "undefined" && window.localStorage
+          ? window.localStorage.getItem("dsh_welcome_notice_acknowledged") === "true"
+          : false;
+      var shouldShow = enabled && !acknowledged;
+
+      React.useEffect(
+        function () {
+          if (!shouldShow) finish();
+        },
+        [shouldShow, finish],
+      );
+
+      if (!shouldShow) return null;
+
+      var acknowledge = function () {
+        persistSettingToLocalStorage("dsh_welcome_notice_acknowledged", "true");
+        finish();
+      };
+
+      return h(
+        "div",
+        { className: "dsh-tw-overlay", role: "presentation" },
+        h("div", { className: "dsh-tw-mask", "aria-hidden": "true" }),
+        h(
+          "div",
+          {
+            className: "dsh-tw-welcomeNotice",
+            role: "dialog",
+            "aria-modal": "true",
+            "aria-label": "Internal Testing Notice",
+          },
+          h("h2", { className: "dsh-tw-welcomeNoticeTitle" }, "Internal Testing Notice"),
+          h(
+            "p",
+            { className: "dsh-tw-welcomeNoticeBody" },
+            "DeepSeek Stack remains in active testing. Plugins and APIs continue to evolve, and feedback from the developer community is welcome.",
+          ),
+          h(
+            "div",
+            { className: "dsh-tw-welcomeNoticeActions" },
+            h(
+              "button",
+              { type: "button", className: "dsh-tw-welcomeNoticeButton", onClick: acknowledge },
+              "Continue",
+            ),
+          ),
         ),
       );
     }
@@ -5317,6 +5419,26 @@ window.__ModuleLoader__.load({
         "settings.section.icon",
         harnessGlyph("agent-presets", AgentPresetsGlyph),
         "tweaks: agent presets nav glyph",
+      );
+
+      // Shadows client-ui-settings-models' "welcome-notice" settings.onboarding
+      // entry (same id, same order, lower priority wins the cell) so the
+      // Settings "Internal Testing Notice" toggle actually controls it. See
+      // TweaksWelcomeNoticeOverride.
+      ctx.slots.inject(
+        "settings.onboarding",
+        function () {
+          return ctx.slots.register(
+            {
+              name: "settings.onboarding",
+              id: "welcome-notice",
+              priority: -10,
+              order: -100,
+            },
+            TweaksWelcomeNoticeOverride,
+          );
+        },
+        "tweaks: welcome notice override",
       );
 
       // 1. Session header utilities: 3-dots with View Switcher and Download Log
