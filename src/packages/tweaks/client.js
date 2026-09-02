@@ -596,6 +596,23 @@ body.dsh-composer-unified div[class*="promptToolbar"] {
   display: inline-flex !important;
   align-items: center !important;
 }
+/* Full-Width Conversation: ConversationRoot's own width axis reads
+   --dsh-chat-user-width first, ahead of its adaptive clamp, and its width
+   handles publish onto that same property when dragged (harness/packages/
+   client/ui-conversation/src/client/skeleton/ConversationRoot.tsx). Setting
+   it here reuses that existing override point instead of touching the
+   pinned harness CSS module. Targeted at the ConversationRoot instance
+   itself (the one element carrying both data-phase and a
+   data-conversation-scroll descendant), not the whole document, so it
+   cannot leak into an unrelated data-phase consumer elsewhere in the
+   shell. A user's own per-conversation drag-resize (which writes this same
+   property directly on the element, and re-asserts it, cleared or set, on
+   every ResizeObserver tick) still wins over this class-level default.
+   !important is not used: the drag handles must remain able to override
+   it live while dragging. */
+body.dsh-full-width-conversation [data-phase]:has([data-conversation-scroll]) {
+  --dsh-chat-user-width: calc(100% - 48px);
+}
 @media (max-width: 768px) {
   .dsh-tw-root.dsh-tw-wide {
     position: fixed !important;
@@ -1767,6 +1784,34 @@ window.__ModuleLoader__.load({
         }
       };
 
+      var fullWidthConversationState = React.useState(function () {
+        if (typeof window === "undefined" || !window.localStorage) return false;
+        return window.localStorage.getItem("dsh_full_width_conversation") === "true";
+      });
+      var fullWidthConversation = fullWidthConversationState[0],
+        setFullWidthConversation = fullWidthConversationState[1];
+
+      /**
+       * Toggles the full-width conversation setting, overriding the transcript
+       * and composer's adaptive width clamp with a near-full-column width via
+       * the --dsh-chat-user-width override point the harness width handles
+       * already publish to (see the SHELL_CSS rule above).
+       */
+      var handleToggleFullWidthConversation = function (e) {
+        var checked = e.target.checked;
+        setFullWidthConversation(checked);
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.setItem(
+            "dsh_full_width_conversation",
+            checked ? "true" : "false",
+          );
+          if (document.body) {
+            if (checked) document.body.classList.add("dsh-full-width-conversation");
+            else document.body.classList.remove("dsh-full-width-conversation");
+          }
+        }
+      };
+
       var hideSendState = React.useState(function () {
         if (typeof window === "undefined" || !window.localStorage) return false;
         return window.localStorage.getItem("dsh_hide_send_button") === "true";
@@ -1955,6 +2000,12 @@ window.__ModuleLoader__.load({
           "Internal Testing Notice",
           "Show the internal testing notice modal dialog on startup",
           createSettingsToggleCheckbox(noticeEnabled, handleToggleNotice),
+        ),
+        // 10. Full-Width Conversation
+        createSettingsRow(
+          "Full-Width Conversation",
+          "Expand the transcript and composer to fill the conversation column instead of the adaptive centered width",
+          createSettingsToggleCheckbox(fullWidthConversation, handleToggleFullWidthConversation),
         ),
       );
     }
@@ -6190,6 +6241,19 @@ window.__ModuleLoader__.load({
             else
               document.addEventListener("DOMContentLoaded", function () {
                 document.body.classList.add("dsh-sidebars-swapped");
+              });
+          }
+        } catch (e) {}
+      })();
+
+      (function initFullWidthConversation() {
+        if (typeof window === "undefined" || !window.localStorage) return;
+        try {
+          if (window.localStorage.getItem("dsh_full_width_conversation") === "true") {
+            if (document.body) document.body.classList.add("dsh-full-width-conversation");
+            else
+              document.addEventListener("DOMContentLoaded", function () {
+                document.body.classList.add("dsh-full-width-conversation");
               });
           }
         } catch (e) {}
