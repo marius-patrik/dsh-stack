@@ -43,33 +43,47 @@ const ok = (name) => console.log("ok -", name);
   ok("chat tab to bottom panel is refused, never removed from its source (#122)");
 }
 
-// ---- a terminal tab moved to "bottom" commits exactly once ----
-{
+/**
+ * Asserts that moving a terminal tab to `targetArea` leaves it in exactly one
+ * area, with the two non-target areas dropping their copies on commit.
+ */
+function assertTerminalMoveCommitsOnce(targetArea, otherAreas, description) {
   const target = new EventTarget();
   const tabMove = loadProtocol(target);
-  const terminalTab = { id: "term-1", type: "terminal" };
+  const terminalTab = { id: `term-${targetArea}`, type: "terminal" };
 
   const areas = { top: [terminalTab], bottom: [], right: [] };
 
-  tabMove.onMoveRequested("bottom", (tab) => {
-    if (!tabMove.takeOwnership("bottom", tab)) return;
-    areas.bottom.push(tab);
+  tabMove.onMoveRequested(targetArea, (tab) => {
+    if (!tabMove.takeOwnership(targetArea, tab)) return;
+    areas[targetArea].push(tab);
   });
-  tabMove.onForeignCommit("top", (detail) => {
-    areas.top = areas.top.filter((t) => t.id !== detail.id);
-  });
-  tabMove.onForeignCommit("right", (detail) => {
-    areas.right = areas.right.filter((t) => t.id !== detail.id);
-  });
+  for (const area of otherAreas) {
+    tabMove.onForeignCommit(area, (detail) => {
+      areas[area] = areas[area].filter((t) => t.id !== detail.id);
+    });
+  }
 
-  tabMove.requestMove("bottom", terminalTab);
+  tabMove.requestMove(targetArea, terminalTab);
 
   const presentIn = Object.keys(areas).filter((area) =>
     areas[area].some((t) => t.id === terminalTab.id),
   );
-  assert.deepEqual(presentIn, ["bottom"], "a committed tab must live in exactly one area");
-  ok("terminal tab moved to bottom panel exists in exactly one area afterward (#122)");
+  assert.deepEqual(presentIn, [targetArea], "a committed tab must live in exactly one area");
+  ok(description);
 }
+
+// ---- terminal tab moves to each hostable area commit exactly once ----
+assertTerminalMoveCommitsOnce(
+  "bottom",
+  ["top", "right"],
+  "terminal tab moved to bottom panel exists in exactly one area afterward (#122)",
+);
+assertTerminalMoveCommitsOnce(
+  "right",
+  ["top", "bottom"],
+  "terminal tab moved to secondary sidebar exists in exactly one area afterward (#241)",
+);
 
 // ---- a move request no destination is listening for leaves the tab in place ----
 {
