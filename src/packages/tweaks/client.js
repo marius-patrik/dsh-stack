@@ -4908,27 +4908,7 @@ window.__ModuleLoader__.load({
       } else if (props && Array.isArray(props.sections)) {
         rawRows = props.sections;
       }
-      // Placeholder nav rows for the window between mount and the first
-      // settings.section ledger snapshot. NOT registrations: nothing here
-      // contributes a section, and an id that no package actually registers
-      // opens onto an empty content area, so the list is only ever correct
-      // while it is momentary (tracked for retirement by #248).
-      if (!rawRows || rawRows.length === 0) {
-        rawRows = [
-          { id: "general", label: "General", order: 0 },
-          { id: "models", label: "Models", order: 10 },
-          { id: "providers", label: "Providers & Quotas", order: 20 },
-          { id: "keybinds", label: "Keybinds", order: 35 },
-          { id: "appearance", label: "Appearance", order: 40 },
-          { id: "formatters", label: "Formatters", order: 50 },
-          { id: "lsp", label: "Language Servers", order: 60 },
-          { id: "tools", label: "Tools", order: 70 },
-          { id: "agents", label: "Agents", order: 80 },
-          { id: "repos", label: "Repositories", order: 90 },
-          { id: "actions", label: "Actions", order: 100 },
-          { id: "voice", label: "Voice", order: 110 },
-        ];
-      }
+
       var SUPPRESSED_SECTIONS = new Set([
         "provider-status",
         "provider-usage",
