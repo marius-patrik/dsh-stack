@@ -1677,12 +1677,15 @@ window.__ModuleLoader__.load({
       var searchEnabled = searchState[0],
         setSearchEnabled = searchState[1];
 
-      var swapSidebarsState = React.useState(function () {
-        if (typeof window === "undefined" || !window.localStorage) return false;
-        return window.localStorage.getItem("dsh_swap_sidebars") === "true";
+      var mainSidebarLocationState = React.useState(function () {
+        if (typeof window === "undefined" || !window.localStorage) return "left";
+        var saved = window.localStorage.getItem("dsh_main_sidebar_location");
+        if (saved === "left" || saved === "right") return saved;
+        var legacy = window.localStorage.getItem("dsh_swap_sidebars");
+        return legacy === "true" ? "right" : "left";
       });
-      var swapSidebars = swapSidebarsState[0],
-        setSwapSidebars = swapSidebarsState[1];
+      var mainSidebarLocation = mainSidebarLocationState[0],
+        setMainSidebarLocation = mainSidebarLocationState[1];
 
       var defaultModeState = React.useState(function () {
         try {
@@ -1768,24 +1771,23 @@ window.__ModuleLoader__.load({
       };
 
       /**
-       * Toggles the swap sidebars state, updating the theme and container styles accordingly.
-       *
-       * The function sets the data-theme attribute on the document element to either "oled", "light", or removes it,
-       * depending on the themeType. It also updates the container styles for the settings row.
-       *
-       * On failure, the function does not change the theme or styles, maintaining the current state.
+       * Sets the main sidebar location (left or right), updating the body class and
+       * notifying other surfaces via a custom event.
        */
-      var handleToggleSwapSidebars = function (e) {
-        var checked = e.target.checked;
-        setSwapSidebars(checked);
+      var handleSelectMainSidebarLocation = function (e) {
+        var location = e.target.value;
+        setMainSidebarLocation(location);
         if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
+          window.localStorage.setItem("dsh_main_sidebar_location", location);
+          try {
+            window.localStorage.removeItem("dsh_swap_sidebars");
+          } catch (err) {}
           window.dispatchEvent(
-            new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
+            new CustomEvent("dsh:main-sidebar-location", { detail: { location: location } }),
           );
           if (document.body) {
-            if (checked) document.body.classList.add("dsh-sidebars-swapped");
-            else document.body.classList.remove("dsh-sidebars-swapped");
+            if (location === "right") document.body.classList.add("dsh-main-sidebar-right");
+            else document.body.classList.remove("dsh-main-sidebar-right");
           }
         }
       };
@@ -1992,11 +1994,14 @@ window.__ModuleLoader__.load({
           "Display quick search bar at the top of the sidebar explorer",
           createSettingsToggleCheckbox(searchEnabled, handleToggleSearch),
         ),
-        // 8. Swap Sidebars
+        // 8. Main Sidebar Location
         createSettingsRow(
-          "Swap Main & Secondary Sidebars",
-          "Position the Main Sidebar on the right and the Secondary Sidebar dock on the left",
-          createSettingsToggleCheckbox(swapSidebars, handleToggleSwapSidebars),
+          "Main Sidebar Location",
+          "Choose which side the main sidebar appears on",
+          createSettingsSelect(mainSidebarLocation, handleSelectMainSidebarLocation, [
+            { value: "left", label: "Left" },
+            { value: "right", label: "Right" },
+          ]),
         ),
         // 9. Internal Testing Notice
         createSettingsRow(
@@ -6239,7 +6244,19 @@ window.__ModuleLoader__.load({
       (function initMainSidebarLocation() {
         if (typeof window === "undefined" || !window.localStorage) return;
         try {
-          if (window.localStorage.getItem("dsh_main_sidebar_location") === "right") {
+          var saved = window.localStorage.getItem("dsh_main_sidebar_location");
+          var legacy = window.localStorage.getItem("dsh_swap_sidebars");
+          var location = saved;
+          if (location !== "left" && location !== "right") {
+            location = legacy === "true" ? "right" : "left";
+            window.localStorage.setItem("dsh_main_sidebar_location", location);
+          }
+          if (legacy !== null) {
+            try {
+              window.localStorage.removeItem("dsh_swap_sidebars");
+            } catch (err) {}
+          }
+          if (location === "right") {
             if (document.body) document.body.classList.add("dsh-main-sidebar-right");
             else
               document.addEventListener("DOMContentLoaded", function () {
