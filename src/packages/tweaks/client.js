@@ -1513,7 +1513,7 @@ window.__ModuleLoader__.load({
     /**
      * Injects a custom theme palette as CSS custom properties into a `<style>` tag
      * (creating it on first use) and applies the corresponding `data-theme` attribute.
-     * Shared by ThemeSettingsSection's live preview and the module's saved-palette
+     * Shared by the theme studio's live preview and the module's saved-palette
      * initializer so both write the exact same variable set.
      */
     function applyCustomThemePaletteVars(palette, themeType) {
@@ -2121,11 +2121,15 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Sets the document's data-theme attribute to "oled" or "light" based on the themeType,
-     * and updates the container styles for the settings row. On failure, it maintains the
-     * current theme and styles without change.
+     * The Appearance section's own tab: the palette studio that edits the
+     * live CSS custom properties, saves named palettes and exports them.
+     *
+     * It registers into `settings.appearance.tab` alongside the tabs owned by
+     * `themes`, `providers` and `skin-settings`, so the section that hosts it
+     * treats it like any other contribution rather than special-casing the
+     * package it happens to live in.
      */
-    function ThemeSettingsSection() {
+    function ThemeStudioTab() {
       var THEME_PRESETS = [
         {
           id: "dark",
@@ -2853,6 +2857,143 @@ window.__ModuleLoader__.load({
     }
 
     /**
+     * The strip a settings section renders when it hosts more than one page.
+     *
+     * One strip serves every multi-page section — only the entries and the
+     * selection callback differ — so the pill row, its active treatment and
+     * its geometry are written once rather than per section.
+     *
+     * @param {{tabs: Array<{id: string, label: string}>, active: string, onSelect: (id: string) => void}} props - entries, current selection and the select handler.
+     * @returns {JSX.Element} the tab strip.
+     */
+    function SettingsSubtabStrip(props) {
+      var tabs = props.tabs,
+        active = props.active,
+        onSelect = props.onSelect;
+      return h(
+        "div",
+        {
+          style: {
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "4px",
+            background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.05))",
+            padding: "3px",
+            borderRadius: "8px",
+            border: "1px solid var(--dsw-alias-border-l1)",
+          },
+        },
+        tabs.map(function (tab) {
+          var isAct = active === tab.id;
+          return h(
+            "button",
+            {
+              key: tab.id,
+              type: "button",
+              role: "tab",
+              "aria-selected": isAct ? "true" : "false",
+              onClick: function () {
+                onSelect(tab.id);
+              },
+              style: {
+                padding: "4px 12px",
+                borderRadius: "6px",
+                border: "none",
+                background: isAct ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
+                color: isAct ? "#fff" : "var(--dsw-alias-label-secondary)",
+                fontSize: "12px",
+                fontWeight: isAct ? 600 : 400,
+                cursor: "pointer",
+                textTransform: "capitalize",
+                transition: "all 120ms ease",
+              },
+            },
+            tab.label,
+          );
+        }),
+      );
+    }
+
+    /**
+     * The Appearance section: the single settings destination for everything
+     * that changes how the Stack looks.
+     *
+     * It owns no appearance controls of its own. The palette studio, the theme
+     * directory, the icon catalog and the skin picker each live in the package
+     * that implements them and register into the `settings.appearance.tab`
+     * seat this section declares; the section only orders the strip and mounts
+     * the selected page, exactly as the settings shell does for
+     * `settings.section`.
+     *
+     * @param {{renderSlot: Function, close: () => void, useAppearanceTabs: Function}} props - the child-render share, the shell's close affordance and the tab ledger.
+     * @returns {JSX.Element} the tab strip and the active tab's page.
+     */
+    function AppearanceSettingsSection(props) {
+      var renderSlot = props.renderSlot,
+        close = props.close,
+        useAppearanceTabs = props.useAppearanceTabs;
+
+      var tabs = [];
+      if (typeof useAppearanceTabs === "function") {
+        tabs =
+          useAppearanceTabs(function (s) {
+            return s;
+          }) || [];
+      }
+
+      var requestedState = React.useState(undefined);
+      var requested = requestedState[0],
+        setRequested = requestedState[1];
+
+      var active;
+      for (var i = 0; i < tabs.length; i++) {
+        if (tabs[i].id === requested) {
+          active = requested;
+          break;
+        }
+      }
+      if (active === undefined && tabs.length > 0) active = tabs[0].id;
+
+      var body;
+      if (active === undefined) {
+        body = h(
+          "div",
+          { style: { color: "var(--dsw-alias-label-secondary)" } },
+          "No appearance pages are registered.",
+        );
+      } else if (typeof renderSlot !== "function") {
+        body = h(
+          "div",
+          { style: { color: "var(--dsw-alias-state-error-primary)" } },
+          "Appearance pages cannot render: the shell supplied no slot renderer.",
+        );
+      } else {
+        try {
+          body = renderSlot("settings.appearance.tab", { close: close }, { only: active });
+        } catch (e) {
+          console.warn("Failed rendering appearance tab " + active, e);
+          body = h(
+            "div",
+            { style: { color: "var(--dsw-alias-state-error-primary)" } },
+            "Appearance page " + active + " unavailable",
+          );
+        }
+      }
+
+      return h(
+        "div",
+        {
+          className: "dsh-tw-section",
+          style: { display: "flex", flexDirection: "column", gap: "16px" },
+        },
+        tabs.length > 0
+          ? h(SettingsSubtabStrip, { tabs: tabs, active: active, onSelect: setRequested })
+          : null,
+        body,
+      );
+    }
+
+    /**
      * Renders a section of customization settings with a grid layout for color fields.
      * Each field is displayed in a flex container with specific styling for padding,
      * border, and background color. The background color is derived from the `customPalette`
@@ -3082,45 +3223,15 @@ window.__ModuleLoader__.load({
               "Manage agent skills, workflow hooks, launcher scripts, and tool extensions.",
             ),
           ),
-          h(
-            "div",
-            {
-              style: {
-                display: "flex",
-                gap: "4px",
-                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.05))",
-                padding: "3px",
-                borderRadius: "8px",
-                border: "1px solid var(--dsw-alias-border-l1)",
-              },
-            },
-            ["skills", "hooks", "scripts"].map(function (tabKey) {
-              var isAct = subtab === tabKey;
-              return h(
-                "button",
-                {
-                  key: tabKey,
-                  type: "button",
-                  onClick: function () {
-                    setSubtab(tabKey);
-                  },
-                  style: {
-                    padding: "4px 12px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: isAct ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
-                    color: isAct ? "#fff" : "var(--dsw-alias-label-secondary)",
-                    fontSize: "12px",
-                    fontWeight: isAct ? 600 : 400,
-                    cursor: "pointer",
-                    textTransform: "capitalize",
-                    transition: "all 120ms ease",
-                  },
-                },
-                tabKey,
-              );
-            }),
-          ),
+          h(SettingsSubtabStrip, {
+            tabs: [
+              { id: "skills", label: "skills" },
+              { id: "hooks", label: "hooks" },
+              { id: "scripts", label: "scripts" },
+            ],
+            active: subtab,
+            onSelect: setSubtab,
+          }),
         ),
         // Skills Subtab
         subtab === "skills"
@@ -4172,14 +4283,7 @@ window.__ModuleLoader__.load({
         if (closeButton.current) closeButton.current.focus();
       }, []);
 
-      var PERSONALIZATION_IDS = new Set([
-        "general",
-        "themes",
-        "appearance",
-        "icons",
-        "keybinds",
-        "keybindings",
-      ]);
+      var PERSONALIZATION_IDS = new Set(["general", "appearance", "keybinds", "keybindings"]);
       var CUSTOMIZATION_IDS = new Set([
         "agents",
         "actions",
@@ -4208,7 +4312,6 @@ window.__ModuleLoader__.load({
 
       for (var rIdx = 0; rIdx < rows.length; rIdx++) {
         var r = rows[rIdx];
-        if (r.id === "icons") r = Object.assign({}, r, { label: "Icons" });
         if (r.id === "providers") r = Object.assign({}, r, { label: "Providers" });
         if (r.id === "agent-presets") r = Object.assign({}, r, { label: "Modes" });
         if (r.id === "actions" || r.id === "session-modes")
@@ -4806,7 +4909,7 @@ window.__ModuleLoader__.load({
           { id: "models", label: "Models", order: 10 },
           { id: "providers", label: "Providers & Quotas", order: 20 },
           { id: "keybinds", label: "Keybinds", order: 35 },
-          { id: "themes", label: "Themes", order: 40 },
+          { id: "appearance", label: "Appearance", order: 40 },
           { id: "formatters", label: "Formatters", order: 50 },
           { id: "lsp", label: "Language Servers", order: 60 },
           { id: "tools", label: "Tools", order: 70 },
@@ -4994,6 +5097,61 @@ window.__ModuleLoader__.load({
     // contract: getSnapshot returns the cached rows until the ledger or the
     // locale revision moves). Ported from ui-settings-general's apply.
     /**
+     * An observable source over one list slot's ledger, projecting each entry
+     * to the `{ id, order, label }` row every settings navigator reads — the
+     * shell's section nav and a section's own tab strip alike.
+     *
+     * Labels resolve on each read rather than at registration, so a locale
+     * change re-labels rows without the registrant re-registering; the cached
+     * projection is returned untouched until the ledger version or the locale
+     * revision moves, which is what useSyncExternalStore requires.
+     */
+    function makeSlotRowsSource(ctx, slotName) {
+      var rowsVersion = -1;
+      var rowsRevision = -1;
+      var rows = [];
+      return {
+        getSnapshot: function () {
+          var version = ctx.slots.getVersion(slotName);
+          var revision = ctx.locale.getSnapshot().revision;
+          if (version !== rowsVersion || revision !== rowsRevision) {
+            rowsVersion = version;
+            rowsRevision = revision;
+            rows = ctx.slots
+              .entries(slotName)
+              .map(function (e) {
+                var lbl = "";
+                try {
+                  if (typeof e.options.label === "function") lbl = e.options.label();
+                  else if (typeof e.options.label === "string") lbl = e.options.label;
+                  else if (resolveSlotLabel) lbl = resolveSlotLabel(e.options.label);
+                } catch (err) {
+                  lbl = e.options.id || "";
+                }
+                return {
+                  id: e.options.id !== undefined ? e.options.id : "",
+                  order: e.options.order !== undefined ? e.options.order : 0,
+                  label: lbl || e.options.id || "",
+                };
+              })
+              .sort(function (a, b) {
+                return a.order - b.order;
+              });
+          }
+          return rows;
+        },
+        subscribe: function (listener) {
+          var offLedger = ctx.slots.subscribe(slotName, listener);
+          var offLocale = ctx.locale.subscribe(listener);
+          return function () {
+            offLedger();
+            offLocale();
+          };
+        },
+      };
+    }
+
+    /**
      * Sets up a shell with injected styles and event handlers for hover effects.
      *
      * On mouse enter, the text color changes to the primary label color.
@@ -5002,53 +5160,13 @@ window.__ModuleLoader__.load({
      * No return value.
      */
     function makeShellInjected(ctx) {
-      var rowsVersion = -1;
-      var rowsRevision = -1;
-      var rows = [];
+      var sections = makeSlotRowsSource(ctx, "settings.section");
       var onboardingVersion = -1;
       var onboardingSteps = [];
       return function () {
         return {
           hooks: {
-            sections: {
-              getSnapshot: function () {
-                var version = ctx.slots.getVersion("settings.section");
-                var revision = ctx.locale.getSnapshot().revision;
-                if (version !== rowsVersion || revision !== rowsRevision) {
-                  rowsVersion = version;
-                  rowsRevision = revision;
-                  rows = ctx.slots
-                    .entries("settings.section")
-                    .map(function (e) {
-                      var lbl = "";
-                      try {
-                        if (typeof e.options.label === "function") lbl = e.options.label();
-                        else if (typeof e.options.label === "string") lbl = e.options.label;
-                        else if (resolveSlotLabel) lbl = resolveSlotLabel(e.options.label);
-                      } catch (err) {
-                        lbl = e.options.id || "";
-                      }
-                      return {
-                        id: e.options.id !== undefined ? e.options.id : "",
-                        order: e.options.order !== undefined ? e.options.order : 0,
-                        label: lbl || e.options.id || "",
-                      };
-                    })
-                    .sort(function (a, b) {
-                      return a.order - b.order;
-                    });
-                }
-                return rows;
-              },
-              subscribe: function (listener) {
-                var offLedger = ctx.slots.subscribe("settings.section", listener);
-                var offLocale = ctx.locale.subscribe(listener);
-                return function () {
-                  offLedger();
-                  offLocale();
-                };
-              },
-            },
+            sections: sections,
             onboardingSteps: {
               getSnapshot: function () {
                 var version = ctx.slots.getVersion("settings.onboarding");
@@ -5208,6 +5326,11 @@ window.__ModuleLoader__.load({
         "tweaks: general section",
       );
 
+      // Appearance is a composition point, not a page: skins, icons and themes
+      // stay implemented by the packages that own them and register into the
+      // `settings.appearance.tab` seat declared here, the same way sections
+      // themselves register into the seat the shell declares.
+      var appearanceTabs = makeSlotRowsSource(ctx, "settings.appearance.tab");
       ctx.slots.inject(
         "settings.section",
         function () {
@@ -5220,14 +5343,34 @@ window.__ModuleLoader__.load({
               label: function () {
                 return "Appearance";
               },
+              children: { "settings.appearance.tab": { kind: "list", scope: "root" } },
               inject: function () {
-                return {};
+                return { hooks: { appearanceTabs: appearanceTabs } };
               },
             },
-            ThemeSettingsSection,
+            AppearanceSettingsSection,
           );
         },
         "tweaks: appearance section",
+      );
+
+      ctx.slots.inject(
+        "settings.appearance.tab",
+        function () {
+          return ctx.slots.register(
+            {
+              name: "settings.appearance.tab",
+              id: "theme-studio",
+              priority: -10,
+              order: 0,
+              label: function () {
+                return "Theme Studio";
+              },
+            },
+            ThemeStudioTab,
+          );
+        },
+        "tweaks: appearance theme-studio tab",
       );
 
       ctx.slots.inject(
@@ -5311,13 +5454,13 @@ window.__ModuleLoader__.load({
         return navIcon("general");
       }
       /**
-       * Sets the theme glyph open state and listens for settings open events.
+       * The Appearance section's nav glyph: the palette mark that stands for
+       * every appearance page — theme studio, skins, icons and themes — now
+       * that they share one nav row.
        *
-       * Guarantees that the theme glyph open state is toggled when the event is triggered.
-       * Returns a cleanup function to remove the event listener.
-       * Fails gracefully by doing nothing if the event listener cannot be added.
+       * @returns {JSX.Element} the palette icon sized for a nav cell.
        */
-      function ThemesGlyph() {
+      function AppearanceGlyph() {
         return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
       /**
@@ -5397,7 +5540,7 @@ window.__ModuleLoader__.load({
       );
       ctx.slots.inject(
         "settings.section.icon",
-        harnessGlyph("appearance", ThemesGlyph),
+        harnessGlyph("appearance", AppearanceGlyph),
         "tweaks: appearance nav glyph",
       );
       ctx.slots.inject(
@@ -6227,7 +6370,7 @@ window.__ModuleLoader__.load({
             icon: icons.appearance,
             action: function () {
               window.dispatchEvent(
-                new CustomEvent("dsh:open-settings", { detail: { section: "themes" } }),
+                new CustomEvent("dsh:open-settings", { detail: { section: "appearance" } }),
               );
             },
           });

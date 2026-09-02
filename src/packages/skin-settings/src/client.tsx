@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
-import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
+import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import {
-  SETTINGS_SECTION_ICON_SLOT,
+  SETTINGS_APPEARANCE_TAB_SLOT,
+  type SettingsAppearanceTabOwnerProps,
   SettingsSection,
   SettingsOptionRow,
 } from "@dsh-stack/settings-panel";
-import { PaletteIcon } from "@dsh-stack/lucide-animated/client";
 import { defaultSkins, type SkinId, type SkinRuntime } from "@dsh-stack/skin-runtime";
 import type {} from "@dsh-stack/skin-runtime/client";
 
@@ -17,7 +17,7 @@ export const inject = ["slots", "skin"];
 export function SkinSettings({
   runtime,
   close,
-}: SettingsSectionOwnerProps & { runtime: SkinRuntime }) {
+}: SettingsAppearanceTabOwnerProps & { runtime: SkinRuntime }) {
   const [active, setActive] = useState<SkinId>(runtime.getActive());
   useEffect(() => runtime.subscribe(() => setActive(runtime.getActive())), [runtime]);
 
@@ -43,24 +43,21 @@ export function SkinSettings({
   );
 }
 
-/** Renders the Skins section's nav glyph from the canonical animated icon set. */
-export function SkinSettingsIcon() {
-  return <PaletteIcon aria-hidden="true" size={16} />;
-}
-
-/** apply implementation. */
+/**
+ * Registers the skin picker as one page of the Appearance section.
+ *
+ * The picker is not a settings section of its own: it contributes to the
+ * `settings.appearance.tab` seat that section declares, so skins sit beside
+ * themes and icons under one Appearance entry without this package and the
+ * section's owner importing anything from each other.
+ * @param ctx - the client context supplying the skin runtime and slot registry.
+ */
 export function apply(ctx: ClientContext): void {
   const runtime = ctx.skin;
-  ctx.slots.inject("settings.section", () =>
+  ctx.slots.inject(SETTINGS_APPEARANCE_TAB_SLOT, () =>
     ctx.slots.register(
-      { name: "settings.section", id: "skins", order: 35, label: "Skins", inject: () => ({}) },
-      (props: SettingsSectionOwnerProps) => <SkinSettings {...props} runtime={runtime} />,
-    ),
-  );
-  ctx.slots.inject(SETTINGS_SECTION_ICON_SLOT, () =>
-    ctx.slots.register(
-      { name: SETTINGS_SECTION_ICON_SLOT, id: "skins", order: 0 },
-      SkinSettingsIcon,
+      { name: SETTINGS_APPEARANCE_TAB_SLOT, id: "skins", order: 10, label: "Skins" },
+      (props: SettingsAppearanceTabOwnerProps) => <SkinSettings {...props} runtime={runtime} />,
     ),
   );
 }

@@ -184,38 +184,6 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Themes the specified element to have a dark background and transparent or no shadows.
-     *
-     * Guarantees a dark background and transparent border for user content and certain UI elements.
-     * Fails by clearing the text content of the element if the conditions are not met.
-     */
-    function ThemesGlyph(props) {
-      var React = require("react");
-      var size = (props && props.size) || 16;
-      return React.createElement(
-        "svg",
-        {
-          width: size,
-          height: size,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          className: "themes-navGlyph dsh-icon-animated",
-        },
-        React.createElement("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
-        React.createElement("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }),
-        React.createElement("circle", { cx: "8.5", cy: "7.5", r: ".5", fill: "currentColor" }),
-        React.createElement("circle", { cx: "6.5", cy: "12.5", r: ".5", fill: "currentColor" }),
-        React.createElement("path", {
-          d: "M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z",
-        }),
-      );
-    }
-
-    /**
      * Renders a titled group of selectable choice buttons (theme mode, border style, etc.):
      * a heading row above a responsive grid of buttons, each showing a label/description
      * and highlighted when selected. Shared by ThemesSection's mode and border-style pickers
@@ -758,12 +726,15 @@ window.__ModuleLoader__.load({
           registrations = [];
         };
       }, "themes: theme directory sync");
+      // The theme directory is one page of the Appearance section, not a
+      // settings section of its own: it registers into the seat Appearance
+      // declares, and keeps its own component, inject face and persistence.
       ctx.slots.inject(
-        "settings.section",
+        "settings.appearance.tab",
         () =>
           ctx.slots.register(
             {
-              name: "settings.section",
+              name: "settings.appearance.tab",
               id: "themes",
               order: 30,
               label: () => "Themes",
@@ -782,20 +753,7 @@ window.__ModuleLoader__.load({
             },
             ThemesSection,
           ),
-        "themes: themes settings section",
-      );
-      ctx.slots.inject(
-        "settings.section.icon",
-        () =>
-          ctx.slots.register(
-            {
-              name: "settings.section.icon",
-              id: "themes",
-              order: 0,
-            },
-            ThemesGlyph,
-          ),
-        "themes: themes nav glyph",
+        "themes: appearance themes tab",
       );
     }
     //#endregion
