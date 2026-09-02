@@ -3137,13 +3137,17 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 1c. SETTINGS: APPS SECTION
+    /** Sub-tabs mounted inside AppsSection: local runners, plus the merged Terminals and Containers settings. */
+    var APPS_SUBTABS = [
+      { id: "runtimes", label: "Runtimes" },
+      { id: "terminals", label: "Terminals" },
+      { id: "containers", label: "Containers" },
+    ];
+
     /**
-     * Triggers the edit modal for the specified account when clicked.
+     * Renders the Apps settings section with sub-tabs for runtimes, terminals, and containers.
      *
-     * @param {object} row - The row object containing the reference to the modal.
-     * @param {string} accountName - The name of the account to be edited.
-     *
-     * On click, opens the edit modal with the given reference and account name.
+     * @returns {React.ReactElement} The Apps settings section.
      */
     function AppsSection() {
       var state = React.useState({
@@ -3152,6 +3156,9 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       });
       var data = state[0],
         setData = state[1];
+      var subtabState = React.useState("runtimes");
+      var subtab = subtabState[0],
+        setSubtab = subtabState[1];
 
       React.useEffect(function () {
         fetch(QUOTAS_API + "/integrations")
@@ -3184,205 +3191,277 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           "div",
           {
             style: {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               borderBottom: "1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.15))",
               paddingBottom: "16px",
-            },
-          },
-          h(
-            "h2",
-            {
-              style: {
-                margin: "0 0 4px 0",
-                fontSize: "18px",
-                fontWeight: 600,
-                color: "var(--dsw-alias-label-primary)",
-              },
-            },
-            "Developer Apps & Local Runners",
-          ),
-          h(
-            "div",
-            { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
-            "Manage local inference runtimes (Ollama, vLLM), developer platforms, MCP tools, and speech engines.",
-          ),
-        ),
-        // Ollama Local Runner
-        h(
-          "div",
-          {
-            style: {
-              borderRadius: "10px",
-              border: "1px solid var(--dsw-alias-border-l1)",
-              background: "var(--dsw-alias-surface-l1)",
-              padding: "16px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
+              gap: "16px",
+              flexWrap: "wrap",
             },
           },
           h(
             "div",
-            { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+            null,
             h(
-              "div",
-              { style: { display: "flex", alignItems: "center", gap: "10px" } },
-              h(ProviderBrandIcon, { id: "ollama", size: 22 }),
-              h(
-                "div",
-                null,
-                h("div", { style: { fontSize: "15px", fontWeight: 600 } }, "Ollama Local Engine"),
-                h(
-                  "div",
-                  { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                  "Local offline LLM runner on http://127.0.0.1:11434",
-                ),
-              ),
-            ),
-            h(
-              "span",
+              "h2",
               {
                 style: {
-                  padding: "3px 8px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
+                  margin: "0 0 4px 0",
+                  fontSize: "18px",
                   fontWeight: 600,
-                  background: ollamaMeta ? "rgba(99, 102, 241, 0.15)" : "rgba(128,128,128,0.15)",
-                  color: ollamaMeta ? "#6366f1" : "var(--dsw-alias-label-secondary)",
+                  color: "var(--dsw-alias-label-primary)",
                 },
               },
-              ollamaMeta ? "ONLINE" : "STANDBY",
+              "Developer Apps & Local Runners",
+            ),
+            h(
+              "div",
+              { style: { fontSize: "13px", color: "var(--dsw-alias-label-secondary)" } },
+              "Manage local inference runtimes (Ollama, vLLM), developer platforms, MCP tools, speech engines, terminal sessions, and sandboxed containers.",
             ),
           ),
-          ollamaMeta
-            ? h(
+          h(
+            "div",
+            {
+              style: {
+                display: "flex",
+                gap: "4px",
+                background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.05))",
+                padding: "3px",
+                borderRadius: "8px",
+                border: "1px solid var(--dsw-alias-border-l1)",
+              },
+            },
+            APPS_SUBTABS.map(function (tab) {
+              var isAct = subtab === tab.id;
+              return h(
+                "button",
+                {
+                  key: tab.id,
+                  type: "button",
+                  onClick: function () {
+                    setSubtab(tab.id);
+                  },
+                  style: {
+                    padding: "4px 12px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: isAct ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
+                    color: isAct ? "#fff" : "var(--dsw-alias-label-secondary)",
+                    fontSize: "12px",
+                    fontWeight: isAct ? 600 : 400,
+                    cursor: "pointer",
+                    transition: "all 120ms ease",
+                  },
+                },
+                tab.label,
+              );
+            }),
+          ),
+        ),
+        // Runtimes Subtab
+        subtab === "runtimes"
+          ? h(
+              "div",
+              { style: { display: "flex", flexDirection: "column", gap: "20px" } },
+              // Ollama Local Runner
+              h(
                 "div",
-                { style: { display: "flex", flexDirection: "column", gap: "6px" } },
+                {
+                  style: {
+                    borderRadius: "10px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "var(--dsw-alias-surface-l1)",
+                    padding: "16px 20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "12px",
+                  },
+                },
                 h(
                   "div",
-                  { style: { fontSize: "12px", fontWeight: 600 } },
-                  "Installed Local Models:",
-                ),
-                (ollamaMeta.availableModels || []).map(function (m) {
-                  return h(
+                  {
+                    style: {
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    },
+                  },
+                  h(
                     "div",
+                    { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                    h(ProviderBrandIcon, { id: "ollama", size: 22 }),
+                    h(
+                      "div",
+                      null,
+                      h(
+                        "div",
+                        { style: { fontSize: "15px", fontWeight: 600 } },
+                        "Ollama Local Engine",
+                      ),
+                      h(
+                        "div",
+                        { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                        "Local offline LLM runner on http://127.0.0.1:11434",
+                      ),
+                    ),
+                  ),
+                  h(
+                    "span",
                     {
-                      key: m.name,
                       style: {
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "6px 10px",
-                        borderRadius: "5px",
-                        background: "var(--dsw-alias-surface-l2)",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        background: ollamaMeta
+                          ? "rgba(99, 102, 241, 0.15)"
+                          : "rgba(128,128,128,0.15)",
+                        color: ollamaMeta ? "#6366f1" : "var(--dsw-alias-label-secondary)",
                       },
                     },
-                    h("span", { style: { fontSize: "12px" } }, m.name),
+                    ollamaMeta ? "ONLINE" : "STANDBY",
+                  ),
+                ),
+                ollamaMeta
+                  ? h(
+                      "div",
+                      { style: { display: "flex", flexDirection: "column", gap: "6px" } },
+                      h(
+                        "div",
+                        { style: { fontSize: "12px", fontWeight: 600 } },
+                        "Installed Local Models:",
+                      ),
+                      (ollamaMeta.availableModels || []).map(function (m) {
+                        return h(
+                          "div",
+                          {
+                            key: m.name,
+                            style: {
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: "6px 10px",
+                              borderRadius: "5px",
+                              background: "var(--dsw-alias-surface-l2)",
+                            },
+                          },
+                          h("span", { style: { fontSize: "12px" } }, m.name),
+                          h(
+                            "span",
+                            {
+                              style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" },
+                            },
+                            m.size ? (m.size / (1024 * 1024 * 1024)).toFixed(1) + " GB" : "",
+                          ),
+                        );
+                      }),
+                    )
+                  : null,
+              ),
+              // MCP Tools Runner
+              h(
+                "div",
+                {
+                  style: {
+                    borderRadius: "10px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "var(--dsw-alias-surface-l1)",
+                    padding: "16px 20px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  },
+                },
+                h(
+                  "div",
+                  { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                  h(ToolsGlyph, { size: 22 }),
+                  h(
+                    "div",
+                    null,
                     h(
-                      "span",
-                      { style: { fontSize: "11px", color: "var(--dsw-alias-label-tertiary)" } },
-                      m.size ? (m.size / (1024 * 1024 * 1024)).toFixed(1) + " GB" : "",
+                      "div",
+                      { style: { fontSize: "15px", fontWeight: 600 } },
+                      "Model Context Protocol (MCP) Tools",
                     ),
-                  );
-                }),
-              )
-            : null,
-        ),
-        // MCP Tools Runner
-        h(
-          "div",
-          {
-            style: {
-              borderRadius: "10px",
-              border: "1px solid var(--dsw-alias-border-l1)",
-              background: "var(--dsw-alias-surface-l1)",
-              padding: "16px 20px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", alignItems: "center", gap: "10px" } },
-            h(ToolsGlyph, { size: 22 }),
-            h(
-              "div",
-              null,
+                    h(
+                      "div",
+                      { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                      "Dynamic external tool servers and agent execution bridges",
+                    ),
+                  ),
+                ),
+                h(
+                  "span",
+                  {
+                    style: {
+                      padding: "3px 8px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      background: "rgba(99, 102, 241, 0.15)",
+                      color: "#6366f1",
+                    },
+                  },
+                  "ENABLED",
+                ),
+              ),
+              // Voice & Speech Engine
               h(
                 "div",
-                { style: { fontSize: "15px", fontWeight: 600 } },
-                "Model Context Protocol (MCP) Tools",
+                {
+                  style: {
+                    borderRadius: "10px",
+                    border: "1px solid var(--dsw-alias-border-l1)",
+                    background: "var(--dsw-alias-surface-l1)",
+                    padding: "16px 20px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  },
+                },
+                h(
+                  "div",
+                  { style: { display: "flex", alignItems: "center", gap: "10px" } },
+                  h(MicGlyph, { size: 22, style: { color: "#6366f1" } }),
+                  h(
+                    "div",
+                    null,
+                    h(
+                      "div",
+                      { style: { fontSize: "15px", fontWeight: 600 } },
+                      "Voice & Audio Synthesis Engine",
+                    ),
+                    h(
+                      "div",
+                      { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
+                      "Neural text-to-speech (Edge TTS, OpenAI, ElevenLabs) and audio controls",
+                    ),
+                  ),
+                ),
+                h(
+                  "span",
+                  {
+                    style: {
+                      padding: "3px 8px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      background: "rgba(99, 102, 241, 0.15)",
+                      color: "#6366f1",
+                    },
+                  },
+                  "ACTIVE",
+                ),
               ),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Dynamic external tool servers and agent execution bridges",
-              ),
-            ),
-          ),
-          h(
-            "span",
-            {
-              style: {
-                padding: "3px 8px",
-                borderRadius: "6px",
-                fontSize: "11px",
-                fontWeight: 600,
-                background: "rgba(99, 102, 241, 0.15)",
-                color: "#6366f1",
-              },
-            },
-            "ENABLED",
-          ),
-        ),
-        // Voice & Speech Engine
-        h(
-          "div",
-          {
-            style: {
-              borderRadius: "10px",
-              border: "1px solid var(--dsw-alias-border-l1)",
-              background: "var(--dsw-alias-surface-l1)",
-              padding: "16px 20px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            },
-          },
-          h(
-            "div",
-            { style: { display: "flex", alignItems: "center", gap: "10px" } },
-            h(MicGlyph, { size: 22, style: { color: "#6366f1" } }),
-            h(
-              "div",
-              null,
-              h(
-                "div",
-                { style: { fontSize: "15px", fontWeight: 600 } },
-                "Voice & Audio Synthesis Engine",
-              ),
-              h(
-                "div",
-                { style: { fontSize: "12px", color: "var(--dsw-alias-label-secondary)" } },
-                "Neural text-to-speech (Edge TTS, OpenAI, ElevenLabs) and audio controls",
-              ),
-            ),
-          ),
-          h(
-            "span",
-            {
-              style: {
-                padding: "3px 8px",
-                borderRadius: "6px",
-                fontSize: "11px",
-                fontWeight: 600,
-                background: "rgba(99, 102, 241, 0.15)",
-                color: "#6366f1",
-              },
-            },
-            "ACTIVE",
-          ),
-        ),
+            )
+          : null,
+        // Terminals Subtab
+        subtab === "terminals" ? h(TmuxSettingsSection) : null,
+        // Containers Subtab
+        subtab === "containers" ? h(DockerSettingsSection) : null,
       );
     }
 
@@ -12376,85 +12455,10 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         "providers: apps nav glyph",
       );
 
-      // 2. Terminals Settings Section (Order 11)
-      ctx.slots.inject(
-        "settings.section",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section",
-              id: "terminals",
-              priority: -10,
-              order: 11,
-              locale: NS,
-              label: function () {
-                return "Terminals";
-              },
-              inject: function () {
-                return {};
-              },
-            },
-            TmuxSettingsSection,
-          );
-        },
-        "providers: terminals configuration section",
-      );
-
-      ctx.slots.inject(
-        "settings.section.icon",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section.icon",
-              id: "terminals",
-              priority: -10,
-              order: 0,
-            },
-            TerminalsGlyph,
-          );
-        },
-        "providers: terminals nav glyph",
-      );
-
-      // 3. Containers Settings Section (Order 12)
-      ctx.slots.inject(
-        "settings.section",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section",
-              id: "containers",
-              priority: -10,
-              order: 12,
-              locale: NS,
-              label: function () {
-                return "Containers";
-              },
-              inject: function () {
-                return {};
-              },
-            },
-            DockerSettingsSection,
-          );
-        },
-        "providers: containers configuration section",
-      );
-
-      ctx.slots.inject(
-        "settings.section.icon",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section.icon",
-              id: "containers",
-              priority: -10,
-              order: 0,
-            },
-            ContainersGlyph,
-          );
-        },
-        "providers: containers nav glyph",
-      );
+      // Terminals and Containers no longer register standalone settings.section entries: their
+      // configuration (TmuxSettingsSection, DockerSettingsSection) now lives as sub-tabs of the
+      // Apps section above (see AppsSection / APPS_SUBTABS). TerminalsGlyph and ContainersGlyph
+      // remain in use elsewhere (session-tree UI), so those glyph definitions are unchanged.
 
       // 4. Tools Settings Section (Order 25)
       ctx.slots.inject(
