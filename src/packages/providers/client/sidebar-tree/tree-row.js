@@ -84,6 +84,21 @@ function __dshCreateTreeRow(runtime) {
   }
 
   /**
+   * Prompts for a new title and dispatches a rename if the user confirms.
+   * @param session - the session to rename.
+   * @param promptLabel - the prompt prefix (e.g. "Rename chat:").
+   * @param backfilledTitles - resolved cold titles keyed by session id.
+   * @param dispatchRename - the rename dispatcher.
+   */
+  function promptAndRenameSession(session, promptLabel, backfilledTitles, dispatchRename) {
+    var newTitle = prompt(
+      promptLabel,
+      __dshSessionDurableTitle(session, backfilledTitles),
+    );
+    if (newTitle) dispatchRename(session.id, newTitle);
+  }
+
+  /**
    * The small running-state dot a chat row shows in place of its relative
    * time while the session is busy -- the one visible trace #96 leaves of
    * the old "Active" list once a running chat renders only in its normal
@@ -259,11 +274,7 @@ function __dshCreateTreeRow(runtime) {
                   if (actionId === "pin" || actionId === "unpin") {
                     ctx.grouping.togglePinSession(chat.id);
                   } else if (actionId === "rename") {
-                    var newTitle = prompt(
-                      "Rename chat:",
-                      __dshSessionDurableTitle(chat, ctx.backfilledTitles),
-                    );
-                    if (newTitle) ctx.dispatch.rename(chat.id, newTitle);
+                    promptAndRenameSession(chat, "Rename chat:", ctx.backfilledTitles, ctx.dispatch.rename);
                   } else if (actionId === "fork") {
                     ctx.dispatch.fork(chat.id);
                   } else if (actionId === "archive") {
@@ -365,11 +376,7 @@ function __dshCreateTreeRow(runtime) {
               ],
               onSelect: function (actionId) {
                 if (actionId === "rename") {
-                  var newTitle = prompt(
-                    "Rename subagent:",
-                    __dshSessionDurableTitle(sub, ctx.backfilledTitles),
-                  );
-                  if (newTitle) ctx.dispatch.rename(sub.id, newTitle);
+                  promptAndRenameSession(sub, "Rename subagent:", ctx.backfilledTitles, ctx.dispatch.rename);
                 } else if (actionId === "archive") {
                   ctx.onArchiveChat(sub.id);
                 }
@@ -499,11 +506,7 @@ function __dshCreateTreeRow(runtime) {
                 if (actionId === "restore") {
                   restore();
                 } else if (actionId === "rename") {
-                  var newTitle = prompt(
-                    "Rename chat:",
-                    __dshSessionDurableTitle(chat, ctx.backfilledTitles),
-                  );
-                  if (newTitle) ctx.dispatch.rename(chat.id, newTitle);
+                  promptAndRenameSession(chat, "Rename chat:", ctx.backfilledTitles, ctx.dispatch.rename);
                 } else if (actionId === "delete") {
                   if (!confirm("Permanently delete this archived session?")) return;
                   ctx.grouping
