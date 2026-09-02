@@ -746,6 +746,13 @@ window.__ModuleLoader__.load({
     var Fragment = React.Fragment;
     var createGlyphComponent = __dshCreateGlyphComponent(h);
     var createDecoratedGlyphComponent = __dshCreateDecoratedGlyphComponent(h);
+    // The pill strip both multi-part settings surfaces render, and the fold
+    // that turns the Customization group's flat siblings into one row with
+    // sub-tabs. See client-settings-segmented-tabs.js and
+    // client-settings-customization-hub.js (prepended to this bundle at build
+    // time).
+    var SegmentedTabs = __dshCreateSettingsSegmentedTabs(h);
+    var customizationHub = __dshCreateSettingsCustomizationHub();
 
     /**
      * Creates a navigation icon component with a specified size and path elements.
@@ -1066,8 +1073,40 @@ window.__ModuleLoader__.load({
       ];
     });
 
+    /**
+     * Applies the shell's own naming over a section's registered label, for
+     * the handful of ids whose registrant name reads wrong in this nav (the
+     * harness's "Agent presets" is this product's "Modes", and its "Actions"
+     * are Commands). Applied once, to nav rows and Composition sub-tabs alike,
+     * so the two surfaces can never disagree about a section's name.
+     */
+    function relabelSectionRow(row) {
+      if (!row || !row.id) return row;
+      if (row.id === "icons") return Object.assign({}, row, { label: "Icons" });
+      if (row.id === "providers") return Object.assign({}, row, { label: "Providers" });
+      if (row.id === "agent-presets") return Object.assign({}, row, { label: "Modes" });
+      if (row.id === "actions" || row.id === "session-modes")
+        return Object.assign({}, row, { label: "Commands" });
+      if (row.id === "keybinds") return Object.assign({}, row, { label: "Keybinds" });
+      return row;
+    }
+
+    /**
+     * Returns the stacked-layers mark the consolidated Composition row wears:
+     * the parts an assistant is composed of, seen edge-on.
+     */
+    var LayersNavIcon = createGlyphComponent(16, "", false, true, false, function () {
+      return [
+        h("path", { d: "m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" }),
+        h("path", { d: "M2 12.18a1 1 0 0 0 .6.9l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .58-.91" }),
+        h("path", { d: "M2 17.18a1 1 0 0 0 .6.9l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .58-.91" }),
+      ];
+    });
+
     /** navIcon implementation. */
     function navIcon(id) {
+      if (id === "composition") return h(LayersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
+      if (id === "skills-hooks") return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "general") return h(GeneralNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "integrations" || id === "providers")
         return h(ProvidersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
@@ -2854,6 +2893,13 @@ window.__ModuleLoader__.load({
       );
     }
 
+    // The three strips the Skills & Hooks section splits its own content over.
+    var SKILLS_HOOKS_TABS = [
+      { id: "skills", label: "Skills" },
+      { id: "hooks", label: "Hooks" },
+      { id: "scripts", label: "Scripts" },
+    ];
+
     /**
      * The strip a settings section renders when it hosts more than one page.
      *
@@ -2992,14 +3038,14 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Renders a section of customization settings with a grid layout for color fields.
-     * Each field is displayed in a flex container with specific styling for padding,
-     * border, and background color. The background color is derived from the `customPalette`
-     * object or defaults to a specific hex code if not found.
+     * Renders the Skills & Hooks section: the browser over the agent skills,
+     * workflow hooks and launcher scripts a checkout carries, split across
+     * three strips of its own. Making those entries genuinely runnable rather
+     * than a read-only listing is #119's scope, not this section's.
      *
-     * @returns {JSX.Element} A JSX element representing the customization settings section.
+     * @returns {JSX.Element} A JSX element representing the skills and hooks section.
      */
-    function CustomizationSettingsSection() {
+    function SkillsHooksSettingsSection() {
       var subtabState = React.useState("skills");
       var subtab = subtabState[0],
         setSubtab = subtabState[1];
@@ -3213,7 +3259,7 @@ window.__ModuleLoader__.load({
                   color: "var(--dsw-alias-label-primary)",
                 },
               },
-              "Customization Engine",
+              "Skills, Hooks & Scripts",
             ),
             h(
               "p",
@@ -3222,11 +3268,7 @@ window.__ModuleLoader__.load({
             ),
           ),
           h(SettingsSubtabStrip, {
-            tabs: [
-              { id: "skills", label: "skills" },
-              { id: "hooks", label: "hooks" },
-              { id: "scripts", label: "scripts" },
-            ],
+            tabs: SKILLS_HOOKS_TABS,
             active: subtab,
             onSelect: setSubtab,
           }),
@@ -4239,22 +4281,31 @@ window.__ModuleLoader__.load({
      * Returns a promise that resolves when the document is successfully opened or rejects on failure.
      */
     function SettingsPanel(props) {
-      var rows = props.rows,
-        renderSlot = props.renderSlot,
+      var renderSlot = props.renderSlot,
         activeId = props.activeId;
       var onSelect = props.onSelect,
         onClose = props.onClose,
         openSection = props.openSection;
+      // Plugins/Modes/Tools/Agents/Loops/Skills & Hooks/Profiles are one row
+      // with sub-tabs, not seven siblings; each keeps its own registration and
+      // is still rendered through the settings.section seat.
+      var hub = customizationHub.fold(props.rows, relabelSectionRow);
+      var rows = hub.rows;
+      var resolved = customizationHub.resolve(activeId, hub.tabs);
       var active;
       var found = false;
       for (var i = 0; i < rows.length; i++) {
-        if (rows[i].id === activeId) {
+        if (rows[i].id === resolved.active) {
           active = rows[i].id;
           found = true;
           break;
         }
       }
       if (!found) active = rows.length > 0 ? rows[0].id : undefined;
+      var subTab;
+      if (active === customizationHub.id) {
+        subTab = resolved.subTab !== undefined ? resolved.subTab : hub.tabs[0].id;
+      }
       var titleId = React.useId();
 
       React.useEffect(
@@ -4283,15 +4334,10 @@ window.__ModuleLoader__.load({
 
       var PERSONALIZATION_IDS = new Set(["general", "appearance", "keybinds", "keybindings"]);
       var CUSTOMIZATION_IDS = new Set([
-        "agents",
+        customizationHub.id,
         "actions",
         "session-modes",
         "commands",
-        "agent-presets",
-        "modes",
-        "tools",
-        "loops",
-        "plugins",
       ]);
       var INTEGRATION_IDS = new Set([
         "providers",
@@ -4648,6 +4694,30 @@ window.__ModuleLoader__.load({
         );
       }
 
+      /**
+       * Renders one registered section into the content area. Every section
+       * reaches the screen through this one dispatch, whether the nav row or a
+       * Composition sub-tab selected it, so a folded section is rendered by the
+       * same component with the same owner props it always had.
+       */
+      function renderSection(id) {
+        if (id === undefined || typeof renderSlot !== "function") return null;
+        try {
+          return renderSlot(
+            "settings.section",
+            { close: onClose, openSection: openSection },
+            { only: id },
+          );
+        } catch (e) {
+          console.warn("Failed rendering settings section " + id, e);
+          return h(
+            "div",
+            { style: { padding: "20px", color: "var(--dsw-alias-state-error-primary)" } },
+            "Section " + id + " unavailable",
+          );
+        }
+      }
+
       var currentNavWidth = isNavCollapsed ? 56 : navWidth;
 
       return h(
@@ -4744,24 +4814,14 @@ window.__ModuleLoader__.load({
           h(
             "div",
             { className: "dsh-tw-options" },
-            active !== undefined && typeof renderSlot === "function"
-              ? (function () {
-                  try {
-                    return renderSlot(
-                      "settings.section",
-                      { close: onClose, openSection: openSection },
-                      { only: active },
-                    );
-                  } catch (e) {
-                    console.warn("Failed rendering settings section " + active, e);
-                    return h(
-                      "div",
-                      { style: { padding: "20px", color: "var(--dsw-alias-state-error-primary)" } },
-                      "Section " + active + " unavailable",
-                    );
-                  }
-                })()
+            subTab !== undefined
+              ? h(
+                  "div",
+                  { style: { padding: "16px 0 8px" } },
+                  h(SegmentedTabs, { tabs: hub.tabs, active: subTab, onSelect: onSelect }),
+                )
               : null,
+            renderSection(subTab !== undefined ? subTab : active),
           ),
         ),
         // Bottom-Right Corner Resize Handle
@@ -4901,6 +4961,11 @@ window.__ModuleLoader__.load({
       } else if (props && Array.isArray(props.sections)) {
         rawRows = props.sections;
       }
+      // Placeholder nav rows for the window between mount and the first
+      // settings.section ledger snapshot. NOT registrations: nothing here
+      // contributes a section, and an id that no package actually registers
+      // opens onto an empty content area, so the list is only ever correct
+      // while it is momentary (tracked for retirement by #248).
       if (!rawRows || rawRows.length === 0) {
         rawRows = [
           { id: "general", label: "General", order: 0 },
@@ -5399,20 +5464,20 @@ window.__ModuleLoader__.load({
           return ctx.slots.register(
             {
               name: "settings.section",
-              id: "customization",
+              id: "skills-hooks",
               priority: -10,
               order: 25,
               label: function () {
-                return "Customization";
+                return "Skills & Hooks";
               },
               inject: function () {
                 return {};
               },
             },
-            CustomizationSettingsSection,
+            SkillsHooksSettingsSection,
           );
         },
-        "tweaks: customization section",
+        "tweaks: skills and hooks section",
       );
 
       ctx.slots.inject(
@@ -5461,13 +5526,8 @@ window.__ModuleLoader__.load({
       function AppearanceGlyph() {
         return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
-      /**
-       * Provides a configuration section for customizing various aspects of the application.
-       *
-       * Returns an array of configuration sections, each with an 'id', 'label', and 'order'.
-       * Falls back to a predefined set of sections if no custom sections are provided.
-       */
-      function CustomizationGlyph() {
+      /** The Skills & Hooks section's mark: the wrench the tooling nav uses. */
+      function SkillsHooksGlyph() {
         return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       }
       /**
@@ -5543,8 +5603,8 @@ window.__ModuleLoader__.load({
       );
       ctx.slots.inject(
         "settings.section.icon",
-        harnessGlyph("customization", CustomizationGlyph),
-        "tweaks: customization nav glyph",
+        harnessGlyph("skills-hooks", SkillsHooksGlyph),
+        "tweaks: skills and hooks nav glyph",
       );
       ctx.slots.inject(
         "settings.section.icon",

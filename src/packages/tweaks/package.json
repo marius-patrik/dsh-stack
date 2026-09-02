@@ -18,12 +18,14 @@
   "files": [
     "lib",
     "client.js",
+    "client-settings-customization-hub.js",
+    "client-settings-segmented-tabs.js",
     "stack.json"
   ],
   "scripts": {
-    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client.js > lib/client.js",
+    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client-settings-segmented-tabs.js client-settings-customization-hub.js client.js > lib/client.js",
     "typecheck": "tsc --noEmit",
-    "test": "node check-plugin.mjs"
+    "test": "node check-plugin.mjs && node settings-customization-hub.test.mjs"
   },
   "dsh": {
     "bundle": {

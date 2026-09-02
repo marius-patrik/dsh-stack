@@ -106,12 +106,21 @@ const glyphFactory = readFileSync(
   join(import.meta.dirname, "..", "..", "scripts", "client-runtime", "glyph-factory.js"),
   "utf8",
 );
+const segmentedTabs = readFileSync(
+  join(import.meta.dirname, "client-settings-segmented-tabs.js"),
+  "utf8",
+);
+const customizationHub = readFileSync(
+  join(import.meta.dirname, "client-settings-customization-hub.js"),
+  "utf8",
+);
 const rootClient = readFileSync(join(import.meta.dirname, "client.js"), "utf8");
 const builtClient = readFileSync(clientPath, "utf8");
 assert.equal(
   builtClient,
-  cryptoPolyfill + glyphFactory + rootClient,
-  "lib/client.js must be the shared crypto polyfill + glyph factory + client.js",
+  cryptoPolyfill + glyphFactory + segmentedTabs + customizationHub + rootClient,
+  "lib/client.js must be the shared crypto polyfill + glyph factory + the settings" +
+    " segmented-tabs and customization-hub bundles + client.js",
 );
 
 globalThis.window = {
@@ -338,6 +347,23 @@ assert.equal(sectionOptions.id, "general");
 assert.equal(sectionOptions.order, 0);
 assert.equal(typeof sectionOptions.label, "function");
 assert.equal(sectionOptions.children["settings.general.item"].kind, "list");
+
+// The Skills/Hooks/Scripts browser is named for what it holds. A section
+// called "Customization" nested in the Customization group was the collision
+// #119/#235 reported and #239 resolved, so the old id must not come back.
+const skillsRec = allRecords.find(
+  (r) => r.entry.name === "settings.section" && r.entry.id === "skills-hooks",
+);
+assert.ok(skillsRec, "skills-hooks settings section must be registered");
+assert.equal(skillsRec.entry.label(), "Skills & Hooks");
+assert.ok(
+  !allRecords.some((r) => r.entry.name === "settings.section" && r.entry.id === "customization"),
+  "the settings section named after its own group must not be re-registered",
+);
+assert.ok(
+  allRecords.some((r) => r.entry.name === "settings.section.icon" && r.entry.id === "skills-hooks"),
+  "the skills-hooks section keeps a nav glyph under its own id",
+);
 
 const actionOptions = records.get("settings.action").entry;
 assert.equal(actionOptions.id, "open-document");
