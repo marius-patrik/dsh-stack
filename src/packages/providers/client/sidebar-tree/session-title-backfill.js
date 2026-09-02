@@ -85,8 +85,10 @@ function __dshCreateSessionTitleBackfill(React) {
             })
             .catch(function (error) {
               // Rows keep their host-supplied label; the console carries why
-              // they did not gain a resolved title.
+              // they did not gain a resolved title. Continue with the rest of
+              // the queue so one failing batch does not block the others.
               console.warn("dsh sidebar: session title backfill failed", error);
+              requestNextBatch();
             });
         }
 

@@ -91,10 +91,7 @@ function __dshCreateTreeRow(runtime) {
    * @param dispatchRename - the rename dispatcher.
    */
   function promptAndRenameSession(session, promptLabel, backfilledTitles, dispatchRename) {
-    var newTitle = prompt(
-      promptLabel,
-      __dshSessionDurableTitle(session, backfilledTitles),
-    );
+    var newTitle = prompt(promptLabel, __dshSessionDurableTitle(session, backfilledTitles));
     if (newTitle) dispatchRename(session.id, newTitle);
   }
 
@@ -200,11 +197,7 @@ function __dshCreateTreeRow(runtime) {
               }),
             )
           : null,
-        h(
-          "span",
-          { className: "dsh-tree-title", title: label },
-          label,
-        ),
+        h("span", { className: "dsh-tree-title", title: label }, label),
         hasSubagents
           ? h(
               "span",
@@ -274,7 +267,12 @@ function __dshCreateTreeRow(runtime) {
                   if (actionId === "pin" || actionId === "unpin") {
                     ctx.grouping.togglePinSession(chat.id);
                   } else if (actionId === "rename") {
-                    promptAndRenameSession(chat, "Rename chat:", ctx.backfilledTitles, ctx.dispatch.rename);
+                    promptAndRenameSession(
+                      chat,
+                      "Rename chat:",
+                      ctx.backfilledTitles,
+                      ctx.dispatch.rename,
+                    );
                   } else if (actionId === "fork") {
                     ctx.dispatch.fork(chat.id);
                   } else if (actionId === "archive") {
@@ -376,7 +374,12 @@ function __dshCreateTreeRow(runtime) {
               ],
               onSelect: function (actionId) {
                 if (actionId === "rename") {
-                  promptAndRenameSession(sub, "Rename subagent:", ctx.backfilledTitles, ctx.dispatch.rename);
+                  promptAndRenameSession(
+                    sub,
+                    "Rename subagent:",
+                    ctx.backfilledTitles,
+                    ctx.dispatch.rename,
+                  );
                 } else if (actionId === "archive") {
                   ctx.onArchiveChat(sub.id);
                 }
@@ -449,11 +452,7 @@ function __dshCreateTreeRow(runtime) {
         },
         h(glyphs.Chat, { size: 14 }),
       ),
-      h(
-        "span",
-        { className: "dsh-tree-title", title: label },
-        label,
-      ),
+      h("span", { className: "dsh-tree-title", title: label }, label),
       h(
         "span",
         {
@@ -506,7 +505,12 @@ function __dshCreateTreeRow(runtime) {
                 if (actionId === "restore") {
                   restore();
                 } else if (actionId === "rename") {
-                  promptAndRenameSession(chat, "Rename chat:", ctx.backfilledTitles, ctx.dispatch.rename);
+                  promptAndRenameSession(
+                    chat,
+                    "Rename chat:",
+                    ctx.backfilledTitles,
+                    ctx.dispatch.rename,
+                  );
                 } else if (actionId === "delete") {
                   if (!confirm("Permanently delete this archived session?")) return;
                   ctx.grouping
