@@ -3137,14 +3137,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     }
 
     // 1c. SETTINGS: APPS SECTION
-    /**
-     * Triggers the edit modal for the specified account when clicked.
-     *
-     * @param {object} row - The row object containing the reference to the modal.
-     * @param {string} accountName - The name of the account to be edited.
-     *
-     * On click, opens the edit modal with the given reference and account name.
-     */
     /** Sub-tabs mounted inside AppsSection: local runners, plus the merged Terminals and Containers settings. */
     var APPS_SUBTABS = [
       { id: "runtimes", label: "Runtimes" },
@@ -3152,6 +3144,11 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       { id: "containers", label: "Containers" },
     ];
 
+    /**
+     * Renders the Apps settings section with sub-tabs for runtimes, terminals, and containers.
+     *
+     * @returns {React.ReactElement} The Apps settings section.
+     */
     function AppsSection() {
       var state = React.useState({
         integrationsMeta: null,

@@ -1149,13 +1149,9 @@ window.__ModuleLoader__.load({
     );
 
     /**
-     * Returns a navigation icon based on the provided ID.
+     * Renders a terminal glyph for session-tree and workspace surfaces.
      *
-     * Guarantees: Returns an HTML element representing a navigation icon.
-     *             Returns `null` if the ID does not match any known icon.
-     *
-     * @param {string} id - The ID corresponding to the desired navigation icon.
-     * @returns {React.ReactElement | null} The navigation icon or null if ID is unrecognized.
+     * @returns {React.ReactElement} An SVG element representing a terminal.
      */
     var TerminalsGlyph = createDecoratedGlyphComponent(
       16,
@@ -1171,16 +1167,9 @@ window.__ModuleLoader__.load({
     );
 
     /**
-     * Returns a navigation icon based on the provided `id`.
+     * Renders a container glyph for session-tree and workspace surfaces.
      *
-     * Guarantees:
-     * - Returns `h(ContainersNavIcon)` if `id` is "containers".
-     * - Returns `h(DataGlyph)` for "models" or "provider-usage".
-     * - Returns `h(CommandsIcon)` for "session-modes", "actions", or "commands".
-     * - Returns `h(SettingsIcon)` for any other `id`.
-     *
-     * Fails:
-     * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+     * @returns {React.ReactElement} An SVG element representing containers.
      */
     var ContainersGlyph = createDecoratedGlyphComponent(
       16,
@@ -1326,16 +1315,13 @@ window.__ModuleLoader__.load({
     })(React ? React.Component : undefined);
 
     /**
-     * Returns a navigation icon based on the provided `id`.
+     * Renders a dropdown menu of selectable items anchored to the parent.
      *
-     * Guarantees:
-     * - Returns `h(ContainersNavIcon)` for "containers".
-     * - Returns `h(DataGlyph)` for "models" or "provider-usage".
-     * - Returns `h(CommandsIcon)` for "session-modes", "actions", or "commands".
-     * - Returns `h(SettingsIcon)` for any other `id`.
+     * Closes when the user clicks outside the menu. Calls `onSelect` with the
+     * chosen item when an option is activated.
      *
-     * Fails:
-     * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+     * @param {Object} props - Component props.
+     * @returns {React.ReactElement | null} The dropdown menu, or null when closed.
      */
     function SelectDropdownMenu(props) {
       var open = props.open,
@@ -1348,14 +1334,9 @@ window.__ModuleLoader__.load({
         function () {
           if (!open) return;
           /**
-           * Guarantees:
-           * - Returns a React component based on the `id` parameter:
-           *   - `h(ContainersNavIcon)` for "containers".
-           *   - `h(DataGlyph)` for "models" or "provider-usage".
-           *   - `h(CommandsIcon)` for "session-modes", "actions", or "commands".
-           *   - `h(SettingsIcon)` for any other `id`.
-           * Fails:
-           * - Returns `h(SettingsIcon)` for any `id` not explicitly handled.
+           * Closes the dropdown when a pointerdown event occurs outside the menu.
+           *
+           * @param {Event} e - The pointerdown event.
            */
           var handlePointerDown = function (e) {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
