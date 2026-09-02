@@ -349,7 +349,20 @@ const generalRow = rows.find((r) => r.id === "general");
 assert.ok(generalRow, "general row must be in sections snapshot");
 assert.equal(generalRow.order, 0);
 assert.equal(generalRow.label, "通用设置");
-assert.deepEqual(shellInjected.hooks.onboardingSteps.getSnapshot(), []);
+
+// tweaks shadows client-ui-settings-models' "welcome-notice"
+// settings.onboarding entry (same id, lower priority) so the "Internal
+// Testing Notice" toggle actually gates it -- see issue #233.
+const onboardingRec = allRecords.find(
+  (r) => r.entry.name === "settings.onboarding" && r.entry.id === "welcome-notice",
+);
+assert.ok(onboardingRec, "welcome-notice onboarding override must be registered");
+assert.equal(onboardingRec.entry.priority, -10);
+assert.equal(onboardingRec.entry.order, -100);
+assert.equal(typeof onboardingRec.component, "function");
+assert.deepEqual(shellInjected.hooks.onboardingSteps.getSnapshot(), [
+  { id: "welcome-notice", order: -100 },
+]);
 
 rmSync(root, { recursive: true, force: true });
 console.log("plugin check passed");

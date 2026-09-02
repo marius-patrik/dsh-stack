@@ -1,6 +1,6 @@
 # tweaks takes over the settings surface. ui-settings-general's host
 # registration of ui-onboarding is replaced by tweaks's own registration;
-# the welcome-notice step from ui-settings-models continues to write through
-# the same settings API.
+# tweaks also shadows the "welcome-notice" settings.onboarding step from
+# ui-settings-models so the Stack-owned toggle and localStorage ack control it.
 - id: ui-settings-general
   disabled: true
