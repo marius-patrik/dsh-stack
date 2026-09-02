@@ -305,15 +305,17 @@ const clientCtx = {
   },
 };
 clientExports.apply(clientCtx);
-const themesSection = clientRegistrants.get("settings.section")();
-assert.equal(themesSection.name, "settings.section");
-assert.equal(themesSection.id, "themes");
-assert.equal(themesSection.order, 30);
-assert.equal(themesSection.label(), "Themes");
-assert.ok(themesSection.inject().applyTheme, "themes section applyTheme callback missing");
-const themesGlyph = clientRegistrants.get("settings.section.icon")();
-assert.equal(themesGlyph.name, "settings.section.icon");
-assert.equal(themesGlyph.id, "themes");
+// The theme directory is now one page of the Appearance section, not a
+// standalone settings section; it registers into the seat the Appearance
+// section declares.
+const themesTab = clientRegistrants.get("settings.appearance.tab")();
+assert.equal(themesTab.name, "settings.appearance.tab");
+assert.equal(themesTab.id, "themes");
+assert.equal(themesTab.order, 30);
+assert.equal(themesTab.label(), "Themes");
+const themesTabInject = themesTab.inject();
+assert.ok(themesTabInject.applyTheme, "themes appearance tab applyTheme callback missing");
+assert.ok(themesTabInject.hooks.themeSnapshot, "themes appearance tab themeSnapshot hook missing");
 console.log("client bundle shape ok");
 
 rmSync(root, { recursive: true, force: true });

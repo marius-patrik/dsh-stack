@@ -1082,9 +1082,7 @@ window.__ModuleLoader__.load({
       if (id === "session-modes" || id === "actions" || id === "commands")
         return h(CommandsIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "agents") return h(RobotHeadNavIcon, { className: "dsh-tw-navIcon", size: 16 });
-      if (id === "themes" || id === "appearance")
-        return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
-      if (id === "icons") return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
+      if (id === "appearance") return h(PaletteIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "agent-presets" || id === "modes")
         return h(AgentPresetIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "tools") return h(ToolsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
