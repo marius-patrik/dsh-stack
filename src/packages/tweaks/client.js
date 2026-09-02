@@ -591,27 +591,23 @@ div[class*="conversationScroll"],
 div[class*="scrollPort"] {
   padding-top: 38px !important;
 }
-/* Composer Toolbar Layout: Split vs Unified */
-body.dsh-composer-split div[class*="promptForm"],
-body.dsh-composer-split form[class*="prompt"] {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
-}
-body.dsh-composer-split div[class*="promptActions"],
-body.dsh-composer-split div[class*="promptToolbar"] {
+/* Composer Toolbar Layout: Split vs Unified.
+   Anchors on the composer's own data attributes and real DOM order
+   (harness packages/client/ui-conversation/src/client/skeleton/InputBar.tsx:
+   [data-composer-card] wraps [data-input-scroll] (the draft scrollport)
+   immediately followed by the toolbar row, itself split into a leading
+   tools group and a trailing model/send group), not hashed CSS-module
+   class-name guesses. */
+body.dsh-composer-split [data-composer-card] [data-input-scroll] + div {
   order: -1 !important;
-  border-bottom: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
-  padding-bottom: 6px !important;
-  margin-bottom: 4px !important;
   width: 100% !important;
-  display: flex !important;
-  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  border-bottom: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+  margin-bottom: 6px !important;
+  padding-bottom: 8px !important;
 }
-body.dsh-composer-unified div[class*="promptActions"],
-body.dsh-composer-unified div[class*="promptToolbar"] {
-  display: inline-flex !important;
-  align-items: center !important;
+body.dsh-composer-split [data-composer-card] [data-input-scroll] + div > div:first-child {
+  flex-basis: 100% !important;
 }
 /* Full-Width Conversation: ConversationRoot's own width axis reads
    --dsh-chat-user-width first, ahead of its adaptive clamp, and its width
@@ -6441,6 +6437,27 @@ window.__ModuleLoader__.load({
         });
       }
 
+      (function initComposerLayout() {
+        if (typeof window === "undefined" || !window.localStorage) return;
+        try {
+          var layout = window.localStorage.getItem("dsh_composer_toolbar_layout") || "unified";
+          /**
+           * Applies the persisted composer toolbar layout ("split" or
+           * "unified") to the document body as a class, so the shell CSS
+           * renders the correct layout from first paint instead of only
+           * after the Settings panel's own toggle handler runs.
+           * @returns {void} No return value; mutates document.body's class list.
+           */
+          var applyClass = function () {
+            document.body.classList.remove("dsh-composer-split", "dsh-composer-unified");
+            document.body.classList.add(
+              layout === "split" ? "dsh-composer-split" : "dsh-composer-unified",
+            );
+          };
+          if (document.body) applyClass();
+          else document.addEventListener("DOMContentLoaded", applyClass);
+        } catch (e) {}
+      })();
       // Universal Lucide Animated Icons DOM Decorator
       /**
        * Sets the style for a badge based on the sub object's state.
