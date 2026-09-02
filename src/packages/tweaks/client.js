@@ -1655,6 +1655,34 @@ window.__ModuleLoader__.load({
       );
     }
 
+    /** Registered agent preset ids the Default Agent Preset dropdown may offer. */
+    var AGENT_PRESET_OPTIONS = [
+      { value: "standard", label: "Standard (Full Harness)" },
+      { value: "ptc", label: "PTC (Programmer Tool Call)" },
+      { value: "minimal", label: "Minimal (Bash + Editor)" },
+      { value: "cordis", label: "Creator (Preset Authoring)" },
+    ];
+
+    /** Read the stored default preset, migrating any no-longer-registered id to standard. */
+    function readDefaultPreset() {
+      var fallback = "standard";
+      if (typeof window === "undefined" || !window.localStorage) return fallback;
+      try {
+        var stored = window.localStorage.getItem("dsh_default_preset");
+        if (!stored) return fallback;
+        var valid = AGENT_PRESET_OPTIONS.some(function (opt) {
+          return opt.value === stored;
+        });
+        if (!valid) {
+          window.localStorage.setItem("dsh_default_preset", fallback);
+          return fallback;
+        }
+        return stored;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
     /** GeneralSection implementation. */
     function GeneralSection(props) {
       var noticeState = React.useState(isWelcomeNoticeEnabled);
@@ -1678,13 +1706,7 @@ window.__ModuleLoader__.load({
       var mainSidebarLocation = mainSidebarLocationState[0],
         setMainSidebarLocation = mainSidebarLocationState[1];
 
-      var defaultModeState = React.useState(function () {
-        try {
-          return localStorage.getItem("dsh_default_preset") || "code";
-        } catch (e) {
-          return "code";
-        }
-      });
+      var defaultModeState = React.useState(readDefaultPreset);
       var defaultMode = defaultModeState[0],
         setDefaultMode = defaultModeState[1];
 
@@ -1915,12 +1937,7 @@ window.__ModuleLoader__.load({
               setDefaultMode(e.target.value);
               persistSettingToLocalStorage("dsh_default_preset", e.target.value);
             },
-            [
-              { value: "code", label: "Code (Pair Programmer)" },
-              { value: "architect", label: "Architect (Design & Plan)" },
-              { value: "ask", label: "Ask (Quick Q&A)" },
-              { value: "standard", label: "Standard (Full Harness)" },
-            ],
+            AGENT_PRESET_OPTIONS,
           ),
         ),
         // 2. Permission Preset
