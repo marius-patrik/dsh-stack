@@ -27,13 +27,14 @@ export function mountQuotaWeb(ctx: Context, registry: QuotaRegistry): unknown {
     httpCtx.webServer.register({
       kind: "prefix",
       path: QUOTAS_PREFIX,
-      handler: makeQuotaHandler(registry),
+      handler: makeQuotaHandler(httpCtx, registry),
     }),
   );
 }
 
 /** Build the request handler for everything under `/quotas`, dispatching to each domain in turn. */
 function makeQuotaHandler(
+  plugin: Context,
   registry: QuotaRegistry,
 ): (req: IncomingMessage, res: ServerResponse) => void {
   return async (req, res) => {
@@ -44,6 +45,7 @@ function makeQuotaHandler(
       url,
       pathname: url.pathname,
       method: req.method ?? "GET",
+      plugin,
     };
 
     try {

@@ -46,14 +46,15 @@ function __dshCreateTreeRow(runtime) {
    * opens its context menu. Every chat-shaped row (live, subagent, archived)
    * wires these the same way.
    * @param ctx - the row's ctx (see `renderChatRow`).
-   * @param chatLike - the item this row opens, needing `id` and `title`.
+   * @param chatLike - the item this row opens, needing `id`.
    * @param openMenu - the row's own `openMenu(pos)` closure.
+   * @param label - the label the row renders, carried to the opened chat.
    * @returns `{ onClick, onContextMenu }`.
    */
-  function chatRowOpenHandlers(ctx, chatLike, openMenu) {
+  function chatRowOpenHandlers(ctx, chatLike, openMenu, label) {
     return {
       onClick: function () {
-        ctx.onOpenChat(chatLike.id, chatLike.title);
+        ctx.onOpenChat(chatLike.id, label);
       },
       onContextMenu: rowContextMenuHandler(openMenu),
     };
@@ -111,7 +112,7 @@ function __dshCreateTreeRow(runtime) {
    * @param padLeft - the row's indent in pixels.
    * @param ctx - `{ currentSessionId, grouping, dispatch, ellipsisOpen,
    * setEllipsisOpen, expandedSubagents, toggleSubagentExpand, onOpenChat,
-   * onArchiveChat }`.
+   * onArchiveChat, backfilledTitles }`.
    * @returns the row element.
    */
   function renderChatRow(chat, padLeft, ctx) {
@@ -122,12 +123,13 @@ function __dshCreateTreeRow(runtime) {
     var isSubExp = Boolean(ctx.expandedSubagents[chat.id]);
     var isPinned = ctx.grouping.isPinnedSession(chat, chat.id);
     var isRunning = ctx.grouping.isRunningSession(chat);
+    var label = __dshSessionRowTitle(chat, ctx.backfilledTitles, "Untitled Chat");
 
     /** Opens the context menu at a click position or at the ellipsis button. */
     function openMenu(pos) {
       ctx.setEllipsisOpen({ id: "chat::" + chat.id, pos: pos });
     }
-    var chatOpenHandlers = chatRowOpenHandlers(ctx, chat, openMenu);
+    var chatOpenHandlers = chatRowOpenHandlers(ctx, chat, openMenu, label);
 
     return h(
       "div",
@@ -185,8 +187,8 @@ function __dshCreateTreeRow(runtime) {
           : null,
         h(
           "span",
-          { className: "dsh-tree-title", title: chat.title || "Chat Session" },
-          chat.title || "Untitled Chat",
+          { className: "dsh-tree-title", title: label },
+          label,
         ),
         hasSubagents
           ? h(
@@ -257,7 +259,10 @@ function __dshCreateTreeRow(runtime) {
                   if (actionId === "pin" || actionId === "unpin") {
                     ctx.grouping.togglePinSession(chat.id);
                   } else if (actionId === "rename") {
-                    var newTitle = prompt("Rename chat:", chat.title || "");
+                    var newTitle = prompt(
+                      "Rename chat:",
+                      __dshSessionDurableTitle(chat, ctx.backfilledTitles),
+                    );
                     if (newTitle) ctx.dispatch.rename(chat.id, newTitle);
                   } else if (actionId === "fork") {
                     ctx.dispatch.fork(chat.id);
@@ -292,12 +297,13 @@ function __dshCreateTreeRow(runtime) {
   function renderSubagentRow(sub, parentPadLeft, ctx) {
     var isSubActive = sub.id === ctx.currentSessionId;
     var isSubMenuOpen = Boolean(ctx.ellipsisOpen && ctx.ellipsisOpen.id === "chat::" + sub.id);
+    var label = __dshSessionRowTitle(sub, ctx.backfilledTitles, "Subagent");
 
     /** Opens the subagent's context menu at a click position or at the ellipsis button. */
     function openMenu(pos) {
       ctx.setEllipsisOpen({ id: "chat::" + sub.id, pos: pos });
     }
-    var chatOpenHandlers = chatRowOpenHandlers(ctx, sub, openMenu);
+    var chatOpenHandlers = chatRowOpenHandlers(ctx, sub, openMenu, label);
 
     return h(
       "div",
@@ -323,9 +329,9 @@ function __dshCreateTreeRow(runtime) {
         {
           className: "dsh-tree-title",
           style: { fontSize: "11.5px" },
-          title: sub.title || "Subagent Session",
+          title: label,
         },
-        sub.title || "Subagent",
+        label,
       ),
       h(
         "span",
@@ -359,7 +365,10 @@ function __dshCreateTreeRow(runtime) {
               ],
               onSelect: function (actionId) {
                 if (actionId === "rename") {
-                  var newTitle = prompt("Rename subagent:", sub.title || "");
+                  var newTitle = prompt(
+                    "Rename subagent:",
+                    __dshSessionDurableTitle(sub, ctx.backfilledTitles),
+                  );
                   if (newTitle) ctx.dispatch.rename(sub.id, newTitle);
                 } else if (actionId === "archive") {
                   ctx.onArchiveChat(sub.id);
@@ -378,7 +387,8 @@ function __dshCreateTreeRow(runtime) {
    * @param chat - the archived session record.
    * @param padLeft - the row's indent in pixels.
    * @param ctx - `{ currentSessionId, ellipsisOpen, setEllipsisOpen,
-   * dispatch, grouping, quotasApiBase, loadAll, onOpenChat, onActionFailure }`.
+   * dispatch, grouping, quotasApiBase, loadAll, onOpenChat, onActionFailure,
+   * backfilledTitles }`.
    * @returns the row element.
    */
   function renderArchivedChatRow(chat, padLeft, ctx) {
@@ -386,12 +396,13 @@ function __dshCreateTreeRow(runtime) {
     var isMenuOpen = Boolean(
       ctx.ellipsisOpen && ctx.ellipsisOpen.id === "archived-chat::" + chat.id,
     );
+    var label = __dshSessionRowTitle(chat, ctx.backfilledTitles, "Archived Chat");
 
     /** Opens the archived row's context menu at a click position or at the ellipsis button. */
     function openMenu(pos) {
       ctx.setEllipsisOpen({ id: "archived-chat::" + chat.id, pos: pos });
     }
-    var chatOpenHandlers = chatRowOpenHandlers(ctx, chat, openMenu);
+    var chatOpenHandlers = chatRowOpenHandlers(ctx, chat, openMenu, label);
 
     /** Restores the chat, surfacing a failure instead of leaving the click looking inert. */
     function restore() {
@@ -433,8 +444,8 @@ function __dshCreateTreeRow(runtime) {
       ),
       h(
         "span",
-        { className: "dsh-tree-title", title: chat.title || "Archived Chat" },
-        chat.title || "Untitled Chat",
+        { className: "dsh-tree-title", title: label },
+        label,
       ),
       h(
         "span",
@@ -488,7 +499,10 @@ function __dshCreateTreeRow(runtime) {
                 if (actionId === "restore") {
                   restore();
                 } else if (actionId === "rename") {
-                  var newTitle = prompt("Rename chat:", chat.title || "");
+                  var newTitle = prompt(
+                    "Rename chat:",
+                    __dshSessionDurableTitle(chat, ctx.backfilledTitles),
+                  );
                   if (newTitle) ctx.dispatch.rename(chat.id, newTitle);
                 } else if (actionId === "delete") {
                   if (!confirm("Permanently delete this archived session?")) return;

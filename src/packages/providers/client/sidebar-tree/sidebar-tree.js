@@ -66,6 +66,7 @@ function __dshCreateSidebarTree(runtime) {
   var renderNewItemMenu = __dshCreateNewItemMenu(runtime);
   var renderDirEntries = __dshCreateDirectoryEntries(runtime, renderChatRow, renderNewItemMenu);
   var renderCollapsedRail = __dshCreateCollapsedRail(runtime);
+  var useBackfilledSessionTitles = __dshCreateSessionTitleBackfill(React);
 
   /**
    * Read one feed hook defensively: a slot's injected hook may be absent
@@ -126,6 +127,7 @@ function __dshCreateSidebarTree(runtime) {
 
     var sessionList = readFeed(props && props.useSessions, { ids: [], byId: {} });
     var workspaceList = readFeed(props && props.useWorkspaces, { items: [] });
+    var backfilledTitles = useBackfilledSessionTitles(sessionList, quotasApi);
 
     var openSession = props && props.open;
     var startSession = props && props.startSession;
@@ -486,11 +488,12 @@ function __dshCreateSidebarTree(runtime) {
       containers: containers,
     });
 
-    /** Matches a chat's title/id against the tree's search query. */
+    /** Matches a chat's label/id against the tree's search query. */
     function matchesSearch(chat) {
       if (!searchQuery || !searchQuery.trim()) return true;
       var query = searchQuery.trim().toLowerCase();
-      return ((chat.title || "") + " " + (chat.id || "")).toLowerCase().indexOf(query) !== -1;
+      var label = __dshSessionRowTitle(chat, backfilledTitles, "");
+      return (label + " " + (chat.id || "")).toLowerCase().indexOf(query) !== -1;
     }
 
     var filteredPinnedSessions = grouping.pinnedSessions.filter(matchesSearch);
@@ -509,6 +512,7 @@ function __dshCreateSidebarTree(runtime) {
       quotasApiBase: quotasApi,
       loadAll: loadAll,
       onActionFailure: reportFailure,
+      backfilledTitles: backfilledTitles,
     };
 
     var newItemMenuCtx = {

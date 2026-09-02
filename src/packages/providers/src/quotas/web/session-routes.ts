@@ -1,6 +1,7 @@
 /**
  * `/quotas/api/sessions/*` route handlers: archiving empty/ping-pong-only
- * agent sessions out of the workspace index.
+ * agent sessions out of the workspace index, and resolving the durable titles
+ * the Host omits from cold session-list rows.
  * @module providers/quotas/web/session-routes
  */
 
@@ -8,7 +9,9 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { sendJsonResponse } from "@dsh-stack/plugin-kit";
+import { resolveColdSessionTitles } from "./cold-session-titles.js";
 import { QUOTAS_PREFIX } from "./quotas-prefix.js";
+import { readJsonBody } from "./read-request-body.js";
 import { isRoute, type RouteContext } from "./route-context.js";
 
 const PREFIX = `${QUOTAS_PREFIX}/api/sessions`;
@@ -42,6 +45,22 @@ function isPingPongOnlySession(sessionsRoot: string, id: string): boolean {
 /** Handle one `/quotas/api/sessions/*` request; returns `true` if it matched and was handled. */
 export async function handleSessionRoute(ctx: RouteContext): Promise<boolean> {
   const { res } = ctx;
+
+  if (isRoute(ctx, `${PREFIX}/titles`, "POST")) {
+    const body = await readJsonBody(ctx.req);
+    const requested = body["ids"];
+    if (!Array.isArray(requested)) {
+      sendJsonResponse(res, 400, { error: "expected an 'ids' array of session ids" });
+      return true;
+    }
+    const ids = requested.filter((id): id is string => typeof id === "string" && id !== "");
+    try {
+      sendJsonResponse(res, 200, { titles: await resolveColdSessionTitles(ctx.plugin, ids) });
+    } catch (err) {
+      sendJsonResponse(res, 503, { error: (err as Error).message });
+    }
+    return true;
+  }
 
   if (isRoute(ctx, `${PREFIX}/archive-pong`, "POST")) {
     try {
