@@ -1,8 +1,9 @@
 /**
- * `providers`: fourteen provider adapters (kimi-code, kimi-sub,
- * claude-sub, grok-sub, gemini-sub, openai-api, anthropic-api, gemini-api,
- * grok-api, deepseek-api, mistral-api, groq-api, openrouter-api, zen) wired
- * onto dialects wire dialects. The quotas subpackage provides quota
+ * `providers`: twenty provider adapters (kimi-code, kimi-sub,
+ * claude-sub, grok-sub, gemini-sub, antigravity-sub, openai-api, anthropic-api,
+ * gemini-api, grok-api, deepseek-api, mistral-api, groq-api, openrouter-api,
+ * cerebras-api, zai-api, zen, ollama, llamacpp, vllm) wired onto dialects.
+ * The quotas subpackage provides quota
  * probing, the `/quotas/api/*` web routes, and the `dsh-quotas` settings
  * section — merged from the standalone dsh-quotas plugin to eliminate data
  * duplication. Connection facts resolve per request from the optional
@@ -83,6 +84,10 @@ export {
   ZEN_MAX_OUTPUT,
   ZEN_CLAUDE_CONTEXT,
   ZEN_CLAUDE_MAX_OUTPUT,
+  CEREBRAS_CONTEXT,
+  CEREBRAS_MAX_OUTPUT,
+  ZAI_CONTEXT,
+  ZAI_MAX_OUTPUT,
   vendorBaseId,
   vendorSuffix,
 } from "./providers.js";

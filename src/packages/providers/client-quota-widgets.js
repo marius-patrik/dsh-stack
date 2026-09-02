@@ -37,6 +37,7 @@ var __DSH_QUOTA_VENDOR_LABELS = {
   openrouter: "OpenRouter",
   groq: "Groq",
   cerebras: "Cerebras",
+  zai: "Z.ai",
   mistral: "Mistral",
   deepseek: "DeepSeek",
   openai: "OpenAI",

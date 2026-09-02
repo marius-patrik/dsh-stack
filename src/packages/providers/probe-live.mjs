@@ -51,6 +51,8 @@ const EXTENSION_IDS = [
   "mistral-api",
   "groq-api",
   "openrouter-api",
+  "cerebras-api",
+  "zai-api",
   "zen",
   "ollama",
   "llamacpp",

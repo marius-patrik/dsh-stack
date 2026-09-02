@@ -1,6 +1,6 @@
 /**
  * Route descriptors for the dsh provider adapters (five subscription routes
- * plus eight billable API-key routes). A route couples a provider id with the
+ * plus ten billable API-key routes). A route couples a provider id with the
  * wire dialect it speaks, the endpoint it talks to, the fixed headers and
  * credential slots it needs, and the advisory model catalog it advertises to
  * discovery consumers.
@@ -265,3 +265,7 @@ export const ZEN_CONTEXT = 256_000;
 export const ZEN_MAX_OUTPUT = 64_000;
 export const ZEN_CLAUDE_CONTEXT = 1_000_000;
 export const ZEN_CLAUDE_MAX_OUTPUT = 128_000;
+export const CEREBRAS_CONTEXT = 128_000;
+export const CEREBRAS_MAX_OUTPUT = 8_000;
+export const ZAI_CONTEXT = 128_000;
+export const ZAI_MAX_OUTPUT = 8_000;
