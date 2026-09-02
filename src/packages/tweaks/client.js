@@ -802,52 +802,6 @@ window.__ModuleLoader__.load({
     });
 
     /**
-     * Renders a navigation icon for terminals.
-     *
-     * This icon consists of multiple lines and a polyline that form a specific shape.
-     * It is used to represent terminals within a navigation interface.
-     *
-     * @returns {Array} An array of SVG elements representing the icon.
-     */
-    var TerminalsNavIcon = createGlyphComponent(16, "", false, true, false, function () {
-      return [
-        h("polyline", { points: "4 17 10 11 4 5" }),
-        h("line", { x1: "12", x2: "20", y1: "19", y2: "19" }),
-      ];
-    });
-
-    /**
-     * Renders a navigation icon for containers.
-     *
-     * This icon consists of multiple SVG elements that form a specific shape,
-     * typically used to represent containers within a navigation interface.
-     *
-     * @returns {Array} An array of SVG elements representing the container icon.
-     */
-    var ContainersNavIcon = createGlyphComponent(16, "", false, true, false, function () {
-      return [
-        h("path", {
-          d: "M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z",
-        }),
-        h("path", { d: "m7 16.5-4.74-2.85" }),
-        h("path", { d: "m7 16.5 5-3" }),
-        h("path", { d: "M7 16.5v5.17" }),
-        h("path", {
-          d: "M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z",
-        }),
-        h("path", { d: "m17 16.5-5-3" }),
-        h("path", { d: "m17 16.5 4.74-2.85" }),
-        h("path", { d: "M17 16.5v5.17" }),
-        h("path", {
-          d: "M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z",
-        }),
-        h("path", { d: "M12 8 7.26 5.15" }),
-        h("path", { d: "m12 8 4.74-2.85" }),
-        h("path", { d: "M12 13.5V8" }),
-      ];
-    });
-
-    /**
      * Returns an array of SVG elements representing the plug navigation icon.
      *
      * @returns {Array} An array of SVG path elements composing the plug icon.
@@ -1117,9 +1071,6 @@ window.__ModuleLoader__.load({
       if (id === "integrations" || id === "providers")
         return h(ProvidersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "accounts") return h(ProvidersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
-      if (id === "terminals") return h(TerminalsNavIcon, { className: "dsh-tw-navIcon", size: 16 });
-      if (id === "containers")
-        return h(ContainersNavIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "models") return h(DataGlyph, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "apps") return h(CommandsIcon, { className: "dsh-tw-navIcon", size: 16 });
       if (id === "provider-usage") return h(DataGlyph, { className: "dsh-tw-navIcon", size: 16 });
@@ -4345,15 +4296,7 @@ window.__ModuleLoader__.load({
         "session-modes",
         "commands",
       ]);
-      var INTEGRATION_IDS = new Set([
-        "providers",
-        "accounts",
-        "models",
-        "apps",
-        "hosts",
-        "terminals",
-        "containers",
-      ]);
+      var INTEGRATION_IDS = new Set(["providers", "accounts", "models", "apps", "hosts"]);
 
       var personalRows = [];
       var customRows = [];
