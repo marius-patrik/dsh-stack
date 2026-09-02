@@ -36,7 +36,8 @@
   "scripts": {
     "build": "tsc && cp client.js lib/client.js",
     "typecheck": "tsc --noEmit",
-    "test": "node check-plugin.mjs"
+    "test": "node check-plugin.mjs",
+    "verify": "node check-plugin.mjs"
   },
   "dependencies": {
     "@dsh-stack/plugin-kit": "workspace:*"

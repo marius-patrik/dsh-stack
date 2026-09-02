@@ -9753,22 +9753,6 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       ];
     });
 
-    /**
-     * Sets the visual state of the icon based on mouse events.
-     *
-     * On mouse enter, the icon becomes fully opaque and changes color to #f85149.
-     * On mouse leave, the icon returns to 60% opacity and its original color.
-     *
-     * Fails to change the icon's appearance if the mouse events are not triggered.
-     */
-    var IconsGlyph = createGlyphComponent(16, "", false, false, false, function () {
-      return [
-        h("path", {
-          d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
-        }),
-      ];
-    });
-
     /** Shared 24x24 lucide-style icon SVG wrapper used by LUCIDE_ICONS_CATALOG entries. */
     function renderLucideSvg(s, c) {
       var children = Array.prototype.slice.call(arguments, 2);
@@ -12543,16 +12527,19 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         "providers: loops nav glyph",
       );
 
-      // 6. Icons Settings Section (Order 7)
+      // 6. Icons: one page of the Appearance section (Order 20)
+      //
+      // The icon catalog stays owned here; only its mount point moved from the
+      // settings nav to the seat the Appearance section declares.
       ctx.slots.inject(
-        "settings.section",
+        "settings.appearance.tab",
         function () {
           return ctx.slots.register(
             {
-              name: "settings.section",
+              name: "settings.appearance.tab",
               id: "icons",
               priority: -10,
-              order: 7,
+              order: 20,
               locale: NS,
               label: function () {
                 return "Icons";
@@ -12564,23 +12551,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
             IconsSection,
           );
         },
-        "providers: icons section",
-      );
-
-      ctx.slots.inject(
-        "settings.section.icon",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section.icon",
-              id: "icons",
-              priority: -10,
-              order: 0,
-            },
-            IconsGlyph,
-          );
-        },
-        "providers: icons nav glyph",
+        "providers: appearance icons tab",
       );
     }
 
