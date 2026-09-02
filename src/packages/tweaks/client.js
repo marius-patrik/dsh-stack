@@ -1801,10 +1801,7 @@ window.__ModuleLoader__.load({
         var checked = e.target.checked;
         setFullWidthConversation(checked);
         if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem(
-            "dsh_full_width_conversation",
-            checked ? "true" : "false",
-          );
+          window.localStorage.setItem("dsh_full_width_conversation", checked ? "true" : "false");
           if (document.body) {
             if (checked) document.body.classList.add("dsh-full-width-conversation");
             else document.body.classList.remove("dsh-full-width-conversation");
