@@ -3072,6 +3072,70 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
       );
     }
 
+    /**
+     * Providers settings section (#237): a single "Providers" settings entry
+     * with account/credential management and the model catalog as sub-tabs,
+     * replacing the former separate "Accounts" and "Models" top-level
+     * sections. AccountsSection and ModelsSection are mounted unchanged —
+     * this shell only owns the sub-tab switcher, not their content.
+     */
+    function ProvidersSection() {
+      var subtabState = React.useState("accounts");
+      var subtab = subtabState[0],
+        setSubtab = subtabState[1];
+
+      var tabs = [
+        { key: "accounts", label: "Accounts" },
+        { key: "models", label: "Models" },
+      ];
+
+      return h(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "16px", padding: "4px 0" } },
+        h(
+          "div",
+          {
+            style: {
+              display: "inline-flex",
+              alignSelf: "flex-start",
+              gap: "4px",
+              background: "var(--dsw-alias-surface-l1, rgba(255,255,255,0.05))",
+              padding: "3px",
+              borderRadius: "8px",
+              border: "1px solid var(--dsw-alias-border-l1)",
+            },
+          },
+          tabs.map(function (tab) {
+            var isAct = subtab === tab.key;
+            return h(
+              "button",
+              {
+                key: tab.key,
+                type: "button",
+                onClick: function () {
+                  setSubtab(tab.key);
+                },
+                style: {
+                  padding: "4px 12px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: isAct ? "var(--dsw-alias-primary, #6366f1)" : "transparent",
+                  color: isAct ? "#fff" : "var(--dsw-alias-label-secondary)",
+                  fontSize: "12px",
+                  fontWeight: isAct ? 600 : 400,
+                  cursor: "pointer",
+                  transition: "all 120ms ease",
+                },
+              },
+              tab.label,
+            );
+          }),
+        ),
+        subtab === "accounts" ? h(AccountsSection, null) : null,
+        subtab === "models" ? h(ModelsSection, null) : null,
+      );
+    }
+
     // 1c. SETTINGS: APPS SECTION
     /**
      * Triggers the edit modal for the specified account when clicked.
@@ -9708,30 +9772,13 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
     );
 
     /**
-     * Displays a button to close a tab with an opacity of 0.6 and a hover effect.
-     * On hover, the button changes color to #f85149 and becomes fully opaque.
-     * On click, the `removeTab` function is called to close the tab identified by `t.id`.
+     * Nav glyph for the consolidated "Providers" settings section (#237),
+     * covering both the accounts/credentials and models sub-tabs.
      */
-    var AccountsGlyph = createGlyphComponent(16, "", false, false, false, function () {
+    var ProvidersGlyph = createGlyphComponent(16, "", false, false, false, function () {
       return [
         h("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
         h("circle", { cx: "12", cy: "7", r: "4" }),
-      ];
-    });
-
-    /**
-     * Sets up a glyph with specific styles and interactive behaviors.
-     *
-     * On mouse enter, the glyph becomes fully opaque and changes color.
-     * On mouse leave, it reverts to its initial opacity and color.
-     *
-     * @param {MouseEvent} e - The mouse event triggering the style changes.
-     */
-    var ModelsGlyph = createGlyphComponent(16, "", false, false, false, function () {
-      return [
-        h("path", {
-          d: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z",
-        }),
       ];
     });
 
@@ -12247,28 +12294,30 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
         "providers: global terminals manager and top tab bar",
       );
 
-      // 1. Accounts Settings Section (Order 8)
+      // 1. Providers Settings Section (Order 8): consolidates the former
+      // "accounts" and "models" sections into one, with accounts/credential
+      // management and the model catalog as sub-tabs (#237).
       ctx.slots.inject(
         "settings.section",
         function () {
           return ctx.slots.register(
             {
               name: "settings.section",
-              id: "accounts",
+              id: "providers",
               priority: -10,
               order: 8,
               locale: NS,
               label: function () {
-                return "Accounts";
+                return "Providers";
               },
               inject: function () {
                 return {};
               },
             },
-            AccountsSection,
+            ProvidersSection,
           );
         },
-        "providers: accounts section",
+        "providers: providers section",
       );
 
       ctx.slots.inject(
@@ -12277,54 +12326,14 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           return ctx.slots.register(
             {
               name: "settings.section.icon",
-              id: "accounts",
+              id: "providers",
               priority: -10,
               order: 0,
             },
-            AccountsGlyph,
+            ProvidersGlyph,
           );
         },
-        "providers: accounts nav glyph",
-      );
-
-      // 2. Models Settings Section (Order 9)
-      ctx.slots.inject(
-        "settings.section",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section",
-              id: "models",
-              priority: -10,
-              order: 9,
-              locale: NS,
-              label: function () {
-                return "Models";
-              },
-              inject: function () {
-                return {};
-              },
-            },
-            ModelsSection,
-          );
-        },
-        "providers: models section",
-      );
-
-      ctx.slots.inject(
-        "settings.section.icon",
-        function () {
-          return ctx.slots.register(
-            {
-              name: "settings.section.icon",
-              id: "models",
-              priority: -10,
-              order: 0,
-            },
-            ModelsGlyph,
-          );
-        },
-        "providers: models nav glyph",
+        "providers: providers nav glyph",
       );
 
       // 3. Apps Settings Section (Order 10)
