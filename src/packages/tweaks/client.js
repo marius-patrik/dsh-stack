@@ -2084,6 +2084,10 @@ window.__ModuleLoader__.load({
 
       if (!shouldShow) return null;
 
+      /**
+       * Persists the user's acknowledgement of the welcome notice and completes
+       * the onboarding step so the coordinator advances to the next entry.
+       */
       var acknowledge = function () {
         persistSettingToLocalStorage("dsh_welcome_notice_acknowledged", "true");
         finish();
