@@ -82,7 +82,7 @@ function __dshCreateCollapsedRail(runtime) {
               var rect = event.currentTarget.getBoundingClientRect();
               var isSwapped =
                 typeof document !== "undefined" &&
-                document.body.classList.contains("dsh-sidebars-swapped");
+                document.body.classList.contains("dsh-main-sidebar-right");
               var posX = isSwapped ? rect.left - 194 : rect.right + 4;
               var posY = rect.top;
               ctx.setPlusMenu(

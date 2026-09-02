@@ -507,53 +507,59 @@ body[data-theme="oled"] [class*="agentGoal"] {
   background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08)) !important;
   color: var(--dsw-alias-label-primary) !important;
 }
-body.dsh-sidebars-swapped [class*="frame"] {
-  grid-template-columns: var(--dsh-secondary-sidebar-width, 0px) minmax(0, 1fr) var(--dsh-sidebar-width, 240px) !important;
+/* Main sidebar on the right: the shell grid's three tracks are re-ordered so
+   the secondary dock's width leads and the main sidebar's width trails. Both
+   track sizes come from variables the client publishes from the live layout
+   (--dsh-main-sidebar-width mirrors the harness's own first track; see
+   trackMainSidebarWidth), never from a guessed constant, so a track and the
+   column sitting in it can never disagree about how wide the sidebar is. */
+body.dsh-main-sidebar-right [class*="frame"] {
+  grid-template-columns: var(--dsh-secondary-sidebar-width, 0px) minmax(0, 1fr) var(--dsh-main-sidebar-width, 240px) !important;
 }
-body.dsh-sidebars-swapped div[class*="detailsCol"],
-body.dsh-sidebars-swapped .dsh-right-sidebar-dock {
+/* The three shell columns are ordinary static grid children: grid placement
+   moves them, and the track owns the width. Restating the width on the child
+   is what lets it outgrow its track and render past the viewport edge, so the
+   width is deliberately left to the grid and only overflow is constrained. */
+body.dsh-main-sidebar-right div[class*="detailsCol"] {
   grid-column: 1 !important;
   grid-row: 1 !important;
   order: 1 !important;
-  width: var(--dsh-secondary-sidebar-width, 0px) !important;
-  max-width: var(--dsh-secondary-sidebar-width, 0px) !important;
-  right: auto !important;
-  left: 0 !important;
-  border-left: none !important;
-  border-right: none !important;
+  min-width: 0 !important;
   overflow: hidden !important;
 }
-body.dsh-sidebars-swapped div[class*="centerCol"] {
+body.dsh-main-sidebar-right div[class*="centerCol"] {
   grid-column: 2 !important;
   grid-row: 1 !important;
   order: 2 !important;
+  min-width: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
-body.dsh-sidebars-swapped div[class*="sidebarCol"],
-body.dsh-sidebars-swapped .dsh-tw-root {
+body.dsh-main-sidebar-right div[class*="sidebarCol"] {
   grid-column: 3 !important;
   grid-row: 1 !important;
   order: 3 !important;
-  width: var(--dsh-sidebar-width, 240px) !important;
-  left: auto !important;
-  right: 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
   border-right: none !important;
   border-left: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
 }
-body.dsh-sidebars-swapped .dsh-mainview-terminal,
-body.dsh-sidebars-swapped .dsh-mainview-container,
-body.dsh-sidebars-swapped .dsh-mainview-monaco {
-  left: var(--dsh-secondary-sidebar-width, 0px) !important;
-  right: var(--dsh-sidebar-width, 240px) !important;
-}
-body.dsh-sidebars-swapped .dsh-top-conversation-header {
-  left: var(--dsh-secondary-sidebar-width, 0px) !important;
-  right: var(--dsh-sidebar-width, 240px) !important;
-}
-body.dsh-sidebars-swapped .dsh-tw-navResizer {
+/* The secondary dock is position: fixed, so it is not in the shell grid at
+   all and grid placement would be a no-op on it. Its viewport offsets are
+   what actually move it to the left edge. */
+body.dsh-main-sidebar-right .dsh-right-sidebar-dock {
   right: auto !important;
-  left: -4px !important;
+  left: 0 !important;
+  border-left: none !important;
+  border-right: 1px solid var(--dsw-alias-border-l1, rgba(128,128,128,0.12)) !important;
+}
+body.dsh-main-sidebar-right .dsh-mainview-terminal,
+body.dsh-main-sidebar-right .dsh-mainview-container,
+body.dsh-main-sidebar-right .dsh-mainview-monaco,
+body.dsh-main-sidebar-right .dsh-top-conversation-header {
+  left: var(--dsh-secondary-sidebar-width, 0px) !important;
+  right: var(--dsh-main-sidebar-width, 240px) !important;
 }
 button[class*="sessionLogButton"],
 [data-slot="conversation.session.header.utilities"] > button[class*="sessionLogButton"] {
@@ -1671,12 +1677,15 @@ window.__ModuleLoader__.load({
       var searchEnabled = searchState[0],
         setSearchEnabled = searchState[1];
 
-      var swapSidebarsState = React.useState(function () {
-        if (typeof window === "undefined" || !window.localStorage) return false;
-        return window.localStorage.getItem("dsh_swap_sidebars") === "true";
+      var mainSidebarLocationState = React.useState(function () {
+        if (typeof window === "undefined" || !window.localStorage) return "left";
+        var saved = window.localStorage.getItem("dsh_main_sidebar_location");
+        if (saved === "left" || saved === "right") return saved;
+        var legacy = window.localStorage.getItem("dsh_swap_sidebars");
+        return legacy === "true" ? "right" : "left";
       });
-      var swapSidebars = swapSidebarsState[0],
-        setSwapSidebars = swapSidebarsState[1];
+      var mainSidebarLocation = mainSidebarLocationState[0],
+        setMainSidebarLocation = mainSidebarLocationState[1];
 
       var defaultModeState = React.useState(function () {
         try {
@@ -1762,24 +1771,23 @@ window.__ModuleLoader__.load({
       };
 
       /**
-       * Toggles the swap sidebars state, updating the theme and container styles accordingly.
-       *
-       * The function sets the data-theme attribute on the document element to either "oled", "light", or removes it,
-       * depending on the themeType. It also updates the container styles for the settings row.
-       *
-       * On failure, the function does not change the theme or styles, maintaining the current state.
+       * Sets the main sidebar location (left or right), updating the body class and
+       * notifying other surfaces via a custom event.
        */
-      var handleToggleSwapSidebars = function (e) {
-        var checked = e.target.checked;
-        setSwapSidebars(checked);
+      var handleSelectMainSidebarLocation = function (e) {
+        var location = e.target.value;
+        setMainSidebarLocation(location);
         if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem("dsh_swap_sidebars", checked ? "true" : "false");
+          window.localStorage.setItem("dsh_main_sidebar_location", location);
+          try {
+            window.localStorage.removeItem("dsh_swap_sidebars");
+          } catch (err) {}
           window.dispatchEvent(
-            new CustomEvent("dsh:sidebars-swapped", { detail: { swapped: checked } }),
+            new CustomEvent("dsh:main-sidebar-location", { detail: { location: location } }),
           );
           if (document.body) {
-            if (checked) document.body.classList.add("dsh-sidebars-swapped");
-            else document.body.classList.remove("dsh-sidebars-swapped");
+            if (location === "right") document.body.classList.add("dsh-main-sidebar-right");
+            else document.body.classList.remove("dsh-main-sidebar-right");
           }
         }
       };
@@ -1986,11 +1994,14 @@ window.__ModuleLoader__.load({
           "Display quick search bar at the top of the sidebar explorer",
           createSettingsToggleCheckbox(searchEnabled, handleToggleSearch),
         ),
-        // 8. Swap Sidebars
+        // 8. Main Sidebar Location
         createSettingsRow(
-          "Swap Main & Secondary Sidebars",
-          "Position the Main Sidebar on the right and the Secondary Sidebar dock on the left",
-          createSettingsToggleCheckbox(swapSidebars, handleToggleSwapSidebars),
+          "Main Sidebar Location",
+          "Choose which side the main sidebar appears on",
+          createSettingsSelect(mainSidebarLocation, handleSelectMainSidebarLocation, [
+            { value: "left", label: "Left" },
+            { value: "right", label: "Right" },
+          ]),
         ),
         // 9. Internal Testing Notice
         createSettingsRow(
@@ -6230,14 +6241,26 @@ window.__ModuleLoader__.load({
         }
       })();
 
-      (function initSwappedSidebars() {
+      (function initMainSidebarLocation() {
         if (typeof window === "undefined" || !window.localStorage) return;
         try {
-          if (window.localStorage.getItem("dsh_swap_sidebars") === "true") {
-            if (document.body) document.body.classList.add("dsh-sidebars-swapped");
+          var saved = window.localStorage.getItem("dsh_main_sidebar_location");
+          var legacy = window.localStorage.getItem("dsh_swap_sidebars");
+          var location = saved;
+          if (location !== "left" && location !== "right") {
+            location = legacy === "true" ? "right" : "left";
+            window.localStorage.setItem("dsh_main_sidebar_location", location);
+          }
+          if (legacy !== null) {
+            try {
+              window.localStorage.removeItem("dsh_swap_sidebars");
+            } catch (err) {}
+          }
+          if (location === "right") {
+            if (document.body) document.body.classList.add("dsh-main-sidebar-right");
             else
               document.addEventListener("DOMContentLoaded", function () {
-                document.body.classList.add("dsh-sidebars-swapped");
+                document.body.classList.add("dsh-main-sidebar-right");
               });
           }
         } catch (e) {}
@@ -6255,6 +6278,42 @@ window.__ModuleLoader__.load({
           }
         } catch (e) {}
       })();
+
+      /**
+       * Mirrors the main sidebar's live width into `--dsh-main-sidebar-width`.
+       *
+       * The harness sizes its shell grid by writing `grid-template-columns`
+       * inline on the frame element, with the main sidebar as the leading
+       * track. Placing the sidebar on the right replaces that whole property,
+       * so the replacement track cannot inherit the harness's sizing and has
+       * to read it: this takes the first track out of the inline value the
+       * harness still writes, and publishes it for both the replacement track
+       * and every element that offsets against the sidebar. Reading the inline
+       * declaration rather than the rendered element keeps the harness the one
+       * owner of the width even while the override wins the cascade, and it is
+       * what stops the sidebar from being sized by one number while its grid
+       * track is sized by another — the disagreement that pushed it past the
+       * viewport edge (#234).
+       */
+      function trackMainSidebarWidth() {
+        if (typeof document === "undefined") return;
+        var frame = document.querySelector('[class*="frame"]');
+        if (!frame) return;
+        var leadingTrack = (frame.style.gridTemplateColumns || "").trim().split(/\s+/)[0];
+        if (!/^\d+(\.\d+)?px$/.test(leadingTrack)) return;
+        document.documentElement.style.setProperty("--dsh-main-sidebar-width", leadingTrack);
+      }
+
+      if (typeof window !== "undefined" && typeof document !== "undefined") {
+        trackMainSidebarWidth();
+        var mainSidebarWidthObserver = new MutationObserver(trackMainSidebarWidth);
+        mainSidebarWidthObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["style"],
+          childList: true,
+          subtree: true,
+        });
+      }
 
       // Universal Lucide Animated Icons DOM Decorator
       /**

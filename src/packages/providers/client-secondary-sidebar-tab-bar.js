@@ -144,7 +144,7 @@ function __dshCreateSecondarySidebarTabBar(deps) {
         var startW = width;
         var isSwapped =
           typeof document !== "undefined" &&
-          document.body.classList.contains("dsh-sidebars-swapped");
+          document.body.classList.contains("dsh-main-sidebar-right");
         /** Tracks pointer movement to resize the sidebar during a drag. */
         var onMove = function (moveEv) {
           var delta = isSwapped ? moveEv.clientX - startX : startX - moveEv.clientX;

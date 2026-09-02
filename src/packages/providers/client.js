@@ -6429,7 +6429,7 @@ button:hover .dsh-icon-branch, .dsh-icon-branch:hover, [role="button"]:hover .ds
           };
         }
       }
-      var isSwapped = document.body.classList.contains("dsh-sidebars-swapped");
+      var isSwapped = document.body.classList.contains("dsh-main-sidebar-right");
       var customSecondary =
         typeof window !== "undefined" && window.__dsh_right_sidebar_width__
           ? window.__dsh_right_sidebar_width__
