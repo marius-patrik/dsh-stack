@@ -515,6 +515,14 @@ function __dshCreateSidebarTree(runtime) {
       backfilledTitles: backfilledTitles,
     };
 
+    var liveProcessRowCtx = {
+      quotasApiBase: quotasApi,
+      ellipsisOpen: ellipsisOpen,
+      setEllipsisOpen: setEllipsisOpen,
+      loadAll: loadAll,
+      onActionFailure: reportFailure,
+    };
+
     var newItemMenuCtx = {
       plusMenu: plusMenu,
       setPlusMenu: setPlusMenu,
@@ -620,7 +628,9 @@ function __dshCreateSidebarTree(runtime) {
         actions: renderNewItemMenu(null, "containers-plus", newItemMenuCtx),
         wrapperStyle: groupWrapperStyle,
         emptyText: "(no running containers)",
-        children: grouping.containerRows.map(liveProcessRows.renderContainerRow),
+        children: grouping.containerRows.map(function (container) {
+          return liveProcessRows.renderContainerRow(container, liveProcessRowCtx);
+        }),
       }),
 
       renderTreeGroup({
@@ -635,7 +645,9 @@ function __dshCreateSidebarTree(runtime) {
         actions: renderNewItemMenu(null, "terminals-plus", newItemMenuCtx),
         wrapperStyle: groupWrapperStyle,
         emptyText: "(no live terminals)",
-        children: grouping.terminalRows.map(liveProcessRows.renderTerminalRow),
+        children: grouping.terminalRows.map(function (session) {
+          return liveProcessRows.renderTerminalRow(session, liveProcessRowCtx);
+        }),
       }),
 
       renderTreeGroup({
