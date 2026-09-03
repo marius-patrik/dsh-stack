@@ -28,6 +28,8 @@ const {
   loadCredentialEnv,
   ensureHeadlessProfile,
   normalizeCustomProviders,
+  parseWorktreeList,
+  decidePrune,
 } = await import("./lib/index.js");
 
 const root = mkdtempSync(join(tmpdir(), "launcher-"));
@@ -215,6 +217,9 @@ assert.deepEqual(route(["accounts", "list"], { invokedName: "dsh" }), {
   kind: "verb",
   verb: "accounts",
   args: ["list"],
+});
+assert.deepEqual(route(["prune-worktrees"], { invokedName: "dsh" }), {
+  kind: "prune-worktrees",
 });
 assert.deepEqual(route(["plugin", "list"], { invokedName: "dsh" }), {
   kind: "passthrough",
@@ -466,6 +471,58 @@ const piAiEntry = headlessPatch.find((entry) => entry.id === "llm-pi-ai");
 assert.ok(piAiEntry !== undefined);
 assert.equal(piAiEntry.config.providers[0].id, "test-provider");
 console.log("ensureHeadlessProfile ok");
+
+// parseWorktreeList: porcelain parsing, main-checkout flagging, detached entries.
+const porcelain = [
+  "worktree /repo",
+  "HEAD aaa",
+  "branch refs/heads/main",
+  "",
+  "worktree /repo/worktrees/issue-1",
+  "HEAD bbb",
+  "branch refs/heads/fix/1-thing",
+  "",
+  "worktree /repo/worktrees/detached",
+  "HEAD ccc",
+  "detached",
+  "",
+].join("\n");
+const worktrees = parseWorktreeList(porcelain);
+assert.equal(worktrees.length, 3);
+assert.deepEqual(worktrees[0], { path: "/repo", branch: "main", isMain: true });
+assert.deepEqual(worktrees[1], {
+  path: "/repo/worktrees/issue-1",
+  branch: "fix/1-thing",
+  isMain: false,
+});
+assert.deepEqual(worktrees[2], { path: "/repo/worktrees/detached", branch: null, isMain: false });
+console.log("parseWorktreeList ok");
+
+// decidePrune: every unsafe state keeps with a reason; fully safe prunes.
+assert.deepEqual(decidePrune({ branch: null, clean: true, unpushed: 0, hasMergedPr: true }), {
+  action: "keep",
+  reason: "detached HEAD",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: false, unpushed: 0, hasMergedPr: true }), {
+  action: "keep",
+  reason: "uncommitted changes",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: null, hasMergedPr: true }), {
+  action: "keep",
+  reason: "no upstream branch",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: 2, hasMergedPr: true }), {
+  action: "keep",
+  reason: "2 unpushed commit(s)",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: 0, hasMergedPr: false }), {
+  action: "keep",
+  reason: "no merged PR for branch",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: 0, hasMergedPr: true }), {
+  action: "prune",
+});
+console.log("decidePrune ok");
 
 rmSync(root, { recursive: true, force: true });
 
