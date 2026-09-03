@@ -1,0 +1,105 @@
+name: Board status
+
+on:
+  issues:
+    types: [assigned]
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, ready_for_review, converted_to_draft]
+
+concurrency:
+  group: board-status-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  # GITHUB_TOKEN may edit Projects v2 owned by the same account as this repo;
+  # this is what drives the Status field without a PAT (#272).
+  projects: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PROJECT_NUMBER: "13"
+  PROJECT_OWNER: marius-patrik
+
+jobs:
+  board-status:
+    name: Sync project board status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve project and Status field ids
+        id: ids
+        shell: bash
+        run: |
+          set -euo pipefail
+          project_id=$(gh project list --owner "$PROJECT_OWNER" --format json \
+            --jq ".projects[] | select(.number == $PROJECT_NUMBER) | .id")
+          field_id=$(gh project field-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --format json \
+            --jq '.fields[] | select(.name == "Status") | .id')
+          echo "project-id=$project_id" >> "$GITHUB_OUTPUT"
+          echo "field-id=$field_id" >> "$GITHUB_OUTPUT"
+
+      - name: Sync statuses
+        shell: bash
+        env:
+          PROJECT_ID: ${{ steps.ids.outputs.project-id }}
+          FIELD_ID: ${{ steps.ids.outputs.field-id }}
+        run: |
+          set -euo pipefail
+
+          option_id() {
+            gh project field-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --format json \
+              --jq ".fields[] | select(.name == \"Status\") | .options[] | select(.name == \"$1\") | .id"
+          }
+
+          item_id() {
+            local url="$1" id
+            id=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
+              --jq ".items[] | select(.content.url == \"$url\") | .id" | head -1)
+            if [ -z "$id" ]; then
+              id=$(gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "$url" --format json --jq '.id' \
+                || gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
+                  --jq ".items[] | select(.content.url == \"$url\") | .id" | head -1)
+            fi
+            printf '%s' "$id"
+          }
+
+          set_status() {
+            local url="$1" status="$2"
+            local id
+            id=$(item_id "$url")
+            gh project item-edit --project-id "$PROJECT_ID" --id "$id" --field-id "$FIELD_ID" \
+              --single-select-option-id "$(option_id "$status")"
+            echo "board: $url -> $status"
+          }
+
+          repo_url="https://github.com/${{ github.repository }}"
+
+          if [ "${{ github.event_name }}" = "issues" ]; then
+            # issues.assigned: work has an owner -> In Progress.
+            set_status "$repo_url/issues/${{ github.event.issue.number }}" "In Progress"
+            exit 0
+          fi
+
+          pr_number="${{ github.event.pull_request.number }}"
+          pr_url="$repo_url/pull/$pr_number"
+          # Draft PRs mean work in progress; ready/non-draft PRs mean review.
+          if [ "${{ github.event.pull_request.draft }}" = "true" ]; then
+            target="In Progress"
+          else
+            target="In Review"
+          fi
+          set_status "$pr_url" "$target"
+
+          # Linked issues follow the PR: closing keywords in the body plus a
+          # trailing "(#123)" reference in the title.
+          body=$(gh pr view "$pr_number" --json body,title --jq '.body + "\n" + .title')
+          issue_numbers=()
+          mapfile -t issue_numbers < <(printf '%s\n' "$body" \
+            | grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+|\(#[0-9]+\)' \
+            | grep -oE '[0-9]+' | sort -u || true)
+          for n in ${issue_numbers[@]+"${issue_numbers[@]}"}; do
+            [ -n "$n" ] && set_status "$repo_url/issues/$n" "$target"
+          done
