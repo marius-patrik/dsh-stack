@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * dsh — homeRoot/command-aware launcher and service manager for the DeepSeek
  * Harness. Canonical TypeScript implementation lives in src/; this bin is the
@@ -16,16 +17,17 @@
  *   dsh [args...]    Fall through to the harness CLI
  */
 
-import { basename } from "node:path";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import {
   attachToServer,
+  ensureHeadlessProfile,
   findHarnessDir,
   findListenerPid,
   followLog,
   harnessCli,
+  loadCredentialEnv,
   migrateHome,
   packageDir,
   readLogTail,
@@ -181,8 +183,12 @@ async function main() {
   const tweaks = readTweaks(join(home, "settings.yaml"));
   home = migrateHome(home, tweaks.homeRoot ?? "", (msg) => process.stderr.write(`${msg}\n`));
   env.DSH_HOME = home;
+  loadCredentialEnv(join(home, ".credentials.yaml"), env);
   const profile =
     env.DSH_PROFILE !== undefined && env.DSH_PROFILE.length > 0 ? env.DSH_PROFILE : "web";
+  if (profile === "headless" || process.argv.includes("headless")) {
+    ensureHeadlessProfile({ home, pkgDir });
+  }
   const plan = route(process.argv.slice(2), {
     invokedName: basename(process.argv[1] ?? "dsh"),
     command: tweaks.command,

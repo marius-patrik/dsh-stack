@@ -1,9 +1,11 @@
 // jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling packages
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+
 import assert from "node:assert";
 import { createHash, createHmac, randomBytes } from "node:crypto";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import YAML from "yaml";
 
 const {
   readTweaks,
@@ -23,6 +25,9 @@ const {
   formatPluginMetricsLine,
   readBrowserSessionSecret,
   browserSessionCookieHeader,
+  loadCredentialEnv,
+  ensureHeadlessProfile,
+  normalizeCustomProviders,
 } = await import("./lib/index.js");
 
 const root = mkdtempSync(join(tmpdir(), "launcher-"));
@@ -398,7 +403,72 @@ console.log(
   "browser-session cookie ok (secret round-trip, independent HMAC verification, degrade-to-undefined)",
 );
 
+// loadCredentialEnv: populate refs into env, non-overwrite, missing file handling.
+const testEnv = { EXISTING_KEY: "existing-value" };
+const credsFile = join(authHome, ".credentials.yaml");
+writeFileSync(
+  credsFile,
+  [
+    "version: 1",
+    "refs:",
+    "  EXISTING_KEY: new-value",
+    "  LOADED_KEY: loaded-value",
+    "records: {}",
+  ].join("\n"),
+);
+loadCredentialEnv(credsFile, testEnv);
+assert.equal(testEnv.EXISTING_KEY, "existing-value", "existing env key must not be overwritten");
+assert.equal(testEnv.LOADED_KEY, "loaded-value", "missing env key must be loaded from refs");
+loadCredentialEnv(join(root, "non-existent-creds.yaml"), testEnv);
+assert.equal(testEnv.LOADED_KEY, "loaded-value");
+console.log("loadCredentialEnv ok");
+
+// normalizeCustomProviders: aligns mistral-conversations and google-generative-ai.
+const rawProviders = [
+  { id: "p1", api: "openai-completions", baseURL: "https://example.com/v1" },
+  { id: "p2", api: "mistral-conversations" },
+  { id: "p3", api: "google-generative-ai" },
+];
+const normalized = normalizeCustomProviders(rawProviders);
+assert.equal(normalized[0].api, "openai-completions");
+assert.equal(normalized[1].api, "openai-completions");
+assert.equal(normalized[1].baseURL, "https://api.mistral.ai/v1");
+assert.equal(normalized[2].api, "openai-completions");
+assert.equal(normalized[2].baseURL, "https://generativelanguage.googleapis.com/v1beta/openai/");
+console.log("normalizeCustomProviders ok");
+
+// ensureHeadlessProfile: package.json, symlinks, cordis.patch.yml.
+const headlessHome = join(root, "headless-home");
+mkdirSync(headlessHome, { recursive: true });
+writeFileSync(
+  join(headlessHome, "settings.yaml"),
+  [
+    "providers:",
+    "  custom:",
+    "    - id: test-provider",
+    "      name: Test Provider",
+    "      api: openai-completions",
+    "      baseURL: https://test.api/v1",
+  ].join("\n"),
+);
+const pkgDir = join(import.meta.dirname ?? ".");
+ensureHeadlessProfile({ home: headlessHome, pkgDir });
+const headlessPkgJson = JSON.parse(
+  readFileSync(join(headlessHome, "profiles", "headless", "package.json"), "utf8"),
+);
+assert.equal(headlessPkgJson.dependencies["@dsh-stack/pack-bundle-headless"], "^0.1.0");
+assert.ok(headlessPkgJson.dsh.profile.bundles.includes("@dsh-stack/pack-bundle-headless"));
+const headlessPatch = YAML.parse(
+  readFileSync(join(headlessHome, "profiles", "headless", "cordis.patch.yml"), "utf8"),
+);
+assert.ok(Array.isArray(headlessPatch));
+const piAiEntry = headlessPatch.find((entry) => entry.id === "llm-pi-ai");
+assert.ok(piAiEntry !== undefined);
+assert.equal(piAiEntry.config.providers[0].id, "test-provider");
+console.log("ensureHeadlessProfile ok");
+
 rmSync(root, { recursive: true, force: true });
+
 console.log("plugin check passed");
 
 // jscpd:ignore-end
