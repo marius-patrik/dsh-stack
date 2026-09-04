@@ -19,13 +19,20 @@
  * @module @dsh-stack/scripts/ci-runner-pool
  */
 import { spawn } from "node:child_process";
-
-// Logs are consumed through a pipe by the service manager, so flush each line
-// rather than letting Node buffer progress until the process exits.
-const log = (line) => process.stdout.write(`${line}\n`);
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+
+/**
+ * Writes one progress line to stdout.
+ *
+ * Logs are consumed through a pipe by the service manager, so each line is
+ * flushed on its own rather than letting Node buffer progress until the
+ * process exits.
+ *
+ * @param {string} line - The message to emit, without a trailing newline.
+ */
+const log = (line) => process.stdout.write(`${line}\n`);
 
 /** Repository whose queue this pool serves. */
 const REPO = process.env.CI_RUNNER_POOL_REPO ?? "marius-patrik/dsh-stack";
