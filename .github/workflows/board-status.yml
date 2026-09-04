@@ -15,12 +15,14 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  # GITHUB_TOKEN may edit Projects v2 owned by the same account as this repo;
-  # this is what drives the Status field without a PAT (#272).
-  projects: write
 
 env:
+  # GITHUB_TOKEN cannot edit Projects v2 (user/org projects need a PAT or GitHub
+  # App token). Repo reads below use GITHUB_TOKEN; the gh project commands use
+  # PROJECTS_TOKEN — a classic PAT with only the `project` scope, stored as a
+  # repo secret.
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
   PROJECT_NUMBER: "13"
   PROJECT_OWNER: marius-patrik
 
@@ -32,6 +34,8 @@ jobs:
       - name: Resolve project and Status field ids
         id: ids
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
         run: |
           set -euo pipefail
           project_id=$(gh project list --owner "$PROJECT_OWNER" --format json \
@@ -49,18 +53,23 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Project writes go through PROJECTS_TOKEN; repo reads use GITHUB_TOKEN.
+          gh_project() {
+            GH_TOKEN="$PROJECTS_TOKEN" gh project "$@"
+          }
+
           option_id() {
-            gh project field-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --format json \
+            gh_project field-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --format json \
               --jq ".fields[] | select(.name == \"Status\") | .options[] | select(.name == \"$1\") | .id"
           }
 
           item_id() {
             local url="$1" id
-            id=$(gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
+            id=$(gh_project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
               --jq ".items[] | select(.content.url == \"$url\") | .id" | head -1)
             if [ -z "$id" ]; then
-              id=$(gh project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "$url" --format json --jq '.id' \
-                || gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
+              id=$(gh_project item-add "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --url "$url" --format json --jq '.id' \
+                || gh_project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --limit 500 --format json \
                   --jq ".items[] | select(.content.url == \"$url\") | .id" | head -1)
             fi
             printf '%s' "$id"
@@ -70,7 +79,7 @@ jobs:
             local url="$1" status="$2"
             local id
             id=$(item_id "$url")
-            gh project item-edit --project-id "$PROJECT_ID" --id "$id" --field-id "$FIELD_ID" \
+            gh_project item-edit --project-id "$PROJECT_ID" --id "$id" --field-id "$FIELD_ID" \
               --single-select-option-id "$(option_id "$status")"
             echo "board: $url -> $status"
           }
