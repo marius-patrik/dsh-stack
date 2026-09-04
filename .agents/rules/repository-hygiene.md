@@ -12,7 +12,8 @@ than trusting that every event fired.
   deleted. Pushing a branch as a backup, with no pull request, is not a
   supported state.
 - Every open issue and pull request is on board 13, carries an `area:*` and a
-  `severity:*` label, and has a Status.
+  `severity:*` label, and has a Status. Items labelled `type:idea` are parked
+  rather than scoped, and are exempt from the label requirement.
 - Board Status is a projection of repository state, reconciled in both
   directions, including terminal states: merged or closed means `Done`.
 - A local worktree whose branch or pull request is gone is pruned.
@@ -29,6 +30,7 @@ projection of durable state:
 | `In Review` | an open non-draft pull request, or an issue linked from one |
 | `In Progress` | an open draft pull request, an issue linked from one, or an assigned issue |
 | `Blocked` | an open `blocked_by` dependency, or the `blocked` label |
+| `Ideas` | open and carrying the `type:idea` label — parked, not yet scoped |
 | `Ready` | open, unassigned, unblocked, and carrying both required labels |
 | `Backlog` | open but not yet triaged — a required label is missing |
 
@@ -38,6 +40,10 @@ the board is used:
 - **To mark something blocked, record the block.** Add the `blocked` label or a
   real `blocked_by` dependency. Setting `Blocked` on the board alone is undone
   by the next sweep.
+- **To park something as an idea, label it `type:idea`.** An idea is untriaged
+  by definition, so it is exempt from the `area:*`/`severity:*` requirement and
+  is not reported as a missing-label gap. Real work outranks the marker: assign
+  it, open a pull request against it, or block it, and it moves accordingly.
 - **To mark something in progress, assign it.** An unassigned issue with no pull
   request is `Ready` no matter how much work is underway, because nothing in the
   repository says otherwise.
@@ -75,6 +81,22 @@ the reason is structural rather than a bug to fix:
 Anything that must be true of *every* item therefore needs a reconciler that can
 rederive the answer from current truth, independent of which events fired. The
 event triggers exist for latency; the schedule exists for completeness.
+
+## Editing the Status field wipes every item's value
+
+`updateProjectV2Field` replaces a single-select field's option set wholesale
+rather than appending to it, and **regenerates every option id in the process**.
+Items store the id, not the name, so adding one option orphans the stored value
+on every item at once — observed here as 172 of 174 items dropping to no Status
+from a single mutation adding `Ideas`.
+
+The recovery is the sweep, and this is precisely why Status is derived rather
+than authored: one `node src/scripts/sweep-repository-hygiene.mjs` restored all
+135 affected items from repository state. Nothing was lost, because nothing was
+stored only on the board.
+
+When adding a Status option, pass the complete option list including every
+existing one, expect the wipe, and run the sweep immediately afterwards.
 
 ## Destructive actions are logged
 

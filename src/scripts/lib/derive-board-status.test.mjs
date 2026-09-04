@@ -46,6 +46,31 @@ test("an assigned issue with no pull request is In Progress", () => {
   assert.equal(deriveBoardStatus({ kind: "issue", state: "open", assigned: true }), "In Progress");
 });
 
+test("a parked idea is set aside before the triage split", () => {
+  assert.equal(deriveBoardStatus({ kind: "issue", state: "open", idea: true }), "Ideas");
+  // Labelling an idea does not promote it out of Ideas; only real work does.
+  assert.equal(
+    deriveBoardStatus({ kind: "issue", state: "open", idea: true, triaged: true }),
+    "Ideas",
+  );
+});
+
+test("real work on an idea outranks the parked marker", () => {
+  assert.equal(
+    deriveBoardStatus({ kind: "issue", state: "open", idea: true, assigned: true }),
+    "In Progress",
+  );
+  assert.equal(
+    deriveBoardStatus({ kind: "issue", state: "open", idea: true, linkedPullState: "ready" }),
+    "In Review",
+  );
+  assert.equal(
+    deriveBoardStatus({ kind: "issue", state: "open", idea: true, blocked: true }),
+    "Blocked",
+  );
+  assert.equal(deriveBoardStatus({ kind: "issue", state: "closed", idea: true }), "Done");
+});
+
 test("triage completeness separates Ready from Backlog", () => {
   assert.equal(deriveBoardStatus({ kind: "issue", state: "open", triaged: true }), "Ready");
   assert.equal(deriveBoardStatus({ kind: "issue", state: "open", triaged: false }), "Backlog");
@@ -61,6 +86,7 @@ test("every derived value is a real board Status", () => {
     { kind: "issue", state: "open", linkedPullState: "ready" },
     { kind: "issue", state: "open", linkedPullState: "draft" },
     { kind: "issue", state: "open", assigned: true },
+    { kind: "issue", state: "open", idea: true },
     { kind: "issue", state: "open", triaged: true },
     { kind: "issue", state: "open" },
   ];

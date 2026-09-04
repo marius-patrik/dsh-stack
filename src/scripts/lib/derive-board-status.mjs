@@ -9,15 +9,17 @@
  * only ever restate what the repository already says.
  *
  * The corollary is that Status set only on the board, with nothing in the
- * repository backing it, cannot survive a sweep. `Blocked` is the case that
- * matters in practice: it means an open `blocked_by` dependency or an explicit
- * `blocked` label, not an unrecorded judgement.
+ * repository backing it, cannot survive a sweep. `Blocked` and `Ideas` are the
+ * cases that matter in practice: `Blocked` means an open `blocked_by`
+ * dependency or an explicit `blocked` label, and `Ideas` means a `type:idea`
+ * label — neither is an unrecorded judgement.
  *
  * @module @dsh-stack/scripts/derive-board-status
  */
 
 /** Board Status values, in lifecycle order. */
 export const BOARD_STATUSES = Object.freeze([
+  "Ideas",
   "Backlog",
   "Ready",
   "In Progress",
@@ -30,8 +32,9 @@ export const BOARD_STATUSES = Object.freeze([
  * Projects one item's repository state onto its board Status.
  *
  * Order matters: terminal state wins over everything, then an explicit block,
- * then whatever review or ownership signal exists, and triage completeness
- * separates a `Ready` item from an untriaged `Backlog` one.
+ * then whatever review or ownership signal exists. A parked idea is set aside
+ * before the final split, so it is not mistaken for untriaged work; triage
+ * completeness then separates a `Ready` item from a `Backlog` one.
  *
  * @param {object} item - The item's repository state.
  * @param {"issue"|"pull"} item.kind - Whether this is an issue or a pull request.
@@ -42,6 +45,8 @@ export const BOARD_STATUSES = Object.freeze([
  * @param {boolean} [item.assigned] - Whether anyone is assigned.
  * @param {boolean} [item.triaged] - Whether both an `area:*` and a `severity:*`
  *   label are present.
+ * @param {boolean} [item.idea] - Whether the `type:idea` label is present,
+ *   marking the item as parked rather than scoped work.
  * @param {"draft"|"ready"|null} [item.linkedPullState] - For an issue, the state
  *   of the open pull request that references it, if any.
  * @returns {string} One of {@link BOARD_STATUSES}.
@@ -55,5 +60,8 @@ export function deriveBoardStatus(item) {
   if (item.linkedPullState === "ready") return "In Review";
   if (item.linkedPullState === "draft") return "In Progress";
   if (item.assigned) return "In Progress";
+  // A parked idea is not untriaged work waiting to be picked up, so it does not
+  // belong in the same column as an issue that simply lacks its labels.
+  if (item.idea) return "Ideas";
   return item.triaged ? "Ready" : "Backlog";
 }

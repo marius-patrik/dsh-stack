@@ -104,7 +104,7 @@ New architecture-decision docs and PRD sections for a capability must land in th
 
 Repository state is self-consistent, and a scheduled sweep enforces it rather than trusting that every event fired. A non-`main` remote branch is either backed by an open pull request or deleted; pushing a branch as a backup, with no pull request, is not a supported state. Every open issue and pull request is on board 13, carries an `area:*` and a `severity:*` label, and has a Status. Board Status is a projection of repository state, reconciled in both directions including terminal states — merged or closed means `Done`.
 
-Because reconciliation rederives every Status from scratch, a Status that nothing in the repository backs cannot survive a sweep. To mark something blocked, record the block (`blocked` label or a `blocked_by` dependency); to mark something in progress, assign it; triage — both required labels — is what promotes `Backlog` to `Ready`.
+Because reconciliation rederives every Status from scratch, a Status that nothing in the repository backs cannot survive a sweep. To mark something blocked, record the block (`blocked` label or a `blocked_by` dependency); to park something as an idea, label it `type:idea`, which also exempts it from the label requirement, since an idea is untriaged by definition; to mark something in progress, assign it; triage — both required labels — is what promotes `Backlog` to `Ready`.
 
 The sweep deletes only branches with zero commits ahead of `main`, where nothing can be lost. A branch ahead of `main` with no pull request gets a draft pull request, never a deletion, because an unproposed branch is a review problem rather than a cleanup problem.
 

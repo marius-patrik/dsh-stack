@@ -5,13 +5,14 @@
  * `blocked_by` dependency, or an explicit `blocked` label — so that a blocked
  * item stays blocked through a reconciliation that rederives Status from
  * scratch. A block recorded only as a board Status cannot survive, and is not
- * treated as one here.
+ * treated as one here. `idea` works the same way, through `type:idea`.
  *
  * @module @dsh-stack/scripts/collect-issue-states
  */
 import { runGh } from "./run-gh.mjs";
 
 const BLOCKED_LABEL = "blocked";
+const IDEA_LABEL = "type:idea";
 
 /**
  * Collects issue states, including whether each is blocked and fully triaged.
@@ -20,7 +21,7 @@ const BLOCKED_LABEL = "blocked";
  * @param {string} source.owner - Repository owner.
  * @param {string} source.repo - Repository name.
  * @param {string} [source.token] - Token for repository reads.
- * @returns {Map<number, {number: number, state: string, assigned: boolean, labels: string[], blocked: boolean, triaged: boolean, title: string}>}
+ * @returns {Map<number, {number: number, state: string, assigned: boolean, labels: string[], blocked: boolean, idea: boolean, triaged: boolean, title: string}>}
  */
 export function collectIssueStates({ owner, repo, token }) {
   const issues = JSON.parse(
@@ -52,6 +53,7 @@ export function collectIssueStates({ owner, repo, token }) {
       assigned: issue.assignees.length > 0,
       labels,
       blocked: labels.includes(BLOCKED_LABEL) || (blockedByDependency.get(issue.number) ?? 0) > 0,
+      idea: labels.includes(IDEA_LABEL),
       triaged:
         labels.some((name) => name.startsWith("area:")) &&
         labels.some((name) => name.startsWith("severity:")),
