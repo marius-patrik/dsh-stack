@@ -26,6 +26,7 @@
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "dependencies": {
+    "@dsh-stack/directory-picker-fix": "workspace:*",
     "@dsh-stack/formatters": "workspace:*",
     "@dsh-stack/hosts": "workspace:*",
     "@dsh-stack/lsp": "workspace:*"

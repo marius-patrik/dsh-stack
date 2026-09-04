@@ -1,12 +1,17 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreBinaries": ["script", "dns-sd", "sips", "tailscale"],
+  "ignore": ["harness/**"],
   "rules": {
     "duplicates": "warn"
   },
   "workspaces": {
     ".": {
-      "entry": ["src/scripts/*.mjs", "src/scripts/client-runtime/*.js"],
+      "entry": [
+        "src/scripts/*.mjs",
+        "src/scripts/**/*.test.mjs",
+        "src/scripts/client-runtime/*.js"
+      ],
       "project": ["src/scripts/**/*.{mjs,js}"]
     },
     "src/packages/*": {
@@ -18,6 +23,17 @@
         "bin/*.mjs"
       ],
       "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"]
+    },
+    "src/packages/providers": {
+      "entry": [
+        "src/index.{ts,tsx,mjs,js}",
+        "src/client.{ts,tsx}",
+        "client.js",
+        "*.mjs",
+        "bin/*.mjs"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "*.mjs", "bin/*.mjs"],
+      "ignoreDependencies": ["@dsh-stack/sidebar-preferences"]
     },
     "publish/extensions/skin-claude": {
       "entry": ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "*.mjs"],

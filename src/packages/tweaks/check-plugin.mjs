@@ -3,7 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
+import {
+  assertClientInjectIsPackageIds,
+  assertLoaderShape,
+} from "../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "tweaks-"));
 process.env.HOME = root;
@@ -17,6 +20,10 @@ const { readTweaksSection, writeTweaksSection, normalizeSection, sectionsEqual }
 assertLoaderShape(plugin, "tweaks");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));
 
+const manifest = JSON.parse(readFileSync(join(import.meta.dirname, "package.json"), "utf8"));
+assertClientInjectIsPackageIds(manifest.dsh.client.inject, manifest.name);
+console.log("dsh.client.inject is package ids ok:", JSON.stringify(manifest.dsh.client.inject));
+
 const home = join(root, ".agents");
 const base = {
   homeRoot: "/new/home",
@@ -27,7 +34,13 @@ const base = {
 const ctx = new Context();
 const settingsRegistrations = [];
 const settings = {
-  /** register implementation. */
+  /**
+   * Registers a settings namespace.
+   *
+   * Guarantees that the provided namespace (`ns`) is added to `settingsRegistrations`.
+   * Returns an object with `get` that returns the base option and `watch` that returns undefined.
+   * Fails if the namespace is not added to `settingsRegistrations`.
+   */
   register(ns, _schema, opts) {
     settingsRegistrations.push(ns);
     return { get: () => opts.base, watch: () => undefined };
@@ -93,12 +106,21 @@ const glyphFactory = readFileSync(
   join(import.meta.dirname, "..", "..", "scripts", "client-runtime", "glyph-factory.js"),
   "utf8",
 );
+const segmentedTabs = readFileSync(
+  join(import.meta.dirname, "client-settings-segmented-tabs.js"),
+  "utf8",
+);
+const customizationHub = readFileSync(
+  join(import.meta.dirname, "client-settings-customization-hub.js"),
+  "utf8",
+);
 const rootClient = readFileSync(join(import.meta.dirname, "client.js"), "utf8");
 const builtClient = readFileSync(clientPath, "utf8");
 assert.equal(
   builtClient,
-  cryptoPolyfill + glyphFactory + rootClient,
-  "lib/client.js must be the shared crypto polyfill + glyph factory + client.js",
+  cryptoPolyfill + glyphFactory + segmentedTabs + customizationHub + rootClient,
+  "lib/client.js must be the shared crypto polyfill + glyph factory + the settings" +
+    " segmented-tabs and customization-hub bundles + client.js",
 );
 
 globalThis.window = {
@@ -119,9 +141,6 @@ const stubModules = {
   "@deepseek-ai/dsh-client-ui-slots": {
     resolveSlotLabel: (label) => (typeof label === "function" ? label() : label),
   },
-  "@deepseek-ai/dsh-client-web-react": {
-    bindSnapshotSelector: (observable) => (selector) => selector(observable.getSnapshot()),
-  },
 };
 const /** stubRequire implementation. */ stubRequire = (name) => stubModules[name];
 const clientModule = clientSpec.factory(stubRequire);
@@ -141,7 +160,14 @@ const localeEntries = new Map();
 let localeRevision = 0;
 const allRecords = [];
 const slotsStub = {
-  /** register implementation. */
+  /**
+   * Registers the given locale dictionaries under the specified namespace.
+   *
+   * @param {string} ns - The namespace under which to register the locale dictionaries.
+   * @param {Object} dicts - The locale dictionaries to register.
+   * @returns {void}
+   * @throws Will throw an error if an unexpected `get` call is made.
+   */
   register(entry, component) {
     records.set(entry.name, { entry, component });
     allRecords.push({ entry, component });
@@ -162,11 +188,19 @@ const slotsStub = {
     for (const rec of allRecords) if (rec.entry.name === name) list.push(rec);
     return list.map((rec) => ({ options: rec.entry }));
   },
-  /** getVersion implementation. */
+  /**
+   * Returns the version number of the system.
+   *
+   * @returns {number} The version number.
+   */
   getVersion() {
     return 1;
   },
-  /** subscribe implementation. */
+  /**
+   * Subscribes to receive updates for a specific entry.
+   *
+   * @returns {function} A subscription function that returns an unsubscribe function.
+   */
   subscribe() {
     return () => {};
   },
@@ -205,32 +239,69 @@ const ctxStub = {
       const dicts = localeEntries.get(ns);
       return (key) => (dicts && dicts.zh[key] !== undefined ? dicts.zh[key] : key);
     },
-    /** getSnapshot implementation. */
+    /**
+     * Retrieves the current connection snapshot.
+     *
+     * Guarantees a connection object if the document is open and the connection is loopback.
+     * Throws an error for any unexpected `name` other than "connection".
+     */
     getSnapshot() {
       return { revision: localeRevision };
     },
-    /** subscribe implementation. */
+    /**
+     * Subscribes to a settings effect, executing the provided function with the current settings.
+     * The function is called with the settings object, which includes `describe` and `openDocument`.
+     * If the subscription is successful, the function is executed; otherwise, an error is thrown.
+     */
     subscribe() {
       return () => {};
     },
   },
   layout: {
-    /** toggleSidebar implementation. */
-    /** toggleSidebar implementation. */
+    /**
+     * Toggles the sidebar visibility.
+     *
+     * The caller must ensure that the sidebar's visibility state is toggled between visible and hidden.
+     * This function returns a function that hides the sidebar when called.
+     * If the sidebar is already hidden, attempting to hide it again has no effect.
+     */
+    /**
+     * Toggles the sidebar visibility.
+     *
+     * This function executes a side effect by calling the provided `fn` function.
+     * It returns a cleanup function that can be used to revert the sidebar state.
+     *
+     * On failure, an error is thrown.
+     */
     toggleSidebar() {},
   },
   workspaces: {
-    /** startSession implementation. */
-    /** startSession implementation. */
+    /**
+     * Retrieves the current locale snapshot.
+     *
+     * Guarantees a connection object if the document is open and the connection is loopback.
+     * Throws an error for any unexpected `name` other than "connection".
+     */
+    /**
+     * Subscribes to a settings effect, executing the provided function with the current settings.
+     *
+     * Guarantees the execution of the provided function with the current settings upon subscription.
+     * Throws an error if the subscription is attempted with an unexpected name.
+     */
     startSession() {},
   },
   slots: slotsStub,
 };
 clientModule.apply(ctxStub);
 
-const /** assertRegistered implementation. */
-  assertRegistered = (name, reason) =>
-    assert.ok(records.has(name), `${reason}: ${name} not registered`);
+/**
+ * Retrieves the current locale settings snapshot.
+ *
+ * Guarantees a connection object with the `revision` property if the locale is registered.
+ * Throws an error if the locale is not registered or if the connection is not loopback.
+ */
+const assertRegistered = (name, reason) =>
+  assert.ok(records.has(name), `${reason}: ${name} not registered`);
 // @dsh-stack/sidebar-shell is the canonical declarer of the `sidebar` slot and
 // its children. Two entries may not declare the same child slot, so tweaks must
 // not register a `sidebar` root of its own -- doing so made the client loader
@@ -277,6 +348,23 @@ assert.equal(sectionOptions.order, 0);
 assert.equal(typeof sectionOptions.label, "function");
 assert.equal(sectionOptions.children["settings.general.item"].kind, "list");
 
+// The Skills/Hooks/Scripts browser is named for what it holds. A section
+// called "Customization" nested in the Customization group was the collision
+// #119/#235 reported and #239 resolved, so the old id must not come back.
+const skillsRec = allRecords.find(
+  (r) => r.entry.name === "settings.section" && r.entry.id === "skills-hooks",
+);
+assert.ok(skillsRec, "skills-hooks settings section must be registered");
+assert.equal(skillsRec.entry.label(), "Skills & Hooks");
+assert.ok(
+  !allRecords.some((r) => r.entry.name === "settings.section" && r.entry.id === "customization"),
+  "the settings section named after its own group must not be re-registered",
+);
+assert.ok(
+  allRecords.some((r) => r.entry.name === "settings.section.icon" && r.entry.id === "skills-hooks"),
+  "the skills-hooks section keeps a nav glyph under its own id",
+);
+
 const actionOptions = records.get("settings.action").entry;
 assert.equal(actionOptions.id, "open-document");
 
@@ -287,7 +375,20 @@ const generalRow = rows.find((r) => r.id === "general");
 assert.ok(generalRow, "general row must be in sections snapshot");
 assert.equal(generalRow.order, 0);
 assert.equal(generalRow.label, "通用设置");
-assert.deepEqual(shellInjected.hooks.onboardingSteps.getSnapshot(), []);
+
+// tweaks shadows client-ui-settings-models' "welcome-notice"
+// settings.onboarding entry (same id, lower priority) so the "Internal
+// Testing Notice" toggle actually gates it -- see issue #233.
+const onboardingRec = allRecords.find(
+  (r) => r.entry.name === "settings.onboarding" && r.entry.id === "welcome-notice",
+);
+assert.ok(onboardingRec, "welcome-notice onboarding override must be registered");
+assert.equal(onboardingRec.entry.priority, -10);
+assert.equal(onboardingRec.entry.order, -100);
+assert.equal(typeof onboardingRec.component, "function");
+assert.deepEqual(shellInjected.hooks.onboardingSteps.getSnapshot(), [
+  { id: "welcome-notice", order: -100 },
+]);
 
 rmSync(root, { recursive: true, force: true });
 console.log("plugin check passed");

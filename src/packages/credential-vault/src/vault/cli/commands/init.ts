@@ -12,7 +12,14 @@ import { writePrivateFile } from "../../files.js";
 
 const CONFIG_SCHEMA_VERSION = 1 as const;
 
-/** initCommand implementation. */
+/**
+ * Initializes a new Vault directory with a configuration and master key.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param io - The input/output interface for the CLI.
+ * @returns 0 if successful, or an error code if a vault already exists.
+ * @throws If a vault already exists at the specified directory.
+ */
 export async function initCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const directory = resolveVaultDirectory(io.env, io.home);
   if (await readVaultConfig(directory))

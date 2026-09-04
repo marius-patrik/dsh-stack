@@ -18,7 +18,16 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 export const geminiOauthCreds: Detector = {
   name: "gemini-oauth-creds",
   provider: "google",
-  /** detect implementation. */
+  /**
+   * Detects and returns OAuth credentials for the specified provider.
+   *
+   * Guarantees an array of secret material objects if credentials are found;
+   * otherwise, returns an empty array.
+   *
+   * @param source - The source providing the file paths and reading capabilities.
+   * @param context - Additional context for the detection process.
+   * @returns An array of secret material objects containing OAuth credentials or an empty array.
+   */
   async detect(source, context) {
     const file = joinSource(source.home, ".gemini/oauth_creds.json");
     const document = parseJson(await source.readFile(file));

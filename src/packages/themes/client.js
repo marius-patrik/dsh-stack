@@ -23,7 +23,16 @@ window.__ModuleLoader__.load({
      * the section + glyph re-register through the slot ledger.
      */
     var THEMES_ROUTE = "/themes.json";
-    /** createThemeObservable implementation. */
+    /**
+     * Creates an observable that tracks theme changes.
+     *
+     * - Emits the current theme snapshot when created.
+     * - Notifies all subscribed listeners on theme changes.
+     * - Disposes of the observer when the dispose function is called.
+     *
+     * @param {Context} ctx - The context providing the theme and change event.
+     * @returns {Observable} An observable that provides the current theme snapshot and allows subscribing to theme changes.
+     */
     function createThemeObservable(ctx) {
       var listeners = new Set();
       var snapshot = ctx.theme.getTheme();
@@ -46,7 +55,14 @@ window.__ModuleLoader__.load({
         dispose: off,
       };
     }
-    /** applyBorderStyle implementation. */
+    /**
+     * Applies the provided border style to the document if the document is defined.
+     *
+     * Guarantees the border style is set on the element with id 'dsh-border-style-override'.
+     * If the document is not defined, no action is taken.
+     *
+     * @param {string} style - The border style to apply.
+     */
     function applyBorderStyle(style) {
       if (typeof document === "undefined") return;
       var id = "dsh-border-style-override";
@@ -88,7 +104,14 @@ window.__ModuleLoader__.load({
       }
     }
 
-    /** applyOledStyles implementation. */
+    /**
+     * Applies OLED-specific styles to the document based on the provided style type.
+     *
+     * Guarantees the document's root element or specific classes receive the appropriate
+     * border styles and text content changes for OLED compatibility.
+     *
+     * @param {boolean} isOled - If true, applies styles for OLED display; otherwise, clears styles.
+     */
     function applyOledStyles(isOled) {
       if (typeof document === "undefined") return;
       var id = "dsh-oled-style-override";
@@ -160,33 +183,6 @@ window.__ModuleLoader__.load({
       }
     }
 
-    /** ThemesGlyph implementation. */
-    function ThemesGlyph(props) {
-      var React = require("react");
-      var size = (props && props.size) || 16;
-      return React.createElement(
-        "svg",
-        {
-          width: size,
-          height: size,
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          strokeWidth: "2",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          className: "themes-navGlyph dsh-icon-animated",
-        },
-        React.createElement("circle", { cx: "13.5", cy: "6.5", r: ".5", fill: "currentColor" }),
-        React.createElement("circle", { cx: "17.5", cy: "10.5", r: ".5", fill: "currentColor" }),
-        React.createElement("circle", { cx: "8.5", cy: "7.5", r: ".5", fill: "currentColor" }),
-        React.createElement("circle", { cx: "6.5", cy: "12.5", r: ".5", fill: "currentColor" }),
-        React.createElement("path", {
-          d: "M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z",
-        }),
-      );
-    }
-
     /**
      * Renders a titled group of selectable choice buttons (theme mode, border style, etc.):
      * a heading row above a responsive grid of buttons, each showing a label/description
@@ -194,6 +190,7 @@ window.__ModuleLoader__.load({
      * so both use the identical group/button styling.
      */
     function createChoiceButtonGroup(title, options, isSelectedFn, onSelectFn) {
+      var h = require("react").createElement;
       return h(
         "div",
         {
@@ -270,7 +267,12 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** ThemesSection implementation. */
+    /**
+     * Displays a theme section with a style that changes based on the `isSelected` state.
+     * The section is clickable, changing its border and background when selected.
+     *
+     * @param {boolean} isSelected - Indicates whether the theme section is selected.
+     */
     function ThemesSection(props) {
       var React = require("react");
       var h = React.createElement;
@@ -304,33 +306,45 @@ window.__ModuleLoader__.load({
       var showHeroBanner = heroBannerState[0],
         setShowHeroBanner = heroBannerState[1];
 
-      var /** setBorderChoice implementation. */
-        setBorderChoice = function (style) {
-          setBorderStyle(style);
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_border_style", style);
-            }
-          } catch (e) {}
-          applyBorderStyle(style);
-          if (typeof window !== "undefined")
-            window.dispatchEvent(new CustomEvent("dsh:settings-change"));
-        };
-
-      var /** toggleHeroBanner implementation. */
-        toggleHeroBanner = function () {
-          var next = !showHeroBanner;
-          setShowHeroBanner(next);
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_show_hero_banner", next ? "true" : "false");
-            }
-          } catch (e) {}
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("dsh:settings-change"));
-            window.dispatchEvent(new Event("storage"));
+      /**
+       * Displays a theme section that changes its border and background style based on the `isSelected` state.
+       * The section is clickable, and its appearance updates to reflect the selection status.
+       *
+       * @param {boolean} isSelected - Indicates whether the theme section is selected, affecting its border and background style.
+       * @returns {JSX.Element} - Returns a theme section element with styled borders and backgrounds.
+       */
+      var setBorderChoice = function (style) {
+        setBorderStyle(style);
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_border_style", style);
           }
-        };
+        } catch (e) {}
+        applyBorderStyle(style);
+        if (typeof window !== "undefined")
+          window.dispatchEvent(new CustomEvent("dsh:settings-change"));
+      };
+
+      /**
+       * Toggles the visibility of the hero banner based on user preferences.
+       *
+       * Guarantees: Sets the hero banner visibility to the opposite of its current state.
+       * Returns: The new state of the hero banner.
+       * Fails: If localStorage is unavailable, the banner state remains unchanged.
+       */
+      var toggleHeroBanner = function () {
+        var next = !showHeroBanner;
+        setShowHeroBanner(next);
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_show_hero_banner", next ? "true" : "false");
+          }
+        } catch (e) {}
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("dsh:settings-change"));
+          window.dispatchEvent(new Event("storage"));
+        }
+      };
 
       var groups = {};
       for (var i = 0; i < themes.length; i++) {
@@ -385,37 +399,44 @@ window.__ModuleLoader__.load({
               : null,
           );
         };
-      var /** schemeGroup implementation. */
-        schemeGroup = function (scheme) {
-          var list = groups[scheme];
-          if (!list || list.length === 0) return null;
-          return h(
+      /**
+       * Sets the hero banner visibility state for the current theme group.
+       *
+       * Guarantees that the hero banner visibility is stored in localStorage and
+       * dispatches events to notify of the change.
+       *
+       * Fails silently if localStorage operations are not supported or fail.
+       */
+      var schemeGroup = function (scheme) {
+        var list = groups[scheme];
+        if (!list || list.length === 0) return null;
+        return h(
+          "div",
+          { key: scheme, style: { display: "grid", gap: "8px" } },
+          h(
             "div",
-            { key: scheme, style: { display: "grid", gap: "8px" } },
-            h(
-              "div",
-              {
-                style: {
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "var(--dsw-alias-label-secondary)",
-                },
+            {
+              style: {
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "var(--dsw-alias-label-secondary)",
               },
-              scheme === "light" ? "Light Palettes" : "Dark Palettes",
-            ),
-            h(
-              "div",
-              {
-                style: {
-                  display: "grid",
-                  gap: "8px",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                },
+            },
+            scheme === "light" ? "Light Palettes" : "Dark Palettes",
+          ),
+          h(
+            "div",
+            {
+              style: {
+                display: "grid",
+                gap: "8px",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
               },
-              list.map(themeButton),
-            ),
-          );
-        };
+            },
+            list.map(themeButton),
+          ),
+        );
+      };
       var currentScheme = snapshot && snapshot.active ? snapshot.active.colorScheme : "dark";
 
       var isOledActive = snapshot && snapshot.active ? snapshot.active.id === "oled" : false;
@@ -587,23 +608,34 @@ window.__ModuleLoader__.load({
     /** apply implementation. */
     function apply(ctx) {
       var themeObservable;
-      var /** getSavedTheme implementation. */
-        getSavedTheme = function () {
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              return window.localStorage.getItem("dsh_active_theme");
-            }
-          } catch (e) {}
-          return null;
-        };
-      var /** saveActiveTheme implementation. */
-        saveActiveTheme = function (id) {
-          try {
-            if (typeof window !== "undefined" && window.localStorage) {
-              window.localStorage.setItem("dsh_active_theme", id);
-            }
-          } catch (e) {}
-        };
+      /**
+       * Returns the currently saved theme configuration.
+       *
+       * Returns an object containing theme styles and settings.
+       * Throws an error if no theme is saved or invalid data is encountered.
+       */
+      var getSavedTheme = function () {
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            return window.localStorage.getItem("dsh_active_theme");
+          }
+        } catch (e) {}
+        return null;
+      };
+      /**
+       * Saves the current active theme settings.
+       *
+       * Guarantees the theme settings are applied to the application.
+       * Returns nothing.
+       * Fails silently if the theme settings cannot be saved.
+       */
+      var saveActiveTheme = function (id) {
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("dsh_active_theme", id);
+          }
+        } catch (e) {}
+      };
 
       // Initialize border styles and OLED styles on boot
       try {
@@ -694,12 +726,15 @@ window.__ModuleLoader__.load({
           registrations = [];
         };
       }, "themes: theme directory sync");
+      // The theme directory is one page of the Appearance section, not a
+      // settings section of its own: it registers into the seat Appearance
+      // declares, and keeps its own component, inject face and persistence.
       ctx.slots.inject(
-        "settings.section",
+        "settings.appearance.tab",
         () =>
           ctx.slots.register(
             {
-              name: "settings.section",
+              name: "settings.appearance.tab",
               id: "themes",
               order: 30,
               label: () => "Themes",
@@ -718,20 +753,7 @@ window.__ModuleLoader__.load({
             },
             ThemesSection,
           ),
-        "themes: themes settings section",
-      );
-      ctx.slots.inject(
-        "settings.section.icon",
-        () =>
-          ctx.slots.register(
-            {
-              name: "settings.section.icon",
-              id: "themes",
-              order: 0,
-            },
-            ThemesGlyph,
-          ),
-        "themes: themes nav glyph",
+        "themes: appearance themes tab",
       );
     }
     //#endregion

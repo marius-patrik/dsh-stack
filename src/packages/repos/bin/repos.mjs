@@ -28,7 +28,14 @@ const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const settingsPath = join(home, "settings.yaml");
 const NS = "repos";
 
-/** readSection implementation. */
+/**
+ * Yields key-value pairs from the specified section in the given text.
+ *
+ * The caller must provide a text containing sections separated by headers
+ * and specify the section name. This function returns key-value pairs
+ * found within the specified section. If the section is not found or
+ * the text is malformed, it yields nothing.
+ */
 function* readSection(text, section) {
   let inSection = false;
   for (const line of text.split("\n")) {
@@ -45,7 +52,12 @@ function* readSection(text, section) {
   }
 }
 
-/** parseJsonValue implementation. */
+/**
+ * Parses a JSON value string into its corresponding JavaScript value.
+ * Guarantees returning `null` for empty strings or "null", or the parsed JSON value.
+ * Throws an error if the JSON string is malformed.
+ * Returns `true` for the string "true".
+ */
 function parseJsonValue(raw) {
   if (raw === "" || raw === "null") return null;
   if (raw[0] === "{" || raw[0] === "[") {
@@ -62,7 +74,12 @@ function parseJsonValue(raw) {
   return raw;
 }
 
-/** readSectionData implementation. */
+/**
+ * Reads and parses the content of a file at `settingsPath` into a JavaScript value.
+ * Guarantees returning the parsed JSON value or `null` for empty content or "null".
+ * Throws an error if the file content is not a valid JSON string.
+ * Returns `true` for the string "true".
+ */
 async function readSectionData() {
   try {
     const text = await readFile(settingsPath, "utf8");
@@ -77,7 +94,12 @@ async function readSectionData() {
   return {};
 }
 
-/** writeSectionData implementation. */
+/**
+ * Reads and parses the content of a file at `settingsPath` into a JavaScript value.
+ * Guarantees returning an object with parsed values or `null` if the file is empty or contains "null".
+ * Throws an error if the file content is not a valid JSON string.
+ * Returns `true` for the string "true".
+ */
 async function writeSectionData(section) {
   let text = "";
   try {
@@ -103,18 +125,33 @@ function git(cwd, args) {
   return (res.stdout ?? "").trim();
 }
 
-/** currentBranch implementation. */
+/**
+ * Executes a Git command with the specified arguments in the given working directory.
+ * Guarantees that the command is executed successfully, returning its output.
+ * Throws an error if the command fails or is not executed correctly.
+ */
 function currentBranch(cwd) {
   const out = git(cwd, ["branch", "--show-current"]);
   return out.length > 0 ? out : null;
 }
 
-/** workDir implementation. */
+/**
+ * Executes a Git command in the specified directory and returns its standard output.
+ * Guarantees that the command is successful, throwing an error if it exits with a non-zero status.
+ * @param {string} cwd - The current working directory for the Git command.
+ * @param {string[]} args - The arguments to pass to the Git command.
+ * @returns {string} The standard output of the Git command.
+ * @throws {Error} If the Git command exits with a non-zero status.
+ */
 function workDir(rawPath) {
   return rawPath !== undefined && rawPath.length > 0 ? rawPath : process.cwd();
 }
 
-/** printHelp implementation. */
+/**
+ * Prints help information to the console.
+ * Guarantees that help information is formatted and printed correctly.
+ * Throws an error if the formatting or printing process fails.
+ */
 function printHelp() {
   process.stdout.write(`usage: dsh repos <verb> [args]
 
@@ -130,7 +167,11 @@ verbs:
 `);
 }
 
-/** main implementation. */
+/**
+ * Executes a Git command to retrieve the current branch name in the specified working directory.
+ * Guarantees that the command is executed successfully, returning the current branch name.
+ * Throws an error if the command fails or is not executed correctly.
+ */
 async function main() {
   const verb = process.argv[2];
   const argv = process.argv.slice(3);

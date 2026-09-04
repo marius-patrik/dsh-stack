@@ -1,14 +1,18 @@
 // jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling packages
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+
+import assert from "node:assert";
+import { createHash, createHmac, randomBytes } from "node:crypto";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import assert from "node:assert";
+import YAML from "yaml";
 
 const {
   readTweaks,
   resolveHome,
   migrateHome,
   parseBoundPort,
+  parseLaunchToken,
   readProfilePort,
   resolvePort,
   startPortHint,
@@ -19,6 +23,13 @@ const {
   parsePluginInventory,
   summarizePluginMetrics,
   formatPluginMetricsLine,
+  readBrowserSessionSecret,
+  browserSessionCookieHeader,
+  loadCredentialEnv,
+  ensureHeadlessProfile,
+  normalizeCustomProviders,
+  parseWorktreeList,
+  decidePrune,
 } = await import("./lib/index.js");
 
 const root = mkdtempSync(join(tmpdir(), "launcher-"));
@@ -95,6 +106,41 @@ assert.equal(parseBoundPort("nothing bound yet"), null);
 assert.equal(parseBoundPort("dsh web: http://127.0.0.1:99999"), null);
 console.log("parseBoundPort ok");
 
+// parseBoundPort: dsh gateway line (the real API/proxy port) always wins over
+// the harness's own dsh-web line (the web-asset port), regardless of order.
+assert.equal(
+  parseBoundPort("dsh web: http://127.0.0.1:3081\ndsh gateway: http://127.0.0.1:3080\n"),
+  3080,
+);
+assert.equal(
+  parseBoundPort("dsh gateway: http://127.0.0.1:3080\ndsh web: http://127.0.0.1:3081\n"),
+  3080,
+);
+assert.equal(
+  parseBoundPort("dsh gateway: http://127.0.0.1:3080\ndsh gateway: http://127.0.0.1:3082\n"),
+  3082,
+);
+console.log("parseBoundPort gateway-line precedence ok");
+
+// parseLaunchToken: last dsh-web line WITH a token wins, a token-less dsh-web
+// line (the pre-auth boot announcement some harness pins also print) is
+// ignored, and a restart's later token supersedes an earlier one.
+assert.equal(parseLaunchToken("dsh web: http://127.0.0.1:3081\n"), null);
+assert.equal(
+  parseLaunchToken(
+    "dsh web: http://127.0.0.1:3081\ndsh web: http://127.0.0.1:3081/?token=abc-123_XYZ\n",
+  ),
+  "abc-123_XYZ",
+);
+assert.equal(
+  parseLaunchToken(
+    "dsh web: http://127.0.0.1:3081/?token=first-token\ndsh web: http://127.0.0.1:3081/?token=second-token\n",
+  ),
+  "second-token",
+);
+assert.equal(parseLaunchToken("nothing bound yet"), null);
+console.log("parseLaunchToken ok");
+
 // readProfilePort: webserver entry of the profile patch.
 mkdirSync(join(homeB, "profiles", "web"), { recursive: true });
 writeFileSync(
@@ -133,6 +179,20 @@ assert.equal(startPortHint(homeB, "web"), 3081);
 assert.equal(startPortHint(homeB, "headless"), 3080);
 console.log("resolvePort/startPortHint ok");
 
+// resolvePort: a dsh gateway line in the log is runtime truth about the port
+// external consumers actually reach, so it wins even over a pinned profile
+// port (dsh-stack#182). A plain dsh-web line still defers to the profile pin.
+const gatewayLogFile = join(root, "dsh-gateway.log");
+writeFileSync(
+  gatewayLogFile,
+  "dsh web: http://127.0.0.1:3090\ndsh gateway: http://127.0.0.1:3080\n",
+);
+assert.equal(resolvePort(homeB, "web", gatewayLogFile), 3080);
+writeFileSync(gatewayLogFile, "dsh gateway: http://127.0.0.1:3080\n");
+assert.equal(resolvePort(homeB, "web", gatewayLogFile), 3080);
+rmSync(gatewayLogFile);
+console.log("resolvePort gateway-line-over-pin ok");
+
 // route: lifecycle, logs, package verbs, passthrough, dsh-restart alias,
 // dsh-tweaks.command default.
 assert.deepEqual(route(["restart"], { invokedName: "dsh" }), {
@@ -157,6 +217,9 @@ assert.deepEqual(route(["accounts", "list"], { invokedName: "dsh" }), {
   kind: "verb",
   verb: "accounts",
   args: ["list"],
+});
+assert.deepEqual(route(["prune-worktrees"], { invokedName: "dsh" }), {
+  kind: "prune-worktrees",
 });
 assert.deepEqual(route(["plugin", "list"], { invokedName: "dsh" }), {
   kind: "passthrough",
@@ -207,12 +270,13 @@ const inventoryPayload = {
         { entryId: "ui-sidebar", moduleName: "@dsh-stack/ui-sidebar", fiberPhase: "active" },
         { entryId: "lsp", moduleName: "@dsh-stack/lsp", fiberPhase: "failed" },
         { entryId: "hosts", moduleName: "@dsh-stack/hosts", fiberPhase: "pending" },
+        { entryId: "tool-bash", moduleName: "@deepseek-ai/dsh-tool-bash", fiberPhase: null },
       ],
     },
   },
 };
 const entries = parsePluginInventory(inventoryPayload);
-assert.equal(entries.length, 4);
+assert.equal(entries.length, 5);
 assert.equal(entries[2].entryId, "lsp");
 assert.equal(parsePluginInventory({ result: { ok: false, value: { entries: [] } } }), null);
 assert.equal(parsePluginInventory({ result: { ok: true, value: {} } }), null);
@@ -223,17 +287,28 @@ console.log("parsePluginInventory ok");
 
 // summarizePluginMetrics/formatPluginMetricsLine: counts and the banner.
 const metrics = summarizePluginMetrics(entries);
-assert.equal(metrics.total, 4);
+assert.equal(metrics.total, 5);
 assert.equal(metrics.active, 2);
+assert.equal(metrics.notMounted, 1);
+assert.deepEqual(
+  metrics.pending.map((entry) => entry.entryId),
+  ["hosts"],
+);
 assert.deepEqual(
   metrics.failed.map((entry) => entry.entryId),
   ["lsp"],
 );
-assert.deepEqual(summarizePluginMetrics([]), { total: 0, active: 0, failed: [] });
+assert.deepEqual(summarizePluginMetrics([]), {
+  total: 0,
+  active: 0,
+  pending: [],
+  notMounted: 0,
+  failed: [],
+});
 const at = new Date(2026, 0, 2, 3, 4, 5);
 assert.equal(
   formatPluginMetricsLine(metrics, at),
-  "── 03:04:05 · plugins: 4 total · 2 active · 1 failed ──",
+  "── 03:04:05 · plugins: 2 active · 1 pending · 1 not mounted · 1 failed ──",
 );
 assert.equal(formatPluginMetricsLine(null, at), "── 03:04:05 · plugins: server not answering ──");
 console.log("plugin metrics ok");
@@ -247,7 +322,210 @@ assert.equal(readLogTail(logFile, 50), "l1\nl2\nl3\n");
 assert.equal(readLogTail(join(root, "nope.log"), 50), null);
 console.log("logs helpers ok");
 
+// readBrowserSessionSecret + browserSessionCookieHeader: read the same
+// on-disk shape harness's dsh-credentials-local writes, and mint a cookie an
+// independent reimplementation of browser-auth.ts's own verification logic
+// (HMAC-SHA256 over base64url JSON, matching cookie name) accepts.
+/** Base64url-encode, matching browser-session-cookie.ts's own encoder. */
+function encodeBase64Url(value) {
+  return value.toString("base64").replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+/**
+ * Verifies a minted cookie against an independent reimplementation of
+ * harness's browser-auth.ts decode/HMAC-check logic, so this test proves the
+ * cookie is actually acceptable rather than just round-tripping the
+ * package's own encoder against itself.
+ */
+function independentlyVerifyCookie(cookieHeader, secret, authority) {
+  const eq = cookieHeader.indexOf("=");
+  const name = cookieHeader.slice(0, eq);
+  const value = cookieHeader.slice(eq + 1);
+  const expectedName =
+    "dsh-auth-" + encodeBase64Url(createHash("sha256").update(authority).digest());
+  assert.equal(name, expectedName, "cookie name must be dsh-auth-<sha256(authority)>");
+  const [version, body, signature] = value.split(".");
+  assert.equal(version, "v1");
+  const expectedSignature = encodeBase64Url(createHmac("sha256", secret).update(body).digest());
+  assert.equal(signature, expectedSignature, "HMAC signature must verify against the secret");
+  const payload = JSON.parse(
+    Buffer.from(body.replaceAll("-", "+").replaceAll("_", "/"), "base64").toString("utf8"),
+  );
+  assert.equal(payload.version, 1);
+  assert.equal(payload.authority, authority);
+  assert.ok(payload.expiresAt > payload.issuedAt);
+  return payload;
+}
+
+const authHome = join(root, "auth-home");
+mkdirSync(authHome, { recursive: true });
+const realSecretBytes = randomBytes(32);
+const realSecret = encodeBase64Url(realSecretBytes);
+writeFileSync(
+  join(authHome, ".credentials.yaml"),
+  [
+    "version: 1",
+    "refs: {}",
+    "records:",
+    "  client-connection/browser-session:",
+    "    kind: grant",
+    "    payload:",
+    "      version: 1",
+    `      secret: ${realSecret}`,
+    "",
+  ].join("\n"),
+);
+const readSecret = await readBrowserSessionSecret(authHome);
+assert.ok(readSecret !== undefined, "secret must be read from a well-formed credentials file");
+assert.ok(readSecret.equals(realSecretBytes), "read secret must round-trip exactly");
+const cookie = browserSessionCookieHeader(readSecret, "127.0.0.1:3080");
+independentlyVerifyCookie(cookie, realSecretBytes, "127.0.0.1:3080");
+
+// Missing file, missing record, and wrong-shaped record all degrade to
+// undefined rather than throwing.
+assert.equal(await readBrowserSessionSecret(join(root, "nope-home")), undefined);
+const emptyHome = join(root, "empty-home");
+mkdirSync(emptyHome, { recursive: true });
+writeFileSync(join(emptyHome, ".credentials.yaml"), "version: 1\nrefs: {}\nrecords: {}\n");
+assert.equal(await readBrowserSessionSecret(emptyHome), undefined);
+const wrongVersionHome = join(root, "wrong-version-home");
+mkdirSync(wrongVersionHome, { recursive: true });
+writeFileSync(
+  join(wrongVersionHome, ".credentials.yaml"),
+  [
+    "version: 1",
+    "refs: {}",
+    "records:",
+    "  client-connection/browser-session:",
+    "    kind: grant",
+    "    payload:",
+    "      version: 2",
+    `      secret: ${realSecret}`,
+    "",
+  ].join("\n"),
+);
+assert.equal(await readBrowserSessionSecret(wrongVersionHome), undefined);
+console.log(
+  "browser-session cookie ok (secret round-trip, independent HMAC verification, degrade-to-undefined)",
+);
+
+// loadCredentialEnv: populate refs into env, non-overwrite, missing file handling.
+const testEnv = { EXISTING_KEY: "existing-value" };
+const credsFile = join(authHome, ".credentials.yaml");
+writeFileSync(
+  credsFile,
+  [
+    "version: 1",
+    "refs:",
+    "  EXISTING_KEY: new-value",
+    "  LOADED_KEY: loaded-value",
+    "records: {}",
+  ].join("\n"),
+);
+loadCredentialEnv(credsFile, testEnv);
+assert.equal(testEnv.EXISTING_KEY, "existing-value", "existing env key must not be overwritten");
+assert.equal(testEnv.LOADED_KEY, "loaded-value", "missing env key must be loaded from refs");
+loadCredentialEnv(join(root, "non-existent-creds.yaml"), testEnv);
+assert.equal(testEnv.LOADED_KEY, "loaded-value");
+console.log("loadCredentialEnv ok");
+
+// normalizeCustomProviders: aligns mistral-conversations and google-generative-ai.
+const rawProviders = [
+  { id: "p1", api: "openai-completions", baseURL: "https://example.com/v1" },
+  { id: "p2", api: "mistral-conversations" },
+  { id: "p3", api: "google-generative-ai" },
+];
+const normalized = normalizeCustomProviders(rawProviders);
+assert.equal(normalized[0].api, "openai-completions");
+assert.equal(normalized[1].api, "openai-completions");
+assert.equal(normalized[1].baseURL, "https://api.mistral.ai/v1");
+assert.equal(normalized[2].api, "openai-completions");
+assert.equal(normalized[2].baseURL, "https://generativelanguage.googleapis.com/v1beta/openai/");
+console.log("normalizeCustomProviders ok");
+
+// ensureHeadlessProfile: package.json, symlinks, cordis.patch.yml.
+const headlessHome = join(root, "headless-home");
+mkdirSync(headlessHome, { recursive: true });
+writeFileSync(
+  join(headlessHome, "settings.yaml"),
+  [
+    "providers:",
+    "  custom:",
+    "    - id: test-provider",
+    "      name: Test Provider",
+    "      api: openai-completions",
+    "      baseURL: https://test.api/v1",
+  ].join("\n"),
+);
+const pkgDir = join(import.meta.dirname ?? ".");
+ensureHeadlessProfile({ home: headlessHome, pkgDir });
+const headlessPkgJson = JSON.parse(
+  readFileSync(join(headlessHome, "profiles", "headless", "package.json"), "utf8"),
+);
+assert.equal(headlessPkgJson.dependencies["@dsh-stack/pack-bundle-headless"], "^0.1.0");
+assert.ok(headlessPkgJson.dsh.profile.bundles.includes("@dsh-stack/pack-bundle-headless"));
+const headlessPatch = YAML.parse(
+  readFileSync(join(headlessHome, "profiles", "headless", "cordis.patch.yml"), "utf8"),
+);
+assert.ok(Array.isArray(headlessPatch));
+const piAiEntry = headlessPatch.find((entry) => entry.id === "llm-pi-ai");
+assert.ok(piAiEntry !== undefined);
+assert.equal(piAiEntry.config.providers[0].id, "test-provider");
+console.log("ensureHeadlessProfile ok");
+
+// parseWorktreeList: porcelain parsing, main-checkout flagging, detached entries.
+const porcelain = [
+  "worktree /repo",
+  "HEAD aaa",
+  "branch refs/heads/main",
+  "",
+  "worktree /repo/worktrees/issue-1",
+  "HEAD bbb",
+  "branch refs/heads/fix/1-thing",
+  "",
+  "worktree /repo/worktrees/detached",
+  "HEAD ccc",
+  "detached",
+  "",
+].join("\n");
+const worktrees = parseWorktreeList(porcelain);
+assert.equal(worktrees.length, 3);
+assert.deepEqual(worktrees[0], { path: "/repo", branch: "main", isMain: true });
+assert.deepEqual(worktrees[1], {
+  path: "/repo/worktrees/issue-1",
+  branch: "fix/1-thing",
+  isMain: false,
+});
+assert.deepEqual(worktrees[2], { path: "/repo/worktrees/detached", branch: null, isMain: false });
+console.log("parseWorktreeList ok");
+
+// decidePrune: every unsafe state keeps with a reason; fully safe prunes.
+assert.deepEqual(decidePrune({ branch: null, clean: true, unpushed: 0, hasMergedPr: true }), {
+  action: "keep",
+  reason: "detached HEAD",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: false, unpushed: 0, hasMergedPr: true }), {
+  action: "keep",
+  reason: "uncommitted changes",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: null, hasMergedPr: true }), {
+  action: "keep",
+  reason: "no upstream branch",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: 2, hasMergedPr: true }), {
+  action: "keep",
+  reason: "2 unpushed commit(s)",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: 0, hasMergedPr: false }), {
+  action: "keep",
+  reason: "no merged PR for branch",
+});
+assert.deepEqual(decidePrune({ branch: "b", clean: true, unpushed: 0, hasMergedPr: true }), {
+  action: "prune",
+});
+console.log("decidePrune ok");
+
 rmSync(root, { recursive: true, force: true });
+
 console.log("plugin check passed");
 
 // jscpd:ignore-end

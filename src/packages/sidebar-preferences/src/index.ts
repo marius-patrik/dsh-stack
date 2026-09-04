@@ -1,10 +1,29 @@
-import { publishCrossBundle, subscribeCrossBundle } from "@dsh-stack/plugin-kit";
+export const name = "sidebar-preferences";
+export const inject: string[] = [];
+
+/**
+ * Host loader entry for the browser-only sidebar-preferences plugin: mounting
+ * it puts the package on the loader's entry list so the client-modules
+ * scanner picks up its `dsh.client` bundle.
+ */
+export function apply(): void {}
+
+/**
+ * The sidebar tree's layout (#103): `"sections"` renders each group
+ * (Pinned, Containers, Terminals, Host Machine, Global, Archived) as its own
+ * visually separated block, the shape the tree has always had. `"unified"`
+ * renders the same groups as one continuous tree with no dividers between
+ * them.
+ */
+export type SidebarTreeLayout = "sections" | "unified";
 
 export interface SidebarPreferences {
   readonly showBrandLogo: boolean;
   readonly showNewConversation: boolean;
   /** Whether the sidebar renders the file/workspace tree region. */
   readonly showFiles: boolean;
+  /** Whether the sidebar tree renders as discrete sections or one unified tree. */
+  readonly treeLayout: SidebarTreeLayout;
 }
 
 export type SidebarPreferenceKey = keyof SidebarPreferences;
@@ -13,21 +32,22 @@ export const defaultSidebarPreferences: SidebarPreferences = {
   showBrandLogo: true,
   showNewConversation: true,
   showFiles: true,
+  treeLayout: "sections",
 };
 
 const STORAGE_KEY = "dsh-stack.sidebar.preferences";
 
 /**
- * Cross-bundle change channel. This module is inlined into every consuming
- * client bundle, so a module-local listener set would only ever notify the copy
- * that was mutated -- see plugin-kit's cross-bundle-channel.
+ * Change listeners. `sidebarPreferences` is a singleton -- its client plugin
+ * provides it as the cordis `sidebarPreferences` service, so every surface
+ * shares this one listener set (see #108).
  */
-const CHANGE_CHANNEL = "dsh-stack.sidebar.preferences:changed";
+const listeners = new Set<() => void>();
 
 /**
  * Reads persisted sidebar preferences, falling back to defaults. Deliberately
- * uncached: `localStorage` is the single source of truth shared by every
- * bundled copy of this module, so caching here would let copies diverge.
+ * uncached: `localStorage` is the durable source of truth, so caching here
+ * would let a fresh page load miss a change made in another tab.
  */
 function read(): SidebarPreferences {
   let parsed: Partial<SidebarPreferences> = {};
@@ -42,6 +62,7 @@ function read(): SidebarPreferences {
     showNewConversation:
       parsed.showNewConversation ?? defaultSidebarPreferences.showNewConversation,
     showFiles: parsed.showFiles ?? defaultSidebarPreferences.showFiles,
+    treeLayout: parsed.treeLayout ?? defaultSidebarPreferences.treeLayout,
   };
 }
 
@@ -52,9 +73,9 @@ function write(next: SidebarPreferences): void {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // Storage is unavailable (private mode, blocked site data); the change
-    // still broadcasts so live subscribers re-render for this page's lifetime.
+    // still notifies live subscribers so they re-render for this page's lifetime.
   }
-  publishCrossBundle(CHANGE_CHANNEL);
+  for (const listener of listeners) listener();
 }
 
 export const sidebarPreferences = {
@@ -63,7 +84,7 @@ export const sidebarPreferences = {
     return read();
   },
   /** Updates one sidebar preference when its value changes. */
-  set(key: SidebarPreferenceKey, value: boolean): void {
+  set<K extends SidebarPreferenceKey>(key: K, value: SidebarPreferences[K]): void {
     const current = read();
     if (current[key] === value) return;
     write({ ...current, [key]: value });
@@ -75,17 +96,20 @@ export const sidebarPreferences = {
       showBrandLogo: patch.showBrandLogo ?? current.showBrandLogo,
       showNewConversation: patch.showNewConversation ?? current.showNewConversation,
       showFiles: patch.showFiles ?? current.showFiles,
+      treeLayout: patch.treeLayout ?? current.treeLayout,
     };
     if (
       next.showBrandLogo === current.showBrandLogo &&
       next.showNewConversation === current.showNewConversation &&
-      next.showFiles === current.showFiles
+      next.showFiles === current.showFiles &&
+      next.treeLayout === current.treeLayout
     )
       return;
     write(next);
   },
   /** Subscribes to preference changes and returns an unsubscribe function. */
   subscribe(listener: () => void): () => void {
-    return subscribeCrossBundle(CHANGE_CHANNEL, listener);
+    listeners.add(listener);
+    return () => listeners.delete(listener);
   },
 };

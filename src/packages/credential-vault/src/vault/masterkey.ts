@@ -89,7 +89,14 @@ export class StaticMasterKey implements MasterKeySource {
     this.description = description;
   }
 
-  /** key implementation. */
+  /**
+   * Returns a cached or newly derived Scrypt key as a Uint8Array.
+   *
+   * Guarantees a Scrypt key is returned, either from cache or by deriving from the passphrase and parameters.
+   * On failure, returns the cached key if available; otherwise, attempts to load or create parameters and derive the key.
+   *
+   * @returns A Promise resolving to a Uint8Array representing the Scrypt key.
+   */
   async key(): Promise<Uint8Array> {
     return Uint8Array.from(this.#key);
   }
@@ -135,7 +142,12 @@ export class PassphraseMasterKey implements MasterKeySource {
     return this.#file;
   }
 
-  /** key implementation. */
+  /**
+   * Provides the key as a Uint8Array, loading or creating it if not cached.
+   *
+   * @returns A Promise resolving to the key as a Uint8Array.
+   * @throws Will throw an error if the directory is not provided when accessing the key.
+   */
   async key(): Promise<Uint8Array> {
     if (this.#cached) return Uint8Array.from(this.#cached);
     const stored = await this.#loadOrCreateParameters();
@@ -189,7 +201,12 @@ export class KeyFileMasterKey implements MasterKeySource {
     this.#file = path.join(path.resolve(options.directory), options.fileName ?? KEY_FILE);
   }
 
-  /** keyFile implementation. */
+  /**
+   * Provides the path to the key file and loads or creates the key if not cached.
+   *
+   * @returns A Promise resolving to the key as a Uint8Array.
+   * @throws Will throw an error if the directory is not provided.
+   */
   get keyFile(): string {
     return this.#file;
   }
@@ -257,7 +274,14 @@ export function sameKey(left: Uint8Array, right: Uint8Array): boolean {
   return timingSafeEqual(Buffer.from(left), Buffer.from(right));
 }
 
-/** parseKdfFile implementation. */
+/**
+ * Parses a KDF file string into its salt and scrypt parameters.
+ *
+ * @param raw - The JSON-encoded string representing the KDF file.
+ * @param file - The name of the file being parsed, used for error messages.
+ * @returns An object containing the salt as a Uint8Array and the scrypt parameters.
+ * @throws Will throw an error if the JSON is malformed or if the parameters are invalid.
+ */
 function parseKdfFile(
   raw: string,
   file: string,

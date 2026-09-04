@@ -9,7 +9,13 @@ export const githubKeychain: Detector = {
   name: "github-keychain",
   // jscpd:ignore-start -- mirrors detectors/claude-credentials.ts's small detector shape for a different credential source
   provider: "github",
-  /** detect implementation. */
+  /**
+   * Detects GitHub CLI keychain tokens for the specified provider.
+   *
+   * Returns an array of findings if any are detected; otherwise, returns an empty array.
+   * If the source platform is not "darwin", no tokens are detected.
+   * On failure, returns an empty array.
+   */
   async detect(source, context) {
     if (source.platform !== "darwin") return [];
     const services = (await source.keychainItems())

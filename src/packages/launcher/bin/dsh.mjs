@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * dsh — homeRoot/command-aware launcher and service manager for the DeepSeek
  * Harness. Canonical TypeScript implementation lives in src/; this bin is the
@@ -12,22 +13,26 @@
  *   dsh logs [-f] [-n lines]   View or tail the web server logs
  *   dsh attach [-n lines] [-i seconds]  Live attached view: streamed log plus
  *                                       a refreshing plugin-metrics line
+ *   dsh prune-worktrees        Remove worktrees whose PR has merged (also runs
+ *                              automatically after start/restart)
  *   dsh accounts|theme|lsp|formatter|agents [args]   Owning package CLIs
  *   dsh [args...]    Fall through to the harness CLI
  */
 
-import { basename } from "node:path";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import {
   attachToServer,
+  ensureHeadlessProfile,
   findHarnessDir,
   findListenerPid,
   followLog,
   harnessCli,
+  loadCredentialEnv,
   migrateHome,
   packageDir,
+  pruneMergedWorktrees,
   readLogTail,
   readTweaks,
   resolveHome,
@@ -61,7 +66,23 @@ function execBin(bin, prefixArgs, args) {
 /** Print the status report for the resolved port. */
 async function showStatus(home, profile) {
   const port = resolvePort(home, profile, logFile);
-  process.stdout.write(`${await statusReport(port, logFile)}\n`);
+  process.stdout.write(`${await statusReport(port, logFile, home, profile)}\n`);
+}
+
+/**
+ * Prune worktrees whose PRs have merged (#269). Best-effort after a successful
+ * start/restart: failures are reported, never fatal to the launch.
+ */
+async function pruneAfterStart(pkgDir) {
+  try {
+    await pruneMergedWorktrees({
+      repoDir: join(pkgDir, "..", "..", ".."),
+      pkgDir,
+      log: (msg) => process.stdout.write(`${msg}\n`),
+    });
+  } catch (err) {
+    process.stderr.write(`dsh: worktree prune failed: ${err?.message ?? err}\n`);
+  }
 }
 
 /** Start the server and report the outcome. Returns false on failure. */
@@ -104,6 +125,7 @@ async function execute(plan, ctx) {
     }
     if (plan.action === "start") {
       if (!(await start(harnessDir, home, profile))) process.exitCode = 1;
+      else await pruneAfterStart(pkgDir);
       return;
     }
     process.stdout.write("dsh: restarting web server...\n");
@@ -111,6 +133,11 @@ async function execute(plan, ctx) {
       process.stdout.write(`${msg}\n`),
     );
     if (!(await start(harnessDir, home, profile))) process.exitCode = 1;
+    else await pruneAfterStart(pkgDir);
+    return;
+  }
+  if (plan.kind === "prune-worktrees") {
+    await pruneAfterStart(pkgDir);
     return;
   }
   if (plan.kind === "logs") {
@@ -131,6 +158,8 @@ async function execute(plan, ctx) {
     }
     await attachToServer({
       port,
+      home,
+      profile,
       logFile,
       lines: plan.lines,
       intervalMs: plan.intervalMs,
@@ -179,8 +208,12 @@ async function main() {
   const tweaks = readTweaks(join(home, "settings.yaml"));
   home = migrateHome(home, tweaks.homeRoot ?? "", (msg) => process.stderr.write(`${msg}\n`));
   env.DSH_HOME = home;
+  loadCredentialEnv(join(home, ".credentials.yaml"), env);
   const profile =
     env.DSH_PROFILE !== undefined && env.DSH_PROFILE.length > 0 ? env.DSH_PROFILE : "web";
+  if (profile === "headless" || process.argv.includes("headless")) {
+    ensureHeadlessProfile({ home, pkgDir });
+  }
   const plan = route(process.argv.slice(2), {
     invokedName: basename(process.argv[1] ?? "dsh"),
     command: tweaks.command,

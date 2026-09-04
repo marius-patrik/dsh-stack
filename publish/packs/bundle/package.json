@@ -49,8 +49,11 @@
     "@dsh-stack/icon-engine": "workspace:*",
     "@dsh-stack/lsp": "workspace:*",
     "@dsh-stack/lucide-animated": "workspace:*",
+    "@dsh-stack/marketplace": "workspace:*",
+    "@dsh-stack/marketplace-source-dsh-stack": "workspace:*",
     "@dsh-stack/profile-runtime": "workspace:*",
     "@dsh-stack/profile-ui": "workspace:*",
+    "@dsh-stack/provider-rotation": "workspace:*",
     "@dsh-stack/providers": "workspace:*",
     "@dsh-stack/repos": "workspace:*",
     "@dsh-stack/sidebar-preferences": "workspace:*",
@@ -78,7 +81,6 @@
     "@dsh-stack/tweak-stats": "workspace:*",
     "@dsh-stack/tweaks": "workspace:*",
     "@dsh-stack/voice": "workspace:*",
-    "@dsh-stack/workspace-files": "workspace:*",
-    "@dsh-stack/workspace-tabs": "workspace:*"
+    "@dsh-stack/workspace-files": "workspace:*"
   }
 }

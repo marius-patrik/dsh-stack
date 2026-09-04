@@ -20,7 +20,8 @@
       "inject": [
         "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-client-ui-slots"
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@dsh-stack/skin-runtime"
       ],
       "platform": "web"
     }
@@ -31,7 +32,6 @@
     "verify": "node verify.mjs"
   },
   "dependencies": {
-    "@dsh-stack/lucide-animated": "workspace:*",
     "@dsh-stack/settings-panel": "workspace:*",
     "@dsh-stack/skin-runtime": "workspace:*"
   },

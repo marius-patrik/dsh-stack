@@ -35,6 +35,13 @@ export type {
 
 export interface QuotaSnapshot {
   provider: string;
+  /**
+   * Human label for this provider (a route's `displayName`, or a configured
+   * route's directory entry name). Lets a per-account breakdown for a
+   * numbered multi-account vendor (`openrouter-2`, ...) show a name instead
+   * of the bare id, without a second lookup back into model settings.
+   */
+  displayName?: string;
   status: "available" | "unknown" | "error";
   used?: number;
   limit?: number;
@@ -64,12 +71,21 @@ export class QuotaRegistry {
     };
   }
 
-  /** snapshot implementation. */
+  /**
+   * Returns the snapshot for the given provider if it exists, or undefined if not found.
+   *
+   * @param provider - The identifier for the quota provider.
+   * @returns The QuotaSnapshot for the provider, or undefined if no snapshot exists.
+   */
   snapshot(provider: string): QuotaSnapshot | undefined {
     return this.snapshots.get(provider);
   }
 
-  /** all implementation. */
+  /**
+   * Returns an array of all QuotaSnapshot instances.
+   *
+   * @returns An array of QuotaSnapshot objects representing the current snapshots.
+   */
   all(): readonly QuotaSnapshot[] {
     return [...this.snapshots.values()];
   }
@@ -175,15 +191,20 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   // registered, so a route that registers after this plugin mounted still
   // gets probed without needing a restart.
   const builtinIds = new Set<string>();
-  const /** syncBuiltinProviders implementation. */
-    syncBuiltinProviders = (): void => {
-      const routes = ctx.providers.list();
-      for (const provider of createBuiltinProviders(read, routes)) {
-        if (builtinIds.has(provider.id)) continue;
-        disposers.push(registry.register(provider));
-        builtinIds.add(provider.id);
-      }
-    };
+  /**
+   * Syncs built-in provider routes by registering new routes not already registered.
+   * Ensures that any new built-in providers added to `ctx.providers` are probed
+   * without requiring a restart. This function does not return any value but
+   * updates the `disposers` and `builtinIds` as side effects.
+   */
+  const syncBuiltinProviders = (): void => {
+    const routes = ctx.providers.list();
+    for (const provider of createBuiltinProviders(read, routes)) {
+      if (builtinIds.has(provider.id)) continue;
+      disposers.push(registry.register(provider));
+      builtinIds.add(provider.id);
+    }
+  };
   syncBuiltinProviders();
   ctx.providers.onChange(syncBuiltinProviders);
 
@@ -197,38 +218,58 @@ export function applyQuotas(ctx: Context, config: QuotasConfig = {}): QuotaRegis
   // generic prober, which would read the plugin's own settings section, find no
   // baseURL there, and report "no endpoint configured" about a route whose
   // endpoint is declared in code.
-  /** covered implementation. */
+  /**
+   * Determines if a route is covered by this plugin.
+   *
+   * Guarantees:
+   * - Returns true if the candidate route is either owned by the plugin or
+   *   configured as a provider.
+   * - Ensures that every owned route is covered, even if it lacks a probe.
+   *
+   * Fails:
+   * - Returns false for routes not owned or configured by the plugin.
+   */
   const covered = (candidate: string): boolean =>
     builtinIds.has(candidate) || ctx.providers.has(candidate);
   const configuredIds = new Set<string>();
-  const /** syncConfiguredProviders implementation. */
-    syncConfiguredProviders = (): void => {
-      const llm = ctx.get("llm") as
-        | {
-            listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
-          }
-        | undefined;
-      const settingsProvider = ctx.get("settings") as
-        | {
-            describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
-          }
-        | undefined;
-      if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
-        return;
-      const listConfigurable = llm.listConfigurableProviders.bind(llm);
-      const describe = settingsProvider.describe.bind(settingsProvider);
-      for (const provider of createConfiguredProviders({
-        listConfigurable,
-        // Verbatim, not redacted: the probe needs the real credential reference,
-        // and this read never leaves the process.
-        describeSettings: () => describe(),
-        readToken: read,
-        covered,
-      })) {
-        disposers.push(registry.register(provider));
-        configuredIds.add(provider.id);
-      }
-    };
+  /**
+   * Synchronizes configured provider IDs with the current context.
+   *
+   * Guarantees:
+   * - Updates the set of configured provider IDs to match the current context.
+   * - Ensures that all providers explicitly configured are included in the set.
+   *
+   * Fails:
+   * - Does nothing if no changes are detected between the current and previous
+   *   context states.
+   */
+  const syncConfiguredProviders = (): void => {
+    const llm = ctx.get("llm") as
+      | {
+          listConfigurableProviders?: () => readonly ConfigurableProviderEntry[];
+        }
+      | undefined;
+    const settingsProvider = ctx.get("settings") as
+      | {
+          describe?: (options?: { redactSecrets?: boolean }) => readonly SettingsDescriptorView[];
+        }
+      | undefined;
+    if (llm?.listConfigurableProviders === undefined || settingsProvider?.describe === undefined)
+      return;
+    const listConfigurable = llm.listConfigurableProviders.bind(llm);
+    const describe = settingsProvider.describe.bind(settingsProvider);
+    for (const provider of createConfiguredProviders({
+      listConfigurable,
+      // Verbatim, not redacted: the probe needs the real credential reference,
+      // and this read never leaves the process.
+      describeSettings: () => describe(),
+      readToken: read,
+      covered,
+    })) {
+      disposers.push(registry.register(provider));
+      configuredIds.add(provider.id);
+    }
+  };
   syncConfiguredProviders();
 
   /** Every provider the registry should refresh on a cycle. */

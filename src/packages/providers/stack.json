@@ -8,11 +8,12 @@
     "lib",
     "cordis.patch.yml",
     "presets",
+    "client",
     "client.js",
     "README.md",
     "package.json",
     "stack.json"
   ],
-  "dependencies": ["stack.library.plugin-kit"],
+  "dependencies": ["stack.library.plugin-kit", "stack.ui.sidebar-preferences"],
   "optionalDependencies": []
 }

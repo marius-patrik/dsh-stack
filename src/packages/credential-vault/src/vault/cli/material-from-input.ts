@@ -141,7 +141,12 @@ export function totpParametersFromInput(raw: string, options: MaterialOptions = 
   });
 }
 
-/** jsonObject implementation. */
+/**
+ * Parses a JSON string into an object if valid, or returns null if invalid.
+ *
+ * @param text - The JSON string to parse.
+ * @returns The parsed object if valid JSON and an object, otherwise null.
+ */
 function jsonObject(text: string): Record<string, unknown> | null {
   if (!text.startsWith("{")) return null;
   try {
@@ -154,7 +159,13 @@ function jsonObject(text: string): Record<string, unknown> | null {
   }
 }
 
-/** stringField implementation. */
+/**
+ * Retrieves the value of a specified field from a document as a string if it exists and is non-empty.
+ *
+ * @param document - The document from which to retrieve the field value.
+ * @param field - The field name to retrieve.
+ * @returns The string value of the field if it exists and is non-empty, otherwise null.
+ */
 export function stringField(document: Record<string, unknown>, field: string): string | null {
   const value = document[field];
   return typeof value === "string" && value.length > 0 ? value : null;

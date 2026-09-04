@@ -31,7 +31,14 @@ export interface RegimeSnapshot {
   };
 }
 
-/** sma implementation. */
+/**
+ * Calculates the Simple Moving Average (SMA) of the given values over the specified period.
+ * Returns the SMA value if the period is valid and values are sufficient; otherwise, returns null.
+ *
+ * @param values - An array of numbers representing the data points.
+ * @param period - The number of periods to consider for the SMA calculation.
+ * @returns The SMA value or null if the period is invalid or insufficient data is available.
+ */
 export function sma(values: readonly number[], period: number): number | null {
   if (period <= 0 || values.length < period) return null;
   let sum = 0;
@@ -39,7 +46,13 @@ export function sma(values: readonly number[], period: number): number | null {
   return sum / period;
 }
 
-/** ema implementation. */
+/**
+ * Calculates the Exponential Moving Average (EMA) of the given data points.
+ *
+ * @param values - An array of numbers representing the data points.
+ * @param period - The number of periods to consider for the EMA calculation.
+ * @returns The EMA value or null if the period is invalid or insufficient data is available.
+ */
 export function ema(values: readonly number[], period: number): number | null {
   return emaSeries(values, period).at(-1) ?? null;
 }
@@ -57,7 +70,13 @@ export function emaSeries(values: readonly number[], period: number): number[] {
   return result;
 }
 
-/** rsi implementation. */
+/**
+ * Calculates the Relative Strength Index (RSI) for a given set of closing prices.
+ *
+ * @param closes - An array of numbers representing the closing prices.
+ * @param period - The number of periods to consider for the RSI calculation (default is 14).
+ * @returns The RSI value or null if the period is invalid or insufficient data is available.
+ */
 export function rsi(closes: readonly number[], period = 14): number | null {
   if (period <= 0 || closes.length <= period) return null;
   let gain = 0;
@@ -87,7 +106,13 @@ export function atr(candles: readonly Candle[], period = 14): number | null {
   return value;
 }
 
-/** adx implementation. */
+/**
+ * Calculates the Average True Range (ATR) of the given candle data.
+ *
+ * @param candles - An array of candlestick data.
+ * @param period - The period for the ATR calculation.
+ * @returns The ATR value or null if the period is invalid or insufficient data is available.
+ */
 export function adx(
   candles: readonly Candle[],
   period = 14,
@@ -144,7 +169,14 @@ export function mfi(candles: readonly Candle[], period = 14): number | null {
   return 100 - 100 / (1 + positive / negative);
 }
 
-/** bollinger implementation. */
+/**
+ * Calculates the Average Directional Index (ADX) for a given set of candle data.
+ *
+ * @param candles - An array of candlestick data.
+ * @param period - The period for the ADX calculation (default is 14).
+ * @returns An object containing the ADX value and the DI+ and DI- values.
+ *          Returns null if the period is invalid or the input data is insufficient.
+ */
 export function bollinger(
   closes: readonly number[],
   period = 20,
@@ -162,7 +194,13 @@ export function bollinger(
   };
 }
 
-/** snapshot implementation. */
+/**
+ * Calculates the Average Directional Index (ADX) for a given set of candle data.
+ *
+ * @param candles - An array of candlestick data providing high, low, close prices, and volume.
+ * @param period - The period for the ADX calculation (default is 14).
+ * @returns An object containing the ADX value and the DI+ and DI- values, or null if invalid period or insufficient data.
+ */
 export function snapshot(candles: readonly Candle[]): RegimeSnapshot {
   const closes = candles.map((candle) => candle.close);
   const ema12 = emaSeries(closes, 12);
@@ -204,7 +242,14 @@ export function snapshot(candles: readonly Candle[]): RegimeSnapshot {
   };
 }
 
-/** trueRanges implementation. */
+/**
+ * Calculates the true range values for a given period of candle data.
+ *
+ * @param closes - An array of closing prices for the period.
+ * @param period - The period for the true range calculation (default is not specified).
+ * @returns An object containing the middle, upper, and lower true range values.
+ *          Returns null if the period is invalid or insufficient data is provided.
+ */
 function trueRanges(candles: readonly Candle[]): number[] {
   return candles.map((candle, index) => {
     const previous = candles[index - 1];

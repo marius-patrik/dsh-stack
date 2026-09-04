@@ -1,10 +1,7 @@
 /**
- * Slim entry point re-assembling the quotas web surface from its
- * decomposed pieces: binary/usage probing, meter-bar/dashboard rendering,
- * and the per-domain route handlers (tmux, docker, filesystem, git,
- * sessions, core quota routes) dispatched in turn by `makeQuotaHandler`.
- * Public API (`QUOTAS_PREFIX`, `mountQuotaWeb`) is unchanged from the
- * previous single-file `web.ts`.
+ * Slim entry point re-assembling the quotas web surface: binary/usage probing,
+ * snapshot telemetry APIs, and per-domain route handlers (tmux, docker, filesystem,
+ * git, sessions, core quota snapshot routes) dispatched in turn by `makeQuotaHandler`.
  * @module providers/quotas/web
  */
 
@@ -30,13 +27,14 @@ export function mountQuotaWeb(ctx: Context, registry: QuotaRegistry): unknown {
     httpCtx.webServer.register({
       kind: "prefix",
       path: QUOTAS_PREFIX,
-      handler: makeQuotaHandler(registry),
+      handler: makeQuotaHandler(httpCtx, registry),
     }),
   );
 }
 
 /** Build the request handler for everything under `/quotas`, dispatching to each domain in turn. */
 function makeQuotaHandler(
+  plugin: Context,
   registry: QuotaRegistry,
 ): (req: IncomingMessage, res: ServerResponse) => void {
   return async (req, res) => {
@@ -47,6 +45,7 @@ function makeQuotaHandler(
       url,
       pathname: url.pathname,
       method: req.method ?? "GET",
+      plugin,
     };
 
     try {

@@ -117,12 +117,52 @@ window.__ModuleLoader__.load({
         hasSubscription: true,
       },
       {
-        id: "other",
-        name: "Other Providers",
-        description: "Mistral, Groq, OpenRouter, and custom API keys",
-        prefixes: ["MISTRAL_", "GROQ_", "OPENROUTER_"],
-        defaultKeys: ["MISTRAL_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY"],
-        probeIds: ["mistral-api", "groq-api", "openrouter-api"],
+        id: "mistral",
+        name: "Mistral",
+        description: "Mistral platform API key",
+        prefixes: ["MISTRAL_"],
+        defaultKeys: ["MISTRAL_API_KEY"],
+        probeIds: ["mistral-api"],
+        oauthProviderId: null,
+        hasSubscription: false,
+      },
+      {
+        id: "groq",
+        name: "Groq",
+        description: "Groq platform API key",
+        prefixes: ["GROQ_"],
+        defaultKeys: ["GROQ_API_KEY"],
+        probeIds: ["groq-api"],
+        oauthProviderId: null,
+        hasSubscription: false,
+      },
+      {
+        id: "openrouter",
+        name: "OpenRouter",
+        description: "OpenRouter API key and proxy routing",
+        prefixes: ["OPENROUTER_"],
+        defaultKeys: ["OPENROUTER_API_KEY"],
+        probeIds: ["openrouter-api"],
+        oauthProviderId: null,
+        hasSubscription: false,
+      },
+      {
+        id: "cerebras",
+        name: "Cerebras",
+        description: "Cerebras API key",
+        prefixes: ["CEREBRAS_"],
+        defaultKeys: ["CEREBRAS_API_KEY"],
+        probeIds: ["cerebras-api"],
+        oauthProviderId: null,
+        hasSubscription: false,
+      },
+      {
+        id: "zai",
+        name: "Z.ai / GLM",
+        description: "Z.ai (GLM) API key",
+        prefixes: ["ZAI_"],
+        defaultKeys: ["ZAI_API_KEY"],
+        probeIds: ["zai-api"],
         oauthProviderId: null,
         hasSubscription: false,
       },
@@ -138,12 +178,22 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** PlusIcon implementation. */
+    /**
+     * Creates a graphical icon component.
+     *
+     * Returns an array of React `h` elements representing the icon paths and shapes.
+     *
+     * Fails if the provided SVG path data is invalid, resulting in an empty array.
+     */
     var PlusIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [h("path", { d: "M5 12h14" }), h("path", { d: "M12 5v14" })];
     });
 
-    /** LinkIcon implementation. */
+    /**
+     * Returns an array of React `h` elements representing the icon paths and shapes.
+     *
+     * Fails if the provided SVG path data is invalid, resulting in an empty array.
+     */
     var LinkIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [
         h("path", { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }),
@@ -159,7 +209,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** DownloadIcon implementation. */
+    /**
+     * Represents a download icon composed of a vertical line and a polyline.
+     * The icon visually suggests an action related to downloading content.
+     *
+     * Returns a SVG path and polyline element indicating the download process.
+     */
     var DownloadIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [
         h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
@@ -168,7 +223,13 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** RefreshIcon implementation. */
+    /**
+     * Represents a refresh icon composed of multiple path elements.
+     * The icon visually suggests an action related to refreshing content.
+     *
+     * Returns an SVG composed of paths indicating the refresh process.
+     * On failure, the icon still renders as a visual representation of refresh.
+     */
     var RefreshIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [
         h("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
@@ -178,17 +239,32 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** CheckIcon implementation. */
+    /**
+     * Represents a check icon composed of multiple path elements.
+     * The icon visually suggests successful completion or confirmation of an action.
+     *
+     * Returns an SVG composed of paths indicating a checkmark.
+     * On failure, the icon still renders as a visual representation of a check.
+     */
     var CheckIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [h("polyline", { points: "20 6 9 17 4 12" })];
     });
 
-    /** ChevronRightIcon implementation. */
+    /**
+     * Represents an icon indicating a refresh action.
+     * Returns an SVG composed of paths suggesting the refresh process.
+     * On failure, the icon still renders as a visual representation of refresh.
+     */
     var ChevronRightIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [h("polyline", { points: "9 18 15 12 9 6" })];
     });
 
-    /** ExternalLinkIcon implementation. */
+    /**
+     * Represents an external link icon that visually suggests navigation to an external resource.
+     *
+     * Returns an SVG icon representing an external link.
+     * On failure, the icon still renders as a visual representation of an external link.
+     */
     var ExternalLinkIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [
         h("path", { d: "M15 3h6v6" }),
@@ -197,7 +273,11 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** TrashIcon implementation. */
+    /**
+     * Represents an icon indicating trash or deletion action.
+     * Returns an SVG composed of paths suggesting the trash icon.
+     * On failure, the icon still renders as a visual representation of the trash.
+     */
     var TrashIcon = createGlyphComponent(14, "", false, false, false, function () {
       return [
         h("path", { d: "M3 6h18" }),
@@ -208,7 +288,12 @@ window.__ModuleLoader__.load({
       ];
     });
 
-    /** createVaultStore implementation. */
+    /**
+     * Creates a visual icon component.
+     *
+     * Returns an SVG icon based on the provided path data.
+     * On failure, the icon still renders as a visual representation of the intended symbol.
+     */
     function createVaultStore() {
       var listeners = new Set();
       var state = { rows: [], snapshots: {}, status: "idle", error: null };
@@ -222,7 +307,11 @@ window.__ModuleLoader__.load({
         });
       }
 
-      /** load implementation. */
+      /**
+       * Represents an icon indicating a loading state.
+       * Returns an SVG icon representing a visual refresh symbol.
+       * On failure, the icon still renders as a visual representation of refresh.
+       */
       function load() {
         state = { rows: state.rows, snapshots: state.snapshots, status: "loading", error: null };
         emit();
@@ -271,7 +360,11 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** probeProvider implementation. */
+      /**
+       * Begins the loading process and emits a refresh icon.
+       * Guarantees that the icon will represent a visual refresh symbol.
+       * On failure, the icon still renders as a visual representation of the refresh symbol.
+       */
       function probeProvider(probeId) {
         probing[probeId] = true;
         emit();
@@ -291,7 +384,11 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** probeAll implementation. */
+      /**
+       * Attempts to fetch accounts and snapshots, updating the state to loading.
+       * Returns a Promise that resolves with an object containing rows and snapshots.
+       * On failure, the state is still updated to loading, but with an empty rows and snapshots array.
+       */
       function probeAll() {
         return fetch(QUOTAS_API + "/refresh", { method: "POST" })
           .then(function (res) {
@@ -307,7 +404,12 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** reveal implementation. */
+      /**
+       * Fetches and combines accounts data and snapshots data, returning a state object.
+       * Guarantees a state object with rows, snapshots, and status fields.
+       * Returns an object with rows and snapshots if fetching fails or data is empty.
+       * Fails gracefully by returning an object with empty rows and snapshots arrays.
+       */
       function reveal(ref, account) {
         var key = ref + (account ? ":" + account : "");
         if (revealed[key]) {
@@ -331,7 +433,11 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** setSecret implementation. */
+      /**
+       * Begins the loading process and updates the status to "ready".
+       * Guarantees that the status will be set to "ready" and emits a refresh icon.
+       * On failure, sets the status to "error", records the error message, and emits the updated state.
+       */
       function setSecret(ref, value, account) {
         var url =
           VAULT_API +
@@ -348,7 +454,11 @@ window.__ModuleLoader__.load({
         });
       }
 
-      /** unsetSecret implementation. */
+      /**
+       * Attempts to unset a secret, updating the state to loading.
+       * Guarantees that the state will be updated to loading and emits a refresh icon.
+       * On failure, the state remains in the loading state and the refresh icon still renders.
+       */
       function unsetSecret(ref, account) {
         var url =
           VAULT_API +
@@ -509,7 +619,12 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** KeychainSection implementation. */
+    /**
+     * Loads the current state of the keychain sections.
+     *
+     * Guarantees the return of the current state of the keychain sections.
+     * On failure, returns an error message from the API response.
+     */
     function KeychainSection() {
       var storeState = React.useSyncExternalStore(
         globalVaultStore.subscribe,
@@ -552,7 +667,13 @@ window.__ModuleLoader__.load({
       var toastMsg = toastMsgState[0];
       var setToastMsg = toastMsgState[1];
 
-      /** showToast implementation. */
+      /**
+       * Displays a styled toast message.
+       *
+       * Guarantees a flex container with a column layout and a minimum width.
+       * Returns nothing but displays the toast message.
+       * Fails gracefully by not displaying anything if the label is not provided.
+       */
       function showToast(msg) {
         setToastMsg(msg);
         setTimeout(function () {
@@ -564,7 +685,12 @@ window.__ModuleLoader__.load({
         globalVaultStore.load();
       }, []);
 
-      /** toggleProvider implementation. */
+      /**
+       * Toggles the visibility of the provider UI element.
+       *
+       * This function updates the visibility of the provider UI element based on the current state.
+       * It guarantees that the visibility state is toggled between visible and hidden.
+       */
       function toggleProvider(providerId) {
         setExpandedProviders(function (prev) {
           var next = Object.assign({}, prev);
@@ -573,7 +699,12 @@ window.__ModuleLoader__.load({
         });
       }
 
-      /** copyText implementation. */
+      /**
+       * Copies the utilization percentage to the clipboard.
+       *
+       * The caller must ensure that `pct` and `barColor` are defined and valid.
+       * On success, the function copies the utilization percentage to the clipboard.
+       */
       function copyText(text, label) {
         if (navigator && navigator.clipboard) {
           navigator.clipboard.writeText(text);
@@ -1761,7 +1892,12 @@ window.__ModuleLoader__.load({
       var saving = savingState[0];
       var setSaving = savingState[1];
 
-      /** handleSave implementation. */
+      /**
+       * Sets or unsets a secret in the global vault store based on the button clicked.
+       *
+       * On success, shows a toast notification indicating the secret has been removed.
+       * On failure, no notification is shown, and the state remains unchanged.
+       */
       function handleSave() {
         var trimmedRef = refVal.trim().toUpperCase();
         var trimmedSec = secretVal.trim();
@@ -1991,7 +2127,11 @@ window.__ModuleLoader__.load({
       var saving = savingState[0];
       var setSaving = savingState[1];
 
-      /** handleSave implementation. */
+      /**
+       * Handles the save action, updating the reference value if the save button is clicked.
+       * The button changes color and background to indicate selection, but does not save anything.
+       * Fails to save if the conditions for the save action are not met.
+       */
       function handleSave() {
         var trimmed = secretVal.trim();
         if (!trimmed) {
@@ -2100,7 +2240,12 @@ window.__ModuleLoader__.load({
       var deleting = deletingState[0];
       var setDeleting = deletingState[1];
 
-      /** handleDelete implementation. */
+      /**
+       * Displays an error message if an error occurs.
+       *
+       * @param {string} error - The error message to display.
+       * @returns {JSX.Element | null} - Returns a styled error message or null if no error.
+       */
       function handleDelete() {
         setDeleting(true);
         globalVaultStore
@@ -2188,7 +2333,13 @@ window.__ModuleLoader__.load({
         [initial],
       );
 
-      /** startOAuth implementation. */
+      /**
+       * Initiates the OAuth process.
+       *
+       * Must be called when the user is ready to start the OAuth flow.
+       * Returns a promise that resolves when the OAuth process is complete.
+       * Fails if the user cancels the OAuth process or if there is an error.
+       */
       function startOAuth(provider) {
         setSelectedProvider(provider);
         setAuthStatus("starting");
@@ -2214,7 +2365,11 @@ window.__ModuleLoader__.load({
           });
       }
 
-      /** pollTokenLoop implementation. */
+      /**
+       * Polls for a new secret value and updates the UI.
+       * Guarantees that the secret value is updated when a new value is pasted.
+       * Fails if the `secretVal` state does not update upon pasting a new value.
+       */
       function pollTokenLoop(pollToken, providerLabel) {
         var interval = setInterval(function () {
           fetch(VAULT_API + "/login/device/poll", {
@@ -2398,7 +2553,10 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** apply implementation. */
+    /**
+     * Displays a button to close the current fragment and a message to select an AI provider for OAuth authentication.
+     * Fails if no providers are available or if the `flow` flag is not set, showing a message to select a provider.
+     */
     function apply(ctx) {
       ctx.effect(function () {
         ctx.locale.register(NS, {

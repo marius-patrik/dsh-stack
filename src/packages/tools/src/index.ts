@@ -108,8 +108,13 @@ export function apply(ctx: Context, config: ToolsConfigType): void {
   );
 
   ctx.inject(["settings"], (sctx) => {
-    const /** settings implementation. */
-      settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
+    /**
+     * Provides tool settings as an object of type `ToolSettingsType` or `undefined`.
+     *
+     * Guarantees the returned settings object contains the tool's description and parameters.
+     * Returns `undefined` if settings are not found for the given namespace.
+     */
+    const settings = () => sctx.settings.get(NS) as ToolSettingsType | undefined;
     // jscpd:ignore-end
 
     for (const [name, tool] of Object.entries(toolsFor(settings(), config))) {

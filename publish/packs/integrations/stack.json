@@ -5,6 +5,11 @@
   "kind": "pack",
   "description": "External integrations, providers, LSP, tooling, host and sandbox composition pack.",
   "files": ["package.json", "stack.json", "README.md"],
-  "dependencies": ["stack.dev.formatters", "stack.dev.lsp", "stack.infra.hosts"],
+  "dependencies": [
+    "stack.dev.formatters",
+    "stack.dev.lsp",
+    "stack.infra.directory-picker-fix",
+    "stack.infra.hosts"
+  ],
   "optionalDependencies": []
 }

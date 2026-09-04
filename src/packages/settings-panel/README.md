@@ -23,6 +23,21 @@ content.
 | `SettingsToggleRow` | one labelled option row with a description and a checkbox — sidebar preferences |
 | `SettingsCloseButton` | the section's close action |
 
+## Slot seats
+
+Two settings slots are declared at runtime by hand-authored JavaScript that
+carries no TypeScript face, so their `SlotMap` types live here — in the package
+every Stack settings registrant already depends on.
+
+| Export | Seat | Filled by |
+| --- | --- | --- |
+| `SETTINGS_SECTION_ICON_SLOT` | `settings.section.icon` — one nav glyph per settings section, keyed by section id | whichever plugin owns the matching `settings.section` entry |
+| `SETTINGS_APPEARANCE_TAB_SLOT` | `settings.appearance.tab` — one page inside the Appearance section | the packages owning the theme studio, skins, icons and themes |
+
+`settings.appearance.tab` is what makes Appearance a single settings
+destination without its owner importing the three feature packages whose pages
+it shows; see `.agents/notes/decisions/settings-section-composition.md`.
+
 ## Usage
 
 ```tsx

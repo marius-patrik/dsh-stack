@@ -1,0 +1,41 @@
+{
+  "name": "@dsh-stack/provider-rotation",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "stack": {
+    "kind": "plugin",
+    "id": "stack.ai.provider-rotation"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "verify": "node verify.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2"
+  },
+  "dependencies": {
+    "@dsh-stack/providers": "workspace:*"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
+    "typescript": "^6.0.3"
+  }
+}

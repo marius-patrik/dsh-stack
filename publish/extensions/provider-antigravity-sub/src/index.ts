@@ -7,7 +7,7 @@
 import type { Context } from "@deepseek-ai/cordis";
 import type { ProviderRoute } from "@dsh-stack/providers";
 import { EFFORTS, HEADER, TOKEN } from "@dsh-stack/providers";
-import { ANTIGRAVITY_PROJECT_HEADER } from "@dsh-stack/dialects";
+import { ANTIGRAVITY_PROJECT_HEADER } from "@dsh-stack/dialect-antigravity";
 
 /** The `antigravity-sub` provider route. */
 export const route: ProviderRoute = {
@@ -39,6 +39,13 @@ export const route: ProviderRoute = {
   // modelConfigId is refused), so the route advertises the one it serves.
   models: [
     {
+      id: "gemini-3.8-flash",
+      name: "Gemini 3.8 Flash",
+      contextWindow: 1_048_576,
+      maxTokens: 65_535,
+      reasoning: EFFORTS,
+    },
+    {
       id: "gemini-3.7-flash",
       name: "Gemini 3.7 Flash",
       contextWindow: 1_048_576,
@@ -66,7 +73,11 @@ export const route: ProviderRoute = {
 export const name = "provider-antigravity-sub";
 export const inject = ["providers"];
 
-/** apply implementation. */
+/**
+ * Registers the route with the given context's providers.
+ *
+ * @param ctx - The context containing providers to register the route with.
+ */
 export function apply(ctx: Context): void {
   ctx.providers.register(route);
 }

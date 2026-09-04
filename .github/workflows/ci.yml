@@ -34,25 +34,171 @@ jobs:
           node-version: 22.19.0
           cache: pnpm
 
-      # No actions/cache step for the store: each self-hosted runner already
-      # keeps a persistent per-runner store (npm_config_store_dir in its .env),
-      # and the cached path above pointed at ~/.local/share/pnpm/store, which
-      # is not where either runner actually stores packages.
+      # setup-node's cache: pnpm above already restores the pnpm store from
+      # GitHub's cache service on hosted runners; a separate actions/cache step
+      # for the store would just duplicate it.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # TypeScript incremental state, restored so tsc can skip unchanged
+      # projects instead of recompiling all 73 packages. A fresh checkout has no
+      # lib/ or .tsbuildinfo, so without this the incremental flag buys nothing
+      # in CI. The key is per-commit with progressively looser restore-keys, so
+      # a run warm-starts from the most recent build and tsc itself decides what
+      # is actually stale -- the cache is a warm start, not a correctness claim.
+      - name: Restore TypeScript build state
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/packages/*/lib
+            publish/plugins/*/lib
+            publish/extensions/*/lib
+            publish/packs/*/lib
+            **/*.tsbuildinfo
+          key: ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            ts-build-${{ runner.os }}-
+
+      # The cache above is keyed by lockfile hash with loose restore-keys, so
+      # it can warm-start from a run that predates a package deletion. Two
+      # separate cache path patterns can each independently resurrect a
+      # since-deleted package's directory with no sibling package.json in
+      # this checkout: the */lib glob restores its lib/ output, and the
+      # **/*.tsbuildinfo glob separately restores its own
+      # tsconfig.tsbuildinfo directly (tsc's project-reference incremental
+      # state), which alone is enough for actions/cache to materialize the
+      # directory even with no lib/ present at all -- confirmed by CI: the
+      # lib/ prune alone still left a bare
+      # src/packages/workspace-tabs/tsconfig.tsbuildinfo, which
+      # verify-stack.mjs read as a broken package rather than a stale
+      # artifact.
+      #
+      # Only prune a package.json-less directory when its entire content is
+      # explained by the cache's own path patterns (lib/ and *.tsbuildinfo)
+      # -- i.e. nothing else is present. A directory checked out from git
+      # with real source but a genuinely missing package.json has other
+      # files too, and is left alone: that is exactly the broken-package
+      # case verify-stack.mjs exists to catch, and pruning on package.json
+      # absence alone would silently hide it instead.
+      - name: Prune orphaned build cache
+        run: |
+          for canonicalRoot in src/packages publish/plugins publish/extensions publish/packs; do
+            [ -d "$canonicalRoot" ] || continue
+            for pkg in "$canonicalRoot"/*/; do
+              pkg="${pkg%/}"
+              [ -d "$pkg" ] || continue
+              [ -f "$pkg/package.json" ] && continue
+              other="$(find "$pkg" -mindepth 1 \( -name lib -prune \) -o \( -name '*.tsbuildinfo' -prune \) -o -print | head -1)"
+              if [ -z "$other" ]; then
+                echo "Removing orphaned build cache: $pkg (no package.json, only cache-restorable content)"
+                rm -rf "$pkg"
+              fi
+            done
+          done
+
       - name: Build Stack workspace
         run: pnpm build
-
-      - name: Typecheck Stack workspace
-        run: pnpm typecheck
 
       - name: Verify Stack workspace
         run: pnpm verify
 
       - name: Test Stack workspace
         run: pnpm test
+
+  typecheck:
+    name: Typecheck Stack workspace
+    runs-on: ubuntu-latest
+
+    # Split out of the workspace job rather than left in sequence with it.
+    # Build and typecheck were the two dominant steps -- roughly eleven minutes
+    # each -- and running them back to back put every pull request behind ~22
+    # minutes of work that has no ordering requirement between the two halves.
+    # They are not redundant: the build compiles tsconfig.json, while typecheck
+    # uses the broader tsconfig.typecheck.json that also covers test sources.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.19.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # TypeScript incremental state, restored so tsc can skip unchanged
+      # projects instead of recompiling all 73 packages. A fresh checkout has no
+      # lib/ or .tsbuildinfo, so without this the incremental flag buys nothing
+      # in CI. The key is per-commit with progressively looser restore-keys, so
+      # a run warm-starts from the most recent build and tsc itself decides what
+      # is actually stale -- the cache is a warm start, not a correctness claim.
+      - name: Restore TypeScript build state
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/packages/*/lib
+            publish/plugins/*/lib
+            publish/extensions/*/lib
+            publish/packs/*/lib
+            **/*.tsbuildinfo
+          key: ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ts-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            ts-build-${{ runner.os }}-
+
+      # The cache above is keyed by lockfile hash with loose restore-keys, so
+      # it can warm-start from a run that predates a package deletion. Two
+      # separate cache path patterns can each independently resurrect a
+      # since-deleted package's directory with no sibling package.json in
+      # this checkout: the */lib glob restores its lib/ output, and the
+      # **/*.tsbuildinfo glob separately restores its own
+      # tsconfig.tsbuildinfo directly (tsc's project-reference incremental
+      # state), which alone is enough for actions/cache to materialize the
+      # directory even with no lib/ present at all -- confirmed by CI: the
+      # lib/ prune alone still left a bare
+      # src/packages/workspace-tabs/tsconfig.tsbuildinfo, which
+      # verify-stack.mjs read as a broken package rather than a stale
+      # artifact.
+      #
+      # Only prune a package.json-less directory when its entire content is
+      # explained by the cache's own path patterns (lib/ and *.tsbuildinfo)
+      # -- i.e. nothing else is present. A directory checked out from git
+      # with real source but a genuinely missing package.json has other
+      # files too, and is left alone: that is exactly the broken-package
+      # case verify-stack.mjs exists to catch, and pruning on package.json
+      # absence alone would silently hide it instead.
+      - name: Prune orphaned build cache
+        run: |
+          for canonicalRoot in src/packages publish/plugins publish/extensions publish/packs; do
+            [ -d "$canonicalRoot" ] || continue
+            for pkg in "$canonicalRoot"/*/; do
+              pkg="${pkg%/}"
+              [ -d "$pkg" ] || continue
+              [ -f "$pkg/package.json" ] && continue
+              other="$(find "$pkg" -mindepth 1 \( -name lib -prune \) -o \( -name '*.tsbuildinfo' -prune \) -o -print | head -1)"
+              if [ -z "$other" ]; then
+                echo "Removing orphaned build cache: $pkg (no package.json, only cache-restorable content)"
+                rm -rf "$pkg"
+              fi
+            done
+          done
+
+      - name: Build Stack workspace
+        run: pnpm build
+
+      - name: Typecheck Stack workspace
+        run: pnpm typecheck
 
   dependency-audit:
     name: Dependency audit
@@ -75,10 +221,9 @@ jobs:
           node-version: 22.19.0
           cache: pnpm
 
-      # No actions/cache step for the store: each self-hosted runner already
-      # keeps a persistent per-runner store (npm_config_store_dir in its .env),
-      # and the cached path above pointed at ~/.local/share/pnpm/store, which
-      # is not where either runner actually stores packages.
+      # setup-node's cache: pnpm above already restores the pnpm store from
+      # GitHub's cache service on hosted runners; a separate actions/cache step
+      # for the store would just duplicate it.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

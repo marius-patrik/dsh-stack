@@ -23,7 +23,11 @@ The Stack UI uses DSH's native slot/composition seams and does not mutate the DO
 
 The Files view uses DSH filesystem capabilities. Tabs, panes, terminals, conversations, containers, and workspaces share one tab model. File icons are resolved through an icon service; VS Code icon support is its own plugin.
 
-Settings contains a Profiles area, sidebar preferences, skins, credentials, agents/personas, themes, quotas, providers/models, and other feature-owned sections. Settings remains compact and feature-owned sections do not duplicate shell state.
+Settings contains a Profiles area, sidebar preferences, credentials, agents/personas, quotas, providers/models, and other feature-owned sections. Settings remains compact and feature-owned sections do not duplicate shell state.
+
+Everything that changes how the Stack looks lives under one Appearance section rather than as sibling entries in the settings nav: the theme studio, skins, icons, and themes are pages inside it. Appearance owns no controls of its own — each page stays implemented by the package that owns it and registers into the section's `settings.appearance.tab` seat, so adding an appearance page never means editing the section.
+
+Quota status has no standalone page: the Accounts and Models settings sections embed live quota meter bars, status lights, and reset timers directly against the provider/account cards they describe, including a per-account breakdown for multi-account vendors (OpenRouter, Groq, Cerebras, and any other numbered custom provider a user configures). The `QuotaRegistry`/`QuotaSnapshot` probing engine and its `/quotas/api/*` endpoints remain the one data source both the built-in provider cards and the custom-vendor breakdown read from.
 
 ## Skins and branding
 

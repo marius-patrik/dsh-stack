@@ -51,6 +51,8 @@ const EXTENSION_IDS = [
   "mistral-api",
   "groq-api",
   "openrouter-api",
+  "cerebras-api",
+  "zai-api",
   "zen",
   "ollama",
   "llamacpp",
@@ -75,25 +77,33 @@ const modelOverride = modelArg
       return [s.slice(0, i), s.slice(i + 1)];
     })()
   : null;
-const /** firstModel implementation. */
-  firstModel = async (id) => {
-    const route = ctx.providers.get(id);
-    try {
-      const models = await llm.adapter.listModels(id);
-      if (models.length > 0) return { model: models[0].id, via: "discovery" };
-      if (route?.models?.[0]?.id)
-        return { model: route.models[0].id, via: "static (discovery empty — gated?)" };
-      return { model: undefined, via: "none" };
-    } catch (e) {
-      if (route?.models?.[0]?.id)
-        return {
-          model: route.models[0].id,
-          via: "static (discovery: " + String(e?.code ?? e?.message ?? e).slice(0, 60) + ")",
-        };
-      console.log("  listModels(" + id + ") error: " + String(e?.message ?? e).slice(0, 150));
-      return { model: undefined, via: "none" };
-    }
-  };
+/**
+ * Attempts to retrieve a model ID for the given ID.
+ *
+ * Guarantees returning an object with `model` and `via` properties.
+ * On failure, returns `model: undefined, via: "none"`.
+ *
+ * @param {string} id - The ID used to fetch the model.
+ * @returns {Promise<{ model: string | undefined, via: string }>} - The model ID and source of discovery.
+ */
+const firstModel = async (id) => {
+  const route = ctx.providers.get(id);
+  try {
+    const models = await llm.adapter.listModels(id);
+    if (models.length > 0) return { model: models[0].id, via: "discovery" };
+    if (route?.models?.[0]?.id)
+      return { model: route.models[0].id, via: "static (discovery empty — gated?)" };
+    return { model: undefined, via: "none" };
+  } catch (e) {
+    if (route?.models?.[0]?.id)
+      return {
+        model: route.models[0].id,
+        via: "static (discovery: " + String(e?.code ?? e?.message ?? e).slice(0, 60) + ")",
+      };
+    console.log("  listModels(" + id + ") error: " + String(e?.message ?? e).slice(0, 150));
+    return { model: undefined, via: "none" };
+  }
+};
 
 const results = [];
 for (const id of ids) {

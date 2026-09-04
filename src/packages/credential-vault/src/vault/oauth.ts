@@ -133,7 +133,17 @@ export function derivePkceCodeChallengeS256(codeVerifier: string): string {
   return base64Url(createHash("sha256").update(codeVerifier).digest());
 }
 
-/** runPkceAuthorizationFlow implementation. */
+/**
+ * Initiates an OAuth PKCE authorization flow.
+ *
+ * Guarantees:
+ * - Returns an OAuthLoginResult containing the access token upon successful authorization.
+ * - Handles the authorization process by opening a browser to the authorization URL.
+ * - Ensures the code verifier is generated and used for the PKCE challenge.
+ * - Listens for the callback on the specified path and timeout.
+ *
+ * Fails if the browser cannot be opened or the callback is not received within the timeout.
+ */
 export async function runPkceAuthorizationFlow(
   options: OAuthPkceFlowOptions,
 ): Promise<OAuthLoginResult> {
@@ -184,7 +194,14 @@ export async function runPkceAuthorizationFlow(
   }
 }
 
-/** runDeviceAuthorizationFlow implementation. */
+/**
+ * Initiates the OAuth device authorization flow to obtain an authentication credential.
+ *
+ * The caller must provide valid OAuthDeviceFlowOptions, including the device authorization URL,
+ * client ID, and a transport mechanism for making HTTP requests.
+ * On success, returns an OAuthLoginResult indicating the credential has been authenticated.
+ * On failure, ensures the listener is properly closed.
+ */
 export async function runDeviceAuthorizationFlow(
   options: OAuthDeviceFlowOptions,
 ): Promise<OAuthLoginResult> {
@@ -264,7 +281,13 @@ export class OAuthTokenRefresher {
     this.#maxAttempts = options.maxAttempts ?? 5;
   }
 
-  /** state implementation. */
+  /**
+   * Returns the current refresh state for the given provider.
+   *
+   * @param providerId - The unique identifier for the provider.
+   * @returns The refresh state for the provider, which can be "ready", "in-progress", or "failed".
+   *          If the provider is not found, returns "ready".
+   */
   state(providerId: string): RefreshState {
     return this.#state.get(providerId) ?? "ready";
   }
@@ -382,7 +405,17 @@ async function resolveClientSecret(
   return record.kind === "api_key" ? record.apiKey : null;
 }
 
-/** resolveOAuthEndpoints implementation. */
+/**
+ * Resolves the OAuth client secret from the vault or returns null if not found.
+ *
+ * Guarantees a null return if the method is not "oauth_pkce" or if the client
+ * secret credential ID is not provided. Returns the secret value if found,
+ * otherwise null.
+ *
+ * @param store - The credential store to retrieve the secret from.
+ * @param auth - The OAuth authentication configuration.
+ * @returns The client secret value or null if not found.
+ */
 export async function resolveOAuthEndpoints(
   auth: OAuthPkceAuth,
   transport: OAuthTransport,
@@ -442,7 +475,12 @@ function resolveTokenEndpoint(auth: OAuthAuthConfig): string {
   return auth.tokenUrl;
 }
 
-/** fetchDiscovery implementation. */
+/**
+ * Returns configuration for OAuth endpoints based on provided or discovered URLs.
+ *
+ * Guarantees the returned configuration includes `authorizationEndpoint`, `tokenEndpoint`, and optionally `deviceAuthorizationEndpoint`.
+ * Fails if `auth.discoveryUrl` is provided and either `adoptsAuthorization` or `adoptsToken` is true, by asserting the issuer.
+ */
 async function fetchDiscovery(url: string, transport: OAuthTransport): Promise<DiscoveryDocument> {
   const response = await transport({
     url,
@@ -510,7 +548,17 @@ function assertDiscoveryIssuer(discoveryUrl: string, issuer: string | null): voi
   }
 }
 
-/** expectedIssuer implementation. */
+/**
+ * Validates the issuer field in the metadata document against the expected
+ * issuer identifier. If the issuer does not match or is unusable, an error is
+ * thrown. Returns the issuer string if it matches the expected issuer.
+ *
+ * @param body - The metadata document as a record of strings.
+ * @param field - The field name representing the issuer in the document.
+ * @returns The issuer string if valid, or undefined if the field is missing.
+ * @throws An error if the issuer does not match the expected issuer or is
+ *         unusable.
+ */
 function expectedIssuer(discoveryUrl: string): string | null {
   const url = new URL(discoveryUrl);
   const segments = url.pathname.split("/").filter((segment) => segment.length > 0);
@@ -525,7 +573,15 @@ function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
-/** oauthTokenRequest implementation. */
+/**
+ * Ensures the issuer in the metadata matches the expected issuer for the given
+ * discovery URL. Throws an error if the issuer is missing or doesn't match.
+ *
+ * @param discoveryUrl - The URL of the OAuth discovery document.
+ * @param issuer - The issuer identifier from the metadata.
+ * @throws Will throw an error if the issuer is missing or doesn't match the
+ * expected issuer for the discovery URL.
+ */
 async function oauthTokenRequest(
   transport: OAuthTransport,
   url: string,
@@ -581,7 +637,13 @@ function shouldRefresh(
   return Number.isFinite(expiresAt) && nowMs + skewMs >= expiresAt;
 }
 
-/** jitteredBackoff implementation. */
+/**
+ * Extracts the path segment between ".well-known" and the last segment of the URL.
+ *
+ * @param url - The URL from which to extract the path segment.
+ * @returns The path segment between ".well-known" and the last segment, or the URL origin if no such segment exists.
+ * @throws Will throw an error if the URL does not contain ".well-known" or if it is not followed by another segment.
+ */
 function jitteredBackoff(
   baseMs: number,
   maxMs: number,
@@ -593,7 +655,12 @@ function jitteredBackoff(
   return Math.max(0, Math.round(core + jitter));
 }
 
-/** isTransientRefreshError implementation. */
+/**
+ * Determines if an error is a transient refresh error.
+ *
+ * @returns Returns true if the error is a transient refresh error; otherwise, false.
+ * @throws Throws no errors, but returns false for non-transient errors.
+ */
 function isTransientRefreshError(error: string | null): boolean {
   return (
     error === null ||
@@ -603,7 +670,14 @@ function isTransientRefreshError(error: string | null): boolean {
   );
 }
 
-/** createLoopbackListener implementation. */
+/**
+ * Establishes a loopback listener for OAuth token requests.
+ *
+ * @param discoveryUrl - The URL of the OAuth discovery document.
+ * @param issuer - The issuer identifier from the metadata.
+ * @throws Will throw an error if the issuer does not match the expected issuer
+ * for the discovery URL or if the issuer is missing.
+ */
 async function createLoopbackListener(
   pathname: string,
   timeoutMs: number,
@@ -684,7 +758,13 @@ async function createLoopbackListener(
   };
 }
 
-/** base64Url implementation. */
+/**
+ * Extracts the path segment from a URL after ".well-known" or returns the URL origin if no such segment exists.
+ *
+ * @param url - The URL from which to extract the path segment.
+ * @returns The path segment between ".well-known" and the last segment, or the URL origin if no such segment exists.
+ * @throws Will throw an error if the URL does not contain ".well-known" or if it is not followed by another segment.
+ */
 function base64Url(bytes: Uint8Array): string {
   return Buffer.from(bytes)
     .toString("base64")
@@ -708,13 +788,26 @@ function requiredString(value: Record<string, unknown>, field: string): string {
   return raw;
 }
 
-/** optionalString implementation. */
+/**
+ * Checks if an error is a transient refresh error.
+ *
+ * @param error - The error string or null indicating the error type.
+ * @returns true if the error is transient; otherwise, false.
+ * @throws Throws no errors, but returns false for non-transient errors.
+ */
 function optionalString(value: Record<string, unknown>, field: string): string | null {
   const raw = value[field];
   return typeof raw === "string" && raw.length > 0 ? raw : null;
 }
 
-/** optionalFiniteNumber implementation. */
+/**
+ * Establishes a loopback listener for OAuth token requests.
+ *
+ * @param pathname - The path to listen for OAuth token requests.
+ * @param timeoutMs - The timeout duration in milliseconds for the request.
+ * @throws Will throw an error if the request does not receive a response within the specified timeout.
+ * @returns An object containing the redirect URI, a callback to wait for the OAuth callback, and a method to close the listener.
+ */
 function optionalFiniteNumber(value: Record<string, unknown>, field: string): number | null {
   const raw = value[field];
   const parsed = typeof raw === "string" ? Number(raw) : raw;

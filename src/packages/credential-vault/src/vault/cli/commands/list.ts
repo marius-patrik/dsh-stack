@@ -15,7 +15,15 @@ export async function healthById(
   return new Map(health.map((entry) => [entry.id, entry]));
 }
 
-/** listCommand implementation. */
+/**
+ * Lists the records in the vault directory.
+ *
+ * Returns 0 if successful, or 1 if no records are found or JSON output is requested.
+ *
+ * @param args - The parsed command-line arguments.
+ * @param io - The input/output interface for the command.
+ * @returns A number indicating success (0) or failure (1).
+ */
 export async function listCommand(args: ParsedArguments, io: VaultCliIo): Promise<number> {
   const { store, directory } = await openVault(io);
   const descriptors = await store.describe();

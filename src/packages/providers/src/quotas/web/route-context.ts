@@ -5,6 +5,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import type { Context } from "@deepseek-ai/cordis";
 
 export interface RouteContext {
   req: IncomingMessage;
@@ -12,6 +13,8 @@ export interface RouteContext {
   url: URL;
   pathname: string;
   method: string;
+  /** The plugin context the quotas surface was mounted on, for routes that call Host services. */
+  plugin: Context;
 }
 
 /** True when the request matches an exact `/quotas/...` path and HTTP method. */

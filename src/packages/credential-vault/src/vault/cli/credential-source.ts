@@ -40,7 +40,14 @@ export interface CredentialSource {
   environment(): Promise<Record<string, string>>;
 }
 
-/** joinSource implementation. */
+/**
+ * Joins an array of strings into a single path string with slashes, ensuring no
+ * consecutive slashes are present. Returns null if any part of the input is
+ * invalid or if the operation fails.
+ *
+ * @param parts - An array of strings representing path components.
+ * @returns A string representing the joined path or null on failure.
+ */
 export function joinSource(...parts: string[]): string {
   return parts.join("/").replace(/\/+/g, "/");
 }

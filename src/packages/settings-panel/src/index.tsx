@@ -13,6 +13,8 @@ import type { CSSProperties, ReactNode } from "react";
 
 export { SETTINGS_SECTION_ICON_SLOT } from "./section-icon-slot.js";
 export type { SettingsSectionIconOwnerProps } from "./section-icon-slot.js";
+export { SETTINGS_APPEARANCE_TAB_SLOT } from "./appearance-tab-slot.js";
+export type { SettingsAppearanceTabOwnerProps } from "./appearance-tab-slot.js";
 
 /** Vertical rhythm between a section's option rows, in pixels. */
 const OPTION_GAP = 8;
