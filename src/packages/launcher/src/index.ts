@@ -22,8 +22,12 @@ export {
 } from "./ports.js";
 export type { StartedServer } from "./processes.js";
 export { findListenerPid, startServer, stopServer } from "./processes.js";
+export type { PruneWorktreesOptions } from "./prune-worktrees.js";
+export { originRepo, pruneMergedWorktrees } from "./prune-worktrees.js";
 export type { RouteOptions, RoutePlan } from "./route.js";
 export { parseAttachArgs, parseLogsArgs, route } from "./route.js";
 export { statusReport } from "./status.js";
 export type { DshTweaks } from "./tweaks.js";
 export { readTweaks } from "./tweaks.js";
+export type { PruneDecision, PruneDecisionInput, WorktreeEntry } from "./worktree-prune.js";
+export { decidePrune, parseWorktreeList } from "./worktree-prune.js";

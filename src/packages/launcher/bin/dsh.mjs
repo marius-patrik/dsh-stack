@@ -13,6 +13,8 @@
  *   dsh logs [-f] [-n lines]   View or tail the web server logs
  *   dsh attach [-n lines] [-i seconds]  Live attached view: streamed log plus
  *                                       a refreshing plugin-metrics line
+ *   dsh prune-worktrees        Remove worktrees whose PR has merged (also runs
+ *                              automatically after start/restart)
  *   dsh accounts|theme|lsp|formatter|agents [args]   Owning package CLIs
  *   dsh [args...]    Fall through to the harness CLI
  */
@@ -30,6 +32,7 @@ import {
   loadCredentialEnv,
   migrateHome,
   packageDir,
+  pruneMergedWorktrees,
   readLogTail,
   readTweaks,
   resolveHome,
@@ -64,6 +67,22 @@ function execBin(bin, prefixArgs, args) {
 async function showStatus(home, profile) {
   const port = resolvePort(home, profile, logFile);
   process.stdout.write(`${await statusReport(port, logFile, home, profile)}\n`);
+}
+
+/**
+ * Prune worktrees whose PRs have merged (#269). Best-effort after a successful
+ * start/restart: failures are reported, never fatal to the launch.
+ */
+async function pruneAfterStart(pkgDir) {
+  try {
+    await pruneMergedWorktrees({
+      repoDir: join(pkgDir, "..", "..", ".."),
+      pkgDir,
+      log: (msg) => process.stdout.write(`${msg}\n`),
+    });
+  } catch (err) {
+    process.stderr.write(`dsh: worktree prune failed: ${err?.message ?? err}\n`);
+  }
 }
 
 /** Start the server and report the outcome. Returns false on failure. */
@@ -106,6 +125,7 @@ async function execute(plan, ctx) {
     }
     if (plan.action === "start") {
       if (!(await start(harnessDir, home, profile))) process.exitCode = 1;
+      else await pruneAfterStart(pkgDir);
       return;
     }
     process.stdout.write("dsh: restarting web server...\n");
@@ -113,6 +133,11 @@ async function execute(plan, ctx) {
       process.stdout.write(`${msg}\n`),
     );
     if (!(await start(harnessDir, home, profile))) process.exitCode = 1;
+    else await pruneAfterStart(pkgDir);
+    return;
+  }
+  if (plan.kind === "prune-worktrees") {
+    await pruneAfterStart(pkgDir);
     return;
   }
   if (plan.kind === "logs") {

@@ -3,6 +3,7 @@ export type RoutePlan =
   | { kind: "lifecycle"; action: "start" | "stop" | "restart" | "status" }
   | { kind: "logs"; follow: boolean; lines: number }
   | { kind: "attach"; lines: number; intervalMs: number }
+  | { kind: "prune-worktrees" }
   | { kind: "verb"; verb: string; args: string[] }
   | { kind: "passthrough"; args: string[] };
 
@@ -39,6 +40,8 @@ export function route(argv: string[], opts: RouteOptions): RoutePlan {
     case "logs":
     case "log":
       return { kind: "logs", ...parseLogsArgs(rest) };
+    case "prune-worktrees":
+      return { kind: "prune-worktrees" };
     case "attach":
       return { kind: "attach", ...parseAttachArgs(rest) };
     case "accounts":
