@@ -128,6 +128,7 @@ for (const issue of issues.values()) {
       blocked: issue.blocked,
       assigned: issue.assigned,
       triaged: issue.triaged,
+      idea: issue.idea,
       linkedPullState: linkedPullState.get(issue.number) ?? null,
     }),
   });
@@ -217,7 +218,9 @@ function openDraftPull(name, reason) {
 }
 
 const missingLabels = [...issues.values()]
-  .filter((issue) => issue.state === "open" && !issue.triaged)
+  // A parked idea is untriaged by definition; reporting it every run would be
+  // noise that never clears, so `type:idea` is what marks the gap as intended.
+  .filter((issue) => issue.state === "open" && !issue.triaged && !issue.idea)
   .map((issue) => {
     const missing = [];
     if (!issue.labels.some((name) => name.startsWith("area:"))) missing.push("area");
