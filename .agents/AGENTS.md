@@ -100,6 +100,16 @@ New architecture-decision docs and PRD sections for a capability must land in th
 - Before a pull request merges, everything it touched must be scoped in attached issue(s): deferred work, follow-ups, or scope discovered mid-PR that isn't fully resolved in the PR gets its own linked GitHub issue, not an implicit or undocumented gap.
 - A pull request's description must precisely describe everything the PR actually did — an accurate, complete account of the changes, not a vague or partial summary.
 
+## Repository hygiene
+
+Repository state is self-consistent, and a scheduled sweep enforces it rather than trusting that every event fired. A non-`main` remote branch is either backed by an open pull request or deleted; pushing a branch as a backup, with no pull request, is not a supported state. Every open issue and pull request is on board 13, carries an `area:*` and a `severity:*` label, and has a Status. Board Status is a projection of repository state, reconciled in both directions including terminal states — merged or closed means `Done`.
+
+Because reconciliation rederives every Status from scratch, a Status that nothing in the repository backs cannot survive a sweep. To mark something blocked, record the block (`blocked` label or a `blocked_by` dependency); to mark something in progress, assign it; triage — both required labels — is what promotes `Backlog` to `Ready`.
+
+The sweep deletes only branches with zero commits ahead of `main`, where nothing can be lost. A branch ahead of `main` with no pull request gets a draft pull request, never a deletion, because an unproposed branch is a review problem rather than a cleanup problem.
+
+Event-driven hooks cannot do this alone, and the reason is structural: GitHub runs `pull_request` workflows against `refs/pull/N/merge`, so a conflicting pull request emits no events at all; a workflow added today never sees the backlog predating it; and a failed run drops its events with nothing to replay them. Event triggers exist for latency, the schedule for completeness. Full text: `.agents/rules/repository-hygiene.md`.
+
 ## File and naming granularity
 
 - Avoid monolith files: a source file should generally implement one function (one cohesive unit of behavior), not a grab-bag of unrelated helpers.

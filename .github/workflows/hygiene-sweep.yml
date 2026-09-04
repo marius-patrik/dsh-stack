@@ -1,0 +1,61 @@
+name: Repository hygiene
+
+# Two triggers, one implementation. Events keep the board current within
+# seconds of a change; the schedule is what makes the result complete, because
+# events alone provably cannot be. GitHub runs `pull_request` workflows against
+# `refs/pull/N/merge`, so a conflicting pull request emits no events at all; a
+# workflow added today never sees the backlog that predates it; and a failed run
+# drops its events with nothing to replay them. The sweep rederives every
+# item from current repository state, so whichever trigger fires, the outcome is
+# the same.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+  issues:
+    types: [opened, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  pull_request:
+    branches: [main]
+    types: [opened, closed, reopened, ready_for_review, converted_to_draft]
+
+# One reconciler at a time. A later run supersedes an earlier one rather than
+# racing it for the same board writes; the sweep is idempotent, so cancelling
+# an in-flight run loses nothing.
+concurrency:
+  group: repository-hygiene
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  sweep:
+    name: Sweep repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          # The sweep runs a plain Node script against the GitHub API; it needs
+          # no workspace install, so the default package-manager cache would
+          # only fail looking for a pnpm that is never used here.
+          package-manager-cache: false
+
+      - name: Reconcile board, branches, and labels
+        env:
+          # Repository reads and branch/pull writes use the workflow token.
+          # Projects v2 is not reachable with GITHUB_TOKEN — a user or org
+          # project needs a PAT or App token — so board writes use
+          # PROJECTS_TOKEN, a classic PAT holding only the `project` scope.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          PROJECT_OWNER: marius-patrik
+          PROJECT_NUMBER: "13"
+          HYGIENE_REPO_OWNER: ${{ github.repository_owner }}
+          HYGIENE_REPO_NAME: ${{ github.event.repository.name }}
+          HYGIENE_BRANCH_GRACE_HOURS: "24"
+        run: node src/scripts/sweep-repository-hygiene.mjs
