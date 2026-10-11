@@ -5,6 +5,7 @@
  * concurrently races TypeScript declaration emission for local workspace peers.
  */
 import { spawn } from "node:child_process";
+import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
@@ -50,6 +51,8 @@ async function discover() {
 /** Spawn a package's own build command and propagate its exit status. */
 async function build(pkg) {
   if (!pkg.build) return;
+  // Some package scripts concatenate client assets into lib/ even with zero TS emit.
+  await mkdir(join(pkg.dir, "lib"), { recursive: true });
   await new Promise((resolve, reject) => {
     const child = spawn("bun", ["run", "build"], { cwd: pkg.dir, stdio: "inherit" });
     child.on("error", reject);
