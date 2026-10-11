@@ -44,3 +44,4 @@ accounts.vault
 # CI runs by cache, so tsc can skip unchanged projects instead of recompiling
 # all 73 packages on every run.
 *.tsbuildinfo
+\n/.ci-packages/

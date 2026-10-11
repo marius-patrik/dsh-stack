@@ -45,7 +45,8 @@
     "verify:stateful-client-packages": "node scripts/verify-stateful-client-packages.mjs",
     "verify:jscpd-exemptions": "node scripts/verify-jscpd-exemptions.mjs",
     "browser:check": "node scripts/browser-check.mjs",
-    "verify:bundle-composition": "node scripts/generate-bundles.mjs --check"
+    "verify:bundle-composition": "node scripts/generate-bundles.mjs --check",
+    "release:local-fixtures": "node scripts/release.mjs local-fixtures"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",

@@ -207,13 +207,45 @@ async function version() {
   console.log(`Stack version: ${main.version}`);
 }
 
+/** Pack an isolated file:-only dependency graph for a clean native DSH CI installation. */
+async function localFixtures() {
+  const packages = await discoverPackages();
+  const byName = new Map(packages.map((item) => [item.pkg.name, item]));
+  const dir = join(root, ".ci-packages");
+  await fs.rm(dir, { recursive: true, force: true });
+  await fs.mkdir(dir, { recursive: true });
+  const stageRoot = join(dir, ".stage");
+  await fs.mkdir(stageRoot);
+  const packed = new Map();
+  for (const item of publicationOrder(packages)) {
+    const staged = await stagePackage(item, byName, stageRoot);
+    const manifest = await readJson(join(staged, "package.json"));
+    for (const section of ["dependencies", "optionalDependencies"]) {
+      for (const name of Object.keys(manifest[section] ?? {})) {
+        const archive = packed.get(name);
+        if (archive) manifest[section][name] = `file:${archive}`;
+      }
+    }
+    await writeJson(join(staged, "package.json"), manifest);
+    const response = JSON.parse(await run("npm", ["pack", staged, "--pack-destination", dir, "--json"]));
+    const file = response?.[0]?.filename;
+    if (typeof file !== "string") throw new Error(`${item.pkg.name}: failed to pack local fixture`);
+    packed.set(item.pkg.name, join(dir, file));
+  }
+  await fs.rm(stageRoot, { recursive: true, force: true });
+  await writeJson(join(dir, "fixtures.json"), Object.fromEntries(packed));
+  console.log(`Packed ${packed.size} local native fixtures.`);
+}
+
 if (command === "manifest") {
   await writeManifest(await buildManifest(await discoverPackages()));
 } else if (command === "assets") {
   await assets();
+} else if (command === "local-fixtures") {
+  await localFixtures();
 } else if (command === "version") {
   await version();
 } else {
-  throw new Error("usage: node scripts/release.mjs <manifest|assets|version>");
+  throw new Error("usage: node scripts/release.mjs <manifest|assets|local-fixtures|version>");
 }
 // jscpd:ignore-end
