@@ -34,7 +34,8 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
+          # Do not use setup-node registry-url: it injects a placeholder
+          # NODE_AUTH_TOKEN, which masks tokenless OIDC authentication.
           package-manager-cache: false
 
       - name: Install compatible pnpm for native DSH
