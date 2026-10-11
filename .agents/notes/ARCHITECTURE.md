@@ -1,25 +1,25 @@
-# Architecture notes
+# Architecture
 
 ## Source ownership
 
-`src/packages/` is the canonical flat implementation layer; `publish/plugins/`, `publish/extensions/`, and `publish/packs/` compose those implementations without duplicating them. Each package directory containing a `package.json` is independently addressable. No implementation is duplicated between pack roots and child plugins/extensions.
+`plugins/<name>/` is the flat source implementation catalog, with one owner per feature. `bundles/` contains arbitrarily nested native DSH composition-only packages; `profiles/` contains actual DSH profile directory templates. Their logical layout is not an additional runtime hierarchy.
 
 ## Runtime ownership
 
-DeepSeek Harness owns Cordis runtime composition, session lifecycle, native agent presets, filesystem capabilities, credentials, providers, and other upstream seams. Stack consumes those contracts and extends them through plugins.
+DeepSeek Harness owns all runtime composition, profile installation and activation, session lifecycle, host services, package version resolution, and UI slots. Stack ships compatible native plugins and ordinary `dsh.bundle.patch` layers. There is no Stack-owned `dsh` launcher.
 
-## Composition
+## Bundle composition
 
-Required dependencies form the hard graph. Optional dependencies are feature accelerators. Packs declare their component plugin graph explicitly. Runtime services are created only by their owning plugin; packs contain metadata/composition and never manufacture fake initialized services.
-
-## UI
-
-The Stack shell uses native DSH slots. State lives in feature services or dedicated support libraries, not in duplicated React/local-storage copies. External integrations are isolated plugins. Brand skins and icon providers are isolated plugins.
+Every leaf bundle has an ordinary `package.json` declaring `dsh.bundle.patch`; parent packages declare child bundles via local dependencies and `stack.compose`. The build generator resolves the dependency DAG, deduplicates shared children, checks for cycles and duplicate inserted rows, and emits each parent patch. DSH only sees standard native patches; no nested runtime interpretation is needed.
 
 ## Profiles
 
-Profiles select a graph of plugins and packs. They do not fork implementations. The active profile is persisted as user preference and changes composition through the supported runtime mechanism.
+`profiles/web/` and `profiles/headless/` are actual DSH `dsh.profile` template folders, not npm bundle packages. Installed DSH profiles are user-managed and can select individual bundles or the complete `@dsh-stack/stack`/`@dsh-stack/stack-headless` experience. User-provided patches apply with native DSH precedence.
 
-## Verification
+## Distribution
 
-The verifier checks package contract, unique package/plugin IDs, namespace rules, tracked generated-output absence, duplicate source bodies, unfinished markers, unsafe casts, broken workspace links, and truthful pack/plugin metadata. CI executes typecheck, build, verify, and tests on every PR.
+The Stack root coordinates per-package semver and reproducible release artifacts but never owns installation. The native npm package manifest is authoritative. `scripts/release.mjs` resolves `workspace:` dependencies to published exact versions and emits tarballs, an integrity inventory, and a complete release manifest. Publishing and updates remain with native DSH/npm operations.
+
+## Quality gates
+
+CI must validate formatting, build, typecheck, tests, unique package ownership, dependency closure, generated patches, release asset contents, clean external DSH installation, `--dump-config`, real browser UI, Headless smoke, and upgrade/removal without changing user profile state.

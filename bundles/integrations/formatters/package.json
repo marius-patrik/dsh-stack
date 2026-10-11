@@ -1,0 +1,21 @@
+{
+  "name": "@dsh-stack/bundle-formatters",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/bundle-formatters composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@dsh-stack/formatters": "workspace:*"
+  }
+}

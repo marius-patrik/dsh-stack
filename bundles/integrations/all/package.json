@@ -1,0 +1,30 @@
+{
+  "name": "@dsh-stack/bundle-integrations",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/bundle-integrations composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "stack": {
+    "compose": [
+      "@dsh-stack/bundle-formatters",
+      "@dsh-stack/bundle-hosts",
+      "@dsh-stack/bundle-lsp"
+    ]
+  },
+  "dependencies": {
+    "@dsh-stack/bundle-formatters": "workspace:*",
+    "@dsh-stack/bundle-hosts": "workspace:*",
+    "@dsh-stack/bundle-lsp": "workspace:*"
+  }
+}

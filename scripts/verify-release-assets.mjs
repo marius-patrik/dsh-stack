@@ -1,65 +1,50 @@
+/** Verify that every native release artifact exists and matches the package catalog. */
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
-const execFileAsync = promisify(execFile);
-const root = process.cwd();
-const pluginsDir = join(root, "plugins");
-const releaseDir = join(root, ".release");
-const groups = ["agents", "ai", "core", "integrations", "trading", "ux", "vcs"];
+const run = promisify(execFile);
+const dir = join(root, ".release");
 
-/** Return the expected release-asset slugs for all publishable native plugins. */
-async function expectedPlugins() {
-  const result = [];
-  for (const group of groups) {
-    for (const entry of await fs.readdir(join(pluginsDir, group), { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      try {
-        await fs.access(join(pluginsDir, group, entry.name, "stack.json"));
-        result.push(`${group}-${entry.name}`);
-      } catch {
-        // Not a published release component.
-      }
+/** Count all publishable packages from their canonical manifests. */
+async function expectedNames() {
+  const dirs = [...(await listPluginPackageDirs()), ...(await listBundlePackageDirs())];
+  const names = [];
+  for (const path of dirs) {
+    const pkg = await readJson(join(path, "package.json"));
+    if (!pkg.private) names.push(pkg.name);
+  }
+  return names.sort();
+}
+
+/** Validate that the published inventory is complete and npm artifacts are readable. */
+async function main() {
+  const catalog = await readJson(join(dir, "stack-release.json"));
+  const assets = await readJson(join(dir, "component-assets.json"));
+  if (catalog.format !== 3 || assets.format !== 3) throw new Error("Unexpected release format");
+  const expected = await expectedNames();
+  const actual = catalog.packages.map((p) => p.name).sort();
+  if (JSON.stringify(expected) !== JSON.stringify(actual))
+    throw new Error("Incomplete native release manifest");
+  const archived = assets.packages.map((p) => p.name).sort();
+  if (JSON.stringify(expected) !== JSON.stringify(archived))
+    throw new Error("Incomplete native npm archives");
+  for (const item of assets.packages) {
+    const path = join(dir, item.file);
+    if (!(await fs.stat(path)).isFile()) throw new Error(`Missing package archive: ${item.file}`);
+    const { stdout } = await run("tar", ["-tzf", path]);
+    if (!stdout.split("\n").includes("package/package.json"))
+      throw new Error(`No npm package.json: ${item.file}`);
+    if (
+      catalog.packages.find((p) => p.name === item.name)?.bundle &&
+      !stdout.split("\n").includes("package/dist/cordis.patch.yml")
+    ) {
+      throw new Error(`Missing native bundle patch: ${item.name}`);
     }
   }
-  return result.sort();
-}
-
-/** Verify that one plugin archive is readable and contains a root package manifest. */
-async function verifyArchive(archive) {
-  await execFileAsync("unzip", ["-t", archive]);
-  const { stdout } = await execFileAsync("unzip", ["-Z1", archive]);
-  if (!stdout.split("\n").includes("package.json")) {
-    throw new Error(`Missing root package.json in ${archive}`);
-  }
-}
-
-/** Validate the complete generated plugin release-asset inventory. */
-async function main() {
-  const inventory = JSON.parse(
-    await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"),
-  );
-  if (inventory.format !== 2 || !Array.isArray(inventory.plugins)) {
-    throw new Error("Unsupported component-assets.json");
-  }
-  const suffix = /-\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.zip$/;
-  const actual = inventory.plugins
-    .map((name) => name.replace(/^plugin-/, "").replace(suffix, ""))
-    .sort();
-  const expected = await expectedPlugins();
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error(
-      `Plugin ZIP inventory mismatch: expected ${expected.length}, generated ${actual.length}`,
-    );
-  }
-  for (const asset of inventory.plugins) {
-    const archive = join(releaseDir, asset);
-    const stat = await fs.stat(archive);
-    if (!stat.isFile() || stat.size === 0) throw new Error(`Invalid release asset: ${asset}`);
-    await verifyArchive(archive);
-  }
-  console.log(`Validated ${expected.length} plugin ZIPs.`);
+  console.log(`Verified ${expected.length} native npm package archives.`);
 }
 
 await main();

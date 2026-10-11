@@ -1,0 +1,24 @@
+{
+  "name": "@dsh-stack/bundle-providers",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/bundle-providers composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@dsh-stack/credential-vault": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/providers": "workspace:*",
+    "@dsh-stack/tweaks": "workspace:*"
+  }
+}

@@ -6,9 +6,9 @@ DSH Stack is a polished, distributable extension system for DeepSeek Harness. DS
 
 ## Architecture
 
-The canonical source tree is `src/packages/`, composed by `publish/plugins/`, `publish/extensions/`, and `publish/packs/`. Every feature has one owner. Libraries implement reusable mechanics; plugins/extensions expose user-visible behavior or external integrations; packs compose plugins/extensions and never impersonate runtime services. The harness submodule is pinned and pristine.
+The canonical source is a flat `plugins/<name>/` tree, recursively nested composition-only bundle packages in `bundles/`, and actual native DSH profiles in `profiles/`. Every feature has a single implementation owner. The complete Web composition is `@dsh-stack/stack`, with `@dsh-stack/stack-headless` for Headless.
 
-Plugin composition supports required dependencies, optional dependencies, bundled dependencies, and plugin packs. External services are isolated into their own plugins. Profiles are compositions, not alternate implementations.
+DSH owns installation, profiles, runtime, lifecycle, update/removal, and CLI. Parent bundle dependencies are flattened at build time into ordinary native patches; there is no custom runtime composition or profile manager. Users may manually activate optional capabilities in DSH.
 
 ## Profiles
 
@@ -59,11 +59,9 @@ Every external service is its own plugin. At minimum the stack supports GitHub, 
 
 ## Packaging and distribution
 
-Every plugin, extension, and pack is its own publishable package under `publish/**`, with the same package contract and its own semver. The Stack root package is a release coordinator rather than a substitute for plugin packages.
+Each public plugin and each native DSH bundle is an independently publishable npm package. The repository root coordinates releases. The build generator emits deterministic native patches from recursive bundle dependency declarations. Release assets have exact package versions, dependency closure and integrity data; installable packages do not contain `workspace:` references.
 
-Every merge to `main` increments the Stack version. Only modified plugins/packs receive version bumps, based on the semantic change within that package. The release pipeline builds every package, publishes every newly versioned package, generates a complete package catalog with exact versions, dependencies and integrity data, uploads package artifacts and the full manifest to the GitHub release, and updates the updater catalog.
-
-The Stack release always contains the complete plugin/pack catalog. Packs reference exact component versions. The updater plugin compares installed versions against the remote catalog and performs dependency-aware updates.
+The external DSH runtime and native package manager install, update, activate, and remove bundles. Stack does not own a substitute launcher, installer, profile reconciler or updater.
 
 ## Quality bar
 

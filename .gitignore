@@ -6,13 +6,10 @@ node_modules/
 # git worktrees
 /worktrees/
 
-# DSH build output
-DSH/apps/*/lib/
-DSH/packages/*/lib/
-DSH/*/dist/
-
 # stack package build output
-plugins/*/*/lib/
+plugins/*/lib/
+bundles/**/lib/
+bundles/**/dist/
 
 # repo .agents/ (docs, hooks, rules, requests, notes) is an ordinary
 # tracked directory — do not confuse it with ~/.agents, the user-home
@@ -47,3 +44,4 @@ accounts.vault
 # CI runs by cache, so tsc can skip unchanged projects instead of recompiling
 # all 73 packages on every run.
 *.tsbuildinfo
+\n/.ci-packages/

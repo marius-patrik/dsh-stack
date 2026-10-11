@@ -1,0 +1,16 @@
+{
+  "name": "dsh-profile-headless",
+  "private": true,
+  "dependencies": {
+    "@dsh-stack/stack-headless": "0.1.0"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-headless",
+        "@dsh-stack/stack-headless"
+      ]
+    }
+  }
+}

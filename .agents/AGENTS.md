@@ -12,29 +12,22 @@ still-open decision (#60).
 
 ## Repository mission
 
-`KiKi` is the umbrella repository for the DeepSeek Harness-based stack and its adjacent agent infrastructure. The upstream `DSH/` submodule is pinned and pristine. Stack owns the complete implementation catalog in `plugins/`.
+`KiKi` is a native DeepSeek Harness extension distribution. DSH owns installation, profile storage/activation, updates, runtime and CLI. Stack owns reusable plugins, declarative bundles, actual DSH profile templates, and release artifacts.
 
 ## Canonical structure
 
-- `plugins/<group>/<plugin>/` is the canonical native implementation layer. The first-level folders (`agents`, `ai`, `core`, `integrations`, `trading`, `ux`, `vcs`) are logical bundles for repository organization only; they are not packages or runtime profile compositions.
-- `plugins/Memory/` is staged external source pending migration. `_migrate/` contains migration-only repositories and is never runtime architecture.
-- Profiles are ordinary DSH profiles. KiKi mounts native plugins directly through normal profile configuration and does not inject an aggregate `@dsh-stack/bundle*` package.
-- `scripts/` is verification and release tooling, plus the `dsh` launcher/service-manager script and its aliases.
-- `.agents/notes/` is the canonical documentation root.
-- `README.md` is a standalone repository overview. Root `AGENTS.md` points to `.agents/AGENTS.md`; `CONTRIBUTING.md` points to `AGENTS.md`; no root `CLAUDE.md` exists.
-- `DSH/` is upstream and must not be modified.
-- No duplicate implementation tree, compatibility bridge, migration shim, legacy runtime path, or parallel feature owner is allowed.
+- `plugins/<name>/` — single flat implementation package list; no plugin grouping levels. `plugins/dsh-tui` is Chimney's external submodule, managed as a native DSH plugin but excluded from Stack's Bun package build.
+- `bundles/**/` — recursively nested leaf DSH bundles; no dedicated `packs/` directory. Parent bundles compose children at build time into a normal native patch.
+- `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
+- `_migrate/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.
+- `scripts/` owns build, verification and publishing only. No Stack launcher, profile manager, updater or DSH submodule.
+- `.agents/notes/` is the documentation root. `README.md` is standalone, and `CONTRIBUTING.md` symlinks directly to `.agents/AGENTS.md`; no root `AGENTS.md` or `CLAUDE.md`.
 
-There is no second tree of wrappers. An earlier layout kept implementations in `src/packages/` and `publish/extensions/` and put 74 re-export shims in `publish/plugins/`, each resolving a canonical package elsewhere; the seven domain packs and the `@dsh-stack/pack-bundle` wrapper composed them. A folder that only re-exports another plugin is an indirection with no owner, and `verify-stack.mjs` fails it.
+## Plugins and nested bundles
 
-## Plugin grouping model
+A plugin contains exactly one implementation and a native npm package manifest. A bundle declares its `dsh.bundle.patch` and `stack.compose` child dependency list in its `package.json`; the generator flattens its child DAG and rejects duplicate loader entries. DSH activates installed bundles through its normal profile package operations.
 
-- **Plugin** = one concrete package under `plugins/<group>/<plugin>/`.
-- **Logical bundle** = a first-level folder under `plugins/` used only to group related plugins. It has no package manifest, loader entry, or profile semantics.
-- **Profile** = normal DSH profile configuration. Profile membership is independent from logical grouping folders.
-- There is no separate extension tree, pack tree, or aggregate `@dsh-stack/bundle*` runtime package.
-
-Every canonical package follows the common package contract: unique `@dsh-stack/<id>` name, independent semantic version, ESM, explicit exports, publishable files only, appropriate `stack.kind`, globally unique namespaced `stack.id`, explicit required/optional dependencies, and build/typecheck/test/verify scripts. `stack.kind` is `plugin` or `library`; logical bundles are directories, not package kinds.
+There is no second runtime composition system, transitional implementation path, aggregate code wrapper, or duplicate package metadata source. The main `@dsh-stack/stack` bundle is composition-only and installable through native DSH.
 
 ## No duplicate or legacy implementations
 
@@ -42,14 +35,7 @@ There is exactly one implementation owner for every feature. Before adding code,
 
 ## Profiles
 
-Profiles are ordinary DSH profiles and compose plugins directly. Logical plugin folders do not define profile membership.
-
-| Profile | Purpose |
-| --- | --- |
-| `@dsh-stack/profile-default` | general Stack experience |
-| `@dsh-stack/profile-coding` | coding, repositories, tools and editor/LSP capabilities |
-| `@dsh-stack/profile-trading` | research, backtesting, optimization and absorbed MoneyMaker capabilities |
-| `@dsh-stack/profile-skyblock` | reserved for native SkyBlock capabilities after migration |
+Installed profiles are real DSH profiles. The repository's `profiles/web` and `profiles/headless` are shareable native profile templates; users may select and customize the underlying DSH bundles and optional plugin activation. Stack does not provision profiles or rewrite user overrides.
 
 ## UI
 

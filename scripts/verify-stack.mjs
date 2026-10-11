@@ -8,8 +8,8 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
 const pluginsDir = join(root, "plugins");
-const groups = ["agents", "ai", "core", "integrations", "trading", "ux", "vcs"];
-const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib"]);
+
+const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib", "dsh-tui"]);
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
 const errors = [];
 const packageNames = new Map();
@@ -56,26 +56,17 @@ async function* walk(dir) {
   }
 }
 
-/** Enumerate canonical package directories under every logical plugin group. */
+/** Enumerate flat implementation package roots. */
 async function nativePackageDirs() {
   const dirs = [];
-  for (const group of groups) {
-    const groupDir = join(pluginsDir, group);
-    assert(await exists(groupDir), `plugins/${group}/ logical bundle is missing`);
-    if (!(await exists(groupDir))) continue;
+  for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === "dsh-tui") continue;
+    const dir = join(pluginsDir, entry.name);
     assert(
-      !(await exists(join(groupDir, "package.json"))),
-      `plugins/${group}/ is organizational only and must not be a package`,
+      await exists(join(dir, "package.json")),
+      `${relative(root, dir)} must be a flat package`,
     );
-    for (const entry of await fs.readdir(groupDir, { withFileTypes: true })) {
-      if (!entry.isDirectory() || ignoredDirs.has(entry.name)) continue;
-      const dir = join(groupDir, entry.name);
-      assert(
-        await exists(join(dir, "package.json")),
-        `${relative(root, dir)} must contain package.json`,
-      );
-      if (await exists(join(dir, "package.json"))) dirs.push(dir);
-    }
+    if (await exists(join(dir, "package.json"))) dirs.push(dir);
   }
   return dirs.sort();
 }
@@ -171,10 +162,8 @@ async function verifyPackage(dir) {
 /** Run all repository-structure, package-contract, dependency, and source invariants. */
 async function main() {
   assert(await exists(pluginsDir), "plugins/ implementation root is missing");
-  assert(
-    !(await exists(join(root, "bundles"))),
-    "root bundles/ runtime composition tree must not exist",
-  );
+  assert(await exists(join(root, "bundles")), "bundles/ hierarchy is missing");
+  assert(await exists(join(root, "profiles")), "profiles/ is missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 
   const dirs = await nativePackageDirs();
@@ -191,9 +180,7 @@ async function main() {
     }
   }
 
-  for (const group of groups) {
-    const sourceRoot = join(pluginsDir, group);
-    if (!(await exists(sourceRoot))) continue;
+  for (const sourceRoot of [pluginsDir, join(root, "bundles")]) {
     for await (const file of walk(sourceRoot)) {
       const rel = relative(root, file).replaceAll("\\", "/");
       if (!codeExts.has(extname(rel))) continue;
@@ -230,9 +217,7 @@ async function main() {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  console.log(
-    `Stack verification passed: ${publicPackages.size} public packages across ${groups.length} logical plugin bundles.`,
-  );
+  console.log(`Stack verification passed: ${publicPackages.size} flat native packages.`);
 }
 
 await main();

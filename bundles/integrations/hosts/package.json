@@ -1,0 +1,21 @@
+{
+  "name": "@dsh-stack/bundle-hosts",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/bundle-hosts composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@dsh-stack/hosts": "workspace:*"
+  }
+}

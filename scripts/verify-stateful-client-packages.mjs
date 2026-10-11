@@ -36,11 +36,6 @@ const root = resolveRepoRoot(import.meta.url);
  */
 const STATEFUL_CLIENT_PACKAGES = ["@dsh-stack/sidebar-preferences", "@dsh-stack/skin-runtime"];
 
-const PACKAGE_GROUPS = new Map([
-  ["sidebar-preferences", "ux"],
-  ["skin-runtime", "ux"],
-]);
-
 /**
  * Resolves a reviewed stateful package id to its nested package.json path.
  *
@@ -49,9 +44,7 @@ const PACKAGE_GROUPS = new Map([
  */
 function packageJsonPath(packageId) {
   const name = packageId.replace(/^@dsh-stack\//, "");
-  const group = PACKAGE_GROUPS.get(name);
-  if (group === undefined) throw new Error(`no logical plugin group registered for ${packageId}`);
-  return join(root, "plugins", group, name, "package.json");
+  return join(root, "plugins", name, "package.json");
 }
 
 const violations = [];

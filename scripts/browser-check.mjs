@@ -42,10 +42,15 @@ if (url === undefined) {
 const browser = await chromium.launch();
 const page = await browser.newPage();
 const consoleErrors = [];
+const failedResponses = [];
 page.on("console", (message) => {
-  if (message.type() === "error") consoleErrors.push(message.text());
+  if (message.type() === "error")
+    consoleErrors.push(`${message.text()} [${message.location().url}]`);
 });
 page.on("pageerror", (error) => consoleErrors.push(`pageerror: ${error.message}`));
+page.on("response", (response) => {
+  if (response.status() >= 400) failedResponses.push(`${response.status()} ${response.url()}`);
+});
 
 try {
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
@@ -70,7 +75,9 @@ try {
     process.stdout.write(`  ${text.includes(marker) ? "ok  " : "FAIL"} ${surface} (${marker})\n`);
   }
   process.stdout.write(`console errors: ${consoleErrors.length}\n`);
-  for (const error of consoleErrors.slice(0, 5)) process.stdout.write(`  - ${error}\n`);
+  for (const error of consoleErrors.slice(0, 20)) process.stdout.write(`  - ${error}\n`);
+  process.stdout.write(`HTTP failures: ${failedResponses.length}\n`);
+  for (const response of failedResponses.slice(0, 25)) process.stdout.write(`  - ${response}\n`);
 
   if (screenshot !== null) {
     mkdirSync(dirname(screenshot), { recursive: true });
