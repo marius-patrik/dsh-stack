@@ -44,7 +44,8 @@ const page = await browser.newPage();
 const consoleErrors = [];
 const failedResponses = [];
 page.on("console", (message) => {
-  if (message.type() === "error") consoleErrors.push(`${message.text()} [${message.location().url}]`);
+  if (message.type() === "error")
+    consoleErrors.push(`${message.text()} [${message.location().url}]`);
 });
 page.on("pageerror", (error) => consoleErrors.push(`pageerror: ${error.message}`));
 page.on("response", (response) => {
