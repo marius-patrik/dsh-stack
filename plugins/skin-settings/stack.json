@@ -1,7 +1,7 @@
 {
   "id": "stack.ui.skin.settings",
   "name": "@dsh-stack/skin-settings",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "plugin",
   "description": "@dsh-stack/skin-settings",
   "files": ["lib", "README.md", "package.json", "stack.json"],
