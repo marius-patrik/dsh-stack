@@ -65,7 +65,9 @@ async function main() {
   if (!Number.isInteger(concurrency) || concurrency < 1)
     throw new Error("DSH_BUILD_PARALLELISM must be a positive integer");
   const nodes = await discover();
-  const ready = [...nodes.values()].filter((node) => node.pending === 0).sort((a, b) => a.name.localeCompare(b.name));
+  const ready = [...nodes.values()]
+    .filter((node) => node.pending === 0)
+    .sort((a, b) => a.name.localeCompare(b.name));
   let inFlight = 0;
   let complete = 0;
   let rejected;
@@ -75,31 +77,40 @@ async function main() {
       while (!rejected && inFlight < concurrency && ready.length) {
         const pkg = ready.shift();
         inFlight++;
-        build(pkg).then(() => {
-          complete++;
-          for (const next of pkg.downstream) {
-            next.pending--;
-            if (next.pending === 0) {
-              ready.push(next);
-              ready.sort((a, b) => a.name.localeCompare(b.name));
+        build(pkg)
+          .then(() => {
+            complete++;
+            for (const next of pkg.downstream) {
+              next.pending--;
+              if (next.pending === 0) {
+                ready.push(next);
+                ready.sort((a, b) => a.name.localeCompare(b.name));
+              }
             }
-          }
-        }).catch((error) => {
-          rejected ??= error;
-        }).finally(() => {
-          inFlight--;
-          if (inFlight === 0 && rejected) reject(rejected);
-          else if (inFlight === 0 && ready.length === 0) {
-            if (complete !== nodes.size)
-              reject(new Error(`Workspace dependency cycle: ${nodes.size - complete} unresolved packages`));
-            else resolve();
-          } else dispatch();
-        });
+          })
+          .catch((error) => {
+            rejected ??= error;
+          })
+          .finally(() => {
+            inFlight--;
+            if (inFlight === 0 && rejected) reject(rejected);
+            else if (inFlight === 0 && ready.length === 0) {
+              if (complete !== nodes.size)
+                reject(
+                  new Error(
+                    `Workspace dependency cycle: ${nodes.size - complete} unresolved packages`,
+                  ),
+                );
+              else resolve();
+            } else dispatch();
+          });
       }
     }
     dispatch();
   });
-  console.log(`Built ${complete} workspace packages with dependency-aware parallelism ${concurrency}.`);
+  console.log(
+    `Built ${complete} workspace packages with dependency-aware parallelism ${concurrency}.`,
+  );
 }
 
 await main();
