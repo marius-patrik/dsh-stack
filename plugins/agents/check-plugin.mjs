@@ -159,7 +159,7 @@ console.log("base splice ok");
 // declaration in the web-app bundle (`<id>.patch.yml`) whose plugin entry list
 // is nested under `config.plugins`, not a per-preset `agent.cordis.yml`
 // directory under `packages/preset/agent-presets/presets`.
-const baseDir = basePresetDir() ?? join(import.meta.dirname, "fixtures", "dsh-presets");
+const baseDir = basePresetDir() ?? join(import.meta.dirname, "..", "..", ".agents", "test-fixtures", "dsh-presets");
 assert.ok(
   baseDir !== undefined && existsSync(join(baseDir, "standard.patch.yml")),
   "shipped standard preset declaration must be reachable for the splice test",
