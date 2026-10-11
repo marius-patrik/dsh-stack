@@ -45,9 +45,6 @@
     "@deepseek-ai/schemastery": "^3.0.0"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
     "client": {
       "inject": [
         "slots",

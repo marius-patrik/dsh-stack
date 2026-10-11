@@ -2,11 +2,6 @@
   "name": "@dsh-stack/lsp",
   "description": "LSP server configuration + dsh lsp CLI for the DeepSeek Harness LSP capability seam",
   "version": "0.1.0",
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    }
-  },
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -21,7 +16,6 @@
   "files": [
     "lib",
     "bin",
-    "cordis.patch.yml",
     "README.md"
   ],
   "scripts": {

@@ -15,9 +15,6 @@
     "./src/*": "./src/*"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
     "client": {
       "inject": [
         "slots",
@@ -30,7 +27,6 @@
   "files": [
     "lib",
     "client.js",
-    "cordis.patch.yml",
     "README.md"
   ],
   "scripts": {

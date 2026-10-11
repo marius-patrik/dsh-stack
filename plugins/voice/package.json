@@ -34,7 +34,6 @@
   "files": [
     "lib",
     "client.js",
-    "cordis.patch.yml",
     "README.md"
   ],
   "scripts": {
@@ -43,9 +42,6 @@
     "test": "node check-plugin.mjs"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
     "client": {
       "inject": [
         "slots",

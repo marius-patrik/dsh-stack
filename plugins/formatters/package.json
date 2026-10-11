@@ -2,11 +2,6 @@
   "name": "@dsh-stack/formatters",
   "description": "Per-extension formatter commands + format tool + auto-format-on-edit for the dsh web UI",
   "version": "0.1.0",
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    }
-  },
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
