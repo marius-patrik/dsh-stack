@@ -14,7 +14,7 @@ export async function listPluginPackageDirs() {
   const base = join(root, "plugins");
   const dirs = [];
   for (const entry of await fs.readdir(base, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name === "Memory") continue;
+    if (!entry.isDirectory() || entry.name === "dsh-tui") continue;
     const dir = join(base, entry.name);
     try {
       await fs.access(join(dir, "package.json"));

@@ -60,7 +60,7 @@ async function* walk(dir) {
 async function nativePackageDirs() {
   const dirs = [];
   for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
+    if (!entry.isDirectory() || entry.name === "dsh-tui") continue;
     const dir = join(pluginsDir, entry.name);
     assert(
       await exists(join(dir, "package.json")),

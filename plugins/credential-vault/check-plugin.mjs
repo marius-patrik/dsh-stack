@@ -1155,7 +1155,6 @@ const cryptoPolyfill = readFileSync(
     dirname(fileURLToPath(import.meta.url)),
     "..",
     "..",
-    "..",
     "scripts",
     "client-runtime",
     "crypto-polyfill.js",
@@ -1165,7 +1164,6 @@ const cryptoPolyfill = readFileSync(
 const glyphFactory = readFileSync(
   join(
     dirname(fileURLToPath(import.meta.url)),
-    "..",
     "..",
     "..",
     "scripts",

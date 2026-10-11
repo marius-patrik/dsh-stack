@@ -107,7 +107,7 @@ async function buildManifest(packages) {
         bundle: published.dsh?.bundle?.patch ?? null,
       };
     }),
-    profiles: ["web", "headless"],
+    profiles: ["web", "headless", "tui"],
   };
 }
 
