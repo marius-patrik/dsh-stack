@@ -4,7 +4,7 @@ import * as dialects from "@dsh-stack/dialects";
 import { Context } from "@deepseek-ai/cordis";
 import { LlmError } from "@deepseek-ai/dsh-llm";
 import assert from "node:assert";
-import { assertLoaderShape, stubSettingsService } from "../../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
 
 // The harness' own projection rule, imported rather than reimplemented: the
 // settings service decides what is editable from `volatileForm` /
