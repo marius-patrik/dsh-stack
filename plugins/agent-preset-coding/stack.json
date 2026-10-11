@@ -1,7 +1,7 @@
 {
   "id": "stack.agent.preset.coding",
   "name": "@dsh-stack/agent-preset-coding",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "plugin",
   "description": "Software-engineering Stack agent preset extension.",
   "files": ["lib", "README.md", "package.json", "stack.json"],
