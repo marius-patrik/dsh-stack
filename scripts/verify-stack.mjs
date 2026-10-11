@@ -62,7 +62,10 @@ async function nativePackageDirs() {
   for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const dir = join(pluginsDir, entry.name);
-    assert(await exists(join(dir, "package.json")), `${relative(root, dir)} must be a flat package`);
+    assert(
+      await exists(join(dir, "package.json")),
+      `${relative(root, dir)} must be a flat package`,
+    );
     if (await exists(join(dir, "package.json"))) dirs.push(dir);
   }
   return dirs.sort();
@@ -214,9 +217,7 @@ async function main() {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  console.log(
-    `Stack verification passed: ${publicPackages.size} flat native packages.`,
-  );
+  console.log(`Stack verification passed: ${publicPackages.size} flat native packages.`);
 }
 
 await main();

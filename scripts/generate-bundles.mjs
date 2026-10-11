@@ -13,15 +13,22 @@ async function definitions() {
   for (const dir of await listBundlePackageDirs()) {
     const manifest = await readJson(join(dir, "package.json"));
     const name = manifest.name;
-    if (typeof name !== "string" || !name.startsWith("@dsh-stack/")) throw new Error(`Invalid bundle identity: ${dir}`);
+    if (typeof name !== "string" || !name.startsWith("@dsh-stack/"))
+      throw new Error(`Invalid bundle identity: ${dir}`);
     if (catalog.has(name)) throw new Error(`Duplicate bundle name: ${name}`);
     if (manifest.dsh?.bundle?.patch !== "./dist/cordis.patch.yml") {
-      throw new Error(`${name}: dsh.bundle.patch must point to the generated dist/cordis.patch.yml`);
+      throw new Error(
+        `${name}: dsh.bundle.patch must point to the generated dist/cordis.patch.yml`,
+      );
     }
     const compose = manifest.stack?.compose ?? [];
-    if (!Array.isArray(compose) || compose.some(x => typeof x !== "string")) throw new Error(`${name}: invalid stack.compose`);
-    if (new Set(compose).size !== compose.length) throw new Error(`${name}: duplicate child bundle`);
-    for (const child of compose) if (manifest.dependencies?.[child] === undefined) throw new Error(`${name}: missing dependency on ${child}`);
+    if (!Array.isArray(compose) || compose.some((x) => typeof x !== "string"))
+      throw new Error(`${name}: invalid stack.compose`);
+    if (new Set(compose).size !== compose.length)
+      throw new Error(`${name}: duplicate child bundle`);
+    for (const child of compose)
+      if (manifest.dependencies?.[child] === undefined)
+        throw new Error(`${name}: missing dependency on ${child}`);
     catalog.set(name, { dir, manifest, compose });
   }
   return catalog;
@@ -47,7 +54,8 @@ async function compose(name, catalog) {
       if (!patch.trim()) throw new Error(`${current}: empty source patch`);
       for (const m of patch.matchAll(/^    - id: ([A-Za-z0-9._-]+)\s*$/gm)) {
         const previous = seenEntries.get(m[1]);
-        if (previous) throw new Error(`${name}: duplicate inserted row ${m[1]} in ${previous} and ${current}`);
+        if (previous)
+          throw new Error(`${name}: duplicate inserted row ${m[1]} in ${previous} and ${current}`);
         seenEntries.set(m[1], current);
       }
       patches.push(`# From ${current}\n${patch.trimEnd()}`);
@@ -69,8 +77,13 @@ async function main() {
     const target = join(bundle.dir, "dist", "cordis.patch.yml");
     if (check) {
       let existing;
-      try { existing = await fs.readFile(target, "utf8"); } catch { /* absent */ }
-      if (existing !== expected) throw new Error(`${name}: stale generated patch; run bundle generation`);
+      try {
+        existing = await fs.readFile(target, "utf8");
+      } catch {
+        /* absent */
+      }
+      if (existing !== expected)
+        throw new Error(`${name}: stale generated patch; run bundle generation`);
       continue;
     }
     await fs.mkdir(dirname(target), { recursive: true });
