@@ -18,7 +18,7 @@ profile fails to boot with:
 Error: service "directoryPicker" has been registered at <BrowseDirectoryPicker>
 ```
 
-`DSH/` is pinned and must not be modified directly. This package is
+DSH is installed independently; Stack must not modify the upstream harness. This package is
 dsh-stack's own composition-level lever around the bug: its `apply()` mounts
 the resolved backend as a plain, eager `ctx.plugin()` composition instead of
 a dynamic Loader entry, reusing harness's own exported
@@ -31,9 +31,9 @@ effect, but that disable does not live in this package's own `cordis.patch.yml`
 their own patch read at boot, and no Stack profile lists this package there
 directly -- it is only ever composed as a nested `insert` row inside
 `the web profile`. The disable is instead emitted by
-`src/scripts/generate-stack-bundle-patch.mjs` (`STATIC_DISABLE_ROWS`) into
-the web profile's normal `cordis.patch.yml`, the one file a Stack profile's
-top-level bundle list actually applies.
+`bundles/stack/composition/cordis.patch.yml` into the aggregated native
+`@dsh-stack/stack` patch before the replacement row is inserted. The native
+DSH Web profile reads this patch through `dsh.profile.bundles`.
 
 ## Usage
 

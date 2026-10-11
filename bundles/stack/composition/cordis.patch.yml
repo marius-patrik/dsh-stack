@@ -1,4 +1,9 @@
 # Stack UI and agent rows outside the native reusable bundles.
+# The official auto backend dynamically creates a second directoryPicker service
+# under the complete Stack composition. The replacement row below mounts one
+# backend statically; the official row must not be simultaneously active.
+- id: directory-picker
+  disabled: true
 - insert:
     - id: agent-actions
       name: '@dsh-stack/agent-actions'

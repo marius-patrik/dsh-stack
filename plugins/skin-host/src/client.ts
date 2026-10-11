@@ -30,17 +30,18 @@ export function apply(ctx: ClientContext): void {
     Mark = (props: { size?: number }) => createElement(selected.mark, props);
   const /** Name implementation. */ Name = () => createElement(selected.name);
 
+  // Shadow the official brand cell at a distinct priority; same-priority slots are invalid.
   ctx.slots.inject("sidebar.brand.mark", function* () {
-    yield ctx.slots.register({ name: "sidebar.brand.mark", inject: () => ({ size: 24 }) }, Mark);
+    yield ctx.slots.register({ name: "sidebar.brand.mark", priority: -10, inject: () => ({ size: 24 }) }, Mark);
   });
 
   ctx.slots.inject("sidebar.brand.name", function* () {
-    yield ctx.slots.register({ name: "sidebar.brand.name", inject: () => ({}) }, Name);
+    yield ctx.slots.register({ name: "sidebar.brand.name", priority: -10, inject: () => ({}) }, Name);
   });
 
   ctx.slots.inject("conversation.hero.brand.mark", function* () {
     yield ctx.slots.register(
-      { name: "conversation.hero.brand.mark", inject: () => ({ size: 24 }) },
+      { name: "conversation.hero.brand.mark", priority: -10, inject: () => ({ size: 24 }) },
       Mark,
     );
   });
