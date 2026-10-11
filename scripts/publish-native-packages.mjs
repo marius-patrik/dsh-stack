@@ -107,7 +107,9 @@ async function confirm(item, attempts = 1) {
     }
     if (attempt + 1 < attempts) {
       // npm can accept a publish before new metadata propagates to readers.
-      console.log(`awaiting registry visibility for ${item.name}@${item.version} (${attempt + 1}/${attempts})`);
+      console.log(
+        `awaiting registry visibility for ${item.name}@${item.version} (${attempt + 1}/${attempts})`,
+      );
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   }
@@ -131,7 +133,10 @@ async function publish(item) {
     const output = `${error?.stderr ?? ""}\n${error?.stdout ?? ""}`;
     // The write API can know a version exists before an unauthenticated
     // npm view sees it. A duplicate is not a success until the final exact-byte check.
-    if (!/\bE403\b/i.test(output) || !/cannot publish over the previously published versions/i.test(output)) {
+    if (
+      !/\bE403\b/i.test(output) ||
+      !/cannot publish over the previously published versions/i.test(output)
+    ) {
       throw error;
     }
     console.log(`npm already has ${item.name}@${item.version}; awaiting public visibility`);
