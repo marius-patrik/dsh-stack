@@ -1005,17 +1005,6 @@
         "react": "^18.2.0",
       },
     },
-    "plugins/tui": {
-      "name": "@dsh-stack/tui",
-      "version": "0.2.0",
-      "bin": {
-        "dsh-tui": "./bin/dsh-tui.mjs",
-      },
-      "devDependencies": {
-        "@types/node": "^22.0.0",
-        "typescript": "^5.9.0",
-      },
-    },
     "plugins/tweak-drag-drop": {
       "name": "@dsh-stack/tweak-drag-drop",
       "version": "0.1.0",
@@ -1749,7 +1738,6 @@
 
     "@dsh-stack/translator": ["@dsh-stack/translator@workspace:plugins/translator"],
 
-    "@dsh-stack/tui": ["@dsh-stack/tui@workspace:plugins/tui"],
 
     "@dsh-stack/tweak-drag-drop": ["@dsh-stack/tweak-drag-drop@workspace:plugins/tweak-drag-drop"],
 
