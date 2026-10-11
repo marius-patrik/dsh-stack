@@ -5,7 +5,7 @@
  * concurrently races TypeScript declaration emission for local workspace peers.
  */
 import { spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { mkdir, access, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
@@ -22,6 +22,7 @@ async function discover() {
       dir,
       name: pkg.name,
       build: typeof pkg.scripts?.build === "string",
+      types: pkg.types ?? null,
       references: new Set([
         ...Object.keys(pkg.dependencies ?? {}),
         ...Object.keys(pkg.optionalDependencies ?? {}),
@@ -53,6 +54,14 @@ async function build(pkg) {
   if (!pkg.build) return;
   // Some package scripts concatenate client assets into lib/ even with zero TS emit.
   await mkdir(join(pkg.dir, "lib"), { recursive: true });
+  if (pkg.types) {
+    try {
+      await access(join(pkg.dir, pkg.types));
+    } catch {
+      // A restored incremental marker without emitted declarations is not a valid cache hit.
+      await rm(join(pkg.dir, "tsconfig.tsbuildinfo"), { force: true });
+    }
+  }
   await new Promise((resolve, reject) => {
     const child = spawn("bun", ["run", "build"], { cwd: pkg.dir, stdio: "inherit" });
     child.on("error", reject);
