@@ -64,10 +64,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "peerDependenciesMeta": {
-    "@deepseek-ai/dsh-web-app": {
-      "optional": true
-    }
   }
 }
