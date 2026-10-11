@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/tweak-keybinds",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keybind settings surface: the tweaks-keybinds section schema and validation consumed by the client.",
   "license": "MIT",
   "type": "module",
