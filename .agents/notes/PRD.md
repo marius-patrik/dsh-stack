@@ -6,7 +6,7 @@ DSH Stack is a polished, distributable extension system for DeepSeek Harness. DS
 
 ## Architecture
 
-The canonical source tree is `src/packages/`, composed by `publish/plugins/`, `publish/extensions/`, and `publish/packs/`. Every feature has one owner. Libraries implement reusable mechanics; plugins/extensions expose user-visible behavior or external integrations; packs compose plugins/extensions and never impersonate runtime services. The harness submodule is pinned and pristine.
+The canonical source tree is `src/packages/`, composed by `publish/plugins/`, `publish/extensions/`, and `publish/packs/`. Every feature has one owner. Libraries implement reusable mechanics; plugins/extensions expose user-visible behavior or external integrations; packs compose plugins/extensions and never impersonate runtime services. The harness is an independently installed runtime; Stack plugins are installed through native DSH profile/package commands.
 
 Plugin composition supports required dependencies, optional dependencies, bundled dependencies, and plugin packs. External services are isolated into their own plugins. Profiles are compositions, not alternate implementations.
 

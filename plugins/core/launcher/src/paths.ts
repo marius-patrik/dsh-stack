@@ -9,15 +9,14 @@ export function packageDir(importMetaUrl: string): string {
 }
 
 /**
- * Locate the harness checkout: the DSH_HARNESS env var wins, else the
- * `DSH/` submodule of the enclosing KiKi checkout. Returns null when
- * no checkout is present (verbs that don't need the harness still work).
+ * Locate an external upstream harness checkout supplied by DSH_HARNESS.
+ * The native DSH installation owns its runtime; Stack does not carry a
+ * fallback harness submodule. Returns null for non-runtime launcher verbs.
  */
-export function findHarnessDir(env: NodeJS.ProcessEnv, pkgDir: string): string | null {
+export function findHarnessDir(env: NodeJS.ProcessEnv, _pkgDir: string): string | null {
   const fromEnv = env.DSH_HARNESS;
   if (fromEnv !== undefined && fromEnv.length > 0 && existsSync(fromEnv)) return fromEnv;
-  const sibling = join(pkgDir, "..", "..", "..", "DSH");
-  return existsSync(join(sibling, "apps")) ? sibling : null;
+  return null;
 }
 
 /**

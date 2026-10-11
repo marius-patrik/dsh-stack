@@ -16,11 +16,10 @@ on:
       - "plugins/**/patches/**"
       - "plugins/**/stack.json"
       - "publish/**"
-      # Profile boot wiring and harness pin.
+      # Profile boot wiring.
       - "plugins/core/launcher/**"
       - "scripts/browser-check.mjs"
       - ".github/workflows/browser-verification.yml"
-      - "DSH"
 
 permissions:
   contents: read
@@ -39,6 +38,8 @@ jobs:
     # The harness build is the long pole; give the job room rather than letting a
     # partial boot look like a pass.
     timeout-minutes: 45
+    env:
+      DSH_HARNESS: ${{ runner.temp }}/dsh-upstream
 
     steps:
       - name: Checkout repository
@@ -46,8 +47,8 @@ jobs:
         with:
           submodules: false
 
-      - name: Checkout pinned DSH
-        run: git submodule update --init --force --depth=1 --recursive DSH
+      - name: Checkout upstream DSH as an isolated CI fixture
+        run: git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git "$RUNNER_TEMP/dsh-upstream"
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
@@ -73,11 +74,9 @@ jobs:
       - name: Build Stack workspace
         run: bun run build
 
-      # The pinned harness is what actually serves the app, so it has to be built
-      # too. `bootstrap all` also typechecks it; the harness gate that owns the
-      # submodule's own e2e lane is a separate concern and is not reused here,
-      # because that lane writes into the pinned checkout.
-      - name: Build pinned harness
+      # Browser integration runs against a separately fetched upstream harness.
+      # The Stack checkout neither pins nor manages the runtime.
+      - name: Build external test harness
         run: ./scripts/bootstrap install && ./scripts/bootstrap build
 
       - name: Cache Playwright browsers

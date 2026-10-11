@@ -12,7 +12,7 @@ still-open decision (#60).
 
 ## Repository mission
 
-`KiKi` is the umbrella repository for the DeepSeek Harness-based stack and its adjacent agent infrastructure. The upstream `DSH/` submodule is pinned and pristine. Stack owns the complete implementation catalog in `plugins/`.
+`KiKi` is the umbrella repository for the DeepSeek Harness-based stack and its adjacent agent infrastructure. DSH is installed separately through its native distribution and owns runtime installation and profile composition. Stack owns the complete implementation catalog in `plugins/`.
 
 ## Canonical structure
 
@@ -21,8 +21,8 @@ still-open decision (#60).
 - Profiles are ordinary DSH profiles. KiKi mounts native plugins directly through normal profile configuration and does not inject an aggregate `@dsh-stack/bundle*` package.
 - `scripts/` is verification and release tooling, plus the `dsh` launcher/service-manager script and its aliases.
 - `.agents/notes/` is the canonical documentation root.
-- `README.md` is a standalone repository overview. Root `AGENTS.md` points to `.agents/AGENTS.md`; `CONTRIBUTING.md` points to `AGENTS.md`; no root `CLAUDE.md` exists.
-- `DSH/` is upstream and must not be modified.
+- `README.md` is a standalone repository overview. There is no root `AGENTS.md` symlink; `CONTRIBUTING.md` points directly to `.agents/AGENTS.md`; no root `CLAUDE.md` exists.
+- No `DSH/` submodule is checked into Stack; install plugins through DSH's native `dsh plugin` path, without Stack managing a separate harness checkout.
 - No duplicate implementation tree, compatibility bridge, migration shim, legacy runtime path, or parallel feature owner is allowed.
 
 There is no second tree of wrappers. An earlier layout kept implementations in `src/packages/` and `publish/extensions/` and put 74 re-export shims in `publish/plugins/`, each resolving a canonical package elsewhere; the seven domain packs and the `@dsh-stack/pack-bundle` wrapper composed them. A folder that only re-exports another plugin is an indirection with no owner, and `verify-stack.mjs` fails it.

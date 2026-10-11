@@ -7,7 +7,7 @@ status: active
 
 ## Repository mission
 
-KiKi is the umbrella repository for the DSH-based agent platform and adjacent infrastructure. The upstream DSH submodule is pinned and pristine.
+KiKi is the umbrella repository for the DSH-based agent platform and adjacent infrastructure. DSH is installed separately and remains the sole owner of runtime installation and native plugin/profile management.
 
 ## Canonical structure
 
@@ -19,8 +19,8 @@ KiKi is the umbrella repository for the DSH-based agent platform and adjacent in
 - `scripts/` contains verification, release, and bootstrap tooling.
 - `.agents/notes/` is the canonical documentation root.
 - `README.md` is a standalone repository overview.
-- Root `AGENTS.md` points to `.agents/AGENTS.md`; `CONTRIBUTING.md` points to `AGENTS.md`; there is no root `CLAUDE.md`.
-- `DSH/` is upstream and must not be modified.
+- There is no root `AGENTS.md` symlink; `CONTRIBUTING.md` points directly to `.agents/AGENTS.md`; there is no root `CLAUDE.md`.
+- No harness gitlink is tracked here. Stack plugins install into ordinary DSH profiles using DSH's native plugin commands.
 
 No duplicate implementation tree, compatibility bridge, migration shim, legacy runtime path, or parallel feature owner is allowed.
 

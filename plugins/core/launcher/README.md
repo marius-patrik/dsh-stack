@@ -47,9 +47,10 @@ dsh [args...]    Fall through to the harness CLI
   plugin counts. A server that stops answering the RPC is reported in that
   line rather than ending the session. Ctrl-C detaches: the log watcher and
   the poll timer are torn down and `dsh` exits 0, leaving the server running.
-- **Harness discovery**: `DSH_HARNESS` env var, else the `DSH/` submodule
-  of the enclosing KiKi checkout (`../../../DSH` relative to this
-  package). Server logs go to `<os-tmpdir>/dsh-web.log`.
+- **Harness discovery**: an explicit external `DSH_HARNESS` checkout path for
+  developer tooling only. DSH itself owns normal installation, native profile
+  composition, and the standard `dsh` CLI; Stack does not vendor a harness.
+  Server logs go to `<os-tmpdir>/dsh-web.log`.
 
 ## Platform notes
 
