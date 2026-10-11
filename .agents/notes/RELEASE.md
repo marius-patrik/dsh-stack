@@ -1,32 +1,15 @@
-# Release and distribution contract
+# Native release and distribution contract
 
-The Stack root package is the release coordinator. Each `publish/plugins/**`, `publish/extensions/**`, and `publish/packs/**` package is independently publishable.
+The repository is a build/release coordinator, not an installer or running application. Every public `plugins/<name>/` package and every nested `bundles/**/` package is independently versioned and distributed as an npm package. `profiles/` contains non-publishable genuine DSH profile templates.
 
-## Versioning
+## Artifacts
 
-- Stack version increments exactly once for each merge to `main`.
-- A plugin/pack version changes only when files owned by that package changed in the merged range.
-- Conventional commit intent is interpreted within each package: breaking change → major, feature → minor, otherwise patch.
-- Dependency-only changes still bump the dependent package when its published metadata changes.
+A release includes the Stack version, every package and bundle name and version, exact Stack dependency graph, DSH/runtime peer requirements, built npm tarballs, hashes/integrity values and one release manifest. Bundle parents include build-generated deterministic patches. Published packages must contain no `workspace:` ranges; release tooling resolves them to exact versions.
 
-## Release contents
+## Lifecycle
 
-Every release contains:
+DSH's native plugin manager and underlying package manager install, update, activate, deactivate, and remove bundles and their dependencies. Stack does not ship a separate updater, package download manager, or profile rewrite tool. Profile overrides remain user-owned. Optional components can be manually activated.
 
-- the Stack version;
-- every plugin and pack ID and exact version;
-- required and optional dependencies with exact versions where resolvable;
-- package tarball URLs and integrity hashes;
-- profile membership;
-- pack membership;
-- minimum supported Stack/runtime information.
+## Publication ordering
 
-All newly versioned packages are published publicly. Every package tarball and the complete manifest are attached to the GitHub release.
-
-## Updater
-
-The updater plugin consumes the release manifest/catalog, compares installed package versions, resolves dependency constraints, downloads verified artifacts, and applies updates atomically. A failed update leaves the prior installation usable.
-
-## CI/release ordering
-
-Pull request CI must pass before merge. Release runs only from `main` after the merge. The release workflow must not produce a second release from its own version-bump commit.
+Publish dependencies before bundle parents according to the dependency DAG. Release only on `main` after PR gates pass. Do not publish a second release from the release-version commit. Fresh external-DSH install and Web/Headless smoke gates must pass before considering distribution complete.

@@ -1,28 +1,29 @@
-# KiKi
+# DSH Stack
 
-KiKi is a collection of native plugins and supporting packages for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). DSH owns the runtime, its installation, profiles, package management, and plugin lifecycle. This repository does not vendor or pin the harness.
+First-class plugins, recursive bundles, and actual native profile templates for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). DSH exclusively owns the runtime, CLI, profile storage, package installation, activation, updates, and lifecycle. Stack supplies packages and declarative composition.
 
-## Repository layout
+## Repository
 
-- `plugins/` — independently versioned Stack packages, grouped by logical domain. The groups are organizational, not runtime bundles or profile compositions.
-- `plugins/Memory/` — staged external Memory plugin source pending migration.
-- `_migrate/` — temporary source repositories used only for migration, not runtime deployment.
-- `scripts/` — Stack development and release tooling.
+- `plugins/<name>/`: flat independent implementation packages (including reusable libraries and Cordis plugins).
+- `bundles/**/`: arbitrarily nested *leaf* packages with `dsh.bundle.patch` metadata. Parent bundles recursively compose children at build time, producing one normal native DSH patch, not a runtime manager.
+- `profiles/<name>/`: actual `dsh.profile.bundles` profile manifest and `cordis.patch.yml` templates. These are profile directories, **not** npm bundles. DSH maintains the installed profiles under its own home directory.
+- `scripts/`: build, verification, and publication only.
 
-## Native installation
+The `plugins/Memory` gitlink is staged external source and not a managed runtime installation. The `_migrate/` sources are not part of the installed Stack.
 
-Install and run DSH separately using its official distribution. Install any Stack package that declares `dsh.bundle` through DSH's native profile command, for example from a built Stack checkout:
+## Native DSH installation
+
+Install DSH independently via its own official distribution and package manager. Once Stack packages have been published, install the complete Web experience using the native DSH command:
 
 ```sh
-bun install
-bun run build
-dsh plugin --profile web add ./plugins/ux/themes
+dsh plugin --profile web add @dsh-stack/stack
 dsh --profile web --dump-config
+dsh --profile web
 ```
 
-DSH, not KiKi, manages installed packages and the active profile. The top-level Stack workspace is **not** a DSH bundle; install the individual native bundles or their published artifacts. Packages without `dsh.bundle` are libraries or standalone tools and do not activate a plugin layer on their own.
+For a headless installation use `dsh plugin --profile headless add @dsh-stack/stack-headless`. Smaller nested bundles can be installed individually. The package manager installs dependencies, and users may enable optional plugins via normal DSH profile patches or the native plugin UI.
 
-For a development integration that needs an upstream source checkout, use an *external* DSH checkout and set `DSH_HARNESS` to its path. No harness checkout is part of this Git repository.
+The files under `profiles/` are deployable native-profile templates; copying them directly into a DSH home is an explicit user operation, not a Stack CLI feature. Never introduce a separate launcher, symlink manager, profile mutation layer, or updater. DSH's native profile manager is authoritative.
 
 ## Development
 
@@ -32,6 +33,10 @@ bun run build
 bun run typecheck
 bun run verify
 bun run test
+bun run release:assets
+bun run release:verify
 ```
 
-Repository rules and contributor guidance live in [`.agents/AGENTS.md`](.agents/AGENTS.md).
+`bun run build` generates the deterministic recursive bundle patches before compiling plugins. Compiled `dist/` and `lib/` are not tracked. The release pipeline packages independently publishable npm tarballs with resolved exact package versions rather than shipping a replacement runtime.
+
+Repository rules and contributor guidance live in [`.agents/AGENTS.md`](.agents/AGENTS.md). The architectural migration is tracked by [P0 issue #320](https://github.com/marius-patrik/dsh-stack/issues/320).
