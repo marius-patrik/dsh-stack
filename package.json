@@ -16,7 +16,7 @@
     "koffi"
   ],
   "scripts": {
-    "build": "bun run --filter '*' --if-present build",
+    "build": "node scripts/generate-bundles.mjs && bun run --filter '*' --if-present build",
     "typecheck": "bun run --filter '*' --if-present typecheck",
     "format": "biome format --write .",
     "format:check": "biome format --write . && git diff --exit-code",
@@ -24,7 +24,7 @@
     "verify:jsdocs": "node scripts/verify-jsdocs.mjs",
     "verify:duplicates": "jscpd plugins bundles scripts",
     "verify:dead-code": "knip --no-progress",
-    "verify": "bun run verify:plugin-readmes && bun run verify:jsdocs && bun run verify:duplicates && bun run verify:jscpd-exemptions && bun run verify:dead-code && bun run verify:stateful-client-packages && node scripts/verify-stack.mjs && bun run --filter '*' --if-present verify",
+    "verify": "bun run verify:plugin-readmes && bun run verify:jsdocs && bun run verify:duplicates && bun run verify:jscpd-exemptions && bun run verify:dead-code && bun run verify:stateful-client-packages && bun run verify:bundle-composition && node scripts/verify-stack.mjs && bun run --filter '*' --if-present verify",
     "test": "node --test 'scripts/**/*.test.mjs' && bun run --filter '*' --if-present test",
     "release:manifest": "node scripts/release.mjs manifest",
     "release:version": "node scripts/release.mjs version",
@@ -32,7 +32,8 @@
     "release:verify": "node scripts/verify-release-assets.mjs",
     "verify:stateful-client-packages": "node scripts/verify-stateful-client-packages.mjs",
     "verify:jscpd-exemptions": "node scripts/verify-jscpd-exemptions.mjs",
-    "browser:check": "node scripts/browser-check.mjs"
+    "browser:check": "node scripts/browser-check.mjs",
+    "verify:bundle-composition": "node scripts/generate-bundles.mjs --check"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
