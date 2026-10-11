@@ -26,16 +26,21 @@ async function main() {
   if (catalog.format !== 3 || assets.format !== 3) throw new Error("Unexpected release format");
   const expected = await expectedNames();
   const actual = catalog.packages.map((p) => p.name).sort();
-  if (JSON.stringify(expected) !== JSON.stringify(actual)) throw new Error("Incomplete native release manifest");
+  if (JSON.stringify(expected) !== JSON.stringify(actual))
+    throw new Error("Incomplete native release manifest");
   const archived = assets.packages.map((p) => p.name).sort();
-  if (JSON.stringify(expected) !== JSON.stringify(archived)) throw new Error("Incomplete native npm archives");
+  if (JSON.stringify(expected) !== JSON.stringify(archived))
+    throw new Error("Incomplete native npm archives");
   for (const item of assets.packages) {
     const path = join(dir, item.file);
     if (!(await fs.stat(path)).isFile()) throw new Error(`Missing package archive: ${item.file}`);
     const { stdout } = await run("tar", ["-tzf", path]);
-    if (!stdout.split("\n").includes("package/package.json")) throw new Error(`No npm package.json: ${item.file}`);
-    if (catalog.packages.find((p) => p.name === item.name)?.bundle &&
-        !stdout.split("\n").includes("package/dist/cordis.patch.yml")) {
+    if (!stdout.split("\n").includes("package/package.json"))
+      throw new Error(`No npm package.json: ${item.file}`);
+    if (
+      catalog.packages.find((p) => p.name === item.name)?.bundle &&
+      !stdout.split("\n").includes("package/dist/cordis.patch.yml")
+    ) {
       throw new Error(`Missing native bundle patch: ${item.name}`);
     }
   }

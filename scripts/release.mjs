@@ -5,12 +5,7 @@ import { createHash } from "node:crypto";
 import { join, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import {
-  listPluginPackageDirs,
-  listBundlePackageDirs,
-  readJson,
-  root,
-} from "./lib/repo-paths.mjs";
+import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const command = process.argv[2];
@@ -26,8 +21,8 @@ async function run(cmd, args, options = {}) {
 /** Discover native plugin and bundle leaves; profiles are intentionally not npm packages. */
 async function discoverPackages() {
   const sources = [
-    ...((await listPluginPackageDirs()).map((dir) => ({ dir, kind: "plugin" }))),
-    ...((await listBundlePackageDirs()).map((dir) => ({ dir, kind: "bundle" }))),
+    ...(await listPluginPackageDirs()).map((dir) => ({ dir, kind: "plugin" })),
+    ...(await listBundlePackageDirs()).map((dir) => ({ dir, kind: "bundle" })),
   ];
   const result = [];
   const names = new Set();
@@ -47,7 +42,12 @@ async function discoverPackages() {
 /** Return npm-compatible exact ranges for local workspace references. */
 function publishableManifest(component, byName) {
   const pkg = structuredClone(component.pkg);
-  for (const section of ["dependencies", "optionalDependencies", "peerDependencies", "devDependencies"]) {
+  for (const section of [
+    "dependencies",
+    "optionalDependencies",
+    "peerDependencies",
+    "devDependencies",
+  ]) {
     for (const [name, value] of Object.entries(pkg[section] ?? {})) {
       if (typeof value !== "string" || !value.startsWith("workspace:")) continue;
       const dependency = byName.get(name);
@@ -116,7 +116,9 @@ async function writeManifest(manifest) {
   await fs.mkdir(releaseDir, { recursive: true });
   const path = join(releaseDir, "stack-release.json");
   await writeJson(path, manifest);
-  const digest = createHash("sha256").update(await fs.readFile(path)).digest("hex");
+  const digest = createHash("sha256")
+    .update(await fs.readFile(path))
+    .digest("hex");
   await fs.writeFile(join(releaseDir, "stack-release.sha256"), `${digest}  stack-release.json\n`);
 }
 
@@ -128,9 +130,10 @@ async function stagePackage(item, byName, stageRoot) {
     recursive: true,
     force: true,
     dereference: true,
-    filter: (path) => !relative(item.dir, path).split(/[\\/]/).some(
-      (part) => part === "node_modules" || part === ".git",
-    ),
+    filter: (path) =>
+      !relative(item.dir, path)
+        .split(/[\\/]/)
+        .some((part) => part === "node_modules" || part === ".git"),
   });
   const published = publishableManifest(item, byName);
   await writeJson(join(target, "package.json"), published);
@@ -155,7 +158,8 @@ async function assets() {
     const json = await run("npm", ["pack", staged, "--pack-destination", releaseDir, "--json"]);
     const entries = JSON.parse(json);
     const file = entries?.[0]?.filename;
-    if (typeof file !== "string") throw new Error(`${item.pkg.name}: npm pack did not return a tarball`);
+    if (typeof file !== "string")
+      throw new Error(`${item.pkg.name}: npm pack did not return a tarball`);
     archives.push({
       name: item.pkg.name,
       version: item.pkg.version,
@@ -169,17 +173,22 @@ async function assets() {
   const checksums = [];
   for (const file of (await fs.readdir(releaseDir)).sort()) {
     if (file.endsWith(".sha256") || file === "SHA256SUMS") continue;
-    const hash = createHash("sha256").update(await fs.readFile(join(releaseDir, file))).digest("hex");
+    const hash = createHash("sha256")
+      .update(await fs.readFile(join(releaseDir, file)))
+      .digest("hex");
     checksums.push(`${hash}  ${file}`);
   }
   await fs.writeFile(join(releaseDir, "SHA256SUMS"), `${checksums.join("\n")}\n`);
-  console.log(`Packed ${archives.length} native npm packages, including ${packages.filter(p => p.kind === "bundle").length} bundles.`);
+  console.log(
+    `Packed ${archives.length} native npm packages, including ${packages.filter((p) => p.kind === "bundle").length} bundles.`,
+  );
 }
 
 /** Bump a package semver without altering unrelated package metadata. */
 function bumpVersion(version, kind) {
   const values = version.split(".").map(Number);
-  if (values.length !== 3 || values.some((v) => !Number.isInteger(v) || v < 0)) throw new Error(`Invalid semver: ${version}`);
+  if (values.length !== 3 || values.some((v) => !Number.isInteger(v) || v < 0))
+    throw new Error(`Invalid semver: ${version}`);
   if (kind === "major") return `${values[0] + 1}.0.0`;
   if (kind === "minor") return `${values[0]}.${values[1] + 1}.0`;
   return `${values[0]}.${values[1]}.${values[2] + 1}`;
@@ -192,7 +201,14 @@ async function version() {
   main.version = bumpVersion(main.version, bumpArg);
   await writeJson(rootPath, main);
   for (const item of await discoverPackages()) {
-    const changed = await run("git", ["diff", "--name-only", "HEAD^", "HEAD", "--", item.relativePath]);
+    const changed = await run("git", [
+      "diff",
+      "--name-only",
+      "HEAD^",
+      "HEAD",
+      "--",
+      item.relativePath,
+    ]);
     if (!changed) continue;
     const next = bumpVersion(item.pkg.version, bumpArg);
     item.pkg.version = next;
@@ -202,7 +218,9 @@ async function version() {
       const legacy = await readJson(legacyPath);
       legacy.version = next;
       await writeJson(legacyPath, legacy);
-    } catch { /* Native bundles have no legacy stack.json. */ }
+    } catch {
+      /* Native bundles have no legacy stack.json. */
+    }
   }
   console.log(`Stack version: ${main.version}`);
 }
@@ -227,7 +245,9 @@ async function localFixtures() {
       }
     }
     await writeJson(join(staged, "package.json"), manifest);
-    const response = JSON.parse(await run("npm", ["pack", staged, "--pack-destination", dir, "--json"]));
+    const response = JSON.parse(
+      await run("npm", ["pack", staged, "--pack-destination", dir, "--json"]),
+    );
     const file = response?.[0]?.filename;
     if (typeof file !== "string") throw new Error(`${item.pkg.name}: failed to pack local fixture`);
     packed.set(item.pkg.name, join(dir, file));
