@@ -4,6 +4,13 @@
 # backend statically; the official row must not be simultaneously active.
 - id: directory-picker
   disabled: true
+# Stack's sidebar and general-settings components replace these official
+# Web shell seats. Preserve the old tested composition contract in the
+# new native aggregate bundle; leaving both active duplicates single slots.
+- id: ui-sidebar
+  disabled: true
+- id: ui-settings-general
+  disabled: true
 - insert:
     - id: agent-actions
       name: '@dsh-stack/agent-actions'
