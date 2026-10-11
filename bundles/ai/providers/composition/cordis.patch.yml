@@ -17,11 +17,11 @@
 
 - insert:
     - id: dialects
-      name: 'dialects'
+      name: '@dsh-stack/dialects'
       config: {}
 
     - id: accounts
-      name: 'credentials'
+      name: '@dsh-stack/credential-vault'
       config: {}
 
     - id: providers
@@ -29,7 +29,7 @@
       config: {}
 
     - id: tweaks
-      name: 'tweaks'
+      name: '@dsh-stack/tweaks'
       config: {}
 
 - id: agent-presets

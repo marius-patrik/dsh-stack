@@ -16,6 +16,9 @@
     }
   },
   "dependencies": {
-    "@dsh-stack/providers": "workspace:*"
+    "@dsh-stack/credential-vault": "workspace:*",
+    "@dsh-stack/dialects": "workspace:*",
+    "@dsh-stack/providers": "workspace:*",
+    "@dsh-stack/tweaks": "workspace:*"
   }
 }

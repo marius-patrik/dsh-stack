@@ -21,9 +21,6 @@
     - id: agent-tools
       name: '@dsh-stack/agent-tools'
       config: {}
-    - id: credential-vault
-      name: '@dsh-stack/credential-vault'
-      config: {}
     - id: dialect-antigravity
       name: '@dsh-stack/dialect-antigravity'
       config: {}
