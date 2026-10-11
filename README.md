@@ -9,7 +9,7 @@ First-class plugins, recursive bundles, and actual native profile templates for 
 - `profiles/<name>/`: actual `dsh.profile.bundles` profile manifest and `cordis.patch.yml` templates. These are profile directories, **not** npm bundles. DSH maintains the installed profiles under its own home directory.
 - `scripts/`: build, verification, and publication only.
 
-The `plugins/Memory` gitlink is staged external source and not a managed runtime installation. The `_migrate/` sources are not part of the installed Stack.
+The `_migrate/Memory` gitlink is staged external source and not a managed runtime installation. The `_migrate/` sources are not part of the installed Stack.
 
 ## Native DSH installation
 

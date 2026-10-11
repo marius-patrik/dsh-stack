@@ -19,7 +19,7 @@ still-open decision (#60).
 - `plugins/<name>/` — single flat implementation package list; no plugin grouping levels.
 - `bundles/**/` — recursively nested leaf DSH bundles; no dedicated `packs/` directory. Parent bundles compose children at build time into a normal native patch.
 - `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
-- `plugins/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.
+- `_migrate/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.
 - `scripts/` owns build, verification and publishing only. No Stack launcher, profile manager, updater or DSH submodule.
 - `.agents/notes/` is the documentation root. `README.md` is standalone, and `CONTRIBUTING.md` symlinks directly to `.agents/AGENTS.md`; no root `AGENTS.md` or `CLAUDE.md`.
 

@@ -13,6 +13,6 @@ Native bundle parent package dependencies declare child bundles. At build time `
 
 `profiles/` entries are actual `dsh.profile` manifest and `cordis.patch.yml` templates, not npm package aliases. Profiles may contain DSH application base bundles and the selected Stack bundle; users control optional activation and personal overrides directly via DSH.
 
-`plugins/Memory` is staged external source and `_migrate/` is migration-only. `CONTRIBUTING.md` links to `.agents/AGENTS.md`, with no root `AGENTS.md`, `CLAUDE.md`, or `DSH/` gitlink.
+`_migrate/Memory` is staged external source and `_migrate/` is migration-only. `CONTRIBUTING.md` links to `.agents/AGENTS.md`, with no root `AGENTS.md`, `CLAUDE.md`, or `DSH/` gitlink.
 
 No duplicate implementation tree, transitional production path, stale compatibility adapter, or parallel feature owner is allowed.
