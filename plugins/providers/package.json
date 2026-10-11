@@ -1,7 +1,7 @@
 {
   "name": "@dsh-stack/providers",
   "description": "Subscription and API provider adapters for dsh, wired onto Stack dialects and the harness credential seam",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
