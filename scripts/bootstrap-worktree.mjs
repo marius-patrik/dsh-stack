@@ -10,7 +10,7 @@
  *  4. Smoke-test against DSH_HARNESS, a separately installed DSH checkout.
  *
  * Usage:
- *   node src/scripts/bootstrap-worktree.mjs [--from <primary-checkout>] <worktree-path>
+ *   node scripts/bootstrap-worktree.mjs [--from <primary-checkout>] <worktree-path>
  *
  * @module @dsh-stack/scripts/bootstrap-worktree
  */
@@ -180,7 +180,9 @@ async function main() {
   console.log(`Primary root:  ${primaryRoot}`);
   console.log(`Worktree root: ${targetRoot}`);
   if (!process.env.DSH_HARNESS || !existsSync(join(process.env.DSH_HARNESS, "apps"))) {
-    throw new Error("Set DSH_HARNESS to an external, installed upstream checkout before bootstrapping a worktree");
+    throw new Error(
+      "Set DSH_HARNESS to an external, installed upstream checkout before bootstrapping a worktree",
+    );
   }
   await installAndBuild(targetRoot);
   await seedData(primaryRoot, targetRoot);

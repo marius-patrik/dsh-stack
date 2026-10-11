@@ -39,7 +39,7 @@ jobs:
     # partial boot look like a pass.
     timeout-minutes: 45
     env:
-      DSH_HARNESS: ${{ runner.temp }}/dsh-upstream
+      DSH_HARNESS: /tmp/dsh-upstream
 
     steps:
       - name: Checkout repository
@@ -48,7 +48,7 @@ jobs:
           submodules: false
 
       - name: Checkout upstream DSH as an isolated CI fixture
-        run: git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git "$RUNNER_TEMP/dsh-upstream"
+        run: git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git "$DSH_HARNESS"
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
