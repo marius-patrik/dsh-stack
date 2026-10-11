@@ -2,7 +2,7 @@
 import assert from "node:assert";
 import { readFileSync } from "node:fs";
 import { Context } from "@deepseek-ai/cordis";
-import { assertLoaderShape, stubSettingsService } from "../../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
 
 // The harness' own projection rule, imported rather than reimplemented: the
 // settings service decides what is editable from `volatileForm` /
