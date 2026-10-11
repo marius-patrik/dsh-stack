@@ -8,7 +8,7 @@ import { Readable } from "node:stream";
 import { execFileSync } from "node:child_process";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape, stubSettingsService } from "../../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "themes-"));
 
