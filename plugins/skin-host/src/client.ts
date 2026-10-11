@@ -32,11 +32,17 @@ export function apply(ctx: ClientContext): void {
 
   // Shadow the official brand cell at a distinct priority; same-priority slots are invalid.
   ctx.slots.inject("sidebar.brand.mark", function* () {
-    yield ctx.slots.register({ name: "sidebar.brand.mark", priority: -10, inject: () => ({ size: 24 }) }, Mark);
+    yield ctx.slots.register(
+      { name: "sidebar.brand.mark", priority: -10, inject: () => ({ size: 24 }) },
+      Mark,
+    );
   });
 
   ctx.slots.inject("sidebar.brand.name", function* () {
-    yield ctx.slots.register({ name: "sidebar.brand.name", priority: -10, inject: () => ({}) }, Name);
+    yield ctx.slots.register(
+      { name: "sidebar.brand.name", priority: -10, inject: () => ({}) },
+      Name,
+    );
   });
 
   ctx.slots.inject("conversation.hero.brand.mark", function* () {
