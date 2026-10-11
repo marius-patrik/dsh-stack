@@ -1,0 +1,26 @@
+{
+  "name": "@dsh-stack/bundle-ai",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/bundle-ai composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "stack": {
+    "compose": [
+      "@dsh-stack/bundle-providers"
+    ]
+  },
+  "dependencies": {
+    "@dsh-stack/bundle-providers": "workspace:*"
+  }
+}

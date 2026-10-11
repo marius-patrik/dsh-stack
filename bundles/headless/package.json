@@ -1,0 +1,32 @@
+{
+  "name": "@dsh-stack/stack-headless",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/stack-headless composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "stack": {
+    "compose": [
+      "@dsh-stack/bundle-agents",
+      "@dsh-stack/bundle-ai",
+      "@dsh-stack/bundle-formatters",
+      "@dsh-stack/bundle-lsp"
+    ]
+  },
+  "dependencies": {
+    "@dsh-stack/bundle-agents": "workspace:*",
+    "@dsh-stack/bundle-ai": "workspace:*",
+    "@dsh-stack/bundle-formatters": "workspace:*",
+    "@dsh-stack/bundle-lsp": "workspace:*"
+  }
+}

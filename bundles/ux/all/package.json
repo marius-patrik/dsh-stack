@@ -1,0 +1,30 @@
+{
+  "name": "@dsh-stack/bundle-ux",
+  "version": "0.1.0",
+  "description": "Native DSH @dsh-stack/bundle-ux composition bundle",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dist/cordis.patch.yml"
+    }
+  },
+  "stack": {
+    "compose": [
+      "@dsh-stack/bundle-themes",
+      "@dsh-stack/bundle-tweaks",
+      "@dsh-stack/bundle-voice"
+    ]
+  },
+  "dependencies": {
+    "@dsh-stack/bundle-themes": "workspace:*",
+    "@dsh-stack/bundle-tweaks": "workspace:*",
+    "@dsh-stack/bundle-voice": "workspace:*"
+  }
+}
