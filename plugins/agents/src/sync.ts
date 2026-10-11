@@ -20,7 +20,8 @@
 
 import { mkdir, readdir, readFile, rm, writeFile, rename } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { composeComposition, composeMetadata } from "./compose.js";
 import { parsePersona, type Persona } from "./persona.js";
 
@@ -51,10 +52,9 @@ export interface SyncReport {
 
 /**
  * The shipped preset declarations: `DSH_AGENTS_BASE_DIR` when set, else the
- * `DSH/packages/bundle/web-app/presets` tree beside this package's checkout
- * (four levels up from `lib/`, since packages live under `src/`). Returns
- * undefined when neither resolves, which degrades materialization to the bare
- * persona row.
+ * installed upstream `@deepseek-ai/dsh-web-app` module export. Returns undefined
+ * when that optional upstream bundle is not installed, so materialization
+ * degrades to a bare persona without any embedded checkout.
  *
  * Moved here from `DSH/apps/cli/config/agent-presets` by harness commit
  * f94495e527 ("bundle the shipped presets inside dsh-agent-presets"), then
@@ -66,7 +66,12 @@ export function basePresetDir(): string | undefined {
   if (process.env.DSH_AGENTS_BASE_DIR !== undefined && process.env.DSH_AGENTS_BASE_DIR !== "") {
     return process.env.DSH_AGENTS_BASE_DIR;
   }
-  return new URL("../../../../DSH/packages/bundle/web-app/presets", import.meta.url).pathname;
+  try {
+    const standard = import.meta.resolve("@deepseek-ai/dsh-web-app/presets/standard.patch.yml");
+    return dirname(fileURLToPath(standard));
+  } catch {
+    return undefined;
+  }
 }
 
 /** Leading spaces of a line, or the whole line when it carries no other text. */
