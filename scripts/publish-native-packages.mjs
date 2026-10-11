@@ -78,7 +78,7 @@ async function publishedIntegrity(name, version) {
   try {
     const { stdout } = await execFileAsync(
       "npm",
-      ["view", `${name}@${version}`, "dist.integrity", "--json", "--registry", registry],
+      ["view", `${name}@${version}`, "dist.integrity", "--json", "--prefer-online", "--registry", registry],
       { maxBuffer: 1024 * 1024 },
     );
     const parsed = JSON.parse(stdout);
@@ -106,7 +106,9 @@ async function confirm(item, attempts = 1) {
       return true;
     }
     if (attempt + 1 < attempts) {
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      // npm can accept a publish before new metadata propagates to readers.
+      console.log(`awaiting registry visibility for ${item.name}@${item.version} (${attempt + 1}/${attempts})`);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   }
   return false;
@@ -124,7 +126,7 @@ async function publish(item) {
     ["publish", item.path, "--access", "public", "--tag", "latest", "--registry", registry],
     { maxBuffer: 1024 * 1024 * 8 },
   );
-  if (!(await confirm(item, 6))) {
+  if (!(await confirm(item, 45))) {
     throw new Error(`${item.name}@${item.version} is not visible in npm after publication`);
   }
   console.log(`verified new ${item.name}@${item.version}`);
