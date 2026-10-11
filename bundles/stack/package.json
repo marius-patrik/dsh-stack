@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/stack",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Native DSH @dsh-stack/stack composition bundle",
   "type": "module",
   "files": [

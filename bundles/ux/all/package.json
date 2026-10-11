@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/bundle-ux",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Native DSH @dsh-stack/bundle-ux composition bundle",
   "type": "module",
   "files": [
