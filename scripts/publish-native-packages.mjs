@@ -114,11 +114,11 @@ async function confirm(item, attempts = 1) {
       return true;
     }
     if (attempt + 1 < attempts) {
-      // npm can accept a publish before new metadata propagates to readers.
+      // npm scans newly published packages before public visibility; this can take 15+ minutes.
       console.log(
         `awaiting registry visibility for ${item.name}@${item.version} (${attempt + 1}/${attempts})`,
       );
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
   return false;
@@ -163,7 +163,7 @@ if (planOnly) {
   // Publish endpoints and read endpoints may converge at different times.
   // Never claim success until every package is publicly readable with exact bytes.
   for (const item of plan) {
-    if (!(await confirm(item, 90))) {
+    if (!(await confirm(item, 240))) {
       throw new Error(`${item.name}@${item.version} is not publicly visible after publication`);
     }
     console.log(`verified public ${item.name}@${item.version}`);
