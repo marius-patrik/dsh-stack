@@ -4,7 +4,7 @@ import * as plugin from "./lib/index.js";
 import {
   assertClientInjectIsPackageIds,
   assertLoaderShape,
-} from "../../../scripts/plugin-check-kit.mjs";
+} from "../../scripts/plugin-check-kit.mjs";
 
 assertLoaderShape(plugin, "agent-loops");
 

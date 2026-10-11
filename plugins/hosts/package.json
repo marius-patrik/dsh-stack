@@ -32,7 +32,7 @@
     "client.js"
   ],
   "scripts": {
-    "build": "tsc && cat ../../../scripts/client-runtime/crypto-polyfill.js client.js > lib/client.js",
+    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js client.js > lib/client.js",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {

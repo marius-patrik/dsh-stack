@@ -5,7 +5,7 @@ import { join, resolve as pathResolve } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { Context } from "@deepseek-ai/cordis";
 import assert from "node:assert";
-import { assertLoaderShape, stubSettingsService } from "../../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape, stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "formatters-"));
 const cli = new URL("./bin/formatter.mjs", import.meta.url).pathname;

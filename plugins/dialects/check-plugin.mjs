@@ -1,6 +1,6 @@
 import * as plugin from "./lib/index.js";
 import { Context } from "@deepseek-ai/cordis";
-import { assertLoaderShape } from "../../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
 
 assertLoaderShape(plugin, "dialects");
 console.log("loader shape ok:", plugin.name, "inject=", JSON.stringify(plugin.inject));

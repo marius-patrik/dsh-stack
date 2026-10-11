@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { openaiDialect } from "./lib/openai.js";
 import { translateOpenAi } from "./lib/translate-openai.js";
-import { userMessage, collect, ok } from "../../../scripts/dialect-test-kit.mjs";
+import { userMessage, collect, ok } from "../../scripts/dialect-test-kit.mjs";
 
 // ---- openai: serialize shape ----
 const req = openaiDialect.serialize(
