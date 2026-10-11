@@ -1,65 +1,46 @@
 import { promises as fs } from "node:fs";
-import { join } from "node:path";
+import { join, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { listPluginPackageDirs, listBundlePackageDirs } from "./lib/repo-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
-const pluginsDir = join(root, "plugins");
 const releaseDir = join(root, ".release");
-const groups = ["agents", "ai", "core", "integrations", "trading", "ux", "vcs"];
 
-/** Return the expected release-asset slugs for all publishable native plugins. */
-async function expectedPlugins() {
-  const result = [];
-  for (const group of groups) {
-    for (const entry of await fs.readdir(join(pluginsDir, group), { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      try {
-        await fs.access(join(pluginsDir, group, entry.name, "stack.json"));
-        result.push(`${group}-${entry.name}`);
-      } catch {
-        // Not a published release component.
-      }
-    }
-  }
-  return result.sort();
+/** Compute expected published asset inventory from native source packages. */
+async function expectedPackages() {
+  const dirs = [...await listPluginPackageDirs(), ...await listBundlePackageDirs()];
+  return (await Promise.all(dirs.map(async (dir) => {
+    const manifest = JSON.parse(await fs.readFile(join(dir, "package.json"), "utf8"));
+    return manifest.private ? null : manifest.name;
+  }))).filter(Boolean).sort();
 }
 
-/** Verify that one plugin archive is readable and contains a root package manifest. */
+/** Verify each ZIP and its root package.json. */
 async function verifyArchive(archive) {
   await execFileAsync("unzip", ["-t", archive]);
   const { stdout } = await execFileAsync("unzip", ["-Z1", archive]);
-  if (!stdout.split("\n").includes("package.json")) {
-    throw new Error(`Missing root package.json in ${archive}`);
-  }
+  if (!stdout.split("\n").includes("package.json")) throw new Error(`Missing package.json: ${archive}`);
 }
 
-/** Validate the complete generated plugin release-asset inventory. */
+/** Validate assets and cross-check manifest versions with archives. */
 async function main() {
-  const inventory = JSON.parse(
-    await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"),
-  );
-  if (inventory.format !== 2 || !Array.isArray(inventory.plugins)) {
-    throw new Error("Unsupported component-assets.json");
-  }
-  const suffix = /-\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.zip$/;
-  const actual = inventory.plugins
-    .map((name) => name.replace(/^plugin-/, "").replace(suffix, ""))
-    .sort();
-  const expected = await expectedPlugins();
+  const inventory = JSON.parse(await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"));
+  if (!Array.isArray(inventory.plugins)) throw new Error("Invalid component-assets.json");
+  const expected = await expectedPackages();
+  const manifest = JSON.parse(await fs.readFile(join(releaseDir, "stack-release.json"), "utf8"));
+  const actual = manifest.packages.map((pkg) => pkg.name).sort();
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error(
-      `Plugin ZIP inventory mismatch: expected ${expected.length}, generated ${actual.length}`,
-    );
+    throw new Error(`Release inventory mismatch: expected ${expected.length}, found ${actual.length}`);
   }
-  for (const asset of inventory.plugins) {
-    const archive = join(releaseDir, asset);
-    const stat = await fs.stat(archive);
-    if (!stat.isFile() || stat.size === 0) throw new Error(`Invalid release asset: ${asset}`);
+  for (const file of inventory.plugins) {
+    const archive = join(releaseDir, file);
+    if (!(await fs.stat(archive)).isFile()) throw new Error(`Not an asset: ${file}`);
     await verifyArchive(archive);
   }
-  console.log(`Validated ${expected.length} plugin ZIPs.`);
+  if (inventory.plugins.length !== expected.length) throw new Error("Missing package archives");
+  console.log(`Validated ${expected.length} native Stack release archives.`);
 }
 
 await main();

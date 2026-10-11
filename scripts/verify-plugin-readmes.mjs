@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-const roots = [join(process.cwd(), "plugins")];
+const roots = [join(process.cwd(), "plugins"), join(process.cwd(), "bundles")];
 const missing = [];
 
 /**
@@ -27,7 +27,7 @@ async function walk(dir) {
   await Promise.all(
     entries
       .filter(
-        (entry) => entry.isDirectory() && entry.name !== "node_modules" && entry.name !== "packs",
+        (entry) => entry.isDirectory() && entry.name !== "node_modules",
       )
       .map((entry) => walk(join(dir, entry.name))),
   );

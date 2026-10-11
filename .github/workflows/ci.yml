@@ -49,7 +49,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            plugins/*/*/lib
+            plugins/*/lib\n            bundles/**/lib
             **/*.tsbuildinfo
           key: ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ github.sha }}
           restore-keys: |
@@ -66,7 +66,7 @@ jobs:
       # state), which alone is enough for actions/cache to materialize the
       # directory even with no lib/ present at all -- confirmed by CI: the
       # lib/ prune alone still left a bare
-      # plugins/<group>/<package>/tsconfig.tsbuildinfo, which
+      # plugins/<package>/tsconfig.tsbuildinfo, which
       # verify-stack.mjs read as a broken package rather than a stale
       # artifact.
       #
@@ -79,7 +79,7 @@ jobs:
       # absence alone would silently hide it instead.
       - name: Prune orphaned build cache
         run: |
-          for pkg in plugins/*/*/; do
+          for pkg in plugins/*/; do
             pkg="${pkg%/}"
             [ -d "$pkg" ] || continue
             [ -f "$pkg/package.json" ] && continue
@@ -138,7 +138,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            plugins/*/*/lib
+            plugins/*/lib\n            bundles/**/lib
             **/*.tsbuildinfo
           key: ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ github.sha }}
           restore-keys: |
@@ -155,7 +155,7 @@ jobs:
       # state), which alone is enough for actions/cache to materialize the
       # directory even with no lib/ present at all -- confirmed by CI: the
       # lib/ prune alone still left a bare
-      # plugins/<group>/<package>/tsconfig.tsbuildinfo, which
+      # plugins/<package>/tsconfig.tsbuildinfo, which
       # verify-stack.mjs read as a broken package rather than a stale
       # artifact.
       #
@@ -168,7 +168,7 @@ jobs:
       # absence alone would silently hide it instead.
       - name: Prune orphaned build cache
         run: |
-          for pkg in plugins/*/*/; do
+          for pkg in plugins/*/; do
             pkg="${pkg%/}"
             [ -d "$pkg" ] || continue
             [ -f "$pkg/package.json" ] && continue
