@@ -18,7 +18,7 @@
     },
     "plugins/agent-actions": {
       "name": "@dsh-stack/agent-actions",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -34,7 +34,7 @@
     },
     "plugins/agent-preset-coding": {
       "name": "@dsh-stack/agent-preset-coding",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/agents": "workspace:*",
       },
@@ -44,7 +44,7 @@
     },
     "plugins/agent-preset-default": {
       "name": "@dsh-stack/agent-preset-default",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/agents": "workspace:*",
       },
@@ -54,7 +54,7 @@
     },
     "plugins/agent-preset-manager": {
       "name": "@dsh-stack/agent-preset-manager",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/agents": "workspace:*",
       },
@@ -64,7 +64,7 @@
     },
     "plugins/agents": {
       "name": "@dsh-stack/agents",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "bin": {
         "agents": "bin/agents.mjs",
       },
@@ -90,7 +90,7 @@
     },
     "plugins/automations": {
       "name": "@dsh-stack/automations",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@types/node": "^22.0.0",
@@ -102,7 +102,7 @@
     },
     "plugins/commands": {
       "name": "@dsh-stack/agent-commands",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -113,7 +113,7 @@
     },
     "plugins/loops": {
       "name": "@dsh-stack/agent-loops",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@types/node": "^22.0.0",
@@ -129,7 +129,7 @@
     },
     "plugins/personas": {
       "name": "@dsh-stack/agent-personas",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -140,7 +140,7 @@
     },
     "plugins/skills": {
       "name": "@dsh-stack/agent-skills",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -151,7 +151,7 @@
     },
     "plugins/tools": {
       "name": "@dsh-stack/agent-tools",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -176,7 +176,7 @@
     },
     "plugins/dialect-antigravity": {
       "name": "@dsh-stack/dialect-antigravity",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/dialects": "workspace:*",
       },
@@ -191,7 +191,7 @@
     },
     "plugins/dialect-claude": {
       "name": "@dsh-stack/dialect-claude",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/dialects": "workspace:*",
       },
@@ -206,7 +206,7 @@
     },
     "plugins/dialect-code-assist": {
       "name": "@dsh-stack/dialect-code-assist",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/dialect-gemini": "workspace:*",
         "@dsh-stack/dialects": "workspace:*",
@@ -222,7 +222,7 @@
     },
     "plugins/dialect-gemini": {
       "name": "@dsh-stack/dialect-gemini",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/dialects": "workspace:*",
       },
@@ -236,7 +236,7 @@
     },
     "plugins/dialect-openai": {
       "name": "@dsh-stack/dialect-openai",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/dialects": "workspace:*",
       },
@@ -251,7 +251,7 @@
     },
     "plugins/dialects": {
       "name": "@dsh-stack/dialects",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "eventsource-parser": "^3.0.0",
       },
@@ -267,7 +267,7 @@
     },
     "plugins/provider-anthropic-api": {
       "name": "@dsh-stack/provider-anthropic-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -278,7 +278,7 @@
     },
     "plugins/provider-antigravity-sub": {
       "name": "@dsh-stack/provider-antigravity-sub",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/dialect-antigravity": "workspace:*",
         "@dsh-stack/providers": "workspace:*",
@@ -290,7 +290,7 @@
     },
     "plugins/provider-cerebras-api": {
       "name": "@dsh-stack/provider-cerebras-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -301,7 +301,7 @@
     },
     "plugins/provider-claude-sub": {
       "name": "@dsh-stack/provider-claude-sub",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -312,7 +312,7 @@
     },
     "plugins/provider-deepseek-api": {
       "name": "@dsh-stack/provider-deepseek-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -323,7 +323,7 @@
     },
     "plugins/provider-gemini-api": {
       "name": "@dsh-stack/provider-gemini-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -334,7 +334,7 @@
     },
     "plugins/provider-gemini-sub": {
       "name": "@dsh-stack/provider-gemini-sub",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -345,7 +345,7 @@
     },
     "plugins/provider-grok-api": {
       "name": "@dsh-stack/provider-grok-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -356,7 +356,7 @@
     },
     "plugins/provider-grok-sub": {
       "name": "@dsh-stack/provider-grok-sub",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -367,7 +367,7 @@
     },
     "plugins/provider-groq-api": {
       "name": "@dsh-stack/provider-groq-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -378,7 +378,7 @@
     },
     "plugins/provider-kimi-code": {
       "name": "@dsh-stack/provider-kimi-code",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -389,7 +389,7 @@
     },
     "plugins/provider-kimi-sub": {
       "name": "@dsh-stack/provider-kimi-sub",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -400,7 +400,7 @@
     },
     "plugins/provider-llamacpp": {
       "name": "@dsh-stack/provider-llamacpp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -411,7 +411,7 @@
     },
     "plugins/provider-mistral-api": {
       "name": "@dsh-stack/provider-mistral-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -422,7 +422,7 @@
     },
     "plugins/provider-ollama": {
       "name": "@dsh-stack/provider-ollama",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -433,7 +433,7 @@
     },
     "plugins/provider-openai-api": {
       "name": "@dsh-stack/provider-openai-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -444,7 +444,7 @@
     },
     "plugins/provider-openrouter-api": {
       "name": "@dsh-stack/provider-openrouter-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -455,7 +455,7 @@
     },
     "plugins/provider-rotation": {
       "name": "@dsh-stack/provider-rotation",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -471,7 +471,7 @@
     },
     "plugins/provider-vllm": {
       "name": "@dsh-stack/provider-vllm",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -482,7 +482,7 @@
     },
     "plugins/provider-zai-api": {
       "name": "@dsh-stack/provider-zai-api",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -493,7 +493,7 @@
     },
     "plugins/provider-zen": {
       "name": "@dsh-stack/provider-zen",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/providers": "workspace:*",
       },
@@ -504,7 +504,7 @@
     },
     "plugins/providers": {
       "name": "@dsh-stack/providers",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/credential-vault": "workspace:*",
         "@dsh-stack/dialect-antigravity": "workspace:*",
@@ -543,7 +543,7 @@
     },
     "plugins/credential-vault": {
       "name": "@dsh-stack/credential-vault",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@deepseek-ai/dsh-client-ui-primitives": "0.2.0-rc.2",
@@ -563,7 +563,7 @@
     },
     "plugins/marketplace": {
       "name": "@dsh-stack/marketplace",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -574,7 +574,7 @@
     },
     "plugins/marketplace-source-dsh-stack": {
       "name": "@dsh-stack/marketplace-source-dsh-stack",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/marketplace": "workspace:*",
       },
@@ -585,7 +585,7 @@
     },
     "plugins/plugin-kit": {
       "name": "@dsh-stack/plugin-kit",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "typescript": "^6.0.3",
       },
@@ -597,7 +597,7 @@
     },
     "plugins/directory-picker-fix": {
       "name": "@dsh-stack/directory-picker-fix",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@deepseek-ai/cordis-plugin-loader": "^1.0.2",
@@ -618,7 +618,7 @@
     },
     "plugins/formatters": {
       "name": "@dsh-stack/formatters",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -647,7 +647,7 @@
     },
     "plugins/hosts": {
       "name": "@dsh-stack/hosts",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@types/node": "^22.0.0",
@@ -660,7 +660,7 @@
     },
     "plugins/lsp": {
       "name": "@dsh-stack/lsp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -685,7 +685,7 @@
     },
     "plugins/translator": {
       "name": "@dsh-stack/translator",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@types/node": "^22.0.0",
@@ -697,7 +697,7 @@
     },
     "plugins/trading-backtest": {
       "name": "@dsh-stack/trading-backtest",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/trading-research": "workspace:*",
       },
@@ -707,7 +707,7 @@
     },
     "plugins/trading-market-data": {
       "name": "@dsh-stack/trading-market-data",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/trading-research": "workspace:*",
       },
@@ -717,7 +717,7 @@
     },
     "plugins/trading-optimizer": {
       "name": "@dsh-stack/trading-optimizer",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/trading-backtest": "workspace:*",
         "@dsh-stack/trading-research": "workspace:*",
@@ -728,14 +728,14 @@
     },
     "plugins/trading-research": {
       "name": "@dsh-stack/trading-research",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "typescript": "^6.0.3",
       },
     },
     "plugins/icon-engine": {
       "name": "@dsh-stack/icon-engine",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -743,7 +743,7 @@
     },
     "plugins/lucide-animated": {
       "name": "@dsh-stack/lucide-animated",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/icon-engine": "workspace:*",
         "lucide-react": "^0.468.0",
@@ -759,14 +759,14 @@
     },
     "plugins/profile-runtime": {
       "name": "@dsh-stack/profile-runtime",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "typescript": "^6.0.3",
       },
     },
     "plugins/profile-ui": {
       "name": "@dsh-stack/profile-ui",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/lucide-animated": "workspace:*",
         "@dsh-stack/profile-runtime": "workspace:*",
@@ -796,7 +796,7 @@
     },
     "plugins/settings-panel": {
       "name": "@dsh-stack/settings-panel",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/dsh-client-ui-slots": "0.2.0-rc.2",
         "@types/react": "~18.3.1",
@@ -810,7 +810,7 @@
     },
     "plugins/sidebar-preferences": {
       "name": "@dsh-stack/sidebar-preferences",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -821,7 +821,7 @@
     },
     "plugins/sidebar-settings": {
       "name": "@dsh-stack/sidebar-settings",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/lucide-animated": "workspace:*",
         "@dsh-stack/settings-panel": "workspace:*",
@@ -846,7 +846,7 @@
     },
     "plugins/sidebar-shell": {
       "name": "@dsh-stack/sidebar-shell",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@deepseek-ai/dsh-client-store": "0.2.0-rc.2",
         "@dsh-stack/sidebar-preferences": "workspace:*",
@@ -879,7 +879,7 @@
     },
     "plugins/skin-claude": {
       "name": "@dsh-stack/skin-claude",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "thesvg": "^3.3.1",
       },
@@ -893,7 +893,7 @@
     },
     "plugins/skin-codex": {
       "name": "@dsh-stack/skin-codex",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "thesvg": "^3.3.1",
       },
@@ -907,7 +907,7 @@
     },
     "plugins/skin-deepseek": {
       "name": "@dsh-stack/skin-deepseek",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "thesvg": "^3.3.1",
       },
@@ -922,7 +922,7 @@
     },
     "plugins/skin-host": {
       "name": "@dsh-stack/skin-host",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/skin-claude": "workspace:*",
         "@dsh-stack/skin-codex": "workspace:*",
@@ -950,7 +950,7 @@
     },
     "plugins/skin-runtime": {
       "name": "@dsh-stack/skin-runtime",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "typescript": "^6.0.3",
@@ -961,7 +961,7 @@
     },
     "plugins/skin-settings": {
       "name": "@dsh-stack/skin-settings",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/settings-panel": "workspace:*",
         "@dsh-stack/skin-runtime": "workspace:*",
@@ -985,7 +985,7 @@
     },
     "plugins/themes": {
       "name": "@dsh-stack/themes",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1007,7 +1007,7 @@
     },
     "plugins/tweak-drag-drop": {
       "name": "@dsh-stack/tweak-drag-drop",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1025,7 +1025,7 @@
     },
     "plugins/tweak-fork-undo": {
       "name": "@dsh-stack/tweak-fork-undo",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1047,7 +1047,7 @@
     },
     "plugins/tweak-keybinds": {
       "name": "@dsh-stack/tweak-keybinds",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1065,7 +1065,7 @@
     },
     "plugins/tweak-plan-toggle": {
       "name": "@dsh-stack/tweak-plan-toggle",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1087,7 +1087,7 @@
     },
     "plugins/tweak-share-links": {
       "name": "@dsh-stack/tweak-share-links",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "bin": {
         "share": "bin/share.mjs",
       },
@@ -1111,7 +1111,7 @@
     },
     "plugins/tweak-slash-commands": {
       "name": "@dsh-stack/tweak-slash-commands",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1131,7 +1131,7 @@
     },
     "plugins/tweak-stats": {
       "name": "@dsh-stack/tweak-stats",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "bin": {
         "stats": "bin/stats.mjs",
         "sessions": "bin/sessions.mjs",
@@ -1154,7 +1154,7 @@
     },
     "plugins/tweaks": {
       "name": "@dsh-stack/tweaks",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
         "yaml": "^2.9.0",
@@ -1177,7 +1177,7 @@
     },
     "plugins/voice": {
       "name": "@dsh-stack/voice",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1201,14 +1201,14 @@
     },
     "plugins/workspace-files": {
       "name": "@dsh-stack/workspace-files",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "typescript": "^6.0.3",
       },
     },
     "plugins/repos": {
       "name": "@dsh-stack/repos",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/plugin-kit": "workspace:*",
       },
@@ -1233,21 +1233,21 @@
     },
     "bundles/agents/all": {
       "name": "@dsh-stack/bundle-agents",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/agents": "workspace:*",
       },
     },
     "bundles/ai/all": {
       "name": "@dsh-stack/bundle-ai",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/bundle-providers": "workspace:*",
       },
     },
     "bundles/ai/providers": {
       "name": "@dsh-stack/bundle-providers",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/credential-vault": "workspace:*",
         "@dsh-stack/dialects": "workspace:*",
@@ -1257,7 +1257,7 @@
     },
     "bundles/headless": {
       "name": "@dsh-stack/stack-headless",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/bundle-agents": "workspace:*",
         "@dsh-stack/bundle-ai": "workspace:*",
@@ -1267,7 +1267,7 @@
     },
     "bundles/integrations/all": {
       "name": "@dsh-stack/bundle-integrations",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/bundle-formatters": "workspace:*",
         "@dsh-stack/bundle-hosts": "workspace:*",
@@ -1276,28 +1276,28 @@
     },
     "bundles/integrations/formatters": {
       "name": "@dsh-stack/bundle-formatters",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/formatters": "workspace:*",
       },
     },
     "bundles/integrations/hosts": {
       "name": "@dsh-stack/bundle-hosts",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/hosts": "workspace:*",
       },
     },
     "bundles/integrations/lsp": {
       "name": "@dsh-stack/bundle-lsp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/lsp": "workspace:*",
       },
     },
     "bundles/stack": {
       "name": "@dsh-stack/stack",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/agent-actions": "workspace:*",
         "@dsh-stack/agent-loops": "workspace:*",
@@ -1356,7 +1356,7 @@
     },
     "bundles/ux/all": {
       "name": "@dsh-stack/bundle-ux",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/bundle-themes": "workspace:*",
         "@dsh-stack/bundle-tweaks": "workspace:*",
@@ -1365,21 +1365,21 @@
     },
     "bundles/ux/themes": {
       "name": "@dsh-stack/bundle-themes",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/themes": "workspace:*",
       },
     },
     "bundles/ux/tweaks": {
       "name": "@dsh-stack/bundle-tweaks",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/tweaks": "workspace:*",
       },
     },
     "bundles/ux/voice": {
       "name": "@dsh-stack/bundle-voice",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@dsh-stack/voice": "workspace:*",
       },
