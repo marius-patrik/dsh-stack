@@ -114,22 +114,28 @@ async function confirm(item, attempts = 1) {
   return false;
 }
 
-/** Publish an absent package once, then confirm that npm serves the intended bytes. */
+/** Publish or observe a package; verify every result after registry metadata catches up. */
 async function publish(item) {
   if (await confirm(item)) {
     console.log(`verified existing ${item.name}@${item.version}`);
     return;
   }
   console.log(`publishing ${item.name}@${item.version}`);
-  await execFileAsync(
-    "npm",
-    ["publish", item.path, "--access", "public", "--tag", "latest", "--registry", registry],
-    { maxBuffer: 1024 * 1024 * 8 },
-  );
-  if (!(await confirm(item, 45))) {
-    throw new Error(`${item.name}@${item.version} is not visible in npm after publication`);
+  try {
+    await execFileAsync(
+      "npm",
+      ["publish", item.path, "--access", "public", "--tag", "latest", "--registry", registry],
+      { maxBuffer: 1024 * 1024 * 8 },
+    );
+  } catch (error) {
+    const output = `${error?.stderr ?? ""}\n${error?.stdout ?? ""}`;
+    // The write API can know a version exists before an unauthenticated
+    // npm view sees it. A duplicate is not a success until the final exact-byte check.
+    if (!/\bE403\b/i.test(output) || !/cannot publish over the previously published versions/i.test(output)) {
+      throw error;
+    }
+    console.log(`npm already has ${item.name}@${item.version}; awaiting public visibility`);
   }
-  console.log(`verified new ${item.name}@${item.version}`);
 }
 
 const plan = publicationPlan(
@@ -141,5 +147,13 @@ if (planOnly) {
   for (const item of plan) console.log(`  ${item.name}@${item.version}`);
 } else {
   for (const item of plan) await publish(item);
+  // Publish endpoints and read endpoints may converge at different times.
+  // Never claim success until every package is publicly readable with exact bytes.
+  for (const item of plan) {
+    if (!(await confirm(item, 90))) {
+      throw new Error(`${item.name}@${item.version} is not publicly visible after publication`);
+    }
+    console.log(`verified public ${item.name}@${item.version}`);
+  }
   console.log(`Published and verified ${plan.length} native packages on npm`);
 }
