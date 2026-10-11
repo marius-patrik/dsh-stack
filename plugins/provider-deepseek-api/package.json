@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/provider-deepseek-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "deepseek-api provider-route extension for the Stack `providers` registry.",
   "license": "MIT",
   "type": "module",

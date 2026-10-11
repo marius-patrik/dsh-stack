@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/provider-gemini-sub",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "gemini-sub provider-route extension for the Stack `providers` registry.",
   "license": "MIT",
   "type": "module",

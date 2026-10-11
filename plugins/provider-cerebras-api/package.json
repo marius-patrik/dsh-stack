@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/provider-cerebras-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "cerebras-api provider-route extension for the Stack `providers` registry.",
   "license": "MIT",
   "type": "module",
