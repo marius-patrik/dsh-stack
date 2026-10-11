@@ -56,9 +56,17 @@ jobs:
           node scripts/verify-release-assets.mjs
           node scripts/publish-native-packages.mjs --plan
 
-      - name: Publish dependency graph to public npm
+      - name: Require tokenless OIDC publishing
+        run: |
+          set -euo pipefail
+          npm --version
+          node -e 'const [major, minor, patch] = require("node:child_process").execFileSync("npm", ["--version"], {encoding:"utf8"}).trim().split(".").map(Number); if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) process.exit(1)'
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          test -z "${NODE_AUTH_TOKEN:-}"
+
+      - name: Publish dependency graph to public npm via OIDC
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
         run: node scripts/publish-native-packages.mjs
 
