@@ -25,8 +25,11 @@ function publicationPlan(catalog, inventory) {
   }
   const declared = new Map(catalog.packages.map((item) => [item.name, item]));
   const archives = new Map(inventory.packages.map((item) => [item.name, item]));
-  if (declared.size !== catalog.packages.length || archives.size !== inventory.packages.length ||
-      declared.size !== archives.size) {
+  if (
+    declared.size !== catalog.packages.length ||
+    archives.size !== inventory.packages.length ||
+    declared.size !== archives.size
+  ) {
     throw new Error("Duplicate or incomplete native package inventory");
   }
 
@@ -42,8 +45,12 @@ function publicationPlan(catalog, inventory) {
     if (!item || !archive || archive.version !== item.version) {
       throw new Error(`Missing or version-mismatched release package: ${name}`);
     }
-    if (!/^[a-zA-Z0-9_.-]+\.tgz$/.test(archive.file) || basename(archive.file) !== archive.file ||
-        typeof archive.integrity !== "string" || !archive.integrity.startsWith("sha512-")) {
+    if (
+      !/^[a-zA-Z0-9_.-]+\.tgz$/.test(archive.file) ||
+      basename(archive.file) !== archive.file ||
+      typeof archive.integrity !== "string" ||
+      !archive.integrity.startsWith("sha512-")
+    ) {
       throw new Error(`Unsafe archive reference or missing integrity: ${name}`);
     }
     visiting.add(name);
@@ -92,7 +99,9 @@ async function confirm(item, attempts = 1) {
     const current = await publishedIntegrity(item.name, item.version);
     if (current !== null) {
       if (current !== item.integrity) {
-        throw new Error(`${item.name}@${item.version} exists with different bytes; refusing overwrite`);
+        throw new Error(
+          `${item.name}@${item.version} exists with different bytes; refusing overwrite`,
+        );
       }
       return true;
     }
