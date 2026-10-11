@@ -1,7 +1,7 @@
 {
   "id": "stack.ai.dialect.openai",
   "name": "@dsh-stack/dialect-openai",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "plugin",
   "description": "OpenAI-compatible wire dialect extension for the Stack dialects registry.",
   "files": ["lib", "README.md", "package.json", "stack.json"],
