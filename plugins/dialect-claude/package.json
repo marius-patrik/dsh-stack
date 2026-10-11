@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/dialect-claude",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Anthropic Claude wire dialect extension for the Stack dialects registry.",
   "license": "MIT",
   "type": "module",
