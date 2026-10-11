@@ -1,57 +1,45 @@
+/** Verify that every native release artifact exists and matches the package catalog. */
 import { promises as fs } from "node:fs";
-import { join, basename } from "node:path";
+import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { listPluginPackageDirs, listBundlePackageDirs } from "./lib/repo-paths.mjs";
+import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
-const execFileAsync = promisify(execFile);
-const root = process.cwd();
-const releaseDir = join(root, ".release");
+const run = promisify(execFile);
+const dir = join(root, ".release");
 
-/** Compute expected published asset inventory from native source packages. */
-async function expectedPackages() {
+/** Count all publishable packages from their canonical manifests. */
+async function expectedNames() {
   const dirs = [...(await listPluginPackageDirs()), ...(await listBundlePackageDirs())];
-  return (
-    await Promise.all(
-      dirs.map(async (dir) => {
-        const manifest = JSON.parse(await fs.readFile(join(dir, "package.json"), "utf8"));
-        return manifest.private ? null : manifest.name;
-      }),
-    )
-  )
-    .filter(Boolean)
-    .sort();
+  const names = [];
+  for (const path of dirs) {
+    const pkg = await readJson(join(path, "package.json"));
+    if (!pkg.private) names.push(pkg.name);
+  }
+  return names.sort();
 }
 
-/** Verify each ZIP and its root package.json. */
-async function verifyArchive(archive) {
-  await execFileAsync("unzip", ["-t", archive]);
-  const { stdout } = await execFileAsync("unzip", ["-Z1", archive]);
-  if (!stdout.split("\n").includes("package.json"))
-    throw new Error(`Missing package.json: ${archive}`);
-}
-
-/** Validate assets and cross-check manifest versions with archives. */
+/** Validate that the published inventory is complete and npm artifacts are readable. */
 async function main() {
-  const inventory = JSON.parse(
-    await fs.readFile(join(releaseDir, "component-assets.json"), "utf8"),
-  );
-  if (!Array.isArray(inventory.plugins)) throw new Error("Invalid component-assets.json");
-  const expected = await expectedPackages();
-  const manifest = JSON.parse(await fs.readFile(join(releaseDir, "stack-release.json"), "utf8"));
-  const actual = manifest.packages.map((pkg) => pkg.name).sort();
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error(
-      `Release inventory mismatch: expected ${expected.length}, found ${actual.length}`,
-    );
+  const catalog = await readJson(join(dir, "stack-release.json"));
+  const assets = await readJson(join(dir, "component-assets.json"));
+  if (catalog.format !== 3 || assets.format !== 3) throw new Error("Unexpected release format");
+  const expected = await expectedNames();
+  const actual = catalog.packages.map((p) => p.name).sort();
+  if (JSON.stringify(expected) !== JSON.stringify(actual)) throw new Error("Incomplete native release manifest");
+  const archived = assets.packages.map((p) => p.name).sort();
+  if (JSON.stringify(expected) !== JSON.stringify(archived)) throw new Error("Incomplete native npm archives");
+  for (const item of assets.packages) {
+    const path = join(dir, item.file);
+    if (!(await fs.stat(path)).isFile()) throw new Error(`Missing package archive: ${item.file}`);
+    const { stdout } = await run("tar", ["-tzf", path]);
+    if (!stdout.split("\n").includes("package/package.json")) throw new Error(`No npm package.json: ${item.file}`);
+    if (catalog.packages.find((p) => p.name === item.name)?.bundle &&
+        !stdout.split("\n").includes("package/dist/cordis.patch.yml")) {
+      throw new Error(`Missing native bundle patch: ${item.name}`);
+    }
   }
-  for (const file of inventory.plugins) {
-    const archive = join(releaseDir, file);
-    if (!(await fs.stat(archive)).isFile()) throw new Error(`Not an asset: ${file}`);
-    await verifyArchive(archive);
-  }
-  if (inventory.plugins.length !== expected.length) throw new Error("Missing package archives");
-  console.log(`Validated ${expected.length} native Stack release archives.`);
+  console.log(`Verified ${expected.length} native npm package archives.`);
 }
 
 await main();

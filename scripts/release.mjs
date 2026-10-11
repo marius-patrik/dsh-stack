@@ -1,198 +1,219 @@
-// jscpd:ignore-start -- release manifest and archive generation intentionally share the same package metadata traversal
+// jscpd:ignore-start -- release manifest, semver and packaging share package traversal intentionally
+/** Build native package archives and one versioned Stack release catalog. */
 import { promises as fs } from "node:fs";
 import { createHash } from "node:crypto";
-import { join, relative } from "node:path";
+import { join, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { listPluginPackageDirs, readJson, root } from "./lib/repo-paths.mjs";
+import {
+  listPluginPackageDirs,
+  listBundlePackageDirs,
+  readJson,
+  root,
+} from "./lib/repo-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const command = process.argv[2];
 const bumpArg = process.argv[3] ?? "patch";
+const releaseDir = join(root, ".release");
 
-if (!["manifest", "version", "assets"].includes(command)) {
-  console.error("usage: node scripts/release.mjs <manifest|version|assets> [major|minor|patch]");
-  process.exit(2);
-}
-if (command === "version" && !new Set(["major", "minor", "patch"]).has(bumpArg)) {
-  console.error(`invalid version bump: ${bumpArg}`);
-  process.exit(2);
+/** Run an executable relative to the repository. */
+async function run(cmd, args, options = {}) {
+  const { stdout } = await execFileAsync(cmd, args, { cwd: root, ...options });
+  return stdout.trim();
 }
 
-/** Read and parse a UTF-8 JSON file. */
-/** Serialize a value as consistently formatted UTF-8 JSON. */
+/** Discover native plugin and bundle leaves; profiles are intentionally not npm packages. */
+async function discoverPackages() {
+  const sources = [
+    ...((await listPluginPackageDirs()).map((dir) => ({ dir, kind: "plugin" }))),
+    ...((await listBundlePackageDirs()).map((dir) => ({ dir, kind: "bundle" }))),
+  ];
+  const result = [];
+  const names = new Set();
+  for (const { dir, kind } of sources) {
+    const pkg = await readJson(join(dir, "package.json"));
+    if (pkg.private === true) continue;
+    if (typeof pkg.name !== "string" || !pkg.name.startsWith("@dsh-stack/")) {
+      throw new Error(`Not a native Stack package: ${relative(root, dir)}`);
+    }
+    if (names.has(pkg.name)) throw new Error(`Duplicate native package: ${pkg.name}`);
+    names.add(pkg.name);
+    result.push({ dir, kind, pkg, relativePath: relative(root, dir) });
+  }
+  return result.sort((a, b) => a.pkg.name.localeCompare(b.pkg.name));
+}
+
+/** Return npm-compatible exact ranges for local workspace references. */
+function publishableManifest(component, byName) {
+  const pkg = structuredClone(component.pkg);
+  for (const section of ["dependencies", "optionalDependencies", "peerDependencies", "devDependencies"]) {
+    for (const [name, value] of Object.entries(pkg[section] ?? {})) {
+      if (typeof value !== "string" || !value.startsWith("workspace:")) continue;
+      const dependency = byName.get(name);
+      if (!dependency) throw new Error(`${pkg.name}: unresolved workspace dependency ${name}`);
+      pkg[section][name] = dependency.pkg.version;
+    }
+  }
+  return pkg;
+}
+
+/** Topologically order packages so prerequisites publish before bundle parents. */
+function publicationOrder(packages) {
+  const byName = new Map(packages.map((pkg) => [pkg.pkg.name, pkg]));
+  const visited = new Set();
+  const visiting = new Set();
+  const sorted = [];
+  /** Walk a published package's direct runtime dependencies. */
+  function visit(pkg) {
+    if (visited.has(pkg.pkg.name)) return;
+    if (visiting.has(pkg.pkg.name)) throw new Error(`Dependency cycle: ${pkg.pkg.name}`);
+    visiting.add(pkg.pkg.name);
+    for (const dep of Object.keys(pkg.pkg.dependencies ?? {})) {
+      const local = byName.get(dep);
+      if (local) visit(local);
+    }
+    visiting.delete(pkg.pkg.name);
+    visited.add(pkg.pkg.name);
+    sorted.push(pkg);
+  }
+  for (const pkg of packages) visit(pkg);
+  return sorted;
+}
+
+/** Write JSON in a deterministic release artifact format. */
 async function writeJson(path, value) {
   await fs.writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
-/** Run a repository command and return trimmed stdout. */
-async function exec(command, args, options = {}) {
-  const { stdout } = await execFileAsync(command, args, { cwd: root, ...options });
-  return stdout.trim();
-}
-/** Calculate the next semantic version for a requested bump kind. */
-function bumpVersion(version, kind) {
-  const [major, minor, patch] = version.split(".").map(Number);
-  if (![major, minor, patch].every((value) => Number.isInteger(value) && value >= 0)) {
-    throw new Error(`invalid semver: ${version}`);
-  }
-  if (kind === "major") return `${major + 1}.0.0`;
-  if (kind === "minor") return `${major}.${minor + 1}.0`;
-  return `${major}.${minor}.${patch + 1}`;
-}
 
-/** Discover publishable native packages beneath the logical plugin groups. */
-async function discoverPackages() {
-  const packages = [];
-  for (const dir of await listPluginPackageDirs()) {
-    try {
-      const [stack, pkg] = await Promise.all([
-        readJson(join(dir, "stack.json")),
-        readJson(join(dir, "package.json")),
-      ]);
-      if (typeof stack?.id !== "string") continue;
-      packages.push({
-        dir,
-        stack,
-        pkg,
-        relativePath: relative(join(root, "plugins"), dir),
-      });
-    } catch {
-      // Private/non-published packages without stack.json are not release components.
-    }
-  }
-  packages.sort((a, b) => a.stack.id.localeCompare(b.stack.id));
-  return packages;
-}
-
-/** Build the machine-readable release manifest for all native KiKi packages. */
-async function buildManifest() {
+/** Produce a manifest of the complete package graph, including bundles. */
+async function buildManifest(packages) {
   const rootPackage = await readJson(join(root, "package.json"));
-  const packages = await discoverPackages();
-  const byId = new Map(packages.map((item) => [item.stack.id, item]));
+  const byName = new Map(packages.map((item) => [item.pkg.name, item]));
   return {
-    format: 2,
+    format: 3,
     stack: { name: rootPackage.name, version: rootPackage.version },
-    packages: packages.map(({ stack, pkg, dir }) => ({
-      id: stack.id,
-      name: stack.name,
-      version: stack.version,
-      kind: stack.kind,
-      dependencies: (stack.dependencies ?? []).map((id) => ({
-        id,
-        version: byId.get(id)?.stack.version ?? null,
-      })),
-      optionalDependencies: (stack.optionalDependencies ?? []).map((id) => ({
-        id,
-        version: byId.get(id)?.stack.version ?? null,
-      })),
-      files: stack.files,
-      packagePath: relative(root, dir),
-      packagePrivate: pkg.private === true,
-    })),
+    packages: packages.map((item) => {
+      const published = publishableManifest(item, byName);
+      return {
+        id: published.name,
+        name: published.name,
+        version: published.version,
+        kind: item.kind,
+        packagePath: item.relativePath,
+        dependencies: published.dependencies ?? {},
+        optionalDependencies: published.optionalDependencies ?? {},
+        peerDependencies: published.peerDependencies ?? {},
+        bundle: published.dsh?.bundle?.patch ?? null,
+      };
+    }),
+    profiles: ["web", "headless"],
   };
 }
 
-/** Write the release manifest and its integrity checksum. */
-async function manifest() {
-  const value = await buildManifest();
-  const outputDir = join(root, ".release");
-  await fs.mkdir(outputDir, { recursive: true });
-  const output = join(outputDir, "stack-release.json");
-  await writeJson(output, value);
-  const integrity = createHash("sha256")
-    .update(await fs.readFile(output))
-    .digest("hex");
-  await fs.writeFile(
-    join(outputDir, "stack-release.sha256"),
-    `${integrity}  stack-release.json\n`,
-    "utf8",
-  );
-  console.log(output);
+/** Persist a manifest plus content hash for consumers and verifiers. */
+async function writeManifest(manifest) {
+  await fs.mkdir(releaseDir, { recursive: true });
+  const path = join(releaseDir, "stack-release.json");
+  await writeJson(path, manifest);
+  const digest = createHash("sha256").update(await fs.readFile(path)).digest("hex");
+  await fs.writeFile(join(releaseDir, "stack-release.sha256"), `${digest}  stack-release.json\n`);
 }
 
-/** Stage and archive one native plugin package for release. */
-async function zipPackage(component, outputDir, stageDir) {
-  const slug = component.relativePath.replaceAll("/", "-");
-  const version = component.pkg.version ?? component.stack.version ?? "0.0.0";
-  const archive = join(outputDir, `plugin-${slug}-${version}.zip`);
-  const staged = join(stageDir, slug);
-  await fs.mkdir(stageDir, { recursive: true });
-  await fs.cp(component.dir, staged, {
+/** Stage the publishable package without installing a second runtime or rewriting sources. */
+async function stagePackage(item, byName, stageRoot) {
+  const slug = item.pkg.name.slice("@dsh-stack/".length);
+  const target = join(stageRoot, slug);
+  await fs.cp(item.dir, target, {
     recursive: true,
-    dereference: true,
     force: true,
-    filter: (source) => !relative(component.dir, source).split("/").includes("node_modules"),
+    dereference: true,
+    filter: (path) => !relative(item.dir, path).split(/[\\/]/).some(
+      (part) => part === "node_modules" || part === ".git",
+    ),
   });
-  await exec("zip", ["-qr", archive, "."], { cwd: staged });
-  return archive;
+  const published = publishableManifest(item, byName);
+  await writeJson(join(target, "package.json"), published);
+  if (item.kind === "bundle") {
+    await fs.access(join(target, "dist", "cordis.patch.yml"));
+  }
+  return target;
 }
 
-/** Generate all release assets and their checksum inventory. */
+/** Build npm tarballs with resolved internal versions and generate integrity inventory. */
 async function assets() {
-  const outputDir = join(root, ".release");
-  const stageDir = join(outputDir, ".stage");
-  await fs.rm(outputDir, { recursive: true, force: true });
-  await fs.mkdir(outputDir, { recursive: true });
-  await manifest();
-
+  const packages = await discoverPackages();
+  const byName = new Map(packages.map((item) => [item.pkg.name, item]));
+  const order = publicationOrder(packages);
+  await fs.rm(releaseDir, { recursive: true, force: true });
+  await fs.mkdir(releaseDir, { recursive: true });
+  const stage = join(releaseDir, ".stage");
+  await fs.mkdir(stage, { recursive: true });
   const archives = [];
-  for (const component of await discoverPackages()) {
-    archives.push(await zipPackage(component, outputDir, stageDir));
+  for (const item of order) {
+    const staged = await stagePackage(item, byName, stage);
+    const json = await run("npm", ["pack", staged, "--pack-destination", releaseDir, "--json"]);
+    const entries = JSON.parse(json);
+    const file = entries?.[0]?.filename;
+    if (typeof file !== "string") throw new Error(`${item.pkg.name}: npm pack did not return a tarball`);
+    archives.push({
+      name: item.pkg.name,
+      version: item.pkg.version,
+      file,
+      integrity: entries[0].integrity,
+    });
   }
-  await fs.rm(stageDir, { recursive: true, force: true });
-
-  await writeJson(join(outputDir, "component-assets.json"), {
-    format: 2,
-    plugins: archives.map((file) => relative(outputDir, file)),
-    total: archives.length,
-  });
-
-  const files = await fs.readdir(outputDir);
+  await fs.rm(stage, { recursive: true, force: true });
+  await writeManifest(await buildManifest(packages));
+  await writeJson(join(releaseDir, "component-assets.json"), { format: 3, packages: archives });
   const checksums = [];
-  for (const file of files.sort()) {
-    if (file.endsWith(".sha256")) continue;
-    const digest = createHash("sha256")
-      .update(await fs.readFile(join(outputDir, file)))
-      .digest("hex");
-    checksums.push(`${digest}  ${file}`);
+  for (const file of (await fs.readdir(releaseDir)).sort()) {
+    if (file.endsWith(".sha256") || file === "SHA256SUMS") continue;
+    const hash = createHash("sha256").update(await fs.readFile(join(releaseDir, file))).digest("hex");
+    checksums.push(`${hash}  ${file}`);
   }
-  await fs.writeFile(join(outputDir, "SHA256SUMS"), `${checksums.join("\n")}\n`, "utf8");
-  console.log(`Generated ${archives.length} plugin ZIPs`);
+  await fs.writeFile(join(releaseDir, "SHA256SUMS"), `${checksums.join("\n")}\n`);
+  console.log(`Packed ${archives.length} native npm packages, including ${packages.filter(p => p.kind === "bundle").length} bundles.`);
 }
 
-/** Bump the root and changed package versions according to commit history. */
+/** Bump a package semver without altering unrelated package metadata. */
+function bumpVersion(version, kind) {
+  const values = version.split(".").map(Number);
+  if (values.length !== 3 || values.some((v) => !Number.isInteger(v) || v < 0)) throw new Error(`Invalid semver: ${version}`);
+  if (kind === "major") return `${values[0] + 1}.0.0`;
+  if (kind === "minor") return `${values[0]}.${values[1] + 1}.0`;
+  return `${values[0]}.${values[1]}.${values[2] + 1}`;
+}
+
+/** Bump the root and changed package versions based on their changes. */
 async function version() {
-  const rootPackagePath = join(root, "package.json");
-  const rootPackage = await readJson(rootPackagePath);
-  const commitText = await exec("git", ["log", "--format=%s%n%b", "-n", "200"]);
-  const rootBump = /BREAKING CHANGE|^[^\n]*!:/m.test(commitText)
-    ? "major"
-    : /^(feat)(\([^)]*\))?:/m.test(commitText)
-      ? "minor"
-      : bumpArg;
-  rootPackage.version = bumpVersion(rootPackage.version, rootBump);
-  await writeJson(rootPackagePath, rootPackage);
-
+  const rootPath = join(root, "package.json");
+  const main = await readJson(rootPath);
+  main.version = bumpVersion(main.version, bumpArg);
+  await writeJson(rootPath, main);
   for (const item of await discoverPackages()) {
-    const relativeDir = relative(root, item.dir);
-    const changed = await exec("git", ["diff", "--name-only", "HEAD^", "HEAD", "--", relativeDir]);
+    const changed = await run("git", ["diff", "--name-only", "HEAD^", "HEAD", "--", item.relativePath]);
     if (!changed) continue;
-    const messages = await exec("git", ["log", "--format=%s%n%b", "-n", "50", "--", relativeDir]);
-    const bump = /BREAKING CHANGE|^[^\n]*!:/m.test(messages)
-      ? "major"
-      : /^(feat)(\([^)]*\))?:/m.test(messages)
-        ? "minor"
-        : bumpArg;
-    const next = bumpVersion(item.stack.version, bump);
-    item.stack.version = next;
+    const next = bumpVersion(item.pkg.version, bumpArg);
     item.pkg.version = next;
-    await writeJson(join(item.dir, "stack.json"), item.stack);
     await writeJson(join(item.dir, "package.json"), item.pkg);
+    const legacyPath = join(item.dir, "stack.json");
+    try {
+      const legacy = await readJson(legacyPath);
+      legacy.version = next;
+      await writeJson(legacyPath, legacy);
+    } catch { /* Native bundles have no legacy stack.json. */ }
   }
-  console.log(`Stack version: ${rootPackage.version}`);
+  console.log(`Stack version: ${main.version}`);
 }
 
-if (command === "manifest") await manifest();
-else if (command === "assets") await assets();
-else await version();
+if (command === "manifest") {
+  await writeManifest(await buildManifest(await discoverPackages()));
+} else if (command === "assets") {
+  await assets();
+} else if (command === "version") {
+  await version();
+} else {
+  throw new Error("usage: node scripts/release.mjs <manifest|assets|version>");
+}
 // jscpd:ignore-end
