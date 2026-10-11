@@ -1,15 +1,47 @@
 # Native npm publication
 
-The GitHub release contains immutable, versioned `.tgz` archives for every Stack plugin and bundle, with `component-assets.json`, `stack-release.json`, and `SHA256SUMS`.
+A GitHub release contains immutable, versioned `.tgz` archives for every Stack plugin and bundle, alongside `component-assets.json`, `stack-release.json`, and `SHA256SUMS`.
 
-`.github/workflows/publish-native-npm.yml` runs on manually published releases and is explicitly dispatched by the GitHub release workflow (because releases created with `GITHUB_TOKEN` do not propagate release events). It also supports manual dispatch (to recover or republish the *existing* release without rebuilding). It:
+The `.github/workflows/publish-native-npm.yml` publisher runs for manually published releases and is explicitly dispatched by the release workflow because `GITHUB_TOKEN`-created releases do not propagate the `release` event. It also supports manual dispatch for an existing release. It:
 
-1. Downloads and verifies SHA-256 release bytes and the native package inventory.
-2. Publishes exact archives in dependency-first order to `registry.npmjs.org`. Existing matching versions are verified and skipped; mismatches fail. Packages are never repacked during publication.
-3. Installs Stack Web, Headless and Chimney TUI from the public registry into clean native DSH profiles, checks their composed patches, and exercises Web remove/reinstall.
+1. Downloads release assets and validates SHA-256 checksums and the native inventory.
+2. Publishes the original archives in dependency-first order to `registry.npmjs.org`, without rebuilding or repacking.
+3. Verifies the exact SHA-512 npm pack integrity of **all** packages against public registry metadata. A duplicate-version response alone never counts as success.
+4. Installs Stack Web, Headless, and Chimney TUI into clean native DSH profiles from the public registry, checks their composition, and exercises Web remove/reinstall.
 
-**Bootstrap requirement:** An owner of npm's `@dsh-stack` scope must configure authentication. For first publication, configure the repository Actions secret `NPM_TOKEN` with npm publish permission and suitable 2FA bypass. Once each package exists, configure GitHub Actions as its trusted publisher in npm settings (owner `marius-patrik`, repository `dsh-stack`, workflow `publish-native-npm.yml`, `npm publish` permission). This workflow already requests `id-token: write`; OIDC allows retiring the long-lived token after setup. npm requires the publishing owner to configure trust; repository automation cannot grant itself npm ownership.
+### Initial publication
 
-A failed publication remains recoverable: rerun **Publish native npm packages** with the existing release tag. The publisher compares each package's registry integrity against the archived npm pack integrity and skips previously published matching versions.
+An npm owner must first create the `@dsh-stack` organization. Bootstrap publishing uses a short-lived granular npm token with permission to publish under `@dsh-stack` and appropriate 2FA bypass, installed as the GitHub Actions repository secret `NPM_TOKEN`. Keep the token out of the repository and logs. Revoke it after OIDC publishing has been validated.
 
-Native compatibility smoke uses DSH `0.2.0-rc.2`, the declared peer cohort of Chimney TUI `0.14.0`. Revalidate peers before advancing this pin. Publication is complete only when all packages are visible in the public npm registry and the clean install check is green. A successful GitHub release alone is insufficient.
+Re-run **Publish native npm packages** with the existing release tag to resume. Existing versions with matching integrity are verified and skipped. The npm registry performs publish-time scanning before exposing newly published versions; an initial `npm publish` success or a subsequent duplicate-version error may precede public `npm view` visibility by 15 minutes or more. The publisher separates the write pass from the integrity-verification pass and allows for that delay.
+
+### Migrate every package to GitHub Actions trusted publishing (OIDC)
+
+When every package is visible, configure the trusted publisher for **each** npm package (there is no scope-wide trusted publisher). Use the GitHub repository `marius-patrik/dsh-stack`, workflow filename `publish-native-npm.yml`, no environment, and permission **Allow npm publish**. The workflow already requests `id-token: write` and uses GitHub-hosted runners and Node 24.
+
+A package must exist first. Creating the trust connection requires an npm owner with interactive npm authentication and account 2FA: **a granular access token with bypass 2FA cannot authorize `npm trust`**. To avoid 91 manual browser forms, use npm CLI 11.15.0 or newer locally. Authenticate interactively and download the immutable package list for the release you just published:
+
+```sh
+npm login
+tag=$(gh release view --repo marius-patrik/dsh-stack --json tagName --jq .tagName)
+mkdir -p .release
+gh release download "$tag" --repo marius-patrik/dsh-stack \
+  --pattern stack-release.json --dir .release --clobber
+node -e 'for (const pkg of require("./.release/stack-release.json").packages) console.log(pkg.name)' |
+  while IFS= read -r package; do
+    npm trust github "$package" \
+      --repo marius-patrik/dsh-stack \
+      --file publish-native-npm.yml --allow-publish --yes || exit 1
+    sleep 2
+  done
+```
+
+npm can offer a five-minute 2FA grace period during bulk configuration; another interactive verification may be required partway through. Inspect/reconcile existing trust connections if the loop stops on a package that has already been configured.
+
+**Validation deadline:** New npm trusted-publisher configurations expire after **48 hours** unless they complete at least one successful OIDC publish. Therefore, do not enable trust until a new version of **every** package is prepared for prompt OIDC publishing; rerunning an existing release will skip identical published versions and will not validate the trust. The publication workflow must publish without `NODE_AUTH_TOKEN` for the OIDC validation run, and that run must pass the public registry integrity and native DSH installation gates. Only then remove `NPM_TOKEN` and, in npm package settings, select publishing access requiring 2FA and disallowing traditional tokens.
+
+### Recovery and completion gates
+
+Publication is complete only when every package is visible at its exact release integrity and clean DSH Web, Headless, and TUI registry installations pass. A successful GitHub release alone is not sufficient. The dependency-order script is restartable against the same release tag.
+
+Native compatibility smoke currently uses DSH `0.2.0-rc.2`, the declared peer cohort of Chimney TUI `0.14.0`. Revalidate those peers before advancing this pin.
