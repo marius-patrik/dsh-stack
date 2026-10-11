@@ -7,10 +7,11 @@ on:
       - "plugins/**"
       - "bundles/**"
       - "profiles/**"
-      - "scripts/release.mjs"
-      - "scripts/generate-bundles.mjs"
-      - "scripts/browser-check.mjs"
-      - ".github/workflows/browser-verification.yml"
+      - "scripts/**"
+      - ".github/workflows/**"
+      - "package.json"
+      - "bun.lock"
+      - ".gitmodules"
 
 permissions:
   contents: read
