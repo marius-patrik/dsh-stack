@@ -1,0 +1,85 @@
+name: Publish native npm packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub Release tag (empty uses the latest)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: native-npm-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish and verify npm packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout release tooling
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          submodules: false
+
+      - name: Configure npm registry and OIDC
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install compatible pnpm for native DSH
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.28.5
+
+      - name: Download and verify immutable GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="${RELEASE_TAG:-$(gh release view --json tagName --jq .tagName)}"
+          test -n "$tag"
+          mkdir -p .release
+          gh release download "$tag" --dir .release --clobber
+          (cd .release && sha256sum --check SHA256SUMS)
+          node scripts/verify-release-assets.mjs
+          node scripts/publish-native-packages.mjs --plan
+
+      - name: Publish dependency graph to public npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+        run: node scripts/publish-native-packages.mjs
+
+      - name: Verify native installation from public npm
+        env:
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+          DSH_HOME: ${{ runner.temp }}/registry-dsh-home
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/registry-dsh" --no-audit --no-fund @deepseek-ai/dsh@0.2.0-rc.2
+          cli="$RUNNER_TEMP/registry-dsh/node_modules/@deepseek-ai/dsh/lib/bin.js"
+          node "$cli" plugin --profile web add @dsh-stack/stack
+          node "$cli" --profile web --dump-config > "$RUNNER_TEMP/registry-web.yml"
+          grep -q '@dsh-stack/' "$RUNNER_TEMP/registry-web.yml"
+          node "$cli" plugin --profile headless add @dsh-stack/stack-headless
+          node "$cli" --profile headless --dump-config > "$RUNNER_TEMP/registry-headless.yml"
+          grep -q '@dsh-stack/' "$RUNNER_TEMP/registry-headless.yml"
+          node "$cli" plugin --profile tui add @dsh-stack/stack-headless
+          node "$cli" plugin --profile tui add @deepseek-harness-tui/dsh-tui@0.14.0
+          node "$cli" --profile tui --dump-config > "$RUNNER_TEMP/registry-tui.yml"
+          grep -q '@deepseek-harness-tui/dsh-tui' "$RUNNER_TEMP/registry-tui.yml"
+          node "$cli" plugin --profile web remove @dsh-stack/stack
+          node "$cli" plugin --profile web add @dsh-stack/stack
+          node "$cli" --profile web --dump-config | grep -q '@dsh-stack/'

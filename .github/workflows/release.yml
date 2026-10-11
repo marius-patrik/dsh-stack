@@ -75,6 +75,9 @@ jobs:
       - name: Verify native npm tarballs, manifest and bundle patches
         run: bun run release:verify
 
+      - name: Verify registry publication dependency plan
+        run: node scripts/publish-native-packages.mjs --plan
+
       - name: Create GitHub release and upload all assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

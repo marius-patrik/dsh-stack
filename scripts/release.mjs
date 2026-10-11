@@ -42,6 +42,12 @@ async function discoverPackages() {
 /** Return npm-compatible exact ranges for local workspace references. */
 function publishableManifest(component, byName) {
   const pkg = structuredClone(component.pkg);
+  // A concrete source repository is required for npm's GitHub trusted publishing.
+  pkg.repository = {
+    type: "git",
+    url: "https://github.com/marius-patrik/dsh-stack.git",
+    directory: component.relativePath,
+  };
   for (const section of [
     "dependencies",
     "optionalDependencies",
