@@ -10,7 +10,19 @@
   },
   "workspaces": [
     "plugins/*",
-    "bundles/**"
+    "bundles/agents/all",
+    "bundles/ai/all",
+    "bundles/ai/providers",
+    "bundles/headless",
+    "bundles/integrations/all",
+    "bundles/integrations/formatters",
+    "bundles/integrations/hosts",
+    "bundles/integrations/lsp",
+    "bundles/stack",
+    "bundles/ux/all",
+    "bundles/ux/themes",
+    "bundles/ux/tweaks",
+    "bundles/ux/voice"
   ],
   "trustedDependencies": [
     "koffi"
