@@ -28,7 +28,7 @@
     "koffi"
   ],
   "scripts": {
-    "build": "node scripts/generate-bundles.mjs && bun run --filter '*' --if-present build",
+    "build": "node scripts/generate-bundles.mjs && node scripts/build-workspace.mjs",
     "typecheck": "bun run --filter '*' --if-present typecheck",
     "format": "biome format --write .",
     "format:check": "biome format --write . && git diff --exit-code",
