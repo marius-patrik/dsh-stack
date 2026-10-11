@@ -40,7 +40,7 @@ bun run release:assets
 bun run release:verify
 ```
 
-Public npm registry publication is separate from GitHub Release asset creation. See [native npm publication](docs/native-npm-publication.md) for the OIDC/token bootstrap, release recovery, exact-byte verification and clean registry install gates.
+Public npm registry publication is separate from GitHub Release asset creation. See [native npm publication](.agents/notes/native-npm-publication.md) for the OIDC/token bootstrap, release recovery, exact-byte verification and clean registry install gates.
 
 `bun run build` generates the deterministic recursive bundle patches before compiling plugins. Compiled `dist/` and `lib/` are not tracked. The release pipeline packages independently publishable npm tarballs with resolved exact package versions rather than shipping a replacement runtime.
 
