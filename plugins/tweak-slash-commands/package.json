@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/tweak-slash-commands",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Config-file slash commands: a settings-driven registry bridging into the harness command registry.",
   "license": "MIT",
   "type": "module",
