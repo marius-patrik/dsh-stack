@@ -2,7 +2,7 @@
 
 The GitHub release contains immutable, versioned `.tgz` archives for every Stack plugin and bundle, with `component-assets.json`, `stack-release.json`, and `SHA256SUMS`.
 
-`.github/workflows/publish-native-npm.yml` runs on published releases and supports manual dispatch (to recover or republish the *existing* release without rebuilding). It:
+`.github/workflows/publish-native-npm.yml` runs on manually published releases and is explicitly dispatched by the GitHub release workflow (because releases created with `GITHUB_TOKEN` do not propagate release events). It also supports manual dispatch (to recover or republish the *existing* release without rebuilding). It:
 
 1. Downloads and verifies SHA-256 release bytes and the native package inventory.
 2. Publishes exact archives in dependency-first order to `registry.npmjs.org`. Existing matching versions are verified and skipped; mismatches fail. Packages are never repacked during publication.
