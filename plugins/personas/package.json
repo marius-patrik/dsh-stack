@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/agent-personas",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Canonical agent persona registry service.",
   "license": "MIT",
   "type": "module",
