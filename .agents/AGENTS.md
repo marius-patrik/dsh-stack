@@ -16,7 +16,7 @@ still-open decision (#60).
 
 ## Canonical structure
 
-- `plugins/<name>/` — single flat implementation package list; no plugin grouping levels.
+- `plugins/<name>/` — single flat implementation package list; no plugin grouping levels. `plugins/dsh-tui` is Chimney's external submodule, managed as a native DSH plugin but excluded from Stack's Bun package build.
 - `bundles/**/` — recursively nested leaf DSH bundles; no dedicated `packs/` directory. Parent bundles compose children at build time into a normal native patch.
 - `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
 - `_migrate/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.

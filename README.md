@@ -8,6 +8,7 @@ First-class plugins, recursive bundles, and actual native profile templates for 
 - `bundles/**/`: arbitrarily nested *leaf* packages with `dsh.bundle.patch` metadata. Parent bundles recursively compose children at build time, producing one normal native DSH patch, not a runtime manager.
 - `profiles/<name>/`: actual `dsh.profile.bundles` profile manifest and `cordis.patch.yml` templates. These are profile directories, **not** npm bundles. DSH maintains the installed profiles under its own home directory.
 - `scripts/`: build, verification, and publication only.
+- `plugins/dsh-tui`: Chimney's independently maintained native DSH TUI source as a pinned Git submodule (not a Stack workspace).
 
 The `_migrate/Memory` gitlink is staged external source and not a managed runtime installation. The `_migrate/` sources are not part of the installed Stack.
 
@@ -20,6 +21,8 @@ dsh plugin --profile web add @dsh-stack/stack
 dsh --profile web --dump-config
 dsh --profile web
 ```
+
+For the native terminal UI, see [`profiles/tui/`](profiles/tui/README.md), using Chimney's `@deepseek-harness-tui/dsh-tui` bundle after Stack's headless bundle. Chimney 0.14.0 targets DSH up to 0.2.0-rc.2; newer host compatibility must be verified before installation.
 
 For a headless installation use `dsh plugin --profile headless add @dsh-stack/stack-headless`. Smaller nested bundles can be installed individually. The package manager installs dependencies, and users may enable optional plugins via normal DSH profile patches or the native plugin UI.
 

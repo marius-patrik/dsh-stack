@@ -12,3 +12,7 @@ Install complete experiences through DSH's native `dsh plugin --profile web add 
 Arbitrarily nested reusable bundles are under `bundles/`, not under `profiles/`. A nested bundle declares child bundles in its package manifest and receives a flattened patch at build time, since DSH does not automatically apply transitive bundle patches.
 
 DarkFactory and SkyAgent remain under `_migrate/` until their native implementations are verified.
+
+## Terminal UI profile
+
+`profiles/tui/` selects `@deepseek-ai/dsh-base`, `@dsh-stack/stack-headless`, and Chimney's independently released `@deepseek-harness-tui/dsh-tui` in that order. Source is a Git submodule at `plugins/dsh-tui` with its own pnpm workspace and nested submodule; no source rewrite or Stack-bundled copy. Compatible DSH versions must satisfy both native peer contracts without allowances.
