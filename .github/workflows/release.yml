@@ -66,11 +66,14 @@ jobs:
           git rev-parse --verify --quiet "refs/tags/$next_version" >/dev/null && exit 1 || true
           echo "tag=$next_version" >> "$GITHUB_OUTPUT"
 
-      - name: Build complete release assets
-        run: node scripts/release.mjs assets
+      - name: Build native Stack packages and recursive bundle patches
+        run: bun run build
 
-      - name: Validate every plugin ZIP asset
-        run: node scripts/verify-release-assets.mjs
+      - name: Build complete native npm release assets
+        run: bun run release:assets
+
+      - name: Verify native npm tarballs, manifest and bundle patches
+        run: bun run release:verify
 
       - name: Create GitHub release and upload all assets
         env:
