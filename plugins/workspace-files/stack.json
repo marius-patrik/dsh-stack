@@ -1,7 +1,7 @@
 {
   "id": "stack.workspace.files",
   "name": "@dsh-stack/workspace-files",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "plugin",
   "description": "@dsh-stack/workspace-files",
   "files": ["lib", "README.md", "package.json", "stack.json"],
