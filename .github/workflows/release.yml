@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   release:
@@ -87,3 +88,15 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Release $TAG" \
             --generate-notes
+
+      # GITHUB_TOKEN-created release events do not trigger separate workflows.
+      # workflow_dispatch is the supported exception and runs with a scoped token.
+      - name: Dispatch public npm publication
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.versioning.outputs.tag }}
+        run: |
+          gh workflow run publish-native-npm.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f tag="$TAG"
