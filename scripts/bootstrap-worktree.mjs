@@ -4,12 +4,10 @@
  * `DSH_HOME=<worktree>/.data dsh --profile headless`.
  *
  * Steps:
- *  1. Locate the primary checkout and copy its built DSH/ into the worktree
- *     (excluding DSH's own .git, so the shared submodule pin is reused).
- *  2. Install workspace dependencies and build @dsh-stack/launcher.
- *  3. Create .data/ and seed it with settings.yaml + .credentials.yaml from the
- *     primary checkout, rewriting dsh-tweaks.homeRoot to the worktree's .data.
- *  4. Run a smoke test: `dsh --profile headless --help`.
+ *  1. Locate the primary and target Stack worktrees (DSH is external).
+ *  2. Install Stack workspace dependencies and build @dsh-stack/launcher.
+ *  3. Seed .data/ from the primary checkout, adjusting homeRoot.
+ *  4. Smoke-test against DSH_HARNESS, a separately installed DSH checkout.
  *
  * Usage:
  *   node src/scripts/bootstrap-worktree.mjs [--from <primary-checkout>] <worktree-path>
@@ -19,7 +17,7 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promises as fs } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 /** Run a command and return a promise that rejects on nonzero exit. */
@@ -76,9 +74,6 @@ export async function resolveRepoRoots(targetPath, primaryFromFlag) {
   let primaryRoot;
   if (primaryFromFlag) {
     primaryRoot = resolve(primaryFromFlag);
-    if (!existsSync(join(primaryRoot, "DSH"))) {
-      throw new Error(`Primary checkout missing DSH/: ${primaryRoot}`);
-    }
   } else {
     const commonGitDir = await git(absTarget, ["rev-parse", "--git-common-dir"]);
     primaryRoot = dirname(resolve(absTarget, commonGitDir));
@@ -94,25 +89,6 @@ export async function resolveRepoRoots(targetPath, primaryFromFlag) {
  */
 export function rewriteHomeRoot(settingsYaml, homeRoot) {
   return settingsYaml.replace(/^([ \t]*homeRoot:[ \t]*).+$/m, `$1${homeRoot}`);
-}
-
-/** Copy the primary's built DSH/ into the worktree, excluding .git. */
-async function copyHarness(primaryRoot, targetRoot) {
-  const src = join(primaryRoot, "DSH");
-  const dest = join(targetRoot, "DSH");
-  if (!existsSync(src)) {
-    throw new Error(`Primary DSH/ not found at ${src}`);
-  }
-  if (existsSync(dest)) {
-    console.log(`Removing existing ${dest} before copy...`);
-    await fs.rm(dest, { recursive: true, force: true });
-  }
-  console.log(`Copying DSH from ${src} to ${dest}...`);
-  await fs.cp(src, dest, {
-    recursive: true,
-    preserveTimestamps: true,
-    filter: (srcPath) => basename(srcPath) !== ".git",
-  });
 }
 
 /** Install dependencies and build the launcher package. */
@@ -163,7 +139,7 @@ async function seedData(primaryRoot, targetRoot) {
 
 /** Verify the launcher can resolve its own built output under the headless profile. */
 async function smokeTest(targetRoot) {
-  const bin = join(targetRoot, "plugins", "launcher", "bin", "dsh.mjs");
+  const bin = join(targetRoot, "plugins", "core", "launcher", "bin", "dsh.mjs");
   if (!existsSync(bin)) {
     throw new Error(`Launcher bin missing at ${bin}`);
   }
@@ -203,7 +179,9 @@ async function main() {
   const { primaryRoot, targetRoot } = await resolveRepoRoots(targetArg, primaryFromFlag);
   console.log(`Primary root:  ${primaryRoot}`);
   console.log(`Worktree root: ${targetRoot}`);
-  await copyHarness(primaryRoot, targetRoot);
+  if (!process.env.DSH_HARNESS || !existsSync(join(process.env.DSH_HARNESS, "apps"))) {
+    throw new Error("Set DSH_HARNESS to an external, installed upstream checkout before bootstrapping a worktree");
+  }
   await installAndBuild(targetRoot);
   await seedData(primaryRoot, targetRoot);
   await smokeTest(targetRoot);
