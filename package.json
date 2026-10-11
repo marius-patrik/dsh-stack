@@ -10,6 +10,7 @@
   },
   "workspaces": [
     "plugins/*",
+    "!plugins/dsh-tui",
     "bundles/agents/all",
     "bundles/ai/all",
     "bundles/ai/providers",

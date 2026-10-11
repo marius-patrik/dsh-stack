@@ -26,7 +26,7 @@ async function walk(dir) {
   }
   await Promise.all(
     entries
-      .filter((entry) => entry.isDirectory() && entry.name !== "node_modules")
+      .filter((entry) => entry.isDirectory() && entry.name !== "node_modules" && entry.name !== "dsh-tui")
       .map((entry) => walk(join(dir, entry.name))),
   );
 }

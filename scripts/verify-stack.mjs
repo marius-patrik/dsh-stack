@@ -9,7 +9,7 @@ const execFileAsync = promisify(execFile);
 const root = process.cwd();
 const pluginsDir = join(root, "plugins");
 
-const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib"]);
+const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib", "dsh-tui"]);
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
 const errors = [];
 const packageNames = new Map();

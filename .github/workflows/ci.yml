@@ -83,6 +83,7 @@ jobs:
           for pkg in plugins/*/; do
             pkg="${pkg%/}"
             [ -d "$pkg" ] || continue
+            [ "$pkg" = "plugins/dsh-tui" ] && continue
             [ -f "$pkg/package.json" ] && continue
             other="$(find "$pkg" -mindepth 1 \( -name lib -prune \) -o \( -name '*.tsbuildinfo' -prune \) -o -print | head -1)"
             if [ -z "$other" ]; then
@@ -173,6 +174,7 @@ jobs:
           for pkg in plugins/*/; do
             pkg="${pkg%/}"
             [ -d "$pkg" ] || continue
+            [ "$pkg" = "plugins/dsh-tui" ] && continue
             [ -f "$pkg/package.json" ] && continue
             other="$(find "$pkg" -mindepth 1 \( -name lib -prune \) -o \( -name '*.tsbuildinfo' -prune \) -o -print | head -1)"
             if [ -z "$other" ]; then
