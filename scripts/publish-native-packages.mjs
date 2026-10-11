@@ -78,7 +78,15 @@ async function publishedIntegrity(name, version) {
   try {
     const { stdout } = await execFileAsync(
       "npm",
-      ["view", `${name}@${version}`, "dist.integrity", "--json", "--prefer-online", "--registry", registry],
+      [
+        "view",
+        `${name}@${version}`,
+        "dist.integrity",
+        "--json",
+        "--prefer-online",
+        "--registry",
+        registry,
+      ],
       { maxBuffer: 1024 * 1024 },
     );
     const parsed = JSON.parse(stdout);
