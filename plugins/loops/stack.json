@@ -1,7 +1,7 @@
 {
   "id": "stack.agent.loops",
   "name": "@dsh-stack/agent-loops",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "plugin",
   "description": "Goal-based file-defined automation loops.",
   "files": ["lib", "client.js", "package.json", "stack.json"],
