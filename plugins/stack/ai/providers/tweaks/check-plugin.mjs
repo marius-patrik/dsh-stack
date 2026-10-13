@@ -211,7 +211,9 @@ const cryptoPolyfill = readFileSync(
     "..",
     "..",
     "scripts",
-    "client-runtime", "crypto-polyfill.js"),
+    "client-runtime",
+    "crypto-polyfill.js",
+  ),
   "utf8",
 );
 const glyphFactory = readFileSync(
@@ -223,7 +225,9 @@ const glyphFactory = readFileSync(
     "..",
     "..",
     "scripts",
-    "client-runtime", "glyph-factory.js"),
+    "client-runtime",
+    "glyph-factory.js",
+  ),
   "utf8",
 );
 const segmentedTabs = readFileSync(
