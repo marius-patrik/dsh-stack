@@ -49,7 +49,7 @@ for (const dir of await listPluginPackageDirs()) {
   pluginPaths.set(pkg.name, join(dir, "package.json"));
 }
 function packageJsonPath(packageId) {
-  return pluginPaths.get(packageId) ?? join(root, "composition", "<missing>", packageId);
+  return pluginPaths.get(packageId) ?? join(root, "plugins", "<missing>", packageId);
 }
 
 const violations = [];

@@ -1,6 +1,6 @@
 # Native release and distribution contract
 
-The repository is a build/release coordinator, not an installer or running application. Every public `plugins/<name>/` package and every nested `bundles/**/` package is independently versioned and distributed as an npm package. `profiles/` contains non-publishable genuine DSH profile templates.
+The repository is a build/release coordinator, not an installer or running application. Every public plugin or native bundle package discovered recursively under `plugins/**/package.json` is independently versioned and distributed as an npm package. Shared child bundles are stored only once even if included by several bundle DAG parents. `profiles/` contains non-publishable genuine DSH profile templates.
 
 ## Artifacts
 
