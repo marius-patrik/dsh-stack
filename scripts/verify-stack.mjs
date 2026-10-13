@@ -163,6 +163,25 @@ async function main() {
   for (const removed of ["bundles", "composition", "plugins/standalone"]) {
     assert(!(await exists(join(root, removed))), `obsolete source root ${removed} must not exist`);
   }
+  const canonicalTopLevel = new Set([
+    "agents",
+    "ai",
+    "integrations",
+    "ux",
+    "plugin-kit",
+    "composition",
+    "dist",
+    "lib",
+    "node_modules",
+  ]);
+  for (const entry of await fs.readdir(join(pluginsDir, "stack"), { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      assert(
+        canonicalTopLevel.has(entry.name),
+        `plugins/stack/${entry.name} must be placed under its owning nested bundle`,
+      );
+    }
+  }
   assert((await listBundlePackageDirs()).length > 0, "native DSH bundles are missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 

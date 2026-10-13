@@ -11,18 +11,18 @@ profiles/
   tui/                         Native TUI profile template
 plugins/
   stack/                       @dsh-stack/stack full bundle
-    agents/                    Agents bundle, agent plugin and related extensions
+    agents/                    Agents bundle, agents, presets, tools and loops
     ai/                        AI bundle
-      providers/               Providers bundle with implementation plugins
-    integrations/              Integrations bundle
+      providers/               Providers bundle, dialects, credential-vault, models and provider adapters
+    integrations/              Integrations bundle, repos, workspace and trading tooling
       formatters/              Formatters bundle and implementation
       hosts/                   Hosts bundle and implementation
       lsp/                     LSP bundle and implementation
     ux/                        UX bundle
-      themes/                  Themes bundle and related plugins
-      tweaks/                  Tweaks bundle
+      themes/                  Themes bundle, icons and skins
+      tweaks/                  Tweaks bundle and tweak implementations
       voice/                   Voice bundle and plugin
-    <name>/                    Plugins mounted directly by full Stack
+    plugin-kit/                Shared native plugin foundation (package)
   headless/                    @dsh-stack/stack-headless bundle
     dsh-tui/                   Chimney third-party source submodule (external release)
 ```
