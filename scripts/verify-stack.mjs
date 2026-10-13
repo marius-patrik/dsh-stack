@@ -206,9 +206,19 @@ async function main() {
 
   // Chimney's independently published TUI plugin must not become a child
   // of the Stack headless bundle simply because its profile uses headless.
-  const { stdout: gitlinks } = await execFileAsync("git", ["ls-files", "--stage", "--", "plugins/dsh-tui"], { cwd: root });
-  assert(/^160000 [a-f0-9]{40} 0\tplugins\/dsh-tui\s*$/m.test(gitlinks), "Chimney TUI source must be an independent plugins/dsh-tui gitlink");
-  assert(!(await exists(join(pluginsDir, "headless", "dsh-tui"))), "Chimney TUI must not be nested under headless");
+  const { stdout: gitlinks } = await execFileAsync(
+    "git",
+    ["ls-files", "--stage", "--", "plugins/dsh-tui"],
+    { cwd: root },
+  );
+  assert(
+    /^160000 [a-f0-9]{40} 0\tplugins\/dsh-tui\s*$/m.test(gitlinks),
+    "Chimney TUI source must be an independent plugins/dsh-tui gitlink",
+  );
+  assert(
+    !(await exists(join(pluginsDir, "headless", "dsh-tui"))),
+    "Chimney TUI must not be nested under headless",
+  );
 
   for (const [id, { stack }] of publicPackages) {
     const required = Array.isArray(stack.dependencies) ? stack.dependencies : [];
