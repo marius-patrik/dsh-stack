@@ -169,7 +169,7 @@ async function verifyPackage(dir) {
 async function main() {
   assert(await exists(packagesDir), "packages/ root is missing");
   assert(!(await exists(join(root, "profiles"))), "Stack must not own profile templates");
-  for (const removed of ["bundles", "composition", "_migrate", "plugins", "scripts"]) {
+  for (const removed of ["bundles", "composition", "_migrate", "plugins", "scripts", "lib", "packages/stack/plugin-kit/tooling"]) {
     assert(!(await exists(join(root, removed))), `obsolete source root ${removed} must not exist`);
   }
   for (const name of ["profile-ui", "profile-runtime"]) {
