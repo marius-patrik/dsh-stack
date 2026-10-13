@@ -1,5 +1,9 @@
 import { relative } from "node:path";
-import { root, listPluginPackageDirs, listBundlePackageDirs } from "./packages/stack/plugin-kit/tooling/repo-paths.mjs";
+import {
+  root,
+  listPluginPackageDirs,
+  listBundlePackageDirs,
+} from "./packages/stack/plugin-kit/tooling/repo-paths.mjs";
 
 const plugin = {
   entry: ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "client.js", "*.mjs", "bin/*.mjs"],
