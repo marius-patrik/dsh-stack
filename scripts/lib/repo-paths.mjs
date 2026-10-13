@@ -15,7 +15,7 @@ export async function readJson(path) {
 }
 
 /** Find all native packages, leaving external submodules and generated output alone. */
-export async function listCompositionPackageDirs() {
+async function listCompositionPackageDirs() {
   const result = [];
   /** Recurse even when the current directory is itself an npm package. */
   async function visit(dir) {
