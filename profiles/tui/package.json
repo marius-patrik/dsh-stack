@@ -2,7 +2,7 @@
   "name": "dsh-profile-tui",
   "private": true,
   "dependencies": {
-    "@dsh-stack/stack-headless": "0.1.0",
+    "@dsh-stack/stack-headless": "0.1.2",
     "@deepseek-harness-tui/dsh-tui": "0.14.0"
   },
   "dsh": {

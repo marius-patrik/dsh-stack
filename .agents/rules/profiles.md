@@ -15,4 +15,4 @@ DarkFactory and SkyAgent remain under `_migrate/` until their native implementat
 
 ## Terminal UI profile
 
-`profiles/tui/` selects `@deepseek-ai/dsh-base`, `@dsh-stack/stack-headless`, and Chimney's independently released `@deepseek-harness-tui/dsh-tui` in that order. Source is a Git submodule at `plugins/headless/dsh-tui` with its own pnpm workspace and nested submodule; no source rewrite or Stack-bundled copy. Compatible DSH versions must satisfy both native peer contracts without allowances.
+`profiles/tui/` selects `@deepseek-ai/dsh-base`, `@dsh-stack/stack-headless`, and Chimney's independently released `@deepseek-harness-tui/dsh-tui` in that order. Source is a Git submodule at `plugins/dsh-tui` with its own pnpm workspace and nested submodule; no source rewrite or Stack-bundled copy. Compatible DSH versions must satisfy both native peer contracts without allowances.

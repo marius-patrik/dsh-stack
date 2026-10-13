@@ -10,7 +10,7 @@
     "**/.turbo/**",
     "**/package.json",
     "**/stack.json",
-    "plugins/headless/dsh-tui/**",
+    "plugins/dsh-tui/**",
     "**/tsconfig.json",
     "**/tsconfig.typecheck.json",
     "plugins/**/src/index.mjs"
