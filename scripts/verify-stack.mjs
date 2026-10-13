@@ -184,6 +184,10 @@ async function main() {
       );
     }
   }
+  assert(
+    !(await exists(join(pluginsDir, "headless"))),
+    "obsolete alternate headless Stack bundle must not exist",
+  );
   assert((await listBundlePackageDirs()).length > 0, "native DSH bundles are missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 
@@ -209,6 +213,39 @@ async function main() {
         `profiles/${profile} pins ${name}@${version}, expected native source ${packageVersions.get(name)}`,
       );
     }
+  }
+
+  // Every profile reuses one canonical Stack graph; presentation varies only at the DSH layer.
+  const sharedBundle = "@dsh-stack/stack";
+  const surfaces = {
+    web: ["@deepseek-ai/dsh-base", "@deepseek-ai/dsh-web-app", sharedBundle],
+    headless: ["@deepseek-ai/dsh-base", "@deepseek-ai/dsh-headless", sharedBundle],
+    tui: ["@deepseek-ai/dsh-base", sharedBundle, "@deepseek-harness-tui/dsh-tui"],
+  };
+  for (const [profile, requiredBundles] of Object.entries(surfaces)) {
+    const manifest = await readJson(
+      join(root, "profiles", profile, "package.json"),
+      `profiles/${profile}/package.json`,
+    );
+    assert(
+      JSON.stringify(manifest?.dsh?.profile?.bundles) === JSON.stringify(requiredBundles),
+      `profiles/${profile} must use canonical Stack composition with its native DSH surface`,
+    );
+    assert(
+      JSON.stringify(
+        Object.fromEntries(
+          Object.entries(manifest?.dependencies ?? {}).filter(([name]) =>
+            name.startsWith("@dsh-stack/"),
+          ),
+        ),
+      ) === JSON.stringify({ [sharedBundle]: packageVersions.get(sharedBundle) }),
+      `profiles/${profile} must depend on only the canonical ${sharedBundle} package`,
+    );
+    const patch = await fs.readFile(join(root, "profiles", profile, "cordis.patch.yml"), "utf8");
+    assert(
+      /^\s*(?:#.*\n\s*)*\[\]\s*$/.test(patch),
+      `profiles/${profile} must not fork the canonical Stack patch in its template`,
+    );
   }
 
   // Chimney's independently published TUI plugin must not become a child

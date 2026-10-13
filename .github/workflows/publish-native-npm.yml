@@ -82,13 +82,19 @@ jobs:
           node "$cli" plugin --profile web add @dsh-stack/stack
           node "$cli" --profile web --dump-config > "$RUNNER_TEMP/registry-web.yml"
           grep -q '@dsh-stack/' "$RUNNER_TEMP/registry-web.yml"
-          node "$cli" plugin --profile headless add @dsh-stack/stack-headless
+          node "$cli" plugin --profile headless add @dsh-stack/stack
           node "$cli" --profile headless --dump-config > "$RUNNER_TEMP/registry-headless.yml"
           grep -q '@dsh-stack/' "$RUNNER_TEMP/registry-headless.yml"
-          node "$cli" plugin --profile tui add @dsh-stack/stack-headless
+          node "$cli" plugin --profile tui add @dsh-stack/stack
           node "$cli" plugin --profile tui add @deepseek-harness-tui/dsh-tui@0.14.0
           node "$cli" --profile tui --dump-config > "$RUNNER_TEMP/registry-tui.yml"
           grep -q '@deepseek-harness-tui/dsh-tui' "$RUNNER_TEMP/registry-tui.yml"
+          # All DSH profiles must activate the same Stack plugin inventory.
+          for profile in web headless tui; do
+            grep -oE '@dsh-stack/[a-z0-9-]+' "$RUNNER_TEMP/registry-${profile}.yml" | sort -u > "$RUNNER_TEMP/stack-${profile}.txt"
+          done
+          diff -u "$RUNNER_TEMP/stack-web.txt" "$RUNNER_TEMP/stack-headless.txt"
+          diff -u "$RUNNER_TEMP/stack-web.txt" "$RUNNER_TEMP/stack-tui.txt"
           node "$cli" plugin --profile web remove @dsh-stack/stack
           node "$cli" plugin --profile web add @dsh-stack/stack
           node "$cli" --profile web --dump-config | grep -q '@dsh-stack/'

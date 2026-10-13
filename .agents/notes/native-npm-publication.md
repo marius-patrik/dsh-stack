@@ -24,6 +24,10 @@ The source-tree migration in PR #332 changed the native packages' published `rep
 
 The subsequent fix bumps all 91 independently published package versions, synchronizes 78 legacy `stack.json` descriptors and `bun.lock`, and checks every release archive's existing npm version integrity *before* creating another GitHub Release. The preflight accepts an unpublished version or an identical archive; an existing version with different bytes aborts without creating a release. Publication retains the same check and independent native DSH installation verification. Never reuse a prior npm package version when its packed contents change.
 
+## Unified profile composition
+
+Historical `@dsh-stack/stack-headless@0.1.2` remains on npm as an immutable old release. Current source publishes **one** Stack aggregate, `@dsh-stack/stack`, shared across Web, Headless and TUI profiles. Chimney's TUI is a separate presentation adapter, not an alternate Stack graph. New release inventories should contain **90** native packages rather than the older 91.
+
 ## Publication process
 
 The [release workflow](../../.github/workflows/release.yml) creates a versioned GitHub Release and explicitly dispatches `publish-native-npm.yml` because release events created by `GITHUB_TOKEN` do not propagate into another workflow. The publication job:
