@@ -11,7 +11,7 @@ Install all experiences through DSH's native `dsh plugin --profile <name> add @d
 
 Arbitrarily nested native bundles are under `plugins/`; profile templates remain at root `profiles/`. A nested bundle declares child bundles in its package manifest and receives a flattened patch at build time, since DSH does not automatically apply transitive bundle patches.
 
-A separate `stack-headless`/`stack-tui` aggregate is forbidden: profile surface differences may not fork the nested Stack bundle DAG. DarkFactory and SkyAgent remain under `_migrate/` until their native implementations are verified.
+A separate `stack-headless`/`stack-tui` aggregate is forbidden: profile surface differences may not fork the nested Stack bundle DAG. DarkFactory and Cognition are independent external source submodules at `plugins/DarkFactory` and `plugins/Cognition`. Their placement does not mount them into the Stack runtime; integration requires a verified native DSH plugin and explicit composition.
 
 ## Terminal UI profile
 

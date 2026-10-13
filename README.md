@@ -23,10 +23,12 @@ plugins/
       tweaks/                  Tweaks bundle and tweak implementations
       voice/                   Voice bundle and plugin
     plugin-kit/                Shared native plugin foundation (package)
+  Cognition/                   External Cognition Git submodule (not built/published by Stack)
+  DarkFactory/                 External DarkFactory Git submodule (not built/published by Stack)
   dsh-tui/                     Chimney independent external plugin source submodule (TUI-only)
 ```
 
-Every nested `package.json` is still an independently publishable npm package. The physical folders follow bundle ownership, while the native `stack.compose` dependency DAG and Cordis patch rows determine runtime activation. Placing an optional plugin in a bundle's source folder does not activate it automatically. Shared bundles (for example between full Stack and headless) are not duplicated.
+Every native Stack `package.json` is independently publishable; external Git submodules at `plugins/Cognition`, `plugins/DarkFactory` and `plugins/dsh-tui` retain their own distribution lifecycles and are excluded from Stack's build, verification and npm publication. The physical folders follow bundle ownership, while the native `stack.compose` dependency DAG and Cordis patch rows determine runtime activation. Placing an optional plugin in a bundle's source folder does not activate it automatically. Shared bundles (for example between full Stack and headless) are not duplicated.
 
 ## Native installation
 
@@ -50,4 +52,4 @@ bun run release:assets
 bun run release:verify
 ```
 
-The build walks all nested plugin and bundle package manifests. `_migrate/` is not part of an installed Stack. See [native npm publication](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).
+The build walks native Stack plugin and bundle package manifests while excluding external submodules. To fetch their pinned source revisions, run `git submodule update --init plugins/Cognition plugins/DarkFactory plugins/dsh-tui`. See [native npm publication](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).

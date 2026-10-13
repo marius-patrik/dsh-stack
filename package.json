@@ -9,8 +9,7 @@
     "bun": ">=1.4.0"
   },
   "workspaces": [
-    "plugins/**",
-    "!plugins/dsh-tui"
+    "plugins/stack/**"
   ],
   "trustedDependencies": [
     "koffi"

@@ -20,7 +20,7 @@ still-open decision (#60).
 - `plugins/dsh-tui/` — Chimney's external TUI submodule, activated only by the TUI profile and excluded from Stack's Bun build. There is **no** separate headless or TUI Stack bundle; all profiles consume `@dsh-stack/stack`.
 - The on-disk bundle hierarchy tracks source ownership; actual activation remains determined by `stack.compose`, native Cordis patches, and DSH user profile state. An optional plugin nested under a bundle is not activated merely by its location.
 - `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
-- `_migrate/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.
+- `plugins/Cognition/` and `plugins/DarkFactory/` are independently maintained Git submodules, pinned to upstream `main` revisions. They are excluded from Stack's native npm workspace, build and release until native integration is explicitly implemented. No `_migrate/` source tree is retained.
 - `scripts/` owns build, verification and publishing only. No Stack launcher, profile manager, updater or DSH submodule.
 - `.agents/notes/` is the documentation root. `README.md` is standalone, and `CONTRIBUTING.md` symlinks directly to `.agents/AGENTS.md`; no root `AGENTS.md` or `CLAUDE.md`.
 

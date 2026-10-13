@@ -10,7 +10,16 @@ const execFileAsync = promisify(execFile);
 const root = process.cwd();
 const pluginsDir = join(root, "plugins");
 
-const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib", "dsh-tui"]);
+const ignoredDirs = new Set([
+  "node_modules",
+  ".git",
+  "dist",
+  "coverage",
+  "lib",
+  "Cognition",
+  "DarkFactory",
+  "dsh-tui",
+]);
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
 const errors = [];
 const packageNames = new Map();
@@ -162,7 +171,7 @@ async function main() {
       `missing native ${profile} profile template`,
     );
   }
-  for (const removed of ["bundles", "composition", "plugins/standalone"]) {
+  for (const removed of ["bundles", "composition", "plugins/standalone", "_migrate"]) {
     assert(!(await exists(join(root, removed))), `obsolete source root ${removed} must not exist`);
   }
   const canonicalTopLevel = new Set([
@@ -263,6 +272,28 @@ async function main() {
     !(await exists(join(pluginsDir, "headless", "dsh-tui"))),
     "Chimney TUI must not be nested under headless",
   );
+
+  // External plugin sources must remain independent, pinned gitlinks.
+  const modules = await fs.readFile(join(root, ".gitmodules"), "utf8");
+  for (const name of ["DarkFactory", "Cognition"]) {
+    const path = "plugins/" + name;
+    const { stdout: record } = await execFileAsync("git", ["ls-files", "--stage", "--", path], {
+      cwd: root,
+    });
+    assert(
+      record
+        .trim()
+        .split("\n")
+        .some((line) => /^160000 [a-f0-9]{40} 0\t/.test(line) && line.endsWith("\t" + path)),
+      path + " must be a pinned external Git submodule",
+    );
+    assert(
+      modules.includes('[submodule "' + path + '"]') &&
+        modules.includes("url = https://github.com/marius-patrik/" + name + ".git"),
+      path + " must use the canonical upstream repository",
+    );
+  }
+  assert(!modules.includes("_migrate"), "obsolete migration submodules must not be configured");
 
   for (const [id, { stack }] of publicPackages) {
     const required = Array.isArray(stack.dependencies) ? stack.dependencies : [];

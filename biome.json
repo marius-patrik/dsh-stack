@@ -12,6 +12,12 @@
       "!**/.next",
       "!worktrees",
       "!**/worktrees",
+      "!plugins/Cognition",
+      "!plugins/Cognition/**",
+      "!plugins/DarkFactory",
+      "!plugins/DarkFactory/**",
+      "!plugins/dsh-tui",
+      "!plugins/dsh-tui/**",
       "!.claude"
     ]
   },

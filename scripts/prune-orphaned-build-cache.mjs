@@ -9,7 +9,7 @@ import { join, relative } from "node:path";
 
 const root = process.cwd();
 const cacheNames = new Set(["lib", "dist", "node_modules", ".turbo", ".next"]);
-const skipNames = new Set(["node_modules", "dsh-tui", ".git"]);
+const skipNames = new Set(["node_modules", "Cognition", "DarkFactory", "dsh-tui", ".git"]);
 let removed = 0;
 
 /** Identify files that can only originate from dependency or compiler caches. */
