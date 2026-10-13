@@ -161,7 +161,16 @@ console.log("base splice ok");
 // directory under `packages/preset/agent-presets/presets`.
 const baseDir =
   basePresetDir() ??
-  join(import.meta.dirname, "..", "..", ".agents", "test-fixtures", "dsh-presets");
+  join(
+    import.meta.dirname,
+    "..",
+    "..",
+    "..",
+    "..",
+    ".agents",
+    "test-fixtures",
+    "dsh-presets",
+  );
 assert.ok(
   baseDir !== undefined && existsSync(join(baseDir, "standard.patch.yml")),
   "shipped standard preset declaration must be reachable for the splice test",
