@@ -4,14 +4,7 @@
   "version": "0.1.2",
   "kind": "plugin",
   "description": "Anthropic Claude wire dialect extension for the Stack dialects registry.",
-  "files": [
-    "lib",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
-  "dependencies": [
-    "stack.ai.dialects"
-  ],
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": ["stack.ai.dialects"],
   "optionalDependencies": []
 }

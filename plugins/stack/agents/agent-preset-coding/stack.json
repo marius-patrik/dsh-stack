@@ -4,14 +4,7 @@
   "version": "0.1.2",
   "kind": "plugin",
   "description": "Software-engineering Stack agent preset extension.",
-  "files": [
-    "lib",
-    "README.md",
-    "package.json",
-    "stack.json"
-  ],
-  "dependencies": [
-    "stack.agent.agents"
-  ],
+  "files": ["lib", "README.md", "package.json", "stack.json"],
+  "dependencies": ["stack.agent.agents"],
   "optionalDependencies": []
 }

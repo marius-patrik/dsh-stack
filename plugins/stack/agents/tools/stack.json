@@ -4,12 +4,7 @@
   "version": "0.1.2",
   "kind": "plugin",
   "description": "Config-file custom tools for the dsh harness.",
-  "files": [
-    "lib",
-    "bin",
-    "package.json",
-    "stack.json"
-  ],
+  "files": ["lib", "bin", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []
 }

@@ -4,11 +4,7 @@
   "version": "0.1.2",
   "kind": "plugin",
   "description": "Canonical agent skill registry service.",
-  "files": [
-    "lib",
-    "package.json",
-    "stack.json"
-  ],
+  "files": ["lib", "package.json", "stack.json"],
   "dependencies": [],
   "optionalDependencies": []
 }
