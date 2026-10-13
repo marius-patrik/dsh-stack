@@ -16,6 +16,10 @@ Every native bundle has an ordinary `package.json` declaring `dsh.bundle.patch`;
 
 `profiles/web/`, `profiles/headless/`, and `profiles/tui/` are DSH `dsh.profile` template folders, not npm bundle packages. Every profile uses the **same** complete `@dsh-stack/stack` composition from `plugins/stack`; only the DSH surface and optional independently maintained TUI adapter differ. There is no second headless/TUI Stack aggregate. User-provided patches apply with native DSH precedence.
 
+## External plugin sources
+
+`plugins/DarkFactory` and `plugins/Cognition` track independent upstream repositories as Git submodules. Their pinned source revisions do not imply native Stack activation or publication; workspace discovery, package verification, formatting and native releases exclude them until an explicit integration. `plugins/dsh-tui` is similarly independent, activated through its published DSH TUI profile entry. The repository contains no `_migrate/` root.
+
 ## Distribution
 
 The Stack root coordinates per-package semver and reproducible release artifacts but never owns installation. The native npm package manifest is authoritative. `scripts/release.mjs` resolves `workspace:` dependencies to published exact versions and emits tarballs, an integrity inventory, and a complete release manifest. Publishing and updates remain with native DSH/npm operations.

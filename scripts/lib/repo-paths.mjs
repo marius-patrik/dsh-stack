@@ -7,7 +7,16 @@ import { join } from "node:path";
 
 export const root = process.cwd();
 const pluginsRoot = join(root, "plugins");
-const ignored = new Set(["node_modules", ".git", "lib", "dist", "coverage", "dsh-tui"]);
+const ignored = new Set([
+  "node_modules",
+  ".git",
+  "lib",
+  "dist",
+  "coverage",
+  "Cognition",
+  "DarkFactory",
+  "dsh-tui",
+]);
 
 /** Read a UTF-8 JSON file. */
 export async function readJson(path) {

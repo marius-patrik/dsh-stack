@@ -4,7 +4,16 @@ import ts from "typescript";
 
 const root = process.cwd();
 const sourceRoots = ["plugins", "scripts"];
-const ignoredDirectories = new Set(["node_modules", "lib", "dist", ".next", ".turbo", "dsh-tui"]);
+const ignoredDirectories = new Set([
+  "node_modules",
+  "lib",
+  "dist",
+  ".next",
+  ".turbo",
+  "Cognition",
+  "DarkFactory",
+  "dsh-tui",
+]);
 
 /** Recursively collect source files that are part of the repository implementation. */
 async function collectFiles(directory) {

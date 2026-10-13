@@ -34,6 +34,14 @@ jobs:
         with:
           submodules: false
 
+      - name: Validate independent external plugin submodules
+        run: |
+          set -euo pipefail
+          git submodule sync
+          git submodule update --init --depth 1 plugins/DarkFactory plugins/Cognition
+          test "$(git -C plugins/DarkFactory rev-parse HEAD)" = "$(git rev-parse HEAD:plugins/DarkFactory)"
+          test "$(git -C plugins/Cognition rev-parse HEAD)" = "$(git rev-parse HEAD:plugins/Cognition)"
+
       - name: Install bun
         uses: oven-sh/setup-bun@v2
         with:

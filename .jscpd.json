@@ -11,6 +11,8 @@
     "**/package.json",
     "**/stack.json",
     "plugins/dsh-tui/**",
+    "plugins/Cognition/**",
+    "plugins/DarkFactory/**",
     "**/tsconfig.json",
     "**/tsconfig.typecheck.json",
     "plugins/**/src/index.mjs"
