@@ -10,7 +10,7 @@
   },
   "workspaces": [
     "plugins/**",
-    "!plugins/headless/dsh-tui"
+    "!plugins/dsh-tui"
   ],
   "trustedDependencies": [
     "koffi"

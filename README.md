@@ -24,7 +24,7 @@ plugins/
       voice/                   Voice bundle and plugin
     plugin-kit/                Shared native plugin foundation (package)
   headless/                    @dsh-stack/stack-headless bundle
-    dsh-tui/                   Chimney third-party source submodule (external release)
+  dsh-tui/                     Chimney independent external plugin source submodule (TUI-only)
 ```
 
 Every nested `package.json` is still an independently publishable npm package. The physical folders follow bundle ownership, while the native `stack.compose` dependency DAG and Cordis patch rows determine runtime activation. Placing an optional plugin in a bundle's source folder does not activate it automatically. Shared bundles (for example between full Stack and headless) are not duplicated.

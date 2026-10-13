@@ -2,7 +2,7 @@
   "name": "dsh-profile-web",
   "private": true,
   "dependencies": {
-    "@dsh-stack/stack": "0.1.0"
+    "@dsh-stack/stack": "0.1.2"
   },
   "dsh": {
     "profile": {

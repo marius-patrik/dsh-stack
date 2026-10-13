@@ -14,6 +14,7 @@ const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib", 
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
 const errors = [];
 const packageNames = new Map();
+const packageVersions = new Map();
 const stackIds = new Map();
 const publicPackages = new Map();
 const sourceHashes = new Map();
@@ -98,6 +99,7 @@ async function verifyPackage(dir) {
     if (previous)
       fail(`duplicate package name ${pkg.name}: ${previous} and ${relative(root, packagePath)}`);
     else packageNames.set(pkg.name, relative(root, packagePath));
+    packageVersions.set(pkg.name, pkg.version);
   }
 
   const stack = await readJson(stackPath, relative(root, stackPath));
@@ -187,6 +189,43 @@ async function main() {
 
   const dirs = await nativePackageDirs();
   for (const dir of dirs) await verifyPackage(dir);
+
+  // Bundles are native DSH packages without legacy stack.json descriptors;
+  // include them in the version registry used by profile template checks.
+  for (const dir of await listBundlePackageDirs()) {
+    const manifest = await readJson(join(dir, "package.json"), relative(root, dir));
+    if (manifest?.name) packageVersions.set(manifest.name, manifest.version);
+  }
+
+  // Profiles are templates, not workspaces. Check pinned Stack versions
+  // against the independently published native bundles they actually install.
+  for (const profile of ["web", "headless", "tui"]) {
+    const path = join(root, "profiles", profile, "package.json");
+    const manifest = await readJson(path, relative(root, path));
+    for (const [name, version] of Object.entries(manifest?.dependencies ?? {})) {
+      if (!name.startsWith("@dsh-stack/")) continue;
+      assert(
+        packageVersions.get(name) === version,
+        `profiles/${profile} pins ${name}@${version}, expected native source ${packageVersions.get(name)}`,
+      );
+    }
+  }
+
+  // Chimney's independently published TUI plugin must not become a child
+  // of the Stack headless bundle simply because its profile uses headless.
+  const { stdout: gitlinks } = await execFileAsync(
+    "git",
+    ["ls-files", "--stage", "--", "plugins/dsh-tui"],
+    { cwd: root },
+  );
+  assert(
+    /^160000 [a-f0-9]{40} 0\tplugins\/dsh-tui\s*$/m.test(gitlinks),
+    "Chimney TUI source must be an independent plugins/dsh-tui gitlink",
+  );
+  assert(
+    !(await exists(join(pluginsDir, "headless", "dsh-tui"))),
+    "Chimney TUI must not be nested under headless",
+  );
 
   for (const [id, { stack }] of publicPackages) {
     const required = Array.isArray(stack.dependencies) ? stack.dependencies : [];
