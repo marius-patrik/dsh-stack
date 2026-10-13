@@ -1,5 +1,6 @@
 // jscpd:ignore-start -- repository-wide contract verifier
 import { createHash } from "node:crypto";
+import { listPluginPackageDirs, listBundlePackageDirs } from "./lib/repo-paths.mjs";
 import { existsSync, promises as fs } from "node:fs";
 import { extname, join, relative } from "node:path";
 import { execFile } from "node:child_process";
@@ -56,19 +57,9 @@ async function* walk(dir) {
   }
 }
 
-/** Enumerate flat implementation package roots. */
+/** Enumerate implementation packages from the entire plugin composition tree. */
 async function nativePackageDirs() {
-  const dirs = [];
-  for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name === "dsh-tui") continue;
-    const dir = join(pluginsDir, entry.name);
-    assert(
-      await exists(join(dir, "package.json")),
-      `${relative(root, dir)} must be a flat package`,
-    );
-    if (await exists(join(dir, "package.json"))) dirs.push(dir);
-  }
-  return dirs.sort();
+  return listPluginPackageDirs();
 }
 
 /** Return tracked generated outputs that must not be committed. */
@@ -161,9 +152,37 @@ async function verifyPackage(dir) {
 
 /** Run all repository-structure, package-contract, dependency, and source invariants. */
 async function main() {
-  assert(await exists(pluginsDir), "plugins/ implementation root is missing");
-  assert(await exists(join(root, "bundles")), "bundles/ hierarchy is missing");
-  assert(await exists(join(root, "profiles")), "profiles/ is missing");
+  assert(await exists(pluginsDir), "plugins/ root is missing");
+  assert(await exists(join(root, "profiles")), "native profile template root is missing");
+  for (const profile of ["web", "headless", "tui"]) {
+    assert(
+      await exists(join(root, "profiles", profile, "package.json")),
+      `missing native ${profile} profile template`,
+    );
+  }
+  for (const removed of ["bundles", "composition", "plugins/standalone"]) {
+    assert(!(await exists(join(root, removed))), `obsolete source root ${removed} must not exist`);
+  }
+  const canonicalTopLevel = new Set([
+    "agents",
+    "ai",
+    "integrations",
+    "ux",
+    "plugin-kit",
+    "composition",
+    "dist",
+    "lib",
+    "node_modules",
+  ]);
+  for (const entry of await fs.readdir(join(pluginsDir, "stack"), { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      assert(
+        canonicalTopLevel.has(entry.name),
+        `plugins/stack/${entry.name} must be placed under its owning nested bundle`,
+      );
+    }
+  }
+  assert((await listBundlePackageDirs()).length > 0, "native DSH bundles are missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 
   const dirs = await nativePackageDirs();
@@ -180,7 +199,7 @@ async function main() {
     }
   }
 
-  for (const sourceRoot of [pluginsDir, join(root, "bundles")]) {
+  for (const sourceRoot of [pluginsDir]) {
     for await (const file of walk(sourceRoot)) {
       const rel = relative(root, file).replaceAll("\\", "/");
       if (!codeExts.has(extname(rel))) continue;
@@ -217,7 +236,9 @@ async function main() {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  console.log(`Stack verification passed: ${publicPackages.size} flat native packages.`);
+  console.log(
+    `Stack verification passed: ${publicPackages.size} native packages in plugin composition tree.`,
+  );
 }
 
 await main();

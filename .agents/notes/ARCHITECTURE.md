@@ -2,7 +2,7 @@
 
 ## Source ownership
 
-`plugins/<name>/` is the flat source implementation catalog, with one owner per feature. `bundles/` contains arbitrarily nested native DSH composition-only packages; `profiles/` contains actual DSH profile directory templates. Their logical layout is not an additional runtime hierarchy.
+`plugins/<name>/` is the recursive source implementation and bundle graph, with one owner per feature. Nested native bundles and their implementation plugins share `plugins/`; `profiles/` remains the separate DSH profile-template root. Physical nesting records composition ownership; native DSH metadata remains the runtime authority.
 
 ## Runtime ownership
 
@@ -10,7 +10,7 @@ DeepSeek Harness owns all runtime composition, profile installation and activati
 
 ## Bundle composition
 
-Every leaf bundle has an ordinary `package.json` declaring `dsh.bundle.patch`; parent packages declare child bundles via local dependencies and `stack.compose`. The build generator resolves the dependency DAG, deduplicates shared children, checks for cycles and duplicate inserted rows, and emits each parent patch. DSH only sees standard native patches; no nested runtime interpretation is needed.
+Every native bundle has an ordinary `package.json` declaring `dsh.bundle.patch`; parent packages declare child bundles via local dependencies and `stack.compose`. The build generator resolves the dependency DAG, deduplicates shared children, checks for cycles and duplicate inserted rows, and emits each parent patch. DSH only sees standard native patches; no nested runtime interpretation is needed.
 
 ## Profiles
 

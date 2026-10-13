@@ -49,48 +49,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            plugins/*/lib
-            bundles/**/lib
+            plugins/**/lib
             **/*.tsbuildinfo
           key: ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ github.sha }}
           restore-keys: |
             ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
             ts-build-${{ runner.os }}-
 
-      # The cache above is keyed by lockfile hash with loose restore-keys, so
-      # it can warm-start from a run that predates a package deletion. Two
-      # separate cache path patterns can each independently resurrect a
-      # since-deleted package's directory with no sibling package.json in
-      # this checkout: the */lib glob restores its lib/ output, and the
-      # **/*.tsbuildinfo glob separately restores its own
-      # tsconfig.tsbuildinfo directly (tsc's project-reference incremental
-      # state), which alone is enough for actions/cache to materialize the
-      # directory even with no lib/ present at all -- confirmed by CI: the
-      # lib/ prune alone still left a bare
-      # plugins/<package>/tsconfig.tsbuildinfo, which
-      # verify-stack.mjs read as a broken package rather than a stale
-      # artifact.
-      #
-      # Only prune a package.json-less directory when its entire content is
-      # explained by the cache's own path patterns (lib/ and *.tsbuildinfo)
-      # -- i.e. nothing else is present. A directory checked out from git
-      # with real source but a genuinely missing package.json has other
-      # files too, and is left alone: that is exactly the broken-package
-      # case verify-stack.mjs exists to catch, and pruning on package.json
-      # absence alone would silently hide it instead.
-      - name: Prune orphaned build cache
-        run: |
-          for pkg in plugins/*/; do
-            pkg="${pkg%/}"
-            [ -d "$pkg" ] || continue
-            [ "$pkg" = "plugins/dsh-tui" ] && continue
-            [ -f "$pkg/package.json" ] && continue
-            other="$(find "$pkg" -mindepth 1 \( -name lib -prune \) -o \( -name '*.tsbuildinfo' -prune \) -o -print | head -1)"
-            if [ -z "$other" ]; then
-              echo "Removing orphaned build cache: $pkg (no package.json, only cache-restorable content)"
-              rm -rf "$pkg"
-            fi
-          done
+
+      - name: Prune orphaned compiler output
+        run: node scripts/prune-orphaned-build-cache.mjs
 
       - name: Build Stack workspace
         run: bun run build
@@ -140,48 +108,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            plugins/*/lib
-            bundles/**/lib
+            plugins/**/lib
             **/*.tsbuildinfo
           key: ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ github.sha }}
           restore-keys: |
             ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
             ts-build-${{ runner.os }}-
 
-      # The cache above is keyed by lockfile hash with loose restore-keys, so
-      # it can warm-start from a run that predates a package deletion. Two
-      # separate cache path patterns can each independently resurrect a
-      # since-deleted package's directory with no sibling package.json in
-      # this checkout: the */lib glob restores its lib/ output, and the
-      # **/*.tsbuildinfo glob separately restores its own
-      # tsconfig.tsbuildinfo directly (tsc's project-reference incremental
-      # state), which alone is enough for actions/cache to materialize the
-      # directory even with no lib/ present at all -- confirmed by CI: the
-      # lib/ prune alone still left a bare
-      # plugins/<package>/tsconfig.tsbuildinfo, which
-      # verify-stack.mjs read as a broken package rather than a stale
-      # artifact.
-      #
-      # Only prune a package.json-less directory when its entire content is
-      # explained by the cache's own path patterns (lib/ and *.tsbuildinfo)
-      # -- i.e. nothing else is present. A directory checked out from git
-      # with real source but a genuinely missing package.json has other
-      # files too, and is left alone: that is exactly the broken-package
-      # case verify-stack.mjs exists to catch, and pruning on package.json
-      # absence alone would silently hide it instead.
-      - name: Prune orphaned build cache
-        run: |
-          for pkg in plugins/*/; do
-            pkg="${pkg%/}"
-            [ -d "$pkg" ] || continue
-            [ "$pkg" = "plugins/dsh-tui" ] && continue
-            [ -f "$pkg/package.json" ] && continue
-            other="$(find "$pkg" -mindepth 1 \( -name lib -prune \) -o \( -name '*.tsbuildinfo' -prune \) -o -print | head -1)"
-            if [ -z "$other" ]; then
-              echo "Removing orphaned build cache: $pkg (no package.json, only cache-restorable content)"
-              rm -rf "$pkg"
-            fi
-          done
+
+      - name: Prune orphaned compiler output
+        run: node scripts/prune-orphaned-build-cache.mjs
 
       - name: Build Stack workspace
         run: bun run build

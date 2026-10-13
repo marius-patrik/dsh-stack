@@ -1,20 +1,35 @@
 # DSH Stack
 
-First-class plugins, recursive bundles, and actual native profile templates for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). DSH exclusively owns the runtime, CLI, profile storage, package installation, activation, updates, and lifecycle. Stack supplies packages and declarative composition.
+Native DeepSeek Harness plugins, nested bundles, and real profile templates. DSH retains ownership of package installation, profile activation, updates, runtime and CLI; Stack distributes native packages and declarative patches.
 
-## Repository
+## Native composition tree
 
-- `plugins/<name>/`: flat independent implementation packages (including reusable libraries and Cordis plugins).
-- `bundles/**/`: arbitrarily nested *leaf* packages with `dsh.bundle.patch` metadata. Parent bundles recursively compose children at build time, producing one normal native DSH patch, not a runtime manager.
-- `profiles/<name>/`: actual `dsh.profile.bundles` profile manifest and `cordis.patch.yml` templates. These are profile directories, **not** npm bundles. DSH maintains the installed profiles under its own home directory.
-- `scripts/`: build, verification, and publication only.
-- `plugins/dsh-tui`: Chimney's independently maintained native DSH TUI source as a pinned Git submodule (not a Stack workspace).
+```text
+profiles/
+  web/                         Native Web profile template
+  headless/                    Native headless profile template
+  tui/                         Native TUI profile template
+plugins/
+  stack/                       @dsh-stack/stack full bundle
+    agents/                    Agents bundle, agents, presets, tools and loops
+    ai/                        AI bundle
+      providers/               Providers bundle, dialects, credential-vault, models and provider adapters
+    integrations/              Integrations bundle, repos, workspace and trading tooling
+      formatters/              Formatters bundle and implementation
+      hosts/                   Hosts bundle and implementation
+      lsp/                     LSP bundle and implementation
+    ux/                        UX bundle
+      themes/                  Themes bundle, icons and skins
+      tweaks/                  Tweaks bundle and tweak implementations
+      voice/                   Voice bundle and plugin
+    plugin-kit/                Shared native plugin foundation (package)
+  headless/                    @dsh-stack/stack-headless bundle
+    dsh-tui/                   Chimney third-party source submodule (external release)
+```
 
-The `_migrate/Memory` gitlink is staged external source and not a managed runtime installation. The `_migrate/` sources are not part of the installed Stack.
+Every nested `package.json` is still an independently publishable npm package. The physical folders follow bundle ownership, while the native `stack.compose` dependency DAG and Cordis patch rows determine runtime activation. Placing an optional plugin in a bundle's source folder does not activate it automatically. Shared bundles (for example between full Stack and headless) are not duplicated.
 
-## Native DSH installation
-
-Install DSH independently via its own official distribution and package manager. Once Stack packages have been published, install the complete Web experience using the native DSH command:
+## Native installation
 
 ```sh
 dsh plugin --profile web add @dsh-stack/stack
@@ -22,11 +37,7 @@ dsh --profile web --dump-config
 dsh --profile web
 ```
 
-For the native terminal UI, see [`profiles/tui/`](profiles/tui/README.md), using Chimney's `@deepseek-harness-tui/dsh-tui` bundle after Stack's headless bundle. Chimney 0.14.0 targets DSH up to 0.2.0-rc.2; newer host compatibility must be verified before installation.
-
-For a headless installation use `dsh plugin --profile headless add @dsh-stack/stack-headless`. Smaller nested bundles can be installed individually. The package manager installs dependencies, and users may enable optional plugins via normal DSH profile patches or the native plugin UI.
-
-The files under `profiles/` are deployable native-profile templates; copying them directly into a DSH home is an explicit user operation, not a Stack CLI feature. Never introduce a separate launcher, symlink manager, profile mutation layer, or updater. DSH's native profile manager is authoritative.
+For TUI use [the TUI profile](profiles/tui/README.md) and Chimney's compatible `@deepseek-harness-tui/dsh-tui`. Headless installation uses `@dsh-stack/stack-headless`. DSH user profiles are maintained by DSH, not by Stack.
 
 ## Development
 
@@ -40,8 +51,4 @@ bun run release:assets
 bun run release:verify
 ```
 
-Public npm registry publication is separate from GitHub Release asset creation. See [native npm publication](.agents/notes/native-npm-publication.md) for the OIDC/token bootstrap, release recovery, exact-byte verification and clean registry install gates.
-
-`bun run build` generates the deterministic recursive bundle patches before compiling plugins. Compiled `dist/` and `lib/` are not tracked. The release pipeline packages independently publishable npm tarballs with resolved exact package versions rather than shipping a replacement runtime.
-
-Repository rules and contributor guidance live in [`.agents/AGENTS.md`](.agents/AGENTS.md). The architectural migration is tracked by [P0 issue #320](https://github.com/marius-patrik/dsh-stack/issues/320).
+The build walks all nested plugin and bundle package manifests. `_migrate/` is not part of an installed Stack. See [native npm publication](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).

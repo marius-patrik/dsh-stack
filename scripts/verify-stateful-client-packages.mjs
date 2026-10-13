@@ -24,6 +24,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { resolveRepoRoot } from "./lib/resolve-repo-root.mjs";
+import { listPluginPackageDirs } from "./lib/repo-paths.mjs";
 
 const root = resolveRepoRoot(import.meta.url);
 // jscpd:ignore-end
@@ -42,9 +43,14 @@ const STATEFUL_CLIENT_PACKAGES = ["@dsh-stack/sidebar-preferences", "@dsh-stack/
  * @param {string} packageId - full `@dsh-stack/<name>` package name.
  * @returns {string} absolute path to that package's package.json.
  */
+const pluginPaths = new Map();
+for (const dir of await listPluginPackageDirs()) {
+  const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
+  pluginPaths.set(pkg.name, join(dir, "package.json"));
+}
+/** Resolve the native package manifest of a reviewed shared client-state owner. */
 function packageJsonPath(packageId) {
-  const name = packageId.replace(/^@dsh-stack\//, "");
-  return join(root, "plugins", name, "package.json");
+  return pluginPaths.get(packageId) ?? join(root, "plugins", "<missing>", packageId);
 }
 
 const violations = [];

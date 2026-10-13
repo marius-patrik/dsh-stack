@@ -6,7 +6,7 @@ DSH Stack is a polished, distributable extension system for DeepSeek Harness. DS
 
 ## Architecture
 
-The canonical source is a flat `plugins/<name>/` tree, recursively nested composition-only bundle packages in `bundles/`, and actual native DSH profiles in `profiles/`. Every feature has a single implementation owner. The complete Web composition is `@dsh-stack/stack`, with `@dsh-stack/stack-headless` for Headless.
+The canonical source is one recursive `plugins/` tree with independently publishable native bundles and their implementation plugins colocated under the corresponding bundle ownership folders. Native profile templates stay in the root `profiles/` directory. Physical nesting does not automatically mount optional plugins. Every feature has a single implementation owner. The complete Web composition is `@dsh-stack/stack`, with `@dsh-stack/stack-headless` for Headless.
 
 DSH owns installation, profiles, runtime, lifecycle, update/removal, and CLI. Parent bundle dependencies are flattened at build time into ordinary native patches; there is no custom runtime composition or profile manager. Users may manually activate optional capabilities in DSH.
 

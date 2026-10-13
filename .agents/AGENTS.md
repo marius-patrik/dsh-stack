@@ -16,8 +16,9 @@ still-open decision (#60).
 
 ## Canonical structure
 
-- `plugins/<name>/` — single flat implementation package list; no plugin grouping levels. `plugins/dsh-tui` is Chimney's external submodule, managed as a native DSH plugin but excluded from Stack's Bun package build.
-- `bundles/**/` — recursively nested leaf DSH bundles; no dedicated `packs/` directory. Parent bundles compose children at build time into a normal native patch.
+- `plugins/stack/` — publishable full Stack bundle containing its nested native bundles and plugin packages, grouped by composition. Every `package.json` remains an independent package boundary; no parallel `bundles/` or `standalone/` tree.
+- `plugins/headless/` — publishable headless DSH bundle. `plugins/headless/dsh-tui` is Chimney's external submodule, used by the independent TUI profile and excluded from Stack's Bun build.
+- The on-disk bundle hierarchy tracks source ownership; actual activation remains determined by `stack.compose`, native Cordis patches, and DSH user profile state. An optional plugin nested under a bundle is not activated merely by its location.
 - `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
 - `_migrate/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.
 - `scripts/` owns build, verification and publishing only. No Stack launcher, profile manager, updater or DSH submodule.
