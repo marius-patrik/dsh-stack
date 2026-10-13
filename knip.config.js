@@ -22,7 +22,9 @@ for (const dir of await listPluginPackageDirs()) {
 for (const dir of await listBundlePackageDirs()) {
   workspaces[relative(root, dir).replaceAll("\\", "/")] = { ...bundle };
 }
-workspaces["plugins/stack/ai/providers/providers"].ignoreDependencies = ["@dsh-stack/sidebar-preferences"];
+workspaces["plugins/stack/ai/providers/providers"].ignoreDependencies = [
+  "@dsh-stack/sidebar-preferences",
+];
 workspaces["plugins/stack/ux/themes/skin-claude"].ignoreDependencies = ["@types/react"];
 workspaces["plugins/stack/ux/themes/skin-codex"].ignoreDependencies = ["@types/react"];
 
