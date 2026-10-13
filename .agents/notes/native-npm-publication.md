@@ -26,7 +26,7 @@ The subsequent fix bumps all 91 independently published package versions, synchr
 
 ## Unified native composition
 
-Current source publishes **one** Stack aggregate, `@dsh-stack/stack`, shared across Web, Headless and TUI profiles. Chimney's TUI is a separate presentation adapter, not an alternate Stack graph. New release inventories should contain **88** native packages after removing Stack-owned profile UI/runtime.
+The repository publishes **one** Stack aggregate, `@dsh-stack/stack`, shared across Web, Headless and TUI profiles. Chimney's TUI is a separate presentation adapter, not an alternate Stack graph. Release inventories contain **88** native packages.
 
 ## Publication process
 
