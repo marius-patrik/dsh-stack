@@ -1,0 +1,30 @@
+name: One-time pinned formatter
+on:
+  push:
+    branches: [fix/native-package-version-collision]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+          submodules: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install locked formatter
+        run: bun install --frozen-lockfile
+      - name: Format manifests with locked Biome version
+        run: bun run format
+      - name: Commit normalized native manifests
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-time-pinned-format.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: apply frozen-lockfile formatter to native manifests"
+          git push origin HEAD:fix/native-package-version-collision
