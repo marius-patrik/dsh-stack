@@ -17,7 +17,7 @@ still-open decision (#60).
 ## Canonical structure
 
 - `plugins/stack/` — publishable full Stack bundle containing its nested native bundles and plugin packages, grouped by composition. Every `package.json` remains an independent package boundary; no parallel `bundles/` or `standalone/` tree.
-- `plugins/headless/` — publishable headless DSH bundle. `plugins/dsh-tui` is Chimney's external submodule, used by the independent TUI profile and excluded from Stack's Bun build.
+- `plugins/dsh-tui/` — Chimney's external TUI submodule, activated only by the TUI profile and excluded from Stack's Bun build. There is **no** separate headless or TUI Stack bundle; all profiles consume `@dsh-stack/stack`.
 - The on-disk bundle hierarchy tracks source ownership; actual activation remains determined by `stack.compose`, native Cordis patches, and DSH user profile state. An optional plugin nested under a bundle is not activated merely by its location.
 - `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
 - `_migrate/Memory/` and `_migrate/` are staged external/migration sources, not installed runtime paths.
@@ -36,7 +36,7 @@ There is exactly one implementation owner for every feature. Before adding code,
 
 ## Profiles
 
-Installed profiles are real DSH profiles. The repository's `profiles/web` and `profiles/headless` are shareable native profile templates; users may select and customize the underlying DSH bundles and optional plugin activation. Stack does not provision profiles or rewrite user overrides.
+Installed profiles are real DSH profiles. The repository's `profiles/web`, `profiles/headless`, and `profiles/tui` are shareable native profile templates; all three reference the same complete `@dsh-stack/stack` composition, with only their native DSH surface/adapter rows differing. Users may customize optional plugin activation. Stack does not provision profiles or rewrite user overrides.
 
 ## UI
 

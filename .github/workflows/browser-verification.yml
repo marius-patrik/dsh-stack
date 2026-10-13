@@ -72,11 +72,20 @@ jobs:
       - name: Native DSH install Chimney TUI profile
         run: |
           set -euo pipefail
-          tui_tarball="$(node -e 'const p=require("./.ci-packages/fixtures.json");process.stdout.write(p["@dsh-stack/stack-headless"])')"
-          node "$DSH_INSTALL/node_modules/@deepseek-ai/dsh/lib/bin.js" plugin --profile tui add "file:$tui_tarball"
+          stack_tarball="$(node -e 'const p=require("./.ci-packages/fixtures.json");process.stdout.write(p["@dsh-stack/stack"])')"
+          node "$DSH_INSTALL/node_modules/@deepseek-ai/dsh/lib/bin.js" plugin --profile headless add "file:$stack_tarball"
+          node "$DSH_INSTALL/node_modules/@deepseek-ai/dsh/lib/bin.js" --profile headless --dump-config > "$RUNNER_TEMP/composed-headless.yml"
+          grep -q "@dsh-stack/" "$RUNNER_TEMP/composed-headless.yml"
+          node "$DSH_INSTALL/node_modules/@deepseek-ai/dsh/lib/bin.js" plugin --profile tui add "file:$stack_tarball"
           node "$DSH_INSTALL/node_modules/@deepseek-ai/dsh/lib/bin.js" plugin --profile tui add @deepseek-harness-tui/dsh-tui@0.14.0
           node "$DSH_INSTALL/node_modules/@deepseek-ai/dsh/lib/bin.js" --profile tui --dump-config > "$RUNNER_TEMP/composed-tui.yml"
           grep -q '@deepseek-harness-tui/dsh-tui' "$RUNNER_TEMP/composed-tui.yml"
+          # The DSH surfaces differ, but the Stack plugin inventory must match.
+          for profile in web headless tui; do
+            grep -oE '@dsh-stack/[a-z0-9-]+' "$RUNNER_TEMP/composed-${profile}.yml" | sort -u > "$RUNNER_TEMP/stack-${profile}.txt"
+          done
+          diff -u "$RUNNER_TEMP/stack-web.txt" "$RUNNER_TEMP/stack-headless.txt"
+          diff -u "$RUNNER_TEMP/stack-web.txt" "$RUNNER_TEMP/stack-tui.txt"
 
       - name: Install Playwright Chromium
         run: bunx playwright install --with-deps chromium
@@ -117,6 +126,7 @@ jobs:
           cp "$RUNNER_TEMP/dsh-web.log" "$RUNNER_TEMP/screenshots/dsh-web.log" 2>/dev/null || true
           cp "$RUNNER_TEMP/composed-web.yml" "$RUNNER_TEMP/screenshots/composed-web.yml" 2>/dev/null || true
           cp "$RUNNER_TEMP/composed-tui.yml" "$RUNNER_TEMP/screenshots/composed-tui.yml" 2>/dev/null || true
+          cp "$RUNNER_TEMP/composed-headless.yml" "$RUNNER_TEMP/screenshots/composed-headless.yml" 2>/dev/null || true
 
       - name: Stop native DSH
         if: always()

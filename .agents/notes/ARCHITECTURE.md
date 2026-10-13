@@ -14,7 +14,7 @@ Every native bundle has an ordinary `package.json` declaring `dsh.bundle.patch`;
 
 ## Profiles
 
-`profiles/web/` and `profiles/headless/` are actual DSH `dsh.profile` template folders, not npm bundle packages. Installed DSH profiles are user-managed and can select individual bundles or the complete `@dsh-stack/stack`/`@dsh-stack/stack-headless` experience. User-provided patches apply with native DSH precedence.
+`profiles/web/`, `profiles/headless/`, and `profiles/tui/` are DSH `dsh.profile` template folders, not npm bundle packages. Every profile uses the **same** complete `@dsh-stack/stack` composition from `plugins/stack`; only the DSH surface and optional independently maintained TUI adapter differ. There is no second headless/TUI Stack aggregate. User-provided patches apply with native DSH precedence.
 
 ## Distribution
 

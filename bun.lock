@@ -16,16 +16,6 @@
         "typescript": "^6.0.3",
       },
     },
-    "plugins/headless": {
-      "name": "@dsh-stack/stack-headless",
-      "version": "0.1.2",
-      "dependencies": {
-        "@dsh-stack/bundle-agents": "workspace:*",
-        "@dsh-stack/bundle-ai": "workspace:*",
-        "@dsh-stack/bundle-formatters": "workspace:*",
-        "@dsh-stack/bundle-lsp": "workspace:*",
-      },
-    },
     "plugins/stack": {
       "name": "@dsh-stack/stack",
       "version": "0.1.2",
@@ -1748,8 +1738,6 @@
     "@dsh-stack/skin-settings": ["@dsh-stack/skin-settings@workspace:plugins/stack/ux/themes/skin-settings"],
 
     "@dsh-stack/stack": ["@dsh-stack/stack@workspace:plugins/stack"],
-
-    "@dsh-stack/stack-headless": ["@dsh-stack/stack-headless@workspace:plugins/headless"],
 
     "@dsh-stack/themes": ["@dsh-stack/themes@workspace:plugins/stack/ux/themes/themes"],
 

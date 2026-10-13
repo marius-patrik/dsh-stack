@@ -23,7 +23,6 @@ plugins/
       tweaks/                  Tweaks bundle and tweak implementations
       voice/                   Voice bundle and plugin
     plugin-kit/                Shared native plugin foundation (package)
-  headless/                    @dsh-stack/stack-headless bundle
   dsh-tui/                     Chimney independent external plugin source submodule (TUI-only)
 ```
 
@@ -37,7 +36,7 @@ dsh --profile web --dump-config
 dsh --profile web
 ```
 
-For TUI use [the TUI profile](profiles/tui/README.md) and Chimney's compatible `@deepseek-harness-tui/dsh-tui`. Headless installation uses `@dsh-stack/stack-headless`. DSH user profiles are maintained by DSH, not by Stack.
+For Headless install the **same** `@dsh-stack/stack` package into the `headless` profile. For TUI install the same Stack bundle plus Chimney's compatible `@deepseek-harness-tui/dsh-tui` following [the TUI profile](profiles/tui/README.md). All three profiles compose one nested Stack plugin tree, not three forks; DSH manages the profile surfaces and lifecycle.
 
 ## Development
 
