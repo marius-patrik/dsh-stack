@@ -190,6 +190,13 @@ async function main() {
   const dirs = await nativePackageDirs();
   for (const dir of dirs) await verifyPackage(dir);
 
+  // Bundles are native DSH packages without legacy stack.json descriptors;
+  // include them in the version registry used by profile template checks.
+  for (const dir of await listBundlePackageDirs()) {
+    const manifest = await readJson(join(dir, "package.json"), relative(root, dir));
+    if (manifest?.name) packageVersions.set(manifest.name, manifest.version);
+  }
+
   // Profiles are templates, not workspaces. Check pinned Stack versions
   // against the independently published native bundles they actually install.
   for (const profile of ["web", "headless", "tui"]) {
