@@ -1,13 +1,13 @@
 import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-const roots = [join(process.cwd(), "plugins"), join(process.cwd(), "bundles")];
+const roots = [join(process.cwd(), "composition")];
 const missing = [];
 
 /**
  * Inspects a directory to check for the presence of a package.json and optionally a README file.
  * If no README is found in a directory containing a package.json, it records the relative path.
- * If no directories are found (excluding node_modules and packs), the function does nothing.
+ * If no directories are found (excluding external submodules and generated output), the function does nothing.
  */
 async function walk(dir) {
   let entries;
@@ -22,7 +22,6 @@ async function walk(dir) {
       (entry) => entry.isFile() && /^README(?:\.[^.]*)?$/i.test(entry.name),
     );
     if (!hasReadme) missing.push(relative(process.cwd(), dir));
-    return;
   }
   await Promise.all(
     entries

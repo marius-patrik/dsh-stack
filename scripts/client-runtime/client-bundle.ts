@@ -23,7 +23,7 @@ const CLIENT_EXTERNALS = [
   "@deepseek-ai/cordis",
 ] as const;
 
-const PACKAGES_ROOT = fileURLToPath(new URL("../../plugins/", import.meta.url));
+const PACKAGES_ROOT = fileURLToPath(new URL("../../composition/", import.meta.url));
 
 /**
  * `@dsh-stack/*` package names that themselves declare `dsh.client`. Each one
@@ -34,16 +34,21 @@ const PACKAGES_ROOT = fileURLToPath(new URL("../../plugins/", import.meta.url));
  */
 function stackClientPluginPackages(): ReadonlySet<string> {
   const names = new Set<string>();
-  for (const entry of readdirSync(PACKAGES_ROOT, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    let pkg: { name?: string; dsh?: { client?: unknown } };
-    try {
-      pkg = JSON.parse(readFileSync(join(PACKAGES_ROOT, entry.name, "package.json"), "utf8"));
-    } catch {
-      continue;
+  /** Discover nested client modules; profile manifests and bundle shells are not clients. */
+  function visit(dir: string): void {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || ["node_modules", "lib", "dist", ".git", "dsh-tui"].includes(entry.name)) continue;
+      const child = join(dir, entry.name);
+      try {
+        const pkg: { name?: string; dsh?: { client?: unknown } } = JSON.parse(readFileSync(join(child, "package.json"), "utf8"));
+        if (pkg.name && pkg.dsh?.client) names.add(pkg.name);
+      } catch {
+        // Intermediate composition directories have no package.json.
+      }
+      visit(child);
     }
-    if (pkg.name && pkg.dsh?.client) names.add(pkg.name);
   }
+  visit(PACKAGES_ROOT);
   return names;
 }
 

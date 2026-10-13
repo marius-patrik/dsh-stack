@@ -1,5 +1,6 @@
 // jscpd:ignore-start -- repository-wide contract verifier
 import { createHash } from "node:crypto";
+import { listPluginPackageDirs, listBundlePackageDirs } from "./lib/repo-paths.mjs";
 import { existsSync, promises as fs } from "node:fs";
 import { extname, join, relative } from "node:path";
 import { execFile } from "node:child_process";
@@ -7,7 +8,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
-const pluginsDir = join(root, "plugins");
+const compositionDir = join(root, "composition");
 
 const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib", "dsh-tui"]);
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
@@ -56,19 +57,9 @@ async function* walk(dir) {
   }
 }
 
-/** Enumerate flat implementation package roots. */
+/** Enumerate implementation packages from the entire composition tree. */
 async function nativePackageDirs() {
-  const dirs = [];
-  for (const entry of await fs.readdir(pluginsDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name === "dsh-tui") continue;
-    const dir = join(pluginsDir, entry.name);
-    assert(
-      await exists(join(dir, "package.json")),
-      `${relative(root, dir)} must be a flat package`,
-    );
-    if (await exists(join(dir, "package.json"))) dirs.push(dir);
-  }
-  return dirs.sort();
+  return listPluginPackageDirs();
 }
 
 /** Return tracked generated outputs that must not be committed. */
@@ -161,9 +152,8 @@ async function verifyPackage(dir) {
 
 /** Run all repository-structure, package-contract, dependency, and source invariants. */
 async function main() {
-  assert(await exists(pluginsDir), "plugins/ implementation root is missing");
-  assert(await exists(join(root, "bundles")), "bundles/ hierarchy is missing");
-  assert(await exists(join(root, "profiles")), "profiles/ is missing");
+  assert(await exists(compositionDir), "composition/ root is missing");
+  assert((await listBundlePackageDirs()).length > 0, "native composition bundles are missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 
   const dirs = await nativePackageDirs();
@@ -180,7 +170,7 @@ async function main() {
     }
   }
 
-  for (const sourceRoot of [pluginsDir, join(root, "bundles")]) {
+  for (const sourceRoot of [compositionDir]) {
     for await (const file of walk(sourceRoot)) {
       const rel = relative(root, file).replaceAll("\\", "/");
       if (!codeExts.has(extname(rel))) continue;
@@ -217,7 +207,7 @@ async function main() {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  console.log(`Stack verification passed: ${publicPackages.size} flat native packages.`);
+  console.log(`Stack verification passed: ${publicPackages.size} native packages in composition tree.`);
 }
 
 await main();
