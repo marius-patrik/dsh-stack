@@ -5,7 +5,7 @@ status: active
 
 # Repository mission and canonical structure
 
-The source of truth is a flat native plugin implementation catalog under `plugins/<name>/`, arbitrarily nested reusable native DSH bundle packages under `bundles/**/`, and real DSH profile templates under `profiles/<name>/`. Only leaf bundles with package manifests are workspaces. There is no `bundles/packs/` directory or fixed composition depth.
+The source of truth is a single recursive composition tree under `plugins/<name>/`, native DSH bundles within `bundles/**/`, and native profile templates within `profiles/<name>/`. Bundle and plugin package roots may nest; every package manifest defines an independent workspace. There is no `bundles/packs/` directory or fixed composition depth.
 
 Runtime, native profiles, package installation, updates, plugin activation, and CLI are owned by upstream DSH; Stack builds and publishes native package artifacts, and may not create its own installer, updater, profile manager, legacy launcher, or separate pinned DSH checkout.
 

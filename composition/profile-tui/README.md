@@ -12,7 +12,7 @@ dsh plugin --profile tui add @deepseek-harness-tui/dsh-tui@0.14.0
 dsh --profile tui
 ```
 
-The TUI is published independently and its checkout is tracked at `plugins/dsh-tui` as a Git submodule. For source development only, initialize it and its nested `vendor/dsh-std` submodule with `git submodule update --init --recursive plugins/dsh-tui`. Do **not** add the external repository to Stack's Bun workspace: it uses its own pnpm release pipeline and native bundle metadata. The app's plugin patch is activated once by listing it as a profile bundle, **not** by inlining its patch into Stack's headless bundle.
+The TUI is published independently and its checkout is tracked at `composition/profile-tui/dsh-tui` as a Git submodule. For source development only, initialize it and its nested `vendor/dsh-std` submodule with `git submodule update --init --recursive plugins/dsh-tui`. Do **not** add the external repository to Stack's Bun workspace: it uses its own pnpm release pipeline and native bundle metadata. The app's plugin patch is activated once by listing it as a profile bundle, **not** by inlining its patch into Stack's headless bundle.
 
 **Compatibility:** the pinned Chimney 0.14.0 peer manifest targets DSH up to `0.2.0-rc.2`; do not activate this profile under later DSH versions until its maintainer publishes a compatible package. Never silently suppress DSH's version checks.
 

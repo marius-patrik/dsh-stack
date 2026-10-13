@@ -28,7 +28,7 @@
     "id": "stack.security.credentials"
   },
   "scripts": {
-    "build": "tsc && cat ../../scripts/client-runtime/crypto-polyfill.js ../../scripts/client-runtime/glyph-factory.js client.js > lib/client.js",
+    "build": "tsc && cat ../../../../../scripts/client-runtime/crypto-polyfill.js ../../../../../scripts/client-runtime/glyph-factory.js client.js > lib/client.js",
     "typecheck": "tsc --noEmit",
     "test": "node check-plugin.mjs",
     "verify": "node check-plugin.mjs"

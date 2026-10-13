@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { claudeDialect } from "./lib/claude.js";
 import { translateClaude } from "./lib/translate-claude.js";
-import { userMessage, collect, ok } from "../../scripts/dialect-test-kit.mjs";
+import { userMessage, collect, ok } from "../../../scripts/dialect-test-kit.mjs";
 
 // ---- claude: serialize ----
 const creq = claudeDialect.serialize(

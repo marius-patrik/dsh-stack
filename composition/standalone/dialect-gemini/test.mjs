@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { geminiDialect } from "./lib/gemini.js";
 import { translateGemini } from "./lib/translate-gemini.js";
-import { userMessage, collect, ok } from "../../scripts/dialect-test-kit.mjs";
+import { userMessage, collect, ok } from "../../../scripts/dialect-test-kit.mjs";
 
 // ---- gemini: serialize ----
 const greq = geminiDialect.serialize(

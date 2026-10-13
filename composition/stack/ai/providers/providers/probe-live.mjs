@@ -8,7 +8,7 @@ import * as providers from "./lib/index.js";
 import * as dialects from "@dsh-stack/dialects";
 import { Context } from "@deepseek-ai/cordis";
 import { AccountsService } from "../credential-vault/lib/index.js";
-import { stubSettingsService } from "../../scripts/plugin-check-kit.mjs";
+import { stubSettingsService } from "../../../../../scripts/plugin-check-kit.mjs";
 
 const home = resolve(process.env.DSH_HOME ?? join(homedir(), ".agents"));
 const ctx = new Context();

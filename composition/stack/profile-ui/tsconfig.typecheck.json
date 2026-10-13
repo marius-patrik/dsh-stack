@@ -3,9 +3,9 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "paths": {
-      "@dsh-stack/lucide-animated/client": ["../lucide-animated/src/client.tsx"],
-      "@dsh-stack/profile-runtime": ["../profile-runtime/src/index.ts"],
-      "@dsh-stack/settings-panel": ["../settings-panel/src/index.tsx"]
+      "@dsh-stack/lucide-animated/client": ["../../standalone/lucide-animated/src/client.tsx"],
+      "@dsh-stack/profile-runtime": ["../../standalone/profile-runtime/src/index.ts"],
+      "@dsh-stack/settings-panel": ["../../standalone/settings-panel/src/index.tsx"]
     },
     "rootDir": "../../.."
   },

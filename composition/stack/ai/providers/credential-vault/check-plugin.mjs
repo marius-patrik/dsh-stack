@@ -13,7 +13,7 @@ import {
   mkdirSync,
   existsSync,
 } from "node:fs";
-import { assertLoaderShape } from "../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape } from "../../../../../scripts/plugin-check-kit.mjs";
 import { spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";

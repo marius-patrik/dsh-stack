@@ -9,7 +9,7 @@ import {
   assertLoaderShape,
   loadClientLoaderSpec,
   stubSettingsService,
-} from "../../scripts/plugin-check-kit.mjs";
+} from "../../../../scripts/plugin-check-kit.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "agents-"));
 
