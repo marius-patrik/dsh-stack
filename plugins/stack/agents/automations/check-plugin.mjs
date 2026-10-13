@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import * as plugin from "./lib/index.js";
-import { assertLoaderShape } from "../../../scripts/plugin-check-kit.mjs";
+import { assertLoaderShape } from "../../../../scripts/plugin-check-kit.mjs";
 
 assertLoaderShape(plugin, "automations");
 

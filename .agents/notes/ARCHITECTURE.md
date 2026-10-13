@@ -2,7 +2,7 @@
 
 ## Source ownership
 
-`plugins/<name>/` is the recursive source implementation graph, with one owner per feature. `bundles/` contains arbitrarily nested native DSH composition-only packages; `profiles/` contains actual DSH profile directory templates. Physical nesting records composition ownership; native DSH metadata remains the runtime authority.
+`plugins/<name>/` is the recursive source implementation and bundle graph, with one owner per feature. Nested native bundles and their implementation plugins share `plugins/`; `profiles/` remains the separate DSH profile-template root. Physical nesting records composition ownership; native DSH metadata remains the runtime authority.
 
 ## Runtime ownership
 
@@ -14,7 +14,7 @@ Every native bundle has an ordinary `package.json` declaring `dsh.bundle.patch`;
 
 ## Profiles
 
-`composition/profile-web/` and `composition/profile-headless/` are actual DSH `dsh.profile` template folders, not npm bundle packages. Installed DSH profiles are user-managed and can select individual bundles or the complete `@dsh-stack/stack`/`@dsh-stack/stack-headless` experience. User-provided patches apply with native DSH precedence.
+`profiles/web/` and `profiles/headless/` are actual DSH `dsh.profile` template folders, not npm bundle packages. Installed DSH profiles are user-managed and can select individual bundles or the complete `@dsh-stack/stack`/`@dsh-stack/stack-headless` experience. User-provided patches apply with native DSH precedence.
 
 ## Distribution
 

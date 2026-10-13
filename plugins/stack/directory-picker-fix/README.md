@@ -31,7 +31,7 @@ effect, but that disable does not live in this package's own `cordis.patch.yml`
 their own patch read at boot, and no Stack profile lists this package there
 directly -- it is only ever composed as a nested `insert` row inside
 `the web profile`. The disable is instead emitted by
-`composition/stack/composition/cordis.patch.yml` into the aggregated native
+`plugins/stack/composition/cordis.patch.yml` into the aggregated native
 `@dsh-stack/stack` patch before the replacement row is inserted. The native
 DSH Web profile reads this patch through `dsh.profile.bundles`.
 
