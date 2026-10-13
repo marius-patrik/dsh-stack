@@ -76,8 +76,8 @@ jobs:
       - name: Verify native npm tarballs, manifest and bundle patches
         run: bun run release:verify
 
-      - name: Verify registry publication dependency plan
-        run: node scripts/publish-native-packages.mjs --plan
+      - name: Verify registry publication dependency plan and immutable versions
+        run: node scripts/publish-native-packages.mjs --preflight
 
       - name: Create GitHub release and upload all assets
         env:
