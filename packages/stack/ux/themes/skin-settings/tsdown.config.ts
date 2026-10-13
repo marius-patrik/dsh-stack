@@ -1,0 +1,3 @@
+import { clientBundle } from "../../../plugin-kit/client-runtime/client-bundle.ts";
+
+export default clientBundle("@dsh-stack/skin-settings", "src/client.tsx");

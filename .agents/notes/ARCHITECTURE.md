@@ -2,7 +2,7 @@
 
 ## Source ownership
 
-`plugins/<name>/` is the recursive source implementation and bundle graph, with one owner per feature. Nested native bundles and their implementation plugins share `plugins/`; `profiles/` remains the separate DSH profile-template root. Physical nesting records composition ownership; native DSH metadata remains the runtime authority.
+`packages/<name>/` is the recursive source implementation and bundle graph, with one owner per feature. Nested native bundles and their implementation plugins share `packages/`. Stack has no profile-template root. Physical nesting records composition ownership; native DSH metadata remains the runtime authority.
 
 ## Runtime ownership
 
@@ -12,13 +12,9 @@ DeepSeek Harness owns all runtime composition, profile installation and activati
 
 Every native bundle has an ordinary `package.json` declaring `dsh.bundle.patch`; parent packages declare child bundles via local dependencies and `stack.compose`. The build generator resolves the dependency DAG, deduplicates shared children, checks for cycles and duplicate inserted rows, and emits each parent patch. DSH only sees standard native patches; no nested runtime interpretation is needed.
 
-## Profiles
+## Profile ownership
 
-`profiles/web/`, `profiles/headless/`, and `profiles/tui/` are DSH `dsh.profile` template folders, not npm bundle packages. Every profile uses the **same** complete `@dsh-stack/stack` composition from `plugins/stack`; only the DSH surface and optional independently maintained TUI adapter differ. There is no second headless/TUI Stack aggregate. User-provided patches apply with native DSH precedence.
-
-## External plugin sources
-
-`plugins/DarkFactory` and `plugins/Cognition` track independent upstream repositories as Git submodules. Their pinned source revisions do not imply native Stack activation or publication; workspace discovery, package verification, formatting and native releases exclude them until an explicit integration. `plugins/dsh-tui` is similarly independent, activated through its published DSH TUI profile entry. The repository contains no `_migrate/` root.
+Only DeepSeek Harness defines, installs, persists, selects and activates profiles. Stack publishes one native bundle graph which DSH can consume in any compatible profile or surface. No profile templates or Stack profile UI/runtime are distributed.
 
 ## Distribution
 

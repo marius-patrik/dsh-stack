@@ -1,44 +1,40 @@
 # DSH Stack
 
-Native DeepSeek Harness plugins, nested bundles, and real profile templates. DSH retains ownership of package installation, profile activation, updates, runtime and CLI; Stack distributes native packages and declarative patches.
+Native plugins, recursively composed bundles, and shared libraries for DeepSeek Harness. DSH owns runtime, installation, activation, profile configuration, updates, and lifecycle. Stack publishes ordinary native DSH packages and declarative composition patches.
 
-## Native composition tree
+## Source ownership
 
 ```text
-profiles/
-  web/                         Native Web profile template
-  headless/                    Native headless profile template
-  tui/                         Native TUI profile template
-plugins/
-  stack/                       @dsh-stack/stack full bundle
-    agents/                    Agents bundle, agents, presets, tools and loops
-    ai/                        AI bundle
-      providers/               Providers bundle, dialects, credential-vault, models and provider adapters
-    integrations/              Integrations bundle, repos, workspace and trading tooling
-      formatters/              Formatters bundle and implementation
-      hosts/                   Hosts bundle and implementation
-      lsp/                     LSP bundle and implementation
-    ux/                        UX bundle
-      themes/                  Themes bundle, icons and skins
-      tweaks/                  Tweaks bundle and tweak implementations
-      voice/                   Voice bundle and plugin
-    plugin-kit/                Shared native plugin foundation (package)
-  Cognition/                   External Cognition Git submodule (not built/published by Stack)
-  DarkFactory/                 External DarkFactory Git submodule (not built/published by Stack)
-  dsh-tui/                     Chimney independent external plugin source submodule (TUI-only)
+packages/
+  stack/                 @dsh-stack/stack native aggregate
+    agents/              Agent bundle and agent/tool packages
+    ai/providers/        AI providers, dialects, credential packages
+    integrations/        Host, repository, LSP and domain packages
+    ux/                  Sidebar, settings, themes, skins and tweaks
+    plugin-kit/          Shared plugin library, test kit and client build inputs
+  Cognition/             Independent upstream source submodule
+  DarkFactory/           Independent upstream source submodule
+  dsh-tui/               Independent Chimney TUI source submodule
+lib/
+  build/                 Repository build and bundle generation
+  verify/                Repository and browser verification
+.github/
+  scripts/               GitHub Actions, release and publication tooling
+  workflows/             CI and release automation
 ```
 
-Every native Stack `package.json` is independently publishable; external Git submodules at `plugins/Cognition`, `plugins/DarkFactory` and `plugins/dsh-tui` retain their own distribution lifecycles and are excluded from Stack's build, verification and npm publication. The physical folders follow bundle ownership, while the native `stack.compose` dependency DAG and Cordis patch rows determine runtime activation. Placing an optional plugin in a bundle's source folder does not activate it automatically. Shared bundles (for example between full Stack and headless) are not duplicated.
+Every package manifest under `packages/` is an independent native npm package boundary, with nested bundle declarations resolved through `stack.compose` and generated native `dsh.bundle.patch` layers. Folder proximity never activates a plugin. Independent external source gitlinks are not Stack packages.
 
-## Native installation
+**Profiles are entirely DSH-owned.** There are no Stack profile templates, browser-side Stack profile selector, profile installation scripts, or profile state management. Stack can be installed into an existing DSH profile using DSH's normal commands; the same package graph serves every surface.
+
+## Install via DSH
 
 ```sh
 dsh plugin --profile web add @dsh-stack/stack
 dsh --profile web --dump-config
-dsh --profile web
 ```
 
-For Headless install the **same** `@dsh-stack/stack` package into the `headless` profile. For TUI install the same Stack bundle plus Chimney's compatible `@deepseek-harness-tui/dsh-tui` following [the TUI profile](profiles/tui/README.md). All three profiles compose one nested Stack plugin tree, not three forks; DSH manages the profile surfaces and lifecycle.
+The profile name is a DSH argument, not Stack configuration. Chimney's independently released `@deepseek-harness-tui/dsh-tui` is installed and activated through DSH, not automatically by Stack.
 
 ## Development
 
@@ -52,4 +48,4 @@ bun run release:assets
 bun run release:verify
 ```
 
-The build walks native Stack plugin and bundle package manifests while excluding external submodules. To fetch their pinned source revisions, run `git submodule update --init plugins/Cognition plugins/DarkFactory plugins/dsh-tui`. See [native npm publication](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).
+Stack does not vendor or build the three external source submodules. Fetch their pinned revisions with `git submodule update --init packages/Cognition packages/DarkFactory packages/dsh-tui`. See [distribution](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).

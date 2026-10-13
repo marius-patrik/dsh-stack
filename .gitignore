@@ -7,9 +7,8 @@ node_modules/
 /worktrees/
 
 # stack package build output
-plugins/*/lib/
-bundles/**/lib/
-bundles/**/dist/
+packages/**/lib/
+packages/**/dist/
 
 # repo .agents/ (docs, hooks, rules, requests, notes) is an ordinary
 # tracked directory — do not confuse it with ~/.agents, the user-home

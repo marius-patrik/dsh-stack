@@ -1,12 +1,12 @@
-[submodule "plugins/DarkFactory"]
-	path = plugins/DarkFactory
+[submodule "packages/DarkFactory"]
+	path = packages/DarkFactory
 	url = https://github.com/marius-patrik/DarkFactory.git
 	branch = main
-[submodule "plugins/Cognition"]
-	path = plugins/Cognition
+[submodule "packages/Cognition"]
+	path = packages/Cognition
 	url = https://github.com/marius-patrik/Cognition.git
 	branch = main
-[submodule "plugins/dsh-tui"]
-	path = plugins/dsh-tui
+[submodule "packages/dsh-tui"]
+	path = packages/dsh-tui
 	url = https://github.com/ccch1mneyyy/dsh-TUI.git
 	branch = main

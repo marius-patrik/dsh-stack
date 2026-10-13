@@ -4,7 +4,7 @@ Status: architecture directive
 
 ## Problem
 
-`src/scripts/client-runtime/client-bundle.ts` inlines every `@dsh-stack/*`
+`packages/stack/plugin-kit/client-runtime/client-bundle.ts` inlines every `@dsh-stack/*`
 dependency into each consuming client bundle (`noExternal`), because the
 loader's module table can only resolve a shared `require()` for a package
 that declares `dsh.client`. A shared package that holds mutable state and
