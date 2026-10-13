@@ -152,7 +152,17 @@ async function verifyPackage(dir) {
 
 /** Run all repository-structure, package-contract, dependency, and source invariants. */
 async function main() {
-  assert(await exists(pluginsDir), "composition/ root is missing");
+  assert(await exists(pluginsDir), "plugins/ root is missing");
+  assert(await exists(join(root, "profiles")), "native profile template root is missing");
+  for (const profile of ["web", "headless", "tui"]) {
+    assert(
+      await exists(join(root, "profiles", profile, "package.json")),
+      `missing native ${profile} profile template`,
+    );
+  }
+  for (const removed of ["bundles", "composition", "plugins/standalone"]) {
+    assert(!(await exists(join(root, removed))), `obsolete source root ${removed} must not exist`);
+  }
   assert((await listBundlePackageDirs()).length > 0, "native DSH bundles are missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 
