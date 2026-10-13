@@ -8,7 +8,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = process.cwd();
-const compositionDir = join(root, "composition");
+const pluginsDir = join(root, "plugins");
 
 const ignoredDirs = new Set(["node_modules", ".git", "dist", "coverage", "lib", "dsh-tui"]);
 const codeExts = new Set([".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
@@ -57,7 +57,7 @@ async function* walk(dir) {
   }
 }
 
-/** Enumerate implementation packages from the entire composition tree. */
+/** Enumerate implementation packages from the entire plugin composition tree. */
 async function nativePackageDirs() {
   return listPluginPackageDirs();
 }
@@ -152,8 +152,8 @@ async function verifyPackage(dir) {
 
 /** Run all repository-structure, package-contract, dependency, and source invariants. */
 async function main() {
-  assert(await exists(compositionDir), "composition/ root is missing");
-  assert((await listBundlePackageDirs()).length > 0, "native composition bundles are missing");
+  assert(await exists(pluginsDir), "composition/ root is missing");
+  assert((await listBundlePackageDirs()).length > 0, "native DSH bundles are missing");
   for (const file of await trackedGeneratedFiles()) fail(`${file} is checked-in generated output`);
 
   const dirs = await nativePackageDirs();
@@ -170,7 +170,7 @@ async function main() {
     }
   }
 
-  for (const sourceRoot of [compositionDir]) {
+  for (const sourceRoot of [pluginsDir]) {
     for await (const file of walk(sourceRoot)) {
       const rel = relative(root, file).replaceAll("\\", "/");
       if (!codeExts.has(extname(rel))) continue;
@@ -207,7 +207,7 @@ async function main() {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  console.log(`Stack verification passed: ${publicPackages.size} native packages in composition tree.`);
+  console.log(`Stack verification passed: ${publicPackages.size} native packages in plugin composition tree.`);
 }
 
 await main();

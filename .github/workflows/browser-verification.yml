@@ -4,7 +4,8 @@ name: Browser verification
 on:
   pull_request:
     paths:
-      - "composition/**"
+      - "plugins/**"
+      - "profiles/**"
       - "scripts/**"
       - ".github/workflows/**"
       - "package.json"

@@ -1,4 +1,4 @@
-/** Discover native Stack package roots in the single physical composition tree.
+/** Discover native Stack package roots in the single physical plugin composition tree.
  * Nested packages remain independently publishable: a package.json does not
  * terminate discovery, because child bundles and plugins may live below it.
  */
@@ -6,7 +6,7 @@ import { promises as fs } from "node:fs";
 import { join } from "node:path";
 
 export const root = process.cwd();
-const compositionRoot = join(root, "composition");
+const pluginsRoot = join(root, "plugins");
 const ignored = new Set(["node_modules", ".git", "lib", "dist", "coverage", "dsh-tui"]);
 
 /** Read a UTF-8 JSON file. */
@@ -27,7 +27,7 @@ export async function listCompositionPackageDirs() {
         await visit(join(dir, entry.name));
     }
   }
-  await visit(compositionRoot);
+  await visit(pluginsRoot);
   return result.sort();
 }
 

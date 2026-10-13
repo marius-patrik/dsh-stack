@@ -20,7 +20,7 @@
         "scripts/**/*.{mjs,js}"
       ]
     },
-    "composition/stack/**": {
+    "plugins/stack/**": {
       "entry": [
         "src/index.{ts,tsx,mjs,js}",
         "src/client.{ts,tsx}",
@@ -34,21 +34,7 @@
         "bin/*.mjs"
       ]
     },
-    "composition/standalone/*": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "src/client.{ts,tsx}",
-        "client.js",
-        "*.mjs",
-        "bin/*.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs",
-        "bin/*.mjs"
-      ]
-    },
-    "composition/stack/ai/providers/providers": {
+    "plugins/stack/ai/providers/providers": {
       "entry": [
         "src/index.{ts,tsx,mjs,js}",
         "src/client.{ts,tsx}",
@@ -65,7 +51,33 @@
         "@dsh-stack/sidebar-preferences"
       ]
     },
-    "composition/standalone/skin-claude": {
+    "plugins/stack": {
+      "entry": [
+        "src/index.{ts,tsx,mjs,js}",
+        "*.mjs"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}",
+        "*.mjs"
+      ],
+      "ignoreDependencies": [
+        "@dsh-stack/.+"
+      ]
+    },
+    "plugins/headless": {
+      "entry": [
+        "src/index.{ts,tsx,mjs,js}",
+        "*.mjs"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}",
+        "*.mjs"
+      ],
+      "ignoreDependencies": [
+        "@dsh-stack/.+"
+      ]
+    },
+    "plugins/stack/ux/themes/skin-claude": {
       "entry": [
         "src/index.{ts,tsx,mjs,js}",
         "src/client.{ts,tsx}",
@@ -79,7 +91,7 @@
         "@types/react"
       ]
     },
-    "composition/standalone/skin-codex": {
+    "plugins/stack/ux/themes/skin-codex": {
       "entry": [
         "src/index.{ts,tsx,mjs,js}",
         "src/client.{ts,tsx}",
@@ -91,32 +103,6 @@
       ],
       "ignoreDependencies": [
         "@types/react"
-      ]
-    },
-    "composition/stack": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "*.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs"
-      ],
-      "ignoreDependencies": [
-        "@dsh-stack/.+"
-      ]
-    },
-    "composition/headless": {
-      "entry": [
-        "src/index.{ts,tsx,mjs,js}",
-        "*.mjs"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "*.mjs"
-      ],
-      "ignoreDependencies": [
-        "@dsh-stack/.+"
       ]
     }
   },

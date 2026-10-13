@@ -23,7 +23,7 @@ const CLIENT_EXTERNALS = [
   "@deepseek-ai/cordis",
 ] as const;
 
-const PACKAGES_ROOT = fileURLToPath(new URL("../../composition/", import.meta.url));
+const PACKAGES_ROOT = fileURLToPath(new URL("../../plugins/", import.meta.url));
 
 /**
  * `@dsh-stack/*` package names that themselves declare `dsh.client`. Each one

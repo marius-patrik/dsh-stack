@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-const roots = [join(process.cwd(), "composition")];
+const roots = [join(process.cwd(), "plugins")];
 const missing = [];
 
 /**

@@ -49,7 +49,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            composition/**/lib
+            plugins/**/lib
             **/*.tsbuildinfo
           key: ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ github.sha }}
           restore-keys: |
@@ -105,7 +105,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            composition/**/lib
+            plugins/**/lib
             **/*.tsbuildinfo
           key: ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ github.sha }}
           restore-keys: |
