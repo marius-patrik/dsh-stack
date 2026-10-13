@@ -1,7 +1,7 @@
 /** Generate real DSH bundle patch layers by flattening nested composition dependencies. */
 import { promises as fs } from "node:fs";
 import { join, dirname } from "node:path";
-import { listBundlePackageDirs, readJson, root } from "../repo-paths.mjs";
+import { listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
 const check = process.argv.includes("--check");
 

@@ -20,7 +20,7 @@ still-open decision (#60).
 - `packages/dsh-tui/` — Chimney's external TUI submodule, activated only by the TUI profile and excluded from Stack's Bun build. There is **no** separate headless or TUI Stack bundle; all profiles consume `@dsh-stack/stack`.
 - The on-disk bundle hierarchy tracks source ownership; actual activation remains determined by `stack.compose`, native Cordis patches, and DSH user profile state. An optional plugin nested under a bundle is not activated merely by its location.
 - `packages/Cognition/` and `packages/DarkFactory/` are independently maintained Git submodules, pinned to upstream `main` revisions. They are excluded from Stack's native npm workspace, build and release until native integration is explicitly implemented. No `_migrate/` source tree is retained.
-- `.github/scripts/` owns GitHub-specific automation and release publication; `packages/stack/plugin-kit/` owns reusable plugin development, build, verification, test and client tooling; no root `lib/` or `scripts/` directory is allowed.
+- `.github/scripts/` owns repository build, verification, release and GitHub automation; its `lib/` contains helpers shared by those scripts. `packages/stack/plugin-kit/` owns only actual reusable plugin development APIs, tests and client build inputs. No root `lib/` or `scripts/` directory is allowed.
 - `.agents/notes/` is the documentation root. `README.md` is standalone, and `CONTRIBUTING.md` symlinks directly to `.agents/AGENTS.md`; no root `AGENTS.md` or `CLAUDE.md`.
 
 ## Plugins and nested bundles

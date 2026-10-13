@@ -7,7 +7,7 @@
 import { spawn } from "node:child_process";
 import { mkdir, access, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "../repo-paths.mjs";
+import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
 const concurrency = Math.max(1, Number(process.env.DSH_BUILD_PARALLELISM ?? "6"));
 

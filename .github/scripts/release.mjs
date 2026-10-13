@@ -10,7 +10,7 @@ import {
   listBundlePackageDirs,
   readJson,
   root,
-} from "../../packages/stack/plugin-kit/tooling/repo-paths.mjs";
+} from "./lib/repo-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const command = process.argv[2];

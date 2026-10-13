@@ -17,7 +17,7 @@
  */
 import { promises as fs } from "node:fs";
 import { join, relative } from "node:path";
-import { walkSourceTree } from "../walk-source-tree.mjs";
+import { walkSourceTree } from "./lib/walk-source-tree.mjs";
 
 const root = process.cwd();
 

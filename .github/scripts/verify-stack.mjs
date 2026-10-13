@@ -1,7 +1,6 @@
 // jscpd:ignore-start -- repository-wide contract verifier
 import { createHash } from "node:crypto";
-import { fileURLToPath } from "node:url";
-import { listPluginPackageDirs, listBundlePackageDirs } from "../repo-paths.mjs";
+import { listPluginPackageDirs, listBundlePackageDirs } from "./lib/repo-paths.mjs";
 import { existsSync, promises as fs } from "node:fs";
 import { extname, join, relative } from "node:path";
 import { execFile } from "node:child_process";
@@ -257,11 +256,8 @@ async function main() {
     }
   }
 
-  const verifierSourcePath = fileURLToPath(import.meta.url);
   for (const sourceRoot of [packagesDir]) {
     for await (const file of walk(sourceRoot)) {
-      // This verifier contains the forbidden marker literals in its own assertions.
-      if (file === verifierSourcePath) continue;
       const rel = relative(root, file).replaceAll("\\", "/");
       if (!codeExts.has(extname(rel))) continue;
       const text = await fs.readFile(file, "utf8");

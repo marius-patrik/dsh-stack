@@ -18,7 +18,7 @@ Only DeepSeek Harness defines, installs, persists, selects and activates profile
 
 ## Distribution
 
-The Stack root orchestrates plugin-kit tooling for per-package semver and reproducible release artifacts but never owns installation. The native npm package manifest is authoritative. `.github/scripts/release.mjs` resolves `workspace:` dependencies to published exact versions and emits tarballs, an integrity inventory, and a complete release manifest. Publishing and updates remain with native DSH/npm operations.
+GitHub Actions and repository build scripts under `.github/scripts/` coordinate per-package semver and reproducible release artifacts, without owning installation. The native npm package manifest is authoritative. `.github/scripts/release.mjs` resolves `workspace:` dependencies to published exact versions and emits tarballs, an integrity inventory, and a complete release manifest. Publishing and updates remain with native DSH/npm operations.
 
 ## Quality gates
 

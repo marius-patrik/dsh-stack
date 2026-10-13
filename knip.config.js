@@ -3,7 +3,7 @@ import {
   root,
   listPluginPackageDirs,
   listBundlePackageDirs,
-} from "./packages/stack/plugin-kit/tooling/repo-paths.mjs";
+} from "./.github/scripts/lib/repo-paths.mjs";
 
 const plugin = {
   entry: ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "client.js", "*.mjs", "bin/*.mjs"],
@@ -26,11 +26,6 @@ for (const dir of await listPluginPackageDirs()) {
 for (const dir of await listBundlePackageDirs()) {
   workspaces[relative(root, dir).replaceAll("\\", "/")] = { ...bundle };
 }
-workspaces["packages/stack/plugin-kit"] = {
-  ...plugin,
-  entry: [...plugin.entry, "tooling/build/*.mjs", "tooling/verify/*.mjs"],
-  project: [...plugin.project, "tooling/**/*.mjs"],
-};
 workspaces["packages/stack/ai/providers/providers"].ignoreDependencies = [
   "@dsh-stack/sidebar-preferences",
 ];
