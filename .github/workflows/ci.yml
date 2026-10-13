@@ -57,6 +57,9 @@ jobs:
             ts-build-${{ runner.os }}-
 
 
+      - name: Prune orphaned compiler output
+        run: node scripts/prune-orphaned-build-cache.mjs
+
       - name: Build Stack workspace
         run: bun run build
 
@@ -112,6 +115,9 @@ jobs:
             ts-build-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
             ts-build-${{ runner.os }}-
 
+
+      - name: Prune orphaned compiler output
+        run: node scripts/prune-orphaned-build-cache.mjs
 
       - name: Build Stack workspace
         run: bun run build
