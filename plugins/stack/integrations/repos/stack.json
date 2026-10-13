@@ -1,7 +1,7 @@
 {
   "id": "stack.vcs.repos",
   "name": "@dsh-stack/repos",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "plugin",
   "description": "Repo workflows (status/branch/commit/push/PR) for the dsh harness, consuming the shared vault GitHub token",
   "files": ["lib", "bin", "README.md", "package.json", "stack.json"],

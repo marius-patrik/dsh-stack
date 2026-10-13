@@ -1,7 +1,7 @@
 {
   "name": "@dsh-stack/repos",
   "description": "Repo workflows (status/branch/commit/push/PR) for the dsh harness, consuming the shared vault GitHub token",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

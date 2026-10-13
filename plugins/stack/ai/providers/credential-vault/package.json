@@ -1,7 +1,7 @@
 {
   "name": "@dsh-stack/credential-vault",
   "description": "Encrypted credential vault, account manager, OAuth refresh supervisor, importers and local vault web surface.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

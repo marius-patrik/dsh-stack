@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/provider-llamacpp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "llamacpp provider-route extension for the Stack `providers` registry.",
   "license": "MIT",
   "type": "module",

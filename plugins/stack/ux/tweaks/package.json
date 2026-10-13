@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/bundle-tweaks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Native DSH @dsh-stack/bundle-tweaks composition bundle",
   "type": "module",
   "files": [

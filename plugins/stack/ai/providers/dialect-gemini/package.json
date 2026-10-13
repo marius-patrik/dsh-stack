@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/dialect-gemini",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Google Gemini wire-format serialization helpers, shared by the code-assist dialect.",
   "license": "MIT",
   "type": "module",

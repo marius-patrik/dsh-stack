@@ -1,7 +1,7 @@
 {
   "id": "stack.ai.dialect.gemini",
   "name": "@dsh-stack/dialect-gemini",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "library",
   "description": "Google Gemini wire-format serialization helpers, shared by the code-assist dialect.",
   "files": ["lib", "README.md", "package.json", "stack.json"],

@@ -12,6 +12,7 @@ const execFileAsync = promisify(execFile);
 const releaseDir = join(process.cwd(), ".release");
 const registry = "https://registry.npmjs.org/";
 const planOnly = process.argv.includes("--plan");
+const preflight = process.argv.includes("--preflight");
 
 /** Read a release metadata document. */
 async function document(name) {
@@ -156,8 +157,24 @@ const plan = publicationPlan(
   await document("component-assets.json"),
 );
 console.log(`Native registry publication plan: ${plan.length} packages`);
-if (planOnly) {
+if (planOnly || preflight) {
   for (const item of plan) console.log(`  ${item.name}@${item.version}`);
+  if (preflight) {
+    // The same immutable-byte check used by public publishing must run before
+    // GitHub creates a release. Query independent package versions in bounded
+    // parallelism; absence (E404) is fine, an existing mismatched version is not.
+    const batchSize = 8;
+    for (let index = 0; index < plan.length; index += batchSize) {
+      await Promise.all(
+        plan.slice(index, index + batchSize).map(async (item) => {
+          if (await confirm(item)) {
+            console.log(`matching published version: ${item.name}@${item.version}`);
+          }
+        }),
+      );
+    }
+    console.log(`Native registry collision preflight passed for ${plan.length} packages`);
+  }
 } else {
   for (const item of plan) await publish(item);
   // Publish endpoints and read endpoints may converge at different times.

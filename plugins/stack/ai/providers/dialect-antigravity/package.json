@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/dialect-antigravity",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Antigravity Gemini wire dialect extension for the Stack dialects registry.",
   "license": "MIT",
   "type": "module",

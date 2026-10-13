@@ -1,7 +1,7 @@
 {
   "name": "@dsh-stack/automations",
   "description": "Abstraction plugin for repository automations: the registry concrete automation extensions plug into",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",

@@ -1,7 +1,7 @@
 {
   "id": "stack.ui.sidebar-shell",
   "name": "@dsh-stack/sidebar-shell",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "plugin",
   "description": "@dsh-stack/sidebar-shell",
   "files": ["lib", "README.md", "package.json", "stack.json"],

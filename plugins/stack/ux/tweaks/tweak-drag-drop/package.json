@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/tweak-drag-drop",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Image drag-drop settings surface: the tweaks-drag-drop section (enable + max image bytes) consumed by the client attachment seam.",
   "license": "MIT",
   "type": "module",

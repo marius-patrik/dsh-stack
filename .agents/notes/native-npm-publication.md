@@ -16,6 +16,12 @@ The trusted publisher for each `@dsh-stack/*` package must be configured with:
 
 Do not add a `registry-url` input to `actions/setup-node` in this workflow: that action sets a placeholder `NODE_AUTH_TOKEN` which conflicts with the tokenless-authentication guard. The publication step explicitly selects `https://registry.npmjs.org/` without injecting a publishing credential.
 
+## Relocation and immutable-version safeguard
+
+The source-tree migration in PR #332 changed the native packages' published `repository.directory` metadata. GitHub Release `v0.24.7` packaged the 91 resulting tarballs, but [npm publication #38417325868](https://github.com/marius-patrik/dsh-stack/actions/runs/38417325868) correctly rejected `@dsh-stack/plugin-kit@0.1.1`: that version already existed on npm with different SHA-512 bytes. **A successful GitHub Release is not evidence that its npm packages were published.**
+
+The subsequent fix bumps all 91 independently published package versions, synchronizes 78 legacy `stack.json` descriptors and `bun.lock`, and checks every release archive's existing npm version integrity *before* creating another GitHub Release. The preflight accepts an unpublished version or an identical archive; an existing version with different bytes aborts without creating a release. Publication retains the same check and independent native DSH installation verification. Never reuse a prior npm package version when its packed contents change.
+
 ## Publication process
 
 The [release workflow](../../.github/workflows/release.yml) creates a versioned GitHub Release and explicitly dispatches `publish-native-npm.yml` because release events created by `GITHUB_TOKEN` do not propagate into another workflow. The publication job:

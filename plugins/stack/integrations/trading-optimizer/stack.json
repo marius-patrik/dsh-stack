@@ -1,7 +1,7 @@
 {
   "id": "stack.trading.optimizer",
   "name": "@dsh-stack/trading-optimizer",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "plugin",
   "description": "@dsh-stack/trading-optimizer",
   "files": ["lib", "README.md", "package.json", "stack.json"],

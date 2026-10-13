@@ -1,7 +1,7 @@
 {
   "name": "@dsh-stack/translator",
   "description": "dsh plugin: translate between provider session/skill/hook formats and dsh native format",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

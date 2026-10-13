@@ -13,3 +13,9 @@ DSH's native plugin manager and underlying package manager install, update, acti
 ## Publication ordering
 
 Publish dependencies before bundle parents according to the dependency DAG. Release only on `main` after PR gates pass. Do not publish a second release from the release-version commit. Fresh external-DSH install and Web/Headless smoke gates must pass before considering distribution complete.
+
+## Immutable npm package versions
+
+The registry treats each native `@dsh-stack/*` package version as immutable. Any change to the contents of its release tarball—including `repository.directory` after a source-tree relocation—requires a new semver package version and synchronization of its `stack.json` descriptor, when present. Source versions and the Bun lockfile must be updated together in a pull request; a new GitHub release tag alone does **not** bump package versions.
+
+Before creating a GitHub Release, the release workflow builds the native archives and runs the registry preflight. It checks the full 91-package graph against published npm SHA-512 integrities, allowing absent versions and byte-identical existing versions but refusing different bytes under an existing version. The publication workflow repeats the immutable-byte check and verifies public-registry installation. Never skip either check to force a release through.
