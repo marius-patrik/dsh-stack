@@ -207,7 +207,9 @@ async function main() {
     console.error(errors.join("\n"));
     process.exit(1);
   }
-  console.log(`Stack verification passed: ${publicPackages.size} native packages in plugin composition tree.`);
+  console.log(
+    `Stack verification passed: ${publicPackages.size} native packages in plugin composition tree.`,
+  );
 }
 
 await main();
