@@ -1,10 +1,15 @@
 {
   "id": "stack.security.credentials",
   "name": "@dsh-stack/credential-vault",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "plugin",
   "description": "Encrypted credential vault, account manager, OAuth refresh supervisor, importers and local vault web surface.",
-  "files": ["lib", "client.js", "package.json", "stack.json"],
+  "files": [
+    "lib",
+    "client.js",
+    "package.json",
+    "stack.json"
+  ],
   "dependencies": [],
   "optionalDependencies": []
 }

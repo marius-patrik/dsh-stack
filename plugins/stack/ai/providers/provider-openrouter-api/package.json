@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/provider-openrouter-api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "openrouter-api provider-route extension for the Stack `providers` registry.",
   "license": "MIT",
   "type": "module",

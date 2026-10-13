@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/tweak-stats",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Session observability: the tweaks-stats settings section and the dsh stats/dsh sessions verbs over the projection cache.",
   "license": "MIT",
   "type": "module",

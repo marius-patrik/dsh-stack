@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/tweak-fork-undo",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Fork-based session undo/redo: /undo and /redo fork a new session from an earlier logged boundary.",
   "license": "MIT",
   "type": "module",
