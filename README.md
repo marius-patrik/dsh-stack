@@ -11,13 +11,11 @@ packages/
     ai/providers/        AI providers, dialects, credential packages
     integrations/        Host, repository, LSP and domain packages
     ux/                  Sidebar, settings, themes, skins and tweaks
-    plugin-kit/          Shared plugin library, test kit and client build inputs
+    plugin-kit/          Shared plugin library, test kit, client build inputs
+      tooling/           Repository build and verification tools
   Cognition/             Independent upstream source submodule
   DarkFactory/           Independent upstream source submodule
   dsh-tui/               Independent Chimney TUI source submodule
-lib/
-  build/                 Repository build and bundle generation
-  verify/                Repository and browser verification
 .github/
   scripts/               GitHub Actions, release and publication tooling
   workflows/             CI and release automation

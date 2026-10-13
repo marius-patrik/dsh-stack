@@ -6,7 +6,7 @@
  * walk, which jscpd's zero-threshold duplicate gate correctly flagged as
  * unextracted duplication rather than structural repetition.
  *
- * @module @dsh-stack/lib/walk-source-tree
+ * @module @dsh-stack/plugin-kit/tooling/walk-source-tree
  */
 import { promises as fs } from "node:fs";
 import { join } from "node:path";

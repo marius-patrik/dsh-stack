@@ -1,5 +1,5 @@
 import { relative } from "node:path";
-import { root, listPluginPackageDirs, listBundlePackageDirs } from "./lib/repo-paths.mjs";
+import { root, listPluginPackageDirs, listBundlePackageDirs } from "./packages/stack/plugin-kit/tooling/repo-paths.mjs";
 
 const plugin = {
   entry: ["src/index.{ts,tsx,mjs,js}", "src/client.{ts,tsx}", "client.js", "*.mjs", "bin/*.mjs"],
@@ -12,8 +12,8 @@ const bundle = {
 };
 const workspaces = {
   ".": {
-    entry: [".github/scripts/*.mjs", ".github/scripts/**/*.test.mjs", "lib/**/*.mjs"],
-    project: ["lib/**/*.{mjs,js}", ".github/scripts/**/*.{mjs,js}"],
+    entry: [".github/scripts/*.mjs", ".github/scripts/**/*.test.mjs"],
+    project: [".github/scripts/**/*.{mjs,js}"],
   },
 };
 for (const dir of await listPluginPackageDirs()) {
@@ -22,6 +22,11 @@ for (const dir of await listPluginPackageDirs()) {
 for (const dir of await listBundlePackageDirs()) {
   workspaces[relative(root, dir).replaceAll("\\", "/")] = { ...bundle };
 }
+workspaces["packages/stack/plugin-kit"] = {
+  ...plugin,
+  entry: [...plugin.entry, "tooling/build/*.mjs", "tooling/verify/*.mjs"],
+  project: [...plugin.project, "tooling/**/*.mjs"],
+};
 workspaces["packages/stack/ai/providers/providers"].ignoreDependencies = [
   "@dsh-stack/sidebar-preferences",
 ];

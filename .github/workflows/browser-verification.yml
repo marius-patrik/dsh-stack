@@ -5,7 +5,6 @@ on:
   pull_request:
     paths:
       - "packages/**"
-      - "lib/**"
       - ".github/scripts/**"
       - ".github/workflows/**"
       - "package.json"
@@ -125,7 +124,7 @@ jobs:
             echo "::error::Native DSH did not report an authenticated browser URL"
             exit 1
           fi
-          node lib/verify/browser-check.mjs "$url" \
+          node packages/stack/plugin-kit/tooling/verify/browser-check.mjs "$url" \
             --screenshot "$RUNNER_TEMP/screenshots/web-profile.png"
 
       - name: Collect DSH boot and composition logs

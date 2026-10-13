@@ -22,7 +22,7 @@ import { walkSourceTree } from "../walk-source-tree.mjs";
 const root = process.cwd();
 
 /** Trees carrying source that the duplicate gate scans. */
-const ROOTS = ["packages", "lib", ".github/scripts"];
+const ROOTS = ["packages", ".github/scripts"];
 
 /** Shortest reason accepted. Anything briefer restates the marker rather than justifying it. */
 const MIN_REASON = 20;

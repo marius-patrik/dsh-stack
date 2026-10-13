@@ -8,7 +8,7 @@ import {
   listBundlePackageDirs,
   readJson,
   root,
-} from "../../lib/repo-paths.mjs";
+} from "../../packages/stack/plugin-kit/tooling/repo-paths.mjs";
 
 const run = promisify(execFile);
 const dir = join(root, ".release");

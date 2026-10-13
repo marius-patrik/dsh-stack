@@ -3,7 +3,7 @@ import { join, relative } from "node:path";
 import ts from "typescript";
 
 const root = process.cwd();
-const sourceRoots = ["packages", "lib", ".github/scripts"];
+const sourceRoots = ["packages", ".github/scripts"];
 const ignoredDirectories = new Set([
   "node_modules",
   "lib",

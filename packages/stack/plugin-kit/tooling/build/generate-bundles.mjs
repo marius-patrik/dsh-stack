@@ -1,10 +1,8 @@
 /** Generate real DSH bundle patch layers by flattening nested composition dependencies. */
 import { promises as fs } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { listBundlePackageDirs, readJson } from "../repo-paths.mjs";
+import { listBundlePackageDirs, readJson, root } from "../repo-paths.mjs";
 
-const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const check = process.argv.includes("--check");
 
 /** Load bundle definitions with stable identity and validate native DSH manifest fields. */
