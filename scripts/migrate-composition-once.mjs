@@ -102,63 +102,7 @@ if (existsSync(lock)) {
   const after = fixExplicitPaths(before);
   if (after !== before) { writeFileSync(lock, after); repaired++; }
 }
-const readme = `# DSH Stack
-
-Native DeepSeek Harness plugins, bundles and profile templates live in **one composition tree**. DSH remains responsible for runtime, package installation, updates, activation and user profiles; Stack only ships native packages and declarative composition.
-
-## Physical composition
-
-\`\`\`text
-composition/
-  profile-web/                  Native DSH Web profile template
-  profile-headless/             Native headless profile template
-  profile-tui/                  Native terminal profile template (includes Chimney source gitlink)
-  stack/                        @dsh-stack/stack aggregate native bundle
-    agents/                     @dsh-stack/bundle-agents
-      agents/                   @dsh-stack/agents runtime plugin
-    ai/                         @dsh-stack/bundle-ai
-      providers/                @dsh-stack/bundle-providers and its mounted plugins
-    integrations/               @dsh-stack/bundle-integrations
-      formatters/               Child bundle and formatter implementation
-      hosts/                    Child bundle and hosts implementation
-      lsp/                      Child bundle and LSP implementation
-    ux/                         @dsh-stack/bundle-ux
-      themes/                   Child bundle and theme implementation
-      tweaks/                   Child bundle
-      voice/                    Child bundle and voice implementation
-    <plugin>/                   Plugins inserted directly by the aggregate bundle
-  headless/                     @dsh-stack/stack-headless (composes shared native bundles)
-  standalone/                   Individually publishable plugins not mounted by aggregate patches
-\`\`\`
-
-This is a **source ownership tree**, not a second runtime loader. The native bundle dependency graph is a DAG: shared children can be referenced by both `stack` and `headless` without duplicate source folders. Package identities, `stack.compose` edges and native DSH patch ordering remain authoritative. A physical parent package can also contain independently buildable child package roots. A plugin under `standalone/` is intentionally not automatically activated by the full Stack patch.
-
-## Install
-
-Install DeepSeek Harness independently, then use its native package manager:
-
-\`\`\`sh
-dsh plugin --profile web add @dsh-stack/stack
-dsh --profile web --dump-config
-dsh --profile web
-\`\`\`
-
-For a terminal profile, use [the TUI profile](composition/profile-tui/README.md), whose Chimney DSH TUI source is pinned at `composition/profile-tui/dsh-tui`. For headless, install `@dsh-stack/stack-headless`. Templates are examples to copy explicitly into DSH home, never a parallel Stack installer.
-
-## Development
-
-\`\`\`sh
-bun install
-bun run build
-bun run typecheck
-bun run verify
-bun run test
-bun run release:assets
-bun run release:verify
-\`\`\`
-
-Builds recursively discover *every* package root under `composition/`, flatten native bundles deterministically, and publish each package independently. The `_migrate/` gitlinks are non-installed external migration sources. See [native npm publication](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).
-`;
+const readme = "# DSH Stack\n\nNative DeepSeek Harness plugins, bundles and profile templates live in **one composition tree**. DSH owns installation, runtime, updates and activation; Stack ships native packages and declarative composition.\n\n## Composition tree\n\n```text\ncomposition/\n  profile-web/           Native Web profile template\n  profile-headless/      Native headless profile template\n  profile-tui/           Native terminal profile and pinned Chimney TUI source\n  stack/                 @dsh-stack/stack aggregate bundle\n    agents/              Agents bundle and mounted agent plugin\n    ai/providers/        AI and providers bundles and mounted plugins\n    integrations/        Integrations bundle (formatters, hosts, LSP)\n    ux/                  UX bundle (themes, tweaks, voice)\n    <plugin>/            Plugins directly mounted by the aggregate bundle\n  headless/              @dsh-stack/stack-headless native bundle\n  standalone/            Optional publishable plugins not auto-mounted by Stack\n```\n\nThe native bundle graph is a DAG, not a tree: packages referenced by both full Stack and headless are stored only once. Their names, `stack.compose` edges, and native patches control actual installation. Nesting never introduces a second loader.\n\n## Install\n\n```sh\ndsh plugin --profile web add @dsh-stack/stack\ndsh --profile web --dump-config\ndsh --profile web\n```\n\nHeadless installation uses `@dsh-stack/stack-headless`. Terminal usage is documented in [the TUI profile](composition/profile-tui/README.md). Profile templates are DSH-owned on installation and are never mutated by an independent Stack manager.\n\n## Development\n\n```sh\nbun install\nbun run build\nbun run typecheck\nbun run verify\nbun run test\nbun run release:assets\nbun run release:verify\n```\n\nPackages are discovered recursively in `composition/`, and each native bundle is flattened before packaging. Migration-only gitlinks under `_migrate/` are not installed. See [native npm publication](.agents/notes/native-npm-publication.md) and [contributor rules](.agents/AGENTS.md).\n";
 writeFileSync("README.md", readme);
 function replaceIn(file, replacements) {
   const initial = readFileSync(file, "utf8");
