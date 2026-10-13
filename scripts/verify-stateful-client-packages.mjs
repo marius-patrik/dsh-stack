@@ -48,6 +48,7 @@ for (const dir of await listPluginPackageDirs()) {
   const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
   pluginPaths.set(pkg.name, join(dir, "package.json"));
 }
+/** Resolve the native package manifest of a reviewed shared client-state owner. */
 function packageJsonPath(packageId) {
   return pluginPaths.get(packageId) ?? join(root, "plugins", "<missing>", packageId);
 }
