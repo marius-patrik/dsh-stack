@@ -5,12 +5,7 @@ import { createHash } from "node:crypto";
 import { join, relative, basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import {
-  listPluginPackageDirs,
-  listBundlePackageDirs,
-  readJson,
-  root,
-} from "./lib/repo-paths.mjs";
+import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "./lib/repo-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const command = process.argv[2];
