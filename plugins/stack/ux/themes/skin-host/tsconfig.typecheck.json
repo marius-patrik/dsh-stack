@@ -4,9 +4,9 @@
     "skipLibCheck": true,
     "paths": {
       "@dsh-stack/skin-runtime": ["../skin-runtime/src/index.ts"],
-      "@dsh-stack/skin-codex/client": ["../ux/themes/skin-codex/src/client.tsx"],
-      "@dsh-stack/skin-claude/client": ["../ux/themes/skin-claude/src/client.tsx"],
-      "@dsh-stack/skin-deepseek/client": ["../ux/themes/skin-deepseek/src/client.tsx"]
+      "@dsh-stack/skin-codex/client": ["../skin-codex/src/client.tsx"],
+      "@dsh-stack/skin-claude/client": ["../skin-claude/src/client.tsx"],
+      "@dsh-stack/skin-deepseek/client": ["../skin-deepseek/src/client.tsx"]
     },
     "rootDir": "../../.."
   },

@@ -4,7 +4,7 @@
     "rootDir": "..",
     "paths": {
       "@dsh-stack/sidebar-preferences": ["../sidebar-preferences/src/index.ts"],
-      "@dsh-stack/settings-panel": ["../ux/settings-panel/src/index.tsx"]
+      "@dsh-stack/settings-panel": ["../settings-panel/src/index.tsx"]
     }
   },
   "include": ["src"]
