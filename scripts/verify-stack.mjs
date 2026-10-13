@@ -277,15 +277,14 @@ async function main() {
   const modules = await fs.readFile(join(root, ".gitmodules"), "utf8");
   for (const name of ["DarkFactory", "Cognition"]) {
     const path = "plugins/" + name;
-    const { stdout: record } = await execFileAsync(
-      "git",
-      ["ls-files", "--stage", "--", path],
-      { cwd: root },
-    );
+    const { stdout: record } = await execFileAsync("git", ["ls-files", "--stage", "--", path], {
+      cwd: root,
+    });
     assert(
-      record.trim().split("\n").some((line) =>
-        /^160000 [a-f0-9]{40} 0\t/.test(line) && line.endsWith("\t" + path),
-      ),
+      record
+        .trim()
+        .split("\n")
+        .some((line) => /^160000 [a-f0-9]{40} 0\t/.test(line) && line.endsWith("\t" + path)),
       path + " must be a pinned external Git submodule",
     );
     assert(

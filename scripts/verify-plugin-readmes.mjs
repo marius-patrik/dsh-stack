@@ -26,7 +26,8 @@ async function walk(dir) {
   await Promise.all(
     entries
       .filter(
-        (entry) => entry.isDirectory() &&
+        (entry) =>
+          entry.isDirectory() &&
           !["node_modules", "Cognition", "DarkFactory", "dsh-tui"].includes(entry.name),
       )
       .map((entry) => walk(join(dir, entry.name))),
