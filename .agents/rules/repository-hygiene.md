@@ -91,7 +91,7 @@ on every item at once — observed here as 172 of 174 items dropping to no Statu
 from a single mutation adding `Ideas`.
 
 The recovery is the sweep, and this is precisely why Status is derived rather
-than authored: one `node src/scripts/sweep-repository-hygiene.mjs` restored all
+than authored: one `node .github/scripts/sweep-repository-hygiene.mjs` restored all
 135 affected items from repository state. Nothing was lost, because nothing was
 stored only on the board.
 

@@ -77,7 +77,7 @@ jobs:
         run: bun run release:verify
 
       - name: Verify registry publication dependency plan and immutable versions
-        run: node scripts/publish-native-packages.mjs --preflight
+        run: node .github/scripts/publish-native-packages.mjs --preflight
 
       - name: Create GitHub release and upload all assets
         env:

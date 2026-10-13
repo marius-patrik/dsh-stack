@@ -2,28 +2,25 @@
 
 ## Product
 
-DSH Stack is a polished, distributable extension system for DeepSeek Harness. DSH remains the runtime and composition authority; Stack supplies independently versioned plugins, composable packs, reusable support libraries, profiles, integrations, and the release/update system around them.
+DSH Stack is a polished, distributable extension system for DeepSeek Harness. DSH remains the runtime and composition authority; Stack supplies independently versioned plugins, composable packs, reusable support libraries, integrations, and the release/update system around them.
 
 ## Architecture
 
-The canonical source is one recursive `plugins/` tree with independently publishable native bundles and their implementation plugins colocated under the corresponding bundle ownership folders. Native profile templates stay in the root `profiles/` directory. Physical nesting does not automatically mount optional plugins. Every feature has a single implementation owner. The canonical `@dsh-stack/stack` composition is identical in Web, Headless and TUI profiles. DSH-provided base/surface packages and optional independent TUI presentation adapter are profile concerns, not alternative Stack bundles.
+The canonical source is one recursive `packages/` tree with independently publishable native bundles and their implementation plugins colocated under the corresponding bundle ownership folders. No native profiles are authored in this repository. Physical nesting does not automatically mount optional plugins. Every feature has a single implementation owner. The canonical `@dsh-stack/stack` composition is identical in Web, Headless and TUI profiles. DSH-provided base/surface packages and optional independent TUI presentation adapter are profile concerns, not alternative Stack bundles.
 
 DSH owns installation, profiles, runtime, lifecycle, update/removal, and CLI. Parent bundle dependencies are flattened at build time into ordinary native patches; there is no custom runtime composition or profile manager. Users may manually activate optional capabilities in DSH.
 
-## Profiles
+## Runtime boundary
 
-- **Default** — general DSH experience.
-- **Coding** — development environment, repository workbench, editor/LSP/formatting/tooling, and absorbed DarkFactory functionality.
-- **Trading** — market data/research, deterministic indicators, backtests, optimization, provider seams, and absorbed MoneyMaker functionality.
-- **SkyBlock** — absorbed SkyAgent functionality and SkyBlock-specific tooling.
+DSH alone configures, selects, installs, upgrades and activates profiles. Stack supplies no profile templates, selection UI or profile-specific composition manager. Coding, trading and SkyBlock remain feature/domain packages, not Stack profiles.
 
 ## UI shell
 
-The Stack UI uses DSH's native slot/composition seams and does not mutate the DOM. The sidebar is a canonical implementation with action buttons above Files, profile selection above Settings, configurable New Conversation visibility, configurable brand-logo visibility, file/folder rows, three-dot context menus, muted host/container sections, and a coherent collapsed/expanded layout.
+The Stack UI uses DSH's native slot/composition seams and does not mutate the DOM. The sidebar is a canonical implementation with action buttons above Files, configurable New Conversation visibility, configurable brand-logo visibility, file/folder rows, three-dot context menus, muted host/container sections, and a coherent collapsed/expanded layout.
 
 The Files view uses DSH filesystem capabilities. Tabs, panes, terminals, conversations, containers, and workspaces share one tab model. File icons are resolved through an icon service; VS Code icon support is its own plugin.
 
-Settings contains a Profiles area, sidebar preferences, credentials, agents/personas, quotas, providers/models, and other feature-owned sections. Settings remains compact and feature-owned sections do not duplicate shell state.
+Settings contains sidebar preferences, credentials, agents/personas, quotas, providers/models, and other feature-owned sections. Settings remains compact and feature-owned sections do not duplicate shell state.
 
 Everything that changes how the Stack looks lives under one Appearance section rather than as sibling entries in the settings nav: the theme studio, skins, icons, and themes are pages inside it. Appearance owns no controls of its own — each page stays implemented by the package that owns it and registers into the section's `settings.appearance.tab` seat, so adding an appearance page never means editing the section.
 
@@ -51,7 +48,7 @@ Trading owns provider-neutral market data, deterministic research indicators, ba
 
 ## SkyBlock
 
-SkyBlock is the profile/domain destination for SkyAgent functionality, keeping the domain logic independent of the coding and trading profiles.
+SkyBlock functionality remains a domain integration independent from coding and trading packages.
 
 ## Integrations
 

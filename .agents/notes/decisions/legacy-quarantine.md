@@ -2,7 +2,7 @@
 
 Status: retired
 
-The historical package/agent implementation trees are no longer canonical. The repository's only active implementation root is `plugins/`.
+The historical package/agent implementation trees are no longer canonical. The repository's only active implementation root is `packages/`.
 
 The final architecture has one owner for each feature. Compatibility bridges, duplicate implementation trees, migration shims, legacy runtime paths, and parallel feature owners are not retained merely to preserve the previous layout.
 

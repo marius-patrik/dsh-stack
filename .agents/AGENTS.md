@@ -12,16 +12,15 @@ still-open decision (#60).
 
 ## Repository mission
 
-`KiKi` is a native DeepSeek Harness extension distribution. DSH owns installation, profile storage/activation, updates, runtime and CLI. Stack owns reusable plugins, declarative bundles, actual DSH profile templates, and release artifacts.
+`KiKi` is a native DeepSeek Harness extension distribution. DSH owns installation, profile storage/activation, updates, runtime and CLI. Stack owns reusable plugins, declarative bundles, and release artifacts.
 
 ## Canonical structure
 
-- `plugins/stack/` — publishable full Stack bundle containing its nested native bundles and plugin packages, grouped by composition. Every `package.json` remains an independent package boundary; no parallel `bundles/` or `standalone/` tree.
-- `plugins/dsh-tui/` — Chimney's external TUI submodule, activated only by the TUI profile and excluded from Stack's Bun build. There is **no** separate headless or TUI Stack bundle; all profiles consume `@dsh-stack/stack`.
+- `packages/stack/` — publishable full Stack bundle containing its nested native bundles and plugin packages, grouped by composition. Every `package.json` remains an independent package boundary; no parallel `bundles/` or `standalone/` tree.
+- `packages/dsh-tui/` — Chimney's external TUI submodule, activated only by the TUI profile and excluded from Stack's Bun build. There is **no** separate headless or TUI Stack bundle; all profiles consume `@dsh-stack/stack`.
 - The on-disk bundle hierarchy tracks source ownership; actual activation remains determined by `stack.compose`, native Cordis patches, and DSH user profile state. An optional plugin nested under a bundle is not activated merely by its location.
-- `profiles/<name>/` — genuine `dsh.profile.bundles` manifest and `cordis.patch.yml` templates, distinct from npm bundles.
-- `plugins/Cognition/` and `plugins/DarkFactory/` are independently maintained Git submodules, pinned to upstream `main` revisions. They are excluded from Stack's native npm workspace, build and release until native integration is explicitly implemented. No `_migrate/` source tree is retained.
-- `scripts/` owns build, verification and publishing only. No Stack launcher, profile manager, updater or DSH submodule.
+- `packages/Cognition/` and `packages/DarkFactory/` are independently maintained Git submodules, pinned to upstream `main` revisions. They are excluded from Stack's native npm workspace, build and release until native integration is explicitly implemented. No `_migrate/` source tree is retained.
+- `.github/scripts/` owns repository build, verification, release and GitHub automation; its `lib/` contains helpers shared by those scripts. `packages/stack/plugin-kit/` owns only actual reusable plugin development APIs, tests and client build inputs. No root `lib/` or `scripts/` directory is allowed.
 - `.agents/notes/` is the documentation root. `README.md` is standalone, and `CONTRIBUTING.md` symlinks directly to `.agents/AGENTS.md`; no root `AGENTS.md` or `CLAUDE.md`.
 
 ## Plugins and nested bundles
@@ -34,13 +33,13 @@ There is no second runtime composition system, transitional implementation path,
 
 There is exactly one implementation owner for every feature. Before adding code, locate the existing owner and extend/refactor it. Do not retain old APIs, icon registries, fallback implementations, compatibility bridges, or migration shims merely to preserve an old architecture. Claude and Codex skin-owned UI remain explicit skin ownership exceptions where specified by the product architecture.
 
-## Profiles
+## Profile ownership
 
-Installed profiles are real DSH profiles. The repository's `profiles/web`, `profiles/headless`, and `profiles/tui` are shareable native profile templates; all three reference the same complete `@dsh-stack/stack` composition, with only their native DSH surface/adapter rows differing. Users may customize optional plugin activation. Stack does not provision profiles or rewrite user overrides.
+DSH alone owns profiles, profile selection, installed profile state and activation. Stack ships no profile templates, profile manager, browser-side profile selector or profile lifecycle integration. Existing DSH profiles consume Stack's native packages on the user's terms.
 
 ## UI
 
-The Stack shell uses DSH-native slots. The sidebar provides Files, file-row actions, profile selection, configurable New Conversation/logo visibility, skins, coherent collapsed/expanded behavior, and unified workspace/tab concepts. VS Code icons are an independent extension. DeepSeek, Claude and Codex skins are independent extensions.
+The Stack shell uses DSH-native slots. The sidebar provides Files, file-row actions, configurable New Conversation/logo visibility, skins, coherent collapsed/expanded behavior, and unified workspace/tab concepts. VS Code icons are an independent extension. DeepSeek, Claude and Codex skins are independent extensions.
 
 ## Credentials and agents
 

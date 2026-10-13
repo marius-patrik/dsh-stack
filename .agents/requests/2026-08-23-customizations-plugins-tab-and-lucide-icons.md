@@ -29,8 +29,8 @@ status: scoped
 
 This record was written during session 68 but never committed. It survived only
 inside `stash@{1}` ("session-68 wip: commands/presets/skills icons"), alongside
-implementation work against the retired `plugins/dsh-actions/` and
-`plugins/dsh-tweaks/` layout. The directives above were therefore untracked from
+implementation work against the retired `packages/dsh-actions/` and
+`packages/dsh-tweaks/` layout. The directives above were therefore untracked from
 2026-08-23 until 2026-08-27, when a roadmap audit found the stash.
 
 The stashed implementation is not recoverable — it targets a directory layout the

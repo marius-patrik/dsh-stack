@@ -54,8 +54,8 @@ jobs:
           mkdir -p .release
           gh release download "$tag" --dir .release --clobber
           (cd .release && sha256sum --check SHA256SUMS)
-          node scripts/verify-release-assets.mjs
-          node scripts/publish-native-packages.mjs --plan
+          node .github/scripts/verify-release-assets.mjs
+          node .github/scripts/publish-native-packages.mjs --plan
 
       - name: Require tokenless OIDC publishing
         run: |
@@ -69,7 +69,7 @@ jobs:
       - name: Publish dependency graph to public npm via OIDC
         env:
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-        run: node scripts/publish-native-packages.mjs
+        run: node .github/scripts/publish-native-packages.mjs
 
       - name: Verify native installation from public npm
         env:
