@@ -4,6 +4,8 @@
 
 Stack's **91 public npm packages** were successfully published and verified using **tokenless GitHub Actions OIDC** with [release v0.24.6](https://github.com/marius-patrik/dsh-stack/releases/tag/v0.24.6). [Publication run #38135582481](https://github.com/marius-patrik/dsh-stack/actions/runs/38135582481) passed exact-byte registry verification for all 91 packages and clean native DSH Web, Headless, Chimney TUI, and Web remove/reinstall checks. The release contains 91 versioned `.tgz` archives plus `component-assets.json`, `stack-release.json`, `stack-release.sha256`, and `SHA256SUMS`.
 
+Following the source relocation, [release v0.24.8](https://github.com/marius-patrik/dsh-stack/releases/tag/v0.24.8) published all 91 incremented native package versions successfully with the same tokenless OIDC trust. [Publication workflow #38439397058](https://github.com/marius-patrik/dsh-stack/actions/runs/38439397058) passed public-registry exact-byte verification and clean native DSH installation. The pre-release registry-collision gate was added after the v0.24.7 conflict; it passed for v0.24.8 before the release was created. The earlier v0.24.6 paragraph records the original trusted-publisher bootstrap, not the latest release.
+
 The [publisher](../../.github/workflows/publish-native-npm.yml) **does not read `NPM_TOKEN`**. It requires npm CLI >= 11.5.1, GitHub-hosted runners, `id-token: write`, no `NODE_AUTH_TOKEN`, and the npm trusted-publisher relationship for each package. The published package metadata identifies `marius-patrik/dsh-stack` as the source repository.
 
 The trusted publisher for each `@dsh-stack/*` package must be configured with:
