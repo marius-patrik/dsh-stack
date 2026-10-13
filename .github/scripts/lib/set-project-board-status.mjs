@@ -31,17 +31,7 @@ export function setProjectBoardStatus(write) {
   if (!itemId) {
     itemId = JSON.parse(
       runGh(
-        [
-          "project",
-          "item-add",
-          String(number),
-          "--owner",
-          owner,
-          "--url",
-          url,
-          "--format",
-          "json",
-        ],
+        ["project", "item-add", String(number), "--owner", owner, "--url", url, "--format", "json"],
         token,
       ),
     ).id;

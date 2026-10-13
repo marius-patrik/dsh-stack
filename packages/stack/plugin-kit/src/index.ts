@@ -93,7 +93,6 @@ export function validateCatalog(catalog: PluginCatalog): void {
         throw new Error(`${pack.id} references unknown plugin ${pluginId}`);
     }
   }
-
 }
 
 /**

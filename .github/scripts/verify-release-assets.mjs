@@ -3,7 +3,12 @@ import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { listPluginPackageDirs, listBundlePackageDirs, readJson, root } from "../../lib/repo-paths.mjs";
+import {
+  listPluginPackageDirs,
+  listBundlePackageDirs,
+  readJson,
+  root,
+} from "../../lib/repo-paths.mjs";
 
 const run = promisify(execFile);
 const dir = join(root, ".release");

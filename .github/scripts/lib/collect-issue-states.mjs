@@ -86,7 +86,16 @@ function collectBlockedByCounts({ owner, repo, token }) {
           }
         }
       }`;
-      const args = ["api", "graphql", "-f", `query=${query}`, "-F", `owner=${owner}`, "-F", `repo=${repo}`];
+      const args = [
+        "api",
+        "graphql",
+        "-f",
+        `query=${query}`,
+        "-F",
+        `owner=${owner}`,
+        "-F",
+        `repo=${repo}`,
+      ];
       if (cursor) args.push("-F", `cursor=${cursor}`);
       const page = JSON.parse(runGh(args, token)).data.repository.issues;
       for (const node of page.nodes) counts.set(node.number, node.blockedBy.totalCount);

@@ -1,7 +1,10 @@
 // jscpd:ignore-start -- per-package check-plugin.mjs scaffolding, duplicated by design across sibling packages
 import assert from "node:assert";
 import { readFileSync } from "node:fs";
-import { assertLoaderShape, loadClientLoaderSpec } from "../../plugin-kit/test/plugin-check-kit.mjs";
+import {
+  assertLoaderShape,
+  loadClientLoaderSpec,
+} from "../../plugin-kit/test/plugin-check-kit.mjs";
 
 const plugin = await import("./lib/index.js");
 assertLoaderShape(plugin, "agent-actions");

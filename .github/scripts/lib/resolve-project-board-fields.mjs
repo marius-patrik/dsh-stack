@@ -28,10 +28,7 @@ export function resolveProjectBoardFields({ owner, number, token }) {
   if (!project) throw new Error(`no project number ${number} owned by ${owner}`);
 
   const fields = JSON.parse(
-    runGh(
-      ["project", "field-list", String(number), "--owner", owner, "--format", "json"],
-      token,
-    ),
+    runGh(["project", "field-list", String(number), "--owner", owner, "--format", "json"], token),
   ).fields;
   const status = fields.find((field) => field.name === "Status");
   if (!status) throw new Error(`project ${number} has no Status field`);
