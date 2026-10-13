@@ -1,0 +1,24 @@
+name: Normalize manifests
+on:
+  push:
+    branches: [fix/native-package-version-collision]
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bunx biome format --write .
+      - run: |
+          rm .github/workflows/normalize-manifests-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'style: format native manifests'
+          git push
