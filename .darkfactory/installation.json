@@ -4,12 +4,12 @@
   "slug": "marius-patrik/dsh-stack",
   "sourceBranch": "main",
   "release": {
-    "tag": "v0.291.5",
-    "sha": "d6644d74ae578a73aa2cba988a4f16b6a6e98753",
-    "digest": "bd599d7e9bfd0c6f61655275b2aedcbecacb1a269097200fbbecf319da4384ea"
+    "tag": "v0.291.6",
+    "sha": "368eb9d75d5d828e7ac17fe590d4dc17b028cebc",
+    "digest": "9b601ce17446348fbbac74597067855be7c05f004670cd14d9d77dd40ab545e0"
   },
   "fileHashes": {
-    "repo.dfconfig": "4e01356fbec63785959588de55f5ff65c852e4d232d51830187dbf8c207f8e74",
-    ".github/workflows/darkfactory-control.yml": "899911f1bb7ef38d03deeb9d368adb760307468c7e455d63354bd2185475efe5"
+    "repo.dfconfig": "b4e0a632c19aa404c7a4b2bcd48df84e1a7b504e024a54edf87be697ba070fbe",
+    ".github/workflows/darkfactory-control.yml": "5576e69d4c28aea534989a0b76b06727af4e8df8a1f44405bf0668037771fa92"
   }
 }
