@@ -3,6 +3,9 @@
 # settings.section seat.
 
 - insert:
+    - id: agent-kernel
+      name: '@dsh-stack/agent-kernel'
+      config: {}
     - id: agents
       name: '@dsh-stack/agents'
       config: {}

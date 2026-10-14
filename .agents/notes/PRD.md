@@ -63,3 +63,7 @@ The external DSH runtime and native package manager install, update, activate, a
 ## Quality bar
 
 No duplicate implementations, compatibility bridges, migration shims, legacy detectors, placeholder services, checked-in generated output, unchecked unsafe casts, or unfinished markers. CI is the executable quality gate. UI work is considered complete only when it is connected to actual DSH seams and behaves coherently in the real client.
+
+## Durable agent identity and environments
+
+The agents bundle includes a persistent agent kernel independently of conversation sessions, model routes and presets. Its stable identity and append-only multi-source event history survive process restarts. Event insertion and cursor advancement are atomic and source-event replays must be idempotent. External environments register ordered source streams and semantic capabilities, while DSH remains usable without any specific external environment. Memory extraction and durable activity execution are separate capabilities.
