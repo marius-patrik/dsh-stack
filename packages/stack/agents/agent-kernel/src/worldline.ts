@@ -6,7 +6,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { compareCursor, normalizeCursor } from "./cursor.js";
+import { compareCursor } from "./cursor.js";
 import { decodeSourceEvent, encodeSourceEvent, normalizeSourceEvent } from "./envelope.js";
 import { WORLDLINE_SCHEMA } from "./schema.js";
 import type { AgentEventRecord, SourceEvent } from "./types.js";
@@ -194,6 +194,3 @@ export class AgentWorldline {
     return id;
   }
 }
-
-/** Validate a cursor without opening a worldline; exported for environment authors. */
-export { normalizeCursor };

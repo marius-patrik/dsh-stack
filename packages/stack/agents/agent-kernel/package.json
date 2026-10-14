@@ -39,8 +39,5 @@
     "@deepseek-ai/cordis": "^4.0.1",
     "@types/node": "^22.15.0",
     "typescript": "^6.0.3"
-  },
-  "dependencies": {
-    "@dsh-stack/plugin-kit": "workspace:*"
   }
 }

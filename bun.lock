@@ -102,9 +102,6 @@
     "packages/stack/agents/agent-kernel": {
       "name": "@dsh-stack/agent-kernel",
       "version": "0.1.0",
-      "dependencies": {
-        "@dsh-stack/plugin-kit": "workspace:*",
-      },
       "devDependencies": {
         "@deepseek-ai/cordis": "^4.0.1",
         "@types/node": "^22.15.0",

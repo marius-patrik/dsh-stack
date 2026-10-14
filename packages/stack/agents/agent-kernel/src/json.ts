@@ -23,10 +23,3 @@ export function isJsonValue(value: unknown): value is JsonValue {
   }
   return true;
 }
-
-/** Parse JSON and reject values outside the durable JSON contract. */
-export function parseJsonValue(text: string): JsonValue {
-  const value: unknown = JSON.parse(text);
-  if (!isJsonValue(value)) throw new Error("agent-kernel: stored event envelope is not JSON-safe");
-  return value;
-}
