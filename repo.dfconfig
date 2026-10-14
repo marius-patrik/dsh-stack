@@ -1,0 +1,25 @@
+{
+  "repo": {
+    "identity": {
+      "owner": "marius-patrik",
+      "repo": "dsh-stack",
+      "display_name": "dsh-stack",
+      "project_title": "dsh-stack",
+      "default_branch": "main",
+      "development_branch": "main"
+    },
+    "upstream": {
+      "repo": "marius-patrik/DarkFactory",
+      "ref": "4eb98c408eada7edd6366e46897fc54ea6b42ec1"
+    },
+    "board": {
+      "global": "Global",
+      "boards": [
+        "Global",
+        "dsh-stack"
+      ]
+    }
+  },
+  "docs": {},
+  "providers": {}
+}
