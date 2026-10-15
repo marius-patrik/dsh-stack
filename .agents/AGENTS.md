@@ -127,3 +127,7 @@ An action that cannot proceed says so rather than returning as though it succeed
 ## Verification standard
 
 Completion requires workspace typecheck, workspace build, package-contract verification, duplicate-source verification, placeholder/unchecked-cast/unfinished-code verification, package tests, release packaging/manifest generation, and real user-visible UI wiring. Never weaken a verifier to make CI green; fix the implementation or repository structure.
+
+## Persistent agent kernel boundary
+
+See [.agents/rules/persistent-agent-kernel.md](rules/persistent-agent-kernel.md). The agent kernel owns durable identity, append-only events and environment/capability contracts; it does not own DSH profiles, model routing, personas or provider implementations.
