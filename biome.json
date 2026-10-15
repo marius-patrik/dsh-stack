@@ -12,13 +12,12 @@
       "!**/.next",
       "!worktrees",
       "!**/worktrees",
-      "!plugins/Cognition",
-      "!plugins/Cognition/**",
-      "!plugins/DarkFactory",
-      "!plugins/DarkFactory/**",
-      "!plugins/dsh-tui",
-      "!plugins/dsh-tui/**",
-      "!.claude"
+      "!packages/Cognition",
+      "!packages/Cognition/**",
+      "!packages/DarkFactory",
+      "!packages/DarkFactory/**",
+      "!packages/dsh-tui",
+      "!packages/dsh-tui/**"
     ]
   },
   "formatter": {

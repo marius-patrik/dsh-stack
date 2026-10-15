@@ -1,25 +1,21 @@
 # AGENTS.md
 
-## Canonical rule files
+## Canonical rules
 
-Each standing rule below also exists as its own individually addressable file
-under `.agents/rules/`, one file per rule. Reference a single rule by its file
-(e.g. `.agents/rules/branch-and-merge-policy.md`) instead of quoting a slice of
-this document. This file still carries the full text of every rule; the split
-into `.agents/rules/` is the canonical per-rule addressing layer, and whether
-this document later becomes a generated index over those files is a separate,
-still-open decision (#60).
+This file describes the repository's governing implementation contract. Smaller,
+individually addressable rules live under `.agents/rules/`. Keep both consistent:
+a change to a standing rule updates the relevant rule file and this contract.
 
 ## Repository mission
 
-`KiKi` is a native DeepSeek Harness extension distribution. DSH owns installation, profile storage/activation, updates, runtime and CLI. Stack owns reusable plugins, declarative bundles, and release artifacts.
+DSH Stack is a native DeepSeek Harness extension distribution. DSH owns installation, profile storage/activation, updates, runtime and CLI. Stack owns reusable plugins, declarative bundles, and release artifacts.
 
 ## Canonical structure
 
 - `packages/stack/` — publishable full Stack bundle containing its nested native bundles and plugin packages, grouped by composition. Every `package.json` remains an independent package boundary; no parallel `bundles/` or `standalone/` tree.
 - `packages/dsh-tui/` — Chimney's external TUI submodule, activated only by the TUI profile and excluded from Stack's Bun build. There is **no** separate headless or TUI Stack bundle; all profiles consume `@dsh-stack/stack`.
 - The on-disk bundle hierarchy tracks source ownership; actual activation remains determined by `stack.compose`, native Cordis patches, and DSH user profile state. An optional plugin nested under a bundle is not activated merely by its location.
-- `packages/Cognition/` and `packages/DarkFactory/` are independently maintained Git submodules, pinned to upstream `main` revisions. They are excluded from Stack's native npm workspace, build and release until native integration is explicitly implemented. No `_migrate/` source tree is retained.
+- `packages/Cognition/` and `packages/DarkFactory/` are independently maintained Git submodules, pinned to upstream `main` revisions. They are excluded from Stack's native npm workspace, build and release until native integration is explicitly implemented.
 - `.github/scripts/` owns repository build, verification, release and GitHub automation; its `lib/` contains helpers shared by those scripts. `packages/stack/plugin-kit/` owns only actual reusable plugin development APIs, tests and client build inputs. No root `lib/` or `scripts/` directory is allowed.
 - `.agents/notes/` is the documentation root. `README.md` is standalone, and `CONTRIBUTING.md` symlinks directly to `.agents/AGENTS.md`; no root `AGENTS.md` or `CLAUDE.md`.
 
@@ -57,11 +53,9 @@ bun run test
 
 ## Web UI boundary
 
-The intended separate web UI base is `zhu1090093659/dsh-web-ui`, default branch `dev`. Its tab implementation is the reference/base for the Stack web UI. `zhu1090093659/DSH-better-sidebar` is a separate sidebar reference. Do not copy either project into `dsh-stack` as a second implementation.
-
-## CI node architecture
-
-CI automation is intended to run on a real DSH node managed through `dsh-hosts`, not on a bare GitHub runner installation. The node must boot the complete Stack, synchronize repository/node state through `dsh-hosts`, select the `headless` profile, and expose the GitHub Actions runner as one node capability. Credentials remain outside the repository.
+Stack contributes to DSH-native UI slots and services. Shared UI concepts use one
+component and one state owner, parameterized by placement. External visual references
+are not implementation dependencies or independent client runtimes.
 
 ## Documentation
 
@@ -96,7 +90,7 @@ Event-driven hooks cannot do this alone, and the reason is structural: GitHub ru
 
 ## Release model
 
-The Stack version increments on every merge to `main`. Releases contain the complete native plugin catalog, with exact versions, dependencies, integrity data, and distributable artifacts for every included package.
+GitHub release tags coordinate the native plugin and bundle inventory. Individual npm package versions are immutable and change only when their published contents change; each release records exact dependency and integrity data.
 
 ## Issue, roadmap, and dispatch policy
 
@@ -108,7 +102,7 @@ The Stack version increments on every merge to `main`. Releases contain the comp
 - When you stumble on anything out of scope — a defect, dead or duplicated code, a missing capability, an unenforced rule — file it as an issue (or comment on the existing one) before moving on. A finding recorded only in a session transcript is lost when that session ends.
 - When independent, well-scoped execution work can run unattended (a single child issue, a single sub-scope with clear acceptance criteria), prefer dispatching it to a separate execution agent (a background subagent, or the Kimi CLI where available) running in its own worktree, rather than doing it serially in the primary session — this parallelizes throughput and conserves the primary session's own usage budget.
 - Before dispatching, decompose the issue into small chunks — narrow, sequential, low-ambiguity steps (e.g. "create the section shell", "move content A in", "move content B in", "retire the old registrations") — not one open-ended "implement this issue" prompt. A chunk that still requires real judgment calls, unresolved architecture questions, or live debugging of an inconsistent repro is not junior-dispatchable as scoped; either scope it down further first, or route it to more capable execution (Kimi, or the primary session itself) instead of a junior/headless run.
-- Spread dispatched work across every configured, healthy provider account, not the same one or two repeatedly. `Settings → Accounts` under-represents what's actually configured (see #247) — the authoritative list is `providers.custom` in `.data/settings.yaml` (`grep 'apiKeyEnv' .data/settings.yaml` for a quick census), which `dsh --profile headless` reads directly. At last count that included multiple accounts each for OpenRouter, Mistral, Groq, Gemini, Cerebras, SambaNova, and Z.ai, plus Ollama/local — treat that file, not the Settings UI, as ground truth when picking dispatch targets. The chunk decomposition above and this spread work together: many small independent chunks on many different accounts route around any single provider or account's rate/usage limit, so a limit hit stalls only its own chunk rather than the batch. Within one dispatched run, `dsh`'s own same-vendor account rotation already recovers from a mid-task quota/rate-limit error onto a sibling account without losing progress (see the quota-consolidation work, #164) — this bullet is about the *initial* spread across a batch of dispatches, not manually babysitting an individual run.
+- Distribute eligible independent work across configured, healthy model routes within their quotas and permissions. Discover available routes through native DSH provider services, not hard-coded account lists or local credential files. Keep credentials private and preserve resumable progress when a route is unavailable.
 
 ## Duplication exemptions
 

@@ -26,7 +26,7 @@ Each `@dsh-stack/*` package's npm trusted publisher must match GitHub Actions, o
 
 Verify published packages by installing them through the independently distributed DSH CLI into fresh, isolated DSH-managed Web, Headless and TUI profiles, dumping the resolved configuration, testing real browser composition, and removing/reinstalling the Web bundle. Chimney's `@deepseek-harness-tui/dsh-tui` is installed independently by DSH, not bundled by Stack.
 
-The integration matrix pins DSH `0.2.0-rc.2` and Chimney TUI `0.14.0`; confirm compatibility before updating those versions. Tests use disposable DSH profiles and do not author or mutate profile templates in Stack.
+The integration matrix validates its declared DSH and Chimney TUI versions against fresh native installations. Update the matrix and compatibility fixtures together when a supported dependency changes. Tests use disposable DSH profiles and do not author or mutate profile templates in Stack.
 
 ## Recovery
 

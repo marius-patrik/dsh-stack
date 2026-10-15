@@ -32,11 +32,9 @@ A package with no mutable state (presentational components, constants) does
 not need this treatment: duplicating stateless code across bundles costs
 bundle size, not correctness, so it stays a plain inlined dependency.
 
-## Applied
+## Owners
 
-`skin-runtime` (the active-skin id, consumed by `skin-host` and
-`skin-settings`) and `sidebar-preferences` (sidebar toggle state, consumed by
-`sidebar-settings` and `sidebar-shell`) were converted under this rule and
-`@dsh-stack/plugin-kit/cross-bundle-channel` (the prior DOM-event/localStorage
-workaround) was retired. `settings-panel` (pure presentational furniture, no
-state) was left as an ordinary inlined dependency.
+`skin-runtime` owns active-skin state consumed by `skin-host` and
+`skin-settings`. `sidebar-preferences` owns persisted sidebar presentation
+state consumed by the sidebar UI packages. Stateless presentational components
+such as `settings-panel` do not provide mutable cross-bundle state.

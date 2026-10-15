@@ -82,21 +82,13 @@ Anything that must be true of *every* item therefore needs a reconciler that can
 rederive the answer from current truth, independent of which events fired. The
 event triggers exist for latency; the schedule exists for completeness.
 
-## Editing the Status field wipes every item's value
+## Project Status field updates
 
-`updateProjectV2Field` replaces a single-select field's option set wholesale
-rather than appending to it, and **regenerates every option id in the process**.
-Items store the id, not the name, so adding one option orphans the stored value
-on every item at once — observed here as 172 of 174 items dropping to no Status
-from a single mutation adding `Ideas`.
-
-The recovery is the sweep, and this is precisely why Status is derived rather
-than authored: one `node .github/scripts/sweep-repository-hygiene.mjs` restored all
-135 affected items from repository state. Nothing was lost, because nothing was
-stored only on the board.
-
-When adding a Status option, pass the complete option list including every
-existing one, expect the wipe, and run the sweep immediately afterwards.
+A GitHub Projects single-select option-set replacement can invalidate
+stored option IDs. Read the complete option set before changing it; preserve
+the intended options, verify item statuses after the update, and run the
+repository reconciliation sweep immediately. Never rely on project board
+state as the only record of issue status.
 
 ## Destructive actions are logged
 

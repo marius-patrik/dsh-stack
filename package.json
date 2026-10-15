@@ -23,7 +23,7 @@
     "verify:jsdocs": "node .github/scripts/verify-jsdocs.mjs",
     "verify:duplicates": "jscpd packages .github/scripts",
     "verify:dead-code": "knip --no-progress",
-    "verify": "bun run verify:plugin-readmes && bun run verify:jsdocs && bun run verify:duplicates && bun run verify:jscpd-exemptions && bun run verify:dead-code && bun run verify:stateful-client-packages && bun run verify:bundle-composition && node .github/scripts/verify-stack.mjs && bun run --filter '*' --if-present verify",
+    "verify": "bun run verify:plugin-readmes && bun run verify:active-docs && bun run verify:jsdocs && bun run verify:duplicates && bun run verify:jscpd-exemptions && bun run verify:dead-code && bun run verify:stateful-client-packages && bun run verify:bundle-composition && node .github/scripts/verify-stack.mjs && bun run --filter '*' --if-present verify",
     "test": "node --test '.github/scripts/**/*.test.mjs' && bun run --filter '*' --if-present test",
     "release:manifest": "node .github/scripts/release.mjs manifest",
     "release:version": "node .github/scripts/release.mjs version",
@@ -33,7 +33,8 @@
     "verify:jscpd-exemptions": "node .github/scripts/verify-jscpd-exemptions.mjs",
     "browser:check": "node .github/scripts/browser-check.mjs",
     "verify:bundle-composition": "node .github/scripts/generate-bundles.mjs --check",
-    "release:local-fixtures": "node .github/scripts/release.mjs local-fixtures"
+    "release:local-fixtures": "node .github/scripts/release.mjs local-fixtures",
+    "verify:active-docs": "node .github/scripts/verify-active-docs.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",

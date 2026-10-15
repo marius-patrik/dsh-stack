@@ -5,12 +5,11 @@ repository automations. It contributes exactly one thing — the
 `AutomationsRegistry` cordis service — and deliberately ships no automation of
 its own.
 
-Per the plugin/extension/pack model in `.agents/rules/plugin-extension-and-pack-model.md`,
-a plugin defines the contract that concrete implementations plug into, and every
-individual concrete implementation is its own extension. So each repository
-automation — autoreview, autofix, autodoc, and the GitHub agent from #52 — lands
-as its own extension package registering into this plugin, never as another
-feature bundled inside it.
+Per the native package and bundle ownership rule in
+`.agents/rules/native-bundle-composition.md`, the registry contract and each
+concrete automation implementation have independent package owners. A registered
+automation is active only when its native package has been explicitly mounted;
+declarations alone do not schedule work.
 
 ## The contract
 

@@ -1,15 +1,20 @@
----
-date: 2026-08-27
-status: active
----
+# Issue, roadmap and dispatch policy
 
-# Issue, roadmap, and dispatch policy
-
-- Merged same-repository branches must actually auto-delete: the repository's `delete_branch_on_merge` setting must stay enabled, not just documented as a policy.
-- Large or multi-part work is tracked as an `epic`-labeled master issue with a checklist of child issue links, not as one giant issue or one giant PR. Each child issue gets its own worktree and PR.
-- Every open issue and PR is kept on the repository's project board: **`dsh-stack`, project number 13, owner `marius-patrik`** (`gh project item-add 13 --owner marius-patrik --url <issue-or-pr-url>`) — this is the only project actually linked to this repository (verify via `gh api graphql -f query='{ repository(owner:"marius-patrik", name:"dsh-stack") { projectsV2(first:20) { nodes { number title } } } }'` if in doubt, rather than trusting a remembered number). Each item's `Status` field is kept current with its real state. Every item also carries an `area:*` label and a `severity:*` label (`critical`/`high`/`low` etc.) so priority is visible without re-deriving it from scratch each session.
-- Work with a real dependency chain between packages (e.g. a foundation package other packages build on) uses stacked PRs: land the foundation PR first, then branch dependents from post-merge `main`, not from each other's unmerged branches.
-- A UI bug fix or UI-facing feature is not done until verified live in a real browser against a genuinely booted harness — passing typecheck/build/verify/test is necessary but not sufficient proof a UI feature actually works.
-- When independent, well-scoped execution work can run unattended (a single child issue, a single sub-scope with clear acceptance criteria), prefer dispatching it to a separate execution agent (a background subagent, or the Kimi CLI where available) running in its own worktree, rather than doing it serially in the primary session — this parallelizes throughput and conserves the primary session's own usage budget.
-- Before dispatching, decompose the issue into small chunks — narrow, sequential, low-ambiguity steps (e.g. "create the section shell", "move content A in", "move content B in", "retire the old registrations") — not one open-ended "implement this issue" prompt. A chunk that still requires real judgment calls, unresolved architecture questions, or live debugging of an inconsistent repro is not junior-dispatchable as scoped; either scope it down further first, or route it to more capable execution (Kimi, or the primary session itself) instead of a junior/headless run.
-- Spread dispatched work across every configured, healthy provider account, not the same one or two repeatedly. `Settings → Accounts` under-represents what's actually configured (see #247) — the authoritative list is `providers.custom` in `.data/settings.yaml` (`grep 'apiKeyEnv' .data/settings.yaml` for a quick census), which `dsh --profile headless` reads directly. At last count that included multiple accounts each for OpenRouter, Mistral, Groq, Gemini, Cerebras, SambaNova, and Z.ai, plus Ollama/local — treat that file, not the Settings UI, as ground truth when picking dispatch targets. The chunk decomposition above and this spread work together: many small independent chunks on many different accounts route around any single provider or account's rate/usage limit, so a limit hit stalls only its own chunk rather than the batch. Within one dispatched run, `dsh`'s own same-vendor account rotation already recovers from a mid-task quota/rate-limit error onto a sibling account without losing progress (see the quota-consolidation work, #164) — this bullet is about the *initial* spread across a batch of dispatches, not manually babysitting an individual run.
+- Every actionable feature or defect has a GitHub issue with one implementation
+  owner, user value or reproduced failure, dependencies and behavior-driven
+  acceptance criteria. Deferred concepts are labeled `type:idea` and are
+  not implementation authorization.
+- Large changes use an epic plus independently verifiable child issues.
+  Dependent work branches from the merged foundation, not unmerged PR chains.
+- The repository's canonical project board is `marius-patrik` project 13;
+  keep issue and PR statuses consistent through the repository hygiene sweep.
+- Every pull request must refer to the issue or issues it addresses and
+  contain the latest `main` tip. Merged feature branches are auto-deleted.
+- UI changes require real native DSH browser interaction verification,
+  not only build success or static rendering.
+- Independent work may be dispatched across eligible models, with each
+  execution scoped to one branch and one observable goal. Reviewers own
+  architectural decisions and merge approval.
+- Record newly discovered out-of-scope defects in a concrete issue; do not
+  leave them as untracked transcript notes.
+- Use #352 for the dependency order and approved execution gates.
