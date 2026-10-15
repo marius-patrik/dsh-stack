@@ -1,7 +1,7 @@
 {
   "id": "stack.library.plugin-kit",
   "name": "@dsh-stack/plugin-kit",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "kind": "library",
   "description": "Reusable authoring, settings, responses and native DSH client-build utilities.",
   "files": ["lib", "client-runtime", "package.json", "README.md"],
