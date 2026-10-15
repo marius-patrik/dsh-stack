@@ -2,7 +2,7 @@
 
 ## Product
 
-DSH Stack is a polished, distributable extension system for DeepSeek Harness. DSH remains the runtime and composition authority; Stack supplies independently versioned plugins, composable packs, reusable support libraries, integrations, and the release/update system around them.
+DSH Stack is a polished, distributable extension system for DeepSeek Harness. DSH remains the runtime and composition authority; Stack supplies independently versioned plugins, native bundles, reusable support libraries, integrations, and reproducible release artifacts.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ DSH owns installation, profiles, runtime, lifecycle, update/removal, and CLI. Pa
 
 ## Runtime boundary
 
-DSH alone configures, selects, installs, upgrades and activates profiles. Stack supplies no profile templates, selection UI or profile-specific composition manager. Coding, trading and SkyBlock remain feature/domain packages, not Stack profiles.
+DSH alone configures, selects, installs, upgrades and activates profiles. Stack supplies no profile templates, selection UI or profile-specific composition manager. Coding and trading remain feature/domain packages, not Stack profiles.
 
 ## UI shell
 
@@ -24,7 +24,7 @@ Settings contains sidebar preferences, credentials, agents/personas, quotas, pro
 
 Everything that changes how the Stack looks lives under one Appearance section rather than as sibling entries in the settings nav: the theme studio, skins, icons, and themes are pages inside it. Appearance owns no controls of its own — each page stays implemented by the package that owns it and registers into the section's `settings.appearance.tab` seat, so adding an appearance page never means editing the section.
 
-Quota status has no standalone page: the Accounts and Models settings sections embed live quota meter bars, status lights, and reset timers directly against the provider/account cards they describe, including a per-account breakdown for multi-account vendors (OpenRouter, Groq, Cerebras, and any other numbered custom provider a user configures). The `QuotaRegistry`/`QuotaSnapshot` probing engine and its `/quotas/api/*` endpoints remain the one data source both the built-in provider cards and the custom-vendor breakdown read from.
+Quota status belongs alongside provider and account configuration, with measured usage, status and reset information attached to the corresponding cards. Each distinct account has its own measured state. The `QuotaRegistry`/`QuotaSnapshot` probing engine and its `/quotas/api/*` endpoints remain the one data source both the built-in provider cards and the custom-vendor breakdown read from.
 
 ## Skins and branding
 
@@ -38,21 +38,19 @@ Agents use DSH's native agent-preset primitive. Stack supplies actual preset res
 
 The credential stack supports API keys, passwords, TOTP seeds and QR provisioning, OAuth grants, passkeys/WebAuthn metadata, recovery codes, SSH keys, certificates, cookie jars, and generic secrets. Secret material is kept behind the credential seam; provider configuration stores references rather than raw secrets. The vault uses authenticated encryption and explicit secret typing.
 
-## Coding
+## Coding and integrations
 
-Coding owns repository interaction, editor/LSP/formatting/tooling integrations, code-server and automation features absorbed from DarkFactory, with GitHub/GitHub Projects and Trello exposed as independent integration plugins.
+Repository, workspace, host, formatting, LSP and terminal capabilities are
+implemented as separately owned packages under `packages/stack/integrations/`.
+DarkFactory and Cognition remain independently maintained source dependencies.
+A feature is published only when its native DSH integration and runtime behavior
+are implemented and verified.
 
 ## Trading
 
-Trading owns provider-neutral market data, deterministic research indicators, backtests, optimization and verification. The research/backtest/optimizer chain is deterministic and does not fabricate unsupported metrics.
-
-## SkyBlock
-
-SkyBlock functionality remains a domain integration independent from coding and trading packages.
-
-## Integrations
-
-Every external service is its own plugin. At minimum the stack supports GitHub, GitHub Projects, Trello, Git/GitLab/Forgejo, provider adapters, container/host integrations, LSP servers, terminal integrations, and other absorbed useful capabilities.
+Research, market-data, backtest and optimization packages are optional domain
+capabilities. A claim of market accuracy or backtest support requires
+provider-backed inputs and deterministic, externally verified behavior.
 
 ## Packaging and distribution
 

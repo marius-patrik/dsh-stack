@@ -97,7 +97,7 @@ async function trackedGeneratedFiles() {
   }
 }
 
-/** Validate one canonical native package against KiKi's package contract. */
+/** Validate one canonical native package against the DSH Stack package contract. */
 async function verifyPackage(dir) {
   const packagePath = join(dir, "package.json");
   const stackPath = join(dir, "stack.json");
@@ -137,7 +137,7 @@ async function verifyPackage(dir) {
   );
   assert(
     ["plugin", "library"].includes(String(stack.kind)),
-    `${label} has invalid kind ${String(stack.kind)}; logical bundles are folders, not packages`,
+    `${label} has invalid kind ${String(stack.kind)}; bundle manifests declare dsh.bundle.patch and do not require stack.json`,
   );
   assert(
     typeof stack.version === "string" && /^\d+\.\d+\.\d+$/.test(stack.version),

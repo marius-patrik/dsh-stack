@@ -26,7 +26,7 @@ Every skin is its own plugin. A skin may own logo/brand assets, colors/tokens, t
 
 ## Settings UI
 
-Use DSH's ordinary plugin/settings surface as the baseline. Do not introduce an oversized legacy Stack plugin-settings shell merely to support skins or sidebar branding.
+Use DSH's ordinary plugin/settings surface as the baseline. Do not introduce an independent plugin-settings shell merely to support skins or sidebar branding.
 
 ## No-duplicate rule
 

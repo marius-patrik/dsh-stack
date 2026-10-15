@@ -1,38 +1,37 @@
-# Plugin Composition Model
+# Native plugin and bundle composition
 
-Status: target architecture decision
-Date: 2026-08-22
+Status: active
 
-## Decision
+## Authority
 
-DSH Stack does not require a custom runtime plugin manager merely to resolve plugin dependencies. The native DSH/Cordis composition system remains responsible for plugin lifecycle and dependency resolution. Stack adds a higher-level composition layer for reusable plugin packs/bundles and product profiles.
+DeepSeek Harness is the sole authority for profiles, package installation,
+runtime lifecycle, service injection, and activation. Stack implements native
+plugins and declares native DSH bundle patches; it does not manage profiles.
 
-## Responsibilities
+## Source graph
 
-### DSH / Cordis
+`packages/stack/` contains nested bundle and plugin npm packages.
+Each native bundle declares `dsh.bundle.patch` in its manifest. Its
+`stack.compose` edges name child bundles and their required package
+dependencies. The build generator resolves the graph, deduplicates shared
+children and emits native Cordis patch rows. Source-directory nesting does
+not implicitly activate a package.
 
-Own plugin lifecycle, dependency injection and service availability, required dependency resolution, optional dependency semantics where supported by DSH, plugin activation/disposal, and runtime service ownership.
+The published `@dsh-stack/stack` aggregate exposes one composition graph
+to compatible Web, Headless and TUI DSH profiles. Surface differences
+belong to DSH's native profile/environment, not alternate Stack graphs.
 
-### Stack composition
+## Contract
 
-Own plugin manifests as package metadata, required and optional plugin relationships expressed in a DSH-compatible way, reusable plugin packs/bundles, pack composition and nesting, profile composition, product-specific bundle selection, bundle-level configuration/patches, capability/catalog metadata, and installation/distribution metadata.
-
-## Dependency model
-
-A required dependency missing from a composition is a composition/boot error. We do not implement a parallel DAG executor to reproduce this. Optional integrations must be capability-tested and must not make the optional plugin a hard dependency.
-
-## Plugin packs / bundles
-
-A plugin is an independently owned runtime capability. A plugin pack is a distributable composition of plugins intended to work together. Packs compose recursively into a final DSH profile/bundle graph. A pack is composition metadata, not a runtime service and not a replacement for Cordis.
-
-## Product profiles
-
-The default, coding, trading and skyblock profiles compose shared packs plus product-specific packs and direct plugin rows where necessary.
-
-## No duplicate manager
-
-The old `plugin-manager` package should not be preserved merely because the existing repository has one. It is a candidate for deletion unless the final audit identifies a separate concrete product capability that DSH/Cordis and profile/bundle composition do not provide.
+- Every runtime capability and client state service has one owner.
+- Required dependencies fail deterministically when absent.
+- Optional integrations check capabilities and report unavailability.
+- Multiple patch layers cannot register conflicting row IDs or silently
+  ignore an intended target.
+- All external operations and UI slots use actual native DSH interfaces.
 
 ## Verification
 
-The final implementation must verify required dependency failures deterministically, optional dependency absence/presence, nested pack composition without duplicate registration, one canonical owner per capability, reproducible profile composition, and no Stack runtime reconstruction of DSH's plugin DAG/lifecycle.
+Build-time bundle generation verifies the dependency graph, cycles and
+duplicate patch IDs. Integration checks must verify a fresh native DSH install,
+resolved configuration and behavioral surface compatibility. See #340.

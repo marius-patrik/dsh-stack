@@ -1,16 +1,24 @@
 # CI and merge enforcement
 
-The repository has two independent merge gates:
+## Executable checks
 
-1. **Canonical Stack workspace** — install, typecheck, build, repository verification and tests.
-2. **Format repository** — whole-repository formatting through Biome.
-
-`Merge enforcement` is the final policy check. It fails when the PR head does not contain the current `main` commit and fails unless both required checks have completed successfully for that exact PR head.
-
-## Branch policy
-
-Every PR targeting `main` must contain the current `main` commit before merge. A PR that becomes stale fails `Merge enforcement` until synchronized again.
+- **Canonical Stack workspace** installs the locked dependency graph, builds,
+  typechecks, verifies and tests the first-party workspace.
+- **Format repository** formats with the Biome version selected by `bun.lock`
+  and rejects a dirty resulting tree.
+- **Browser verification** boots native DSH composition and checks UI
+  integration and profile installation.
+- **Merge enforcement** verifies that a pull request head contains the latest
+  `main` commit. It does not substitute for required-check branch rules.
 
 ## Repository protection
 
-The GitHub repository must require `Merge enforcement`, require pull requests, require current branches, and disallow direct pushes to `main`. The workflow is intentionally strict and must not be weakened to accommodate failing or stale PRs.
+GitHub branch rules must require pull requests, up-to-date heads and the
+relevant verified check contexts before merging to `main`. They must prevent
+direct pushes, forced updates and deletion of the protected branch. A workflow
+file alone cannot impose branch protection; configuration and verification are
+tracked in #350.
+
+Failed checks are not bypassed to merge a change. An unexecutable governance
+check must be repaired at its source (#295) while preserving its fail-closed
+behavior.
