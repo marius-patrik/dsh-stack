@@ -18,7 +18,7 @@
     },
     "packages/stack": {
       "name": "@dsh-stack/stack",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "dependencies": {
         "@dsh-stack/agent-actions": "workspace:*",
         "@dsh-stack/agent-loops": "workspace:*",
@@ -34,8 +34,6 @@
         "@dsh-stack/dialect-openai": "workspace:*",
         "@dsh-stack/directory-picker-fix": "workspace:*",
         "@dsh-stack/icon-engine": "workspace:*",
-        "@dsh-stack/marketplace": "workspace:*",
-        "@dsh-stack/marketplace-source-dsh-stack": "workspace:*",
 
         "@dsh-stack/provider-anthropic-api": "workspace:*",
         "@dsh-stack/provider-antigravity-sub": "workspace:*",
@@ -857,7 +855,7 @@
     },
     "packages/stack/plugin-kit": {
       "name": "@dsh-stack/plugin-kit",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "devDependencies": {
         "typescript": "^6.0.3",
       },
@@ -874,28 +872,6 @@
         "@dsh-stack/bundle-themes": "workspace:*",
         "@dsh-stack/bundle-tweaks": "workspace:*",
         "@dsh-stack/bundle-voice": "workspace:*",
-      },
-    },
-    "packages/stack/ux/marketplace": {
-      "name": "@dsh-stack/marketplace",
-      "version": "0.1.2",
-      "devDependencies": {
-        "@deepseek-ai/cordis": "^4.0.1",
-        "typescript": "^6.0.3",
-      },
-      "peerDependencies": {
-        "@deepseek-ai/cordis": "^4.0.1",
-      },
-    },
-    "packages/stack/ux/marketplace-source-dsh-stack": {
-      "name": "@dsh-stack/marketplace-source-dsh-stack",
-      "version": "0.1.2",
-      "dependencies": {
-        "@dsh-stack/marketplace": "workspace:*",
-      },
-      "devDependencies": {
-        "@deepseek-ai/cordis": "^4.0.1",
-        "typescript": "^6.0.3",
       },
     },
     "packages/stack/ux/settings-panel": {
@@ -1624,12 +1600,8 @@
 
     "@dsh-stack/lucide-animated": ["@dsh-stack/lucide-animated@workspace:packages/stack/ux/themes/lucide-animated"],
 
-    "@dsh-stack/marketplace": ["@dsh-stack/marketplace@workspace:packages/stack/ux/marketplace"],
-
-    "@dsh-stack/marketplace-source-dsh-stack": ["@dsh-stack/marketplace-source-dsh-stack@workspace:packages/stack/ux/marketplace-source-dsh-stack"],
 
     "@dsh-stack/plugin-kit": ["@dsh-stack/plugin-kit@workspace:packages/stack/plugin-kit"],
-
 
 
     "@dsh-stack/provider-anthropic-api": ["@dsh-stack/provider-anthropic-api@workspace:packages/stack/ai/providers/provider-anthropic-api"],

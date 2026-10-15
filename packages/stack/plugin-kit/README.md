@@ -1,3 +1,6 @@
 # Plugin kit
 
-Shared reusable library for DSH plugin development and contracts. `src/` contains plugin metadata, composition and settings primitives; `test/` provides common plugin and dialect smoke-test assertions; `client-runtime/` contains shared browser-bundle inputs. Runtime installation and profile management belong exclusively to DSH.
+Reusable authoring-file parsing, settings helpers, JSON responses, client-build
+inputs, and behavioral test utilities for native DSH plugin development.
+
+Runtime installation, bundle composition and profile management belong to DSH.

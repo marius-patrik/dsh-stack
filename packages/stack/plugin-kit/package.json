@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/plugin-kit",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Reusable Stack plugin metadata, validation and composition support primitives.",
   "license": "MIT",
   "type": "module",
