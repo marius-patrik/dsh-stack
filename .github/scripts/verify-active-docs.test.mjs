@@ -12,10 +12,9 @@ test("accepts native composition and package ownership paths", () => {
 });
 
 test("rejects retired implementation locations", () => {
-  assert.deepEqual(
-    findInvalidReferences("Use src/packages/agent-foo and publish/packs/bundle."),
-    ["retired source path"],
-  );
+  assert.deepEqual(findInvalidReferences("Use src/packages/agent-foo and publish/packs/bundle."), [
+    "retired source path",
+  ]);
 });
 
 test("rejects inactive rule and request references", () => {

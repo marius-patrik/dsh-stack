@@ -10,9 +10,15 @@ const documents = [".agents/AGENTS.md", "README.md"];
 // Keep this check focused on retired *references*, not on words such as
 // "migration" used for valid database or release behavior.
 const invalid = [
-  { name: "retired source path", re: /\b(?:src\/packages\/|publish\/(?:packs|plugins|extensions)\/|_migrate\/|plugins\/(?:Cognition|DarkFactory|dsh-tui)\/)/g },
+  {
+    name: "retired source path",
+    re: /\b(?:src\/packages\/|publish\/(?:packs|plugins|extensions)\/|_migrate\/|plugins\/(?:Cognition|DarkFactory|dsh-tui)\/)/g,
+  },
   { name: "retired product name", re: /\bKiKi\b/g },
-  { name: "inactive document link", re: /(?:plugin-extension-and-pack-model\.md|plugin-and-pack-contract\.md|closure-verification\.md|legacy-quarantine\.md|sidebar-workspace-pass\.md|ci-node-architecture\.md|\.agents\/requests\/)/g },
+  {
+    name: "inactive document link",
+    re: /(?:plugin-extension-and-pack-model\.md|plugin-and-pack-contract\.md|closure-verification\.md|legacy-quarantine\.md|sidebar-workspace-pass\.md|ci-node-architecture\.md|\.agents\/requests\/)/g,
+  },
 ];
 
 /**
@@ -21,7 +27,12 @@ const invalid = [
  * @returns {string[]} The violating rules.
  */
 export function findInvalidReferences(content) {
-  return invalid.filter(({ re }) => { re.lastIndex = 0; return re.test(content); }).map(({ name }) => name);
+  return invalid
+    .filter(({ re }) => {
+      re.lastIndex = 0;
+      return re.test(content);
+    })
+    .map(({ name }) => name);
 }
 
 /**
