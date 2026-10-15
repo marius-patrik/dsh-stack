@@ -4,8 +4,7 @@
  * (`@dsh-stack/marketplace`). Its source of truth is the GitHub Releases API
  * for `marius-patrik/dsh-stack` — the latest release's `stack-release.json`
  * manifest asset (produced by `.github/scripts/release.mjs manifest`), which is
- * the same manifest a real installer/auto-updater would consume (per #49's
- * "Auto-update" scope). Fetching is injected as `fetchImpl` (defaulting to
+ * the authoritative native release inventory. Fetching is injected as `fetchImpl` (defaulting to
  * the platform `fetch`) purely so this extension's own tests can exercise
  * real listing/mapping logic against a canned response instead of requiring
  * live network access from a sandboxed CI/dev environment; the extension

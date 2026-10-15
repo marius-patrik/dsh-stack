@@ -6,7 +6,7 @@ installable entries.
 Source of truth: the GitHub Releases API for `marius-patrik/dsh-stack`. On
 `listEntries()`, this extension fetches the repo's latest release, reads its
 `stack-release.json` manifest asset (the same manifest
-`.github/scripts/release.mjs manifest` produces for auto-update consumption), and
+`.github/scripts/release.mjs manifest` produces for native package discovery), and
 maps its package catalog to `MarketplaceEntry` records pointing their install
 source at that release's page.
 

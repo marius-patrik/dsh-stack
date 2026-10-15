@@ -20,7 +20,7 @@ packages/
   workflows/             CI and release automation
 ```
 
-Every package manifest under `packages/` is an independent native npm package boundary, with nested bundle declarations resolved through `stack.compose` and generated native `dsh.bundle.patch` layers. Folder proximity never activates a plugin. Independent external source gitlinks are not Stack packages.
+Every native package manifest under `packages/stack/` is an independent npm package boundary, with nested bundle declarations resolved through `stack.compose` and generated native `dsh.bundle.patch` layers. Folder proximity never activates a plugin. Independent external source gitlinks are not Stack packages.
 
 **Profiles are entirely DSH-owned.** There are no Stack profile templates, browser-side Stack profile selector, profile installation scripts, or profile state management. Stack can be installed into an existing DSH profile using DSH's normal commands; the same package graph serves every surface.
 

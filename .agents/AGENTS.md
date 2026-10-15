@@ -90,7 +90,7 @@ Event-driven hooks cannot do this alone, and the reason is structural: GitHub ru
 
 ## Release model
 
-The Stack version increments on every merge to `main`. Releases contain the complete native plugin catalog, with exact versions, dependencies, integrity data, and distributable artifacts for every included package.
+GitHub release tags coordinate the native plugin and bundle inventory. Individual npm package versions are immutable and change only when their published contents change; each release records exact dependency and integrity data.
 
 ## Issue, roadmap, and dispatch policy
 
