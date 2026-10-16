@@ -1,9 +1,9 @@
 {
   "id": "stack.library.plugin-kit",
   "name": "@dsh-stack/plugin-kit",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "kind": "library",
-  "description": "Reusable Stack plugin metadata, validation and composition support primitives.",
+  "description": "Reusable authoring, settings, responses and native DSH client-build utilities.",
   "files": ["lib", "client-runtime", "package.json", "README.md"],
   "dependencies": [],
   "optionalDependencies": []

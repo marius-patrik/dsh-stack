@@ -1,13 +1,18 @@
 import assert from "node:assert/strict";
-import { definePack, definePlugin, validateCatalog } from "./lib/index.js";
+import {
+  authoringScalar,
+  sanitizeAuthoringId,
+  settingsNamespace,
+  splitAuthoringMarkdown,
+} from "./lib/index.js";
 
-const plugin = definePlugin({ id: "test.feature", version: "1.0.0", description: "test" });
-const pack = definePack({
-  id: "test.pack",
-  version: "1.0.0",
-  description: "test",
-  plugins: [plugin.id],
-});
-validateCatalog({ plugins: [plugin], packs: [pack] });
-assert.equal(plugin.id, "test.feature");
+assert.equal(sanitizeAuthoringId("Some NAME", "fallback"), "some-name");
+assert.equal(sanitizeAuthoringId("...", "fallback"), "fallback");
+assert.equal(authoringScalar(' "quoted value" '), "quoted value");
+
+const markdown = splitAuthoringMarkdown("---\nid: example\n---\nBody");
+assert.equal(markdown.fields.id, "example");
+assert.equal(markdown.body, "Body");
+assert.equal(settingsNamespace("my-plugin"), "my-plugin");
+
 console.log("Plugin kit verification passed.");

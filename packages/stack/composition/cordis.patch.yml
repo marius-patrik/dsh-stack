@@ -39,12 +39,6 @@
     - id: icon-engine
       name: '@dsh-stack/icon-engine'
       config: {}
-    - id: marketplace
-      name: '@dsh-stack/marketplace'
-      config: {}
-    - id: marketplace-source-dsh-stack
-      name: '@dsh-stack/marketplace-source-dsh-stack'
-      config: {}
     - id: provider-anthropic-api
       name: '@dsh-stack/provider-anthropic-api'
       config: {}

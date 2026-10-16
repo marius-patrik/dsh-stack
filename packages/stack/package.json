@@ -1,6 +1,6 @@
 {
   "name": "@dsh-stack/stack",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Native DSH @dsh-stack/stack composition bundle",
   "type": "module",
   "files": [
@@ -38,8 +38,6 @@
     "@dsh-stack/dialect-openai": "workspace:*",
     "@dsh-stack/directory-picker-fix": "workspace:*",
     "@dsh-stack/icon-engine": "workspace:*",
-    "@dsh-stack/marketplace": "workspace:*",
-    "@dsh-stack/marketplace-source-dsh-stack": "workspace:*",
     "@dsh-stack/provider-anthropic-api": "workspace:*",
     "@dsh-stack/provider-antigravity-sub": "workspace:*",
     "@dsh-stack/provider-cerebras-api": "workspace:*",
