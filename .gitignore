@@ -18,6 +18,7 @@ packages/**/dist/
 # committed.
 .agents/RESUME.md
 .agents/scheduled_tasks.lock
+/.opencode
 /.claude
 
 # dsh-tweaks.homeRoot can rehome the harness home root to <repo>/.data
