@@ -23,3 +23,7 @@ GitHub Actions and repository build scripts under `.github/scripts/` coordinate 
 ## Quality gates
 
 CI must validate formatting, build, typecheck, tests, unique package ownership, dependency closure, generated patches, release asset contents, clean external DSH installation, `--dump-config`, real browser UI, Headless smoke, and upgrade/removal without changing user profile state.
+
+## Durable agent kernel
+
+The native `@dsh-stack/agent-kernel` plugin is mounted by the agents bundle, regardless of DSH surface. It supplies one persistent AgentId, an append-only SQLite source-event worldline under the effective DSH home, transactionally committed source cursors, and environment/capability registration. Cordis hosts its lifecycle; environment integrations and future memory/activity layers remain separate owners. It has no required Omnis dependency.

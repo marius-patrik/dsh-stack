@@ -16,6 +16,7 @@
     }
   },
   "dependencies": {
+    "@dsh-stack/agent-kernel": "workspace:*",
     "@dsh-stack/agents": "workspace:*"
   }
 }
